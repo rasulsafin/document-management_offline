@@ -89,7 +89,7 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
                 SetResponse(context, responseString);
                 GetToken(await httpListener.GetContextAsync(), callback);
             }
-            catch (Exception ex)
+            catch
             {
                 callback?.Invoke(null);
             }

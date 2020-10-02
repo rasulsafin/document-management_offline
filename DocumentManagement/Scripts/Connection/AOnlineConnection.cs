@@ -97,7 +97,7 @@ namespace MRS.Bim.DocumentManagement
                             isSuccess = result is bool ? isSuccess & result : isSuccess;
                             actions.Delete(action.ID);
                         }
-                        catch (Exception e)
+                        catch
                         {
                             isSuccess = false;
                         }

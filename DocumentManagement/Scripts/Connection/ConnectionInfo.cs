@@ -8,8 +8,8 @@ namespace MRS.Bim.DocumentManagement
     /// </summary>
     public class ConnectionInfo
     {
-        [JsonProperty]
-        private readonly string imagePath;
+        /*[JsonProperty]
+        private readonly string imagePath;*/
 
         [JsonProperty]
         public readonly string error;
