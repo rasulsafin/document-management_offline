@@ -13,8 +13,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Reference Include="MRS.Bim.DocumentManagement.Tdms">
-        <HintPath>..\MRS.Bim.DocumentManagement.Tdms\bin\Debug\netstandard2.0\MRS.Bim.DocumentManagement.Tdms.dll</HintPath>
+      <Reference Include="DocumentManagement.Models">
+        <HintPath>..\DocumentManagement.Models\bin\Debug\netstandard2.0\DocumentManagement.Models.dll</HintPath>
       </Reference>
     </ItemGroup>
 

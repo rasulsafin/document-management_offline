@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MRS.Bim.DocumentManagement.Tdms", "MRS.Bim.DocumentManagement.Tdms\MRS.Bim.DocumentManagement.Tdms.csproj", "{9A09E3E6-EB1C-4515-924A-923CADFDBD74}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Models", "DocumentManagement.Models\DocumentManagement.Models.csproj", "{9A09E3E6-EB1C-4515-924A-923CADFDBD74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
