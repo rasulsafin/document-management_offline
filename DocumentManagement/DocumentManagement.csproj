@@ -12,4 +12,10 @@
       <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="MRS.Bim.DocumentManagement.Tdms">
+        <HintPath>..\MRS.Bim.DocumentManagement.Tdms\bin\Debug\netstandard2.0\MRS.Bim.DocumentManagement.Tdms.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
