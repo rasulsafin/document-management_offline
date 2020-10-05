@@ -18,4 +18,8 @@
       </Reference>
     </ItemGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\DocumentManagement.Models\DocumentManagement.Models.csproj" />
+    </ItemGroup>
+
 </Project>
