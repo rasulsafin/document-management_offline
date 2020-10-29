@@ -1,3 +1,4 @@
+using System;
 using static MRS.Bim.Tools.PreferenceHandler;
 
 namespace MRS.Bim.DocumentManagement.Utilities
@@ -6,26 +7,26 @@ namespace MRS.Bim.DocumentManagement.Utilities
     {
         public string Token
         {
-            get => Get(CreateKeyByMethodName(cloudName),  ref token);
-            set => Set(CreateKeyByMethodName(cloudName), out token, value);
+            get => Get(CreateKeyByMethodName(cloudName), ref token);
+            set => Set(CreateKeyByMethodName(cloudName), ref token, value);
         }
         
         public string RefreshToken
         {
             get => Get(CreateKeyByMethodName(cloudName), ref refreshToken);
-            set => Set(CreateKeyByMethodName(cloudName), out refreshToken, value);
+            set => Set(CreateKeyByMethodName(cloudName), ref refreshToken, value);
         }
         
-        public string End
+        public DateTime? End
         {
-            get => Get(CreateKeyByMethodName(cloudName),  ref end);
-            set => Set(CreateKeyByMethodName(cloudName), out end, value);
+            get => Get(CreateKeyByMethodName(cloudName), ref end);
+            set => Set(CreateKeyByMethodName(cloudName), ref end, value);
         }
         
         private readonly string cloudName;
         private string token;
         private string refreshToken;
-        private string end;
+        private DateTime? end;
 
         public AccessProperty(string cloudName)
             => this.cloudName = cloudName;
