@@ -44,7 +44,6 @@ namespace MRS.Bim.DocumentManagement
 
         private IConnection Connection { get; set; }
 
-        private dynamic PickedProjectId { get; set; }
 
         private readonly List<object> buffer = new List<object>();
         private readonly Semaphore semaphore = new Semaphore(1, 1);
@@ -64,7 +63,7 @@ namespace MRS.Bim.DocumentManagement
         public void PickProject(Project project)
         {
             Connection.PickProject(project);
-            PickedProjectId = project.ID;
+            CurrentProject = project;
             ProjectPicked?.Invoke(project);
         }
 
@@ -582,7 +581,7 @@ namespace MRS.Bim.DocumentManagement
             {
                 var action = new DMAction
                 {
-                    ProjectId = PickedProjectId,
+                    ProjectId = CurrentProject.ID,
                     MethodName = methodName,
                     Parameters = parameters
                 };

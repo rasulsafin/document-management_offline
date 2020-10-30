@@ -49,7 +49,7 @@ namespace MRS.Bim.Tools
             }
         }
 
-        private static string Database => Combine(MY_DOCUMENTS, DATA_BASE_DIRECTORY_NAME);
+        public static string Database => Combine(MY_DOCUMENTS, DATA_BASE_DIRECTORY_NAME);
 
         private string project;
 
