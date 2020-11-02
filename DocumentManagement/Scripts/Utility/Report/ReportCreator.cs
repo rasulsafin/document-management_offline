@@ -34,17 +34,16 @@ namespace MRS.Bim.Tools.Reports
         public static void Create(params object[] element)
         {
             var date = DateTime.Now;
-            var dateId = date.ToString("ddMMyyyy");
 
             if (string.IsNullOrEmpty(reportCount.ID))
             {
-                reportCount.ID = dateId;
+                reportCount.ID = date.ToString("ddMMyyyy");
                 reportCount.Count = 0;
             }
 
             reportCount.Count++;
 
-            reportId = $"{dateId}-{reportCount.ID}";
+            reportId = $"{reportCount.ID}-{reportCount.Count}";
 
 
             var xml = new XElement("Report",

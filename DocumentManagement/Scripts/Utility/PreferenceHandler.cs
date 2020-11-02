@@ -11,7 +11,7 @@ namespace MRS.Bim.Tools
             return set = (T) BimEnvironment.Instance.GetSettingsFunc(id, typeof(T));
         }
 
-        public static void Set<T>(string id, ref T set, T value)
+        public static void Set<T>(string id, out T set, T value)
         {
             set = value;
             BimEnvironment.Instance.SaveSettingsAction(id, value);

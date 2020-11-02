@@ -7,13 +7,13 @@
         public string ID
         {
             get => Get(CreateKeyByMethodName(nameof(ReportCount)), ref id);
-            set => Set(CreateKeyByMethodName(nameof(ReportCount)), ref id, value);
+            set => Set(CreateKeyByMethodName(nameof(ReportCount)), out id, value);
         }
         
         public int? Count
         {
             get => Get(CreateKeyByMethodName(nameof(ReportCount)), ref count);
-            set => Set(CreateKeyByMethodName(nameof(ReportCount)), ref count, value);
+            set => Set(CreateKeyByMethodName(nameof(ReportCount)), out count, value);
         }
 
         private string id;

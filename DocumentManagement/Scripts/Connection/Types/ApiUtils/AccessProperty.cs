@@ -8,19 +8,19 @@ namespace MRS.Bim.DocumentManagement.Utilities
         public string Token
         {
             get => Get(CreateKeyByMethodName(cloudName), ref token);
-            set => Set(CreateKeyByMethodName(cloudName), ref token, value);
+            set => Set(CreateKeyByMethodName(cloudName), out token, value);
         }
         
         public string RefreshToken
         {
             get => Get(CreateKeyByMethodName(cloudName), ref refreshToken);
-            set => Set(CreateKeyByMethodName(cloudName), ref refreshToken, value);
+            set => Set(CreateKeyByMethodName(cloudName), out refreshToken, value);
         }
         
         public DateTime? End
         {
             get => Get(CreateKeyByMethodName(cloudName), ref end);
-            set => Set(CreateKeyByMethodName(cloudName), ref end, value);
+            set => Set(CreateKeyByMethodName(cloudName), out end, value);
         }
         
         private readonly string cloudName;
