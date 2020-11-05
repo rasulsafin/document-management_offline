@@ -13,9 +13,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MigrationTool", "MigrationT
 		{9A09E3E6-EB1C-4515-924A-923CADFDBD74} = {9A09E3E6-EB1C-4515-924A-923CADFDBD74}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Tests", "DocumentManagement.Tests\DocumentManagement.Tests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Tests", "DocumentManagement.Tests\DocumentManagement.Tests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Api", "DocumentManagement.Api\DocumentManagement.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
+	ProjectSection(ProjectDependencies) = postProject
+		{9A09E3E6-EB1C-4515-924A-923CADFDBD74} = {9A09E3E6-EB1C-4515-924A-923CADFDBD74}
 	EndProjectSection
 EndProject
 Global
@@ -40,6 +45,10 @@ Global
 		{4FCADB27-F8FB-45BF-9380-C9C5770C225E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4FCADB27-F8FB-45BF-9380-C9C5770C225E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4FCADB27-F8FB-45BF-9380-C9C5770C225E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
