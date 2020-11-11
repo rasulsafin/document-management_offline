@@ -1,0 +1,19 @@
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using DocumentManagement.Interface.Models;
+
+namespace DocumentManagement.Interface.Services
+{
+    public interface IObjectiveService
+    {
+        Task<IEnumerable<Objective>> GetAllObjectives();
+        Task<ID<Objective>> Add(NewObjective data);
+        Task Remove(ID<Objective> objectiveID);
+        Task Update(Objective projectData);
+        Task<Objective> Find(ID<Objective> objectiveID);
+
+        Task<IEnumerable<Objective>> GetObjectives(ID<Project> projectID);
+
+        Task<IEnumerable<DynamicFieldInfo>> GetRequiredDynamicFields();
+    }
+}

@@ -19,7 +19,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Models\DocumentManagement.Models.csproj" />
     <ProjectReference Include="..\DocumentManagement\DocumentManagement.csproj" />
   </ItemGroup>
 
