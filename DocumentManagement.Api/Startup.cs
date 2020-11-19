@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using DocumentManagement.Data;
-using DocumentManagement.Models.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,16 +27,18 @@ namespace DocumentManagement.Api
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<DocumentManagementContext>(options => options.UseNpgsql("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;"));
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<DocumentManagement.Database.DMContext>(options => options.UseNpgsql(connection));
+
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
                 opt.SerializerSettings.ReferenceLoopHandling =
                     Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
             services.AddCors();
-            services.AddAutoMapper(typeof(TaskRepository).Assembly);
 
-            services.AddScoped<ITaskRepository, TaskRepository>();
+            //services.AddAutoMapper(typeof(TaskRepository).Assembly);
+            //services.AddScoped<ITaskRepository, TaskRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

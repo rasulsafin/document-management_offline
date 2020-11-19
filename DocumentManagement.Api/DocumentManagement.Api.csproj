@@ -5,17 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="TDMS.dll">
-      <Guid>50bd3023-f3e5-4bb5-88e1-3cb09989fb34</Guid>
-      <VersionMajor>1</VersionMajor>
-      <VersionMinor>0</VersionMinor>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>false</Isolated>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.3" />
@@ -23,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Models\DocumentManagement.Models.csproj" />
+    <ProjectReference Include="..\DocumentManagement\DocumentManagement.csproj" />
   </ItemGroup>
 
 </Project>

@@ -6,19 +6,14 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Migrations\20201027131500_UpdateIndex.cs" />
-      <Compile Remove="Migrations\20201027131500_UpdateIndex.Designer.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
       <PackageReference Include="AutoMapper" Version="10.1.1" />
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-      <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DocumentManagement.Models\DocumentManagement.Models.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
     </ItemGroup>
 
 </Project>
