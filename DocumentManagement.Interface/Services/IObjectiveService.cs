@@ -8,7 +8,7 @@ namespace DocumentManagement.Interface.Services
     {
         Task<IEnumerable<Objective>> GetAllObjectives();
         Task<ID<Objective>> Add(NewObjective data);
-        Task Remove(ID<Objective> objectiveID);
+        Task<bool> Remove(ID<Objective> objectiveID);
         Task Update(Objective projectData);
         Task<Objective> Find(ID<Objective> objectiveID);
 

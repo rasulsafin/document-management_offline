@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using DocumentManagement.Interface.Models;
 
 namespace DocumentManagement.Interface.Services
 {

@@ -1,45 +1,39 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using DocumentManagement.Database;
 using DocumentManagement.Interface;
 using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
+using DocumentManagement.Services;
 
+[assembly: InternalsVisibleTo("DocumentManagement.Tests")]
 namespace DocumentManagement
 {
-    class DocumentManagementApi : IDocumentManagementApi
+    public class DocumentManagementApi : IDocumentManagementApi
     {
-        public Task<IAuthenticatedAccess> Login(string login, string password)
+        private readonly DMContext context;
+
+        public DocumentManagementApi(DMContext context)
         {
-            throw new NotImplementedException();
+            this.context = context;
+        }
+        
+        public async Task<IAuthenticatedAccess> Login(string login, string password)
+        {
+            var userContext = await SynchronizedUserContext.TryLogin(context, login, password);
+            if (userContext == null)
+                return null;
+            return new AuthenticatedAccess(context, userContext);
         }
 
-        public Task<IAuthenticatedAccess> Register(NewUser data)
+        public async Task<IAuthenticatedAccess> Register(NewUser data)
         {
-            throw new NotImplementedException();
-        }
-    }
-
-    class AuthenticatedAccess : IAuthenticatedAccess
-    {
-        public IUserService UserService => throw new NotImplementedException();
-
-        public IProjectService ProjectService => throw new NotImplementedException();
-
-        public IAuthorizationService AuthorizationService => throw new NotImplementedException();
-
-        public IObjectiveService ObjectiveService => throw new NotImplementedException();
-
-        public IItemService ItemService => throw new NotImplementedException();
-
-        public IConnectionService ConnectionService => throw new NotImplementedException();
-
-        public User CurrentUser => throw new NotImplementedException();
-
-        public bool IsInRole(string role)
-        {
-            throw new NotImplementedException();
+            var userContext = await SynchronizedUserContext.TryRegister(context, data);
+            if (userContext == null)
+                return null;
+            return new AuthenticatedAccess(context, userContext);
         }
     }
 }

@@ -6,9 +6,10 @@ namespace DocumentManagement.Interface.Services
 {
     public interface IProjectService
     {
-        IEnumerable<Project> GetUserProjects();
-        Task<ID<Project>> Add(string title);
-        Task Remove(ID<Project> projectID);
+        Task<IEnumerable<Project>> GetAllProjects();
+        Task<IEnumerable<Project>> GetUserProjects(ID<User> userID);
+        Task<ID<Project>> Add(ID<User> owner, string title);
+        Task<bool> Remove(ID<Project> projectID);
         Task Update(Project projectData);
         Task<Project> Find(ID<Project> projectID);
 

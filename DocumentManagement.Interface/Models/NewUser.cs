@@ -4,9 +4,9 @@
     {
         public NewUser(string login, string password, string name)
         {
-            Login = login;
-            Password = password;
-            Name = name;
+            Login = login?.Trim();
+            Password = password?.Trim();
+            Name = name?.Trim();
         }
 
         public string Login { get; }
