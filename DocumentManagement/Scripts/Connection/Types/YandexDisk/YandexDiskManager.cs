@@ -32,7 +32,9 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
         public async Task<bool> Download(CloudItem item, string path)
         {
             boolResult = new TaskCompletionSource<bool>();
-            yandex.DownloadFileAsync(item.ID, File.Create(path), null, LoadCompleted);
+
+            using (var fileStream = File.Create(path))
+                yandex.DownloadFileAsync(item.ID, fileStream, null, LoadCompleted);
             return await boolResult.Task;
         }
 
