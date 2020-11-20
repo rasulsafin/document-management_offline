@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -10,6 +9,7 @@ using Google.Apis.Services;
 using Google.Apis.Upload;
 using Google.Apis.Util.Store;
 using MRS.Bim.DocumentManagement.Utilities;
+using MRS.Bim.Tools;
 using File = Google.Apis.Drive.v3.Data.File;
 
 namespace MRS.Bim.DocumentManagement.GoogleDrive
@@ -19,7 +19,9 @@ namespace MRS.Bim.DocumentManagement.GoogleDrive
         private static readonly string[] SCOPES = {DriveService.Scope.Drive};
         private static readonly string APPLICATION_NAME = "BRIO MRS";
         private static readonly string APP_PROPERTIES_RESOURCE = "GoogleApp";
-        
+        private static readonly string TOKEN_PATH = Path.Combine(PathUtility.ApplicationFolder, "Remote Connections");
+        private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
+
         private readonly AppProperty appProperty;
         private DriveService service;
         private UserCredential credential;
@@ -32,7 +34,7 @@ namespace MRS.Bim.DocumentManagement.GoogleDrive
         {
             cancellationTokenSource = new CancellationTokenSource();
 
-            var credPath =  Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "token.json") ;
+            var credPath = TOKEN_PATH;
             credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     new ClientSecrets
                     {
@@ -43,16 +45,17 @@ namespace MRS.Bim.DocumentManagement.GoogleDrive
                     "user",
                     cancellationTokenSource.Token,
                     new FileDataStore(credPath, true));
-            
+
             service = new DriveService(new BaseClientService.Initializer
             {
                 HttpClientInitializer = credential,
-                ApplicationName = APPLICATION_NAME,
+                ApplicationName = APPLICATION_NAME
             });
             return true;
         }
 
-        public void Disconnect() => credential?.RevokeTokenAsync(CancellationToken.None);
+        public void Disconnect()
+            => credential?.RevokeTokenAsync(CancellationToken.None);
 
         public async Task<bool> Download(CloudItem item, string path)
         {
@@ -97,6 +100,7 @@ namespace MRS.Bim.DocumentManagement.GoogleDrive
         {
             var result = new List<File>();
             var nextPageToken = "";
+
             do
             {
                 var request = service.Files.List();
@@ -133,7 +137,7 @@ namespace MRS.Bim.DocumentManagement.GoogleDrive
             var file = new File
             {
                 Name = appPath,
-                MimeType = "application/vnd.google-apps.folder"
+                MimeType = MIME_TYPE_FOLDER
             };
             var request = service.Files.Create(file);
             var result = await request.ExecuteAsync();

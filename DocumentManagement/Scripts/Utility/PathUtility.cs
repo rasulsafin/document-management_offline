@@ -7,7 +7,8 @@ namespace MRS.Bim.Tools
 {
     public class PathUtility
     {
-        private static readonly string DATA_BASE_DIRECTORY_NAME = "Brio MRS//Database";
+        private static readonly string APPLICATION_DIRECTORY_NAME = "Brio MRS";
+        private static readonly string DATABASE_DIRECTORY_NAME = "Database";
         private static readonly string DEFAULT_PROJECT_DIRECTORY_NAME = ".Default";
         private static readonly string MEDIA_DIRECTORY_NAME = "Media";
         private static readonly string MY_DOCUMENTS = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -49,7 +50,9 @@ namespace MRS.Bim.Tools
             }
         }
 
-        public static string Database => Combine(MY_DOCUMENTS, DATA_BASE_DIRECTORY_NAME);
+        public static string ApplicationFolder => Combine(MY_DOCUMENTS, APPLICATION_DIRECTORY_NAME);
+
+        public static string Database => Combine(ApplicationFolder, DATABASE_DIRECTORY_NAME);
 
         private string project;
 
