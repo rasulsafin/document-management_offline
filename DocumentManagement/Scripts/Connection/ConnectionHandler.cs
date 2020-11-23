@@ -88,6 +88,14 @@ namespace MRS.Bim.DocumentManagement
                     Connection = new OfflineConnection("YandexDisk.db", Progressor);
                     ConnectionType = ConnectionType.Offline;
                     break;
+                case "GoogleDrive ONLINE":
+                    Connection = new GoogleDriveConnection(Progressor);
+                    ConnectionType = ConnectionType.Online;
+                    break;
+                case "GoogleDrive OFFLINE":
+                    Connection = new OfflineConnection("GoogleDrive.db", Progressor);
+                    ConnectionType = ConnectionType.Offline;
+                    break;
                 default:
                     Disconnect();
                     Connection = null;
