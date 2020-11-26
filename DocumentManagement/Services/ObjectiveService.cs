@@ -55,7 +55,7 @@ namespace DocumentManagement.Services
             };
         }
 
-        public async Task<ID<Objective>> Add(NewObjective data)
+        public async Task<ID<Objective>> Add(ObjectiveToCreate data)
         {
             var objective = new Database.Models.Objective()
             {
@@ -96,7 +96,7 @@ namespace DocumentManagement.Services
             }
 
             objective.DynamicFields = new List<Database.Models.DynamicField>();
-            foreach (var field in data.DynamicFields ?? Enumerable.Empty<NewDynamicField>())
+            foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldToCreate>())
             {
                 context.DynamicFields.Add(new Database.Models.DynamicField()
                 {

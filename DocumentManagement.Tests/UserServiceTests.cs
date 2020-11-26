@@ -33,7 +33,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var comparer = new UserComparer(ignoreIDs: true);
                 var current = new User((ID<User>)0, "vpupkin", "Vasily Pupkin");
@@ -49,9 +49,9 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
-                await access.UserService.Add(new NewUser("vpupkin", "312", "Vladimir Pupkin"));
+                await access.UserService.Add(new UserToCreate("vpupkin", "312", "Vladimir Pupkin"));
                 Assert.Fail();
             }
         }
@@ -63,7 +63,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.AuthorizationService);
 
                 var userService = access.UserService;
@@ -72,7 +72,7 @@ namespace DocumentManagement.Tests
                 await auth.AddRole(access.CurrentUser.ID, "admin");
                 await auth.AddRole(access.CurrentUser.ID, "cook");
 
-                var userID = await userService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var userID = await userService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
                 Assert.IsTrue(await auth.AddRole(userID, "operator"));
                 Assert.IsTrue(await auth.AddRole(userID, "cook"));
                 CollectionAssert.AreEquivalent(new string[] { "admin", "operator", "cook" }, (await auth.GetAllRoles()).ToArray());
@@ -90,16 +90,16 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.UserService);
 
                 var userService = access.UserService;
 
-                var userCreds = new List<NewUser>
+                var userCreds = new List<UserToCreate>
                 {
-                    new NewUser("vpupkin", "123", "Vasily Pupkin"),
-                    new NewUser("itaranov", "321", "Ivan Taranov"),
-                    new NewUser("ppshezdetsky", "333", "Pshek Pshezdetsky")
+                    new UserToCreate("vpupkin", "123", "Vasily Pupkin"),
+                    new UserToCreate("itaranov", "321", "Ivan Taranov"),
+                    new UserToCreate("ppshezdetsky", "333", "Pshek Pshezdetsky")
                 };
 
                 // Add new users
@@ -138,7 +138,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var result = await access.UserService.Delete(access.CurrentUser.ID);
                 Assert.IsTrue(result);
@@ -158,7 +158,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 await access.UserService.Update(new User(access.CurrentUser.ID, "vpopkin", "Vasily Popkin"));
 
@@ -174,9 +174,9 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
-                var userID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var userID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
 
                 Assert.IsTrue(await access.UserService.Exists("itaranov"));
                 Assert.IsFalse(await access.UserService.Exists("bwillis"));
@@ -195,7 +195,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "123"));
                 Assert.IsFalse(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
@@ -209,7 +209,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 await access.UserService.UpdatePassword(access.CurrentUser.ID, "321");
                 Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
@@ -224,9 +224,9 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
-                var userID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var userID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
 
                 var user = await access.UserService.Find(userID);
                 Assert.AreEqual("itaranov", user.Login);
@@ -241,9 +241,9 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
-                var userID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var userID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
 
                 var user = await access.UserService.Find("itaranov");
                 Assert.AreEqual("itaranov", user.Login);
@@ -258,11 +258,11 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
 
-                var userID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var userID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
 
                 Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
                 Assert.IsTrue(await access.UserService.Exists(userID));
@@ -281,12 +281,12 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 Assert.IsTrue(await access.UserService.Exists("vpupkin"));
                 Assert.IsFalse(await access.UserService.Exists("itaranov"));
 
-                await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
 
                 Assert.IsTrue(await access.UserService.Exists("vpupkin"));
                 Assert.IsTrue(await access.UserService.Exists("itaranov"));

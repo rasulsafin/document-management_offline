@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace DocumentManagement.Interface.Models
 {
-    public struct NewObjective
+    public struct ObjectiveToCreate
     {
         public ID<User>? AuthorID { get; set; }
         public DateTime CreationDate { get; set; }
@@ -16,7 +16,7 @@ namespace DocumentManagement.Interface.Models
         public ObjectiveStatus Status { get; set; }
         public ID<ObjectiveType> TaskType { get; set; }
         
-        public IEnumerable<NewDynamicField> DynamicFields { get; set; }
+        public IEnumerable<DynamicFieldToCreate> DynamicFields { get; set; }
         public IEnumerable<BimElement> BimElements { get; set; }
     }
 }

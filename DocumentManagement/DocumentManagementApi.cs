@@ -28,7 +28,7 @@ namespace DocumentManagement
             return new AuthenticatedAccess(context, userContext);
         }
 
-        public async Task<IAuthenticatedAccess> Register(NewUser data)
+        public async Task<IAuthenticatedAccess> Register(UserToCreate data)
         {
             var userContext = await SynchronizedUserContext.TryRegister(context, data);
             if (userContext == null)

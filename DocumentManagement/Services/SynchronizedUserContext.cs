@@ -34,7 +34,7 @@ namespace DocumentManagement.Services
             return userContext;
         }
 
-        public static async Task<SynchronizedUserContext> TryRegister(DMContext context, NewUser userData)
+        public static async Task<SynchronizedUserContext> TryRegister(DMContext context, UserToCreate userData)
         {
             if (string.IsNullOrEmpty(userData.Login))
                 throw new ArgumentException("Login is required");

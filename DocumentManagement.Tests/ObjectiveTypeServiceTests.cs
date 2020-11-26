@@ -31,7 +31,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
@@ -49,7 +49,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var id1 = await access.ObjectiveTypeService.Add("Задание");
                 var id2 = await access.ObjectiveTypeService.Add("Задание");
@@ -65,7 +65,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
@@ -99,7 +99,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");

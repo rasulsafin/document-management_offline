@@ -18,6 +18,6 @@ namespace DocumentManagement.Interface
         /// </summary>
         /// <param name="data">New user credentials</param>
         /// <returns>Null if registration failed</returns>
-        Task<IAuthenticatedAccess> Register(NewUser data);
+        Task<IAuthenticatedAccess> Register(UserToCreate data);
     }
 }

@@ -1,8 +1,8 @@
 ﻿namespace DocumentManagement.Interface.Models
 {
-    public struct NewItem
+    public struct ItemToCreate
     {
-        public NewItem(string path, ItemType itemType)
+        public ItemToCreate(string path, ItemType itemType)
         {
             Path = path;
             ItemType = itemType;

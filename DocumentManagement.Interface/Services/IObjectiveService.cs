@@ -7,7 +7,7 @@ namespace DocumentManagement.Interface.Services
     public interface IObjectiveService
     {
         Task<IEnumerable<Objective>> GetAllObjectives();
-        Task<ID<Objective>> Add(NewObjective data);
+        Task<ID<Objective>> Add(ObjectiveToCreate data);
         Task<bool> Remove(ID<Objective> objectiveID);
         Task Update(Objective projectData);
         Task<Objective> Find(ID<Objective> objectiveID);

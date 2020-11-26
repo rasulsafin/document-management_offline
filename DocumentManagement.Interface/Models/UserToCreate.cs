@@ -1,8 +1,8 @@
 ﻿namespace DocumentManagement.Interface.Models
 {
-    public struct NewUser
+    public struct UserToCreate
     {
-        public NewUser(string login, string password, string name)
+        public UserToCreate(string login, string password, string name)
         {
             Login = login?.Trim();
             Password = password?.Trim();

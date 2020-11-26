@@ -29,7 +29,7 @@ namespace DocumentManagement.Services
             return user;
         }
 
-        public virtual async Task<ID<User>> Add(NewUser data)
+        public virtual async Task<ID<User>> Add(UserToCreate data)
         {
             try
             {

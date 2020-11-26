@@ -30,10 +30,10 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 var currentUser = access.CurrentUser.ID;
-                var user1 = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
-                var user2 = await access.UserService.Add(new NewUser("ppshezdetsky", "123", "Pshek Pshezdetsky"));
+                var user1 = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
+                var user2 = await access.UserService.Add(new UserToCreate("ppshezdetsky", "123", "Pshek Pshezdetsky"));
 
                 var projectService = access.ProjectService;
 
@@ -82,10 +82,10 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 var currentUserID = access.CurrentUser.ID;
-                var user1ID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
-                var user2ID = await access.UserService.Add(new NewUser("ppshezdetsky", "123", "Pshek Pshezdetsky"));
+                var user1ID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
+                var user2ID = await access.UserService.Add(new UserToCreate("ppshezdetsky", "123", "Pshek Pshezdetsky"));
                 var projectService = access.ProjectService;
 
                 var commonProject = await projectService.Add(currentUserID, "Common project");
@@ -122,10 +122,10 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
-                var user1ID = await access.UserService.Add(new NewUser("itaranov", "123", "Ivan Taranov"));
+                var user1ID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
                 
                 var projectService = access.ProjectService;
                 
@@ -159,7 +159,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
@@ -195,7 +195,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
@@ -223,7 +223,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;

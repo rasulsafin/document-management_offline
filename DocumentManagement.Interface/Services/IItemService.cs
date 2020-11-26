@@ -6,8 +6,8 @@ namespace DocumentManagement.Interface.Services
 {
     public interface IItemService
     {
-        Task<ID<Item>> Add(NewItem data, ID<Project> parentProject);
-        Task<ID<Item>> Add(NewItem data, ID<Objective> parentObjective);
+        Task<ID<Item>> Add(ItemToCreate data, ID<Project> parentProject);
+        Task<ID<Item>> Add(ItemToCreate data, ID<Objective> parentObjective);
 
         Task Link(ID<Item> itemID, ID<Project> projectID);
         Task Link(ID<Item> itemID, ID<Objective> objectiveID);

@@ -72,7 +72,7 @@ namespace DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public async Task LinkRemoteConnection(NewRemoteConnection connectionInfo)
+        public async Task LinkRemoteConnection(RemoteConnectionToCreate connectionInfo)
         {
             throw new NotImplementedException();
             
@@ -96,7 +96,7 @@ namespace DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public Task Reconnect(NewRemoteConnection connectionInfo)
+        public Task Reconnect(RemoteConnectionToCreate connectionInfo)
         {
             throw new NotImplementedException();
         }

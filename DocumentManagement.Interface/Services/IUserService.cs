@@ -17,7 +17,7 @@ namespace DocumentManagement.Interface.Services
         /// <exception cref="InvalidDataException">Throws if passed data fails database validation checks 
         /// (e.g. user with current login already exists)</exception>
         /// <returns>Identifier of new user</returns>
-        Task<ID<User>> Add(NewUser data);
+        Task<ID<User>> Add(UserToCreate data);
         /// <summary>
         /// Delete user
         /// </summary>

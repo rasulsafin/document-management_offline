@@ -29,7 +29,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser("vpupkin", "abracadabra", "Vasily Pupkin"));
+                var access = await api.Register(new Interface.Models.UserToCreate("vpupkin", "abracadabra", "Vasily Pupkin"));
                 Assert.IsNotNull(access);
             }
         }
@@ -42,7 +42,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser(null, "123", "Name"));
+                var access = await api.Register(new Interface.Models.UserToCreate(null, "123", "Name"));
                 Assert.Fail();
             }
         }
@@ -55,7 +55,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser("login", null, "Name"));
+                var access = await api.Register(new Interface.Models.UserToCreate("login", null, "Name"));
                 Assert.Fail();
             }
         }
@@ -68,7 +68,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser("login", "123", null));
+                var access = await api.Register(new Interface.Models.UserToCreate("login", "123", null));
                 Assert.Fail();
             }
         }
@@ -80,7 +80,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.NewUser("vpupkin", "123456", "Vasily Pupkin"));
+                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123456", "Vasily Pupkin"));
 
                 var accessLog = await api.Login("vpupkin", "123456");
                 Assert.IsNotNull(accessLog);
@@ -94,7 +94,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.NewUser("vpupkin", "123456", "Vasily Pupkin"));
+                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123456", "Vasily Pupkin"));
 
                 var accessLog = await api.Login("vpupkin", "abracadabra");
                 Assert.IsNull(accessLog);
@@ -108,7 +108,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.NewUser("vpupkin", "123456", "Vasily Pupkin"));
+                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123456", "Vasily Pupkin"));
 
                 var accessLog = await api.Login("itaranov", "123456");
                 Assert.IsNull(accessLog);
@@ -122,7 +122,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.NewUser("vpupkin", "123456", "Vasily Pupkin"));
+                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123456", "Vasily Pupkin"));
 
                 var access1 = await api.Login("vpupkin", string.Empty);
                 Assert.IsNull(access1);

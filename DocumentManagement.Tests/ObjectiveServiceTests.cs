@@ -26,7 +26,7 @@ namespace DocumentManagement.Tests
         }
 
         // WARNING: Dynamic fields IDs are not set
-        private static Objective CreateExpectedObjective(NewObjective o, ID<Objective> id, User author, ObjectiveType type)
+        private static Objective CreateExpectedObjective(ObjectiveToCreate o, ID<Objective> id, User author, ObjectiveType type)
         {
             return new Objective()
             {
@@ -58,7 +58,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
                 var errortype = await access.ObjectiveTypeService.Add("Нарушение");
@@ -70,7 +70,7 @@ namespace DocumentManagement.Tests
                 var dueTime = creationTime.AddDays(1);
 
                 // 0. Can add objectives
-                var newObjective1 = new NewObjective()
+                var newObjective1 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -82,17 +82,17 @@ namespace DocumentManagement.Tests
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
                     BimElements = null,
-                    DynamicFields = new List<NewDynamicField>()
+                    DynamicFields = new List<DynamicFieldToCreate>()
                     {
-                        new NewDynamicField("df1", "type 1", "val 1"),
-                        new NewDynamicField("df2", "type 2", "val 2")
+                        new DynamicFieldToCreate("df1", "type 1", "val 1"),
+                        new DynamicFieldToCreate("df2", "type 2", "val 2")
                     }
                 };
 
                 var objective1ID = await access.ObjectiveService.Add(newObjective1);
                 Assert.IsTrue(objective1ID.IsValid);
 
-                var newObjective2 = new NewObjective()
+                var newObjective2 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -108,7 +108,7 @@ namespace DocumentManagement.Tests
                 var childObjectiveID = await access.ObjectiveService.Add(newObjective2);
                 Assert.IsTrue(childObjectiveID.IsValid);
 
-                var newObjective3 = new NewObjective()
+                var newObjective3 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -185,18 +185,18 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
                 var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
 
                 var userProjects = await access.ProjectService.GetUserProjects(access.CurrentUser.ID);
-                var item1 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1ID);
+                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1ID);
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
 
-                var newObjective1 = new NewObjective()
+                var newObjective1 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -247,7 +247,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 //TODO: how to test?
                 Assert.Fail();

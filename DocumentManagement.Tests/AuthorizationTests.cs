@@ -31,7 +31,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.NewUser("vpupkin", "123", "Vasily Pupkin"));
+                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var access = await api.Login("vpupkin", "123");
                 Assert.IsNotNull(access);
@@ -48,7 +48,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.AuthorizationService);
 
                 var user = access.CurrentUser;
@@ -119,13 +119,13 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.AuthorizationService);
 
                 var admin = access.CurrentUser;
                 var auth = access.AuthorizationService;
                 // 0. Add another user
-                var operID = await access.UserService.Add(new Interface.Models.NewUser("itaranov", "123", "Ivan Taranov"));
+                var operID = await access.UserService.Add(new Interface.Models.UserToCreate("itaranov", "123", "Ivan Taranov"));
                 Assert.IsTrue(operID.IsValid);
 
                 // 1. Add admin role

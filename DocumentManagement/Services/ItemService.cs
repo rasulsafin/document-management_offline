@@ -18,7 +18,7 @@ namespace DocumentManagement.Services
             this.context = context;
         }
 
-        public async Task<ID<Item>> Add(NewItem data, ID<Project> parentProject)
+        public async Task<ID<Item>> Add(ItemToCreate data, ID<Project> parentProject)
         {
             var item = new Database.Models.Item() 
             {
@@ -32,7 +32,7 @@ namespace DocumentManagement.Services
             return (ID<Item>)item.ID;
         }
 
-        public async Task<ID<Item>> Add(NewItem data, ID<Objective> parentObjective)
+        public async Task<ID<Item>> Add(ItemToCreate data, ID<Objective> parentObjective)
         {
             var item = new Database.Models.Item()
             {

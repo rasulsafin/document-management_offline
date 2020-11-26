@@ -1,8 +1,8 @@
 ﻿namespace DocumentManagement.Interface.Models
 {
-    public struct NewDynamicField
+    public struct DynamicFieldToCreate
     {
-        public NewDynamicField(string key, string type, string value)
+        public DynamicFieldToCreate(string key, string type, string value)
         {
             Key = key;
             Type = type;

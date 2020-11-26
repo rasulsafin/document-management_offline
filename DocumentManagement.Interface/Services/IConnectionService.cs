@@ -7,10 +7,10 @@ namespace DocumentManagement.Interface.Services
     public interface IConnectionService
     {
         Task<IEnumerable<RemoteConnectionInfo>> GetAvailableConnections();
-        Task LinkRemoteConnection(NewRemoteConnection connectionInfo);
+        Task LinkRemoteConnection(RemoteConnectionToCreate connectionInfo);
         Task<ConnectionStatus> GetRemoteConnectionStatus();
 
-        Task Reconnect(NewRemoteConnection connectionInfo);
+        Task Reconnect(RemoteConnectionToCreate connectionInfo);
         Task<RemoteConnectionInfo> GetCurrentConnection();
 
         Task<IEnumerable<EnumVariant>> GetEnumVariants(string dynamicFieldKey);

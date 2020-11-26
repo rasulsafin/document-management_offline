@@ -32,18 +32,18 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
-                var item11ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1ID);
-                var item12ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1ID);
+                var item11ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1ID);
+                var item12ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1ID);
 
                 Assert.IsTrue(item11ID.IsValid);
                 Assert.IsTrue(item12ID.IsValid);
 
                 var project2ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 2");
-                var item21ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), project2ID);
-                var item22ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), project2ID);
+                var item21ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), project2ID);
+                var item22ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), project2ID);
 
                 Assert.IsTrue(item21ID.IsValid);
                 Assert.IsTrue(item22ID.IsValid);
@@ -73,7 +73,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
                 var taskTypeID = await access.ObjectiveTypeService.Add("Task");
@@ -81,7 +81,7 @@ namespace DocumentManagement.Tests
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
 
-                var newObjective1 = new NewObjective()
+                var newObjective1 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -97,8 +97,8 @@ namespace DocumentManagement.Tests
                 var objective1ID = await access.ObjectiveService.Add(newObjective1);
                 Assert.IsTrue(objective1ID.IsValid);
 
-                var item1ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), objective1ID);
-                var item2ID = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), objective1ID);
+                var item1ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), objective1ID);
+                var item2ID = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), objective1ID);
                 Assert.IsTrue(item1ID.IsValid);
                 Assert.IsTrue(item2ID.IsValid);
 
@@ -119,15 +119,15 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
                 var project2 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 2");
 
-                var item1 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
-                var item2 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1);
-                var item3 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), project2);
-                var item4 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), project2);
+                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
+                var item2 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1);
+                var item3 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), project2);
+                var item4 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), project2);
 
                 var expected = new Item[]
                 {
@@ -179,7 +179,7 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
                 var taskType = await access.ObjectiveTypeService.Add("Task");
@@ -187,7 +187,7 @@ namespace DocumentManagement.Tests
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
 
-                var newObjective1 = new NewObjective()
+                var newObjective1 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -200,7 +200,7 @@ namespace DocumentManagement.Tests
                     ProjectID = project
                 };
 
-                var newObjective2 = new NewObjective()
+                var newObjective2 = new ObjectiveToCreate()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
@@ -216,10 +216,10 @@ namespace DocumentManagement.Tests
                 var objective1 = await access.ObjectiveService.Add(newObjective1);
                 var objective2 = await access.ObjectiveService.Add(newObjective2);
 
-                var item1 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project);
-                var item2 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project);
-                var item3 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), objective1);
-                var item4 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), objective2);
+                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project);
+                var item2 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project);
+                var item3 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\shvabra.tmp", ItemType.Bim), objective1);
+                var item4 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\dinozavra.tmp", ItemType.Media), objective2);
 
                 var expected = new Item[]
                 {
@@ -258,13 +258,13 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
 
-                var item1 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
-                var item2 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1);
-                var item3 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\shvabra.tmp", ItemType.Media), project1);
+                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
+                var item2 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\cadabra.tmp", ItemType.Bim), project1);
+                var item3 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\shvabra.tmp", ItemType.Media), project1);
 
                 var expected = new Item[]
                 {
@@ -293,10 +293,10 @@ namespace DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new NewUser("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
 
                 var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
-                var item1 = await access.ItemService.Add(new NewItem(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
+                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1);
 
                 await access.ItemService.Update(new Item() { ID = item1, ItemType = ItemType.Bim, Path = "cadabra.txt" });
 

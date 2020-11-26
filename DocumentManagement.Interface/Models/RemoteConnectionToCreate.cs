@@ -2,9 +2,9 @@
 
 namespace DocumentManagement.Interface.Models
 {
-    public struct NewRemoteConnection
+    public struct RemoteConnectionToCreate
     {
-        public NewRemoteConnection(ID<RemoteConnectionInfo> iD, IReadOnlyDictionary<string, string> authData)
+        public RemoteConnectionToCreate(ID<RemoteConnectionInfo> iD, IReadOnlyDictionary<string, string> authData)
         {
             ID = iD;
             AuthData = authData;
