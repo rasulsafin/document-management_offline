@@ -2,9 +2,9 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Microsoft.EntityFrameworkCore;
-using DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Tests.Utility;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class DMContextTests

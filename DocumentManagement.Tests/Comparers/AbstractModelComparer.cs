@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     internal abstract class AbstractModelComparer<T> : IEqualityComparer<T> where T : class
     {

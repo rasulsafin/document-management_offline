@@ -1,7 +1,7 @@
-﻿using DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Models;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     internal class ItemComparer : AbstractModelComparer<Item>
     {

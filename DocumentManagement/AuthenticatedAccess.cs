@@ -1,11 +1,11 @@
 ﻿using System;
-using DocumentManagement.Database;
-using DocumentManagement.Interface;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
-using DocumentManagement.Services;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Services;
 
-namespace DocumentManagement
+namespace MRS.DocumentManagement
 {
     internal class AuthenticatedAccess : IAuthenticatedAccess
     {

@@ -1,9 +1,9 @@
-﻿using DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Models;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     internal class ObjectiveComparer : AbstractModelComparer<Objective>
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
-using DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class CryptographyHelperTests

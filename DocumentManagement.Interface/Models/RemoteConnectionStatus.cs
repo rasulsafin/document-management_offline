@@ -1,4 +1,4 @@
-﻿namespace DocumentManagement.Interface.Models
+﻿namespace MRS.DocumentManagement.Interface.Models
 {
     public enum RemoteConnectionStatus
     {

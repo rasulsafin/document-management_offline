@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DocumentManagement.Database.Models
+namespace MRS.DocumentManagement.Database.Models
 {
     public class Objective
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
-using DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DocumentManagement.Database
+namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {

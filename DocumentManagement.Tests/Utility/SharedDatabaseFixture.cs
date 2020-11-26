@@ -2,9 +2,9 @@
 using System.Data.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Data.Sqlite;
-using DocumentManagement.Database;
+using MRS.DocumentManagement.Database;
 
-namespace DocumentManagement.Tests.Utility
+namespace MRS.DocumentManagement.Tests.Utility
 {
     public class SharedDatabaseFixture : IDisposable
     {

@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Models;
 
-namespace DocumentManagement.Interface.Services
+namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IUserService
     {

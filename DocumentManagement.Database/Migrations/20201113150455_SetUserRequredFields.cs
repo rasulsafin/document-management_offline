@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DocumentManagement.Database.Migrations
+namespace MRS.DocumentManagement.Database.Migrations
 {
     public partial class SetUserRequredFields : Migration
     {

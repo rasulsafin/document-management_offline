@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace DocumentManagement.Database.Migrations
+namespace MRS.DocumentManagement.Database.Migrations
 {
     public partial class AddUserRoles : Migration
     {

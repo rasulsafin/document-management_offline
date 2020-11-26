@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Database.Models;
 
-namespace DocumentManagement.Tests.Utility
+namespace MRS.DocumentManagement.Tests.Utility
 {
     public static class MockData
     {

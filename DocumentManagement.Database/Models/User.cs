@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace DocumentManagement.Database.Models
+namespace MRS.DocumentManagement.Database.Models
 {
     public class User
     {

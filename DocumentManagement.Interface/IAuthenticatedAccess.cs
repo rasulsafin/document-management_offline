@@ -1,7 +1,7 @@
-﻿using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
+﻿using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Services;
 
-namespace DocumentManagement.Interface
+namespace MRS.DocumentManagement.Interface
 {
     public interface IAuthenticatedAccess
     {

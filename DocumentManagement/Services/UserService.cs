@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Services;
 using Microsoft.EntityFrameworkCore;
-using DocumentManagement.Database;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
+using System;
+using System.Collections.Generic;
 using System.Linq;
-using DocumentManagement.Interface;
+using System.Threading.Tasks;
 
-namespace DocumentManagement.Services
+namespace MRS.DocumentManagement.Services
 {
     internal class UserService : IUserService
     {

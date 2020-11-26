@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocumentManagement.Tests.Utility
+namespace MRS.DocumentManagement.Tests.Utility
 {
     public static class AssertExtensions
     {

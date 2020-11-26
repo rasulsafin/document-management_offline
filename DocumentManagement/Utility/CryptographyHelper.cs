@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Security.Cryptography;
 
-namespace DocumentManagement.Utility
+namespace MRS.DocumentManagement.Utility
 {
     internal static class CryptographyHelper
     {

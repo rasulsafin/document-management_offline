@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Models;
 
-namespace DocumentManagement.Interface
+namespace MRS.DocumentManagement.Interface
 {
     /// <summary>
     /// Entry point to DocumentManagement API

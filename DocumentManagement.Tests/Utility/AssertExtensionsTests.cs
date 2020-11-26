@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DocumentManagement.Tests.Utility
+namespace MRS.DocumentManagement.Tests.Utility
 {
     [TestClass]
     public class AssertExtensionsTests

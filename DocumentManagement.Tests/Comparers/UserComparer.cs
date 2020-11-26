@@ -1,6 +1,6 @@
-﻿using DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Models;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     internal class UserComparer : AbstractModelComparer<User>
     {

@@ -1,4 +1,4 @@
-﻿namespace DocumentManagement.Interface
+﻿namespace MRS.DocumentManagement.Interface
 {
     [System.Serializable]
     public class InvalidDataException : System.Exception

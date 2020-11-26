@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     internal class DelegateComparer<T> : IEqualityComparer<T> where T : class
     {

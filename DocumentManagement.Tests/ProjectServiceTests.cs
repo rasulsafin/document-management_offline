@@ -1,10 +1,10 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Tests.Utility;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class ProjectServiceTests

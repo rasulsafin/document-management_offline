@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace DocumentManagement.Api.Controllers
+namespace MRS.DocumentManagement.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]

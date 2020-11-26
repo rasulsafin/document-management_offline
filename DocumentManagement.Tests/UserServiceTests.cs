@@ -3,11 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface;
-using DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Tests.Utility;
 
-namespace DocumentManagement.Tests
+namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class UserServiceTests

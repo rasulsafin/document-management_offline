@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DocumentManagement.Database;
-using DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Models;
 
-namespace DocumentManagement.Services
+namespace MRS.DocumentManagement.Services
 {
     internal class SynchronizedAuthorizationService : AuthorizationService
     {

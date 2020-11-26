@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using DocumentManagement.Database;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Services;
 using System.Linq;
 
-namespace DocumentManagement.Services
+namespace MRS.DocumentManagement.Services
 {
     internal class ItemService : IItemService
     {

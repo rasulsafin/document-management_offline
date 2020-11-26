@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
-using DocumentManagement.Database;
-using DocumentManagement.Interface;
-using DocumentManagement.Interface.Models;
-using DocumentManagement.Services;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Services;
 
 [assembly: InternalsVisibleTo("DocumentManagement.Tests")]
-namespace DocumentManagement
+namespace MRS.DocumentManagement
 {
     public class DocumentManagementApi : IDocumentManagementApi
     {

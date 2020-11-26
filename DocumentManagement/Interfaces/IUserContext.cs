@@ -1,6 +1,6 @@
-﻿using DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Models;
 
-namespace DocumentManagement.Services
+namespace MRS.DocumentManagement.Services
 {
     internal interface IUserContext
     {
