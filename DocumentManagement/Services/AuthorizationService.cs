@@ -10,7 +10,7 @@ using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class AuthorizationService : IAuthorizationService
+    public class AuthorizationService : IAuthorizationService
     {
         private readonly DMContext context;
 

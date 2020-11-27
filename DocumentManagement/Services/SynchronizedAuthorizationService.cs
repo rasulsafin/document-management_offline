@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class SynchronizedAuthorizationService : AuthorizationService
+    public class SynchronizedAuthorizationService : AuthorizationService
     {
         private readonly IUserContext userContext;
         private readonly List<string> currentUserRoles = new List<string>();

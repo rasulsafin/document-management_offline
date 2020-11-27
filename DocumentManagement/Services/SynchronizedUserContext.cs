@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class SynchronizedUserContext : IUserContext
+    public class SynchronizedUserContext : IUserContext
     {
         private readonly DMContext context;
         private readonly SynchronizedUserService userService;
@@ -53,7 +53,7 @@ namespace MRS.DocumentManagement.Services
             return userContext;
         }
 
-        private SynchronizedUserContext(DMContext context, User user)
+        public SynchronizedUserContext(DMContext context, User user)
         {
             this.context = context;
             userService = new SynchronizedUserService(context, user);

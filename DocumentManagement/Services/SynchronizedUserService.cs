@@ -5,7 +5,7 @@ using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class SynchronizedUserService : UserService
+    public class SynchronizedUserService : UserService
     {
         public User CurrentUser { get; private set; }
         public event EventHandler<User> CurrentUserChanged;

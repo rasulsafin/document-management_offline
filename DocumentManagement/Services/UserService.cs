@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class UserService : IUserService
+    public class UserService : IUserService
     {
         protected readonly DMContext context;
 

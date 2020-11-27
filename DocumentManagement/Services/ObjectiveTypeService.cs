@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class ObjectiveTypeService : IObjectiveTypeService
+    public class ObjectiveTypeService : IObjectiveTypeService
     {
         private readonly DMContext context;
 

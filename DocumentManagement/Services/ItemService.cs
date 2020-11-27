@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class ItemService : IItemService
+    public class ItemService : IItemService
     {
         private readonly DMContext context;
 

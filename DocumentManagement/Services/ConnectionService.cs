@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class ConnectionService : IConnectionService
+    public class ConnectionService : IConnectionService
     {
         private readonly DMContext context;
         private readonly IUserContext userContext;

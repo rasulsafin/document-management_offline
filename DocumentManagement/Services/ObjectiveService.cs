@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace MRS.DocumentManagement.Services
 {
-    internal class ObjectiveService : IObjectiveService
+    public class ObjectiveService : IObjectiveService
     {
         private readonly DMContext context;
 

@@ -2,7 +2,7 @@
 
 namespace MRS.DocumentManagement.Services
 {
-    internal interface IUserContext
+    public interface IUserContext
     {
         User CurrentUser { get; }
         bool IsInRole(string role);
