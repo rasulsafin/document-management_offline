@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task Update(UserDto user) => await service.Update(user);
 
         [HttpGet]
-        [Route("verify/password")]
+        [Route("verifypassword")]
         public async Task<bool> VerifyPassword(ID<UserDto> userID, string password) => await service.VerifyPassword(userID, password);
 
         [HttpPut]
@@ -36,19 +36,19 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task UpdatePassword(ID<UserDto> userID, string newPass) => await service.UpdatePassword(userID, newPass);
 
         [HttpGet]
-        [Route("find/user")]
+        [Route("id")]
         public async Task<UserDto> Find(ID<UserDto> userID) => await service.Find(userID);
 
         [HttpGet]
-        [Route("Find/User/Login")]
+        [Route("login")]
         public async Task<UserDto> Find(string login) => await service.Find(login);
 
         [HttpGet]
-        [Route("Exists/User")]
+        [Route("exists/id")]
         public async Task<bool> Exists(ID<UserDto> userID) => await service.Exists(userID);
         
         [HttpGet]
-        [Route("Exists/Login")]
+        [Route("exists/login")]
         public async Task<bool> Exists(string login) => await service.Exists(login);
 
         //public async Task<User> GetCurrentUser() => await userService.GetCurrentUser();
