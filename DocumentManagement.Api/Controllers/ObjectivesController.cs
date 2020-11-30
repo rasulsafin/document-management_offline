@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -15,31 +16,27 @@ namespace MRS.DocumentManagement.Api.Controllers
         public ObjectivesController(IObjectiveService objectiveService) => service = objectiveService;
 
         [HttpGet]
-        [Route("Get/Objectives")]
-        public async Task<IEnumerable<Objective>> GetAllObjectives() => await service.GetAllObjectives();
+        public async Task<IEnumerable<ObjectiveDto>> GetAllObjectives() => await service.GetAllObjectives();
 
         [HttpPost]
-        [Route("Add/Objective")]
-        public async Task<ID<Objective>> Add(ObjectiveToCreate data) => await service.Add(data);
+        public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data) => await service.Add(data);
 
         [HttpDelete]
-        [Route("Remove/Objective")]
-        public async Task Remove(ID<Objective> objectiveID) => await service.Remove(objectiveID);
+        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID) => await service.Remove(objectiveID);
 
         [HttpPut]
-        [Route("Update/Objective")]
-        public async Task Update(Objective projectData) => await service.Update(projectData);
+        public async Task Update(ObjectiveDto projectData) => await service.Update(projectData);
 
         [HttpGet]
-        [Route("Find/Objective")]
-        public async Task<Objective> Find(ID<Objective> objectiveID) => await service.Find(objectiveID);
+        [Route("find")]
+        public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID) => await service.Find(objectiveID);
 
         [HttpGet]
-        [Route("Get/Objectives/Project")]
-        public async Task<IEnumerable<Objective>> GetObjectives(ID<Project> projectID) => await service.GetObjectives(projectID);
+        [Route("project")]
+        public async Task<IEnumerable<ObjectiveDto>> GetObjectives(ID<ProjectDto> projectID) => await service.GetObjectives(projectID);
 
         [HttpGet]
-        [Route("Get/DynamicFields")]
-        public async Task<IEnumerable<DynamicFieldInfo>> GetRequiredDynamicFields() => await service.GetRequiredDynamicFields();
+        [Route("dynamicfields")]
+        public async Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields() => await service.GetRequiredDynamicFields();
     }
 }

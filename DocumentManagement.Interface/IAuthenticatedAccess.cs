@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Interface
@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Interface
         /// <summary>
         /// Current user data
         /// </summary>
-        User CurrentUser { get; }
+        UserDto CurrentUser { get; }
         /// <summary>
         /// Check if current user is in passed role
         /// </summary>

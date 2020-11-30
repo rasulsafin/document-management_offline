@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using System;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Services
         private readonly SynchronizedUserService userService;
         private readonly SynchronizedAuthorizationService authorizationService;
 
-        public User CurrentUser => userService.CurrentUser;
+        public UserDto CurrentUser => userService.CurrentUser;
 
         public IUserService UserService => userService;
         public IAuthorizationService AuthorizationService => authorizationService;
@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Services
             return userContext;
         }
 
-        public static async Task<SynchronizedUserContext> TryRegister(DMContext context, UserToCreate userData)
+        public static async Task<SynchronizedUserContext> TryRegister(DMContext context, UserToCreateDto userData)
         {
             if (string.IsNullOrEmpty(userData.Login))
                 throw new ArgumentException("Login is required");
@@ -53,7 +53,7 @@ namespace MRS.DocumentManagement.Services
             return userContext;
         }
 
-        public SynchronizedUserContext(DMContext context, User user)
+        public SynchronizedUserContext(DMContext context, UserDto user)
         {
             this.context = context;
             userService = new SynchronizedUserService(context, user);

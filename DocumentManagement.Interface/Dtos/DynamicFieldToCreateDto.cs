@@ -1,8 +1,8 @@
-﻿namespace MRS.DocumentManagement.Interface.Models
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public struct DynamicFieldToCreate
+    public struct DynamicFieldToCreateDto
     {
-        public DynamicFieldToCreate(string key, string type, string value)
+        public DynamicFieldToCreateDto(string key, string type, string value)
         {
             Key = key;
             Type = type;

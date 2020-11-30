@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -16,9 +16,9 @@ namespace MRS.DocumentManagement.Services
             this.userContext = userContext;
         }
 
-        private bool IsCurrentUser(ID<User> id) => id.IsValid && id == userContext.CurrentUser.ID;
+        private bool IsCurrentUser(ID<UserDto> id) => id.IsValid && id == userContext.CurrentUser.ID;
 
-        public override async Task<bool> AddRole(ID<User> userID, string role)
+        public override async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
             var isAdded = await base.AddRole(userID, role);
             if (isAdded && IsCurrentUser(userID))
@@ -26,7 +26,7 @@ namespace MRS.DocumentManagement.Services
             return isAdded;
         }
 
-        public override async Task<bool> RemoveRole(ID<User> userID, string role)
+        public override async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
             var isRemoved = await base.RemoveRole(userID, role);
             if (isRemoved && IsCurrentUser(userID))
@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Services
             return isRemoved;
         }
 
-        public override async Task<bool> IsInRole(ID<User> userID, string role)
+        public override async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
             if (IsCurrentUser(userID))
             {

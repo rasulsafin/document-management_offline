@@ -1,8 +1,8 @@
-﻿using MRS.DocumentManagement.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        private async Task<Database.Models.User> GetUserChecked(ID<User> userID)
+        private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
         {
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Services
             return user;
         }
 
-        public virtual async Task<ID<User>> Add(UserToCreate data)
+        public virtual async Task<ID<UserDto>> Add(UserToCreateDto data)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace MRS.DocumentManagement.Services
                 };
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
-                return new ID<User>(user.ID);
+                return new ID<UserDto>(user.ID);
             }
             catch (DbUpdateException ex)
             {
@@ -50,7 +50,7 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public virtual async Task<bool> Delete(ID<User> userID)
+        public virtual async Task<bool> Delete(ID<UserDto> userID)
         {
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task<bool> Exists(ID<User> userID)
+        public async Task<bool> Exists(ID<UserDto> userID)
         {
             return await context.Users.AnyAsync(x => x.ID == (int)userID);
         }
@@ -84,12 +84,12 @@ namespace MRS.DocumentManagement.Services
             return await context.Users.AnyAsync(x => x.Login == login);
         }
 
-        public async Task<User> Find(ID<User> userID)
+        public async Task<UserDto> Find(ID<UserDto> userID)
         {
             var dbUser = await context.Users.FindAsync((int)userID);
             if (dbUser != null)
             {
-                return new User((ID<User>)dbUser.ID, dbUser.Login, dbUser.Name);
+                return new UserDto((ID<UserDto>)dbUser.ID, dbUser.Login, dbUser.Name);
             }
             else 
             {
@@ -97,13 +97,13 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<User> Find(string login)
+        public async Task<UserDto> Find(string login)
         {
             login = login.Trim();
             var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
             if (dbUser != null)
             {
-                return new User((ID<User>)dbUser.ID, dbUser.Login, dbUser.Name);
+                return new UserDto((ID<UserDto>)dbUser.ID, dbUser.Login, dbUser.Name);
             }
             else
             {
@@ -111,16 +111,16 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<IEnumerable<User>> GetAllUsers()
+        public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
             var dbUsers = await context.Users
                 .Select(x => new { x.ID, x.Login, x.Name })
                 .ToListAsync();
-            return dbUsers.Select(x => new User((ID<User>)x.ID, x.Login, x.Name))
+            return dbUsers.Select(x => new UserDto((ID<UserDto>)x.ID, x.Login, x.Name))
                 .ToList();
         }
 
-        public virtual async Task Update(User user)
+        public virtual async Task Update(UserDto user)
         {
             var storedUser = await GetUserChecked(user.ID);
             storedUser.Login = user.Login;
@@ -128,7 +128,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public virtual async Task UpdatePassword(ID<User> userID, string newPass)
+        public virtual async Task UpdatePassword(ID<UserDto> userID, string newPass)
         {
             var user = await GetUserChecked(userID);
             Utility.CryptographyHelper.CreatePasswordHash(newPass, out byte[] passHash, out byte[] passSalt);
@@ -137,7 +137,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task<bool> VerifyPassword(ID<User> userID, string password)
+        public async Task<bool> VerifyPassword(ID<UserDto> userID, string password)
         {
             var user = await GetUserChecked(userID);
             return Utility.CryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);

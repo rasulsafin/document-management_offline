@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Dtos;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Interface
 {
@@ -18,6 +18,6 @@ namespace MRS.DocumentManagement.Interface
         /// </summary>
         /// <param name="data">New user credentials</param>
         /// <returns>Null if registration failed</returns>
-        Task<IAuthenticatedAccess> Register(UserToCreate data);
+        Task<IAuthenticatedAccess> Register(UserToCreateDto data);
     }
 }

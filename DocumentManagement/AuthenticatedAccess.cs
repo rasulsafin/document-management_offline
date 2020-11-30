@@ -1,7 +1,6 @@
-﻿using System;
-using MRS.DocumentManagement.Database;
+﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
 
@@ -32,7 +31,7 @@ namespace MRS.DocumentManagement
         public IConnectionService ConnectionService { get; }
         public IObjectiveTypeService ObjectiveTypeService { get; }
 
-        public User CurrentUser => userContext.CurrentUser;
+        public UserDto CurrentUser => userContext.CurrentUser;
         public bool IsInRole(string role) => userContext.IsInRole(role);
     }
 }

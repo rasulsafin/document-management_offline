@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -18,44 +19,44 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        private static Objective MapObjectiveFromDB(Database.Models.Objective ob)
+        private static ObjectiveDto MapObjectiveFromDB(Database.Models.Objective ob)
         {
-            return new Objective()
+            return new ObjectiveDto()
             {
-                ID = (ID<Objective>)ob.ID,
-                Author = new User((ID<User>)ob.Author.ID, ob.Author.Login, ob.Author.Name),
+                ID = (ID<ObjectiveDto>)ob.ID,
+                Author = new UserDto((ID<UserDto>)ob.Author.ID, ob.Author.Login, ob.Author.Name),
                 CreationDate = ob.CreationDate,
                 Description = ob.Description,
-                Status = (ObjectiveStatus)ob.Status,
-                ProjectID = (ID<Project>)ob.ProjectID,
+                Status = (ObjectiveStatusDto)ob.Status,
+                ProjectID = (ID<ProjectDto>)ob.ProjectID,
                 ParentObjectiveID = ob.ParentObjectiveID.HasValue
-                    ? ((ID<Objective>?)ob.ParentObjectiveID)
+                    ? ((ID<ObjectiveDto>?)ob.ParentObjectiveID)
                     : null,
                 DueDate = ob.DueDate,
-                TaskType = new ObjectiveType()
+                TaskType = new ObjectiveTypeDto()
                 {
-                    ID = (ID<ObjectiveType>)ob.ObjectiveType.ID,
+                    ID = (ID<ObjectiveTypeDto>)ob.ObjectiveType.ID,
                     Name = ob.ObjectiveType.Name
                 },
                 Title = ob.Title,
                 DynamicFields = ob.DynamicFields
-                    .Select(x => new DynamicField()
+                    .Select(x => new DynamicFieldDto()
                     {
-                        ID = (ID<DynamicField>)x.ID,
+                        ID = (ID<DynamicFieldDto>)x.ID,
                         Key = x.Key,
                         Type = x.Type,
                         Value = x.Value
                     }).ToList(),
                 BimElements = ob.BimElements
-                    .Select(x => new BimElement()
+                    .Select(x => new BimElementDto()
                     {
-                        ItemID = (ID<Item>)x.BimElement.ItemID,
+                        ItemID = (ID<ItemDto>)x.BimElement.ItemID,
                         GlobalID = x.BimElement.GlobalID
                     }).ToList()
             };
         }
 
-        public async Task<ID<Objective>> Add(ObjectiveToCreate data)
+        public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data)
         {
             var objective = new Database.Models.Objective()
             {
@@ -74,7 +75,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             objective.BimElements = new List<Database.Models.BimElementObjective>();
-            foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElement>())
+            foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
             {
                 var dbBim = await context.BimElements
                     .Where(x => x.ItemID == (int)bim.ItemID)
@@ -96,7 +97,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             objective.DynamicFields = new List<Database.Models.DynamicField>();
-            foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldToCreate>())
+            foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldToCreateDto>())
             {
                 context.DynamicFields.Add(new Database.Models.DynamicField()
                 {
@@ -108,10 +109,10 @@ namespace MRS.DocumentManagement.Services
             }
             await context.SaveChangesAsync();
 
-            return (ID<Objective>)objective.ID;
+            return (ID<ObjectiveDto>)objective.ID;
         }
 
-        public async Task<Objective> Find(ID<Objective> objectiveID)
+        public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
         {
             var dbObjective = await context.Objectives
                 .Include(x => x.DynamicFields)
@@ -123,7 +124,7 @@ namespace MRS.DocumentManagement.Services
             return MapObjectiveFromDB(dbObjective);
         }
 
-        public async Task<IEnumerable<Objective>> GetAllObjectives()
+        public async Task<IEnumerable<ObjectiveDto>> GetAllObjectives()
         {
             var dbObjectives = await context.Objectives
                 .Include(x => x.DynamicFields)
@@ -133,7 +134,7 @@ namespace MRS.DocumentManagement.Services
             return dbObjectives.Select(x => MapObjectiveFromDB(x)).ToList();
         }
 
-        public async Task<IEnumerable<Objective>> GetObjectives(ID<Project> projectID)
+        public async Task<IEnumerable<ObjectiveDto>> GetObjectives(ID<ProjectDto> projectID)
         {
             var dbProject = await context.Projects
                 .Include(x => x.Objectives)
@@ -145,12 +146,12 @@ namespace MRS.DocumentManagement.Services
             return dbProject.Objectives.Select(x => MapObjectiveFromDB(x)).ToList();
         }
 
-        public Task<IEnumerable<DynamicFieldInfo>> GetRequiredDynamicFields()
+        public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields()
         {
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Remove(ID<Objective> objectiveID)
+        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
         {
             var objective = await context.Objectives.FindAsync((int)objectiveID);
             if (objective == null)
@@ -160,7 +161,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task Update(Objective objData)
+        public async Task Update(ObjectiveDto objData)
         {
             var objective = await context.Objectives
                 .Include(x => x.DynamicFields)
@@ -181,7 +182,7 @@ namespace MRS.DocumentManagement.Services
             objective.ObjectiveTypeID = (int)objData.TaskType.ID;
 
             var objectiveFields = objective.DynamicFields;
-            var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicField>();
+            var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
             var fieldsToRemove = objectiveFields.Where(x => !newFields.Any(f => (int)f.ID == x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);
 
@@ -211,7 +212,7 @@ namespace MRS.DocumentManagement.Services
             context.Update(objective);
             await context.SaveChangesAsync();
 
-            var newBimElements = objData.BimElements ?? Enumerable.Empty<BimElement>();
+            var newBimElements = objData.BimElements ?? Enumerable.Empty<BimElementDto>();
             var currentBimLinks = objective.BimElements.ToList();
             var linksToRemove = currentBimLinks
                 .Where(x => !newBimElements.Any(e => 

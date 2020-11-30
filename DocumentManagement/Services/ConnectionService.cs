@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -20,11 +21,11 @@ namespace MRS.DocumentManagement.Services
             this.userContext = userContext;
         }
 
-        private static RemoteConnectionInfo MapConnectionFromDb(Database.Models.ConnectionInfo info)
+        private static RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info)
         {
-            return new RemoteConnectionInfo()
+            return new RemoteConnectionInfoDto()
             {
-                ID = (ID<RemoteConnectionInfo>)info.ID,
+                ID = (ID<RemoteConnectionInfoDto>)info.ID,
                 ServiceName = info.Name,
                 AuthFieldNames = DecodeAuthFieldNames(info.AuthFieldNames)
             };
@@ -44,13 +45,13 @@ namespace MRS.DocumentManagement.Services
             return names;
         }
 
-        public async Task<IEnumerable<RemoteConnectionInfo>> GetAvailableConnections()
+        public async Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections()
         {
             var connDb = await context.ConnectionInfos.ToListAsync();
             return connDb.Select(x => MapConnectionFromDb(x)).ToList();
         }
 
-        public async Task<RemoteConnectionInfo> GetCurrentConnection()
+        public async Task<RemoteConnectionInfoDto> GetCurrentConnection()
         {
             var currentUserID = (int)userContext.CurrentUser.ID;
             var connection = await context.Users.Include(x => x.ConnectionInfo)
@@ -62,17 +63,17 @@ namespace MRS.DocumentManagement.Services
             return MapConnectionFromDb(connection);
         }
 
-        public Task<IEnumerable<EnumVariant>> GetEnumVariants(string dynamicFieldKey)
+        public Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ConnectionStatus> GetRemoteConnectionStatus()
+        public Task<ConnectionStatusDto> GetRemoteConnectionStatus()
         {
             throw new NotImplementedException();
         }
 
-        public async Task LinkRemoteConnection(RemoteConnectionToCreate connectionInfo)
+        public async Task LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
             
@@ -96,7 +97,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public Task Reconnect(RemoteConnectionToCreate connectionInfo)
+        public Task Reconnect(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
         }

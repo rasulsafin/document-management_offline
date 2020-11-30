@@ -1,20 +1,20 @@
-﻿using System.Collections.Generic;
+﻿using MRS.DocumentManagement.Interface.Dtos;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IProjectService
     {
-        Task<IEnumerable<Project>> GetAllProjects();
-        Task<IEnumerable<Project>> GetUserProjects(ID<User> userID);
-        Task<ID<Project>> Add(ID<User> owner, string title);
-        Task<bool> Remove(ID<Project> projectID);
-        Task Update(Project projectData);
-        Task<Project> Find(ID<Project> projectID);
+        Task<IEnumerable<ProjectDto>> GetAllProjects();
+        Task<IEnumerable<ProjectDto>> GetUserProjects(ID<UserDto> userID);
+        Task<ID<ProjectDto>> Add(ID<UserDto> owner, string title);
+        Task<bool> Remove(ID<ProjectDto> projectID);
+        Task Update(ProjectDto projectData);
+        Task<ProjectDto> Find(ID<ProjectDto> projectID);
 
-        Task<IEnumerable<User>> GetUsers(ID<Project> projectID);
-        Task AddUsers(ID<Project> projectID, IEnumerable<ID<User>> users);
-        Task RemoveUsers(ID<Project> projectID, IEnumerable<ID<User>> users);
+        Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID);
+        Task AddUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
+        Task RemoveUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
     }
 }

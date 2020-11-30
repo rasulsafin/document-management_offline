@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -15,23 +16,23 @@ namespace MRS.DocumentManagement.Api.Controllers
         public AuthorizationsController(IAuthorizationService authorizationService) => service = authorizationService;
 
         [HttpGet]
-        [Route("Get/Roles")]
+        [Route("roles")]
         public async Task<IEnumerable<string>> GetAllRoles() => await service.GetAllRoles();
 
         [HttpPost]
-        [Route("GetUserRoles")]
-        public async Task AddRole(ID<User> userID, string role) => await service.AddRole(userID, role);
+        [Route("role/user")]
+        public async Task AddRole(int userID, string role) => await service.AddRole(new ID<UserDto>(userID), role);
 
         [HttpDelete]
-        [Route("Remove/Roles")]
-        public async Task RemoveRole(ID<User> userID, string role) => await service.RemoveRole(userID, role);
+        [Route("roles")]
+        public async Task RemoveRole(ID<UserDto> userID, string role) => await service.RemoveRole(userID, role);
 
         [HttpGet]
-        [Route("Get/Roles/User")]
-        public async Task<IEnumerable<string>> GetUserRoles(ID<User> userID) => await service.GetUserRoles(userID);
+        [Route("roles/user")]
+        public async Task<IEnumerable<string>> GetUserRoles(int userID) => await service.GetUserRoles(new ID<UserDto>(userID));
 
         [HttpGet]
-        [Route("IsInRole/User")]
-        public async Task<bool> IsInRole(ID<User> userID, string role) => await service.IsInRole(userID, role);
+        [Route("isinrole/user")]
+        public async Task<bool> IsInRole(ID<UserDto> userID, string role) => await service.IsInRole(userID, role);
     }
 }

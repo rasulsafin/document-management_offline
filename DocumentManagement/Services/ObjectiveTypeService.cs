@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Microsoft.EntityFrameworkCore;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Models;
-using MRS.DocumentManagement.Interface.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -19,7 +18,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        public async Task<ID<ObjectiveType>> Add(string typeName)
+        public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
             try 
             {
@@ -29,7 +28,7 @@ namespace MRS.DocumentManagement.Services
                 };
                 context.ObjectiveTypes.Add(objType);
                 await context.SaveChangesAsync();
-                return (ID<ObjectiveType>)objType.ID;
+                return (ID<ObjectiveTypeDto>)objType.ID;
             }
             catch (DbUpdateException ex)
             {
@@ -37,42 +36,42 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<ObjectiveType> Find(ID<ObjectiveType> id)
+        public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
             var dbObjective = await context.ObjectiveTypes.FindAsync((int)id);
             if (dbObjective == null)
                 return null;
-            return new ObjectiveType() 
+            return new ObjectiveTypeDto() 
             {
-                ID = (ID<ObjectiveType>)dbObjective.ID,
+                ID = (ID<ObjectiveTypeDto>)dbObjective.ID,
                 Name = dbObjective.Name
             };
         }
 
-        public async Task<ObjectiveType> Find(string typename)
+        public async Task<ObjectiveTypeDto> Find(string typename)
         {
             var dbObjective = await context.ObjectiveTypes
                 .FirstOrDefaultAsync(x => x.Name == typename);
             if (dbObjective == null)
                 return null;
-            return new ObjectiveType()
+            return new ObjectiveTypeDto()
             {
-                ID = (ID<ObjectiveType>)dbObjective.ID,
+                ID = (ID<ObjectiveTypeDto>)dbObjective.ID,
                 Name = dbObjective.Name
             };
         }
 
-        public async Task<IEnumerable<ObjectiveType>> GetAllObjectiveTypes()
+        public async Task<IEnumerable<ObjectiveTypeDto>> GetAllObjectiveTypes()
         {
             var db = await context.ObjectiveTypes.ToListAsync();
-            return db.Select(x => new ObjectiveType()
+            return db.Select(x => new ObjectiveTypeDto()
             {
-                ID = (ID<ObjectiveType>)x.ID,
+                ID = (ID<ObjectiveTypeDto>)x.ID,
                 Name = x.Name
             }).ToList();
         }
 
-        public async Task<bool> Remove(ID<ObjectiveType> id)
+        public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
         {
             try 
             { 

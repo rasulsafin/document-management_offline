@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using MRS.DocumentManagement.Interface.Dtos;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
@@ -15,19 +15,19 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Add role to user
         /// </summary>
         /// <returns>True if role is added, false if user already had this role</returns>
-        Task<bool> AddRole(ID<User> userID, string role);
+        Task<bool> AddRole(ID<UserDto> userID, string role);
         /// <summary>
         /// Remove role from user. If this role is not referenced anymore it's deleted.
         /// </summary>
         /// <returns>True if role was removed, false if user hadn't this role</returns>
-        Task<bool> RemoveRole(ID<User> userID, string role);
+        Task<bool> RemoveRole(ID<UserDto> userID, string role);
         /// <summary>
         /// Get all roles of specified user
         /// </summary>
-        Task<IEnumerable<string>> GetUserRoles(ID<User> userID);
+        Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID);
         /// <summary>
         /// Check if user is in role
         /// </summary>
-        Task<bool> IsInRole(ID<User> userID, string role);
+        Task<bool> IsInRole(ID<UserDto> userID, string role);
     }
 }

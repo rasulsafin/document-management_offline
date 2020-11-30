@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Interface.Models
+namespace MRS.DocumentManagement.Interface
 {
     public struct ID<T> : IEquatable<ID<T>>
     {

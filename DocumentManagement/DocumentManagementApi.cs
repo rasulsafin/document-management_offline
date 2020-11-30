@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
+﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("DocumentManagement.Tests")]
 namespace MRS.DocumentManagement
@@ -28,7 +25,7 @@ namespace MRS.DocumentManagement
             return new AuthenticatedAccess(context, userContext);
         }
 
-        public async Task<IAuthenticatedAccess> Register(UserToCreate data)
+        public async Task<IAuthenticatedAccess> Register(UserToCreateDto data)
         {
             var userContext = await SynchronizedUserContext.TryRegister(context, data);
             if (userContext == null)

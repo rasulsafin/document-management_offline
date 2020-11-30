@@ -40,14 +40,14 @@ namespace MRS.DocumentManagement.Tests
                 ProjectID = o.ProjectID,
                 Status = o.Status,
                 TaskType = type,
-                BimElements = o.BimElements?.ToList() ?? Enumerable.Empty<BimElement>(),
+                BimElements = o.BimElements?.ToList() ?? Enumerable.Empty<BimElementDto>(),
                 DynamicFields = o.DynamicFields?
-                    .Select(x => new DynamicField() 
+                    .Select(x => new DynamicFieldDto() 
                     {
                         Key = x.Key,
                         Type = x.Type,
                         Value = x.Value
-                    }).ToList() ?? Enumerable.Empty<DynamicField>()
+                    }).ToList() ?? Enumerable.Empty<DynamicFieldDto>()
             };
         }
 
@@ -82,10 +82,10 @@ namespace MRS.DocumentManagement.Tests
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
                     BimElements = null,
-                    DynamicFields = new List<DynamicFieldToCreate>()
+                    DynamicFields = new List<DynamicFieldToCreateDto>()
                     {
-                        new DynamicFieldToCreate("df1", "type 1", "val 1"),
-                        new DynamicFieldToCreate("df2", "type 2", "val 2")
+                        new DynamicFieldToCreateDto("df1", "type 1", "val 1"),
+                        new DynamicFieldToCreateDto("df2", "type 2", "val 2")
                     }
                 };
 
@@ -216,23 +216,23 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsNotNull(obj.BimElements);
                 Assert.AreEqual(0, obj.BimElements.Count());
 
-                obj.BimElements = new List<BimElement>()
+                obj.BimElements = new List<BimElementDto>()
                 {
-                    new BimElement() { ItemID = item1, GlobalID = "BIM1" },
-                    new BimElement() { ItemID = item1, GlobalID = "BIM2" }
+                    new BimElementDto() { ItemID = item1, GlobalID = "BIM1" },
+                    new BimElementDto() { ItemID = item1, GlobalID = "BIM2" }
                 };
                 await access.ObjectiveService.Update(obj);
 
-                var bimComparer = new DelegateComparer<BimElement>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
+                var bimComparer = new DelegateComparer<BimElementDto>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
 
                 var added = await access.ObjectiveService.Find(objID);
                 CollectionAssert.That.AreEquivalent(obj.BimElements, added.BimElements, bimComparer);
 
-                obj.BimElements = new List<BimElement>()
+                obj.BimElements = new List<BimElementDto>()
                 {
-                    new BimElement() { ItemID = item1, GlobalID = "BIM1" },
-                    new BimElement() { ItemID = item1, GlobalID = "BIM3" },
-                    new BimElement() { ItemID = item1, GlobalID = "BIM4" }
+                    new BimElementDto() { ItemID = item1, GlobalID = "BIM1" },
+                    new BimElementDto() { ItemID = item1, GlobalID = "BIM3" },
+                    new BimElementDto() { ItemID = item1, GlobalID = "BIM4" }
                 };
                 await access.ObjectiveService.Update(obj);
                 added = await access.ObjectiveService.Find(objID);

@@ -1,25 +1,25 @@
-﻿using System.Collections.Generic;
+﻿using MRS.DocumentManagement.Interface.Dtos;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IItemService
     {
-        Task<ID<Item>> Add(ItemToCreate data, ID<Project> parentProject);
-        Task<ID<Item>> Add(ItemToCreate data, ID<Objective> parentObjective);
+        Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ProjectDto> parentProject);
+        Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ObjectiveDto> parentObjective);
 
-        Task Link(ID<Item> itemID, ID<Project> projectID);
-        Task Link(ID<Item> itemID, ID<Objective> objectiveID);
+        Task Link(ID<ItemDto> itemID, ID<ProjectDto> projectID);
+        Task Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
 
-        Task Unlink(ID<Item> itemID, ID<Project> projectID);
-        Task Unlink(ID<Item> itemID, ID<Objective> objectiveID);
+        Task Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID);
+        Task Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
 
-        Task Update(Item item);
-        Task<Item> Find(ID<Item> itemID);
-        Task<Item> Find(string path);
+        Task Update(ItemDto item);
+        Task<ItemDto> Find(ID<ItemDto> itemID);
+        Task<ItemDto> Find(string path);
 
-        Task<IEnumerable<Item>> GetItems(ID<Project> projectID);
-        Task<IEnumerable<Item>> GetItems(ID<Objective> objectiveID);
+        Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID);
+        Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);
     }
 }

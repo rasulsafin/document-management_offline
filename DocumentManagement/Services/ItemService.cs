@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
 using MRS.DocumentManagement.Interface.Services;
 using System.Linq;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        public async Task<ID<Item>> Add(ItemToCreate data, ID<Project> parentProject)
+        public async Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ProjectDto> parentProject)
         {
             var item = new Database.Models.Item() 
             {
@@ -28,11 +29,11 @@ namespace MRS.DocumentManagement.Services
             context.Items.Add(item);
             await context.SaveChangesAsync();
 
-            await Link((ID<Item>)item.ID, parentProject);
-            return (ID<Item>)item.ID;
+            await Link((ID<ItemDto>)item.ID, parentProject);
+            return (ID<ItemDto>)item.ID;
         }
 
-        public async Task<ID<Item>> Add(ItemToCreate data, ID<Objective> parentObjective)
+        public async Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ObjectiveDto> parentObjective)
         {
             var item = new Database.Models.Item()
             {
@@ -42,11 +43,11 @@ namespace MRS.DocumentManagement.Services
             context.Items.Add(item);
             await context.SaveChangesAsync();
 
-            await Link((ID<Item>)item.ID, parentObjective);
-            return (ID<Item>)item.ID;
+            await Link((ID<ItemDto>)item.ID, parentObjective);
+            return (ID<ItemDto>)item.ID;
         }
 
-        public async Task<Item> Find(ID<Item> itemID)
+        public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
             var dbItem = await context.Items.FindAsync((int)itemID);
             if (dbItem == null)
@@ -54,7 +55,7 @@ namespace MRS.DocumentManagement.Services
             return MapItemFromDB(dbItem);
         }
 
-        public async Task<Item> Find(string path)
+        public async Task<ItemDto> Find(string path)
         {
             var dbItem = await context.Items.FirstOrDefaultAsync(x => x.Path == path);
             if (dbItem == null)
@@ -62,7 +63,7 @@ namespace MRS.DocumentManagement.Services
             return MapItemFromDB(dbItem);
         }
 
-        public async Task<IEnumerable<Item>> GetItems(ID<Project> projectID)
+        public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
             var dbItems = await context.ProjectItems
                 .Where(x => x.ProjectID == (int)projectID)
@@ -71,7 +72,7 @@ namespace MRS.DocumentManagement.Services
             return dbItems.Select(x => MapItemFromDB(x)).ToList();
         }
 
-        public async Task<IEnumerable<Item>> GetItems(ID<Objective> objectiveID)
+        public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID)
         {
             var dbItems = await context.ObjectiveItems
                 .Where(x => x.ObjectiveID == (int)objectiveID)
@@ -80,7 +81,7 @@ namespace MRS.DocumentManagement.Services
             return dbItems.Select(x => MapItemFromDB(x)).ToList();
         }
 
-        public async Task Link(ID<Item> itemID, ID<Project> projectID)
+        public async Task Link(ID<ItemDto> itemID, ID<ProjectDto> projectID)
         {
             var isLinked = await context.ProjectItems.Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ProjectID == (int)projectID)
@@ -97,7 +98,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task Link(ID<Item> itemID, ID<Objective> objectiveID)
+        public async Task Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
         {
             var isLinked = await context.ObjectiveItems.Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ObjectiveID == (int)objectiveID)
@@ -114,7 +115,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task Unlink(ID<Item> itemID, ID<Project> projectID)
+        public async Task Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID)
         {
             var link = await context.ProjectItems
                 .Where(x => x.ItemID == (int)itemID)
@@ -126,7 +127,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task Unlink(ID<Item> itemID, ID<Objective> objectiveID)
+        public async Task Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
         {
             var link = await context.ObjectiveItems
                 .Where(x => x.ItemID == (int)itemID)
@@ -138,7 +139,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        public async Task Update(Item item)
+        public async Task Update(ItemDto item)
         {
             var dbItem = await context.Items.FindAsync((int)item.ID);
             if (dbItem == null)
@@ -149,12 +150,12 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        private static Item MapItemFromDB(Database.Models.Item dbItem)
+        private static ItemDto MapItemFromDB(Database.Models.Item dbItem)
         {
-            return new Item()
+            return new ItemDto()
             {
-                ID = (ID<Item>)dbItem.ID,
-                ItemType = (ItemType)dbItem.ItemType,
+                ID = (ID<ItemDto>)dbItem.ID,
+                ItemType = (ItemTypeDto)dbItem.ItemType,
                 Path = dbItem.Path
             };
         }

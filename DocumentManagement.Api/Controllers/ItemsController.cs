@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
+﻿using Microsoft.AspNetCore.Mvc;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -15,47 +16,47 @@ namespace MRS.DocumentManagement.Api.Controllers
         public ItemsController(IItemService itemService) => service = itemService;
 
         [HttpPost]
-        [Route("Add/Project")]
-        public async Task<ID<Item>> Add(ItemToCreate data, [FromHeader] ID<Project> parentProject) => await service.Add(data, parentProject);
+        [Route("project/{parentproject}")]
+        public async Task<ID<ItemDto>> AddToProject(ItemToCreateDto data, int parentProject) => await service.Add(data, new ID<ProjectDto>(parentProject));
 
         [HttpPost]
-        [Route("Add/Objective")]
-        public async Task<ID<Item>> Add(ItemToCreate data, [FromHeader] ID<Objective> parentObjective) => await service.Add(data, parentObjective);
+        [Route("objective/{parentobjective}")]
+        public async Task<ID<ItemDto>> AddToObjective(ItemToCreateDto data, int parentObjective) => await service.Add(data, new ID<ObjectiveDto>(parentObjective));
 
         [HttpPost]
-        [Route("Link/Project")]
-        public async Task Link(ID<Item> itemID, [FromHeader] ID<Project> projectID) => await service.Link(itemID, projectID);
+        [Route("link/project")]
+        public async Task Link(ID<ItemDto> itemID, [FromHeader] ID<ProjectDto> projectID) => await service.Link(itemID, projectID);
 
         [HttpPost]
-        [Route("Link/Objective")]
-        public async Task Link(ID<Item> itemID, [FromHeader] ID<Objective> objectiveID) => await service.Link(itemID, objectiveID);
+        [Route("link/objective")]
+        public async Task Link(ID<ItemDto> itemID, [FromHeader] ID<ObjectiveDto> objectiveID) => await service.Link(itemID, objectiveID);
 
         [HttpPost]
-        [Route("Unlink/Project")]
-        public async Task Unlink(ID<Item> itemID, [FromHeader] ID<Project> projectID) => await service.Unlink(itemID, projectID);
+        [Route("unlink/project")]
+        public async Task Unlink(ID<ItemDto> itemID, [FromHeader] ID<ProjectDto> projectID) => await service.Unlink(itemID, projectID);
 
         [HttpPost]
-        [Route("Unlink/Objective")]
-        public async Task Unlink(ID<Item> itemID, [FromHeader] ID<Objective> objectiveID) => await service.Unlink(itemID, objectiveID);
+        [Route("unlink/objective")]
+        public async Task Unlink(ID<ItemDto> itemID, [FromHeader] ID<ObjectiveDto> objectiveID) => await service.Unlink(itemID, objectiveID);
 
         [HttpPut]
-        [Route("Update/Item")]
-        public async Task Update(Item item) => await service.Update(item);
+        [Route("update/item")]
+        public async Task Update(ItemDto item) => await service.Update(item);
 
         [HttpGet]
-        [Route("Find/Id")]
-        public async Task<Item> Find(ID<Item> itemID) => await service.Find(itemID);
+        [Route("id")]
+        public async Task<ItemDto> Find(ID<ItemDto> itemID) => await service.Find(itemID);
 
         [HttpGet]
-        [Route("Find/Path")]
-        public async Task<Item> Find(string path) => await service.Find(path);
+        [Route("path")]
+        public async Task<ItemDto> Find(string path) => await service.Find(path);
 
         [HttpGet]
-        [Route("Get/Project")]
-        public async Task<IEnumerable<Item>> GetItems(ID<Project> projectID) => await service.GetItems(projectID);
+        [Route("project")]
+        public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID) => await service.GetItems(projectID);
 
         [HttpGet]
-        [Route("Get/Objective")]
-        public async Task<IEnumerable<Item>> GetItems(ID<Objective> objectiveID) => await service.GetItems(objectiveID);
+        [Route("objective")]
+        public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID) => await service.GetItems(objectiveID);
     }
 }

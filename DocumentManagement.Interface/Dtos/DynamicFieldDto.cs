@@ -1,8 +1,8 @@
-﻿namespace MRS.DocumentManagement.Interface.Models
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class DynamicField
+    public class DynamicFieldDto
     {
-        public ID<DynamicField> ID { get; set; }
+        public ID<DynamicFieldDto> ID { get; set; }
         public string Key { get; set; }
         public string Type { get; set; }
         public string Value { get; set; }

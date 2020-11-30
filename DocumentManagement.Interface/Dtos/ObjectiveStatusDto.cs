@@ -1,6 +1,6 @@
-﻿namespace MRS.DocumentManagement.Interface.Models
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public enum ObjectiveStatus
+    public enum ObjectiveStatusDto
     {
         Undefined,
         Open,

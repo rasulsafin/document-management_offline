@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Models;
 using MRS.DocumentManagement.Interface.Services;
 using System.Linq;
 using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        public virtual async Task<bool> AddRole(ID<User> userID, string role)
+        public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
             var user = await context.Users.FindAsync((int)userID);
             if (user == null)
@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Services
             return dbRoles.Select(x => x.Name).ToList();
         }
 
-        public virtual async Task<IEnumerable<string>> GetUserRoles(ID<User> userID)
+        public virtual async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
         {
             var id = (int)userID;
             return await context.Users
@@ -64,7 +64,7 @@ namespace MRS.DocumentManagement.Services
                 .ToListAsync();
         }
 
-        public virtual async Task<bool> IsInRole(ID<User> userID, string role)
+        public virtual async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
             var id = (int)userID;
             return await context.UserRoles
@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Services
                 .AnyAsync(x => x.Name == role);
         }
 
-        public virtual async Task<bool> RemoveRole(ID<User> userID, string role)
+        public virtual async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
             var iuserID = (int)userID;
             var user = await context.Users.FindAsync(iuserID);

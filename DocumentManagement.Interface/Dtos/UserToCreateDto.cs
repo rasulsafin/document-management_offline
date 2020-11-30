@@ -1,8 +1,8 @@
-﻿namespace MRS.DocumentManagement.Interface.Models
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public struct UserToCreate
+    public struct UserToCreateDto
     {
-        public UserToCreate(string login, string password, string name)
+        public UserToCreateDto(string login, string password, string name)
         {
             Login = login?.Trim();
             Password = password?.Trim();

@@ -8,14 +8,14 @@ namespace MRS.DocumentManagement.Tests
     internal class ObjectiveComparer : AbstractModelComparer<Objective>
     {
         private readonly UserComparer userComparer;
-        private readonly IEqualityComparer<BimElement> bimComparer;
-        private readonly IEqualityComparer<DynamicField> fieldComparer;
+        private readonly IEqualityComparer<BimElementDto> bimComparer;
+        private readonly IEqualityComparer<DynamicFieldDto> fieldComparer;
 
         public ObjectiveComparer(bool ignoreIDs = false) : base(ignoreIDs)
         {
             userComparer = new UserComparer(false);
-            bimComparer = new DelegateComparer<BimElement>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
-            fieldComparer = new DelegateComparer<DynamicField>((x, y) => x.Key == y.Key && x.Type == y.Type && x.Value == y.Value);
+            bimComparer = new DelegateComparer<BimElementDto>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
+            fieldComparer = new DelegateComparer<DynamicFieldDto>((x, y) => x.Key == y.Key && x.Type == y.Type && x.Value == y.Value);
         }
 
         public override bool NotNullEquals([DisallowNull] Objective x, [DisallowNull] Objective y)
