@@ -17,46 +17,44 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpPost]
         [Route("project/{parentproject}")]
-        public async Task<ID<ItemDto>> AddToProject(ItemToCreateDto data, int parentProject) => await service.Add(data, new ID<ProjectDto>(parentProject));
+        public async Task<ID<ItemDto>> AddToProject([FromBody] ItemToCreateDto data, [FromRoute] int parentProject) => await service.Add(data, new ID<ProjectDto>(parentProject));
 
         [HttpPost]
         [Route("objective/{parentobjective}")]
-        public async Task<ID<ItemDto>> AddToObjective(ItemToCreateDto data, int parentObjective) => await service.Add(data, new ID<ObjectiveDto>(parentObjective));
+        public async Task<ID<ItemDto>> AddToObjective([FromBody] ItemToCreateDto data, [FromRoute] int parentObjective) => await service.Add(data, new ID<ObjectiveDto>(parentObjective));
 
         [HttpPost]
-        [Route("link/project")]
-        public async Task Link(ID<ItemDto> itemID, [FromHeader] ID<ProjectDto> projectID) => await service.Link(itemID, projectID);
+        [Route("link/project/{projectID}/item/{itemId}")]
+        public async Task LinkToProject([FromRoute] int itemID, [FromRoute] int projectID) => await service.Link(new ID<ItemDto>(itemID), new ID<ProjectDto>(projectID));
 
         [HttpPost]
-        [Route("link/objective")]
-        public async Task Link(ID<ItemDto> itemID, [FromHeader] ID<ObjectiveDto> objectiveID) => await service.Link(itemID, objectiveID);
+        [Route("link/objective/{objectiveID}/item/{itemId}")]
+        public async Task LinkToObjective([FromRoute] int itemID, [FromRoute] int objectiveID) => await service.Link(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
 
         [HttpPost]
-        [Route("unlink/project")]
-        public async Task Unlink(ID<ItemDto> itemID, [FromHeader] ID<ProjectDto> projectID) => await service.Unlink(itemID, projectID);
+        [Route("unlink/project/{projectID}/item/{itemId}")]
+        public async Task UnlinkFromProject([FromRoute] int itemID, [FromRoute] int projectID) => await service.Unlink(new ID<ItemDto>(itemID), new ID<ProjectDto>(projectID));
 
         [HttpPost]
-        [Route("unlink/objective")]
-        public async Task Unlink(ID<ItemDto> itemID, [FromHeader] ID<ObjectiveDto> objectiveID) => await service.Unlink(itemID, objectiveID);
+        [Route("unlink/objective/{objectiveID}/item/{itemId}")]
+        public async Task UnlinkFromObjective([FromRoute] int itemID, [FromRoute] int objectiveID) => await service.Unlink(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
 
         [HttpPut]
-        [Route("update/item")]
-        public async Task Update(ItemDto item) => await service.Update(item);
+        public async Task Update([FromBody] ItemDto item) => await service.Update(item);
 
         [HttpGet]
-        [Route("id")]
-        public async Task<ItemDto> Find(ID<ItemDto> itemID) => await service.Find(itemID);
+        [Route("{itemID}")]
+        public async Task<ItemDto> Find([FromRoute] int itemID) => await service.Find(new ID<ItemDto>(itemID));
 
         [HttpGet]
-        [Route("path")]
-        public async Task<ItemDto> Find(string path) => await service.Find(path);
+        public async Task<ItemDto> Find([FromQuery] string path) => await service.Find(path);
 
         [HttpGet]
-        [Route("project")]
-        public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID) => await service.GetItems(projectID);
+        [Route("project/{projectID}")]
+        public async Task<IEnumerable<ItemDto>> GetProjectItems([FromRoute] int projectID) => await service.GetItems(new ID<ProjectDto>(projectID));
 
         [HttpGet]
-        [Route("objective")]
-        public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID) => await service.GetItems(objectiveID);
+        [Route("objective/{objectiveID}")]
+        public async Task<IEnumerable<ItemDto>> GetObjectiveItems([FromQuery] int objectiveID) => await service.GetItems(new ID<ObjectiveDto>(objectiveID));
     }
 }

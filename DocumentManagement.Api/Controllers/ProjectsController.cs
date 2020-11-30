@@ -16,31 +16,34 @@ namespace MRS.DocumentManagement.Api.Controllers
         public ProjectsController(IProjectService projectService) => service = projectService;
 
         [HttpGet]
-        public async Task<IEnumerable<ProjectDto>> GetUserProjects(ID<UserDto> userID) => await service.GetUserProjects(userID);
+        [Route("user/{userID}")]
+        public async Task<IEnumerable<ProjectDto>> GetUserProjects([FromRoute] int userID) => await service.GetUserProjects(new ID<UserDto>(userID));
 
         [HttpPost]
-        public async Task<ID<ProjectDto>> Add(ID<UserDto> owner, string title) => await service.Add(owner, title);
+        [Route("user/{userID}")]
+        public async Task<ID<ProjectDto>> Add([FromRoute] int userID, [FromBody] string title) => await service.Add(new ID<UserDto>(userID), title);
 
         [HttpDelete]
-        public async Task Remove(ID<ProjectDto> projectID) => await service.Remove(projectID);
+        [Route("{projectID}")]
+        public async Task Remove([FromRoute] int projectID) => await service.Remove(new ID<ProjectDto>(projectID));
 
         [HttpPut]
-        public async Task Update(ProjectDto projectData) => await service.Update(projectData);
+        public async Task Update([FromBody] ProjectDto projectData) => await service.Update(projectData);
 
         [HttpGet]
-        [Route("find/project")]
-        public async Task<ProjectDto> Find(ID<ProjectDto> projectID) => await service.Find(projectID);
+        [Route("{projectID}")]
+        public async Task<ProjectDto> Find([FromRoute] int projectID) => await service.Find(new ID<ProjectDto>(projectID));
 
         [HttpGet]
-        [Route("users")]
-        public async Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID) => await service.GetUsers(projectID);
+        [Route("{projectID}/users")]
+        public async Task<IEnumerable<UserDto>> GetUsers([FromRoute] int projectID) => await service.GetUsers(new ID<ProjectDto>(projectID));
 
         [HttpPost]
-        [Route("users")]
-        public async Task AddUsers([FromHeader] ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users) => await service.AddUsers(projectID, users);
+        [Route("{projectID}/users")]
+        public async Task AddUsers([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users) => await service.AddUsers(new ID<ProjectDto>(projectID), users);
 
         [HttpDelete]
-        [Route("users")]
-        public async Task RemoveUsers([FromHeader] ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users) => await service.RemoveUsers(projectID, users);
+        [Route("{projectID}/users")]
+        public async Task RemoveUsers([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users) => await service.RemoveUsers(new ID<ProjectDto>(projectID), users);
     }
 }

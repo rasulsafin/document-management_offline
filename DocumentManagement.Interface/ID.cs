@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Interface
 
         public override int GetHashCode() => id.GetHashCode();
 
-        public override string ToString() => $"{{ {typeof(T).Name} ID: {id} }}";
+        public override string ToString() => $"{id}";
 
         public bool IsValid => id > 0;
     }

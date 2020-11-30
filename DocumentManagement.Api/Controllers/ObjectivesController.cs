@@ -19,21 +19,22 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task<IEnumerable<ObjectiveDto>> GetAllObjectives() => await service.GetAllObjectives();
 
         [HttpPost]
-        public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data) => await service.Add(data);
+        public async Task<ID<ObjectiveDto>> Add([FromBody] ObjectiveToCreateDto data) => await service.Add(data);
 
         [HttpDelete]
-        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID) => await service.Remove(objectiveID);
+        [Route("{objectiveID}")]
+        public async Task<bool> Remove([FromRoute] int objectiveID) => await service.Remove(new ID<ObjectiveDto>(objectiveID));
 
         [HttpPut]
-        public async Task Update(ObjectiveDto projectData) => await service.Update(projectData);
+        public async Task Update([FromBody] ObjectiveDto projectData) => await service.Update(projectData);
 
         [HttpGet]
-        [Route("find")]
-        public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID) => await service.Find(objectiveID);
+        [Route("{objectiveID}")]
+        public async Task<ObjectiveDto> Find([FromRoute] int objectiveID) => await service.Find(new ID<ObjectiveDto>(objectiveID));
 
         [HttpGet]
-        [Route("project")]
-        public async Task<IEnumerable<ObjectiveDto>> GetObjectives(ID<ProjectDto> projectID) => await service.GetObjectives(projectID);
+        [Route("project/{projectID}")]
+        public async Task<IEnumerable<ObjectiveDto>> GetObjectives([FromRoute] int projectID) => await service.GetObjectives(new ID<ProjectDto>(projectID));
 
         [HttpGet]
         [Route("dynamicfields")]

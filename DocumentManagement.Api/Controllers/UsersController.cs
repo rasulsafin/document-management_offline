@@ -19,37 +19,38 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task<IEnumerable<UserDto>> GetAllUsers() => await service.GetAllUsers();
 
         [HttpPost]
-        public async Task<ID<UserDto>> Add(UserToCreateDto data) => await service.Add(data);
+        public async Task<ID<UserDto>> Add([FromBody] UserToCreateDto data) => await service.Add(data);
 
         [HttpDelete]
-        public async Task Delete(ID<UserDto> userID) => await service.Delete(userID);
+        [Route("{userID}")]
+        public async Task Delete([FromRoute] int userID) => await service.Delete(new ID<UserDto>(userID));
 
         [HttpPut]
-        public async Task Update(UserDto user) => await service.Update(user);
+        public async Task Update([FromBody] UserDto user) => await service.Update(user);
 
         [HttpGet]
-        [Route("verifypassword")]
-        public async Task<bool> VerifyPassword(ID<UserDto> userID, string password) => await service.VerifyPassword(userID, password);
+        [Route("{userID}/password")]
+        public async Task<bool> VerifyPassword([FromRoute] int userID, [FromBody] string password) => await service.VerifyPassword(new ID<UserDto>(userID), password);
 
         [HttpPut]
-        [Route("password")]
-        public async Task UpdatePassword(ID<UserDto> userID, string newPass) => await service.UpdatePassword(userID, newPass);
+        [Route("{userID}/password")]
+        public async Task UpdatePassword([FromRoute] int userID, [FromBody] string newPass) => await service.UpdatePassword(new ID<UserDto>(userID), newPass);
 
         [HttpGet]
-        [Route("id")]
-        public async Task<UserDto> Find(ID<UserDto> userID) => await service.Find(userID);
+        [Route("{userID}")]
+        public async Task<UserDto> Find([FromRoute] int userID) => await service.Find(new ID<UserDto>(userID));
 
         [HttpGet]
         [Route("login")]
-        public async Task<UserDto> Find(string login) => await service.Find(login);
+        public async Task<UserDto> Find([FromQuery] string login) => await service.Find(login);
 
         [HttpGet]
-        [Route("exists/id")]
-        public async Task<bool> Exists(ID<UserDto> userID) => await service.Exists(userID);
-        
+        [Route("{userID}/exists")]
+        public async Task<bool> Exists([FromRoute] int userID) => await service.Exists(new ID<UserDto>(userID));
+
         [HttpGet]
-        [Route("exists/login")]
-        public async Task<bool> Exists(string login) => await service.Exists(login);
+        [Route("login/exists")]
+        public async Task<bool> Exists([FromQuery] string login) => await service.Exists(login);
 
         //public async Task<User> GetCurrentUser() => await userService.GetCurrentUser();
     }

@@ -16,15 +16,15 @@ namespace DocumentManagement.Api.Controllers
         public ObjectiveTypesController(IObjectiveTypeService objectiveTypeService) => service = objectiveTypeService;
 
         [HttpPost]
-        public async Task<ID<ObjectiveTypeDto>> Add(string typeName) => await service.Add(typeName);
+        public async Task<ID<ObjectiveTypeDto>> Add([FromBody] string typeName) => await service.Add(typeName);
 
         [HttpGet]
-        [Route("find/id")]
-        public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id) => await service.Find(id);
+        [Route("{id}")]
+        public async Task<ObjectiveTypeDto> Find([FromRoute] int id) => await service.Find(new ID<ObjectiveTypeDto>(id));
 
         [HttpGet]
-        [Route("find/name")]
-        public async Task<ObjectiveTypeDto> Find(string typename) => await service.Find(typename);
+        [Route("name")]
+        public async Task<ObjectiveTypeDto> Find([FromQuery] string typename) => await service.Find(typename);
 
         [HttpGet]
         public async Task<IEnumerable<ObjectiveTypeDto>> GetAllObjectiveTypes() => await service.GetAllObjectiveTypes();
