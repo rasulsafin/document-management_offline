@@ -61,11 +61,10 @@ namespace MRS.DocumentManagement.Api
             //services.AddAutoMapper(typeof(TaskRepository).Assembly);scoped
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
-            //services.AddScoped<IUserContext, SynchronizedUserContext>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IObjectiveService, ObjectiveService>();
-            //services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
+            services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
         }

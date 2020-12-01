@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement
             ProjectService = new ProjectService(context);
             ObjectiveService = new ObjectiveService(context);
             ItemService = new ItemService(context);
-            ConnectionService = new ConnectionService(context, userContext);
+            ConnectionService = new ConnectionService(context/*, userContext*/);
             ObjectiveTypeService = new ObjectiveTypeService(context);
         }
 

@@ -81,14 +81,14 @@ namespace MRS.DocumentManagement.Services
             return dbItems.Select(x => MapItemFromDB(x)).ToList();
         }
 
-        public async Task Link(ID<ItemDto> itemID, ID<ProjectDto> projectID)
+        public async Task<bool> Link(ID<ItemDto> itemID, ID<ProjectDto> projectID)
         {
             var isLinked = await context.ProjectItems.Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ProjectID == (int)projectID)
                 .AnyAsync();
             
             if (isLinked)
-                return;
+                return false;
 
             await context.ProjectItems.AddAsync(new Database.Models.ProjectItem()
             {
@@ -96,16 +96,17 @@ namespace MRS.DocumentManagement.Services
                 ProjectID = (int)projectID
             });
             await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
+        public async Task<bool> Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
         {
             var isLinked = await context.ObjectiveItems.Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ObjectiveID == (int)objectiveID)
                 .AnyAsync();
 
             if (isLinked)
-                return;
+                return false;
 
             await context.ObjectiveItems.AddAsync(new Database.Models.ObjectiveItem()
             {
@@ -113,41 +114,46 @@ namespace MRS.DocumentManagement.Services
                 ObjectiveID = (int)objectiveID
             });
             await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID)
+        public async Task<bool> Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID)
         {
             var link = await context.ProjectItems
                 .Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ProjectID == (int)projectID)
                 .FirstOrDefaultAsync();
             if (link == null)
-                return;
+                return false;
             context.ProjectItems.Remove(link);
             await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
+        public async Task<bool> Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
         {
             var link = await context.ObjectiveItems
                 .Where(x => x.ItemID == (int)itemID)
                 .Where(x => x.ObjectiveID == (int)objectiveID)
                 .FirstOrDefaultAsync();
             if (link == null)
-                return;
+                return false;
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task Update(ItemDto item)
+        public async Task<bool> Update(ItemDto item)
         {
             var dbItem = await context.Items.FindAsync((int)item.ID);
             if (dbItem == null)
-                throw new ArgumentException($"Item with key {item.ID} not found");
+                return false;
+                //throw new ArgumentException($"Item with key {item.ID} not found");
             dbItem.ItemType = (int)item.ItemType;
             dbItem.Path = item.Path;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
+            return true;
         }
 
         private static ItemDto MapItemFromDB(Database.Models.Item dbItem)

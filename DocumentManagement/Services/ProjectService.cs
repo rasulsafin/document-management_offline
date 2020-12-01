@@ -24,8 +24,8 @@ namespace MRS.DocumentManagement.Services
             var userID = (int)owner;
             var user = context.Users.Find(userID);
             if (user == null)
-                throw new ArgumentException($"User with key {userID} not found");
-
+                //throw new ArgumentException($"User with key {userID} not found");
+                return ID<ProjectDto>.InvalidID;
             var project = new Database.Models.Project() { Title = title };
             await context.Projects.AddAsync(project);
             await context.SaveChangesAsync();
@@ -39,12 +39,13 @@ namespace MRS.DocumentManagement.Services
             return (ID<ProjectDto>)project.ID;
         }
 
-        public async Task AddUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
+        public async Task<bool> AddUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
             var project = await context.Projects.Include(x => x.Users)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
-            if(project == null)
-                throw new ArgumentException($"Project with key {projectID} not found");
+            if (project == null)
+                return false;
+                //throw new ArgumentException($"Project with key {projectID} not found");
             if (project.Users == null)
                 project.Users = new List<Database.Models.UserProject>();
             foreach (var user in users)
@@ -60,6 +61,7 @@ namespace MRS.DocumentManagement.Services
             }
             context.Update(project);
             await context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<ProjectDto> Find(ID<ProjectDto> projectID)
@@ -116,11 +118,12 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task RemoveUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
+        public async Task<bool> RemoveUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
             var project = await context.Projects.FindAsync((int)projectID);
             if (project == null)
-                throw new ArgumentException($"Project with key {projectID} not found");
+                return false;
+                //throw new ArgumentException($"Project with key {projectID} not found");
             foreach (var user in users)
             {
                 var link = project.Users.FirstOrDefault(x => x.UserID == (int)user);
@@ -131,17 +134,20 @@ namespace MRS.DocumentManagement.Services
             }
             context.Projects.Update(project);
             await context.SaveChangesAsync();
+            return true;
         }
 
-        public async Task Update(ProjectDto projectData)
+        public async Task<bool> Update(ProjectDto projectData)
         {
             var projectID = projectData.ID;
             var project = await context.Projects.FindAsync((int)projectID);
             if (project == null)
-                throw new ArgumentException($"Project with key {projectID} not found");
+                return false;
+                //throw new ArgumentException($"Project with key {projectID} not found");
             project.Title = projectData.Title;
             context.Projects.Update(project);
             await context.SaveChangesAsync();
+            return true;
         }
     }
 }

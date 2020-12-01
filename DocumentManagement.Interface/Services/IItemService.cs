@@ -9,13 +9,13 @@ namespace MRS.DocumentManagement.Interface.Services
         Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ProjectDto> parentProject);
         Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ObjectiveDto> parentObjective);
 
-        Task Link(ID<ItemDto> itemID, ID<ProjectDto> projectID);
-        Task Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
+        Task<bool> Link(ID<ItemDto> itemID, ID<ProjectDto> projectID);
+        Task<bool> Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
 
-        Task Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID);
-        Task Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
+        Task<bool> Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID);
+        Task<bool> Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID);
 
-        Task Update(ItemDto item);
+        Task<bool> Update(ItemDto item);
         Task<ItemDto> Find(ID<ItemDto> itemID);
         Task<ItemDto> Find(string path);
 

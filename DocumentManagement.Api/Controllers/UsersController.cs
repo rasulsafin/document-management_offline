@@ -2,8 +2,8 @@
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using static DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -16,42 +16,100 @@ namespace MRS.DocumentManagement.Api.Controllers
         public UsersController(IUserService userService) => service = userService;
 
         [HttpGet]
-        public async Task<IEnumerable<UserDto>> GetAllUsers() => await service.GetAllUsers();
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var users = await service.GetAllUsers();
+            return ValidateCollection(users);
+        }
 
         [HttpPost]
-        public async Task<ID<UserDto>> Add([FromBody] UserToCreateDto data) => await service.Add(data);
+        public async Task<IActionResult> Add([FromBody] UserToCreateDto data)
+        {
+            try
+            {
+                var userId = await service.Add(data);
+                return ValidateId(userId);
+            }
+            catch (InvalidDataException ex)
+            {
+                return BadRequest(ex);
+            }
+        }
 
         [HttpDelete]
         [Route("{userID}")]
-        public async Task Delete([FromRoute] int userID) => await service.Delete(new ID<UserDto>(userID));
+        public async Task<IActionResult> Delete([FromRoute] int userID)
+        {
+            var deleted = await service.Delete(new ID<UserDto>(userID));
+            return ValidateFoundRelatedResult(deleted);
+        }
 
         [HttpPut]
-        public async Task Update([FromBody] UserDto user) => await service.Update(user);
+        public async Task<IActionResult> Update([FromBody] UserDto user)
+        {
+            var updated = await service.Update(user);
+            if (!updated)
+                return BadRequest();
+
+            return Ok();
+        }
 
         [HttpGet]
         [Route("{userID}/password")]
-        public async Task<bool> VerifyPassword([FromRoute] int userID, [FromBody] string password) => await service.VerifyPassword(new ID<UserDto>(userID), password);
+        public async Task<IActionResult> VerifyPassword([FromRoute] int userID, [FromBody] string password)
+        {
+            try
+            {
+                var verifyResult = await service.VerifyPassword(new ID<UserDto>(userID), password);
+                return Ok(verifyResult);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+        }
 
         [HttpPut]
         [Route("{userID}/password")]
-        public async Task UpdatePassword([FromRoute] int userID, [FromBody] string newPass) => await service.UpdatePassword(new ID<UserDto>(userID), newPass);
+        public async Task<IActionResult> UpdatePassword([FromRoute] int userID, [FromBody] string newPass)
+        {
+            var updated = await service.UpdatePassword(new ID<UserDto>(userID), newPass);
+            if (!updated)
+                return BadRequest();
+
+            return Ok();
+        }
 
         [HttpGet]
         [Route("{userID}")]
-        public async Task<UserDto> Find([FromRoute] int userID) => await service.Find(new ID<UserDto>(userID));
+        public async Task<IActionResult> Find([FromRoute] int userID)
+        {
+            var foundUser = await service.Find(new ID<UserDto>(userID));
+            return ValidateFoundObject(foundUser);
+        }
 
         [HttpGet]
         [Route("login")]
-        public async Task<UserDto> Find([FromQuery] string login) => await service.Find(login);
+        public async Task<IActionResult> Find([FromQuery] string login)
+        {
+            var foundUser = await service.Find(login);
+            return ValidateFoundObject(foundUser);
+        }
 
         [HttpGet]
         [Route("{userID}/exists")]
-        public async Task<bool> Exists([FromRoute] int userID) => await service.Exists(new ID<UserDto>(userID));
+        public async Task<IActionResult> Exists([FromRoute] int userID)
+        {
+            var exists = await service.Exists(new ID<UserDto>(userID));
+            return Ok(exists);
+        }
 
         [HttpGet]
         [Route("login/exists")]
-        public async Task<bool> Exists([FromQuery] string login) => await service.Exists(login);
-
-        //public async Task<User> GetCurrentUser() => await userService.GetCurrentUser();
+        public async Task<IActionResult> Exists([FromQuery] string login)
+        {
+            var exists = await service.Exists(login);
+            return Ok(exists);
+        }
     }
 }

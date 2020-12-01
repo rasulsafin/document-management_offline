@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <summary>
         /// Update user data
         /// </summary>
-        Task Update(UserDto user);
+        Task<bool> Update(UserDto user);
         /// <summary>
         /// Check if password valid for specified user
         /// </summary>
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <summary>
         /// Set new password for specified user
         /// </summary>
-        Task UpdatePassword(ID<UserDto> userID, string newPass);
+        Task<bool> UpdatePassword(ID<UserDto> userID, string newPass);
         /// <summary>
         /// Query user data by user ID
         /// </summary>

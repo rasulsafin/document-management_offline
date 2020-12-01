@@ -120,21 +120,37 @@ namespace MRS.DocumentManagement.Services
                 .ToList();
         }
 
-        public virtual async Task Update(UserDto user)
+        public virtual async Task<bool> Update(UserDto user)
         {
-            var storedUser = await GetUserChecked(user.ID);
-            storedUser.Login = user.Login;
-            storedUser.Name = user.Name;
-            await context.SaveChangesAsync();
+            try
+            {
+                var storedUser = await GetUserChecked(user.ID);
+                storedUser.Login = user.Login;
+                storedUser.Name = user.Name;
+                await context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        public virtual async Task UpdatePassword(ID<UserDto> userID, string newPass)
+        public virtual async Task<bool> UpdatePassword(ID<UserDto> userID, string newPass)
         {
-            var user = await GetUserChecked(userID);
-            Utility.CryptographyHelper.CreatePasswordHash(newPass, out byte[] passHash, out byte[] passSalt);
-            user.PasswordHash = passHash;
-            user.PasswordSalt = passSalt;
-            await context.SaveChangesAsync();
+            try
+            {
+                var user = await GetUserChecked(userID);
+                Utility.CryptographyHelper.CreatePasswordHash(newPass, out byte[] passHash, out byte[] passSalt);
+                user.PasswordHash = passHash;
+                user.PasswordSalt = passSalt;
+                await context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<bool> VerifyPassword(ID<UserDto> userID, string password)

@@ -2,8 +2,8 @@
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using static DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -16,28 +16,56 @@ namespace MRS.DocumentManagement.Api.Controllers
         public ObjectivesController(IObjectiveService objectiveService) => service = objectiveService;
 
         [HttpGet]
-        public async Task<IEnumerable<ObjectiveDto>> GetAllObjectives() => await service.GetAllObjectives();
+        public async Task<IActionResult> GetAllObjectives()
+        {
+            var objectives = await service.GetAllObjectives();
+            return ValidateCollection(objectives);
+        }
 
         [HttpPost]
-        public async Task<ID<ObjectiveDto>> Add([FromBody] ObjectiveToCreateDto data) => await service.Add(data);
+        public async Task<IActionResult> Add([FromBody] ObjectiveToCreateDto data)
+        {
+            var objectiveId = await service.Add(data);
+            return ValidateId(objectiveId);
+        }
 
         [HttpDelete]
         [Route("{objectiveID}")]
-        public async Task<bool> Remove([FromRoute] int objectiveID) => await service.Remove(new ID<ObjectiveDto>(objectiveID));
+        public async Task<IActionResult> Remove([FromRoute] int objectiveID)
+        {
+            var removed = await service.Remove(new ID<ObjectiveDto>(objectiveID));
+            return ValidateFoundRelatedResult(removed);
+        }
 
         [HttpPut]
-        public async Task Update([FromBody] ObjectiveDto projectData) => await service.Update(projectData);
+        public async Task<IActionResult> Update([FromBody] ObjectiveDto projectData)
+        {
+            var updated = await service.Update(projectData);
+            return ValidateFoundRelatedResult(updated);
+        }
 
         [HttpGet]
         [Route("{objectiveID}")]
-        public async Task<ObjectiveDto> Find([FromRoute] int objectiveID) => await service.Find(new ID<ObjectiveDto>(objectiveID));
+        public async Task<IActionResult> Find([FromRoute] int objectiveID)
+        {
+            var foundObjective = await service.Find(new ID<ObjectiveDto>(objectiveID));
+            return ValidateFoundObject(foundObjective);
+        }
 
         [HttpGet]
         [Route("project/{projectID}")]
-        public async Task<IEnumerable<ObjectiveDto>> GetObjectives([FromRoute] int projectID) => await service.GetObjectives(new ID<ProjectDto>(projectID));
+        public async Task<IActionResult> GetObjectives([FromRoute] int projectID)
+        {
+            var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID));
+            return ValidateCollection(objectives);
+        }
 
         [HttpGet]
         [Route("dynamicfields")]
-        public async Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields() => await service.GetRequiredDynamicFields();
+        public async Task<IActionResult> GetRequiredDynamicFields()
+        {
+            return Forbid();
+            //return await service.GetRequiredDynamicFields();
+        }
     }
 }

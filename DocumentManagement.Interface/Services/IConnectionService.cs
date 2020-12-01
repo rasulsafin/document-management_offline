@@ -7,11 +7,11 @@ namespace MRS.DocumentManagement.Interface.Services
     public interface IConnectionService
     {
         Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections();
-        Task LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo);
+        Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo);
         Task<ConnectionStatusDto> GetRemoteConnectionStatus();
 
-        Task Reconnect(RemoteConnectionToCreateDto connectionInfo);
-        Task<RemoteConnectionInfoDto> GetCurrentConnection();
+        Task<bool> Reconnect(RemoteConnectionToCreateDto connectionInfo);
+        Task<RemoteConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
 
         Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
     }

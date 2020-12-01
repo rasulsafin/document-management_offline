@@ -13,12 +13,10 @@ namespace MRS.DocumentManagement.Services
     public class ConnectionService : IConnectionService
     {
         private readonly DMContext context;
-        private readonly IUserContext userContext;
 
-        public ConnectionService(DMContext context, IUserContext userContext)
+        public ConnectionService(DMContext context)
         {
             this.context = context;
-            this.userContext = userContext;
         }
 
         private static RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info)
@@ -51,11 +49,10 @@ namespace MRS.DocumentManagement.Services
             return connDb.Select(x => MapConnectionFromDb(x)).ToList();
         }
 
-        public async Task<RemoteConnectionInfoDto> GetCurrentConnection()
+        public async Task<RemoteConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId)
         {
-            var currentUserID = (int)userContext.CurrentUser.ID;
             var connection = await context.Users.Include(x => x.ConnectionInfo)
-                .Where(x => x.ID == currentUserID)
+                .Where(x => x.ID == (int)userId)
                 .Select(x => x.ConnectionInfo)
                 .FirstOrDefaultAsync();
             if (connection == null)
@@ -73,31 +70,31 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public async Task LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        public async Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
             
-            var currentConnection = await GetCurrentConnection();
-            if (currentConnection != null)
-            {
-                //TODO: what to do?
-            }
+            //var currentConnection = await GetCurrentConnection();
+            //if (currentConnection != null)
+            //{
+            //    //TODO: what to do?
+            //}
 
-            var remote = await context.ConnectionInfos.FindAsync((int)connectionInfo.ID);
-            if (remote == null)
-                throw new ArgumentException($"Remote connection with key {connectionInfo.ID} not found");
-            var authNames = DecodeAuthFieldNames(remote.AuthFieldNames);
+            //var remote = await context.ConnectionInfos.FindAsync((int)connectionInfo.ID);
+            //if (remote == null)
+            //    throw new ArgumentException($"Remote connection with key {connectionInfo.ID} not found");
+            //var authNames = DecodeAuthFieldNames(remote.AuthFieldNames);
             
             
-            // assign connection ID to user
-            var currentUserID = (int)userContext.CurrentUser.ID;
-            var user = await context.Users.FindAsync(currentUserID);
-            user.ConnectionInfoID = remote.ID;
-            context.Users.Update(user);
-            await context.SaveChangesAsync();
+            //// assign connection ID to user
+            //var currentUserID = (int)userContext.CurrentUser.ID;
+            //var user = await context.Users.FindAsync(currentUserID);
+            //user.ConnectionInfoID = remote.ID;
+            //context.Users.Update(user);
+            //await context.SaveChangesAsync();
         }
 
-        public Task Reconnect(RemoteConnectionToCreateDto connectionInfo)
+        public Task<bool> Reconnect(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
         }

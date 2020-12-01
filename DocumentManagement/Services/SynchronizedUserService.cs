@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Services
             return isDeleted;
         }
 
-        public override async Task Update(UserDto user)
+        public override async Task<bool> Update(UserDto user)
         {
             await base.Update(user);
             if (user.ID.IsValid && user.ID == CurrentUser.ID)
@@ -36,6 +36,7 @@ namespace MRS.DocumentManagement.Services
                 CurrentUser = user;
                 CurrentUserChanged?.Invoke(this, CurrentUser);
             }
+            return true;
         }
     }
 }

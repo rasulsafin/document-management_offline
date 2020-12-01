@@ -161,7 +161,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task Update(ObjectiveDto objData)
+        public async Task<bool> Update(ObjectiveDto objData)
         {
             var objective = await context.Objectives
                 .Include(x => x.DynamicFields)
@@ -169,7 +169,8 @@ namespace MRS.DocumentManagement.Services
                 .ThenInclude(x => x.BimElement)
                 .FirstOrDefaultAsync(x => x.ID == (int)objData.ID);
             if (objective == null)
-                throw new ArgumentException($"Objective with key {objData.ID} not found");
+                return false;
+                //throw new ArgumentException($"Objective with key {objData.ID} not found");
             objective.AuthorID = (int)objData.Author.ID;
             objective.ObjectiveTypeID = (int)objData.TaskType.ID;
             objective.ProjectID = (int)objData.ProjectID;
@@ -250,6 +251,7 @@ namespace MRS.DocumentManagement.Services
 
             context.Update(objective);
             await context.SaveChangesAsync();
+            return true;
         }
     }
 }

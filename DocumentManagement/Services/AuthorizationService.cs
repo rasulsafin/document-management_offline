@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Services
             var user = await context.Users.FindAsync((int)userID);
             if (user == null)
                 throw new ArgumentException($"User with key {userID} not found");
-
+            //return false;
             try
             {
                 if (await IsInRole(userID, role))
@@ -78,7 +78,7 @@ namespace MRS.DocumentManagement.Services
             var iuserID = (int)userID;
             var user = await context.Users.FindAsync(iuserID);
             if (user == null)
-                throw new ArgumentException($"User with key {userID} not found");
+                return false;
 
             var links = await context.UserRoles
                 .Where(x => x.Role.Name == role)
