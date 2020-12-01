@@ -18,6 +18,7 @@ using Microsoft.Extensions.Logging;
 using System.Reflection;
 using System.IO;
 using Microsoft.OpenApi.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -73,9 +74,9 @@ namespace MRS.DocumentManagement.Api
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
+            //else
+            //    app.UseExceptionHandler("/error");
 
             app.UseSwagger();
             app.UseSwaggerUI(c =>

@@ -49,7 +49,6 @@ namespace DocumentManagement.Api.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllObjectiveTypes()
         {
-            throw new NullReferenceException();
             var allTypes = await service.GetAllObjectiveTypes();
             return ValidateCollection(allTypes);
         }
