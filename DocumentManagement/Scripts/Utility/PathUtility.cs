@@ -14,7 +14,7 @@ namespace MRS.Bim.Tools
         private static readonly string MY_DOCUMENTS = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         private static readonly string[] PICTURES_EXTENSIONS = {".png", ".jpg"};
         private static readonly string[] VIDEO_EXTENSIONS = {".mp4"};
-        private static readonly string[] IFC_EXTENSIONS = {".ifc", ".ifczip", ".ifcxml"};
+        private static readonly string[] IFC_EXTENSIONS = {".ifc", ".ifczip", ".ifcxml", ".nwd", ".nwf", ".nwc"};
 
         public static PathUtility Instance => INSTANCE_CONTAINER.Value;
         private static readonly Lazy<PathUtility> INSTANCE_CONTAINER = new Lazy<PathUtility>(() => new PathUtility());
