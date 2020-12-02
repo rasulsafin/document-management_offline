@@ -1,20 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-    </PropertyGroup>
-
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+  
     <ItemGroup>
-      <PackageReference Include="Google.Apis.Drive.v3" Version="1.49.0.2138" />
-      <PackageReference Include="LiteDB" Version="5.0.8" />
-      <PackageReference Include="LiteNetLib" Version="0.9.3.2" />
+      <PackageReference Include="AutoMapper" Version="10.1.1" />
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
       <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-      <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DocumentManagement.Models\DocumentManagement.Models.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
     </ItemGroup>
 
 </Project>
