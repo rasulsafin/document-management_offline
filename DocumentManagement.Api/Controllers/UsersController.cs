@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             return Ok();
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("{userID}/password")]
         public async Task<IActionResult> VerifyPassword([FromRoute] int userID, [FromBody] string password)
         {
@@ -65,7 +65,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch
             {
-                return BadRequest();
+                return NotFound();
             }
         }
 

@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        [Route("user/userID/roles")]
+        [Route("user/{userID}/roles")]
         public async Task<IActionResult> GetUserRoles([FromRoute] int userID)
         {
             var roles = await service.GetUserRoles(new ID<UserDto>(userID));
