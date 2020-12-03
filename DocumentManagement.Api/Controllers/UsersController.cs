@@ -89,7 +89,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        [Route("login")]
+        [Route("find")]
         public async Task<IActionResult> Find([FromQuery] string login)
         {
             var foundUser = await service.Find(login);
@@ -105,7 +105,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        [Route("login/exists")]
+        [Route("exists")]
         public async Task<IActionResult> Exists([FromQuery] string login)
         {
             var exists = await service.Exists(login);
