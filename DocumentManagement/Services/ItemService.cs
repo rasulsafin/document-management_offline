@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Services
         {
             var item = new Database.Models.Item() 
             {
-                Path = data.Path,
+                Name = data.Name,
                 ItemType = (int)data.ItemType
             };
             context.Items.Add(item);
@@ -37,7 +37,7 @@ namespace MRS.DocumentManagement.Services
         {
             var item = new Database.Models.Item()
             {
-                Path = data.Path,
+                Name = data.Name,
                 ItemType = (int)data.ItemType
             };
             context.Items.Add(item);
@@ -54,15 +54,6 @@ namespace MRS.DocumentManagement.Services
                 return null;
             return MapItemFromDB(dbItem);
         }
-
-        public async Task<ItemDto> Find(string path)
-        {
-            var dbItem = await context.Items.FirstOrDefaultAsync(x => x.Path == path);
-            if (dbItem == null)
-                return null;
-            return MapItemFromDB(dbItem);
-        }
-
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
             var dbItems = await context.ProjectItems
@@ -148,9 +139,9 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await context.Items.FindAsync((int)item.ID);
             if (dbItem == null)
                 return false;
-                //throw new ArgumentException($"Item with key {item.ID} not found");
+
             dbItem.ItemType = (int)item.ItemType;
-            dbItem.Path = item.Path;
+            dbItem.Name = item.Name;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
             return true;
@@ -162,7 +153,7 @@ namespace MRS.DocumentManagement.Services
             {
                 ID = (ID<ItemDto>)dbItem.ID,
                 ItemType = (ItemTypeDto)dbItem.ItemType,
-                Path = dbItem.Path
+                Name = dbItem.Name
             };
         }
     }

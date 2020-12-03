@@ -65,7 +65,7 @@ namespace MRS.DocumentManagement.Database
 			// EF 5.0 only, unfortunately
 			// https://docs.microsoft.com/en-us/ef/core/miscellaneous/collations-and-case-sensitivity
 			b.Entity<Item>()
-				.HasIndex(x => x.Path)
+				.HasIndex(x => x.Name)
 				.IsUnique(true);
 
 			b.Entity<ObjectiveType>()

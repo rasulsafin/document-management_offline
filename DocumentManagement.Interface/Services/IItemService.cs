@@ -17,7 +17,6 @@ namespace MRS.DocumentManagement.Interface.Services
 
         Task<bool> Update(ItemDto item);
         Task<ItemDto> Find(ID<ItemDto> itemID);
-        Task<ItemDto> Find(string path);
 
         Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID);
         Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);

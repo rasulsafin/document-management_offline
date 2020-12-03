@@ -6,7 +6,7 @@ namespace MRS.DocumentManagement.Database.Models
     { 
         public int ID { get; set; }
 
-        public string Path { get; set; }
+        public string Name { get; set; }
         public int ItemType { get; set; }
 
         public ICollection<ProjectItem> Projects { get; set; }

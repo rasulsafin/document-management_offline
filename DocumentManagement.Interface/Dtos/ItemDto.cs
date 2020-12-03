@@ -3,7 +3,7 @@
     public class ItemDto
     {
         public ID<ItemDto> ID { get; set; }
-        public string Path { get; set; }
+        public string Name { get; set; }
         public ItemTypeDto ItemType { get; set; }
     }
 }
