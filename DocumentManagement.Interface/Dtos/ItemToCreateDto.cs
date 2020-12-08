@@ -2,13 +2,13 @@
 {
     public struct ItemToCreateDto
     {
-        public ItemToCreateDto(string path, ItemTypeDto itemType)
+        public ItemToCreateDto(string name, ItemTypeDto itemType)
         {
-            Path = path;
+            Name = name;
             ItemType = itemType;
         }
 
-        public string Path { get; }
+        public string Name { get; }
         public ItemTypeDto ItemType { get; }
     }
 }

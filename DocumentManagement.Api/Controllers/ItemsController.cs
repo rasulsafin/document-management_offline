@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("link/project/{projectID}/item/{itemId}")]
+        [Route("link/{itemId}/project/{projectID}")]
         public async Task<IActionResult> LinkToProject([FromRoute] int itemID, [FromRoute] int projectID)
         {
             var linked = await service.Link(new ID<ItemDto>(itemID), new ID<ProjectDto>(projectID));
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("link/objective/{objectiveID}/item/{itemId}")]
+        [Route("link/{itemId}/objective/{objectiveID}")]
         public async Task<IActionResult> LinkToObjective([FromRoute] int itemID, [FromRoute] int objectiveID)
         {
             var linked = await service.Link(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("unlink/project/{projectID}/item/{itemId}")]
+        [Route("unlink/{itemId}/project/{projectID}/")]
         public async Task<IActionResult> UnlinkFromProject([FromRoute] int itemID, [FromRoute] int projectID)
         {
             var unlinked = await service.Unlink(new ID<ItemDto>(itemID), new ID<ProjectDto>(projectID));
@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("unlink/objective/{objectiveID}/item/{itemId}")]
+        [Route("unlink/{itemId}/objective/{objectiveID}")]
         public async Task<IActionResult> UnlinkFromObjective([FromRoute] int itemID, [FromRoute] int objectiveID)
         {
             var unlinked = await service.Unlink(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
@@ -85,13 +85,6 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Find([FromQuery] string path)
-        {
-            var foundItem = await service.Find(path);
-            return ValidateFoundObject(foundItem);
-        }
-
-        [HttpGet]
         [Route("project/{projectID}")]
         public async Task<IActionResult> GetProjectItems([FromRoute] int projectID)
         {
@@ -101,7 +94,7 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpGet]
         [Route("objective/{objectiveID}")]
-        public async Task<IActionResult> GetObjectiveItems([FromQuery] int objectiveID)
+        public async Task<IActionResult> GetObjectiveItems([FromRoute] int objectiveID)
         {
             var items = await service.GetItems(new ID<ObjectiveDto>(objectiveID));
             return ValidateCollection(items);
