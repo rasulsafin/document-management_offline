@@ -26,9 +26,16 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpPost]
         [Route("user/{userID}")]
-        public async Task<IActionResult> Add([FromRoute] int userID, [FromBody] string title)
+        public async Task<IActionResult> AddToUser([FromRoute] int userID, [FromBody] string title)
         {
-            var projectId = await service.Add(new ID<UserDto>(userID), title);
+            var projectId = await service.AddToUser(new ID<UserDto>(userID), title);
+            return ValidateId(projectId);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] string title)
+        {
+            var projectId = await service.Add(title);
             return ValidateId(projectId);
         }
 
@@ -64,18 +71,18 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("{projectID}/users")]
-        public async Task<IActionResult> AddUsers([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users)
+        [Route("link/{projectID}")]
+        public async Task<IActionResult> LinkToUser([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users)
         {
-            var added = await service.AddUsers(new ID<ProjectDto>(projectID), users);
+            var added = await service.LinkToUsers(new ID<ProjectDto>(projectID), users);
             return ValidateFoundRelatedResult(added);
         }
 
-        [HttpDelete]
-        [Route("{projectID}/users")]
-        public async Task<IActionResult> RemoveUsers([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users)
+        [HttpPost]
+        [Route("unlink/{projectID}")]
+        public async Task<IActionResult> UnlinkFromUser([FromRoute] int projectID, [FromBody] IEnumerable<ID<UserDto>> users)
         {
-            var removed = await service.RemoveUsers(new ID<ProjectDto>(projectID), users);
+            var removed = await service.UnlinkFromUsers(new ID<ProjectDto>(projectID), users);
             return ValidateFoundRelatedResult(removed);
         }
 

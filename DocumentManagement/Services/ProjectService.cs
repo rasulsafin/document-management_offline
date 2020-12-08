@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        public async Task<ID<ProjectDto>> Add(ID<UserDto> owner, string title)
+        public async Task<ID<ProjectDto>> AddToUser(ID<UserDto> owner, string title)
         {
             var userID = (int)owner;
             var user = context.Users.Find(userID);
@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Services
             return (ID<ProjectDto>)project.ID;
         }
 
-        public async Task<bool> AddUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
+        public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
             var project = await context.Projects.Include(x => x.Users)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
@@ -118,7 +118,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task<bool> RemoveUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
+        public async Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
             var project = await context.Projects.FindAsync((int)projectID);
             if (project == null)
@@ -148,6 +148,15 @@ namespace MRS.DocumentManagement.Services
             context.Projects.Update(project);
             await context.SaveChangesAsync();
             return true;
+        }
+
+        public async Task<ID<ProjectDto>> Add(string title)
+        {
+            var project = new Database.Models.Project() { Title = title };
+            await context.Projects.AddAsync(project);
+            await context.SaveChangesAsync();
+
+            return (ID<ProjectDto>)project.ID;
         }
     }
 }

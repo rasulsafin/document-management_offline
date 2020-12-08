@@ -8,13 +8,14 @@ namespace MRS.DocumentManagement.Interface.Services
     {
         Task<IEnumerable<ProjectDto>> GetAllProjects();
         Task<IEnumerable<ProjectDto>> GetUserProjects(ID<UserDto> userID);
-        Task<ID<ProjectDto>> Add(ID<UserDto> owner, string title);
+        Task<ID<ProjectDto>> AddToUser(ID<UserDto> owner, string title);
+        Task<ID<ProjectDto>> Add(string title);
         Task<bool> Remove(ID<ProjectDto> projectID);
         Task<bool> Update(ProjectDto projectData);
         Task<ProjectDto> Find(ID<ProjectDto> projectID);
 
         Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID);
-        Task<bool> AddUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
-        Task<bool> RemoveUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
+        Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
+        Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
     }
 }
