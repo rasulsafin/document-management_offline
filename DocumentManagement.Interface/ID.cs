@@ -1,9 +1,11 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace MRS.DocumentManagement.Interface
 {
     public struct ID<T> : IEquatable<ID<T>>
     {
+        [JsonProperty]
         private readonly int id;
 
         public static ID<T> InvalidID => new ID<T>(-1);
@@ -29,6 +31,7 @@ namespace MRS.DocumentManagement.Interface
 
         public override string ToString() => $"{id}";
 
+        [JsonIgnore]
         public bool IsValid => id > 0;
     }
 }

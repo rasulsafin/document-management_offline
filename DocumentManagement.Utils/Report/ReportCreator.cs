@@ -2,6 +2,7 @@
 //#define PLAIN
 #undef PLAIN
 
+using MRS.Bim.Tools;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;
