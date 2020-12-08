@@ -1,10 +1,11 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 using MRS.DocumentManagement.Tests.Utility;
 using System;
 using System.Collections.Generic;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -26,9 +27,9 @@ namespace MRS.DocumentManagement.Tests
         }
 
         // WARNING: Dynamic fields IDs are not set
-        private static Objective CreateExpectedObjective(ObjectiveToCreate o, ID<Objective> id, User author, ObjectiveType type)
+        private static ObjectiveDto CreateExpectedObjective(ObjectiveToCreateDto o, ID<ObjectiveDto> id, UserDto author, ObjectiveTypeDto type)
         {
-            return new Objective()
+            return new ObjectiveDto()
             {
                 ID = id,
                 Author = author,
@@ -58,7 +59,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
                 var errortype = await access.ObjectiveTypeService.Add("Нарушение");
@@ -70,14 +71,14 @@ namespace MRS.DocumentManagement.Tests
                 var dueTime = creationTime.AddDays(1);
 
                 // 0. Can add objectives
-                var newObjective1 = new ObjectiveToCreate()
+                var newObjective1 = new ObjectiveToCreateDto()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
                     DueDate = dueTime,
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
-                    Status = ObjectiveStatus.Open,
+                    Status = ObjectiveStatusDto.Open,
                     TaskType = tasktype,
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
@@ -92,14 +93,14 @@ namespace MRS.DocumentManagement.Tests
                 var objective1ID = await access.ObjectiveService.Add(newObjective1);
                 Assert.IsTrue(objective1ID.IsValid);
 
-                var newObjective2 = new ObjectiveToCreate()
+                var newObjective2 = new ObjectiveToCreateDto()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
                     DueDate = dueTime,
                     Title = "Make dough",
                     Description = "Can't make cookies without dough",
-                    Status = ObjectiveStatus.Open,
+                    Status = ObjectiveStatusDto.Open,
                     TaskType = tasktype,
                     ParentObjectiveID = objective1ID,
                     ProjectID = project1ID
@@ -108,14 +109,14 @@ namespace MRS.DocumentManagement.Tests
                 var childObjectiveID = await access.ObjectiveService.Add(newObjective2);
                 Assert.IsTrue(childObjectiveID.IsValid);
 
-                var newObjective3 = new ObjectiveToCreate()
+                var newObjective3 = new ObjectiveToCreateDto()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
                     DueDate = dueTime,
                     Title = "Something is wrong",
                     Description = "Really, something is wrong!",
-                    Status = ObjectiveStatus.Ready,
+                    Status = ObjectiveStatusDto.Ready,
                     TaskType = errortype,
                     ParentObjectiveID = null,
                     ProjectID = project2ID
@@ -127,16 +128,16 @@ namespace MRS.DocumentManagement.Tests
 
                 // 1. Can query all objectives
                 var currentUser = access.CurrentUser;
-                var expected = new Objective[]
+                var expected = new ObjectiveDto[]
                 {
-                    CreateExpectedObjective(newObjective1, objective1ID, currentUser, new ObjectiveType(){ ID = tasktype, Name = "Задание" }),
-                    CreateExpectedObjective(newObjective2, childObjectiveID, currentUser, new ObjectiveType(){ ID = tasktype, Name = "Задание" }),
-                    CreateExpectedObjective(newObjective3, objective3ID, currentUser, new ObjectiveType(){ ID = errortype, Name = "Нарушение" })
+                    CreateExpectedObjective(newObjective1, objective1ID, currentUser, new ObjectiveTypeDto(){ ID = tasktype, Name = "Задание" }),
+                    CreateExpectedObjective(newObjective2, childObjectiveID, currentUser, new ObjectiveTypeDto(){ ID = tasktype, Name = "Задание" }),
+                    CreateExpectedObjective(newObjective3, objective3ID, currentUser, new ObjectiveTypeDto(){ ID = errortype, Name = "Нарушение" })
                 };
 
                 var comparer = new ObjectiveComparer();
                 var allObjectives = await access.ObjectiveService.GetAllObjectives();
-                CollectionAssert.That.AreEquivalent(expected, allObjectives, comparer);
+                CollectionAssert.That.AreEquivalent(expected, allObjectives.ToArray(), comparer);
 
                 //2. Can query objectives by project
                 var project1Objectives = await access.ObjectiveService.GetObjectives(project1ID);
@@ -150,7 +151,7 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsTrue(comparer.Equals(expected[1], found));
 
                 // 2.1 Can not find not existing objective
-                found = await access.ObjectiveService.Find(ID<Objective>.InvalidID);
+                found = await access.ObjectiveService.Find(ID<ObjectiveDto>.InvalidID);
                 Assert.IsNull(found);
 
                 // 3. Can remove objective
@@ -170,11 +171,11 @@ namespace MRS.DocumentManagement.Tests
 
                 // 4. Can update objective
                 var objective = await access.ObjectiveService.Find(objective1ID);
-                objective.Status = ObjectiveStatus.Ready;
+                objective.Status = ObjectiveStatusDto.Ready;
                 await access.ObjectiveService.Update(objective);
 
                 var changed = await access.ObjectiveService.Find(objective1ID);
-                Assert.AreEqual(ObjectiveStatus.Ready, changed.Status);
+                Assert.AreEqual(ObjectiveStatusDto.Ready, changed.Status);
             }
         }
 
@@ -185,25 +186,25 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
                 var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
 
                 var userProjects = await access.ProjectService.GetUserProjects(access.CurrentUser.ID);
-                var item1 = await access.ItemService.Add(new ItemToCreate(@"C:\Windows\Temp\abra.tmp", ItemType.File), project1ID);
+                var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1ID);
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
 
-                var newObjective1 = new ObjectiveToCreate()
+                var newObjective1 = new ObjectiveToCreateDto()
                 {
                     AuthorID = access.CurrentUser.ID,
                     CreationDate = creationTime,
                     DueDate = dueTime,
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
-                    Status = ObjectiveStatus.Open,
+                    Status = ObjectiveStatusDto.Open,
                     TaskType = tasktype,
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
@@ -247,7 +248,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 //TODO: how to test?
                 Assert.Fail();

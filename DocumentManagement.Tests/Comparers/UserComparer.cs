@@ -1,14 +1,14 @@
-﻿using MRS.DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal class UserComparer : AbstractModelComparer<User>
+    internal class UserComparer : AbstractModelComparer<UserDto>
     {
         public UserComparer(bool ignoreIDs) : base(ignoreIDs)
         {
         }
 
-        public override bool NotNullEquals(User x, User y)
+        public override bool NotNullEquals(UserDto x, UserDto y)
         {
             var dataEqual = x.Login == y.Login && x.Name == y.Name;
             if (IgnoreIDs)

@@ -2,8 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Interface.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -31,7 +32,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var access = await api.Login("vpupkin", "123");
                 Assert.IsNotNull(access);
@@ -48,7 +49,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.AuthorizationService);
 
                 var user = access.CurrentUser;
@@ -105,7 +106,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Can_query_roles_from_several_users()
         {
-            async Task AssertRoles(IAuthorizationService auth, ID<User> id, params string[] roles)
+            async Task AssertRoles(IAuthorizationService auth, ID<UserDto> id, params string[] roles)
             {
                 var eroles = roles ?? Enumerable.Empty<string>();
                 CollectionAssert.AreEquivalent(eroles.ToArray(), (await auth.GetUserRoles(id)).ToArray());
@@ -119,13 +120,13 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new Interface.Models.UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
                 Assert.IsNotNull(access.AuthorizationService);
 
                 var admin = access.CurrentUser;
                 var auth = access.AuthorizationService;
                 // 0. Add another user
-                var operID = await access.UserService.Add(new Interface.Models.UserToCreate("itaranov", "123", "Ivan Taranov"));
+                var operID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
                 Assert.IsTrue(operID.IsValid);
 
                 // 1. Add admin role

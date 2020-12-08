@@ -1,9 +1,9 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var id1 = await access.ObjectiveTypeService.Add("Задание");
                 var id2 = await access.ObjectiveTypeService.Add("Задание");
@@ -65,21 +65,21 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
 
                 var types = await access.ObjectiveTypeService.GetAllObjectiveTypes();
-                var expected = new ObjectiveType[] 
+                var expected = new ObjectiveTypeDto[] 
                 {
-                    new ObjectiveType(){ ID = taskTypeID, Name = "Задание" },
-                    new ObjectiveType(){ ID = errorTypeID, Name = "Нарушение" }
+                    new ObjectiveTypeDto(){ ID = taskTypeID, Name = "Задание" },
+                    new ObjectiveTypeDto(){ ID = errorTypeID, Name = "Нарушение" }
                 };
-                var comparer = new DelegateComparer<ObjectiveType>((x, y) => x.ID == y.ID && x.Name == y.Name);
+                var comparer = new DelegateComparer<ObjectiveTypeDto>((x, y) => x.ID == y.ID && x.Name == y.Name);
                 CollectionAssert.That.AreEquivalent(expected, types, comparer);
 
-                var nonexsitent = await access.ObjectiveTypeService.Find(ID<ObjectiveType>.InvalidID);
+                var nonexsitent = await access.ObjectiveTypeService.Find(ID<ObjectiveTypeDto>.InvalidID);
                 Assert.IsNull(nonexsitent);
 
                 var item1 = await access.ObjectiveTypeService.Find(taskTypeID);
@@ -99,7 +99,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
                 var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
@@ -111,11 +111,11 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsFalse(isRemoved);
 
                 var types = await access.ObjectiveTypeService.GetAllObjectiveTypes();
-                var expected = new ObjectiveType[]
+                var expected = new ObjectiveTypeDto[]
                 {
-                    new ObjectiveType(){ ID = errorTypeID, Name = "Нарушение" }
+                    new ObjectiveTypeDto(){ ID = errorTypeID, Name = "Нарушение" }
                 };
-                var comparer = new DelegateComparer<ObjectiveType>((x, y) => x.ID == y.ID && x.Name == y.Name);
+                var comparer = new DelegateComparer<ObjectiveTypeDto>((x, y) => x.ID == y.ID && x.Name == y.Name);
                 CollectionAssert.That.AreEquivalent(expected, types, comparer);
             }
         }

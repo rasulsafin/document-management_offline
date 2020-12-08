@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Models;
 using MRS.DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -30,10 +30,10 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
                 var currentUser = access.CurrentUser.ID;
-                var user1 = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
-                var user2 = await access.UserService.Add(new UserToCreate("ppshezdetsky", "123", "Pshek Pshezdetsky"));
+                var user1 = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+                var user2 = await access.UserService.Add(new UserToCreateDto("ppshezdetsky", "123", "Pshek Pshezdetsky"));
 
                 var projectService = access.ProjectService;
 
@@ -51,25 +51,25 @@ namespace MRS.DocumentManagement.Tests
                 var user1Projects = await projectService.GetUserProjects(user1);
                 var user2Projects = await projectService.GetUserProjects(user2);
 
-                var expectedProjects = new Project[]
+                var expectedProjects = new ProjectDto[]
                 {
-                    new Project { ID = commonProject, Title = "Common project" }
+                    new ProjectDto { ID = commonProject, Title = "Common project" }
                 };
                 CollectionAssert.That.AreEquivalent(expectedProjects, currentUserProjects, new ProjectComparer());
 
-                expectedProjects = new Project[]
+                expectedProjects = new ProjectDto[]
                 {
-                    new Project { ID = commonProject, Title = "Common project" },
-                    new Project { ID = u1Project, Title = "Project for user 1" },
-                    new Project { ID = u12Project, Title = "Project for users 1 and 2" }
+                    new ProjectDto { ID = commonProject, Title = "Common project" },
+                    new ProjectDto { ID = u1Project, Title = "Project for user 1" },
+                    new ProjectDto { ID = u12Project, Title = "Project for users 1 and 2" }
                 };
                 CollectionAssert.That.AreEquivalent(expectedProjects, user1Projects, new ProjectComparer());
 
-                expectedProjects = new Project[]
+                expectedProjects = new ProjectDto[]
                 {
-                    new Project { ID = commonProject, Title = "Common project" },
-                    new Project { ID = u2Project, Title = "Project for user 2" },
-                    new Project { ID = u12Project, Title = "Project for users 1 and 2" }
+                    new ProjectDto { ID = commonProject, Title = "Common project" },
+                    new ProjectDto { ID = u2Project, Title = "Project for user 2" },
+                    new ProjectDto { ID = u12Project, Title = "Project for users 1 and 2" }
                 };
                 CollectionAssert.That.AreEquivalent(expectedProjects, user2Projects, new ProjectComparer());
             }
@@ -82,10 +82,10 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
                 var currentUserID = access.CurrentUser.ID;
-                var user1ID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
-                var user2ID = await access.UserService.Add(new UserToCreate("ppshezdetsky", "123", "Pshek Pshezdetsky"));
+                var user1ID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+                var user2ID = await access.UserService.Add(new UserToCreateDto("ppshezdetsky", "123", "Pshek Pshezdetsky"));
                 var projectService = access.ProjectService;
 
                 var commonProject = await projectService.Add(currentUserID, "Common project");
@@ -102,16 +102,16 @@ namespace MRS.DocumentManagement.Tests
                 var user2 = await access.UserService.Find(user2ID);
 
                 var commonUsers = await projectService.GetUsers(commonProject);
-                CollectionAssert.That.AreEquivalent(new User[] { currentUser, user1, user2 }, commonUsers, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { currentUser, user1, user2 }, commonUsers, new UserComparer(ignoreIDs: false));
 
                 var project1Users = await projectService.GetUsers(u1Project);
-                CollectionAssert.That.AreEquivalent(new User[] { user1 }, project1Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { user1 }, project1Users, new UserComparer(ignoreIDs: false));
 
                 var project2Users = await projectService.GetUsers(u2Project);
-                CollectionAssert.That.AreEquivalent(new User[] { user2 }, project2Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { user2 }, project2Users, new UserComparer(ignoreIDs: false));
 
                 var project12Users = await projectService.GetUsers(u12Project);
-                CollectionAssert.That.AreEquivalent(new User[] { user1, user2 }, project12Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { user1, user2 }, project12Users, new UserComparer(ignoreIDs: false));
             }
         }
 
@@ -122,10 +122,10 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
-                var user1ID = await access.UserService.Add(new UserToCreate("itaranov", "123", "Ivan Taranov"));
+                var user1ID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
                 
                 var projectService = access.ProjectService;
                 
@@ -142,13 +142,13 @@ namespace MRS.DocumentManagement.Tests
                 await projectService.RemoveUsers(project12, new[] { user1ID });
 
                 var project1Users = await projectService.GetUsers(project1);
-                CollectionAssert.That.AreEquivalent(new User[] { }, project1Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { }, project1Users, new UserComparer(ignoreIDs: false));
 
                 var project2Users = await projectService.GetUsers(project2);
-                CollectionAssert.That.AreEquivalent(new User[] { user1 }, project2Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { user1 }, project2Users, new UserComparer(ignoreIDs: false));
 
                 var project12Users = await projectService.GetUsers(project12);
-                CollectionAssert.That.AreEquivalent(new User[] { currentUser }, project12Users, new UserComparer(ignoreIDs: false));
+                CollectionAssert.That.AreEquivalent(new UserDto[] { currentUser }, project12Users, new UserComparer(ignoreIDs: false));
             }
         }
 
@@ -159,7 +159,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
@@ -169,21 +169,21 @@ namespace MRS.DocumentManagement.Tests
                 var project3 = await projectService.Add(currentUserID, "Project 3");
 
                 var p1 = await projectService.Find(project1);
-                Assert.IsTrue(new ProjectComparer().Equals(p1, new Project() { ID = project1, Title = "Project 1" }));
+                Assert.IsTrue(new ProjectComparer().Equals(p1, new ProjectDto() { ID = project1, Title = "Project 1" }));
 
                 await projectService.RemoveUsers(project3, new[] { currentUserID });
 
                 var userProjects = await projectService.GetUserProjects(currentUserID);
-                CollectionAssert.That.AreEquivalent(new Project[] { 
-                    new Project(){ ID = project1, Title = "Project 1" },
-                    new Project(){ ID = project2, Title = "Project 2" }
+                CollectionAssert.That.AreEquivalent(new ProjectDto[] { 
+                    new ProjectDto(){ ID = project1, Title = "Project 1" },
+                    new ProjectDto(){ ID = project2, Title = "Project 2" }
                 }, userProjects, new ProjectComparer());
 
                 var allProjects = await projectService.GetAllProjects();
-                CollectionAssert.That.AreEquivalent(new Project[] {
-                    new Project(){ ID = project1, Title = "Project 1" },
-                    new Project(){ ID = project2, Title = "Project 2" },
-                    new Project(){ ID = project3, Title = "Project 3" }
+                CollectionAssert.That.AreEquivalent(new ProjectDto[] {
+                    new ProjectDto(){ ID = project1, Title = "Project 1" },
+                    new ProjectDto(){ ID = project2, Title = "Project 2" },
+                    new ProjectDto(){ ID = project3, Title = "Project 3" }
                 }, allProjects, new ProjectComparer());
             }
         }
@@ -195,7 +195,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
@@ -203,10 +203,10 @@ namespace MRS.DocumentManagement.Tests
                 var project1 = await projectService.Add(currentUserID, "Project 1");
                 var project2 = await projectService.Add(currentUserID, "Project 2");
 
-                var expectedProjects = new Project[] 
+                var expectedProjects = new ProjectDto[] 
                 {
-                    new Project() { ID = project1, Title = "New project 1" },
-                    new Project() { ID = project2, Title = "New project 2" }
+                    new ProjectDto() { ID = project1, Title = "New project 1" },
+                    new ProjectDto() { ID = project2, Title = "New project 2" }
                 };
                 await projectService.Update(expectedProjects[0]);
                 await projectService.Update(expectedProjects[1]);
@@ -223,7 +223,7 @@ namespace MRS.DocumentManagement.Tests
             using (var context = Fixture.CreateContext(transaction))
             {
                 var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreate("vpupkin", "123", "Vasily Pupkin"));
+                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
@@ -236,9 +236,9 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsTrue(deleted);
 
                 var userProjects = await projectService.GetUserProjects(currentUserID);
-                CollectionAssert.That.AreEquivalent(new Project[] {
-                    new Project(){ ID = project2, Title = "Project 2" },
-                    new Project(){ ID = project3, Title = "Project 3" }
+                CollectionAssert.That.AreEquivalent(new ProjectDto[] {
+                    new ProjectDto(){ ID = project2, Title = "Project 2" },
+                    new ProjectDto(){ ID = project3, Title = "Project 3" }
                 }, userProjects, new ProjectComparer());
 
                 // Try to delete already deleted project

@@ -15,16 +15,16 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         public SharedDatabaseFixture(Action<DMContext> seedAction = null)
         {
-            Connection = new SqliteConnection("DataSource = file::memory:?cache = shared");
-            //Connection = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
+            //Connection = new SqliteConnection("DataSource = file::memory:?cache = shared");
+            Connection = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
             Connection.Open();
             Seed(seedAction);
         }
 
         public DMContext CreateContext(DbTransaction transaction = null)
         {
-            var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseSqlite(Connection).Options);
-            //var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseNpgsql(Connection).Options);
+            //var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseSqlite(Connection).Options);
+            var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseNpgsql(Connection).Options);
 
             if (transaction != null)
             {
@@ -41,12 +41,12 @@ namespace MRS.DocumentManagement.Tests.Utility
                 // FIXME: this check is needed when using shared connection to single database
                 // but SQLite in-memory DB is recreated every time when new connection is set
                 // so this check would prevent database to be initialized correctly
-                //if (!_databaseInitialized)
+                if (!_databaseInitialized)
                 {
                     using (var context = CreateContext())
                     {
-                        context.Database.EnsureDeleted();
-                        context.Database.EnsureCreated();
+                        //context.Database.EnsureDeleted();
+                        //context.Database.EnsureCreated();
                         //context.Database.Migrate();
 
                         // add initial database data here

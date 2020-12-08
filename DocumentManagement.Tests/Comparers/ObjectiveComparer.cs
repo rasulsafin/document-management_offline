@@ -1,11 +1,11 @@
-﻿using MRS.DocumentManagement.Interface.Models;
+﻿using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal class ObjectiveComparer : AbstractModelComparer<Objective>
+    internal class ObjectiveComparer : AbstractModelComparer<ObjectiveDto>
     {
         private readonly UserComparer userComparer;
         private readonly IEqualityComparer<BimElementDto> bimComparer;
@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Tests
             fieldComparer = new DelegateComparer<DynamicFieldDto>((x, y) => x.Key == y.Key && x.Type == y.Type && x.Value == y.Value);
         }
 
-        public override bool NotNullEquals([DisallowNull] Objective x, [DisallowNull] Objective y)
+        public override bool NotNullEquals([DisallowNull] ObjectiveDto x, [DisallowNull] ObjectiveDto y)
         {
             var idMatched = IgnoreIDs ? true : x.ID == y.ID;
 
