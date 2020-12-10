@@ -28,18 +28,16 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Can_login_to_current_fixture()
         {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            await using var transaction = Fixture.Connection.BeginTransaction();
+            await using var context = Fixture.CreateContext(transaction);
+            var api = new DocumentManagementApi(context);
+            await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var access = await api.Login("vpupkin", "123");
-                Assert.IsNotNull(access);
-                Assert.IsTrue(access.CurrentUser.ID.IsValid);
-                Assert.AreEqual("vpupkin", access.CurrentUser.Login);
-                Assert.AreEqual("Vasily Pupkin", access.CurrentUser.Name);
-            }
+            var access = await api.Login("vpupkin", "123");
+            Assert.IsNotNull(access);
+            Assert.IsTrue(access.CurrentUser.ID.IsValid);
+            Assert.AreEqual("vpupkin", access.CurrentUser.Login);
+            Assert.AreEqual("Vasily Pupkin", access.CurrentUser.Name);
         }
 
         [TestMethod]
