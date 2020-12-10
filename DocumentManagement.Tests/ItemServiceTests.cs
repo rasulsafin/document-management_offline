@@ -34,14 +34,14 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
                 var item11ID = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1ID);
                 var item12ID = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\cadabra.tmp", ItemTypeDto.Bim), project1ID);
 
                 Assert.IsTrue(item11ID.IsValid);
                 Assert.IsTrue(item12ID.IsValid);
 
-                var project2ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 2");
+                var project2ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 2");
                 var item21ID = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\shvabra.tmp", ItemTypeDto.Bim), project2ID);
                 var item22ID = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\dinozavra.tmp", ItemTypeDto.Media), project2ID);
 
@@ -51,16 +51,16 @@ namespace MRS.DocumentManagement.Tests
                 var items1 = await access.ItemService.GetItems(project1ID);
                 var expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item11ID, ItemType = ItemTypeDto.File, Path = @"C:\Windows\Temp\abra.tmp" },
-                    new ItemDto(){ ID = item12ID, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\cadabra.tmp" },
+                    new ItemDto(){ ID = item11ID, ItemType = ItemTypeDto.File, Name = @"C:\Windows\Temp\abra.tmp" },
+                    new ItemDto(){ ID = item12ID, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\cadabra.tmp" },
                 };
                 CollectionAssert.That.AreEquivalent(expected, items1, new ItemComparer());
 
                 var items2 = await access.ItemService.GetItems(project2ID);
                 expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item21ID, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\shvabra.tmp" },
-                    new ItemDto(){ ID = item22ID, ItemType = ItemTypeDto.Media, Path = @"C:\Windows\Temp\dinozavra.tmp" },
+                    new ItemDto(){ ID = item21ID, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\shvabra.tmp" },
+                    new ItemDto(){ ID = item22ID, ItemType = ItemTypeDto.Media, Name = @"C:\Windows\Temp\dinozavra.tmp" },
                 };
                 CollectionAssert.That.AreEquivalent(expected, items2, new ItemComparer());
             }
@@ -75,7 +75,7 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
                 var taskTypeID = await access.ObjectiveTypeService.Add("Task");
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
@@ -105,8 +105,8 @@ namespace MRS.DocumentManagement.Tests
                 var items = await access.ItemService.GetItems(objective1ID);
                 var expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item1ID, ItemType = ItemTypeDto.File, Path = @"C:\Windows\Temp\abra.tmp" },
-                    new ItemDto(){ ID = item2ID, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\cadabra.tmp" },
+                    new ItemDto(){ ID = item1ID, ItemType = ItemTypeDto.File, Name = @"C:\Windows\Temp\abra.tmp" },
+                    new ItemDto(){ ID = item2ID, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\cadabra.tmp" },
                 };
                 CollectionAssert.That.AreEquivalent(expected, items, new ItemComparer());
             }
@@ -121,8 +121,8 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
-                var project2 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 2");
+                var project1 = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
+                var project2 = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 2");
 
                 var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1);
                 var item2 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\cadabra.tmp", ItemTypeDto.Bim), project1);
@@ -131,10 +131,10 @@ namespace MRS.DocumentManagement.Tests
 
                 var expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Path = @"C:\Windows\Temp\abra.tmp" },
-                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\cadabra.tmp" },
-                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\shvabra.tmp" },
-                    new ItemDto(){ ID = item4, ItemType = ItemTypeDto.Media, Path = @"C:\Windows\Temp\dinozavra.tmp" },
+                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Name = @"C:\Windows\Temp\abra.tmp" },
+                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\cadabra.tmp" },
+                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\shvabra.tmp" },
+                    new ItemDto(){ ID = item4, ItemType = ItemTypeDto.Media, Name = @"C:\Windows\Temp\dinozavra.tmp" },
                 };
 
                 var project1items = await access.ItemService.GetItems(project1);
@@ -181,7 +181,7 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
                 var taskType = await access.ObjectiveTypeService.Add("Task");
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
@@ -223,10 +223,10 @@ namespace MRS.DocumentManagement.Tests
 
                 var expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Path = @"C:\Windows\Temp\abra.tmp" },
-                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\cadabra.tmp" },
-                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\shvabra.tmp" },
-                    new ItemDto(){ ID = item4, ItemType = ItemTypeDto.Media, Path = @"C:\Windows\Temp\dinozavra.tmp" },
+                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Name = @"C:\Windows\Temp\abra.tmp" },
+                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\cadabra.tmp" },
+                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\shvabra.tmp" },
+                    new ItemDto(){ ID = item4, ItemType = ItemTypeDto.Media, Name = @"C:\Windows\Temp\dinozavra.tmp" },
                 };
 
                 var obj1items = await access.ItemService.GetItems(objective1);
@@ -260,7 +260,7 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project1 = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
 
                 var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1);
                 var item2 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\cadabra.tmp", ItemTypeDto.Bim), project1);
@@ -268,21 +268,15 @@ namespace MRS.DocumentManagement.Tests
 
                 var expected = new ItemDto[]
                 {
-                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Path = @"C:\Windows\Temp\abra.tmp" },
-                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Path = @"C:\Windows\Temp\cadabra.tmp" },
-                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Media, Path = @"C:\Windows\Temp\shvabra.tmp" },
+                    new ItemDto(){ ID = item1, ItemType = ItemTypeDto.File, Name = @"C:\Windows\Temp\abra.tmp" },
+                    new ItemDto(){ ID = item2, ItemType = ItemTypeDto.Bim, Name = @"C:\Windows\Temp\cadabra.tmp" },
+                    new ItemDto(){ ID = item3, ItemType = ItemTypeDto.Media, Name = @"C:\Windows\Temp\shvabra.tmp" },
                 };
 
                 var comparer = new ItemComparer();
 
                 var found = await access.ItemService.Find(item1);
                 Assert.IsTrue(comparer.Equals(expected[0], found));
-
-                found = await access.ItemService.Find(@"C:\Windows\Temp\shvabra.tmp");
-                Assert.IsTrue(comparer.Equals(expected[2], found));
-
-                found = await access.ItemService.Find("somenonexistentcrap");
-                Assert.IsNull(found);
             }
         }
 
@@ -295,15 +289,15 @@ namespace MRS.DocumentManagement.Tests
                 var api = new DocumentManagementApi(context);
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var project1 = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project1 = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
                 var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1);
 
-                await access.ItemService.Update(new ItemDto() { ID = item1, ItemType = ItemTypeDto.Bim, Path = "cadabra.txt" });
+                await access.ItemService.Update(new ItemDto() { ID = item1, ItemType = ItemTypeDto.Bim, Name = "cadabra.txt" });
 
-                var found = await access.ItemService.Find("cadabra.txt");
+                var found = await access.ItemService.Find(item1);
                 Assert.IsNotNull(found);
                 Assert.AreEqual(item1, found.ID);
-                Assert.AreEqual("cadabra.txt", found.Path);
+                Assert.AreEqual("cadabra.txt", found.Name);
                 Assert.AreEqual(ItemTypeDto.Bim, found.ItemType);
             }
         }

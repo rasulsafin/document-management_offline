@@ -127,6 +127,9 @@ namespace MRS.DocumentManagement.Services
         public async Task<IEnumerable<ObjectiveDto>> GetAllObjectives()
         {
             var dbObjectives = await context.Objectives
+                .Include(x=> x.Author)
+                .Include(x=> x.Project)
+                .Include(x=> x.ObjectiveType)
                 .Include(x => x.DynamicFields)
                 .Include(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)

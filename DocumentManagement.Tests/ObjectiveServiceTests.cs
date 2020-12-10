@@ -64,8 +64,8 @@ namespace MRS.DocumentManagement.Tests
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
                 var errortype = await access.ObjectiveTypeService.Add("Нарушение");
 
-                var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
-                var project2ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 2");
+                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
+                var project2ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 2");
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
@@ -189,7 +189,7 @@ namespace MRS.DocumentManagement.Tests
                 var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
                 var tasktype = await access.ObjectiveTypeService.Add("Задание");
-                var project1ID = await access.ProjectService.Add(access.CurrentUser.ID, "Project 1");
+                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
 
                 var userProjects = await access.ProjectService.GetUserProjects(access.CurrentUser.ID);
                 var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1ID);

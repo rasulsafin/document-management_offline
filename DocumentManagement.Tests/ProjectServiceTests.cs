@@ -37,15 +37,15 @@ namespace MRS.DocumentManagement.Tests
 
                 var projectService = access.ProjectService;
 
-                var commonProject = await projectService.Add(currentUser, "Common project");
-                var u1Project = await projectService.Add(user1, "Project for user 1");
-                var u2Project = await projectService.Add(user2, "Project for user 2");
-                var u12Project = await projectService.Add(user1, "Project for users 1 and 2");
+                var commonProject = await projectService.AddToUser(currentUser, "Common project");
+                var u1Project = await projectService.AddToUser(user1, "Project for user 1");
+                var u2Project = await projectService.AddToUser(user2, "Project for user 2");
+                var u12Project = await projectService.AddToUser(user1, "Project for users 1 and 2");
 
-                await projectService.AddUsers(commonProject, new[] { currentUser, user1, user2 });
-                await projectService.AddUsers(u1Project, new[] { user1 });
-                await projectService.AddUsers(u2Project, new[] { user2 });
-                await projectService.AddUsers(u12Project, new[] { user2 });
+                await projectService.LinkToUsers(commonProject, new[] { currentUser, user1, user2 });
+                await projectService.LinkToUsers(u1Project, new[] { user1 });
+                await projectService.LinkToUsers(u2Project, new[] { user2 });
+                await projectService.LinkToUsers(u12Project, new[] { user2 });
 
                 var currentUserProjects = await projectService.GetUserProjects(access.CurrentUser.ID);
                 var user1Projects = await projectService.GetUserProjects(user1);
@@ -88,14 +88,14 @@ namespace MRS.DocumentManagement.Tests
                 var user2ID = await access.UserService.Add(new UserToCreateDto("ppshezdetsky", "123", "Pshek Pshezdetsky"));
                 var projectService = access.ProjectService;
 
-                var commonProject = await projectService.Add(currentUserID, "Common project");
-                var u1Project = await projectService.Add(user1ID, "Project for user 1");
-                var u2Project = await projectService.Add(user2ID, "Project for user 2");
-                var u12Project = await projectService.Add(user1ID, "Project for users 1 and 2");
+                var commonProject = await projectService.AddToUser(currentUserID, "Common project");
+                var u1Project = await projectService.AddToUser(user1ID, "Project for user 1");
+                var u2Project = await projectService.AddToUser(user2ID, "Project for user 2");
+                var u12Project = await projectService.AddToUser(user1ID, "Project for users 1 and 2");
 
                 //do not add users to common project - project without owner should be visible to anyone
-                await projectService.AddUsers(commonProject, new[] { user1ID, user2ID });
-                await projectService.AddUsers(u12Project, new[] { user2ID });
+                await projectService.LinkToUsers(commonProject, new[] { user1ID, user2ID });
+                await projectService.LinkToUsers(u12Project, new[] { user2ID });
 
                 var currentUser = access.CurrentUser;
                 var user1 = await access.UserService.Find(user1ID);
@@ -129,17 +129,17 @@ namespace MRS.DocumentManagement.Tests
                 
                 var projectService = access.ProjectService;
                 
-                var project1 = await projectService.Add(currentUserID, "Project 1");
-                var project2 = await projectService.Add(user1ID, "Project 2");
+                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
+                var project2 = await projectService.AddToUser(user1ID, "Project 2");
                 
-                var project12 = await projectService.Add(currentUserID, "Project 1 and 2");
-                await projectService.AddUsers(project12, new[] { user1ID });
+                var project12 = await projectService.AddToUser(currentUserID, "Project 1 and 2");
+                await projectService.LinkToUsers(project12, new[] { user1ID });
 
                 var currentUser = access.CurrentUser;
                 var user1 = await access.UserService.Find(user1ID);
 
-                await projectService.RemoveUsers(project1, new[] { currentUserID });
-                await projectService.RemoveUsers(project12, new[] { user1ID });
+                await projectService.UnlinkFromUsers(project1, new[] { currentUserID });
+                await projectService.UnlinkFromUsers(project12, new[] { user1ID });
 
                 var project1Users = await projectService.GetUsers(project1);
                 CollectionAssert.That.AreEquivalent(new UserDto[] { }, project1Users, new UserComparer(ignoreIDs: false));
@@ -164,14 +164,14 @@ namespace MRS.DocumentManagement.Tests
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
 
-                var project1 = await projectService.Add(currentUserID, "Project 1");
-                var project2 = await projectService.Add(currentUserID, "Project 2");
-                var project3 = await projectService.Add(currentUserID, "Project 3");
+                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
+                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
+                var project3 = await projectService.AddToUser(currentUserID, "Project 3");
 
                 var p1 = await projectService.Find(project1);
                 Assert.IsTrue(new ProjectComparer().Equals(p1, new ProjectDto() { ID = project1, Title = "Project 1" }));
 
-                await projectService.RemoveUsers(project3, new[] { currentUserID });
+                await projectService.UnlinkFromUsers(project3, new[] { currentUserID });
 
                 var userProjects = await projectService.GetUserProjects(currentUserID);
                 CollectionAssert.That.AreEquivalent(new ProjectDto[] { 
@@ -200,8 +200,8 @@ namespace MRS.DocumentManagement.Tests
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
 
-                var project1 = await projectService.Add(currentUserID, "Project 1");
-                var project2 = await projectService.Add(currentUserID, "Project 2");
+                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
+                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
 
                 var expectedProjects = new ProjectDto[] 
                 {
@@ -228,9 +228,9 @@ namespace MRS.DocumentManagement.Tests
                 var currentUserID = access.CurrentUser.ID;
                 var projectService = access.ProjectService;
 
-                var project1 = await projectService.Add(currentUserID, "Project 1");
-                var project2 = await projectService.Add(currentUserID, "Project 2");
-                var project3 = await projectService.Add(currentUserID, "Project 3");
+                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
+                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
+                var project3 = await projectService.AddToUser(currentUserID, "Project 3");
 
                 var deleted = await projectService.Remove(project1);
                 Assert.IsTrue(deleted);

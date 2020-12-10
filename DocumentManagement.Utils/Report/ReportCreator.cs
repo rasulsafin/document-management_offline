@@ -161,9 +161,9 @@ namespace MRS.DocumentManagement.Utils.Reports
         }
 #endif
         private static XElement GenerateXElement(ItemDto file)
-            => PathUtility.IsPicture(file.Path)
+            => PathUtility.IsPicture(file.Name)
                     ? new XElement(HORIZONTAL_ELEMENT,
-                            new XElement(IMAGE, file.Path))
+                            new XElement(IMAGE, file.Name))
                     : null;
 
         private static XElement TextElement(string text, bool isBold = false)
