@@ -1,24 +1,18 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System.Reflection;
-using System.IO;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Services;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -36,6 +30,21 @@ namespace MRS.DocumentManagement.Api
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<DocumentManagement.Database.DMContext>(options => options.UseNpgsql(connection));
+
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthOptions.ISSUER,
+                        ValidateAudience = true,
+                        ValidAudience = AuthOptions.AUDIENCE,
+                        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true
+                    };
+                });
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
