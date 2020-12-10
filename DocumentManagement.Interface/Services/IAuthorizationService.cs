@@ -29,5 +29,9 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Check if user is in role
         /// </summary>
         Task<bool> IsInRole(ID<UserDto> userID, string role);
+        /// <summary>
+        /// Logs in the user if credentials are correct
+        /// </summary>
+        Task<ValidatedUserDto> Login(string username, string password);
     }
 }

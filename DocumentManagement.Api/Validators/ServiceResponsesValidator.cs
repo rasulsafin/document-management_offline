@@ -3,7 +3,7 @@ using MRS.DocumentManagement.Interface;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DocumentManagement.Api.Validators
+namespace MRS.DocumentManagement.Api.Validators
 {
     internal static class ServiceResponsesValidator
     {

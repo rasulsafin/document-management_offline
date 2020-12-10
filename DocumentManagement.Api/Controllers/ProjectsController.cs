@@ -4,7 +4,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using static DocumentManagement.Api.Validators.ServiceResponsesValidator;
+using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {

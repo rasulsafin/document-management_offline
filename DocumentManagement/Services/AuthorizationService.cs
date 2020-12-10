@@ -14,10 +14,7 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
 
-        public AuthorizationService(DMContext context)
-        {
-            this.context = context;
-        }
+        public AuthorizationService(DMContext context) => this.context = context;
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
@@ -98,8 +95,25 @@ namespace MRS.DocumentManagement.Services
                 context.Roles.RemoveRange(orphanRoles);
                 await context.SaveChangesAsync();
             }
-            return true;
 
+            return true;
+        }
+
+        public async Task<ValidatedUserDto> Login(string username, string password)
+        {
+            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+            if (dbUser == null)
+                return null;
+
+            if (!Utility.CryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
+                return null;
+
+            var dtoUser = new UserDto(new ID<UserDto>(dbUser.ID), username, dbUser.Name);
+
+            if (dbUser.Roles != null && dbUser.Roles.Count > 0)
+                dtoUser.Role = new RoleDto { Name = dbUser.Roles.FirstOrDefault().Role.Name, User = dtoUser };
+
+            return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
         }
     }
 }
