@@ -4,11 +4,17 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentManagement"
+        xmlns:convert="clr-namespace:DocumentManagement.Converters"
         mc:Ignorable="d"
         Title="Yandex Test" Height="450" Width="800">
+    <Window.Resources>
+        <convert:ItemTypeConverter x:Key="itemTypeConverter"/>
+        <convert:ItemSizeConverter x:Key="itemSizeConverter"/>
+
+    </Window.Resources>
     <Grid>
         <TabControl>
-            <TabItem Header="Проекты">
+            <TabItem Header="Файлы">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
@@ -17,7 +23,17 @@
 
                     <StackPanel Grid.Row="1"></StackPanel>
 
-                    <DataGrid Grid.Row="0" ItemsSource="{Binding Projects}"></DataGrid>
+                    <DataGrid Name="gridItems" Grid.Row="0" ItemsSource="{Binding FolderItems}" AutoGenerateColumns="False" 
+                        CanUserAddRows="False" IsReadOnly="True" SelectionChanged="gridItems_SelectionChanged" 
+                        MouseDoubleClick="gridItems_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Name" Width="300" Binding="{Binding Path=DisplayName}"/>
+                            <DataGridTextColumn Header="Date" Width="100" Binding="{Binding Path=LastModified, StringFormat='dd/MM/yyyy hh:mm'}"/>
+                            <DataGridTextColumn Header="Size" Width="100" Binding="{Binding Path=ContentLength, Converter={StaticResource itemSizeConverter}}"/>
+                            <DataGridTextColumn Header="Type" Width="100" Binding="{Binding Path=ContentType, Converter={StaticResource itemTypeConverter}}"/>
+                            <DataGridTextColumn Header="Public" Width="*" Binding="{Binding Path=PublicUrl}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
                 </Grid>
             </TabItem>
             

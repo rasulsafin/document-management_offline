@@ -20,10 +20,16 @@ namespace DocumentManagement
     /// </summary>
     public partial class MainView : Window
     {
+        private MainViewModel Model { get; }
+
         public MainView()
         {
             InitializeComponent();
-            DataContext = new MainModel();
+            DataContext = Model = new MainViewModel(this.Dispatcher);
         }
+
+        private void gridItems_SelectionChanged(object sender, SelectionChangedEventArgs e) => Model.SelectionChanged(e);
+
+        private void gridItems_MouseDoubleClick(object sender, MouseButtonEventArgs e) => Model.SelectItemAsync(this.gridItems.SelectedIndex);
     }
 }

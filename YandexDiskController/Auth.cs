@@ -1,10 +1,8 @@
-﻿using Disk.SDK;
-using DocumentManagement.Connection.YandexDisk;
-using System;
+﻿using DocumentManagement.Connection.YandexDisk;
 
 namespace DocumentManagement
 {
-    internal partial class MainModel
+    internal partial class MainViewModel
     {
         public static string AccessToken { get; private set; }
 
@@ -17,9 +15,31 @@ namespace DocumentManagement
             {
                 YandexDiskAuth auth = new YandexDiskAuth();
                 var result = await auth.GetDiskSdkToken();
-                MainModel.AccessToken = result.Result;
-                controller = new YandexDiskController(AccessToken);
+                //if (result.Error == null)
+                //{
+                    MainViewModel.AccessToken = result;
+                    controller = new YandexDiskController(AccessToken);
+                    //var items = await controller.GetListAsync("/");
+                    //controller.GetList2Async(callbackGetList, "/");
+                    //MainViewModel.Instanse.SetFolderItems(items);
+                //}
+                //else
+                //{
+                //    MessageBox.Show($" { result.Error.Message}", "Ошибка");
+                //}
             }
+
+            //private static void callbackGetList(GenericSdkEventArgs<IEnumerable<DiskItemInfo>> obj)
+            //{
+            //    if (obj.Error == null)
+            //        Instanse.SetFolderItems(obj.Result);
+            //    else
+            //    {
+            //        MessageBox.Show($" { obj.Error.Message}", "Ошибка");
+            //    }
+            //}
         }
+
+        
     }
 }
