@@ -8,6 +8,7 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
         public int ItemType { get; set; }
+        public string ExternalItemId { get; set; }
 
         public ICollection<ProjectItem> Projects { get; set; }
         public ICollection<ObjectiveItem> Objectives { get; set; }
