@@ -13,8 +13,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
         
         public string Title { get; set; }
         public string Description { get; set; }
-        public ObjectiveStatusDto Status { get; set; }
-        public ID<ObjectiveTypeDto> TaskType { get; set; }
+        public ObjectiveStatus Status { get; set; }
+        public ID<ObjectiveTypeDto> ObjectiveType { get; set; }
         
         public IEnumerable<DynamicFieldToCreateDto> DynamicFields { get; set; }
         public IEnumerable<BimElementDto> BimElements { get; set; }

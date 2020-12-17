@@ -88,8 +88,8 @@ namespace MRS.DocumentManagement.Tests
                     DueDate = dueTime,
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
-                    Status = ObjectiveStatusDto.Open,
-                    TaskType = taskTypeID,
+                    Status = ObjectiveStatus.Open,
+                    ObjectiveType = taskTypeID,
                     ParentObjectiveID = null,
                     ProjectID = project1ID
                 };
@@ -194,8 +194,8 @@ namespace MRS.DocumentManagement.Tests
                     DueDate = dueTime,
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
-                    Status = ObjectiveStatusDto.Open,
-                    TaskType = taskType,
+                    Status = ObjectiveStatus.Open,
+                    ObjectiveType = taskType,
                     ParentObjectiveID = null,
                     ProjectID = project
                 };
@@ -207,8 +207,8 @@ namespace MRS.DocumentManagement.Tests
                     DueDate = dueTime,
                     Title = "Погладить кота",
                     Description = "Погладь кота!",
-                    Status = ObjectiveStatusDto.Open,
-                    TaskType = taskType,
+                    Status = ObjectiveStatus.Open,
+                    ObjectiveType = taskType,
                     ParentObjectiveID = null,
                     ProjectID = project
                 };

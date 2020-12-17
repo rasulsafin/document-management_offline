@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace MRS.DocumentManagement.Interface
+namespace MRS.DocumentManagement
 {
     public struct ID<T> : IEquatable<ID<T>>
     {
