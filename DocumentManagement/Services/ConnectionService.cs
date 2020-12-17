@@ -98,5 +98,15 @@ namespace MRS.DocumentManagement.Services
         {
             throw new NotImplementedException();
         }
+
+        public Task<IEnumerable<ItemDto>> GetItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
