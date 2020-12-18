@@ -192,7 +192,7 @@ namespace MRS.DocumentManagement.Tests
                 var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
 
                 var userProjects = await access.ProjectService.GetUserProjects(access.CurrentUser.ID);
-                var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", ItemTypeDto.File), project1ID);
+                var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", "externalId", ItemTypeDto.File), project1ID);
 
                 var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
                 var dueTime = creationTime.AddDays(1);
