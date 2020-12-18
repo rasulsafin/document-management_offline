@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         public ItemsController(IItemService itemService) => service = itemService;
 
         [HttpPost]
-        [Route("project/{parentproject}")]
+        [Route("project/{parentProject}")]
         public async Task<IActionResult> AddToProject([FromBody] ItemToCreateDto data, [FromRoute] int parentProject)
         {
             var itemID = await service.Add(data, new ID<ProjectDto>(parentProject));
@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("objective/{parentobjective}")]
+        [Route("objective/{parentObjective}")]
         public async Task<IActionResult> AddToObjective([FromBody] ItemToCreateDto data, [FromRoute] int parentObjective)
         {
             var itemID = await service.Add(data, new ID<ObjectiveDto>(parentObjective));
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("link/{itemId}/objective/{objectiveID}")]
+        [Route("link/{itemID}/objective/{objectiveID}")]
         public async Task<IActionResult> LinkToObjective([FromRoute] int itemID, [FromRoute] int objectiveID)
         {
             var linked = await service.Link(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("unlink/{itemId}/project/{projectID}/")]
+        [Route("unlink/{itemID}/project/{projectID}/")]
         public async Task<IActionResult> UnlinkFromProject([FromRoute] int itemID, [FromRoute] int projectID)
         {
             var unlinked = await service.Unlink(new ID<ItemDto>(itemID), new ID<ProjectDto>(projectID));
@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("unlink/{itemId}/objective/{objectiveID}")]
+        [Route("unlink/{itemID}/objective/{objectiveID}")]
         public async Task<IActionResult> UnlinkFromObjective([FromRoute] int itemID, [FromRoute] int objectiveID)
         {
             var unlinked = await service.Unlink(new ID<ItemDto>(itemID), new ID<ObjectiveDto>(objectiveID));
