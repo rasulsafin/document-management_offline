@@ -28,8 +28,6 @@ namespace DocumentManagement.Connection.YandexDisk
         #region GetList
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
         {
-            //logger.Message($"path={path}");
-
             try
             {
                 HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
@@ -44,6 +42,20 @@ namespace DocumentManagement.Connection.YandexDisk
                 List<DiskElement> items = DiskElement.GetElements(xml.DocumentElement);
                 return items;
             }
+            catch (WebException web)
+            {
+                logger.Message($"Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
+                    throw;
+                }
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -53,14 +65,14 @@ namespace DocumentManagement.Connection.YandexDisk
         }
         #endregion
 
+        #region Create Directory
         public async Task<bool> CreateDirAsync(string path, string nameDir)
         {
             try
             {
-                string newPath = YandexHelper.NewPath(path, nameDir);
+                string newPath = YandexHelper.NewDirectory(path, nameDir);
                 HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
-                WebResponse response = await request.GetResponseAsync();
-                try
+                using (WebResponse response = await request.GetResponseAsync())
                 {
                     if (response is HttpWebResponse http)
                     {
@@ -69,16 +81,22 @@ namespace DocumentManagement.Connection.YandexDisk
                             return true;
                         }
                     }
+                    return false;
                 }
-                catch
+            }
+            catch (WebException web)
+            {
+                logger.Message($"Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
                 {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
                     throw;
                 }
-                finally
-                {
-                    response.Close();
-                }
-                return false;
             }
             catch (Exception ex)
             {
@@ -86,8 +104,10 @@ namespace DocumentManagement.Connection.YandexDisk
                 logger.Open();
                 throw;
             }
-        }
+        } 
+        #endregion
 
+        #region Download File
         public async Task<bool> DownloadFileAsync(string path, string currentPath, Action<ulong, ulong> updateProgress = null)
         {
             try
@@ -95,8 +115,7 @@ namespace DocumentManagement.Connection.YandexDisk
                 //string newPath = YandexHelper.NewPath(path, nameDir);
                 logger.Message($"path={path}; currentPath={currentPath}; ");
                 HttpWebRequest request = YandexHelper.RequestDownloadFile(accessToken, path);
-                WebResponse response = await request.GetResponseAsync();
-                try
+                using (WebResponse response = await request.GetResponseAsync())
                 {
                     var length = response.ContentLength;
                     logger.Message($"length={length}");
@@ -120,21 +139,25 @@ namespace DocumentManagement.Connection.YandexDisk
                     }
                     return true;
                 }
-                catch (DirectoryNotFoundException)
+            }
+            catch (DirectoryNotFoundException)
+            {
+                logger.Message($"Директория не создана, не могу записать файл");
+                throw;
+            }
+            catch (WebException web)
+            {
+                logger.Message($"Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
                 {
-                    logger.Message($"Директория не создана, не могу записать файл");
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
                     throw;
                 }
-                catch (Exception)
-                {
-                    throw;
-                }
-                finally
-                {
-                    logger.Message($"finally");
-                    response.Close();
-                }
-                //return false;
             }
             catch (Exception ex)
             {
@@ -143,8 +166,10 @@ namespace DocumentManagement.Connection.YandexDisk
                 //throw;
                 return false;
             }
-        }
+        } 
+        #endregion
 
+        #region Delete file and directory
         public async Task<bool> DeleteAsync(string path)
         {
             try
@@ -162,6 +187,20 @@ namespace DocumentManagement.Connection.YandexDisk
                     return false;
                 }
             }
+            catch (WebException web)
+            {
+                logger.Message($"Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
+                    throw;
+                }
+            }
             catch (Exception ex)
             {
                 logger.Error(ex);
@@ -169,8 +208,9 @@ namespace DocumentManagement.Connection.YandexDisk
                 throw;
             }
         }
+        #endregion
 
-
+        #region Load File
         /// <summary>
         /// Загрузить файл на сервер
         /// </summary>
@@ -187,7 +227,7 @@ namespace DocumentManagement.Connection.YandexDisk
                 //logger.Message($"path={path}; fileName={fileName}; ");
                 FileInfo fileInfo = new FileInfo(fileName);
 
-                string diskName = YandexHelper.NewPath(path, fileInfo.Name);
+                string diskName = YandexHelper.NewFile(path, fileInfo.Name);
                 //logger.Message($"diskName={diskName}; ");
 
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
@@ -196,19 +236,6 @@ namespace DocumentManagement.Connection.YandexDisk
                 {
                     //logger.Message($"reader.Length={reader.Length};");
                     request.ContentLength = reader.Length;
-                    //string sha256 = "";
-                    //using (SHA256 mySHA256 = SHA256.Create())
-                    //{
-                    //    byte[] hashValue = mySHA256.ComputeHash(reader);
-                    //    StringBuilder builder = new StringBuilder();
-                    //    for (int i = 0; i < hashValue.Length; i++)
-                    //    {
-                    //        builder.Append($"{hashValue[i]:X2}");
-                    //    }
-                    //    sha256 = builder.ToString();
-                    //}
-                    ////logger.Message($"sha256={sha256}");
-                    //request.Headers["Sha256"] = sha256;
                     using (var writer = request.GetRequestStream())
                     {
                         const int BUFFER_LENGTH = 4096;
@@ -262,5 +289,6 @@ namespace DocumentManagement.Connection.YandexDisk
             }
             return false;
         }
+        #endregion
     }
 }
