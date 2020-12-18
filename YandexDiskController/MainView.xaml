@@ -6,13 +6,13 @@
         xmlns:local="clr-namespace:DocumentManagement"
         xmlns:convert="clr-namespace:DocumentManagement.Converters"
         mc:Ignorable="d"
-        Title="Yandex Test" Height="450" Width="800">
+        Title="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Height="450" Width="800">
     <Window.Resources>
         <convert:ItemTypeConverter x:Key="itemTypeConverter"/>
         <convert:ItemSizeConverter x:Key="itemSizeConverter"/>
 
     </Window.Resources>
-    <Grid>
+    <Grid Keyboard.KeyUp="Grid_KeyUp">
         <TabControl>
             <TabItem Header="Файлы">
                 <Grid>
@@ -21,22 +21,57 @@
                         <RowDefinition Height="30"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="1"></StackPanel>
+                    <StackPanel Orientation="Horizontal" Grid.Row="1">
+                        <Button Width="50" Command="{Binding RootDirCommand}">/</Button>
+                        <Button Width="50" Command="{Binding BackDirCommand}">..</Button>
+                        <Button  Command="{Binding LoadFileCommand}">Загрузить файл (F4)</Button>
+                        <Button  Command="{Binding RefreshCommand}">Обновить (F5)</Button>
+                        <Button Command="{Binding CreateDirCommand}">Создать папку (F7)</Button>
+                        <Button Command="{Binding DeleteCommand}">Удалить (F8)</Button>
+                        <CheckBox Margin="5,0" VerticalAlignment="Center" IsChecked="{Binding InfoMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Инфо</CheckBox>
+                        <TextBlock Text="{Binding CurrentByte}" Margin="5"/>
+                        <TextBlock Text="{Binding TotalByte}" Margin="5"/>
+                        <Button Command="{Binding DebugCommand}">Debug(F11)</Button>
+
+                    </StackPanel>
 
                     <DataGrid Name="gridItems" Grid.Row="0" ItemsSource="{Binding FolderItems}" AutoGenerateColumns="False" 
                         CanUserAddRows="False" IsReadOnly="True" SelectionChanged="gridItems_SelectionChanged" 
                         MouseDoubleClick="gridItems_MouseDoubleClick">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Name" Width="300" Binding="{Binding Path=DisplayName}"/>
-                            <DataGridTextColumn Header="Date" Width="100" Binding="{Binding Path=LastModified, StringFormat='dd/MM/yyyy hh:mm'}"/>
-                            <DataGridTextColumn Header="Size" Width="100" Binding="{Binding Path=ContentLength, Converter={StaticResource itemSizeConverter}}"/>
-                            <DataGridTextColumn Header="Type" Width="100" Binding="{Binding Path=ContentType, Converter={StaticResource itemTypeConverter}}"/>
-                            <DataGridTextColumn Header="Public" Width="*" Binding="{Binding Path=PublicUrl}" />
+                            <DataGridTextColumn Header="Name" Width="200" Binding="{Binding Path=DisplayName}"/>
+                            <DataGridTextColumn Header="Date" Width="50" Binding="{Binding Path=LastModified, StringFormat='dd/MM/yyyy hh:mm'}"/>
+                            <DataGridTextColumn Header="Size" Width="50" Binding="{Binding Path=ContentLength, Converter={StaticResource itemSizeConverter}}"/>
+                            <DataGridTextColumn Header="Type" Width="50" Binding="{Binding Path=ContentType, Converter={StaticResource itemTypeConverter}}"/>
+                            <!--<DataGridTextColumn Header="Public" Width="*" Binding="{Binding Path=PublicUrl}" />-->
+                            <DataGridTextColumn Header="Status"             Width="*" Binding="{Binding Path=Status}" />
+                            <DataGridTextColumn Header="Creationdate"       Width="*" Binding="{Binding Path=Creationdate}" />
+                            <DataGridTextColumn Header="Resourcetype"       Width="*" Binding="{Binding Path=Resourcetype}" />
+                            <DataGridTextColumn Header="Href"               Width="*" Binding="{Binding Path=Href}" />
+                            <DataGridTextColumn Header="Mulca_file_url"     Width="*" Binding="{Binding Path=Mulca_file_url}" />
+                            <DataGridTextColumn Header="Mulca_digest_url"   Width="*" Binding="{Binding Path=Mulca_digest_url}" />
+                            <DataGridTextColumn Header="File_url"           Width="*" Binding="{Binding Path=File_url}" />
+                            <DataGridTextColumn Header="Getetag"           Width="*" Binding="{Binding Path=Getetag}" />
+                            <!--<DataGridTextColumn Header="Public" Width="*" Binding="{Binding Path=PublicUrl}" />-->
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
             </TabItem>
-            
+
         </TabControl>
+
+        <Popup IsOpen="{Binding DownloadProgress, UpdateSourceTrigger=PropertyChanged}" Width="200"    Placement="Center" PopupAnimation="Slide">
+            <Border Background="Aqua">
+                <StackPanel Orientation="Vertical">
+                    <TextBlock HorizontalAlignment="Center"> Загрузка</TextBlock>
+                    <ProgressBar Height="5"
+                        Value="{Binding CurrentByte, UpdateSourceTrigger=PropertyChanged}" 
+                        Maximum="{Binding TotalByte, UpdateSourceTrigger=PropertyChanged}" 
+                        Minimum="0"/>
+                </StackPanel>
+            </Border>
+        </Popup>
+
     </Grid>
+
 </Window>

@@ -31,5 +31,20 @@ namespace DocumentManagement
         private void gridItems_SelectionChanged(object sender, SelectionChangedEventArgs e) => Model.SelectionChanged(e);
 
         private void gridItems_MouseDoubleClick(object sender, MouseButtonEventArgs e) => Model.SelectItemAsync(this.gridItems.SelectedIndex);
+
+        private void Grid_KeyUp(object sender, KeyEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Key.F7: Model.CreateDirCommand.Execute(null); break;
+                case Key.F4: Model.LoadFileCommand.Execute(null); break;
+                case Key.F5: Model.RefreshCommand.Execute(null); break;
+                case Key.F8: Model.DeleteCommand.Execute(null); break;
+                case Key.F11: Model.DebugCommand.Execute(null); break;
+                
+                default:
+                    break;
+            }
+        }
     }
 }

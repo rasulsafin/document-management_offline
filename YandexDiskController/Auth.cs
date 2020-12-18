@@ -15,31 +15,13 @@ namespace DocumentManagement
             {
                 YandexDiskAuth auth = new YandexDiskAuth();
                 var result = await auth.GetDiskSdkToken();
-                //if (result.Error == null)
-                //{
-                    MainViewModel.AccessToken = result;
-                    controller = new YandexDiskController(AccessToken);
-                    //var items = await controller.GetListAsync("/");
-                    //controller.GetList2Async(callbackGetList, "/");
-                    //MainViewModel.Instanse.SetFolderItems(items);
-                //}
-                //else
-                //{
-                //    MessageBox.Show($" { result.Error.Message}", "Ошибка");
-                //}
+                MainViewModel.AccessToken = result;
+                controller = new YandexDiskController(AccessToken);
+                MainViewModel.Instanse.RootDir(null);
             }
-
-            //private static void callbackGetList(GenericSdkEventArgs<IEnumerable<DiskItemInfo>> obj)
-            //{
-            //    if (obj.Error == null)
-            //        Instanse.SetFolderItems(obj.Result);
-            //    else
-            //    {
-            //        MessageBox.Show($" { obj.Error.Message}", "Ошибка");
-            //    }
-            //}
+            
         }
 
-        
+
     }
 }

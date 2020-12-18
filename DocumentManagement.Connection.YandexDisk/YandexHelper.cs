@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
@@ -39,7 +40,7 @@ namespace DocumentManagement.Connection.YandexDisk
             }
         }
 
-        internal static HttpWebRequest RequestGetList(string accessToken, string path)
+        public static HttpWebRequest RequestGetList(string accessToken, string path)
         {
             var url = URI_API_YANDEX + path;
             var request = WebRequest.CreateHttp(url);
@@ -49,11 +50,63 @@ namespace DocumentManagement.Connection.YandexDisk
             request.Headers["Authorization"] = "OAuth " + accessToken;
             return request;
         }
+
+        public static HttpWebRequest RequestCreateDir(string accessToken, string pathNewDirectory)
+        {
+            var url = URI_API_YANDEX + pathNewDirectory;
+            var request = WebRequest.CreateHttp(url);
+            request.Method = "MKCOL";
+            request.Accept = "*/*";            
+            request.Headers["Authorization"] = "OAuth " + accessToken;
+            return request;
+        }
+
+        public static string NewPath(string path, string nameDir)
+        {
+            List<string> items = new List<string>(path.Split('/', StringSplitOptions.RemoveEmptyEntries));
+            items.Add(nameDir);
+            string result = string.Join('/', items);
+            return $"/{result}/";
+        }
+
+        public static HttpWebRequest RequestDownloadFile(string accessToken, string path)
+        {
+            var url = URI_API_YANDEX + path;
+            var request = WebRequest.CreateHttp(url);
+            request.Host = "webdav.yandex.ru";
+            request.Method = "GET";
+            request.Accept = "*/*";
+            request.Headers["Authorization"] = "OAuth " + accessToken;
+            return request;
+        }
+
+        internal static HttpWebRequest RequestLoadFile(string accessToken, string path)
+        {
+            var url = URI_API_YANDEX + path;
+            var request = WebRequest.CreateHttp(url);
+            request.Host = "webdav.yandex.ru";
+            request.Method = "PUT";
+            request.Accept = "*/*";
+            request.Headers["Authorization"] = "OAuth " + accessToken;
+
+            return request;
+        }
+
+        internal static HttpWebRequest RequestDelete(string accessToken, string path)
+        {
+            var url = URI_API_YANDEX + path;
+            var request = WebRequest.CreateHttp(url);
+            request.Host = "webdav.yandex.ru";
+            request.Method = "DELETE";
+            request.Accept = "*/*";
+            request.Headers["Authorization"] = "OAuth " + accessToken;
+            return request;
+        }
         #endregion
     }
 
     #region LOGGER
-    internal class CoolLogger
+    public class CoolLogger
     {
         private FileInfo logFile;
         //private StreamWriter log;
@@ -68,7 +121,7 @@ namespace DocumentManagement.Connection.YandexDisk
             }
         }
 
-        internal void Message(string message = "",
+        public void Message(string message = "",
         [System.Runtime.CompilerServices.CallerMemberName] string memberName = "",
         [System.Runtime.CompilerServices.CallerFilePath] string sourceFilePath = "",
         [System.Runtime.CompilerServices.CallerLineNumber] int sourceLineNumber = 0)
@@ -80,12 +133,12 @@ namespace DocumentManagement.Connection.YandexDisk
             }
         }
 
-        internal void Save()
+        public void Save()
         {
             //logFile
         }
 
-        internal void Error(System.Exception ex)
+        public void Error(System.Exception ex)
         {
             // Get stack trace for the exception with source file information
             var st = new System.Diagnostics.StackTrace(ex, true);
@@ -106,9 +159,15 @@ namespace DocumentManagement.Connection.YandexDisk
             }
         }
 
-        internal void Open()
+        internal void Clear()
         {
-            System.Diagnostics.Process.Start(logFile.FullName);
+            logFile.Delete();
+        }
+
+        public void Open()
+        {
+            //System.Diagnostics.Process.Start(logFile.FullName);
+            Process.Start("C:\\Windows\\System32\\notepad.exe", logFile.FullName.Trim());
         }
     }
     #endregion

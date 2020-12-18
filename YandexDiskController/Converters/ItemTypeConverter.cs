@@ -8,7 +8,7 @@ namespace DocumentManagement.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (string.IsNullOrEmpty(value.ToString()))
+            if (value is string str && string.IsNullOrWhiteSpace(str))
             {
                 return "directory";
             }

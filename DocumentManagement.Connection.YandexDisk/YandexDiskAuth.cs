@@ -58,7 +58,12 @@ namespace DocumentManagement.Connection.YandexDisk
                 token_type = context.Request.QueryString["token_type"];
                 expires_in = int.Parse(context.Request.QueryString["expires_in"]);
 
-                var responseString = "<html><body>You can now close this window!</body></html>";
+                var responseString = @"<html>
+<script>function onLoad()
+{
+window.close();
+}</script>
+<body onload=""onLoad()"">You can now close this window!</body></html>";
                 SetResponse(context, responseString);
 
                 // === complete ===
