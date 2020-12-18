@@ -85,17 +85,24 @@ namespace MRS.DocumentManagement.Services
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
                 {
-                    context.BimElements.Add(new Database.Models.BimElement() 
+                    dbBim = new Database.Models.BimElement()
                     {
                         ItemID = (int)bim.ItemID,
                         GlobalID = bim.GlobalID
-                    });
+                    };
+                    context.BimElements.Add(dbBim);
                 }
                 objective.BimElements.Add(new Database.Models.BimElementObjective() 
                 {
                     ObjectiveID = objective.ID,
                     BimElementID = dbBim.ID
                 });
+            }
+
+            objective.Items = new List<Database.Models.ObjectiveItem>();
+            foreach (var item in data.Items)
+            {
+                await LinkItem(item, objective);
             }
 
             objective.DynamicFields = new List<Database.Models.DynamicField>();
@@ -109,6 +116,7 @@ namespace MRS.DocumentManagement.Services
                     Value = field.Value
                 });                
             }
+
             await context.SaveChangesAsync();
 
             return (ID<ObjectiveDto>)objective.ID;
@@ -260,7 +268,63 @@ namespace MRS.DocumentManagement.Services
                 }
             }
 
+            objective.Items = new List<Database.Models.ObjectiveItem>();
+            var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID);
+            var itemsToUnlink = objectiveItems.Where(o => objData.Items.Any(i => (int)i.ID == o.ItemID));
+
+            foreach (var item in objData.Items)
+            {
+                await LinkItem(item, objective);
+            }
+
+            foreach (var item in itemsToUnlink)
+            {
+                await UnlinkItem(item.ItemID, objective.ID);
+            }
+
             context.Update(objective);
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        private async Task LinkItem(ItemDto item, Database.Models.Objective objective)
+        {
+            var dbItem = await context.Items
+                    .FirstOrDefaultAsync(i => i.ID == (int)item.ID);
+
+            var alreadyLinked = await context.ObjectiveItems
+                .AnyAsync(i => i.ItemID == (int)item.ID
+                            && i.ObjectiveID == objective.ID);
+
+            if (alreadyLinked)
+                return;
+
+            if (dbItem == null)
+            {
+                dbItem = new Database.Models.Item
+                {
+                    ID = (int)item.ID,
+                    ItemType = (int)item.ItemType,
+                    ExternalItemId = item.ExternalItemId
+                };
+                context.Items.Add(dbItem);
+            }
+            objective.Items.Add(new Database.Models.ObjectiveItem
+            {
+                ObjectiveID = objective.ID,
+                ItemID = dbItem.ID
+            });
+        }
+
+        private async Task<bool> UnlinkItem(int itemID, int objectiveID)
+        {
+            var link = await context.ObjectiveItems
+                .Where(x => x.ItemID == itemID)
+                .Where(x => x.ObjectiveID == objectiveID)
+                .FirstOrDefaultAsync();
+            if (link == null)
+                return false;
+            context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
             return true;
         }

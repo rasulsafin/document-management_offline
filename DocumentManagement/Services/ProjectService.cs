@@ -157,5 +157,47 @@ namespace MRS.DocumentManagement.Services
 
             return (ID<ProjectDto>)project.ID;
         }
+
+        private async Task LinkItem(ItemDto item, Database.Models.Project project)
+        {
+            var dbItem = await context.Items
+                    .FirstOrDefaultAsync(i => i.ID == (int)item.ID);
+
+            var alreadyLinked = await context.ProjectItems
+                .AnyAsync(i => i.ItemID == (int)item.ID
+                            && i.ProjectID == project.ID);
+
+            if (alreadyLinked)
+                return;
+
+            if (dbItem == null)
+            {
+                dbItem = new Database.Models.Item
+                {
+                    ID = (int)item.ID,
+                    ItemType = (int)item.ItemType,
+                    ExternalItemId = item.ExternalItemId
+                };
+                context.Items.Add(dbItem);
+            }
+            project.Items.Add(new Database.Models.ProjectItem
+            {
+                ProjectID = project.ID,
+                ItemID = dbItem.ID
+            });
+        }
+
+        private async Task<bool> UnlinkItem(ID<ItemDto> itemID, ID<ProjectDto> projectID)
+        {
+            var link = await context.ProjectItems
+                .Where(x => x.ItemID == (int)itemID)
+                .Where(x => x.ProjectID == (int)projectID)
+                .FirstOrDefaultAsync();
+            if (link == null)
+                return false;
+            context.ProjectItems.Remove(link);
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
 }

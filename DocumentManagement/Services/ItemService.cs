@@ -73,68 +73,6 @@ namespace MRS.DocumentManagement.Services
             return dbItems.Select(x => MapItemFromDB(x)).ToList();
         }
 
-        public async Task<bool> Link(ID<ItemDto> itemID, ID<ProjectDto> projectID)
-        {
-            var isLinked = await context.ProjectItems.Where(x => x.ItemID == (int)itemID)
-                .Where(x => x.ProjectID == (int)projectID)
-                .AnyAsync();
-            
-            if (isLinked)
-                return false;
-
-            await context.ProjectItems.AddAsync(new Database.Models.ProjectItem()
-            {
-                ItemID = (int)itemID,
-                ProjectID = (int)projectID
-            });
-            await context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> Link(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
-        {
-            var isLinked = await context.ObjectiveItems.Where(x => x.ItemID == (int)itemID)
-                .Where(x => x.ObjectiveID == (int)objectiveID)
-                .AnyAsync();
-
-            if (isLinked)
-                return false;
-
-            await context.ObjectiveItems.AddAsync(new Database.Models.ObjectiveItem()
-            {
-                ItemID = (int)itemID,
-                ObjectiveID = (int)objectiveID
-            });
-            await context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> Unlink(ID<ItemDto> itemID, ID<ProjectDto> projectID)
-        {
-            var link = await context.ProjectItems
-                .Where(x => x.ItemID == (int)itemID)
-                .Where(x => x.ProjectID == (int)projectID)
-                .FirstOrDefaultAsync();
-            if (link == null)
-                return false;
-            context.ProjectItems.Remove(link);
-            await context.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<bool> Unlink(ID<ItemDto> itemID, ID<ObjectiveDto> objectiveID)
-        {
-            var link = await context.ObjectiveItems
-                .Where(x => x.ItemID == (int)itemID)
-                .Where(x => x.ObjectiveID == (int)objectiveID)
-                .FirstOrDefaultAsync();
-            if (link == null)
-                return false;
-            context.ObjectiveItems.Remove(link);
-            await context.SaveChangesAsync();
-            return true;
-        }
-
         public async Task<bool> Update(ItemDto item)
         {
             var dbItem = await context.Items.FindAsync((int)item.ID);
