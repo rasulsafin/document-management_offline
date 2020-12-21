@@ -8,7 +8,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public ID<ObjectiveDto> ID { get; set; }
         public ID<ProjectDto> ProjectID { get; set; }
         public ID<ObjectiveDto>? ParentObjectiveID { get; set; }
-        public UserDto Author { get; set; }
+        public ID<UserDto> AuthorID { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime DueDate { get; set; }
         public string Title { get; set; }

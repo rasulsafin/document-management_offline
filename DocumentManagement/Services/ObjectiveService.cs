@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using System;
@@ -21,58 +21,9 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
         }
 
-        //private static ObjectiveDto MapObjectiveFromDB(Database.Models.Objective ob)
-        //{
-        //    return new ObjectiveDto()
-        //    {
-        //        ID = (ID<ObjectiveDto>)ob.ID,
-        //        Author = new UserDto((ID<UserDto>)ob.Author.ID, ob.Author.Login, ob.Author.Name),
-        //        CreationDate = ob.CreationDate,
-        //        Description = ob.Description,
-        //        Status = (ObjectiveStatus)ob.Status,
-        //        ProjectID = (ID<ProjectDto>)ob.ProjectID,
-        //        ParentObjectiveID = ob.ParentObjectiveID.HasValue
-        //            ? ((ID<ObjectiveDto>?)ob.ParentObjectiveID)
-        //            : null,
-        //        DueDate = ob.DueDate,
-        //        ObjectiveType = new ObjectiveTypeDto()
-        //        {
-        //            ID = (ID<ObjectiveTypeDto>)ob.ObjectiveType.ID,
-        //            Name = ob.ObjectiveType.Name
-        //        },
-        //        Title = ob.Title,
-        //        DynamicFields = ob.DynamicFields
-        //            .Select(x => new DynamicFieldDto()
-        //            {
-        //                ID = (ID<DynamicFieldDto>)x.ID,
-        //                Key = x.Key,
-        //                Type = x.Type,
-        //                Value = x.Value
-        //            }).ToList(),
-        //        BimElements = ob.BimElements
-        //            .Select(x => new BimElementDto()
-        //            {
-        //                ItemID = (ID<ItemDto>)x.BimElement.ItemID,
-        //                GlobalID = x.BimElement.GlobalID
-        //            }).ToList()
-        //    };
-        //}
-
         public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data)
         {
-            var objective = new Database.Models.Objective()
-            {
-                AuthorID = data.AuthorID.HasValue ? new int?((int)data.AuthorID) : null,
-                CreationDate = data.CreationDate,
-                DueDate = data.DueDate,
-                Description = data.Description,
-                Title = data.Title,
-                ObjectiveTypeID = (int)data.ObjectiveType,
-                Status = (int)data.Status,
-                ParentObjectiveID = data.ParentObjectiveID.HasValue && data.ParentObjectiveID.Value.IsValid ? new int?((int)data.ParentObjectiveID) : null,
-                ProjectID = (int)data.ProjectID,
-            };
-
+            var objective = mapper.Map<Objective>(data);
             context.Objectives.Add(objective);
             await context.SaveChangesAsync();
 
@@ -134,7 +85,6 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
             if (dbObjective == null)
                 return null;
-            // return MapObjectiveFromDB(dbObjective);
             return mapper.Map<ObjectiveDto>(dbObjective);
         }
 
@@ -197,8 +147,8 @@ namespace MRS.DocumentManagement.Services
             objective.Status = (int)objData.Status;
             objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
             objective.ProjectID = (int)objData.ProjectID;
-            objective.AuthorID = (int)objData.Author.ID;
-            objective.ParentObjectiveID = objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;
+            objective.AuthorID = (int)objData.AuthorID;
+            objective.ParentObjectiveID = objData.ParentObjectiveID.HasValue && objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;
 
 
             var objectiveFields = objective.DynamicFields;

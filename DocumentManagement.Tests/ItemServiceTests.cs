@@ -89,7 +89,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = taskTypeID,
+                    ObjectiveTypeID = taskTypeID,
                     ParentObjectiveID = null,
                     ProjectID = project1ID
                 };
@@ -195,7 +195,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = taskType,
+                    ObjectiveTypeID = taskType,
                     ParentObjectiveID = null,
                     ProjectID = project
                 };
@@ -208,7 +208,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Погладить кота",
                     Description = "Погладь кота!",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = taskType,
+                    ObjectiveTypeID = taskType,
                     ParentObjectiveID = null,
                     ProjectID = project
                 };

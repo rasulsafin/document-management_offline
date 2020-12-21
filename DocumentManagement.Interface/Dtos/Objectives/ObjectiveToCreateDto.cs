@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public string Title { get; set; }
         public string Description { get; set; }
         public ObjectiveStatus Status { get; set; }
-        public ID<ObjectiveTypeDto> ObjectiveType { get; set; }
+        public ID<ObjectiveTypeDto> ObjectiveTypeID { get; set; }
         
         public IEnumerable<ItemDto> Items { get; set; }
         public IEnumerable<DynamicFieldToCreateDto> DynamicFields { get; set; }
