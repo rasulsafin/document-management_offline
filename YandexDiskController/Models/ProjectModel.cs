@@ -1,18 +1,24 @@
 ﻿using DocumentManagement.Base;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Xml.Serialization;
 
 namespace DocumentManagement.Models
 {
     public class ProjectModel : BaseViewModel
     {
-        ProjectDto dto;
+        [XmlIgnore]
+        public ProjectDto dto;
 
         public ProjectModel(ProjectDto dto)
         {
             this.dto = dto;
+        }
+
+        public ProjectModel()
+        {
+            this.dto = new ProjectDto();
         }
 
         public string Title 
@@ -28,13 +34,13 @@ namespace DocumentManagement.Models
         public int ID
         {
             get => (int)dto.ID;
-            //set
-            //{
-            //    dto.Title = value;
-            //    OnPropertyChanged();
-            //}
+            set
+            {
+                dto.ID = (ID<ProjectDto>)value;
+                OnPropertyChanged();
+            }
         }
 
-        
+
     }
 }

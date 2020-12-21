@@ -16,6 +16,8 @@ namespace DocumentManagement
                 YandexDiskAuth auth = new YandexDiskAuth();
                 var result = await auth.GetDiskSdkToken();
                 MainViewModel.AccessToken = result;
+                
+
                 controller = new YandexDiskController(AccessToken);
                 MainViewModel.Instanse.RootDir(null);
             }

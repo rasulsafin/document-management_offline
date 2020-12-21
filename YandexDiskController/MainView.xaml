@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentManagement"
+        xmlns:controls="clr-namespace:DocumentManagement.Contols"
         xmlns:convert="clr-namespace:DocumentManagement.Converters"
         mc:Ignorable="d"
         Title="{Binding Title, UpdateSourceTrigger=PropertyChanged}" Height="450" Width="800">
@@ -13,7 +14,7 @@
 
     </Window.Resources>
     <Grid Keyboard.KeyUp="Grid_KeyUp">
-        <TabControl>
+        <TabControl SelectionChanged="TabControl_SelectionChanged">
             <TabItem Header="Файлы">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -57,7 +58,10 @@
                     </DataGrid>
                 </Grid>
             </TabItem>
+            <TabItem Header="Проекты">
+                <controls:ProjectControl DataContext="{Binding Projects, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
+            </TabItem>
         </TabControl>
 
         <Popup IsOpen="{Binding DownloadProgress, UpdateSourceTrigger=PropertyChanged}" Width="200"    Placement="Center" PopupAnimation="Slide">

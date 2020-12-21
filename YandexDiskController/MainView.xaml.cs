@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DocumentManagement.Dialogs;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,5 +47,29 @@ namespace DocumentManagement
                     break;
             }
         }
+
+        int count=0;
+        private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            count++;
+            if (count > 1) 
+            {
+                //WinBox.ShowMessage($"TabItem_IsEnabledChanged" +
+                //    $"\n{e.AddedItems.Count}" +
+                //    $"\n{e.RemovedItems.Count}");
+            }
+            //if (sender is FrameworkElement element)
+            //try
+            //{
+            //WinBox.ShowMessage($"TabItem_IsEnabledChanged");
+            //}
+            //catch
+            //{ }
+        }
+
+        //private void TabItem_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        //{
+        //    WinBox.ShowMessage($"TabItem_IsEnabledChanged");
+        //}
     }
 }

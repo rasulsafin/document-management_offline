@@ -1,5 +1,6 @@
 ﻿using DocumentManagement.Base;
 using DocumentManagement.Connection.YandexDisk;
+using DocumentManagement.Contols;
 using DocumentManagement.Dialogs;
 using Microsoft.Win32;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -17,7 +18,7 @@ namespace DocumentManagement
 {
     internal partial class MainViewModel : BaseViewModel
     {
-        public static CoolLogger logger = new CoolLogger("controller");
+        public static CoolLogger logger = new CoolLogger("logApp");
 
         #region Binding
         public string NameApp { get; private set; } = "Controller";
@@ -36,6 +37,7 @@ namespace DocumentManagement
         private double totalByte;
 
         public static MainViewModel Instanse { get => instanse; }
+        public static YandexDiskController Controller { get => controller; }
         public HCommand CreateDirCommand { get; }
         public HCommand RootDirCommand { get; }
         public HCommand BackDirCommand { get; }
@@ -74,10 +76,8 @@ namespace DocumentManagement
 
         public DiskElement SelectionElement { get; private set; }
 
-
-
-
-        //public ObservableCollection<ProjectDto> Projects = new ObservableCollection<ProjectDto>();
+        ProjectViewModel projects = new ProjectViewModel();
+        public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
         #endregion
 
         public MainViewModel(Dispatcher dispatcher)

@@ -20,7 +20,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Utils", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk", "DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YandexDiskController", "YandexDiskController\YandexDiskController.csproj", "{A57A622A-1AF3-4E98-AB3A-C631B4B48854}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "YandexDiskTester", "YandexDiskController\YandexDiskTester.csproj", "{A57A622A-1AF3-4E98-AB3A-C631B4B48854}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

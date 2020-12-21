@@ -25,7 +25,7 @@ namespace DocumentManagement.Connection.YandexDisk
 
         }
 
-        #region GetList
+        #region PROPFIND 
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
         {
             try
@@ -104,10 +104,18 @@ namespace DocumentManagement.Connection.YandexDisk
                 logger.Open();
                 throw;
             }
-        } 
+        }
         #endregion
 
         #region Download File
+        /// <summary>
+        /// Скачивание файла (GET)
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="currentPath"></param>
+        /// <param name="updateProgress"></param>
+        /// <returns></returns>
+        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/get.html/</remarks>
         public async Task<bool> DownloadFileAsync(string path, string currentPath, Action<ulong, ulong> updateProgress = null)
         {
             try
@@ -219,7 +227,7 @@ namespace DocumentManagement.Connection.YandexDisk
         /// <param name="progressChenge"></param>
         /// <returns></returns>
         /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
-        public async Task<bool> LoadFileAsync(string path, string fileName, Action<ulong, ulong> progressChenge)
+        public async Task<bool> LoadFileAsync(string path, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
@@ -288,6 +296,36 @@ namespace DocumentManagement.Connection.YandexDisk
                 throw;
             }
             return false;
+        }
+        #endregion
+
+        #region COPY TODO 
+        /// <summary>
+        /// Копирование (COPY)
+        /// </summary>
+        /// <param name="originPath"></param>
+        /// <param name="copyPath"></param>
+        /// <returns></returns>
+        /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
+        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html</remarks>
+        public async Task<bool> CopyAsync(string originPath, string copyPath)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region MOVE TODO
+        /// <summary>
+        /// Перемещение и переименование (MOVE)
+        /// </summary>
+        /// <param name="originPath"></param>
+        /// <param name="movePath"></param>
+        /// <returns></returns>
+        /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
+        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html</remarks>
+        public async Task<bool> MoveAsync(string originPath, string movePath)
+        {
+            throw new NotImplementedException();
         }
         #endregion
     }
