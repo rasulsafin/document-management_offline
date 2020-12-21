@@ -18,36 +18,6 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
         }
 
-        public async Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ProjectDto> parentProject)
-        {
-            var item = new Database.Models.Item() 
-            {
-                Name = data.Name,
-                ExternalItemId = data.ExternalItemId,
-                ItemType = (int)data.ItemType
-            };
-            context.Items.Add(item);
-            await context.SaveChangesAsync();
-
-            await Link((ID<ItemDto>)item.ID, parentProject);
-            return (ID<ItemDto>)item.ID;
-        }
-
-        public async Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ObjectiveDto> parentObjective)
-        {
-            var item = new Database.Models.Item()
-            {
-                Name = data.Name,
-                ExternalItemId = data.ExternalItemId,
-                ItemType = (int)data.ItemType
-            };
-            context.Items.Add(item);
-            await context.SaveChangesAsync();
-
-            await Link((ID<ItemDto>)item.ID, parentObjective);
-            return (ID<ItemDto>)item.ID;
-        }
-
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
             var dbItem = await context.Items.FindAsync((int)itemID);

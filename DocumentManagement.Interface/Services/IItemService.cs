@@ -6,9 +6,6 @@ namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IItemService
     {
-        Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ProjectDto> parentProject);
-        Task<ID<ItemDto>> Add(ItemToCreateDto data, ID<ObjectiveDto> parentObjective);
-
         Task<bool> Update(ItemDto item);
         Task<ItemDto> Find(ID<ItemDto> itemID);
 
