@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Web;
 
 namespace DocumentManagement.Connection.YandexDisk
 {
@@ -61,7 +62,7 @@ namespace DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        public static string NewDirectory(string path, string nameDir)
+        public static string DirectoryName(string path, string nameDir)
         {
             List<string> items = new List<string>(path.Split('/', StringSplitOptions.RemoveEmptyEntries));
             items.Add(nameDir);
@@ -69,7 +70,7 @@ namespace DocumentManagement.Connection.YandexDisk
             return $"/{result}/";
         }
 
-        public static string NewFile(string path, string nameFile)
+        public static string FileName(string path, string nameFile)
         {
             List<string> items = new List<string>(path.Split('/', StringSplitOptions.RemoveEmptyEntries));
             items.Add(nameFile);
@@ -108,6 +109,21 @@ namespace DocumentManagement.Connection.YandexDisk
             request.Method = "DELETE";
             request.Accept = "*/*";
             request.Headers["Authorization"] = "OAuth " + accessToken;
+            return request;
+        }
+
+        internal static HttpWebRequest RequestMove(string accessToken, string originPath, string movePath, bool overwrite = true)
+        {
+            var url = URI_API_YANDEX + originPath;
+            var request = WebRequest.CreateHttp(url);
+            request.Host = "webdav.yandex.ru";
+            request.Method = "MOVE";
+            request.Accept = "*/*";
+            request.Headers["Authorization"] = "OAuth " + accessToken;
+            string encodingString = Uri.EscapeDataString(movePath);
+            request.Headers["Destination"] = encodingString;
+            if (overwrite == false)
+                request.Headers["Overwrite"] = "F";
             return request;
         }
         #endregion

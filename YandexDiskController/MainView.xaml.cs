@@ -40,6 +40,7 @@ namespace DocumentManagement
                 case Key.F7: Model.CreateDirCommand.Execute(null); break;
                 case Key.F4: Model.LoadFileCommand.Execute(null); break;
                 case Key.F5: Model.RefreshCommand.Execute(null); break;
+                case Key.F6: Model.MoveCommand.Execute(null); break;
                 case Key.F8: Model.DeleteCommand.Execute(null); break;
                 case Key.F11: Model.DebugCommand.Execute(null); break;
                 

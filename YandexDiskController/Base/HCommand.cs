@@ -10,10 +10,16 @@ namespace DocumentManagement.Base
     public class HCommand : ICommand
     {
         private Action<object> _method;
+        private bool openTempFile;
 
         public HCommand(Action<object> method)
         {
             _method = method;
+        }
+
+        public HCommand(bool openTempFile)
+        {
+            this.openTempFile = openTempFile;
         }
 
         public event EventHandler CanExecuteChanged;

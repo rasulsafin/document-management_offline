@@ -2,9 +2,10 @@
 using DocumentManagement.Connection.YandexDisk;
 using DocumentManagement.Dialogs;
 using DocumentManagement.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
@@ -13,6 +14,7 @@ using System.Xml.Serialization;
 
 namespace DocumentManagement.Contols
 {
+
     public class ProjectViewModel : BaseViewModel
     {
         private static readonly string DIR_NAME = "data";
@@ -20,9 +22,10 @@ namespace DocumentManagement.Contols
         private static readonly string TEMP_DIR = "Temp.Yandex";
         YandexDisk yandex;
         ProjectModel selectProject;
-
+        bool openTempFile = false;
         public ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
         public ProjectModel SelectProject { get => selectProject; set { selectProject = value; OnPropertyChanged(); } }
+        public bool OpenTempFile { get => openTempFile; set { openTempFile = value; OnPropertyChanged(); } }
 
 
         public HCommand CreateCommand { get; }
@@ -32,46 +35,98 @@ namespace DocumentManagement.Contols
         public HCommand DeleteFileCommand { get; }
         public HCommand DeleteCommand { get; private set; }
         public HCommand RenameCommand { get; }
+        public HCommand CreateLoadFileCommand { get; }
+        public HCommand OpenTempFileCommand { get; }
+        public HCommand XMLPackCommand { get; }
+        public HCommand XMLUnPackCommand { get; }
 
         public ProjectViewModel()
         {
-            CreateCommand = new HCommand(Create);
+            CreateCommand = new HCommand(CreateAsync);
             OpenFileCommand = new HCommand(OpenFile);
             LoadProjectsCommand = new HCommand(UnloadProjectsInServer);
-            DownloadProjectsCommand = new HCommand(DownloadProjects);
+            DownloadProjectsCommand = new HCommand(DownloadProjectsAsync);
             DeleteFileCommand = new HCommand(DeleteFile);
-            DeleteCommand = new HCommand(DeleteProject);
-            RenameCommand = new HCommand(RenameProject);
-            LoadProjectsInFile();
+            DeleteCommand = new HCommand(DeleteProjectAsync);
+            RenameCommand = new HCommand(RenameProjectAsync);
+            CreateLoadFileCommand = new HCommand(CreateLoadFile);
+            OpenTempFileCommand = new HCommand(OpenTempFileMethod);
+            XMLPackCommand = new HCommand(Pack);
+            XMLUnPackCommand = new HCommand(Unpack);
+            //LoadProjectsInFile();
         }
 
-        private void RenameProject(object obj)
+        private void Unpack(object obj)
         {
-            if (SelectProject == null)
-                WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
-            else if (WinBox.ShowInput(
-                question: "Введите новое название проекта:",
-                input: out string name,
-                title: "Переименование проекта",
-                okText: "Переименовать",
-                cancelText: "Отменить",
-                defautValue: SelectProject.Title))
+            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
+            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            if (File.Exists(fileName))
             {
-                SelectProject.Title = name;                
-                SaveProjects();
+                var json = File.ReadAllText(fileName);
+                List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
+
+                Projects.Clear();
+                foreach (ProjectDto item in collection)
+                {
+                    Projects.Add(new ProjectModel(item));
+                }                
             }
         }
 
-        private void DeleteProject(object obj)
+        private void Pack(object obj)
         {
-            if (SelectProject == null)
-                WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
-            else if (WinBox.ShowQuestion($"Удалить проект '{SelectProject.Title}'?"))
+            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
+            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            List<ProjectDto> collectionDto = Projects.Select(x => x.dto).ToList();
+            try
             {
-                Projects.Remove(SelectProject);
-                SaveProjects();
+                var json = JsonConvert.SerializeObject(collectionDto, Formatting.Indented);
+                File.WriteAllText(fileName, json);
+
+                //XmlSerializer formatter = new XmlSerializer(typeof(List<ProjectDto>));
+                //using (FileStream fs = new FileStream(fileName, FileMode.Create))
+                //{
+                //    formatter.Serialize(fs, collectionDto);
+                //}
             }
+            catch (Exception ex)
+            {
+                WinBox.ShowMessage($"Хуйня:{ex.Message}");
+            }
+            OpenGeany(fileName);
         }
+
+        private void OpenTempFileMethod(object obj)
+        {
+            string fileName = Path.Combine(TEMP_DIR, FILE_NAME);
+            OpenGeany(fileName);
+        }
+
+        private void CreateLoadFile(object obj)
+        {
+            //string TempDir = TEMP_DIR;
+            //string PROGECTS_FILE = FILE_NAME;
+            //List<ProjectDto> collectionDto  = Projects.Select(x => x.dto).ToList();
+
+            //List<ProjectYandexModel> collectionProject = new List<ProjectYandexModel>();
+            //foreach (var item in collectionDto)
+            //{
+            //    collectionProject.Add(new ProjectYandexModel(item));
+            //}
+            //if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+            //XmlSerializer formatter = new XmlSerializer(typeof(List<ProjectYandexModel>));
+            //using (FileStream fs = new FileStream(fileName, FileMode.Create))
+            //{
+            //    formatter.Serialize(fs, collectionProject);
+            //}
+
+            //OpenGeany(fileName);
+        }
+
+        
+
+        
 
         private void DeleteFile(object obj)
         {
@@ -81,81 +136,95 @@ namespace DocumentManagement.Contols
             Projects.Clear();
         }
 
-        private void DownloadProjects(object obj)
+        private async void DownloadProjectsAsync(object obj)
         {
-            if (MainViewModel.Controller == null)
-                WinBox.ShowMessage("Контроллер не создан!");
-            WinBox.ShowMessage("Ещё не умею!");
+            ChechYandex();
+            List<ProjectDto> list = await yandex.DownloadProjects();
+
+            Projects.Clear();
+            foreach (var item in list)
+            {
+                Projects.Add(new ProjectModel(item));
+            }
+        }
+        private void OpenFile(object obj)
+        {
+            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            FileInfo file = new FileInfo(fileName);
+            OpenGeany(file.FullName);
+        }
+
+        private static void OpenGeany(string file)
+        {
+            Process.Start(@"c:\Program Files (x86)\Geany\bin\geany.exe", file);
         }
 
         private async void UnloadProjectsInServer(object obj)
+        {
+            ChechYandex();
+            await yandex.UnloadProjects(Projects.Select(x => x.dto).ToList());
+            
+        }
+
+
+        //private void LoadProjectsInFile()
+        //{
+        //    if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
+        //    string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+        //    if (File.Exists(fileName))
+        //    {
+        //        XmlSerializer formatter = new XmlSerializer(typeof(ObservableCollection<ProjectModel>));
+        //        using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
+        //        {
+        //            ObservableCollection<ProjectModel> collection = (ObservableCollection<ProjectModel>)formatter.Deserialize(fs);
+
+        //            Projects.Clear();
+        //            foreach (ProjectModel item in collection)
+        //            {
+        //                Projects.Add(item);
+        //            }
+        //        }
+        //    }
+        //}
+        //private void SaveProjects()
+        //{
+        //    if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
+        //    string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+
+        //    try
+        //    {
+        //        XmlSerializer formatter = new XmlSerializer(typeof(ObservableCollection<ProjectModel>));
+        //        using (FileStream fs = new FileStream(fileName, FileMode.Create))
+        //        {
+        //            formatter.Serialize(fs, Projects);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        WinBox.ShowMessage($"Хуйня:{ex.Message}");
+        //    }
+        //}
+        private void ChechYandex()
         {
             if (yandex == null)
             {
                 yandex = new YandexDisk(MainViewModel.AccessToken);
                 yandex.TempDir = TEMP_DIR;
-                //WinBox.ShowMessage("Контроллер не создан!");
-            }
-            await yandex.UnloadProjects(Projects.Select(x => x.dto).ToList());
-            
-        }
-
-        private void OpenFile(object obj)
-        {
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
-            FileInfo file = new FileInfo(fileName);
-            Process.Start(@"c:\Program Files (x86)\Geany\bin\geany.exe", file.FullName);
-        }
-
-        private void LoadProjectsInFile()
-        {
-            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
-            if (File.Exists(fileName))
-            {
-                XmlSerializer formatter = new XmlSerializer(typeof(ObservableCollection<ProjectModel>));
-                using (FileStream fs = new FileStream(fileName, FileMode.OpenOrCreate))
-                {
-                    ObservableCollection<ProjectModel> collection = (ObservableCollection<ProjectModel>)formatter.Deserialize(fs);
-
-                    Projects.Clear();
-                    foreach (ProjectModel item in collection)
-                    {
-                        Projects.Add(item);
-                    }
-                }
-            }
-        }
-        private void SaveProjects()
-        {
-            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
-
-            try
-            {
-                XmlSerializer formatter = new XmlSerializer(typeof(ObservableCollection<ProjectModel>));
-                using (FileStream fs = new FileStream(fileName, FileMode.Create))
-                {
-                    formatter.Serialize(fs, Projects);
-                }
-            }
-            catch (Exception ex)
-            {
-                WinBox.ShowMessage($"Хуйня:{ex.Message}");
             }
         }
 
-        private void Create(object obj)
+        private async void CreateAsync(object obj)
         {
+            ChechYandex();
             if (WinBox.ShowInput(
                 question: "Введите название проекта:", 
                 input: out string name, 
                 title: "Создание проекта", 
                 okText: "Создать", 
                 cancelText: "Отменить", 
-                defautValue: "Новый проект" ))
+                defautValue: (SelectProject==null)? "Новый проект": SelectProject.Title ))
             {
-                int newId = Projects.Count + 1;
+                int newId = (Projects.Count == 0)? 1 : Projects.Max(x => x.ID) + 1;
 
                 //ProjectDto dto = new ProjectDto();
                 //dto.ID = (ID<ProjectDto>)newId;
@@ -166,9 +235,56 @@ namespace DocumentManagement.Contols
                 project.Title = name;
                 project.ID = newId;
 
-                Projects.Add(project);
-                SaveProjects();
+                bool res = await yandex.AddProject(project.dto);
+                if (res)
+                    DownloadProjectsAsync(null);
+
+                if (OpenTempFile)
+                    OpenTempFileMethod(null);
+
+                //Projects.Add(project);
+                //SaveProjects();
                 //WinBox.ShowMessage($"Создам '{name}'");
+            }
+        }
+
+        private async void DeleteProjectAsync(object obj)
+        {
+            ChechYandex();
+            if (SelectProject == null)
+                WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
+            else if (WinBox.ShowQuestion($"Удалить проект '{SelectProject.Title}'?"))
+            {
+                bool res = await yandex.DeleteProject(SelectProject.dto);
+                if (res)
+                    DownloadProjectsAsync(null);
+
+                if (OpenTempFile)
+                    OpenTempFileMethod(null);
+            }
+        }
+
+        private async void RenameProjectAsync(object obj)
+        {
+            ChechYandex();
+            if (SelectProject == null)
+                WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
+            else if (WinBox.ShowInput(
+                question: "Введите новое название проекта:",
+                input: out string name,
+                title: "Переименование проекта",
+                okText: "Переименовать",
+                cancelText: "Отменить",
+                defautValue: SelectProject.Title))
+            {
+                SelectProject.Title = name;
+
+                bool res = await yandex.UpdateProject(SelectProject.dto);
+                if (res)
+                    DownloadProjectsAsync(null);
+
+                if (OpenTempFile)
+                    OpenTempFileMethod(null);
             }
         }
 

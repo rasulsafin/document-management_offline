@@ -1,10 +1,12 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System;
+﻿#define TEST
+
+using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace DocumentManagement.Connection.YandexDisk
 {
@@ -32,50 +34,177 @@ namespace DocumentManagement.Connection.YandexDisk
                 x => x.IsDirectory && x.DisplayName == APP_DIR
                 ))
             {
-                await controller.CreateDirAsync("/",APP_DIR);
+                await controller.CreateDirAsync("/", APP_DIR);
             }
         }
 
         public string TempDir { get; set; }
 
-
-        public async Task AddProject(ProjectDto project)
-        {
-            // Получаем список файлов и папок в папке приложения 
-            string app = $"/{APP_DIR}/";
-            IEnumerable<DiskElement> list = await controller.GetListAsync(app);
-            //
-            // TODO : Остановился здесь 21.12.2020
-            //
-
-        }
+        #region Projects
 
         /// <summary>
-        /// Вызывается при бездумном копировании (например при переносе данных) 
+        /// Загрузка проектов 
+        /// Вызывается при бездумном копировании  
         /// </summary>
         /// <param name="collectionProject"></param>
         /// <returns></returns>
-        public async Task UnloadProjects(List<ProjectDto> collectionProject)
+#if TEST
+        public
+#else
+        private 
+#endif
+            async Task UnloadProjects(List<ProjectDto> collectionDto)
         {
             string app = $"/{APP_DIR}/";
 
+            //List<ProjectYandexModel> collectionProject = new List<ProjectYandexModel>();
+            //foreach (var item in collectionDto)
+            //{
+            //    collectionProject.Add(new ProjectYandexModel(item));
+            //}
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
             string fileName = Path.Combine(TempDir, PROGECTS_FILE);
-            XmlSerializer formatter = new XmlSerializer(typeof(List<ProjectDto>));
-            using (FileStream fs = new FileStream(fileName, FileMode.Create))
-            {
-                formatter.Serialize(fs, collectionProject);
-            }
-            //await controller.DeleteAsync(YandexHelper.NewFile(app, PROGECTS_FILE));
+
+            var json = JsonConvert.SerializeObject(collectionDto);
+            File.WriteAllText(fileName, json);
+
             await controller.LoadFileAsync(app, fileName);
-
-            IEnumerable<DiskElement> list = await controller.GetListAsync(app);
-
-            foreach (var project in collectionProject)
-            {
-                if (!list.Any(x=>x.IsDirectory && x.DisplayName == project.Title))
-                    await controller.CreateDirAsync(app, project.Title);
-            }
         }
+
+        /// <summary>
+        /// Скачивание проектов
+        /// Вызывается при бездумном копировании  
+        /// </summary>
+        /// <param name="collectionProject"></param>
+        /// <returns></returns>
+#if TEST
+        public
+#else
+        private
+#endif
+            async Task<List<ProjectDto>> DownloadProjects()
+        {
+            string app = $"/{APP_DIR}/";
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+
+            bool res = await controller.DownloadFileAsync(YandexHelper.FileName(app, PROGECTS_FILE), fileName);
+            //if (!res) 
+            var json = File.ReadAllText(fileName);
+            List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
+            return collection;
+        }
+
+        /// <summary>
+        /// Добавляет проект в файл данных.
+        /// предварительно проверяет наличие id, если такой id есть то перезаписывет запись.
+        /// Создает директорию проекта
+        /// </summary>
+        /// <param name="project"></param>
+        /// <returns></returns>
+        public async Task<bool> AddProject(ProjectDto project)
+        {
+            try
+            {
+                string app = $"/{APP_DIR}/";
+                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+                List<ProjectDto> projects = new List<ProjectDto>();
+
+                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+                {
+                    projects = await DownloadProjects();
+                    var find = projects.Find(x => x.ID.Equals(project.ID));
+                    if (find != null)
+                    {
+                        projects.Remove(find);
+                    }
+                }
+                projects.Add(project);
+                await UnloadProjects(projects);
+
+                if (!list.Any(x => x.IsDirectory && x.DisplayName == project.Title))
+                    await controller.CreateDirAsync(app, project.Title);
+                return true;
+            }
+            catch (WebException)
+            { }
+            return false;
+        }
+
+        /// <summary>
+        /// Скачивает файл данных, удаляет проект найденный по id, закачивает файл обратно.
+        /// Удаляет директорию проекта найденную по DisplayName.
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<bool> DeleteProject(ProjectDto dto)
+        {
+            try
+            {
+                string app = $"/{APP_DIR}/";
+                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+                List<ProjectDto> projects = new List<ProjectDto>();
+
+                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+                {
+                    //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+                    projects = await DownloadProjects();
+                    var find = projects.Find(x => x.ID.Equals(dto.ID));
+                    if (find != null)
+                    {
+                        projects.Remove(find);
+                        await UnloadProjects(projects);
+                    }
+                }
+
+                if (list.Any(x => x.IsDirectory && x.DisplayName == dto.Title))
+                    await controller.DeleteAsync(YandexHelper.DirectoryName(app, dto.Title));
+                return true;
+            }
+            catch (WebException)
+            { }
+            return false;
+        }
+
+        /// <summary>
+        /// Обновляет название проекта в папке
+        /// Обновляет название директории
+        /// </summary>
+        /// <param name="dto"></param>
+        /// <returns></returns>
+        public async Task<bool> UpdateProject(ProjectDto dto)
+        {
+            try
+            {
+                string app = $"/{APP_DIR}/";
+                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+                List<ProjectDto> projects = new List<ProjectDto>();
+
+                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+                {
+                    //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+                    projects = await DownloadProjects();
+                    var find = projects.Find(x => x.ID.Equals(dto.ID));
+                    if (find != null)
+                    {
+
+                        bool res = await controller.MoveAsync(
+                            originPath: YandexHelper.DirectoryName(app, find.Title),
+                            movePath: YandexHelper.DirectoryName(app, dto.Title));
+
+                        find.Title = dto.Title;
+                        await UnloadProjects(projects);
+                    }
+                }
+
+                return true;
+            }
+            catch (WebException)
+            { }
+            return false;
+        } 
+        #endregion
+
+
     }
 }

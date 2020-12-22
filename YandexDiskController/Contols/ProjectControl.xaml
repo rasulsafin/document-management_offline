@@ -15,18 +15,30 @@
         <GridSplitter Grid.Column="1" Width="3"/>
 
         <StackPanel Grid.Column="2" Orientation="Vertical">
+            <!--<WrapPanel>
+                <Button Command="{Binding DownloadProjectsCommand}" Margin="3">Получить проекты из хранилища</Button>
+                <Button Command="{Binding LoadProjectsCommand}" Margin="3">Отправить проекты в хранилище</Button>
+                <Button Command="{Binding CreateLoadFileCommand}" Margin="3">Создать файл для загрузки (Локально)</Button>
+                <Button Command="{Binding OpenFileCommand}" Margin="3">Показать файл</Button>
+                <Button Command="{Binding DeleteFileCommand}" Margin="3">Удалить файл</Button>
+            </WrapPanel>
+            <Separator Margin="3"/>-->
             <WrapPanel>
-                <Button Command="{Binding LoadProjectsCommand}" Margin="3,3,0,0">Загрузить проекты на диск</Button>
-                <Button Command="{Binding DownloadProjectsCommand}" Margin="3,3,0,0">Скачать проекты с диска</Button>
-                <Button Command="{Binding OpenFileCommand}" Margin="3,3,0,0">Показать файл</Button>
-                <Button Command="{Binding DeleteFileCommand}" Margin="3,3,0,0">Удалить файл</Button>
+                <Button Command="{Binding CreateCommand}" Margin="3">Создать проект</Button>
+                <Button Command="{Binding DeleteCommand}" Margin="3">Удалить проект</Button>
+                <Button Command="{Binding RenameCommand}" Margin="3">Переименовать проект</Button>
+                <CheckBox IsChecked="{Binding OpenTempFile}" 
+                          HorizontalAlignment="Center" VerticalAlignment="Center">
+                    Открывать временный файл в конце операции
+                </CheckBox>
+                <Button Command="{Binding OpenTempFileCommand}" Margin="3">Открыть временный файл</Button>
             </WrapPanel>
             <Separator Margin="3"/>
-            <WrapPanel>
-                <Button Command="{Binding CreateCommand}" Margin="3,3,0,0">Создать проект</Button>
-                <Button Command="{Binding DeleteCommand}" Margin="3,3,0,0">Удалить проект</Button>
-                <Button Command="{Binding RenameCommand}" Margin="3,3,0,0">Переименовать проект</Button>
-            </WrapPanel>
+            <!--<WrapPanel>
+                <Button Command="{Binding XMLPackCommand}" Margin="3">Запоковать в json</Button>
+                <Button Command="{Binding XMLUnPackCommand}" Margin="3">Pаспоковать из json</Button>
+                
+            </WrapPanel>-->
         </StackPanel>
 
         <ListBox Grid.Column="0" ItemsSource="{Binding Projects, UpdateSourceTrigger=PropertyChanged}" 

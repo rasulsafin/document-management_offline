@@ -27,6 +27,7 @@
                         <Button Width="50" Command="{Binding BackDirCommand}">..</Button>
                         <Button  Command="{Binding LoadFileCommand}">Загрузить файл (F4)</Button>
                         <Button  Command="{Binding RefreshCommand}">Обновить (F5)</Button>
+                        <Button  Command="{Binding MoveCommand}">Переименовать (F6)</Button>
                         <Button Command="{Binding CreateDirCommand}">Создать папку (F7)</Button>
                         <Button Command="{Binding DeleteCommand}">Удалить (F8)</Button>
                         <CheckBox Margin="5,0" VerticalAlignment="Center" IsChecked="{Binding InfoMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Инфо</CheckBox>
@@ -61,6 +62,20 @@
             <TabItem Header="Проекты">
                 <controls:ProjectControl DataContext="{Binding Projects, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
 
+            </TabItem>
+
+            <TabItem Header="Objective" IsSelected="True">
+                <controls:ObjectiveControl DataContext="{Binding Objectives, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </TabItem>
+
+            <TabItem Header="Users">
+                <controls:UsersControl DataContext="{Binding Users, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </TabItem>
+
+            
+            
+            <TabItem Header="Items">
+                <controls:ItemsControl DataContext="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </TabItem>
         </TabControl>
 

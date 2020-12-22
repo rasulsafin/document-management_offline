@@ -45,6 +45,7 @@ namespace DocumentManagement
         public HCommand LoadFileCommand { get; }
         public HCommand DeleteCommand { get; }
         public HCommand RefreshCommand { get; }
+        public HCommand MoveCommand { get; }
 
         public ObservableCollection<DiskElement> FolderItems
         {
@@ -73,11 +74,17 @@ namespace DocumentManagement
         public bool DownloadProgress { get => downloadProgress; set { downloadProgress = value; OnPropertyChanged(); } }
         public double CurrentByte { get => currentByte; set { currentByte = value; OnPropertyChanged(); } }
         public double TotalByte { get => totalByte; set { totalByte = value; OnPropertyChanged(); } }
-
         public DiskElement SelectionElement { get; private set; }
 
         ProjectViewModel projects = new ProjectViewModel();
+        UserViewModel users = new UserViewModel();
+        ObjectiveViewModel objectives = new ObjectiveViewModel();
+
         public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
+
+        public ObjectiveViewModel Objectives { get => objectives; set { objectives = value; OnPropertyChanged(); } }
+
+        public UserViewModel Users { get => users; set { users = value; OnPropertyChanged(); } }
         #endregion
 
         public MainViewModel(Dispatcher dispatcher)
@@ -91,10 +98,12 @@ namespace DocumentManagement
             LoadFileCommand = new HCommand(LoadFile);
             DeleteCommand = new HCommand(DeleteMethod);
             RefreshCommand = new HCommand(Refresh);
+            MoveCommand = new HCommand(Move);
 
             Auth.StartAuth();
             if (!Directory.Exists(TEMP_DIR)) Directory.CreateDirectory(TEMP_DIR);
         }
+
 
         private void Refresh(object obj)
         {
@@ -221,6 +230,25 @@ namespace DocumentManagement
                 else
                     WinBox.ShowMessage("Каталог не создан!");
             }
+        }
+        private async void Move(object obj)
+        {
+            if (SelectionElement == null)
+                WinBox.ShowMessage("Не могу выполнить операцию, нет выбранного элемента!");
+            else if (WinBox.ShowInput(
+                question: $"Введите новое название папки '{SelectionElement.DisplayName}':",
+                input: out string nameDir,
+                title: "Переименование папки",
+                defautValue: SelectionElement.DisplayName,
+                okText: "Перименовать", cancelText: "Отмена"))
+            {// Создать папку 
+                bool res = await controller.MoveAsync(SelectionElement.Href, YandexHelper.DirectoryName(Path, nameDir));
+                if (res)
+                    await RefreshFolder();
+                else
+                    WinBox.ShowMessage("Каталог не переименован!");
+            }
+
         }
 
 

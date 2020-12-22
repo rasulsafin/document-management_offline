@@ -70,7 +70,7 @@ namespace DocumentManagement.Connection.YandexDisk
         {
             try
             {
-                string newPath = YandexHelper.NewDirectory(path, nameDir);
+                string newPath = YandexHelper.DirectoryName(path, nameDir);
                 HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
                 using (WebResponse response = await request.GetResponseAsync())
                 {
@@ -235,7 +235,7 @@ namespace DocumentManagement.Connection.YandexDisk
                 //logger.Message($"path={path}; fileName={fileName}; ");
                 FileInfo fileInfo = new FileInfo(fileName);
 
-                string diskName = YandexHelper.NewFile(path, fileInfo.Name);
+                string diskName = YandexHelper.FileName(path, fileInfo.Name);
                 //logger.Message($"diskName={diskName}; ");
 
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
@@ -277,7 +277,7 @@ namespace DocumentManagement.Connection.YandexDisk
             }
             catch (WebException web)
             {
-                logger.Message($"Status={web.Status}");
+                logger.Message($"Exception Status={web.Status}");
                 if (web.Status == WebExceptionStatus.Timeout)
                 {
                     throw new TimeoutException("Время ожидания сервера вышло.", web);
@@ -325,7 +325,41 @@ namespace DocumentManagement.Connection.YandexDisk
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html</remarks>
         public async Task<bool> MoveAsync(string originPath, string movePath)
         {
-            throw new NotImplementedException();
+            try
+            {                
+                HttpWebRequest request = YandexHelper.RequestMove(accessToken, originPath, movePath);
+                using (WebResponse response = await request.GetResponseAsync())
+                {
+                    if (response is HttpWebResponse http)
+                    {
+                        if (http.StatusCode == HttpStatusCode.Created)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+            catch (WebException web)
+            {
+                logger.Message($"Exception Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                logger.Open();
+                throw;
+            }
         }
         #endregion
     }
