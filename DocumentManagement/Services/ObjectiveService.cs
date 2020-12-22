@@ -139,13 +139,13 @@ namespace MRS.DocumentManagement.Services
             if (objective == null)
                 return false;
 
-            objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
+            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
             objective.CreationDate = objData.CreationDate;
             objective.DueDate = objData.DueDate;
             objective.Title = objData.Title;
             objective.Description = objData.Description;
             objective.Status = (int)objData.Status;
-            objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
+            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
             objective.ProjectID = (int)objData.ProjectID;
             objective.AuthorID = (int)objData.AuthorID;
             objective.ParentObjectiveID = objData.ParentObjectiveID.HasValue && objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;

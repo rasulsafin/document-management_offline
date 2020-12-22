@@ -1,5 +1,5 @@
 using AutoMapper;
-using DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
