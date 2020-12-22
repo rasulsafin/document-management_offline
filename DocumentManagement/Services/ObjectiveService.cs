@@ -4,6 +4,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,7 +138,6 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)objData.ID);
             if (objective == null)
                 return false;
-                //throw new ArgumentException($"Objective with key {objData.ID} not found");
 
             objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
             objective.CreationDate = objData.CreationDate;
@@ -237,29 +237,13 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        private async Task LinkItem(ItemDto item, Database.Models.Objective objective)
+        private async Task LinkItem(ItemDto item, Objective objective)
         {
-            var dbItem = await context.Items
-                    .FirstOrDefaultAsync(i => i.ID == (int)item.ID);
-
-            var alreadyLinked = await context.ObjectiveItems
-                .AnyAsync(i => i.ItemID == (int)item.ID
-                            && i.ObjectiveID == objective.ID);
-
-            if (alreadyLinked)
+            var dbItem = await ItemHelper.CheckItemToLink(context, item, objective.GetType(), objective.ID);
+            if (dbItem == null)
                 return;
 
-            if (dbItem == null)
-            {
-                dbItem = new Database.Models.Item
-                {
-                    ID = (int)item.ID,
-                    ItemType = (int)item.ItemType,
-                    ExternalItemId = item.ExternalItemId
-                };
-                context.Items.Add(dbItem);
-            }
-            objective.Items.Add(new Database.Models.ObjectiveItem
+            objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
                 ItemID = dbItem.ID

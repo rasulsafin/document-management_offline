@@ -3,6 +3,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +24,6 @@ namespace MRS.DocumentManagement.Services
             var userID = (int)owner;
             var user = context.Users.Find(userID);
             if (user == null)
-                //throw new ArgumentException($"User with key {userID} not found");
                 return ID<ProjectDto>.InvalidID;
             var project = new Database.Models.Project() { Title = title };
             await context.Projects.AddAsync(project);
@@ -44,7 +44,6 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
             if (project == null)
                 return false;
-                //throw new ArgumentException($"Project with key {projectID} not found");
             if (project.Users == null)
                 project.Users = new List<Database.Models.UserProject>();
             foreach (var user in users)
@@ -122,7 +121,6 @@ namespace MRS.DocumentManagement.Services
             var project = await context.Projects.FindAsync((int)projectID);
             if (project == null)
                 return false;
-                //throw new ArgumentException($"Project with key {projectID} not found");
             foreach (var user in users)
             {
                 var link = project.Users.FirstOrDefault(x => x.UserID == (int)user);
@@ -142,7 +140,6 @@ namespace MRS.DocumentManagement.Services
             var project = await context.Projects.FindAsync((int)projectID);
             if (project == null)
                 return false;
-                //throw new ArgumentException($"Project with key {projectID} not found");
             project.Title = projectData.Title;
             context.Projects.Update(project);
             await context.SaveChangesAsync();
@@ -160,26 +157,10 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Database.Models.Project project)
         {
-            var dbItem = await context.Items
-                    .FirstOrDefaultAsync(i => i.ID == (int)item.ID);
-
-            var alreadyLinked = await context.ProjectItems
-                .AnyAsync(i => i.ItemID == (int)item.ID
-                            && i.ProjectID == project.ID);
-
-            if (alreadyLinked)
+            var dbItem = await ItemHelper.CheckItemToLink(context, item, project.GetType(), project.ID);
+            if (dbItem == null)
                 return;
 
-            if (dbItem == null)
-            {
-                dbItem = new Database.Models.Item
-                {
-                    ID = (int)item.ID,
-                    ItemType = (int)item.ItemType,
-                    ExternalItemId = item.ExternalItemId
-                };
-                context.Items.Add(dbItem);
-            }
             project.Items.Add(new Database.Models.ProjectItem
             {
                 ProjectID = project.ID,
