@@ -1,9 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,58 +22,9 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
         }
 
-        //private static ObjectiveDto MapObjectiveFromDB(Database.Models.Objective ob)
-        //{
-        //    return new ObjectiveDto()
-        //    {
-        //        ID = (ID<ObjectiveDto>)ob.ID,
-        //        Author = new UserDto((ID<UserDto>)ob.Author.ID, ob.Author.Login, ob.Author.Name),
-        //        CreationDate = ob.CreationDate,
-        //        Description = ob.Description,
-        //        Status = (ObjectiveStatus)ob.Status,
-        //        ProjectID = (ID<ProjectDto>)ob.ProjectID,
-        //        ParentObjectiveID = ob.ParentObjectiveID.HasValue
-        //            ? ((ID<ObjectiveDto>?)ob.ParentObjectiveID)
-        //            : null,
-        //        DueDate = ob.DueDate,
-        //        ObjectiveType = new ObjectiveTypeDto()
-        //        {
-        //            ID = (ID<ObjectiveTypeDto>)ob.ObjectiveType.ID,
-        //            Name = ob.ObjectiveType.Name
-        //        },
-        //        Title = ob.Title,
-        //        DynamicFields = ob.DynamicFields
-        //            .Select(x => new DynamicFieldDto()
-        //            {
-        //                ID = (ID<DynamicFieldDto>)x.ID,
-        //                Key = x.Key,
-        //                Type = x.Type,
-        //                Value = x.Value
-        //            }).ToList(),
-        //        BimElements = ob.BimElements
-        //            .Select(x => new BimElementDto()
-        //            {
-        //                ItemID = (ID<ItemDto>)x.BimElement.ItemID,
-        //                GlobalID = x.BimElement.GlobalID
-        //            }).ToList()
-        //    };
-        //}
-
         public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data)
         {
-            var objective = new Database.Models.Objective()
-            {
-                AuthorID = data.AuthorID.HasValue ? new int?((int)data.AuthorID) : null,
-                CreationDate = data.CreationDate,
-                DueDate = data.DueDate,
-                Description = data.Description,
-                Title = data.Title,
-                ObjectiveTypeID = (int)data.ObjectiveType,
-                Status = (int)data.Status,
-                ParentObjectiveID = data.ParentObjectiveID.HasValue && data.ParentObjectiveID.Value.IsValid ? new int?((int)data.ParentObjectiveID) : null,
-                ProjectID = (int)data.ProjectID,
-            };
-
+            var objective = mapper.Map<Objective>(data);
             context.Objectives.Add(objective);
             await context.SaveChangesAsync();
 
@@ -85,17 +37,24 @@ namespace MRS.DocumentManagement.Services
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
                 {
-                    context.BimElements.Add(new Database.Models.BimElement() 
+                    dbBim = new Database.Models.BimElement()
                     {
                         ItemID = (int)bim.ItemID,
                         GlobalID = bim.GlobalID
-                    });
+                    };
+                    context.BimElements.Add(dbBim);
                 }
                 objective.BimElements.Add(new Database.Models.BimElementObjective() 
                 {
                     ObjectiveID = objective.ID,
                     BimElementID = dbBim.ID
                 });
+            }
+
+            objective.Items = new List<Database.Models.ObjectiveItem>();
+            foreach (var item in data.Items)
+            {
+                await LinkItem(item, objective);
             }
 
             objective.DynamicFields = new List<Database.Models.DynamicField>();
@@ -109,6 +68,7 @@ namespace MRS.DocumentManagement.Services
                     Value = field.Value
                 });                
             }
+
             await context.SaveChangesAsync();
 
             return (ID<ObjectiveDto>)objective.ID;
@@ -126,7 +86,6 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
             if (dbObjective == null)
                 return null;
-            // return MapObjectiveFromDB(dbObjective);
             return mapper.Map<ObjectiveDto>(dbObjective);
         }
 
@@ -179,18 +138,17 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)objData.ID);
             if (objective == null)
                 return false;
-                //throw new ArgumentException($"Objective with key {objData.ID} not found");
 
-            objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
+            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
             objective.CreationDate = objData.CreationDate;
             objective.DueDate = objData.DueDate;
             objective.Title = objData.Title;
             objective.Description = objData.Description;
             objective.Status = (int)objData.Status;
-            objective.ObjectiveTypeID = (int)objData.ObjectiveType.ID;
+            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
             objective.ProjectID = (int)objData.ProjectID;
-            objective.AuthorID = (int)objData.Author.ID;
-            objective.ParentObjectiveID = objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;
+            objective.AuthorID = (int)objData.AuthorID;
+            objective.ParentObjectiveID = objData.ParentObjectiveID.HasValue && objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;
 
 
             var objectiveFields = objective.DynamicFields;
@@ -260,7 +218,47 @@ namespace MRS.DocumentManagement.Services
                 }
             }
 
+            objective.Items = new List<Database.Models.ObjectiveItem>();
+            var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID);
+            var itemsToUnlink = objectiveItems.Where(o => objData.Items.Any(i => (int)i.ID == o.ItemID));
+
+            foreach (var item in objData.Items)
+            {
+                await LinkItem(item, objective);
+            }
+
+            foreach (var item in itemsToUnlink)
+            {
+                await UnlinkItem(item.ItemID, objective.ID);
+            }
+
             context.Update(objective);
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        private async Task LinkItem(ItemDto item, Objective objective)
+        {
+            var dbItem = await ItemHelper.CheckItemToLink(context, item, objective.GetType(), objective.ID);
+            if (dbItem == null)
+                return;
+
+            objective.Items.Add(new ObjectiveItem
+            {
+                ObjectiveID = objective.ID,
+                ItemID = dbItem.ID
+            });
+        }
+
+        private async Task<bool> UnlinkItem(int itemID, int objectiveID)
+        {
+            var link = await context.ObjectiveItems
+                .Where(x => x.ItemID == itemID)
+                .Where(x => x.ObjectiveID == objectiveID)
+                .FirstOrDefaultAsync();
+            if (link == null)
+                return false;
+            context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
             return true;
         }

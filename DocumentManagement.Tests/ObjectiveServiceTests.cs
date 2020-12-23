@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Tests
             return new ObjectiveDto()
             {
                 ID = id,
-                Author = author,
+               // AuthorID = author,
                 CreationDate = o.CreationDate,
                 DueDate = o.DueDate,
                 Title = o.Title,
@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = tasktype,
+                    ObjectiveTypeID = tasktype,
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
                     BimElements = null,
@@ -101,7 +101,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Make dough",
                     Description = "Can't make cookies without dough",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = tasktype,
+                    ObjectiveTypeID = tasktype,
                     ParentObjectiveID = objective1ID,
                     ProjectID = project1ID
                 };
@@ -117,7 +117,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Something is wrong",
                     Description = "Really, something is wrong!",
                     Status = ObjectiveStatus.Ready,
-                    ObjectiveType = errortype,
+                    ObjectiveTypeID = errortype,
                     ParentObjectiveID = null,
                     ProjectID = project2ID
                 };
@@ -205,7 +205,7 @@ namespace MRS.DocumentManagement.Tests
                     Title = "Make cookies",
                     Description = "Mmm, cookies!",
                     Status = ObjectiveStatus.Open,
-                    ObjectiveType = tasktype,
+                    ObjectiveTypeID = tasktype,
                     ParentObjectiveID = null,
                     ProjectID = project1ID,
                     BimElements = null

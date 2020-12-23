@@ -2,11 +2,19 @@
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Utility
+namespace MRS.DocumentManagement.Utility
 {
     public class MappingProfile : Profile
     {
         public MappingProfile()
+        {
+            CreateMapIntToID();
+            CreateMapIDToInt();
+            CreateMapToDto();
+            CreateMapToModel();
+        }
+
+        private void CreateMapToDto()
         {
             CreateMap<User, UserDto>();
             CreateMap<Project, ProjectDto>();
@@ -14,42 +22,41 @@ namespace DocumentManagement.Utility
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<Objective, ObjectiveToListDto>();
             CreateMap<Objective, ObjectiveDto>();
-                //.ForMember(d => d.ProjectID, o => o.MapFrom(x => x.Project.ID))
-                //    .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(x => x.Parent.ID))
-                //    .ForMember(d => d.BimElements, o => o.MapFrom(x => x.BimElements.Select(el => el.ToDto())))
-                //.ForMember(d => d.DynamicFields, o => o.MapFrom(x => x.DynamicFields.Select(f => f.ToDto())));
+        }
+        private void CreateMapToModel()
+        {
+            CreateMap<ObjectiveToCreateDto, Objective>()
+                .ForMember(d => d.AuthorID, s => s.MapFrom(x => x.AuthorID.HasValue ? new int?((int)x.AuthorID) : null))
+                .ForMember(d => d.ParentObjectiveID, s => s
+                           .MapFrom(x => x.ParentObjectiveID.HasValue && x.ParentObjectiveID.Value.IsValid ? new int?((int)x.ParentObjectiveID) : null))
+                .ForMember(d => d.DynamicFields, opt => opt.Ignore())
+                .ForMember(d => d.BimElements, opt => opt.Ignore());
+        }
 
+        private void CreateMapIDToInt()
+        {
+            CreateMap<ID<ItemDto>, int>().ConvertUsing<IDTypeConverter<ItemDto>>();
+            CreateMap<ID<ObjectiveDto>, int>().ConvertUsing<IDTypeConverter<ObjectiveDto>>();
+            CreateMap<ID<ProjectDto>, int>().ConvertUsing<IDTypeConverter<ProjectDto>>();
+            CreateMap<ID<UserDto>, int>().ConvertUsing<IDTypeConverter<UserDto>>();
+            CreateMap<ID<BimElementDto>, int>().ConvertUsing<IDTypeConverter<BimElementDto>>();
+            CreateMap<ID<DynamicFieldDto>, int>().ConvertUsing<IDTypeConverter<DynamicFieldDto>>();
+            CreateMap<ID<ObjectiveTypeDto>, int>().ConvertUsing<IDTypeConverter<ObjectiveTypeDto>>();
+            CreateMap<ID<RemoteConnectionInfoDto>, int>()
+                    .ConvertUsing<IDTypeConverter<RemoteConnectionInfoDto>>();
+        }
+
+        private void CreateMapIntToID()
+        {
+            CreateMap<int, ID<ItemDto>>().ConvertUsing<IntIDTypeConverter<ItemDto>>();
+            CreateMap<int, ID<ObjectiveDto>>().ConvertUsing<IntIDTypeConverter<ObjectiveDto>>();
+            CreateMap<int, ID<ProjectDto>>().ConvertUsing<IntIDTypeConverter<ProjectDto>>();
+            CreateMap<int, ID<UserDto>>().ConvertUsing<IntIDTypeConverter<UserDto>>();
+            CreateMap<int, ID<BimElementDto>>().ConvertUsing<IntIDTypeConverter<BimElementDto>>();
+            CreateMap<int, ID<DynamicFieldDto>>().ConvertUsing<IntIDTypeConverter<DynamicFieldDto>>();
+            CreateMap<int, ID<ObjectiveTypeDto>>().ConvertUsing<IntIDTypeConverter<ObjectiveTypeDto>>();
+            CreateMap<int, ID<RemoteConnectionInfoDto>>()
+                    .ConvertUsing<IntIDTypeConverter<RemoteConnectionInfoDto>>();
         }
     }
 }
-
-        //ID = (ID<ObjectiveDto>)ob.ID,
-        //        Author = new UserDto((ID<UserDto>)ob.Author.ID, ob.Author.Login, ob.Author.Name),
-        //        CreationDate = ob.CreationDate,
-        //        Description = ob.Description,
-        //        Status = (ObjectiveStatus)ob.Status,
-        //        ProjectID = (ID<ProjectDto>)ob.ProjectID,
-        //        ParentObjectiveID = ob.ParentObjectiveID.HasValue
-        //            ? ((ID<ObjectiveDto>?)ob.ParentObjectiveID)
-        //            : null,
-        //        DueDate = ob.DueDate,
-        //        ObjectiveType = new ObjectiveTypeDto()
-        //        {
-        //            ID = (ID<ObjectiveTypeDto>)ob.ObjectiveType.ID,
-        //            Name = ob.ObjectiveType.Name
-        //        },
-        //        Title = ob.Title,
-        //        DynamicFields = ob.DynamicFields
-        //            .Select(x => new DynamicFieldDto()
-        //            {
-        //                ID = (ID<DynamicFieldDto>)x.ID,
-        //                Key = x.Key,
-        //                Type = x.Type,
-        //                Value = x.Value
-        //            }).ToList(),
-        //        BimElements = ob.BimElements
-        //            .Select(x => new BimElementDto()
-        //            {
-        //                ItemID = (ID<ItemDto>)x.BimElement.ItemID,
-        //                GlobalID = x.BimElement.GlobalID
-        //            }).ToList()
