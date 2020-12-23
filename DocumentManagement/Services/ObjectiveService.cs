@@ -1,14 +1,14 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -16,10 +16,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        public ObjectiveService(DMContext context, IMapper mapper)
+        private readonly ItemHelper itemHelper;
+
+        public ObjectiveService(DMContext context, IMapper mapper, ItemHelper itemHelper)
         {
             this.context = context;
             this.mapper = mapper;
+            this.itemHelper = itemHelper;
         }
 
         public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data)
@@ -37,14 +40,10 @@ namespace MRS.DocumentManagement.Services
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
                 {
-                    dbBim = new BimElement()
-                    {
-                        ItemID = (int)bim.ItemID,
-                        GlobalID = bim.GlobalID
-                    };
+                    dbBim = mapper.Map<BimElement>(bim);
                     context.BimElements.Add(dbBim);
                 }
-                objective.BimElements.Add(new BimElementObjective() 
+                objective.BimElements.Add(new BimElementObjective
                 {
                     ObjectiveID = objective.ID,
                     BimElementID = dbBim.ID
@@ -60,13 +59,9 @@ namespace MRS.DocumentManagement.Services
             objective.DynamicFields = new List<DynamicField>();
             foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldToCreateDto>())
             {
-                context.DynamicFields.Add(new DynamicField()
-                {
-                    Key = field.Key,
-                    ObjectiveID = objective.ID,
-                    Type = field.Type,
-                    Value = field.Value
-                });                
+                var dynamicField = mapper.Map<DynamicField>(field);
+                dynamicField.ObjectiveID = objective.ID;
+                context.DynamicFields.Add(dynamicField);
             }
 
             await context.SaveChangesAsync();
@@ -133,21 +128,11 @@ namespace MRS.DocumentManagement.Services
             if (objective == null)
                 return false;
 
-            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
-            objective.CreationDate = objData.CreationDate;
-            objective.DueDate = objData.DueDate;
-            objective.Title = objData.Title;
-            objective.Description = objData.Description;
-            objective.Status = (int)objData.Status;
-            objective.ObjectiveTypeID = (int)objData.ObjectiveTypeID;
-            objective.ProjectID = (int)objData.ProjectID;
-            objective.AuthorID = (int)objData.AuthorID;
-            objective.ParentObjectiveID = objData.ParentObjectiveID.HasValue && objData.ParentObjectiveID.Value.IsValid ? (int?)(objData.ParentObjectiveID.Value) : null;
-
-
+            objective = mapper.Map(objData, objective);
+            
             var objectiveFields = objective.DynamicFields;
             var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
-            var fieldsToRemove = objectiveFields.Where(x => !newFields.Any(f => (int)f.ID == x.ID)).ToList();
+            var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int) f.ID != x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);
 
             foreach (var field in newFields)
@@ -155,13 +140,9 @@ namespace MRS.DocumentManagement.Services
                 var dbField = await context.DynamicFields.FindAsync((int)field.ID);
                 if (dbField == null)
                 {
-                    await context.DynamicFields.AddAsync(new DynamicField()
-                    {
-                        Key = field.Key,
-                        Type = field.Type,
-                        Value = field.Value,
-                        ObjectiveID = objective.ID
-                    });
+                    var dynamicField = mapper.Map<DynamicField>(field);
+                    dynamicField.ObjectiveID = objective.ID;
+                    await context.DynamicFields.AddAsync(dynamicField);
                 }
                 else
                 {
@@ -202,12 +183,12 @@ namespace MRS.DocumentManagement.Services
                     if (bimElement == null)
                     {
                         //bim element does not exist at all - should be created
-                        bimElement = new BimElement() { ItemID = (int)bim.ItemID, GlobalID = bim.GlobalID };
+                        bimElement = mapper.Map<BimElement>(bim);
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
                     //add link between bim element and objective
-                    dbBim = new BimElementObjective() { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
+                    dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
             }
@@ -233,7 +214,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Objective objective)
         {
-            var dbItem = await ItemHelper.CheckItemToLink(context, item, objective.GetType(), objective.ID);
+            var dbItem = await itemHelper.CheckItemToLink(context, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
 

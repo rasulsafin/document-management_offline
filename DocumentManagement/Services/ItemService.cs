@@ -5,24 +5,25 @@ using MRS.DocumentManagement.Interface.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ItemService : IItemService
     {
         private readonly DMContext context;
+        private readonly IMapper mapper;
 
-        public ItemService(DMContext context)
+        public ItemService(DMContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
             var dbItem = await context.Items.FindAsync((int)itemID);
-            if (dbItem == null)
-                return null;
-            return MapItemFromDB(dbItem);
+            return dbItem == null ? null : MapItemFromDB(dbItem);
         }
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
@@ -30,7 +31,7 @@ namespace MRS.DocumentManagement.Services
                 .Where(x => x.ProjectID == (int)projectID)
                 .Select(x => x.Item)
                 .ToListAsync();
-            return dbItems.Select(x => MapItemFromDB(x)).ToList();
+            return dbItems.Select(MapItemFromDB).ToList();
         }
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID)
@@ -39,7 +40,7 @@ namespace MRS.DocumentManagement.Services
                 .Where(x => x.ObjectiveID == (int)objectiveID)
                 .Select(x => x.Item)
                 .ToListAsync();
-            return dbItems.Select(x => MapItemFromDB(x)).ToList();
+            return dbItems.Select(MapItemFromDB).ToList();
         }
 
         public async Task<bool> Update(ItemDto item)
@@ -55,14 +56,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        private static ItemDto MapItemFromDB(Database.Models.Item dbItem)
-        {
-            return new ItemDto()
-            {
-                ID = (ID<ItemDto>)dbItem.ID,
-                ItemType = (ItemTypeDto)dbItem.ItemType,
-                Name = dbItem.Name
-            };
-        }
+        private ItemDto MapItemFromDB(Database.Models.Item dbItem) 
+            => mapper.Map<ItemDto>(dbItem);
     }
 }
