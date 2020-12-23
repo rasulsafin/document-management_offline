@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Tests
                 && fieldsMatched
                 && x.ProjectID == y.ProjectID
                 && x.ParentObjectiveID == y.ParentObjectiveID
-                && userComparer.Equals(x.Author, y.Author)
+                //&& userComparer.Equals(x.AuthorID, y.AuthorID)
                 && x.CreationDate == y.CreationDate
                 && x.DueDate == y.DueDate
                 && x.Title == y.Title
