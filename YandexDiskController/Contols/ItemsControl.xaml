@@ -10,7 +10,7 @@
     <UserControl.Resources>
         <convert:BoolToVisuble x:Key="boolToVisuble" />
     </UserControl.Resources>
-    
+
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
@@ -34,15 +34,17 @@
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
-                    </ComboBox>                    
+                    </ComboBox>
                 </StackPanel>
 
+                <!--#region Управление списками -->
                 <StackPanel Orientation="Horizontal" >
                     <CheckBox IsChecked="{Binding ToObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                               Name="ToObject" VerticalAlignment="Center"/>
                     <TextBlock Text="Задание" Width="100" IsEnabled="{Binding ElementName=ToObject, Path=IsChecked}" 
-                               Visibility="{Binding ElementName=ToObject, Path=IsChecked}" />
-                    <ComboBox ItemsSource="{Binding Objectives}" IsEnabled="{Binding ElementName=ToObject, Path=IsChecked}"
+                                />
+                    <ComboBox ItemsSource="{Binding Objectives}" 
+                              Visibility="{Binding ElementName=ToObject, Path=IsChecked, Converter={StaticResource boolToVisuble}}"
                               SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                               Width="200" HorizontalAlignment="Left">
                         <ComboBox.ItemTemplate>
@@ -56,12 +58,41 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </StackPanel>
+                <!--#endregion-->
+
+                <Expander Header="Off line" IsExpanded="true">
+                    <StackPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding AddItemsCommand}">Добавить</Button>
+                            <Button Command="{Binding DelItemsCommand}">Удалить</Button>
+                            <Button Command="{Binding RenItemsCommand}">Переименовать</Button>
+                        </WrapPanel>
+
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding SaveFileCommand}">Записать в файл</Button>
+                            <Button Command="{Binding LoadFileCommand}">Прочитать из файла</Button>
+                            <!--<Button Command="{Binding RenItemsCommand}">Переименовать</Button>-->
+                        </WrapPanel>
+
+                    </StackPanel>
+
+                </Expander>
+                <Expander Header="On line" IsExpanded="false">
+                    <StackPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding UnloadCommand}">Загрузить на сервер</Button>
+                            <Button Command="{Binding DownloadCommand}">Скачать с сервера</Button>
+                        </WrapPanel>
+
+                    </StackPanel>
+                </Expander>
+
 
             </StackPanel>
         </StackPanel>
 
         <ListBox Grid.Column="0" ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                 SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                 SelectedValue="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <Border>
