@@ -1,5 +1,6 @@
 ﻿using DocumentManagement.Base;
 using DocumentManagement.Connection.YandexDisk;
+using DocumentManagement.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.ObjectModel;
 
@@ -12,7 +13,7 @@ namespace DocumentManagement.Contols
         private static readonly string TEMP_DIR = "Temp.Yandex";
         YandexDisk yandex;
 
-        public ObservableCollection<ItemDto> Items { get; set; } = new ObservableCollection<ItemDto>();
+        public ObservableCollection<ItemModel> Items { get; set; } = new ObservableCollection<ItemModel>();
 
     }
 }

@@ -2,7 +2,7 @@
 using DocumentManagement.Connection.YandexDisk;
 using DocumentManagement.Dialogs;
 using Microsoft.Win32;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using System;
@@ -115,7 +115,7 @@ namespace DocumentManagement.Contols
                 if (SelectedObjective == null)
                     return;
 
-                var status = Enum.Parse<ObjectiveStatusDto>(str);
+                var status = Enum.Parse<ObjectiveStatus>(str);
                 //SelectedObjective.Status = status;
                 //SelectedObjective.DueDate = DateTime.Now;
 
@@ -186,7 +186,7 @@ namespace DocumentManagement.Contols
             objDto.DueDate = DateTime.Now;
             objDto.Title = EditObjective.Title;
             objDto.Description = EditObjective.Description;
-            objDto.Status = ObjectiveStatusDto.Undefined;
+            objDto.Status = ObjectiveStatus.Undefined;
             //obj.TaskType = new ObjectiveTypeDto();
 
             Objectives.Add(objDto);

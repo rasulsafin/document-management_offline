@@ -72,9 +72,9 @@
                 <controls:UsersControl DataContext="{Binding Users, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </TabItem>
 
-            
-            
-            <TabItem Header="Items">
+
+
+            <TabItem Header="Items" IsSelected="True">
                 <controls:ItemsControl DataContext="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </TabItem>
         </TabControl>

@@ -13,8 +13,29 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-        
 
+        <ListBox Grid.Column="0" ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ID}"/>
+                                <TextBlock Text=" "/>
+                                <TextBlock Text="{Binding Name}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ExternalItemId}"/>
+                                <TextBlock Text="  "/>
+                                <TextBlock Text="{Binding ItemType}}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
         <GridSplitter Grid.Column="1" Width="3" Margin="3"/>
     </Grid>
 </UserControl>
