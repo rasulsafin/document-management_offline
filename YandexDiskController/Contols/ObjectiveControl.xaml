@@ -43,15 +43,16 @@
                     На диске
                 </CheckBox>
             </WrapPanel>
-            <Expander Header="Offline" IsExpanded="True">
+            <Expander Header="Offline" IsExpanded="False">
                 <StackPanel>
                     <WrapPanel>
                         <Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>
                         <Button Command="{Binding LoadObjectiveOfflineCommand}">Загрузить задания</Button>
                         <Button Command="{Binding SaveObjectiveOfflineCommand}">Записать задания</Button>
+                        <Button Command="{Binding OpenFileOfflineCommand}">Открыть файл</Button>
                     </WrapPanel>
 
-                    <Expander Header="Offline Add" IsExpanded="True">
+                    <Expander Header="Offline Add" IsExpanded="False">
                         <StackPanel x:Name="add">
                             <StackPanel HorizontalAlignment="Left">
                                 <TextBlock Width="100" > Заголовок</TextBlock>
@@ -66,7 +67,7 @@
                         </StackPanel>
                     </Expander>
                     
-                    <Expander Header="Offline edit" IsExpanded="false">
+                    <Expander Header="Offline edit" IsExpanded="True">
                         <StackPanel x:Name="edit">
                             <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" >
                                 <ComboBox Name="Status" Width="100"  >
@@ -77,11 +78,12 @@
                                     <ComboBoxItem Content="Late"/>
                                 </ComboBox>
                                 <Button Margin="6" Command="{Binding ChengeStatusOfflineCommand}" 
-                                        CommandParameter="{Binding ElementName=Status, Path=SelectedValue}">Изменить статус</Button>
+                                        CommandParameter="{Binding ElementName=Status, Path=SelectedItem.Content}">Изменить статус</Button>
+                                <Button Margin="6" Command="{Binding DeleteObjectiveOfflineCommand}" Content="Удалить задание"/>
                             </StackPanel>
                             <StackPanel  HorizontalAlignment="Left" Orientation="Vertical" >
                                 <TextBox HorizontalAlignment="Left" Width="200" Text="{Binding SelectedObjective.Title, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
-                                <TextBox Width="{Binding ElementName=add, Path=ActualWidth}" Height="50" 
+                                <TextBox Height="50" 
                                          Text="{Binding SelectedObjective.Description, Mode=TwoWay}"/>
                             </StackPanel>
                         </StackPanel>
@@ -90,16 +92,17 @@
                 </StackPanel>
             </Expander>
 
-            <Expander Header="Online" IsExpanded="false">
+            <Expander Header="Online" IsExpanded="True">
                 <WrapPanel>
-                    <Button>Получить проекты</Button>
+                    <Button Command="{Binding DownloadObjectiveCommand}">Получить задания</Button>
+                    <Button Command="{Binding UploadObjectiveCommand}">Отправить задания</Button>
                 </WrapPanel>
             </Expander>
 
 
         </StackPanel>
 
-        <ListBox Grid.Column="0" ItemsSource="{Binding Objectives, UpdateSourceTrigger=PropertyChanged}" 
+        <ListBox Grid.Column="0" ItemsSource="{Binding Objectives, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                  SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <ListBox.ItemTemplate>
                 <DataTemplate>

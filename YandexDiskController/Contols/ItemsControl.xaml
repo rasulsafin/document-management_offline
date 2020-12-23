@@ -13,7 +13,7 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
 
-
+        
 
         <GridSplitter Grid.Column="1" Width="3" Margin="3"/>
     </Grid>

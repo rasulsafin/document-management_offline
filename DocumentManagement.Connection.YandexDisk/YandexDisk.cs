@@ -15,6 +15,7 @@ namespace DocumentManagement.Connection.YandexDisk
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
         private static readonly string PROGECTS_FILE = "Projects.xml";
+        private static readonly string OBJECTIVE_FILE = "Objective.json";
         private static readonly string APP_DIR = "BRIO MRS";
 
         private string accessToken;
@@ -40,6 +41,54 @@ namespace DocumentManagement.Connection.YandexDisk
 
         public string TempDir { get; set; }
 
+        public async Task UnloadObjectivesAsync(ObjectiveDto[] objectiveDtos, ProjectDto project)
+        {
+            string app = $"/{APP_DIR}/";
+            var list = await controller.GetListAsync(app);
+            string projDir = $"/{APP_DIR}/{project.Title}/";
+            if (! list.Any(x => x.Href == projDir && x.IsDirectory))
+            {
+                await controller.CreateDirAsync(app, project.Title);
+            }
+
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            string fileName = Path.Combine(TempDir, OBJECTIVE_FILE);
+            var json = JsonConvert.SerializeObject(objectiveDtos);
+            File.WriteAllText(fileName, json);
+
+            await controller.LoadFileAsync(projDir, fileName);
+        }
+
+        public async Task<ObjectiveDto[]> DownloadObjectivesAsync(ProjectDto project)
+        {
+            string app = $"/{APP_DIR}/";
+            var list = await controller.GetListAsync(app);
+            string projDir = $"/{APP_DIR}/{project.Title}/";
+            if (!list.Any(x => x.Href == projDir && x.IsDirectory))
+            {
+                return null;
+            }
+
+            list = await controller.GetListAsync(projDir);
+            string objFile = $"{projDir}{OBJECTIVE_FILE}";
+            if (!list.Any(x => x.Href == objFile && !x.IsDirectory))
+            {
+                return null;
+            }
+
+            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            string fileName = Path.Combine(TempDir, OBJECTIVE_FILE);
+
+            bool res = await controller.DownloadFileAsync(objFile, fileName);
+            if (res)
+            {
+                var json = File.ReadAllText(fileName);
+                ObjectiveDto[] collect = JsonConvert.DeserializeObject<ObjectiveDto[]>(json);
+                return collect;
+            }
+            return null;
+        }
+
         #region Projects
 
         /// <summary>
@@ -57,11 +106,6 @@ namespace DocumentManagement.Connection.YandexDisk
         {
             string app = $"/{APP_DIR}/";
 
-            //List<ProjectYandexModel> collectionProject = new List<ProjectYandexModel>();
-            //foreach (var item in collectionDto)
-            //{
-            //    collectionProject.Add(new ProjectYandexModel(item));
-            //}
             if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
             string fileName = Path.Combine(TempDir, PROGECTS_FILE);
 
@@ -94,6 +138,7 @@ namespace DocumentManagement.Connection.YandexDisk
             List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
             return collection;
         }
+
 
         /// <summary>
         /// Добавляет проект в файл данных.
@@ -130,6 +175,7 @@ namespace DocumentManagement.Connection.YandexDisk
             { }
             return false;
         }
+
 
         /// <summary>
         /// Скачивает файл данных, удаляет проект найденный по id, закачивает файл обратно.

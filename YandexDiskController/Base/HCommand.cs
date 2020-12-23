@@ -11,6 +11,7 @@ namespace DocumentManagement.Base
     {
         private Action<object> _method;
         private bool openTempFile;
+        private HCommand uploadObjectiveCommand;
 
         public HCommand(Action<object> method)
         {
@@ -20,6 +21,11 @@ namespace DocumentManagement.Base
         public HCommand(bool openTempFile)
         {
             this.openTempFile = openTempFile;
+        }
+
+        public HCommand(HCommand uploadObjectiveCommand)
+        {
+            this.uploadObjectiveCommand = uploadObjectiveCommand;
         }
 
         public event EventHandler CanExecuteChanged;

@@ -79,12 +79,15 @@ namespace DocumentManagement
         ProjectViewModel projects = new ProjectViewModel();
         UserViewModel users = new UserViewModel();
         ObjectiveViewModel objectives = new ObjectiveViewModel();
+        ItemViewModel items = new ItemViewModel();
+        
 
         public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
 
         public ObjectiveViewModel Objectives { get => objectives; set { objectives = value; OnPropertyChanged(); } }
 
         public UserViewModel Users { get => users; set { users = value; OnPropertyChanged(); } }
+        public ItemViewModel Items { get => items; set { items = value; OnPropertyChanged(); } }
         #endregion
 
         public MainViewModel(Dispatcher dispatcher)
