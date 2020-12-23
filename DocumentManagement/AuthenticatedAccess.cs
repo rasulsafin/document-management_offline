@@ -16,11 +16,11 @@ namespace MRS.DocumentManagement
             this.context = context;
             this.userContext = userContext;
 
-            ProjectService = new ProjectService(context);
-            ObjectiveService = new ObjectiveService(context);
-            ItemService = new ItemService(context);
-            ConnectionService = new ConnectionService(context/*, userContext*/);
-            ObjectiveTypeService = new ObjectiveTypeService(context);
+            //ProjectService = new ProjectService(context);
+            //ObjectiveService = new ObjectiveService(context);
+            //ItemService = new ItemService(context);
+            //ConnectionService = new ConnectionService(context/*, userContext*/);
+            //ObjectiveTypeService = new ObjectiveTypeService(context);
         }
 
         public IUserService UserService => userContext.UserService;

@@ -49,8 +49,8 @@ namespace MRS.DocumentManagement.Tests
                 && x.Title == y.Title
                 && x.Description == y.Description
                 && x.Status == y.Status
-                && x.TaskType.ID == y.TaskType.ID
-                && x.TaskType.Name == y.TaskType.Name;
+                && x.ObjectiveType.ID == y.ObjectiveType.ID
+                && x.ObjectiveType.Name == y.ObjectiveType.Name;
         }
     }
 }

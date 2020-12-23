@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Api.Validators
         internal static IActionResult ValidateCollection<T>(IEnumerable<T> collection)
         {
             if (collection.Count() == 0)
-                return new NotFoundResult();
+                return new OkObjectResult(new List<T>());
 
             return new OkObjectResult(collection);            
         }

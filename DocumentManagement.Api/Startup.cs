@@ -1,3 +1,5 @@
+using AutoMapper;
+using DocumentManagement.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -29,7 +31,7 @@ namespace MRS.DocumentManagement.Api
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<DocumentManagement.Database.DMContext>(options => options.UseNpgsql(connection));
+            services.AddDbContext<Database.DMContext>(options => options.UseNpgsql(connection));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -45,6 +47,14 @@ namespace MRS.DocumentManagement.Api
                         ValidateIssuerSigningKey = true
                     };
                 });
+
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            IMapper mapper = mapperConfig.CreateMapper();
+            services.AddSingleton(mapper);
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {

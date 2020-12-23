@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Services;
-using System.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -24,6 +23,7 @@ namespace MRS.DocumentManagement.Services
             var item = new Database.Models.Item() 
             {
                 Name = data.Name,
+                ExternalItemId = data.ExternalItemId,
                 ItemType = (int)data.ItemType
             };
             context.Items.Add(item);
@@ -38,6 +38,7 @@ namespace MRS.DocumentManagement.Services
             var item = new Database.Models.Item()
             {
                 Name = data.Name,
+                ExternalItemId = data.ExternalItemId,
                 ItemType = (int)data.ItemType
             };
             context.Items.Add(item);
