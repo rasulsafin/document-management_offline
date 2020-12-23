@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 
 namespace DocumentManagement.Converters
 {
-    public partial class ItemTypeConverter : IValueConverter
+    public class BoolToVisuble : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is string str && string.IsNullOrWhiteSpace(str))
+            if (value is bool bvalue)
             {
-                return "directory";
+                if (bvalue)
+                    return Visibility.Visible;
             }
-            return value;
+            return Visibility.Collapsed;
+
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
@@ -20,6 +23,4 @@ namespace DocumentManagement.Converters
             throw new NotImplementedException();
         }
     }
-
-
 }

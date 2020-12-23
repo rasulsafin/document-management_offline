@@ -1,6 +1,7 @@
 ﻿using DocumentManagement.Base;
 using DocumentManagement.Connection.YandexDisk;
 using DocumentManagement.Dialogs;
+using DocumentManagement.Models;
 using Microsoft.Win32;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -20,16 +21,16 @@ namespace DocumentManagement.Contols
         private static readonly string PROJECT_FILE = "projects.json";
         private static readonly string TEMP_DIR = "Temp.Yandex";
         YandexDisk yandex;
-        ProjectDto selectedProject;
-        private ObjectiveDto selectedObjective;
-        private ObjectiveDto editObjective = new ObjectiveDto();
+        ProjectModel selectedProject;
+        private ObjectiveModel selectedObjective;
+        private ObjectiveModel editObjective = new ObjectiveModel();
         bool isLocalDB = true;
 
-        public ObservableCollection<ObjectiveDto> Objectives { get; set; } = new ObservableCollection<ObjectiveDto>();
-        public ObservableCollection<ProjectDto> Projects { get; set; } = new ObservableCollection<ProjectDto>();
-        public ProjectDto SelectedProject { get => selectedProject; set { selectedProject = value; OnPropertyChanged(); } }
-        public ObjectiveDto SelectedObjective { get => selectedObjective; set { selectedObjective = value; OnPropertyChanged(); } }
-        public ObjectiveDto EditObjective { get => editObjective; set { editObjective = value; OnPropertyChanged(); } }
+        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = new ObservableCollection<ObjectiveModel>();
+        public ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
+        public ProjectModel SelectedProject { get => selectedProject; set { selectedProject = value; OnPropertyChanged(); } }
+        public ObjectiveModel SelectedObjective { get => selectedObjective; set { selectedObjective = value; OnPropertyChanged(); } }
+        public ObjectiveModel EditObjective { get => editObjective; set { editObjective = value; OnPropertyChanged(); } }
         public bool IsLocalDB { get => isLocalDB; set { isLocalDB = value; OnPropertyChanged(); } }
 
         public HCommand<bool> LocalDBCommand { get; }
@@ -69,7 +70,8 @@ namespace DocumentManagement.Contols
             ChechYandex();
             if (WinBox.ShowQuestion("Загрузить Objective на диск?"))
             {
-                await yandex.UnloadObjectivesAsync(Objectives.ToArray(), SelectedProject);
+                var objs = Objectives.Select(x => x.dto).ToArray();
+                await yandex.UnloadObjectivesAsync(objs, SelectedProject.dto);
             }
         }
 
@@ -78,7 +80,7 @@ namespace DocumentManagement.Contols
             ChechYandex();
             if (WinBox.ShowQuestion("Скачивать Objective с диска?"))
             {
-                ObjectiveDto[] collect = await yandex.DownloadObjectivesAsync(SelectedProject);
+                ObjectiveDto[] collect = await yandex.DownloadObjectivesAsync(SelectedProject.dto);
                 if (collect == null)
                     WinBox.ShowMessage("Скачивание завершилось провалом!");
                 else
@@ -86,7 +88,7 @@ namespace DocumentManagement.Contols
                     Objectives.Clear();
                     foreach (ObjectiveDto item in collect)
                     {
-                        Objectives.Add(item);
+                        Objectives.Add(new ObjectiveModel(item));
                     }
                 }
             }
@@ -165,31 +167,31 @@ namespace DocumentManagement.Contols
                 Objectives.Clear();
                 foreach (ObjectiveDto item in collection)
                 {
-                    Objectives.Add(item);
+                    Objectives.Add(new ObjectiveModel(item));
                 }
             }
         }
 
         private void AddObjectiveOffline(object obj)
         {
-            ObjectiveDto objDto = new ObjectiveDto();
+            ObjectiveModel model = new ObjectiveModel();
             if (Objectives.Count != 0)
             {
-                var max = Objectives.Max(x => (int)x.ID);
-                objDto.ID = (ID<ObjectiveDto>)((int)max + 1);
+                var max = Objectives.Max(x => x.ID);
+                model.ID =max + 1;
             }
             else
-                objDto.ID = (ID<ObjectiveDto>)1;
+                model.ID = 1;
 
-            objDto.ProjectID = SelectedProject.ID;
-            objDto.CreationDate = DateTime.Now;
-            objDto.DueDate = DateTime.Now;
-            objDto.Title = EditObjective.Title;
-            objDto.Description = EditObjective.Description;
-            objDto.Status = ObjectiveStatus.Undefined;
+            model.ProjectID = SelectedProject.ID;
+            model.CreationDate = DateTime.Now;
+            model.DueDate = DateTime.Now;
+            model.Title = EditObjective.Title;
+            model.Description = EditObjective.Description;
+            model.Status = ObjectiveStatus.Undefined;
             //obj.TaskType = new ObjectiveTypeDto();
 
-            Objectives.Add(objDto);
+            Objectives.Add(model);
             SaveObjectiveOffline(null);
         }
 
@@ -212,7 +214,7 @@ namespace DocumentManagement.Contols
             Projects.Clear();
             foreach (ProjectDto item in collection)
             {
-                Projects.Add(item);
+                Projects.Add(new ProjectModel(item));
             }
             SelectedProject = Projects.First();
         }

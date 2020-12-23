@@ -7,8 +7,13 @@ using System.Xml.Serialization;
 
 namespace DocumentManagement.Models
 {
+
+
     public class ProjectModel : BaseViewModel
     {
+
+        public static explicit operator ProjectModel(ProjectDto ident) => new ProjectModel(ident);
+
         [XmlIgnore]
         public ProjectDto dto;
 
@@ -22,10 +27,10 @@ namespace DocumentManagement.Models
             this.dto = new ProjectDto();
         }
 
-        public string Title 
+        public string Title
         {
             get => dto.Title;
-            set 
+            set
             {
                 dto.Title = value;
                 OnPropertyChanged();

@@ -4,15 +4,61 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:DocumentManagement.Contols"
+             xmlns:convert="clr-namespace:DocumentManagement.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <convert:BoolToVisuble x:Key="boolToVisuble" />
+    </UserControl.Resources>
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
+        <StackPanel x:Name="r2d2" Grid.Column="2">
+            <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Width="{Binding ElementName=r2d2, Path=ActualWidth}">
 
+                <StackPanel Orientation="Horizontal" >
+                    <TextBlock Text="Проект" Width="100" />
+                    <ComboBox ItemsSource="{Binding Projects}" 
+                              SelectedValue="{Binding SelectedProject, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="200" HorizontalAlignment="Left">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding ID}"/>
+                                    <TextBlock Text="-"/>
+                                    <TextBlock Text="{Binding Title}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>                    
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" >
+                    <CheckBox IsChecked="{Binding ToObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Name="ToObject" VerticalAlignment="Center"/>
+                    <TextBlock Text="Задание" Width="100" IsEnabled="{Binding ElementName=ToObject, Path=IsChecked}" 
+                               Visibility="{Binding ElementName=ToObject, Path=IsChecked}" />
+                    <ComboBox ItemsSource="{Binding Objectives}" IsEnabled="{Binding ElementName=ToObject, Path=IsChecked}"
+                              SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                              Width="200" HorizontalAlignment="Left">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding ID}"/>
+                                    <TextBlock Text="-"/>
+                                    <TextBlock Text="{Binding Title}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+            </StackPanel>
+        </StackPanel>
 
         <ListBox Grid.Column="0" ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                  SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
@@ -28,7 +74,7 @@
                             <StackPanel Orientation="Horizontal">
                                 <TextBlock Text="{Binding ExternalItemId}"/>
                                 <TextBlock Text="  "/>
-                                <TextBlock Text="{Binding ItemType}}"/>
+                                <TextBlock Text="{Binding ItemType}"/>
                             </StackPanel>
                         </StackPanel>
                     </Border>
