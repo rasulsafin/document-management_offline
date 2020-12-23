@@ -15,13 +15,6 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         public ObjectivesController(IObjectiveService objectiveService) => service = objectiveService;
 
-        [HttpGet]
-        public async Task<IActionResult> GetAllObjectives()
-        {
-            var objectives = await service.GetAllObjectives();
-            return ValidateCollection(objectives);
-        }
-
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ObjectiveToCreateDto data)
         {
