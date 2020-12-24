@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 
-namespace DocumentManagement.Contols
+namespace MRS.DocumentManagement.Contols
 {
     internal class OpenHelper
     {

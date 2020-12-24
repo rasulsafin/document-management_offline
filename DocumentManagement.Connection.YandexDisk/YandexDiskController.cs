@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     /// <summary>Нижний уровень взаимодействия с сервисом YandexDisk</summary>
     public class YandexDiskController

@@ -6,7 +6,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Web;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public static class YandexHelper
     {

@@ -1,10 +1,9 @@
-﻿using DocumentManagement.Base;
-using DocumentManagement.Connection.YandexDisk;
-using DocumentManagement.Dialogs;
-using DocumentManagement.Models;
-using Microsoft.Win32;
-using MRS.DocumentManagement;
+﻿using Microsoft.Win32;
+using MRS.DocumentManagement.Base;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Dialogs;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -12,7 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 
-namespace DocumentManagement.Contols
+namespace MRS.DocumentManagement.Contols
 {
     public class ObjectiveViewModel : BaseViewModel
     {
@@ -20,7 +19,7 @@ namespace DocumentManagement.Contols
         private static readonly string OBJECTIVE_FILE = "objective.json";
         private static readonly string PROJECT_FILE = "projects.json";
         private static readonly string TEMP_DIR = "Temp.Yandex";
-        YandexDisk yandex;
+        YandexDiskManager yandex;
         ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;
         private ObjectiveModel editObjective = new ObjectiveModel();
@@ -228,7 +227,7 @@ namespace DocumentManagement.Contols
         {
             if (yandex == null)
             {
-                yandex = new YandexDisk(MainViewModel.AccessToken);
+                yandex = new YandexDiskManager(MainViewModel.AccessToken);
                 yandex.TempDir = TEMP_DIR;
             }
         }

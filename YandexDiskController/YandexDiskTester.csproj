@@ -4,7 +4,7 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <RootNamespace>DocumentManagement</RootNamespace>
+    <RootNamespace>MRS.DocumentManagement</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

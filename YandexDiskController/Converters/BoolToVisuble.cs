@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace DocumentManagement.Converters
+namespace MRS.DocumentManagement.Converters
 {
     public class BoolToVisuble : IValueConverter
     {

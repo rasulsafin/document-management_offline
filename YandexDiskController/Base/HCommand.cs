@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace DocumentManagement.Base
+namespace MRS.DocumentManagement.Base
 {
     /// <summary>
     /// https://github.com/hty007/testTask/blob/master/GPSTask/BaseView/BaseViewModel.cs

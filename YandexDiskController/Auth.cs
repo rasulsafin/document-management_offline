@@ -1,6 +1,6 @@
-﻿using DocumentManagement.Connection.YandexDisk;
+﻿using MRS.DocumentManagement.Connection.YandexDisk;
 
-namespace DocumentManagement
+namespace MRS.DocumentManagement
 {
     internal partial class MainViewModel
     {

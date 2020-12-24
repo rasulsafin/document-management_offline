@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Xml;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class DiskElement
     {

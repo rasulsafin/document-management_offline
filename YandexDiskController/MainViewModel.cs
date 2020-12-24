@@ -1,20 +1,18 @@
-﻿using DocumentManagement.Base;
-using DocumentManagement.Connection.YandexDisk;
-using DocumentManagement.Contols;
-using DocumentManagement.Dialogs;
+﻿using MRS.DocumentManagement.Base;
+using MRS.DocumentManagement.Contols;
+using MRS.DocumentManagement.Dialogs;
 using Microsoft.Win32;
-using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Threading;
+using MRS.DocumentManagement.Connection.YandexDisk;
 
-namespace DocumentManagement
+namespace MRS.DocumentManagement
 {
     internal partial class MainViewModel : BaseViewModel
     {

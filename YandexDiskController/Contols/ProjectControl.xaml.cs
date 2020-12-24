@@ -1,4 +1,4 @@
-﻿using DocumentManagement.Dialogs;
+﻿using MRS.DocumentManagement.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DocumentManagement.Contols
+namespace MRS.DocumentManagement.Contols
 {
     /// <summary>
     /// Логика взаимодействия для ProjectControl.xaml

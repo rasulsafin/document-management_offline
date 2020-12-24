@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace DocumentManagement.Converters
+namespace MRS.DocumentManagement.Converters
 {
     public partial class ItemTypeConverter : IValueConverter
     {

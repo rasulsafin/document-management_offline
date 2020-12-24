@@ -9,9 +9,9 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDisk
+    public class YandexDiskManager
     {
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
@@ -24,7 +24,7 @@ namespace DocumentManagement.Connection.YandexDisk
         private YandexDiskController controller;
         public string TempDir { get; set; }
 
-        public YandexDisk(string accessToken)
+        public YandexDiskManager(string accessToken)
         {
             this.accessToken = accessToken;
             controller = new YandexDiskController(accessToken);

@@ -1,9 +1,8 @@
-﻿using DocumentManagement.Base;
-using MRS.DocumentManagement;
+﻿using MRS.DocumentManagement.Base;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Xml.Serialization;
 
-namespace DocumentManagement.Models
+namespace MRS.DocumentManagement.Models
 {
     public class ItemModel : BaseViewModel
     {

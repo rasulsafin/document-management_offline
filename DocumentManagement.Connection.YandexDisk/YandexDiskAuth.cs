@@ -3,7 +3,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexDiskAuth
     {

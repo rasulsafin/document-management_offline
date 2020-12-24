@@ -1,10 +1,9 @@
-﻿using DocumentManagement.Base;
-using MRS.DocumentManagement;
+﻿using MRS.DocumentManagement.Base;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 
-namespace DocumentManagement.Models
+namespace MRS.DocumentManagement.Models
 {
     public class ObjectiveModel : BaseViewModel
     {

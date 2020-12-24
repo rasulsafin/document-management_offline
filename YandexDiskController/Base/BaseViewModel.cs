@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace DocumentManagement.Base
+namespace MRS.DocumentManagement.Base
 {
     /// <summary>
     /// https://github.com/hty007/testTask/blob/master/GPSTask/BaseView/BaseViewModel.cs

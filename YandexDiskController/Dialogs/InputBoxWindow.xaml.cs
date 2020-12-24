@@ -1,4 +1,4 @@
-﻿using DocumentManagement.Base;
+﻿using MRS.DocumentManagement.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
 
-namespace DocumentManagement.Dialogs
+namespace MRS.DocumentManagement.Dialogs
 {
     public static class WinBox
     {

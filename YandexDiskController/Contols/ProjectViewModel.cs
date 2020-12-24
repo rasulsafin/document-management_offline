@@ -1,8 +1,8 @@
-﻿using DocumentManagement.Base;
-using DocumentManagement.Connection.YandexDisk;
-using DocumentManagement.Dialogs;
-using DocumentManagement.Models;
+﻿using MRS.DocumentManagement.Base;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Dialogs;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Models;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -10,9 +10,8 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Xml.Serialization;
 
-namespace DocumentManagement.Contols
+namespace MRS.DocumentManagement.Contols
 {
 
     public class ProjectViewModel : BaseViewModel
@@ -20,7 +19,7 @@ namespace DocumentManagement.Contols
         private static readonly string DIR_NAME = "data";
         private static readonly string FILE_NAME = "projects.xml";
         private static readonly string TEMP_DIR = "Temp.Yandex";
-        YandexDisk yandex;
+        YandexDiskManager yandex;
         ProjectModel selectProject;
         bool openTempFile = false;
         public ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
@@ -208,7 +207,7 @@ namespace DocumentManagement.Contols
         {
             if (yandex == null)
             {
-                yandex = new YandexDisk(MainViewModel.AccessToken);
+                yandex = new YandexDiskManager(MainViewModel.AccessToken);
                 yandex.TempDir = TEMP_DIR;
             }
         }
