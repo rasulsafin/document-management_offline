@@ -71,7 +71,6 @@
                         <WrapPanel Orientation="Horizontal">
                             <Button Command="{Binding SaveFileCommand}">Записать в файл</Button>
                             <Button Command="{Binding LoadFileCommand}">Прочитать из файла</Button>
-                            <!--<Button Command="{Binding RenItemsCommand}">Переименовать</Button>-->
                         </WrapPanel>
 
                     </StackPanel>
@@ -80,7 +79,7 @@
                 <Expander Header="On line" IsExpanded="false">
                     <StackPanel>
                         <WrapPanel Orientation="Horizontal">
-                            <Button Command="{Binding UnloadCommand}">Загрузить на сервер</Button>
+                            <Button Command="{Binding UnloadCommand}">Загрузить файл на сервер</Button>
                             <Button Command="{Binding DownloadCommand}">Скачать с сервера</Button>
                         </WrapPanel>
 

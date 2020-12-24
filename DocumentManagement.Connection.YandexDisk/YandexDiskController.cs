@@ -63,6 +63,7 @@ namespace DocumentManagement.Connection.YandexDisk
                 throw;
             }
         }
+
         #endregion
 
         #region Create Directory
@@ -107,7 +108,133 @@ namespace DocumentManagement.Connection.YandexDisk
         }
         #endregion
 
+        #region Content
+
+        public async Task<bool> SetContetnAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
+        {
+            try
+            {
+                #region загрузка 
+                HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, path);
+
+                using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+                {
+                    //logger.Message($"reader.Length={reader.Length};");
+                    request.ContentLength = reader.Length;
+                    using (var writer = request.GetRequestStream())
+                    {
+                        const int BUFFER_LENGTH = 4096;
+                        var total = (ulong)reader.Length;
+                        ulong current = 0;
+                        var buffer = new byte[BUFFER_LENGTH];
+                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        while (count > 0)
+                        {
+                            writer.Write(buffer, 0, count);
+                            current += (ulong)count;
+                            progressChenge?.Invoke(current, total);
+                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        }
+                    }
+                }
+
+                #endregion
+
+                #region прием                
+                using (WebResponse response = await request.GetResponseAsync())
+                {
+                    if (response is HttpWebResponse httpResponse)
+                    {
+                        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
+                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
+                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
+                    }
+                }
+                #endregion
+            }
+            catch (WebException web)
+            {
+                logger.Message($"Exception Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                logger.Open();
+                throw;
+            }
+            return false;
+        }
+        public async Task<string> GetContetnAsync(string path, Action<ulong, ulong> updateProgress = null)
+        {
+            try
+            {
+                HttpWebRequest request = YandexHelper.RequestDownloadFile(accessToken, path);
+                using (WebResponse response = await request.GetResponseAsync())
+                {
+                    var length = response.ContentLength;
+                    logger.Message($"length={length}");
+                    List<string> result = new List<string>();
+                    using (var reader = response.GetResponseStream())
+                    {
+                        const int BUFFER_LENGTH = 4096;
+                        var total = (ulong)response.ContentLength;
+                        ulong current = 0;
+                        var buffer = new byte[BUFFER_LENGTH];
+                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        while (count > 0)
+                        {
+                            result.Add(Encoding.UTF8.GetString(buffer));
+                            current += (ulong)count;
+                            updateProgress?.Invoke(current, total);
+                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        }
+                    }
+
+                    return string.Concat(result);
+                }
+            }
+            catch (DirectoryNotFoundException)
+            {
+                logger.Message($"Директория не создана, не могу записать файл");
+                throw;
+            }
+            catch (WebException web)
+            {
+                logger.Message($"Status={web.Status}");
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    throw new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else
+                {
+                    logger.Error(web);
+                    logger.Open();
+                    throw;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                logger.Open();
+                throw;
+                //return null;
+            }
+        }
+
+
+        #endregion
         #region Download File
+
         /// <summary>
         /// Скачивание файла (GET)
         /// </summary>
@@ -239,6 +366,7 @@ namespace DocumentManagement.Connection.YandexDisk
                 //logger.Message($"diskName={diskName}; ");
 
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
+                //request.Headers["MyHeader"] = "Renat";
 
                 using (var reader = fileInfo.OpenRead())
                 {

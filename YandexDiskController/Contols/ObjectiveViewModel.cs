@@ -71,7 +71,7 @@ namespace DocumentManagement.Contols
             if (WinBox.ShowQuestion("Загрузить Objective на диск?"))
             {
                 var objs = Objectives.Select(x => x.dto).ToArray();
-                await yandex.UnloadObjectivesAsync(objs, SelectedProject.dto);
+                await yandex.SetObjectivesAsync(objs, SelectedProject.dto);
             }
         }
 
@@ -80,7 +80,7 @@ namespace DocumentManagement.Contols
             ChechYandex();
             if (WinBox.ShowQuestion("Скачивать Objective с диска?"))
             {
-                ObjectiveDto[] collect = await yandex.DownloadObjectivesAsync(SelectedProject.dto);
+                ObjectiveDto[] collect = await yandex.GetObjectivesAsync(SelectedProject.dto);
                 if (collect == null)
                     WinBox.ShowMessage("Скачивание завершилось провалом!");
                 else

@@ -7,6 +7,8 @@ namespace DocumentManagement.Models
 {
     public class ItemModel : BaseViewModel
     {
+        public static explicit operator ItemModel(ItemDto ident) => new ItemModel(ident);
+
         [XmlIgnore]
         public ItemDto dto;
 

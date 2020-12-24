@@ -3,6 +3,7 @@ using DocumentManagement.Connection.YandexDisk;
 using DocumentManagement.Dialogs;
 using DocumentManagement.Models;
 using Microsoft.Win32;
+using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using System;
@@ -57,72 +58,112 @@ namespace DocumentManagement.Contols
         {
             AddItemsCommand = new HCommand(AddItems);
             DelItemsCommand = new HCommand(DelItems);
-            RenItemsCommand = new HCommand(RenItems);
             SaveFileCommand = new HCommand(SaveFile);
             LoadFileCommand = new HCommand(LoadFile);
-            UnloadCommand = new HCommand(Unload);
-            DownloadCommand = new HCommand(Download);
+            UnloadCommand = new HCommand(UnloadAsync);
+            DownloadCommand = new HCommand(DownloadAsync);
 
             Initilization();
         }
 
-        private void Download(object obj)
+        private async void DownloadAsync(object obj)
         {
-            WinBox.ShowMessage("Скачивание с сервера не разработано");
-        }
+            ChechYandex();
+            string message = ToObjective ? $"Скачать список item-ов в задание [{SelectedObjective.Title}] c сервера ?"
+                : $"Скачать список item-ов в проекте [{SelectedProject.Title}] с сервера?";
+            if (WinBox.ShowQuestion(message))
+            {
+                List<ItemDto> collect = await yandex.GetItemsAsync(SelectedProject.dto, ToObjective ? SelectedObjective.dto : null);
+                Items.Clear();
+                foreach (ItemDto item in collect)
+                {
+                    Items.Add((ItemModel)item);
+                }
+            }
+            }
 
-        private void Unload(object obj)
+        private async void UnloadAsync(object obj)
         {
-            WinBox.ShowMessage("Загрузка на сервер не разработано");
+            ChechYandex();
+            //string message = ToObjective ? $"Загрузить файл на сервер в проект [{SelectedProject.Title}] и задание [{SelectedObjective.Title}]?"
+            //    : $"Загрузить файл на сервер в проект [{SelectedProject.Title}]?";
+            //if (WinBox.ShowQuestion(message))
+            //{
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Title = "Выберете файл";
+                ofd.Multiselect = false;
+                if (ofd.ShowDialog() == true)
+                {                   
+                    FileInfo file = new FileInfo(ofd.FileName);
+                    ItemDto item = new ItemDto();
+                    item.Name = ofd.SafeFileName;
+                    item.ID = (ID<ItemDto>)(Items.Count + 1);
+                    item.ItemType = GetItemTypeDto(file.Extension);
+
+                    if (!ToObjective)
+                        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto);
+                    else
+                        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto, SelectedObjective.dto);
+                }
+            //}
         }
 
         private void LoadFile(object obj)
         {
-            if (SelectedProject == null) return;
-            string fileName = "";
-            string projDir = Path.Combine(DIR_NAME, SelectedProject.Title);
-            if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
-            if (ToObjective)
+            if (WinBox.ShowQuestion($"Загрузить список из файла?"))
             {
-                if (SelectedObjective == null) return;
-                string objectDir = Path.Combine(projDir, SelectedObjective.Title);
-                if (!Directory.Exists(objectDir)) Directory.CreateDirectory(objectDir);
-                fileName = Path.Combine(objectDir, ITEM_FILE);
+                if (SelectedProject == null) return;
+
+                string fileName = GetItemFileName(
+                    item: ITEM_FILE,
+                    root: DIR_NAME,
+                    progect: SelectedProject.Title,
+                    objective: ToObjective ? SelectedObjective.Title : null);
+
+                string json = File.ReadAllText(fileName);
+                var collect = JsonConvert.DeserializeObject<List<ItemModel>>(json);
+                Items.Clear();
+                foreach (var item in collect)
+                {
+                    Items.Add(item);
+                }
+
+            }
+        }
+        private string GetItemFileName(string item, string root, string progect, string objective = null)
+        {
+            string fileName;
+            string projDir = Path.Combine(root, progect);
+            if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
+            if (objective != null)
+            {
+                fileName = Path.Combine(projDir, $"{objective}_{item}");
             }
             else
             {
-                fileName = Path.Combine(projDir, ITEM_FILE);
+                fileName = Path.Combine(projDir, item);
             }
+
+            return fileName;
         }
 
         private void SaveFile(object obj)
         {
             if (WinBox.ShowQuestion($"Сохранить список?"))
             {
-                string fileName = "";
-                string projDir = Path.Combine(DIR_NAME, SelectedProject.Title);
-                if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
-                if (ToObjective)
-                {
-                    string objectDir = Path.Combine(projDir, SelectedObjective.Title);
-                    if (!Directory.Exists(objectDir)) Directory.CreateDirectory(objectDir);
-                    fileName = Path.Combine(objectDir, ITEM_FILE);
-                }
-                else
-                {
-                    fileName = Path.Combine(projDir, ITEM_FILE);
-                }
+                string fileName = GetItemFileName(
+                    item: ITEM_FILE,
+                    root: DIR_NAME,
+                    progect: SelectedProject.Title,
+                    objective: ToObjective ? SelectedObjective.Title : null);
 
                 string json = JsonConvert.SerializeObject(Items, Formatting.Indented);
                 File.WriteAllText(fileName, json);
             }
+
         }
 
-        private void RenItems(object obj)
-        {
-            
-            WinBox.ShowMessage("Переименовка не разработана");
-        }
+
 
         private void DelItems(object obj)
         {
@@ -145,7 +186,7 @@ namespace DocumentManagement.Contols
             if (ofd.ShowDialog() == true)
             {
                 ItemModel model = new ItemModel();
-                model.ID = Items.Count == 0 ? 1 : Items.Max(x => x.ID)+1;
+                model.ID = Items.Count == 0 ? 1 : Items.Max(x => x.ID) + 1;
                 FileInfo file = new FileInfo(ofd.FileName);
 
                 model.Name = file.Name;
@@ -154,27 +195,27 @@ namespace DocumentManagement.Contols
                     model.ExternalItemId = $"/{DIR_NAME}/{SelectedProject.Title}/{SelectedObjective.Title}/{model.Name}";
                 else
                     model.ExternalItemId = $"/{DIR_NAME}/{SelectedProject.Title}/{model.Name}";
-
-                if (MEDIA_EXTENTION.Contains(file.Extension))
-                {
-                    model.ItemType = ItemTypeDto.Media;
-                }
-                else if (file.Extension.Contains(MEDIA_EXTENTION))
-                {
-                    model.ItemType = ItemTypeDto.Media;
-                }
-                else if (MODELS_EXTENTION.Contains(file.Extension))
-                {
-                    model.ItemType = ItemTypeDto.Bim;
-                }
-                else
-                    model.ItemType = ItemTypeDto.File;
+                model.ItemType = GetItemTypeDto(file.Extension);
 
                 Items.Add(model);
                 // Копирование файла и запись данных
 
             }
 
+        }
+
+        private static ItemTypeDto GetItemTypeDto(string extension)
+        {
+            if (MEDIA_EXTENTION.Contains(extension))
+            {
+                return ItemTypeDto.Media;
+            }
+            else if (MODELS_EXTENTION.Contains(extension))
+            {
+                return ItemTypeDto.Bim;
+            }
+            else
+                return ItemTypeDto.File;
         }
 
         #region Инициализация 
@@ -202,6 +243,8 @@ namespace DocumentManagement.Contols
             {
                 UpdateObjecteve();
             });
+
+           
         }
 
         private void UpdateObjecteve()
@@ -224,7 +267,16 @@ namespace DocumentManagement.Contols
                     SelectedObjective = Objectives.First();
                 }
             }
-        } 
+        }
+
+        private void ChechYandex()
+        {
+            if (yandex == null)
+            {
+                yandex = new YandexDisk(MainViewModel.AccessToken);
+                yandex.TempDir = TEMP_DIR;
+            }
+        }
         #endregion
 
     }
