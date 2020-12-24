@@ -78,8 +78,7 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
-            //services.AddAutoMapper(typeof(TaskRepository).Assembly);scoped
-
+            services.AddScoped<ItemHelper>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();

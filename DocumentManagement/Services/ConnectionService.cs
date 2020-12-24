@@ -7,27 +7,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ConnectionService : IConnectionService
     {
         private readonly DMContext context;
+        private readonly IMapper mapper;
 
-        public ConnectionService(DMContext context)
+        public ConnectionService(DMContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
-        private static RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info)
-        {
-            return new RemoteConnectionInfoDto()
-            {
-                ID = (ID<RemoteConnectionInfoDto>)info.ID,
-                ServiceName = info.Name,
-                AuthFieldNames = DecodeAuthFieldNames(info.AuthFieldNames)
-            };
-        }
+        private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 
+            => mapper.Map<RemoteConnectionInfoDto>(info);
 
         private static string EncodeAuthFieldNames(IEnumerable<string> names)
         {
@@ -35,18 +31,10 @@ namespace MRS.DocumentManagement.Services
             return System.Text.Json.JsonSerializer.Serialize(lnames);
         }
 
-        private static List<string> DecodeAuthFieldNames(string encoded)
-        {
-            var names = new List<string>();
-            if (!string.IsNullOrEmpty(encoded))
-                names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
-            return names;
-        }
-
         public async Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections()
         {
             var connDb = await context.ConnectionInfos.ToListAsync();
-            return connDb.Select(x => MapConnectionFromDb(x)).ToList();
+            return connDb.Select(MapConnectionFromDb).ToList();
         }
 
         public async Task<RemoteConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId)
@@ -55,9 +43,7 @@ namespace MRS.DocumentManagement.Services
                 .Where(x => x.ID == (int)userId)
                 .Select(x => x.ConnectionInfo)
                 .FirstOrDefaultAsync();
-            if (connection == null)
-                return null;
-            return MapConnectionFromDb(connection);
+            return connection != null ? MapConnectionFromDb(connection) : null;
         }
 
         public Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey)
