@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Services
             context.Objectives.Add(objective);
             await context.SaveChangesAsync();
 
-            objective.BimElements = new List<Database.Models.BimElementObjective>();
+            objective.BimElements = new List<BimElementObjective>();
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
             {
                 var dbBim = await context.BimElements
@@ -37,30 +37,30 @@ namespace MRS.DocumentManagement.Services
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
                 {
-                    dbBim = new Database.Models.BimElement()
+                    dbBim = new BimElement()
                     {
                         ItemID = (int)bim.ItemID,
                         GlobalID = bim.GlobalID
                     };
                     context.BimElements.Add(dbBim);
                 }
-                objective.BimElements.Add(new Database.Models.BimElementObjective() 
+                objective.BimElements.Add(new BimElementObjective() 
                 {
                     ObjectiveID = objective.ID,
                     BimElementID = dbBim.ID
                 });
             }
 
-            objective.Items = new List<Database.Models.ObjectiveItem>();
+            objective.Items = new List<ObjectiveItem>();
             foreach (var item in data.Items)
             {
                 await LinkItem(item, objective);
             }
 
-            objective.DynamicFields = new List<Database.Models.DynamicField>();
+            objective.DynamicFields = new List<DynamicField>();
             foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldToCreateDto>())
             {
-                context.DynamicFields.Add(new Database.Models.DynamicField()
+                context.DynamicFields.Add(new DynamicField()
                 {
                     Key = field.Key,
                     ObjectiveID = objective.ID,
@@ -89,24 +89,18 @@ namespace MRS.DocumentManagement.Services
             return mapper.Map<ObjectiveDto>(dbObjective);
         }
 
-        public async Task<IEnumerable<ObjectiveToListDto>> GetAllObjectives()
-        {
-            var dbObjectives = await context.Objectives
-                .Include(x=> x.ObjectiveType)
-                .ToListAsync();
-            return dbObjectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
-        }
-
-        public async Task<IEnumerable<ObjectiveDto>> GetObjectives(ID<ProjectDto> projectID)
+        public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
         {
             var dbProject = await context.Projects
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.DynamicFields)
                 .Include(x => x.Objectives)
+                .ThenInclude(x=>x.ObjectiveType)
+                .Include(x => x.Objectives)
                 .ThenInclude(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
-            return dbProject.Objectives.Select(x => mapper.Map<ObjectiveDto>(x)).ToList();
+            return dbProject.Objectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
         }
 
         public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ObjectiveTypeDto type)
@@ -161,7 +155,7 @@ namespace MRS.DocumentManagement.Services
                 var dbField = await context.DynamicFields.FindAsync((int)field.ID);
                 if (dbField == null)
                 {
-                    await context.DynamicFields.AddAsync(new Database.Models.DynamicField()
+                    await context.DynamicFields.AddAsync(new DynamicField()
                     {
                         Key = field.Key,
                         Type = field.Type,
@@ -208,18 +202,18 @@ namespace MRS.DocumentManagement.Services
                     if (bimElement == null)
                     {
                         //bim element does not exist at all - should be created
-                        bimElement = new Database.Models.BimElement() { ItemID = (int)bim.ItemID, GlobalID = bim.GlobalID };
+                        bimElement = new BimElement() { ItemID = (int)bim.ItemID, GlobalID = bim.GlobalID };
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
                     //add link between bim element and objective
-                    dbBim = new Database.Models.BimElementObjective() { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
+                    dbBim = new BimElementObjective() { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
             }
 
-            objective.Items = new List<Database.Models.ObjectiveItem>();
-            var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID);
+            objective.Items = new List<ObjectiveItem>();
+            var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
             var itemsToUnlink = objectiveItems.Where(o => objData.Items.Any(i => (int)i.ID == o.ItemID));
 
             foreach (var item in objData.Items)
