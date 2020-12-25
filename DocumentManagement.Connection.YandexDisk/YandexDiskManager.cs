@@ -3,6 +3,7 @@
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -15,9 +16,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     {
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
-        private static readonly string PROGECTS_FILE = "Projects.json";
-        private static readonly string ITEMS_FILE = "Items.json";
-        private static readonly string OBJECTIVE_FILE = "Objective.json";
+        private static readonly string PROGECTS_FILE = "Projects_{0}.json";
+        private static readonly string ITEMS_FILE = "Items_{0}.json";
+        private static readonly string OBJECTIVE_FILE = "Objective_{0}.json";
         private static readonly string APP_DIR = "BRIO MRS";
 
         private string accessToken;
@@ -96,13 +97,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
 
 
-        public async Task SetObjectivesAsync(ObjectiveDto[] objectiveDtos, ProjectDto project)
+        public async Task SetObjectivesAsync(ObjectiveDto[] objectiveDtos, ProjectDto project, Action<ulong, ulong> progressChenge = null)
         {
             string app = GetDirApp();
             string projDir = await CheckDirProject(project, app);
 
             var json = JsonConvert.SerializeObject(objectiveDtos);
-            await controller.SetContetnAsync(YandexHelper.FileName(projDir, OBJECTIVE_FILE), json);
+            await controller.SetContetnAsync(YandexHelper.FileName(projDir, OBJECTIVE_FILE), json, progressChenge);
 
             //if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
             //string fileName = Path.Combine(TempDir, OBJECTIVE_FILE);
@@ -125,7 +126,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return projDir;
         }
 
-        public async Task<ObjectiveDto[]> GetObjectivesAsync(ProjectDto project)
+        public async Task<ObjectiveDto[]> GetObjectivesAsync(ProjectDto project, Action<ulong, ulong> updateProgress = null)
         {
             string app = GetDirApp();            
             string projDir = await CheckDirProject(project, app);  
@@ -137,7 +138,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 return null;
             }
 
-            var json = await controller.GetContetnAsync(objFile);            
+            var json = await controller.GetContetnAsync(objFile, updateProgress);            
             List<ObjectiveDto> collect = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
             return collect.ToArray();
 
@@ -154,12 +155,22 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             //return null;
         }
 
+
         private static string GetDirApp()
         {
             return $"/{APP_DIR}/";
         }
 
         #region Projects
+        /// <summary>
+        /// Загрузить проект на диск
+        /// </summary>
+        /// <param name="dto">проект</param>
+        /// <returns></returns>
+        public Task UnloadProject(ProjectDto dto)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Загрузка проектов 

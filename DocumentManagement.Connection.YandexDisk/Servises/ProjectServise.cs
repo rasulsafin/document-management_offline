@@ -1,15 +1,20 @@
-﻿using MRS.DocumentManagement;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class ProjectServise : IProjectService
     {
+        YandexDiskManager yandex;
+
+        public ProjectServise(YandexDiskManager yandex)
+        {
+            this.yandex = yandex;
+        }
+
         public Task<ID<ProjectDto>> Add(string title)
         {
             throw new NotImplementedException();

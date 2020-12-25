@@ -14,8 +14,11 @@ using WPFStorage.Base;
 
 namespace MRS.DocumentManagement
 {
+    
+
     internal partial class MainViewModel : BaseViewModel
     {
+        public static string TEMP_DIR = "Temp";
         public static CoolLogger logger = new CoolLogger("logApp");
 
         #region Binding
@@ -77,7 +80,7 @@ namespace MRS.DocumentManagement
         UserViewModel users = new UserViewModel();
         ObjectiveViewModel objectives = new ObjectiveViewModel();
         ItemViewModel items = new ItemViewModel();
-        
+        private int selectedTab;
 
         public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
 
@@ -85,6 +88,8 @@ namespace MRS.DocumentManagement
 
         public UserViewModel Users { get => users; set { users = value; OnPropertyChanged(); } }
         public ItemViewModel Items { get => items; set { items = value; OnPropertyChanged(); } }
+        public int SelectedTab { get => selectedTab; set { selectedTab = value; OnPropertyChanged(); } }
+
         #endregion
 
         public MainViewModel(Dispatcher dispatcher)
@@ -102,8 +107,15 @@ namespace MRS.DocumentManagement
 
             Auth.StartAuth();
             if (!Directory.Exists(PathManager.APP_DIR)) Directory.CreateDirectory(PathManager.APP_DIR);
+
+            SelectedTab = Properties.Settings.Default.SelectedTab;
         }
 
+        public void CloseApp()
+        {
+            Properties.Settings.Default.SelectedTab = SelectedTab;
+            Properties.Settings.Default.Save();
+        }
 
         private void Refresh()
         {

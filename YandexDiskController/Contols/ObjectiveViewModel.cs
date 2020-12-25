@@ -87,12 +87,12 @@ namespace MRS.DocumentManagement.Contols
             UpdateObjectiveOfflineCommand = new HCommand(UpdateObjectiveOffline);
             AddObjectivesCommand = new HCommand<int>(AddObjectives);
 
-            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
-            if (IsLocalDB)
-            {
-                LoadProjectOffline();
-                LoadObjectiveOffline();
-            }
+            //if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
+            //if (IsLocalDB)
+            //{
+            //    LoadProjectOffline();
+            //    LoadObjectiveOffline();
+            //}
         }
 
 
@@ -319,26 +319,26 @@ namespace MRS.DocumentManagement.Contols
         }
         private void LoadProjectOffline()
         {
-            var fileName = Path.Combine(DIR_NAME, PROJECT_FILE);
-            if (!File.Exists(fileName))
-            {
-                OpenFileDialog OPF = new OpenFileDialog();
-                OPF.Filter = $"PROJECT_FILE|{PROJECT_FILE}|Все файлы|*.*";
-                if (OPF.ShowDialog() == true)
-                {
-                    //WinBox.ShowMessage($"{OPF.FileName}");
-                    File.Copy(OPF.FileName, fileName);
-                }
-            }
-            var json = File.ReadAllText(fileName);
-            List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
+            //var fileName = Path.Combine(DIR_NAME, PROJECT_FILE);
+            //if (!File.Exists(fileName))
+            //{
+            //    OpenFileDialog OPF = new OpenFileDialog();
+            //    OPF.Filter = $"PROJECT_FILE|{PROJECT_FILE}|Все файлы|*.*";
+            //    if (OPF.ShowDialog() == true)
+            //    {
+            //        //WinBox.ShowMessage($"{OPF.FileName}");
+            //        File.Copy(OPF.FileName, fileName);
+            //    }
+            //}
+            //var json = File.ReadAllText(fileName);
+            //List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
 
-            Projects.Clear();
-            foreach (ProjectDto item in collection)
-            {
-                Projects.Add(new ProjectModel(item));
-            }
-            SelectedProject = Projects.First();
+            //Projects.Clear();
+            //foreach (ProjectDto item in collection)
+            //{
+            //    Projects.Add(new ProjectModel(item));
+            //}
+            //SelectedProject = Projects.First();
         }
 
         private void LocalBase(bool obj)

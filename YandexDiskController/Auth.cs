@@ -22,8 +22,7 @@ namespace MRS.DocumentManagement
                 MainViewModel.Instanse.RootDir();
             }
             
-        }
-
+        }        
 
     }
 }

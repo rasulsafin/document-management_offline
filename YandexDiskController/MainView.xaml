@@ -14,7 +14,8 @@
 
     </Window.Resources>
     <Grid Keyboard.KeyUp="Grid_KeyUp">
-        <TabControl SelectionChanged="TabControl_SelectionChanged">
+        <TabControl SelectionChanged="TabControl_SelectionChanged" 
+                    SelectedIndex="{Binding SelectedTab, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
             <TabItem Header="Файлы">
                 <Grid>
                     <Grid.RowDefinitions>

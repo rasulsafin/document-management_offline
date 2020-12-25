@@ -27,6 +27,12 @@ namespace MRS.DocumentManagement
         {
             InitializeComponent();
             DataContext = Model = new MainViewModel(this.Dispatcher);
+            Closed += MainView_Closed;
+        }
+
+        private void MainView_Closed(object sender, EventArgs e)
+        {
+            Model.CloseApp();
         }
 
         private void gridItems_SelectionChanged(object sender, SelectionChangedEventArgs e) => Model.SelectionChanged(e);
