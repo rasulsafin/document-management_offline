@@ -32,6 +32,22 @@ namespace MRS.DocumentManagement.Contols
         public HCommand OpenFileCommand { get; }
         public HCommand UpdateCommand { get; }
 
+        public static List<ProjectDto> GetProjects()
+        {
+            List<ProjectDto> projects = new List<ProjectDto>();
+            DirectoryInfo projDir = new DirectoryInfo(PathManager.GetProjectsDir());
+            foreach (var item in projDir.GetFiles())
+            {
+                if (item.Name.StartsWith("project"))
+                {
+                    string json = File.ReadAllText(item.FullName);
+                    ProjectDto dto = JsonConvert.DeserializeObject<ProjectDto>(json);
+                    projects.Add(dto);
+                }
+            }
+            return projects;
+        }
+
         public ProjectViewModel()
         {
             CreateCommand = new HCommand(CreateProject);
@@ -72,30 +88,52 @@ namespace MRS.DocumentManagement.Contols
                 project.Title = name;
                 project.ID = newId;
                 Projects.Add(project);
-
-                string fileName = PathManager.GetProjectFile(project.dto);
-
-                string json = JsonConvert.SerializeObject(project.dto, Formatting.Indented);
-                File.WriteAllText(fileName, json);
+                SaveProject(project.dto);
             }
             Update();
+        }
+
+        private static void SaveProject(ProjectDto project)
+        {
+            string fileName = PathManager.GetProjectFile(project);
+
+            string json = JsonConvert.SerializeObject(project, Formatting.Indented);
+            File.WriteAllText(fileName, json);
         }
 
         private void Update()
         {
             DirectoryInfo projDir = new DirectoryInfo(PathManager.GetProjectsDir());
-            List<string> files = new List<string>();
+            List<string> filesForDisk = projDir.GetFiles().Select(x=>x.FullName).ToList();
+            List<(string, ProjectDto)> filesForMemory = new List<(string, ProjectDto)>();
             foreach (var project in Projects)
             {
-                files.Add(PathManager.GetProjectFile(project.dto));                
+                filesForMemory.Add((PathManager.GetProjectFile(project.dto), project.dto));                 
             }
-            
-            foreach (var item in projDir.GetFiles())
+            filesForMemory.Sort((x, y)=>x.Item1.CompareTo(y.Item1));
+            filesForDisk.Sort();
+            int i = 0;
+            int j = 0;
+            while (i<filesForMemory.Count && j<filesForDisk.Count )
             {
-                if (!files.Contains(item.FullName))
+                var memory = filesForMemory[i];
+                var disk = filesForDisk[j];
+                if (memory.Item1 == disk)
                 {
-                    LoadProject(item.FullName);
+                    i++;
+                    j++;
                 }
+                else if (memory.Item1.CompareTo(disk) > 0)
+                {
+                    j++;
+                    LoadProject(disk);
+                }
+                else 
+                {
+                    i++;
+                    SaveProject(memory.Item2);
+                }
+
             }
         }
 

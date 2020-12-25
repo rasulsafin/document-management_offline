@@ -16,13 +16,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     {
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
-        private static readonly string PROGECTS_FILE = "Projects_{0}.json";
-        private static readonly string ITEMS_FILE = "Items_{0}.json";
-        private static readonly string OBJECTIVE_FILE = "Objective_{0}.json";
-        private static readonly string APP_DIR = "BRIO MRS";
-
         private string accessToken;
         private YandexDiskController controller;
+        private bool projectsDirCreate;
+
         public string TempDir { get; set; }
 
         public YandexDiskManager(string accessToken)
@@ -36,130 +33,144 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             IEnumerable<DiskElement> list = await controller.GetListAsync();
             if (!list.Any(
-                x => x.IsDirectory && x.DisplayName == APP_DIR
+                x => x.IsDirectory && x.DisplayName == PathManager.APP_DIR
                 ))
             {
-                await controller.CreateDirAsync("/", APP_DIR);
+                await controller.CreateDirAsync("/", PathManager.APP_DIR);
             }
         }
 
 
         public async Task<ItemDto> UnloadItemAsync(ItemDto dto, string fileName, ProjectDto project, ObjectiveDto objective = null)
         {
-            string app = GetDirApp();
-            string projDir = await CheckDirProject(project, app);
-            string hrefItems = GetItemFileName(ITEMS_FILE, projDir, objective?.Title);
-            FileInfo file = new FileInfo(fileName);
-            // TODO:  Рассовывать по папочкам здесь!!!
-            string hrefFile = GetItemFileName(file.Name, projDir);
+            throw new NotImplementedException();
+            //string app = GetDirApp();
+            //string projDir = await CheckDirProject(project, app);
+            //string hrefItems = GetItemFileName(ITEMS_FILE, projDir, objective?.Title);
+            //FileInfo file = new FileInfo(fileName);
+            //// TODO:  Рассовывать по папочкам здесь!!!
+            //string hrefFile = GetItemFileName(file.Name, projDir);
 
-            // Получаем информацию о файлах в папке проекта
-            var list = await controller.GetListAsync(projDir);            
-            List<ItemDto> items = new List<ItemDto>();
-            if (list.Any(x => x.Href == hrefItems))// Это не первый item в этой категории
-            {
-                string json = await controller.GetContetnAsync(hrefItems);
-                items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
-            }
-            // Непосредственная загрузка файла
-            await controller.LoadFileAsync(projDir, file.FullName);
+            //// Получаем информацию о файлах в папке проекта
+            //var list = await controller.GetListAsync(projDir);            
+            //List<ItemDto> items = new List<ItemDto>();
+            //if (list.Any(x => x.Href == hrefItems))// Это не первый item в этой категории
+            //{
+            //    string json = await controller.GetContetnAsync(hrefItems);
+            //    items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
+            //}
+            //// Непосредственная загрузка файла
+            //await controller.LoadFileAsync(projDir, file.FullName);
 
-            // Информация о файле
-            dto.ExternalItemId = hrefFile;
-            items.Add(dto);
-            string jsn = JsonConvert.SerializeObject(items);
-            await controller.SetContetnAsync(hrefItems, jsn);
+            //// Информация о файле
+            //dto.ExternalItemId = hrefFile;
+            //items.Add(dto);
+            //string jsn = JsonConvert.SerializeObject(items);
+            //await controller.SetContetnAsync(hrefItems, jsn);
 
-            return dto;
+            //return dto;
         }
         public async Task<List<ItemDto>> GetItemsAsync(ProjectDto project, ObjectiveDto objective = null)
         {
-            string app = GetDirApp();
-            string projDir = await CheckDirProject(project, app);
-            string hrefItems = GetItemFileName(ITEMS_FILE, projDir, objective?.Title);
-            // Получаем информацию о файлах в папке проекта
-            var list = await controller.GetListAsync(projDir);
-            List<ItemDto> items = new List<ItemDto>();
-            if (list.Any(x => x.Href == hrefItems))// Это не первый item в этой категории
-            {
-                string json = await controller.GetContetnAsync(hrefItems);
-                items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
-            }
-            return items;
+            throw new NotImplementedException();
+            //string app = GetDirApp();
+            //string projDir = await CheckDirProject(project, app);
+            //string hrefItems = GetItemFileName(ITEMS_FILE, projDir, objective?.Title);
+            //// Получаем информацию о файлах в папке проекта
+            //var list = await controller.GetListAsync(projDir);
+            //List<ItemDto> items = new List<ItemDto>();
+            //if (list.Any(x => x.Href == hrefItems))// Это не первый item в этой категории
+            //{
+            //    string json = await controller.GetContetnAsync(hrefItems);
+            //    items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
+            //}
+            //return items;
         }
 
         private string GetItemFileName(string item, string progectDir, string objective = null)
         {
-            string fileName = (objective == null)? item : $"{objective}_{item}";
+            string fileName = (objective == null) ? item : $"{objective}_{item}";
 
             return $"{progectDir}{fileName}";
 
         }
 
 
-        public async Task SetObjectivesAsync(ObjectiveDto[] objectiveDtos, ProjectDto project, Action<ulong, ulong> progressChenge = null)
+        public async Task UploadObjectiveAsync(ObjectiveDto objective, ProjectDto project, Action<ulong, ulong> progressChenge = null)
         {
-            string app = GetDirApp();
-            string projDir = await CheckDirProject(project, app);
+            await CheckDirProject(project);
+            await CheckDirObjectives(project);
 
-            var json = JsonConvert.SerializeObject(objectiveDtos);
-            await controller.SetContetnAsync(YandexHelper.FileName(projDir, OBJECTIVE_FILE), json, progressChenge);
-
-            //if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
-            //string fileName = Path.Combine(TempDir, OBJECTIVE_FILE);
-            //var json = JsonConvert.SerializeObject(objectiveDtos);
-            //File.WriteAllText(fileName, json);
-
-            //await controller.LoadFileAsync(projDir, fileName);
+            string path = PathManager.GetObjectiveFile(project, objective);
+            string json = JsonConvert.SerializeObject(objective);
+            await controller.SetContetnAsync(path, json, progressChenge);
         }
 
-
-        private async Task<string> CheckDirProject(ProjectDto project, string app)
+        private async Task<bool> CheckDirObjectives(ProjectDto project)
         {
-            var list = await controller.GetListAsync(app);
-            string projDir = $"/{APP_DIR}/{project.Title}/";
-            if (!list.Any(x => x.Href == projDir && x.IsDirectory))
+            bool result = true;
+            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetProjectDir(project));
+            string path = PathManager.GetObjectivesDir(project);
+            if (!list.Any(
+                x => x.IsDirectory && x.Href == path
+                ))
             {
-                await controller.CreateDirAsync(app, project.Title);
+                await controller.CreateDirAsync("/", path);
+                result = false;
             }
-
-            return projDir;
+            return result;
         }
 
-        public async Task<ObjectiveDto[]> GetObjectivesAsync(ProjectDto project, Action<ulong, ulong> updateProgress = null)
+        private async Task<bool> CheckDirProject(ProjectDto project)
         {
-            string app = GetDirApp();            
-            string projDir = await CheckDirProject(project, app);  
-            var list = await controller.GetListAsync(projDir);
-
-            string objFile = $"{projDir}{OBJECTIVE_FILE}";
-            if (!list.Any(x => x.Href == objFile && !x.IsDirectory))
+            bool result = true;
+            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+            string path = PathManager.GetProjectDir(project);
+            if (!list.Any(
+                x => x.IsDirectory && x.Href == path
+                ))
             {
-                return null;
+                await controller.CreateDirAsync("/", path);
+                result = false;
             }
+            return result;
+        }
 
-            var json = await controller.GetContetnAsync(objFile, updateProgress);            
-            List<ObjectiveDto> collect = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
-            return collect.ToArray();
-
-            //if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
-            //string fileName = Path.Combine(TempDir, OBJECTIVE_FILE);
-
-            //bool res = await controller.DownloadFileAsync(objFile, fileName);
-            //if (res)
-            //{
-            //    var json = File.ReadAllText(fileName);
-            //    List<ObjectiveDto> collect = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
-            //    return collect.ToArray();
-            //}
+        public async Task<ObjectiveDto> GetObjectiveAsync(ProjectDto project, ID<ObjectiveDto> id)
+        {
+            //if (await CheckDirProject(project))
+            //    if (await CheckDirObjectives(project))
+            //    {
+            //        IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetObjectivesDir(project));
+            //        string path = PathManager.GetObjectiveFile(project, id);
+            //        if (list.Any(x.Href == path))
+            //        {
+            //            string json = await controller.GetContetnAsync(path);
+            //            ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
+            //            return objective;                        
+            //        }
+            //    }
             //return null;
+            try
+            {
+                string path = PathManager.GetObjectiveFile(project, id);
+                string json = await controller.GetContetnAsync(path);
+                ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
+                return objective;
+            }
+            catch (Exception ex)
+            {
+                logger.Error(ex);
+                logger.Open();
+            }
+
         }
 
 
-        private static string GetDirApp()
-        {
-            return $"/{APP_DIR}/";
-        }
+        //private static string GetDirApp()
+        //{
+        //    return $"/{APP_DIR}/";
+        //}
 
         #region Projects
         /// <summary>
@@ -167,9 +178,61 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// </summary>
         /// <param name="dto">проект</param>
         /// <returns></returns>
-        public Task UnloadProject(ProjectDto dto)
+        public async Task UnloadProject(ProjectDto project)
         {
-            throw new NotImplementedException();
+            await CheckProjects();
+            string path = PathManager.GetProjectFile(project);
+            var json = JsonConvert.SerializeObject(project);
+            await controller.SetContetnAsync(path, json);
+        }
+
+
+        /// <summary>
+        /// Создает папку проектов
+        /// Выполнится один раз 
+        /// </summary>
+        /// <returns></returns>
+        private async Task<bool> CheckProjects()
+        {
+            bool result = true;
+            if (!projectsDirCreate)
+            {
+                IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+
+                string path = PathManager.GetProjectsDir();
+                if (!list.Any(
+                    x => x.IsDirectory && x.Href == path
+                    ))
+                {
+                    await controller.CreateDirAsync("/", path);
+                    result = false;
+                }
+                projectsDirCreate = true;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Загружает все проекты
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ProjectDto>> DownloadProjects()
+        {
+            if (!await CheckProjects())
+                return new List<ProjectDto>();
+
+            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetProjectsDir());
+            var projects = new List<ProjectDto>();
+            foreach (var item in list)
+            {
+                if (item.DisplayName.StartsWith("project_"))
+                {
+                    string json = await controller.GetContetnAsync(item.Href);
+                    ProjectDto project = JsonConvert.DeserializeObject<ProjectDto>(json);
+                    projects.Add(project);
+                }
+            }
+            return projects;
         }
 
         /// <summary>
@@ -185,15 +248,16 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 #endif
             async Task UnloadProjects(List<ProjectDto> collectionDto)
         {
-            string app = GetDirApp();
+            throw new NotImplementedException();
+            //string app = GetDirApp();
 
-            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
-            string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+            //if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
+            //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
 
-            var json = JsonConvert.SerializeObject(collectionDto);
-            File.WriteAllText(fileName, json);
+            //var json = JsonConvert.SerializeObject(collectionDto);
+            //File.WriteAllText(fileName, json);
 
-            await controller.LoadFileAsync(app, fileName);
+            //await controller.LoadFileAsync(app, fileName);
         }
 
 
@@ -203,23 +267,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// </summary>
         /// <param name="collectionProject"></param>
         /// <returns></returns>
-#if TEST
-        public
-#else
-        private
-#endif
-            async Task<List<ProjectDto>> DownloadProjects()
-        {
-            string app = GetDirApp();
-            if (!Directory.Exists(TempDir)) Directory.CreateDirectory(TempDir);
-            string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+        //#if TEST
+        //        public
+        //#else
+        //        private
+        //#endif
 
-            bool res = await controller.DownloadFileAsync(YandexHelper.FileName(app, PROGECTS_FILE), fileName);
-            //if (!res) 
-            var json = File.ReadAllText(fileName);
-            List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
-            return collection;
-        }
 
 
         /// <summary>
@@ -231,31 +284,32 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns></returns>
         public async Task<bool> AddProject(ProjectDto project)
         {
-            try
-            {
-                string app = GetDirApp();
-                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
-                List<ProjectDto> projects = new List<ProjectDto>();
+            throw new NotImplementedException();
+            //try
+            //{
+            //    string app = GetDirApp();
+            //    IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+            //    List<ProjectDto> projects = new List<ProjectDto>();
 
-                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
-                {
-                    projects = await DownloadProjects();
-                    var find = projects.Find(x => x.ID.Equals(project.ID));
-                    if (find != null)
-                    {
-                        projects.Remove(find);
-                    }
-                }
-                projects.Add(project);
-                await UnloadProjects(projects);
+            //    if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+            //    {
+            //        projects = await DownloadProjects();
+            //        var find = projects.Find(x => x.ID.Equals(project.ID));
+            //        if (find != null)
+            //        {
+            //            projects.Remove(find);
+            //        }
+            //    }
+            //    projects.Add(project);
+            //    await UnloadProjects(projects);
 
-                if (!list.Any(x => x.IsDirectory && x.DisplayName == project.Title))
-                    await controller.CreateDirAsync(app, project.Title);
-                return true;
-            }
-            catch (WebException)
-            { }
-            return false;
+            //    if (!list.Any(x => x.IsDirectory && x.DisplayName == project.Title))
+            //        await controller.CreateDirAsync(app, project.Title);
+            //    return true;
+            //}
+            //catch (WebException)
+            //{ }
+            //return false;
         }
 
 
@@ -267,31 +321,32 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns></returns>
         public async Task<bool> DeleteProject(ProjectDto dto)
         {
-            try
-            {
-                string app = GetDirApp();
-                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
-                List<ProjectDto> projects = new List<ProjectDto>();
+            throw new NotImplementedException();
+            //try
+            //{
+            //    string app = GetDirApp();
+            //    IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+            //    List<ProjectDto> projects = new List<ProjectDto>();
 
-                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
-                {
-                    //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
-                    projects = await DownloadProjects();
-                    var find = projects.Find(x => x.ID.Equals(dto.ID));
-                    if (find != null)
-                    {
-                        projects.Remove(find);
-                        await UnloadProjects(projects);
-                    }
-                }
+            //    if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+            //    {
+            //        //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+            //        projects = await DownloadProjects();
+            //        var find = projects.Find(x => x.ID.Equals(dto.ID));
+            //        if (find != null)
+            //        {
+            //            projects.Remove(find);
+            //            await UnloadProjects(projects);
+            //        }
+            //    }
 
-                if (list.Any(x => x.IsDirectory && x.DisplayName == dto.Title))
-                    await controller.DeleteAsync(YandexHelper.DirectoryName(app, dto.Title));
-                return true;
-            }
-            catch (WebException)
-            { }
-            return false;
+            //    if (list.Any(x => x.IsDirectory && x.DisplayName == dto.Title))
+            //        await controller.DeleteAsync(YandexHelper.DirectoryName(app, dto.Title));
+            //    return true;
+            //}
+            //catch (WebException)
+            //{ }
+            //return false;
         }
 
         /// <summary>
@@ -302,35 +357,36 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns></returns>
         public async Task<bool> UpdateProject(ProjectDto dto)
         {
-            try
-            {
-                string app = GetDirApp();
-                IEnumerable<DiskElement> list = await controller.GetListAsync(app);
-                List<ProjectDto> projects = new List<ProjectDto>();
+            throw new NotImplementedException();
+            //try
+            //{
+            //    string app = GetDirApp();
+            //    IEnumerable<DiskElement> list = await controller.GetListAsync(app);
+            //    List<ProjectDto> projects = new List<ProjectDto>();
 
-                if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
-                {
-                    //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
-                    projects = await DownloadProjects();
-                    var find = projects.Find(x => x.ID.Equals(dto.ID));
-                    if (find != null)
-                    {
+            //    if (list.Any(x => x.DisplayName == PROGECTS_FILE && !x.IsDirectory))
+            //    {
+            //        //string fileName = Path.Combine(TempDir, PROGECTS_FILE);
+            //        projects = await DownloadProjects();
+            //        var find = projects.Find(x => x.ID.Equals(dto.ID));
+            //        if (find != null)
+            //        {
 
-                        bool res = await controller.MoveAsync(
-                            originPath: YandexHelper.DirectoryName(app, find.Title),
-                            movePath: YandexHelper.DirectoryName(app, dto.Title));
+            //            bool res = await controller.MoveAsync(
+            //                originPath: YandexHelper.DirectoryName(app, find.Title),
+            //                movePath: YandexHelper.DirectoryName(app, dto.Title));
 
-                        find.Title = dto.Title;
-                        await UnloadProjects(projects);
-                    }
-                }
+            //            find.Title = dto.Title;
+            //            await UnloadProjects(projects);
+            //        }
+            //    }
 
-                return true;
-            }
-            catch (WebException)
-            { }
-            return false;
-        } 
+            //    return true;
+            //}
+            //catch (WebException)
+            //{ }
+            //return false;
+        }
         #endregion
 
 

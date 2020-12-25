@@ -32,6 +32,7 @@
                         </DataTemplate>
                     </ComboBox.ItemTemplate>
                 </ComboBox>
+                <Button Command="{Binding UpdateProjectsCommand}">Обновить</Button>
                 <!--<CheckBox x:Name="localDBCheckBox" IsChecked="{Binding IsLocalDB, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                           VerticalAlignment="Center" 
                           Command="{Binding LocalDBCommand}" 
@@ -41,13 +42,13 @@
             </WrapPanel>
             <Expander Header="Offline" IsExpanded="False">
                 <StackPanel>
-                    <TextBlock Text="{Binding StatusOperation, UpdateSourceTrigger=PropertyChanged}"/>
+                    <!--<TextBlock Text="{Binding StatusOperation, UpdateSourceTrigger=PropertyChanged}"/>
                     <WrapPanel>
-                        <!--<Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>-->
+                        --><!--<Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>--><!--
                         <Button Command="{Binding LoadObjectiveOfflineCommand}">Загрузить задания</Button>
                         <Button Command="{Binding SaveObjectiveOfflineCommand}">Записать задания</Button>
                         <Button Command="{Binding OpenFileOfflineCommand}">Открыть файл</Button>
-                    </WrapPanel>
+                    </WrapPanel>-->
 
                     <Expander Header="Add and Edit " IsExpanded="False">
                         <StackPanel x:Name="add">
@@ -70,8 +71,8 @@
                             <Button Margin="6" Command="{Binding AddObjectiveOfflineCommand}">Добавить задание</Button>
                             <Button Margin="6" Command="{Binding UpdateObjectiveOfflineCommand}">Редактировать выбранное задание</Button>
                             <Button Margin="6" Command="{Binding DeleteObjectiveOfflineCommand}" Content="Удалить задание"/>
-                            <Button Margin="6" Command="{Binding AddObjectivesCommand}" CommandParameter="1000" Content="Добавить 1000 записей задание"/>
-                            <Button Margin="6" Command="{Binding AddObjectivesCommand}" CommandParameter="10000" Content="Добавить 10000 записей задание"/>
+                            <Button Margin="6" Command="{Binding AddObjectivesCommand}" CommandParameter="10" Content="Добавить 10 записей задание"/>
+                            <Button Margin="6" Command="{Binding AddObjectivesCommand}" CommandParameter="100" Content="Добавить 100 записей задание"/>
                         </StackPanel>
                     </Expander>
                 </StackPanel>
@@ -81,8 +82,9 @@
                 <StackPanel>
 
                     <WrapPanel>
-                        <Button Command="{Binding DownloadObjectiveCommand}">Получить задания</Button>
                         <Button Command="{Binding UploadObjectiveCommand}">Отправить задания</Button>
+                        <Button Command="{Binding GetIDCommand}">Получить все id</Button>
+                        <Button Command="{Binding DownloadObjectiveCommand}">Загрузить по id</Button>
                     </WrapPanel>
                     <ProgressBar 
                         Height="7" Margin="5"

@@ -19,7 +19,8 @@
                 <Button Command="{Binding CreateCommand}" Margin="3">Создать проект</Button>
                 <Button Command="{Binding DeleteCommand}" Margin="3">Удалить проект</Button>
                 <Button Command="{Binding RenameCommand}" Margin="3">Переименовать проект</Button>
-                <Button Command="{Binding UpdateCommand}" Margin="3">Обновить</Button>                
+                <Button Command="{Binding UpdateCommand}" Margin="3">О<!--<Button Command="{Binding UpdateCommand}" Margin="3">Обновить</Button>-->бновить</Button>
+                                
             </WrapPanel>
             <Separator Margin="3"/>
             <WrapPanel>
