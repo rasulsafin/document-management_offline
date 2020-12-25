@@ -6,7 +6,7 @@ namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IObjectiveService
     {
-        Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data);
+        Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data);
         Task<bool> Remove(ID<ObjectiveDto> objectiveID);
         Task<bool> Update(ObjectiveDto objectiveData);
         Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID);

@@ -25,11 +25,13 @@ namespace MRS.DocumentManagement.Services
             this.itemHelper = itemHelper;
         }
 
-        public async Task<ID<ObjectiveDto>> Add(ObjectiveToCreateDto data)
+        public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
         {
             var objective = mapper.Map<Objective>(data);
             context.Objectives.Add(objective);
             await context.SaveChangesAsync();
+
+            objective.ObjectiveType = context.ObjectiveTypes.Find(objective.ObjectiveTypeID);
 
             objective.BimElements = new List<BimElementObjective>();
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
@@ -66,7 +68,7 @@ namespace MRS.DocumentManagement.Services
 
             await context.SaveChangesAsync();
 
-            return (ID<ObjectiveDto>)objective.ID;
+            return mapper.Map<ObjectiveToListDto>(objective);
         }
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)

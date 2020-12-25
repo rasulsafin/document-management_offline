@@ -18,8 +18,8 @@ namespace MRS.DocumentManagement.Api.Controllers
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ObjectiveToCreateDto data)
         {
-            var objectiveId = await service.Add(data);
-            return ValidateId(objectiveId);
+            var objectiveToList = await service.Add(data);
+            return ValidateFoundObject(objectiveToList);
         }
 
         [HttpDelete]
