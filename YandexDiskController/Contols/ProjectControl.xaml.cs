@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Dialogs;
+﻿using WPFStorage.Dialogs;
 using System;
 using System.Collections.Generic;
 using System.Linq;

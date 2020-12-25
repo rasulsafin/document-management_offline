@@ -1,6 +1,6 @@
-﻿using MRS.DocumentManagement.Base;
+﻿using WPFStorage.Base;
 using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Dialogs;
+using WPFStorage.Dialogs;
 using MRS.DocumentManagement.Models;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
+using System;
 
 namespace MRS.DocumentManagement.Contols
 {
@@ -64,7 +65,7 @@ namespace MRS.DocumentManagement.Contols
             Initilization();
         }
 
-        private async void DownloadAsync(object obj)
+        private async void DownloadAsync()
         {
             ChechYandex();
             string message = ToObjective ? $"Скачать список item-ов в задание [{SelectedObjective.Title}] c сервера ?"
@@ -78,35 +79,35 @@ namespace MRS.DocumentManagement.Contols
                     Items.Add((ItemModel)item);
                 }
             }
-            }
+        }
 
-        private async void UnloadAsync(object obj)
+        private async void UnloadAsync()
         {
             ChechYandex();
             //string message = ToObjective ? $"Загрузить файл на сервер в проект [{SelectedProject.Title}] и задание [{SelectedObjective.Title}]?"
             //    : $"Загрузить файл на сервер в проект [{SelectedProject.Title}]?";
             //if (WinBox.ShowQuestion(message))
             //{
-                OpenFileDialog ofd = new OpenFileDialog();
-                ofd.Title = "Выберете файл";
-                ofd.Multiselect = false;
-                if (ofd.ShowDialog() == true)
-                {                   
-                    FileInfo file = new FileInfo(ofd.FileName);
-                    ItemDto item = new ItemDto();
-                    item.Name = ofd.SafeFileName;
-                    item.ID = (ID<ItemDto>)(Items.Count + 1);
-                    item.ItemType = GetItemTypeDto(file.Extension);
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "Выберете файл";
+            ofd.Multiselect = false;
+            if (ofd.ShowDialog() == true)
+            {
+                FileInfo file = new FileInfo(ofd.FileName);
+                ItemDto item = new ItemDto();
+                item.Name = ofd.SafeFileName;
+                item.ID = (ID<ItemDto>)(Items.Count + 1);
+                item.ItemType = GetItemTypeDto(file.Extension);
 
-                    if (!ToObjective)
-                        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto);
-                    else
-                        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto, SelectedObjective.dto);
-                }
+                if (!ToObjective)
+                    await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto);
+                else
+                    await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto, SelectedObjective.dto);
+            }
             //}
         }
 
-        private void LoadFile(object obj)
+        private void LoadFile()
         {
             if (WinBox.ShowQuestion($"Загрузить список из файла?"))
             {
@@ -145,7 +146,7 @@ namespace MRS.DocumentManagement.Contols
             return fileName;
         }
 
-        private void SaveFile(object obj)
+        private void SaveFile()
         {
             if (WinBox.ShowQuestion($"Сохранить список?"))
             {
@@ -163,7 +164,7 @@ namespace MRS.DocumentManagement.Contols
 
 
 
-        private void DelItems(object obj)
+        private void DelItems()
         {
             if (SelectedItem == null) WinBox.ShowMessage("Нет выбранного элемента.");
             else
@@ -176,7 +177,7 @@ namespace MRS.DocumentManagement.Contols
             }
         }
 
-        private void AddItems(object obj)
+        private void AddItems()
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Выберете файл";
@@ -224,16 +225,23 @@ namespace MRS.DocumentManagement.Contols
                 var fileName = Path.Combine(DIR_NAME, PROJECT_FILE);
                 if (File.Exists(fileName))
                 {
-                    var json = File.ReadAllText(fileName);
-                    List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
-
-                    Projects.Clear();
-                    foreach (ProjectDto item in collection)
+                    try
                     {
-                        Projects.Add((ProjectModel)item);
-                    }
-                    SelectedProject = Projects.First();
+                        var json = File.ReadAllText(fileName);
+                        List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
 
+                        Projects.Clear();
+                        foreach (ProjectDto item in collection)
+                        {
+                            Projects.Add((ProjectModel)item);
+                        }
+                        SelectedProject = Projects.First();
+                    }
+                    catch (Exception ex)
+                    {
+                        OpenHelper.Geany(fileName);
+                        //WinBox.ShowMessage("При загрузки файла призошла ошибка:\n" + ex.Message, "Ошибка", 5000);
+                    }
                 }
             });
 
@@ -242,7 +250,7 @@ namespace MRS.DocumentManagement.Contols
                 UpdateObjecteve();
             });
 
-           
+
         }
 
         private void UpdateObjecteve()
@@ -255,14 +263,23 @@ namespace MRS.DocumentManagement.Contols
                 Objectives.Clear();
                 if (File.Exists(fileName))
                 {
-                    var json = File.ReadAllText(fileName);
-                    List<ObjectiveDto> collection = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
-
-                    foreach (ObjectiveDto item in collection)
+                    try
                     {
-                        Objectives.Add((ObjectiveModel)item);
+                        var json = File.ReadAllText(fileName);
+                        List<ObjectiveDto> collection = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
+
+                        foreach (ObjectiveDto item in collection)
+                        {
+                            Objectives.Add((ObjectiveModel)item);
+                        }
+                        SelectedObjective = Objectives.First();
+
                     }
-                    SelectedObjective = Objectives.First();
+                    catch (Exception ex)
+                    {
+                        OpenHelper.LoadExeption(ex, fileName);
+
+                    }
                 }
             }
         }

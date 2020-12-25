@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement
                 
 
                 controller = new YandexDiskController(AccessToken);
-                MainViewModel.Instanse.RootDir(null);
+                MainViewModel.Instanse.RootDir();
             }
             
         }

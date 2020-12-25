@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Base;
+﻿using WPFStorage.Base;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;

@@ -1,6 +1,4 @@
-﻿using MRS.DocumentManagement.Base;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Dialogs;
+﻿using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using Newtonsoft.Json;
@@ -10,15 +8,16 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using WPFStorage.Base;
+using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement.Contols
 {
 
+
     public class ProjectViewModel : BaseViewModel
     {
-        private static readonly string DIR_NAME = "data";
-        private static readonly string FILE_NAME = "projects.xml";
-        private static readonly string TEMP_DIR = "Temp.Yandex";
+        
         YandexDiskManager yandex;
         ProjectModel selectProject;
         bool openTempFile = false;
@@ -53,12 +52,13 @@ namespace MRS.DocumentManagement.Contols
             XMLPackCommand = new HCommand(Pack);
             XMLUnPackCommand = new HCommand(Unpack);
             //LoadProjectsInFile();
+            if (!Directory.Exists(PathManager.PROJ_DIR)) Directory.CreateDirectory(PathManager.PROJ_DIR);
         }
 
-        private void Unpack(object obj)
+        private void Unpack()
         {
-            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            if (!Directory.Exists(APP_DIR)) Directory.CreateDirectory(APP_DIR);
+            string fileName = Path.Combine(APP_DIR, FILE_NAME);
             if (File.Exists(fileName))
             {
                 var json = File.ReadAllText(fileName);
@@ -72,10 +72,10 @@ namespace MRS.DocumentManagement.Contols
             }
         }
 
-        private void Pack(object obj)
+        private void Pack( )
         {
-            if (!Directory.Exists(DIR_NAME)) Directory.CreateDirectory(DIR_NAME);
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            if (!Directory.Exists(APP_DIR)) Directory.CreateDirectory(APP_DIR);
+            string fileName = Path.Combine(APP_DIR, FILE_NAME);
             List<ProjectDto> collectionDto = Projects.Select(x => x.dto).ToList();
             try
             {
@@ -95,13 +95,13 @@ namespace MRS.DocumentManagement.Contols
             OpenGeany(fileName);
         }
 
-        private void OpenTempFileMethod(object obj)
+        private void OpenTempFileMethod( )
         {
             string fileName = Path.Combine(TEMP_DIR, FILE_NAME);
             OpenGeany(fileName);
         }
 
-        private void CreateLoadFile(object obj)
+        private void CreateLoadFile( )
         {
             //string TempDir = TEMP_DIR;
             //string PROGECTS_FILE = FILE_NAME;
@@ -127,15 +127,15 @@ namespace MRS.DocumentManagement.Contols
 
         
 
-        private void DeleteFile(object obj)
+        private void DeleteFile( )
         {
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            string fileName = Path.Combine(APP_DIR, FILE_NAME);
             FileInfo file = new FileInfo(fileName);
             if (file.Exists) file.Delete();
             Projects.Clear();
         }
 
-        private async void DownloadProjectsAsync(object obj)
+        private async void DownloadProjectsAsync( )
         {
             ChechYandex();
             List<ProjectDto> list = await yandex.DownloadProjects();
@@ -146,9 +146,9 @@ namespace MRS.DocumentManagement.Contols
                 Projects.Add(new ProjectModel(item));
             }
         }
-        private void OpenFile(object obj)
+        private void OpenFile( )
         {
-            string fileName = Path.Combine(DIR_NAME, FILE_NAME);
+            string fileName = Path.Combine(APP_DIR, FILE_NAME);
             FileInfo file = new FileInfo(fileName);
             OpenGeany(file.FullName);
         }
@@ -158,7 +158,7 @@ namespace MRS.DocumentManagement.Contols
             Process.Start(@"c:\Program Files (x86)\Geany\bin\geany.exe", file);
         }
 
-        private async void UnloadProjectsInServer(object obj)
+        private async void UnloadProjectsInServer( )
         {
             ChechYandex();
             await yandex.UnloadProjects(Projects.Select(x => x.dto).ToList());
@@ -212,9 +212,9 @@ namespace MRS.DocumentManagement.Contols
             }
         }
 
-        private async void CreateAsync(object obj)
+        private async void CreateAsync( )
         {
-            ChechYandex();
+            // Создать проект локально
             if (WinBox.ShowInput(
                 question: "Введите название проекта:", 
                 input: out string name, 
@@ -224,30 +224,18 @@ namespace MRS.DocumentManagement.Contols
                 defautValue: (SelectProject==null)? "Новый проект": SelectProject.Title ))
             {
                 int newId = (Projects.Count == 0)? 1 : Projects.Max(x => x.ID) + 1;
-
-                //ProjectDto dto = new ProjectDto();
-                //dto.ID = (ID<ProjectDto>)newId;
-                //dto.Title = name;
-                //ProjectModel project = new ProjectModel(dto);
-
                 ProjectModel project = new ProjectModel();
                 project.Title = name;
                 project.ID = newId;
 
-                bool res = await yandex.AddProject(project.dto);
-                if (res)
-                    DownloadProjectsAsync(null);
+                string fileName = Path.Combine(APP_DIR, )
 
-                if (OpenTempFile)
-                    OpenTempFileMethod(null);
+                string json = JsonConvert.SerializeObject(project.dto);
 
-                //Projects.Add(project);
-                //SaveProjects();
-                //WinBox.ShowMessage($"Создам '{name}'");
             }
         }
 
-        private async void DeleteProjectAsync(object obj)
+        private async void DeleteProjectAsync( )
         {
             ChechYandex();
             if (SelectProject == null)
@@ -256,14 +244,14 @@ namespace MRS.DocumentManagement.Contols
             {
                 bool res = await yandex.DeleteProject(SelectProject.dto);
                 if (res)
-                    DownloadProjectsAsync(null);
+                    DownloadProjectsAsync();
 
                 if (OpenTempFile)
-                    OpenTempFileMethod(null);
+                    OpenTempFileMethod();
             }
         }
 
-        private async void RenameProjectAsync(object obj)
+        private async void RenameProjectAsync( )
         {
             ChechYandex();
             if (SelectProject == null)
@@ -280,10 +268,10 @@ namespace MRS.DocumentManagement.Contols
 
                 bool res = await yandex.UpdateProject(SelectProject.dto);
                 if (res)
-                    DownloadProjectsAsync(null);
+                    DownloadProjectsAsync();
 
                 if (OpenTempFile)
-                    OpenTempFileMethod(null);
+                    OpenTempFileMethod();
             }
         }
 

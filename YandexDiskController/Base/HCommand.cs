@@ -2,30 +2,15 @@
 using System.Windows;
 using System.Windows.Input;
 
-namespace MRS.DocumentManagement.Base
+namespace WPFStorage.Base
 {
-    /// <summary>
-    /// https://github.com/hty007/testTask/blob/master/GPSTask/BaseView/BaseViewModel.cs
-    /// </summary>
     public class HCommand : ICommand
     {
-        private Action<object> _method;
-        private bool openTempFile;
-        private HCommand uploadObjectiveCommand;
+        private Action _method;
 
-        public HCommand(Action<object> method)
+        public HCommand(Action method)
         {
             _method = method;
-        }
-
-        public HCommand(bool openTempFile)
-        {
-            this.openTempFile = openTempFile;
-        }
-
-        public HCommand(HCommand uploadObjectiveCommand)
-        {
-            this.uploadObjectiveCommand = uploadObjectiveCommand;
         }
 
         public event EventHandler CanExecuteChanged;
@@ -39,11 +24,11 @@ namespace MRS.DocumentManagement.Base
         {
             try
             {
-                _method.Invoke(parameter);
+                _method.Invoke();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message, $"Ошибка {this.GetType().Name}");
+                MessageBox.Show($"Ошибка метода '{_method.Method.Name}', модуля '{_method.Target.GetType().Name}'. {ex.Message}");
             }
         }
     }
@@ -83,16 +68,14 @@ namespace MRS.DocumentManagement.Base
                         && d_parameter is T par_t2)
                         _method.Invoke(par_t2);
                     else
-                    {
-                        MessageBox.Show($"Не удалось привести параметр {parameter} к типу { (typeof(T)).FullName }");
-                    }
+                        MessageBox.Show($"не удалось привести параметр {parameter} к типу { (typeof(T)).FullName }");
                 }
 
 
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка метода '{_method.Method.Name}', класса '{_method.Target.GetType().Name}'\nСообщение: {ex.Message}");
+                MessageBox.Show($"Ошибка метода '{_method.Method.Name}', модуля '{_method.Target.GetType().Name}'. {ex.Message}");
             }
         }
     }

@@ -1,6 +1,4 @@
-﻿using MRS.DocumentManagement.Base;
-using MRS.DocumentManagement.Contols;
-using MRS.DocumentManagement.Dialogs;
+﻿using MRS.DocumentManagement.Contols;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -11,6 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using MRS.DocumentManagement.Connection.YandexDisk;
+using WPFStorage.Dialogs;
+using WPFStorage.Base;
 
 namespace MRS.DocumentManagement
 {
@@ -20,8 +20,7 @@ namespace MRS.DocumentManagement
 
         #region Binding
         public string NameApp { get; private set; } = "Controller";
-
-        private const string TEMP_DIR = "Temp";
+        
         static MainViewModel instanse;
         static YandexDiskController controller;
         private ObservableCollection<DiskElement> folderItems = new ObservableCollection<DiskElement>();
@@ -102,16 +101,16 @@ namespace MRS.DocumentManagement
             MoveCommand = new HCommand(Move);
 
             Auth.StartAuth();
-            if (!Directory.Exists(TEMP_DIR)) Directory.CreateDirectory(TEMP_DIR);
+            if (!Directory.Exists(PathManager.APP_DIR)) Directory.CreateDirectory(PathManager.APP_DIR);
         }
 
 
-        private void Refresh(object obj)
+        private void Refresh()
         {
             RefreshFolder();
         }
 
-        private async void DeleteMethod(object obj)
+        private async void DeleteMethod()
         {
             logger.Message("Начинаю удалять!");
             if (SelectionElement == null)
@@ -142,7 +141,7 @@ namespace MRS.DocumentManagement
             }
         }
 
-        private async void LoadFile(object obj)
+        private async void LoadFile()
         {
             OpenFileDialog OPF = new OpenFileDialog();
             if (OPF.ShowDialog() == true)
@@ -186,7 +185,7 @@ namespace MRS.DocumentManagement
             logger.Message("Обновил");
         }
 
-        private async void DebugMethod(object obj)
+        private async void DebugMethod()
         {
             DownloadProgress = true;
             TotalByte = 100;
@@ -201,7 +200,7 @@ namespace MRS.DocumentManagement
             DownloadProgress = false;
         }
 
-        private async void BackDir(object obj)
+        private async void BackDir()
         {
             if (StackPath.Count != 0)
             {
@@ -210,14 +209,14 @@ namespace MRS.DocumentManagement
             }
         }
 
-        private async void RootDir(object obj)
+        private async void RootDir()
         {
             StackPath.Clear();
             Path = "/";
             await RefreshFolder();
         }
 
-        private async void CreateDir(object obj)
+        private async void CreateDir()
         {
             if (WinBox.ShowInput(
                 question: "Введите название папки:",
@@ -232,7 +231,7 @@ namespace MRS.DocumentManagement
                     WinBox.ShowMessage("Каталог не создан!");
             }
         }
-        private async void Move(object obj)
+        private async void Move()
         {
             if (SelectionElement == null)
                 WinBox.ShowMessage("Не могу выполнить операцию, нет выбранного элемента!");
