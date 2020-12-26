@@ -121,6 +121,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return result;
         }
 
+        public Task<List<ID<ObjectiveDto>>> GetIdObjectivesAsync(ProjectDto project)
+        {
+            string path = PathManager.GetObjectivesDir(project);
+            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+
+            throw new NotImplementedException();
+        }
+
         private async Task<bool> CheckDirProject(ProjectDto project)
         {
             bool result = true;

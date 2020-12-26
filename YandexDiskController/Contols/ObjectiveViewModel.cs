@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Contols
 
             UploadObjectiveCommand = new HCommand(UploadToServerAsync);
             DownloadObjectiveCommand = new HCommand(DownloadFromServerAsync);
-            GetIDCommand = new HCommand(GetID);
+            GetIDCommand = new HCommand(GetIDAsync);
             AddObjectivesCommand = new HCommand<int>(AddObjectives);
 
             //LocalDBCommand = new HCommand<bool>(LocalBase);
@@ -96,9 +96,9 @@ namespace MRS.DocumentManagement.Contols
             UpdateProjects();
         }
 
-        private void GetID()
+        private async void GetIDAsync()
         {
-            throw new NotImplementedException();
+            List<ID<ObjectiveDto>> list = await yandex.GetIdObjectivesAsync(SelectedProject.dto);
         }
 
         private async void UploadToServerAsync()
@@ -123,8 +123,20 @@ namespace MRS.DocumentManagement.Contols
         private async void DownloadFromServerAsync()
         {
             ChechYandex();
-            if (WinBox.ShowQuestion("Скачивать Objective с диска?"))
+            if (WinBox.ShowInput(
+                title: "Скачивание...", 
+                question: "Введите id оbjective которую надо скачать с диска?", 
+                input: out string text, 
+                okText: "Скачать", 
+                cancelText: "Отмена"))
             {
+                if (int.TryParse(text, out int num))
+                {
+                    ID<ObjectiveDto> id = (ID<ObjectiveDto>)num;
+                    ObjectiveDto objective = await yandex.GetObjectiveAsync(SelectedProject.dto, id);
+                    Objectives.Add((ObjectiveModel)objective);
+                }
+
                 //ProgressVisible = true;
                 //ObjectiveDto[] collect = await yandex.GetObjectiveAsync(SelectedProject.dto);
                 //ProgressVisible = false;
