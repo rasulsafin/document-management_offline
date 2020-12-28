@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Text;
 
 namespace MRS.DocumentManagement.Contols
 {
@@ -98,7 +99,24 @@ namespace MRS.DocumentManagement.Contols
 
         private async void GetIDAsync()
         {
-            List<ID<ObjectiveDto>> list = await yandex.GetIdObjectivesAsync(SelectedProject.dto);
+            ChechYandex();
+            try
+            {
+
+                List<ID<ObjectiveDto>> list = await yandex.GetObjectivesIdAsync(SelectedProject.dto);
+                StringBuilder message = new StringBuilder();
+                for (int i = 0; i < list.Count; i++)
+                {
+                    if (i != 0) message.Append(',');
+                    if (i % 10 == 0) message.Append('\n');
+                    message.Append(list[i].ToString());
+                }
+                WinBox.ShowMessage(message.ToString());
+            }
+            catch (Exception ex)
+            {
+                WinBox.ShowMessage(ex.Message);
+            }
         }
 
         private async void UploadToServerAsync()

@@ -24,6 +24,31 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             this.accessToken = accessToken;
 
         }
+        private Exception WebExceptionHandler(Exception exception)
+        {
+            if (exception is WebException web)
+            {
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    return new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else if (web.Status == WebExceptionStatus.ProtocolError)
+                {
+                    if (web.Response is HttpWebResponse http)
+                    {
+                        if (http.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
+                            logger.Message(message);
+                            return new FileNotFoundException(message, web);
+                        }
+                    }
+                }
+            }
+            logger.Error(exception);
+            logger.Open();
+            return exception;
+        }
 
         #region PROPFIND 
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
@@ -42,30 +67,16 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 List<DiskElement> items = DiskElement.GetElements(xml.DocumentElement);
                 return items;
             }
-            catch (WebException web)
-            {
-                logger.Message($"Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
-            }
+                throw WebExceptionHandler(ex);
+
+            }            
         }
 
-        #endregion
 
+
+        #endregion
         #region Create Directory
         public async Task<bool> CreateDirAsync(string path, string nameDir)
         {
@@ -85,29 +96,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     return false;
                 }
             }
-            catch (WebException web)
-            {
-                logger.Message($"Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
+                throw WebExceptionHandler(ex);
+
             }
         }
         #endregion
-
         #region Content
 
         public async Task<bool> SetContetnAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
@@ -152,25 +147,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 }
                 #endregion
             }
-            catch (WebException web)
-            {
-                logger.Message($"Exception Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
+                throw WebExceptionHandler(ex);
             }
             return false;
         }
@@ -208,26 +187,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 logger.Message($"Директория не создана, не могу записать файл");
                 throw;
             }
-            catch (WebException web)
-            {
-                logger.Message($"Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
-                //return null;
+                throw WebExceptionHandler(ex);
             }
         }
 
@@ -280,30 +242,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 logger.Message($"Директория не создана, не могу записать файл");
                 throw;
             }
-            catch (WebException web)
-            {
-                logger.Message($"Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                //throw;
-                return false;
+                throw WebExceptionHandler(ex);
             }
-        } 
+        }
         #endregion
-
         #region Delete file and directory
         public async Task<bool> DeleteAsync(string path)
         {
@@ -322,29 +266,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     return false;
                 }
             }
-            catch (WebException web)
-            {
-                logger.Message($"Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
+                throw WebExceptionHandler(ex);
+
             }
         }
         #endregion
-
         #region Load File
         /// <summary>
         /// Загрузить файл на сервер
@@ -403,30 +331,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 }
                 #endregion
             }
-            catch (WebException web)
-            {
-                logger.Message($"Exception Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
+                throw WebExceptionHandler(ex);
+
             }
             return false;
         }
         #endregion
-
         #region COPY TODO 
         /// <summary>
         /// Копирование (COPY)
@@ -438,10 +350,17 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html</remarks>
         public async Task<bool> CopyAsync(string originPath, string copyPath)
         {
-            throw new NotImplementedException();
+            try 
+            {
+                throw new NotImplementedException();
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+
+            }
         }
         #endregion
-
         #region MOVE TODO
         /// <summary>
         /// Перемещение и переименование (MOVE)
@@ -454,7 +373,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         public async Task<bool> MoveAsync(string originPath, string movePath)
         {
             try
-            {                
+            {
                 HttpWebRequest request = YandexHelper.RequestMove(accessToken, originPath, movePath);
                 using (WebResponse response = await request.GetResponseAsync())
                 {
@@ -468,25 +387,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     return false;
                 }
             }
-            catch (WebException web)
-            {
-                logger.Message($"Exception Status={web.Status}");
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    throw new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else
-                {
-                    logger.Error(web);
-                    logger.Open();
-                    throw;
-                }
-            }
             catch (Exception ex)
             {
-                logger.Error(ex);
-                logger.Open();
-                throw;
+                throw WebExceptionHandler(ex);
             }
         }
         #endregion

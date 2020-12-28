@@ -1,6 +1,7 @@
 ﻿#define TEST
 
 using MRS.DocumentManagement.Interface.Dtos;
+using System;
 using System.IO;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
@@ -74,6 +75,17 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         public static string GetAppDir()
         {
             return YandexHelper.DirectoryName("/", APP_DIR);
+        }
+
+        public static bool TryParseObjectiveId(string str, out ID<ObjectiveDto> id)
+        {
+            string text = str.Replace("objective_", "").Replace(".json", "");
+            if (int.TryParse(text, out int num))
+            {
+                id = new ID<ObjectiveDto>(num);
+            }
+            id = ID<ObjectiveDto>.InvalidID;
+            return false;
         }
     }
 }

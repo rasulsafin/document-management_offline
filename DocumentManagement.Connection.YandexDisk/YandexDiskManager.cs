@@ -121,12 +121,20 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return result;
         }
 
-        public Task<List<ID<ObjectiveDto>>> GetIdObjectivesAsync(ProjectDto project)
+        public async Task<List<ID<ObjectiveDto>>> GetObjectivesIdAsync(ProjectDto project)
         {
+            List<ID<ObjectiveDto>> result = new List<ID<ObjectiveDto>>();
             string path = PathManager.GetObjectivesDir(project);
-            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
-
-            throw new NotImplementedException();
+            IEnumerable<DiskElement> list = await controller.GetListAsync(path);
+            foreach (var element in list)
+            {
+                if (PathManager.TryParseObjectiveId(element.DisplayName, out ID<ObjectiveDto> id))
+                {
+                    result.Add(id);
+                }
+            }
+            return result;
+            //throw new NotImplementedException();
         }
 
         private async Task<bool> CheckDirProject(ProjectDto project)
@@ -170,6 +178,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 logger.Error(ex);
                 logger.Open();
+                throw;
             }
 
         }
