@@ -10,6 +10,7 @@ namespace MRS.DocumentManagement.Models
 
         [XmlIgnore]
         public ItemDto dto;
+        private bool isObjective;
 
         public ItemModel(ItemDto dto)
         {
@@ -27,6 +28,16 @@ namespace MRS.DocumentManagement.Models
             set
             {
                 dto.Name = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool IsObjective 
+        {
+            get => isObjective;
+            set
+            {
+                isObjective = value;
                 OnPropertyChanged();
             }
         }

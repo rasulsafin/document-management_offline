@@ -80,6 +80,7 @@ namespace MRS.DocumentManagement
         UserViewModel users = new UserViewModel();
         ObjectiveViewModel objectives = new ObjectiveViewModel();
         ItemViewModel items = new ItemViewModel();
+        SynchronizerViewModel synchronizer = new SynchronizerViewModel();
         private int selectedTab;
 
         public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
@@ -88,6 +89,7 @@ namespace MRS.DocumentManagement
 
         public UserViewModel Users { get => users; set { users = value; OnPropertyChanged(); } }
         public ItemViewModel Items { get => items; set { items = value; OnPropertyChanged(); } }
+        public SynchronizerViewModel Synchronizer { get => synchronizer; set { synchronizer = value; OnPropertyChanged(); } }
         public int SelectedTab { get => selectedTab; set { selectedTab = value; OnPropertyChanged(); } }
 
         #endregion
@@ -113,6 +115,7 @@ namespace MRS.DocumentManagement
 
         public void CloseApp()
         {
+            ObjectModel.Synchronizer.Save();
             Properties.Settings.Default.SelectedTab = SelectedTab;
             Properties.Settings.Default.Save();
         }
@@ -276,7 +279,7 @@ namespace MRS.DocumentManagement
             }
             else
             {
-                string tempPath = System.IO.Path.Combine(TEMP_DIR, item.DisplayName);
+                string tempPath = System.IO.Path.Combine(PathManager.APP_DIR, item.DisplayName);
                 if (!System.IO.File.Exists(tempPath))
                 {
                     if (WinBox.ShowQuestion("Скачать файл во временный каталог и открыть?"))

@@ -13,13 +13,40 @@
 
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel x:Name="r2d2" Grid.Column="2">
-            <StackPanel VerticalAlignment="Top" HorizontalAlignment="Left" Width="{Binding ElementName=r2d2, Path=ActualWidth}">
 
+        <ListBox Grid.Column="0" ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 SelectedValue="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ID}"/>
+                                <TextBlock Text=" "/>
+                                <TextBlock Text="{Binding Name}"/>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ExternalItemId}"/>
+                                <TextBlock Text="  "/>
+                                <TextBlock Text="{Binding ItemType}"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+
+        <GridSplitter Grid.Column="1" ShowsPreview="False" Width="3"
+                      HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+
+        <Border Grid.Column="2">
+            <StackPanel  VerticalAlignment="Top" HorizontalAlignment="Left">
+
+                <!--#region Управление списками -->
                 <StackPanel Orientation="Horizontal" >
                     <TextBlock Text="Проект" Width="100" />
                     <ComboBox ItemsSource="{Binding Projects}" 
@@ -37,7 +64,6 @@
                     </ComboBox>
                 </StackPanel>
 
-                <!--#region Управление списками -->
                 <StackPanel Orientation="Horizontal" >
                     <CheckBox IsChecked="{Binding ToObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                               Name="ToObject" VerticalAlignment="Center"/>
@@ -65,53 +91,25 @@
                         <WrapPanel Orientation="Horizontal">
                             <Button Command="{Binding AddItemsCommand}">Добавить</Button>
                             <Button Command="{Binding DelItemsCommand}">Удалить</Button>
-                            <Button Command="{Binding RenItemsCommand}">Переименовать</Button>
                         </WrapPanel>
 
-                        <WrapPanel Orientation="Horizontal">
+                        <!--<WrapPanel Orientation="Horizontal">
                             <Button Command="{Binding SaveFileCommand}">Записать в файл</Button>
                             <Button Command="{Binding LoadFileCommand}">Прочитать из файла</Button>
-                        </WrapPanel>
-
+                        </WrapPanel>-->
                     </StackPanel>
 
                 </Expander>
                 <Expander Header="On line" IsExpanded="false">
                     <StackPanel>
                         <WrapPanel Orientation="Horizontal">
-                            <Button Command="{Binding UnloadCommand}">Загрузить файл на сервер</Button>
-                            <Button Command="{Binding DownloadCommand}">Скачать с сервера</Button>
+                            <Button Command="{Binding UnloadCommand}">Загрузить выбранный файл на сервер</Button>
+                            <Button Command="{Binding GetIdCommand}">Получить список Id</Button>
                         </WrapPanel>
 
                     </StackPanel>
                 </Expander>
-
-
             </StackPanel>
-        </StackPanel>
-
-        <ListBox Grid.Column="0" ItemsSource="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                 SelectedValue="{Binding SelectedItem, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Border>
-                        <StackPanel Orientation="Vertical">
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ID}"/>
-                                <TextBlock Text=" "/>
-                                <TextBlock Text="{Binding Name}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ExternalItemId}"/>
-                                <TextBlock Text="  "/>
-                                <TextBlock Text="{Binding ItemType}"/>
-                            </StackPanel>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-
-        </ListBox>
-        <GridSplitter Grid.Column="1" Width="3" Margin="3"/>
+        </Border>
     </Grid>
 </UserControl>

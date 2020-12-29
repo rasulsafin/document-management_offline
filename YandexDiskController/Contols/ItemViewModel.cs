@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
 
 namespace MRS.DocumentManagement.Contols
 {
@@ -32,37 +33,46 @@ namespace MRS.DocumentManagement.Contols
         private ObjectiveModel selectedObjective;
         private ItemModel selectedItem;
 
-        public ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
-        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = new ObservableCollection<ObjectiveModel>();
-        public ObservableCollection<ItemModel> Items { get; set; } = new ObservableCollection<ItemModel>();
+        public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
+        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
+        public ObservableCollection<ItemModel> Items { get; set; } = ObjectModel.Items;
         public ProjectModel SelectedProject
         {
             get => selectedProject;
-            set { selectedProject = value; UpdateObjecteve(); OnPropertyChanged(); }
+            set { selectedProject = value; UpdateObjecteve(); UpdateItems(); OnPropertyChanged(); }
         }
-        public ObjectiveModel SelectedObjective { get => selectedObjective; set { selectedObjective = value; OnPropertyChanged(); } }
+        public ObjectiveModel SelectedObjective { get => selectedObjective; set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
         public ItemModel SelectedItem { get => selectedItem; set { selectedItem = value; OnPropertyChanged(); } }
         public bool ToObjective { get => toObjective; set { toObjective = value; OnPropertyChanged(); } }
 
         public HCommand AddItemsCommand { get; }
         public HCommand DelItemsCommand { get; }
-        public HCommand RenItemsCommand { get; }
-        public HCommand SaveFileCommand { get; }
-        public HCommand LoadFileCommand { get; }
         public HCommand UnloadCommand { get; }
-        public HCommand DownloadCommand { get; }
+        public HCommand GetIdCommand { get; }
+
+        //public HCommand RenItemsCommand { get; }
+        //public HCommand SaveFileCommand { get; }
+        //public HCommand LoadFileCommand { get; }
+        //public HCommand DownloadCommand { get; }
         #endregion
 
         public ItemViewModel()
         {
-            AddItemsCommand = new HCommand(AddItems);
+            AddItemsCommand = new HCommand(AddItem);
             DelItemsCommand = new HCommand(DelItems);
-            SaveFileCommand = new HCommand(SaveFile);
-            LoadFileCommand = new HCommand(LoadFile);
             UnloadCommand = new HCommand(UnloadAsync);
-            DownloadCommand = new HCommand(DownloadAsync);
+            GetIdCommand = new HCommand(GetIDs);
+
+            //SaveFileCommand = new HCommand(SaveFile);
+            //LoadFileCommand = new HCommand(LoadFile);
+            //DownloadCommand = new HCommand(DownloadAsync);
 
             Initilization();
+        }
+
+        private void GetIDs()
+        {
+            throw new NotImplementedException();
         }
 
         private async void DownloadAsync()
@@ -107,69 +117,39 @@ namespace MRS.DocumentManagement.Contols
             //}
         }
 
-        private void LoadFile()
+        private void AddItem()
         {
-            if (WinBox.ShowQuestion($"Загрузить список из файла?"))
+            var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
+            if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "Выберете файл";
+            ofd.Multiselect = false;
+            if (ofd.ShowDialog() == true)
             {
-                if (SelectedProject == null) return;
+                ItemModel model = new ItemModel();
+                model.ID = Properties.Settings.Default.ItemNextId++;
+                Properties.Settings.Default.Save();
+                FileInfo file = new FileInfo(ofd.FileName);
 
-                string fileName = GetItemFileName(
-                    item: ITEM_FILE,
-                    root: DIR_NAME,
-                    progect: SelectedProject.Title,
-                    objective: ToObjective ? SelectedObjective.Title : null);
-
-                string json = File.ReadAllText(fileName);
-                var collect = JsonConvert.DeserializeObject<List<ItemModel>>(json);
-                Items.Clear();
-                foreach (var item in collect)
-                {
-                    Items.Add(item);
-                }
-
+                model.Name = file.Name;
+                model.ExternalItemId = file.FullName;
+                model.IsObjective = ToObjective;
+                model.ItemType = GetItemTypeDto(file.Extension);
+                Items.Add(model);
+                if (ToObjective)
+                    SaveItem(model.dto, SelectedProject.dto, SelectedObjective.dto);
+                else
+                    SaveItem(model.dto, SelectedProject.dto);
             }
         }
-        private string GetItemFileName(string item, string root, string progect, string objective = null)
-        {
-            string fileName;
-            string projDir = Path.Combine(root, progect);
-            if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
-            if (objective != null)
-            {
-                fileName = Path.Combine(projDir, $"{objective}_{item}");
-            }
-            else
-            {
-                fileName = Path.Combine(projDir, item);
-            }
-
-            return fileName;
-        }
-
-        private void SaveFile()
-        {
-            if (WinBox.ShowQuestion($"Сохранить список?"))
-            {
-                string fileName = GetItemFileName(
-                    item: ITEM_FILE,
-                    root: DIR_NAME,
-                    progect: SelectedProject.Title,
-                    objective: ToObjective ? SelectedObjective.Title : null);
-
-                string json = JsonConvert.SerializeObject(Items, Formatting.Indented);
-                File.WriteAllText(fileName, json);
-            }
-
-        }
-
-
 
         private void DelItems()
         {
             if (SelectedItem == null) WinBox.ShowMessage("Нет выбранного элемента.");
             else
             {
-                if (WinBox.ShowQuestion($"Вы действительно хотите удалить елемент '{SelectedItem.Name}'"))
+                if (WinBox.ShowQuestion($"Вы действительно хотите удалить элемент '{SelectedItem.Name}'"))
                 {
                     Items.Remove(SelectedItem);
                     SelectedItem = null;
@@ -177,30 +157,25 @@ namespace MRS.DocumentManagement.Contols
             }
         }
 
-        private void AddItems()
+        internal static void DeleteItem(ItemDto item, ProjectDto project, ObjectiveDto objective)
         {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Title = "Выберете файл";
-            ofd.Multiselect = false;
-            if (ofd.ShowDialog() == true)
-            {
-                ItemModel model = new ItemModel();
-                model.ID = Items.Count == 0 ? 1 : Items.Max(x => x.ID) + 1;
-                FileInfo file = new FileInfo(ofd.FileName);
+            throw new NotImplementedException();
+        }
 
-                model.Name = file.Name;
+        public static void SaveItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
+        {
+            var dirProj = PathManager.GetProjectDir(project);
+            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
 
-                if (ToObjective)
-                    model.ExternalItemId = $"/{DIR_NAME}/{SelectedProject.Title}/{SelectedObjective.Title}/{model.Name}";
-                else
-                    model.ExternalItemId = $"/{DIR_NAME}/{SelectedProject.Title}/{model.Name}";
-                model.ItemType = GetItemTypeDto(file.Extension);
+            var dirItems = PathManager.GetItemsDir(project);
+            if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
 
-                Items.Add(model);
-                // Копирование файла и запись данных
+            string path = objective == null
+                    ? PathManager.GetItemFile(item, project, objective)
+                    : PathManager.GetItemFile(item, project);
 
-            }
-
+            string json = JsonConvert.SerializeObject(item, Formatting.Indented);
+            File.WriteAllText(path, json);
         }
 
         private static ItemTypeDto GetItemTypeDto(string extension)
@@ -218,69 +193,75 @@ namespace MRS.DocumentManagement.Contols
         }
 
         #region Инициализация 
-        private async void Initilization()
+        private void Initilization()
         {
-            await Task.Run(() =>
+
+            //await Task.Run(() =>
+            //{
+            //    //var collect = ObjectModel.GetProjects();
+            //    //foreach (ProjectDto item in collect)
+            //    //{
+            //    //    Projects.Add((ProjectModel)item);
+            //    //}
+            //    //if (Projects.Count != 0)
+            //    //    SelectedProject = Projects.First();
+            //});
+
+            //await Task.Run(() =>
+            //{
+            UpdateObjecteve();
+            //});
+            //await Task.Run(() =>
+            //{
+            UpdateItems();
+            //});
+
+        }
+
+        private void UpdateItems()
+        {
+            if (SelectedProject != null)
             {
-                var fileName = Path.Combine(DIR_NAME, PROJECT_FILE);
-                if (File.Exists(fileName))
+                ObjectiveDto obj = ToObjective ? SelectedObjective.dto : null;
+                List<ItemDto> collection = GetItems(SelectedProject.dto, obj);
+                Items.Clear();
+                foreach (ItemDto item in collection)
                 {
-                    try
-                    {
-                        var json = File.ReadAllText(fileName);
-                        List<ProjectDto> collection = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
-
-                        Projects.Clear();
-                        foreach (ProjectDto item in collection)
-                        {
-                            Projects.Add((ProjectModel)item);
-                        }
-                        SelectedProject = Projects.First();
-                    }
-                    catch (Exception ex)
-                    {
-                        OpenHelper.Geany(fileName);
-                        //WinBox.ShowMessage("При загрузки файла призошла ошибка:\n" + ex.Message, "Ошибка", 5000);
-                    }
+                    Items.Add((ItemModel)item);
                 }
-            });
+            }
+        }
 
-            await Task.Run(() =>
+        private List<ItemDto> GetItems(ProjectDto project, ObjectiveDto objective = null)
+        {
+            var dirItem = PathManager.GetItemsDir(project, objective);
+            if (!Directory.Exists(dirItem)) return new List<ItemDto>();
+            var result = new List<ItemDto>();
+            DirectoryInfo dir = new DirectoryInfo(dirItem);
+            foreach (var file in dir.GetFiles())
             {
-                UpdateObjecteve();
-            });
-
-
+                if (file.Name.StartsWith("item_"))
+                {
+                    var json = File.ReadAllText(file.FullName);
+                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+                    result.Add(item);
+                }
+            }
+            return result;
         }
 
         private void UpdateObjecteve()
         {
             if (SelectedProject != null)
             {
-                string projDir = Path.Combine(DIR_NAME, SelectedProject.Title);
-                if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
-                string fileName = Path.Combine(projDir, OBJECTIVE_FILE);
+                List<ObjectiveDto> collection = ObjectiveViewModel.GetObjectives(SelectedProject.dto);
                 Objectives.Clear();
-                if (File.Exists(fileName))
+                foreach (ObjectiveDto item in collection)
                 {
-                    try
-                    {
-                        var json = File.ReadAllText(fileName);
-                        List<ObjectiveDto> collection = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
-
-                        foreach (ObjectiveDto item in collection)
-                        {
-                            Objectives.Add((ObjectiveModel)item);
-                        }
-                        SelectedObjective = Objectives.First();
-
-                    }
-                    catch (Exception ex)
-                    {
-                        OpenHelper.LoadExeption(ex, fileName);
-
-                    }
+                    Objectives.Add((ObjectiveModel)item);
                 }
+                if (Objectives.Count > 0)
+                    SelectedObjective = Objectives.First();
             }
         }
 
@@ -293,6 +274,60 @@ namespace MRS.DocumentManagement.Contols
             }
         }
         #endregion
+
+        //private void LoadFile()
+        //{
+        //    if (WinBox.ShowQuestion($"Загрузить список из файла?"))
+        //    {
+        //        if (SelectedProject == null) return;
+
+        //        string fileName = GetItemFileName(
+        //            item: ITEM_FILE,
+        //            root: DIR_NAME,
+        //            progect: SelectedProject.Title,
+        //            objective: ToObjective ? SelectedObjective.Title : null);
+
+        //        string json = File.ReadAllText(fileName);
+        //        var collect = JsonConvert.DeserializeObject<List<ItemModel>>(json);
+        //        Items.Clear();
+        //        foreach (var item in collect)
+        //        {
+        //            Items.Add(item);
+        //        }
+
+        //    }
+        //}
+        //private void SaveFile()
+        //{
+        //    if (WinBox.ShowQuestion($"Сохранить список?"))
+        //    {
+        //        string fileName = GetItemFileName(
+        //            item: ITEM_FILE,
+        //            root: DIR_NAME,
+        //            progect: SelectedProject.Title,
+        //            objective: ToObjective ? SelectedObjective.Title : null);
+
+        //        string json = JsonConvert.SerializeObject(Items, Formatting.Indented);
+        //        File.WriteAllText(fileName, json);
+        //    }
+
+        //}
+        //private string GetItemFileName(string item, string root, string progect, string objective = null)
+        //{
+        //    string fileName;
+        //    string projDir = Path.Combine(root, progect);
+        //    if (!Directory.Exists(projDir)) Directory.CreateDirectory(projDir);
+        //    if (objective != null)
+        //    {
+        //        fileName = Path.Combine(projDir, $"{objective}_{item}");
+        //    }
+        //    else
+        //    {
+        //        fileName = Path.Combine(projDir, item);
+        //    }
+
+        //    return fileName;
+        //}
 
     }
 }

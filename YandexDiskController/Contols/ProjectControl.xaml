@@ -12,7 +12,8 @@
             <ColumnDefinition Width="Auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <GridSplitter Grid.Column="1" Width="3"/>
+
+        <GridSplitter Grid.Column="1" Width="3" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
 
         <StackPanel Grid.Column="2" Orientation="Vertical">            
             <WrapPanel>

@@ -34,5 +34,41 @@ namespace MRS.DocumentManagement.Properties {
                 this["SelectedTab"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int ObjectiveNextId {
+            get {
+                return ((int)(this["ObjectiveNextId"]));
+            }
+            set {
+                this["ObjectiveNextId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int ItemNextId {
+            get {
+                return ((int)(this["ItemNextId"]));
+            }
+            set {
+                this["ItemNextId"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int ProjectNextId {
+            get {
+                return ((int)(this["ProjectNextId"]));
+            }
+            set {
+                this["ProjectNextId"] = value;
+            }
+        }
     }
 }

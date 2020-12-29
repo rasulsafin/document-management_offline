@@ -75,9 +75,14 @@
 
 
 
-            <TabItem Header="Items" IsSelected="True">
+            <TabItem Header="Items" >
                 <controls:ItemsControl DataContext="{Binding Items, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             </TabItem>
+
+            <TabItem Header="Sync" IsSelected="True">
+                <controls:SynchronizerControl DataContext="{Binding Synchronizer, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            </TabItem>
+            
         </TabControl>
 
         <Popup IsOpen="{Binding DownloadProgress, UpdateSourceTrigger=PropertyChanged}" Width="200"    Placement="Center" PopupAnimation="Slide">

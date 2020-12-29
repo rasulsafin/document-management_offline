@@ -12,11 +12,13 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Text;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
 
 namespace MRS.DocumentManagement.Contols
 {
     public class ObjectiveViewModel : BaseViewModel
     {
+        #region Data and bending
         private static readonly string DIR_NAME = "data";
         private static readonly string OBJECTIVE_FILE = "objective.json";
         private static readonly string PROJECT_FILE = "projects.json";
@@ -31,8 +33,8 @@ namespace MRS.DocumentManagement.Contols
         private double progressMax;
         private double progressValue;
 
-        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = new ObservableCollection<ObjectiveModel>();
-        public ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
+        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
+        public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
         public ProjectModel SelectedProject
         {
             get => selectedProject;
@@ -73,7 +75,9 @@ namespace MRS.DocumentManagement.Contols
         public HCommand DownloadObjectiveCommand { get; }
         public HCommand GetIDCommand { get; }
         public HCommand UpdateObjectiveOfflineCommand { get; }
-        public HCommand<int> AddObjectivesCommand { get; }
+        public HCommand GetObjectiveForIdCommand { get; }
+        public HCommand<int> AddObjectivesCommand { get; } 
+        #endregion
 
         public ObjectiveViewModel()
         {
@@ -85,24 +89,59 @@ namespace MRS.DocumentManagement.Contols
             ChengeStatusOfflineCommand = new HCommand(ChengeStatusOffline);
             UpdateObjectiveOfflineCommand = new HCommand(UpdateObjectiveOffline);
 
+            GetObjectiveForIdCommand = new HCommand(GetObjectiveForID);
+
             UploadObjectiveCommand = new HCommand(UploadToServerAsync);
             DownloadObjectiveCommand = new HCommand(DownloadFromServerAsync);
             GetIDCommand = new HCommand(GetIDAsync);
             AddObjectivesCommand = new HCommand<int>(AddObjectives);
 
-            //LocalDBCommand = new HCommand<bool>(LocalBase);
-            //LoadProjectOfflineCommand = new HCommand(LoadProjectOffline);
-            //OpenFileOfflineCommand = new HCommand(OpenFileOffline);
 
             UpdateProjects();
         }
+
+        private void GetObjectiveForID()
+        {
+            if (WinBox.ShowInput(
+                title: "Открыть задачу",
+                question: "Введи id",
+                input: out string input,
+                okText: "Открыть", cancelText: "Отмена",
+                defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
+                ))
+            {
+                if (int.TryParse(input, out int id))
+                {
+                    (ObjectiveDto objective, ProjectDto project) = GetObjective((ID<ObjectiveDto>)id);
+                    string message = "ObjectiveDto:\n";
+                    if (objective != null)
+                    {
+                        message += $"ID={objective.ID}\n";
+                        message += $"ProjectID={objective.ProjectID}\n";
+                        message += $"Title={objective.Title}\n";
+                        message += $"Status={objective.Status}\n";
+                        message += $"Description={objective.Description}\n";
+                        message += $"CreationDate={objective.CreationDate}\n";
+                        message += $"DueDate={objective.DueDate}\n";
+                    }
+                    message += $"project:\n";
+                    if (project != null)
+                    {
+                        message += $"ID={project.ID}\n";
+                        message += $"Title={project.Title}\n";
+                    }
+                    WinBox.ShowMessage(message);
+                }
+            }    
+        }
+
+        
 
         private async void GetIDAsync()
         {
             ChechYandex();
             try
             {
-
                 List<ID<ObjectiveDto>> list = await yandex.GetObjectivesIdAsync(SelectedProject.dto);
                 StringBuilder message = new StringBuilder();
                 for (int i = 0; i < list.Count; i++)
@@ -112,6 +151,10 @@ namespace MRS.DocumentManagement.Contols
                     message.Append(list[i].ToString());
                 }
                 WinBox.ShowMessage(message.ToString());
+            }
+            catch (FileNotFoundException fileNot)
+            {
+                WinBox.ShowMessage("Папка проекта отсутвует на диске!");
             }
             catch (Exception ex)
             {
@@ -131,21 +174,49 @@ namespace MRS.DocumentManagement.Contols
 
                 //foreach (var item in objs)
                 //{
-                    await yandex.UploadObjectiveAsync(SelectedObjective.dto, SelectedProject.dto);
-                    //ProgressValue++;
+                await yandex.UploadObjectiveAsync(SelectedObjective.dto, SelectedProject.dto);
+                //ProgressValue++;
                 //}
                 //ProgressVisible = false;
             }
+        }
+
+        public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static (ObjectiveDto objective, ProjectDto project) GetObjective(ID<ObjectiveDto> id)
+        {
+            var projects = ObjectModel.GetProjects();
+            foreach (var project in projects)
+            {
+                var dir = PathManager.GetObjectivesDir(project);
+                DirectoryInfo dirInfoObj = new DirectoryInfo(dir);
+                if (dirInfoObj.Exists)
+                {
+                    foreach (var item in dirInfoObj.GetFiles())
+                    {
+                        if (PathManager.TryParseObjectiveId(item.Name, out ID<ObjectiveDto> _id) && id == _id)
+                        {
+                            var json = File.ReadAllText(item.FullName);
+                            ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
+                            return (objective, project);
+                        }
+                    }
+                }
+            }
+            return (null, null);
         }
 
         private async void DownloadFromServerAsync()
         {
             ChechYandex();
             if (WinBox.ShowInput(
-                title: "Скачивание...", 
-                question: "Введите id оbjective которую надо скачать с диска?", 
-                input: out string text, 
-                okText: "Скачать", 
+                title: "Скачивание...",
+                question: "Введите id оbjective которую надо скачать с диска?",
+                input: out string text,
+                okText: "Скачать",
                 cancelText: "Отмена"))
             {
                 if (int.TryParse(text, out int num))
@@ -194,17 +265,18 @@ namespace MRS.DocumentManagement.Contols
 
         private void UpdateObjective()
         {
-            string objDir = PathManager.GetObjectivesDir(SelectedProject.dto);
-            var list = GetObjectives(SelectedProject.dto);
-            list.Sort((x, y) => ((int)x.ID).CompareTo((int)y.ID));
-
-            Objectives.Clear();
-            foreach (ObjectiveDto item in list)
+            if (SelectedProject != null)
             {
-                Objectives.Add(new ObjectiveModel(item));
+                string objDir = PathManager.GetObjectivesDir(SelectedProject.dto);
+                var list = GetObjectives(SelectedProject.dto);
+                list.Sort((x, y) => ((int)x.ID).CompareTo((int)y.ID));
+
+                Objectives.Clear();
+                foreach (ObjectiveDto item in list)
+                {
+                    Objectives.Add(new ObjectiveModel(item));
+                }
             }
-
-
         }
 
         private void DeleteObjective()
@@ -223,26 +295,18 @@ namespace MRS.DocumentManagement.Contols
         private void CreateObjective()
         {
             ObjectiveModel model = new ObjectiveModel();
-            if (Objectives.Count != 0)
-            {
-                var max = Objectives.Max(x => x.ID);
-                model.ID = max + 1;
-            }
-            else
-                model.ID = 1;
-
+            model.ID = ++Properties.Settings.Default.ObjectiveNextId;
+            Properties.Settings.Default.Save();
             model.ProjectID = SelectedProject.ID;
             model.CreationDate = DateTime.Now;
             model.DueDate = DateTime.Now;
             model.Title = EditObjective.Title;
             model.Description = EditObjective.Description;
             model.Status = ObjectiveStatus.Undefined;
-            //obj.TaskType = new ObjectiveTypeDto();
+            //obj.TaskType = new ObjectiveTypeDto();            
 
             Objectives.Add(model);
-            if (Objectives.Count == 0)
-                SaveObjectiveOffline();
-            SetObjective(SelectedProject.dto, model.dto);
+            SaveObjective(SelectedProject.dto, model.dto);
         }
 
         private void SaveObjectiveOffline()
@@ -253,18 +317,28 @@ namespace MRS.DocumentManagement.Contols
 
         private void UpdateProjects()
         {
+            ObjectModel.UpdateProject();
+            //List<ProjectDto> collection = ObjectModel.GetProjects();
 
-            List<ProjectDto> collection = ProjectViewModel.GetProjects();
-
-            Projects.Clear();
-            foreach (ProjectDto item in collection)
-            {
-                Projects.Add(new ProjectModel(item));
-            }
-            SelectedProject = Projects.First();
+            //Projects.Clear();
+            //foreach (ProjectDto item in collection)
+            //{
+            //    Projects.Add(new ProjectModel(item));
+            //}
+            //if (Projects.Count != 0)
+            //    SelectedProject = Projects.First();
         }
 
         public static void SetObjectives(List<ObjectiveDto> objectives, ProjectDto project)
+        {
+            foreach (var objective in objectives)
+            {
+                SaveObjective(project, objective);
+            }
+
+        }
+
+        public static void SaveObjective(ProjectDto project, ObjectiveDto objective)
         {
             string dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
@@ -272,15 +346,6 @@ namespace MRS.DocumentManagement.Contols
             string dirObj = PathManager.GetObjectivesDir(project);
             if (!Directory.Exists(dirObj)) Directory.CreateDirectory(dirObj);
 
-            foreach (var objective in objectives)
-            {
-                SetObjective(project, objective);
-            }
-
-        }
-
-        private static void SetObjective(ProjectDto project, ObjectiveDto objective)
-        {
             string filename = PathManager.GetObjectiveFile(project, objective);
             var json = JsonConvert.SerializeObject(objective, Formatting.Indented);
             File.WriteAllText(filename, json);
@@ -289,8 +354,6 @@ namespace MRS.DocumentManagement.Contols
         public static List<ObjectiveDto> GetObjectives(ProjectDto project)
         {
             var result = new List<ObjectiveDto>();
-            //try
-            //{
 
             string dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) return result;
@@ -309,11 +372,6 @@ namespace MRS.DocumentManagement.Contols
                     result.Add(objective);
                 }
             }
-            //}
-            //catch (Exception ex)
-            //{
-            //    OpenHelper.LoadExeption(ex, fileName);
-            //}
             return result;
         }
 
@@ -330,7 +388,7 @@ namespace MRS.DocumentManagement.Contols
             string[] names;
             string[] discriptions;
 
-            string namesFile =  "Names.txt";
+            string namesFile = "Names.txt";
             if (!File.Exists(namesFile))
             {
                 if (WinBox.ShowQuestion("Файл с именами не существует создать его?"))
@@ -344,7 +402,7 @@ namespace MRS.DocumentManagement.Contols
                 names = File.ReadAllLines(namesFile);
             }
 
-            string discriptionsFile =  "Discriptions.txt";
+            string discriptionsFile = "Discriptions.txt";
             if (!File.Exists(discriptionsFile))
             {
                 if (WinBox.ShowQuestion("Файл с описаниями не существует создать его?"))
@@ -364,13 +422,8 @@ namespace MRS.DocumentManagement.Contols
             for (int i = 0; i < obj; i++)
             {
                 ObjectiveModel model = new ObjectiveModel();
-                if (Objectives.Count != 0)
-                {
-                    var max = Objectives.Max(x => x.ID);
-                    model.ID = max + 1;
-                }
-                else
-                    model.ID = 1;
+                
+                model.ID = Properties.Settings.Default.ObjectiveNextId++;
 
                 model.ProjectID = SelectedProject.ID;
                 model.CreationDate = DateTime.Now;
@@ -384,13 +437,13 @@ namespace MRS.DocumentManagement.Contols
                 model.Description = discriptions[index];
 
                 model.Status = (ObjectiveStatus)random.Next(0, 4);
-
                 Objectives.Add(model);
             }
+                Properties.Settings.Default.Save();
             SaveObjectiveOffline();
         }
 
-        
+
 
         private void ChechYandex()
         {

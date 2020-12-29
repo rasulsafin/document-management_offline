@@ -105,7 +105,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #endregion
         #region Content
 
-        public async Task<bool> SetContetnAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
+        public async Task<bool> SetContentAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
@@ -153,7 +153,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
             return false;
         }
-        public async Task<string> GetContetnAsync(string path, Action<ulong, ulong> updateProgress = null)
+        /// <summary>
+        /// Скачивает файл и возвращает его содержимое
+        /// </summary>
+        /// <param name="path"> путь к файлу</param>
+        /// <param name="updateProgress"></param>
+        /// <returns></returns>
+        /// <exception cref="DirectoryNotFoundException">Директория не создана, не могу прочитать файл</exception>
+        /// <exception cref="FileNotFoundException">Файл не существует</exception>
+        public async Task<string> GetContentAsync(string path, Action<ulong, ulong> updateProgress = null)
         {
             try
             {
@@ -184,7 +192,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
             catch (DirectoryNotFoundException)
             {
-                logger.Message($"Директория не создана, не могу записать файл");
+                logger.Message($"Директория не создана, не могу прочитать файл");
                 throw;
             }
             catch (Exception ex)

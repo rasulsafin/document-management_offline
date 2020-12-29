@@ -40,17 +40,18 @@
                     На диске
                 </CheckBox>-->
             </WrapPanel>
-            <!--<Expander Header="Offline" IsExpanded="False">
+            <Expander Header="Offline" IsExpanded="False">
                 <StackPanel>
-                    <TextBlock Text="{Binding StatusOperation, UpdateSourceTrigger=PropertyChanged}"/>
+                    <!--<TextBlock Text="{Binding StatusOperation, UpdateSourceTrigger=PropertyChanged}"/>-->
                     <WrapPanel>
-                        <Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>
-                        <Button Command="{Binding LoadObjectiveOfflineCommand}">Загрузить задания</Button>
-                        <Button Command="{Binding SaveObjectiveOfflineCommand}">Записать задания</Button>
-                        <Button Command="{Binding OpenFileOfflineCommand}">Открыть файл</Button>
+                        <Button Command="{Binding GetObjectiveForIdCommand}">Открыть по ID</Button>
+                        <!--<Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>-->
+                        <!--<Button Command="{Binding LoadObjectiveOfflineCommand}">Загрузить задания</Button>-->
+                        <!--<Button Command="{Binding SaveObjectiveOfflineCommand}">Записать задания</Button>-->
+                        <!--<Button Command="{Binding OpenFileOfflineCommand}">Открыть файл</Button>-->
                     </WrapPanel>
                 </StackPanel>
-            </Expander>-->
+            </Expander>
             <Expander Header="Add and Edit " IsExpanded="False">
                 <StackPanel x:Name="add">
                     <StackPanel HorizontalAlignment="Left">
@@ -122,6 +123,6 @@
             </ListBox.ItemTemplate>
 
         </ListBox>
-        <GridSplitter Grid.Column="1" Width="3" Margin="3"/>
+        <GridSplitter Grid.Column="1" Width="3" Margin="3"  HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>
