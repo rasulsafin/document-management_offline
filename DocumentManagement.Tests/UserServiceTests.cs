@@ -6,18 +6,72 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Services;
+using AutoMapper;
+using MRS.DocumentManagement.Utility;
+using Microsoft.EntityFrameworkCore;
 
 namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class UserServiceTests
     {
+        private static readonly User BOHR_USER = new User
+        {
+            Login = "NBohr",
+            Name = "Nils Bohr",
+            PasswordHash = new byte[10],
+            PasswordSalt = new byte[5]
+        };
+        private static readonly User HEISENBERG_USER = new User
+        {
+            Login = "IAmTheDangerous",
+            Name = "Werner Heisenberg",
+            PasswordHash = new byte[10],
+            PasswordSalt = new byte[5]
+        };
+        private static readonly User SCHREDINGER_USER = new User
+        {
+            Login = "loveDogs1932",
+            Name = "Ervin Schredinger",
+            PasswordHash = new byte[10],
+            PasswordSalt = new byte[5]
+        };
+        private static readonly User PAULI_USER = new User
+        {
+            Login = "principlesHater",
+            Name = "Wolfgang Pauli",
+            PasswordHash = new byte[10],
+            PasswordSalt = new byte[5]
+        };
+
         public static SharedDatabaseFixture Fixture { get; private set; }
 
+        private static UserService service;
+        private static IMapper mapper;
+
         [ClassInitialize]
-        public static async Task Setup(TestContext _)
+        public static void Setup(TestContext _)
         {
-            Fixture = new SharedDatabaseFixture();
+            var mapperConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+            mapper = mapperConfig.CreateMapper();
+
+            Fixture = new SharedDatabaseFixture(context =>
+            {
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+                //context.Database.Migrate();
+
+                //context.Users.RemoveRange(DEFAULT_USERS);
+                context.Users.AddRange(PAULI_USER, SCHREDINGER_USER, HEISENBERG_USER, BOHR_USER);
+                context.SaveChanges();
+            });
+
+            service = new UserService(Fixture.Context, mapper);
         }
 
         [ClassCleanup]
@@ -27,270 +81,312 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Check_get_current_user()
+        public async Task ExistsId_ExistingUser_ReturnsTrue()
         {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            var existingUser = Fixture.Context.Users.FirstOrDefault();
+            var existingUserId = new ID<UserDto>(existingUser.ID);
 
-                var comparer = new UserComparer(ignoreIDs: true);
-                var current = new UserDto((ID<UserDto>)0, "vpupkin", "Vasily Pupkin");
-                Assert.IsTrue(comparer.Equals(access.CurrentUser, current));
-            }
+            var result = await service.Exists(existingUserId);
+
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
-        public async Task Can_not_add_user_with_duplicate_login()
+        public async Task ExistsId_NotExistingUser_ReturnsFalse()
         {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            var notExistingUserId = ID<UserDto>.InvalidID;
 
-                await access.UserService.Add(new UserToCreateDto("vpupkin", "312", "Vladimir Pupkin"));
-                Assert.Fail();
-            }
+            var result = await service.Exists(notExistingUserId);
+
+            Assert.IsFalse(result);
         }
 
         [TestMethod]
-        public async Task Are_user_specific_roles_deleted_when_user_is_deleted()
+        public async Task ExistsLogin_ExistingUser_ReturnsTrue()
         {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-                Assert.IsNotNull(access.AuthorizationService);
+            var existingUser = Fixture.Context.Users.FirstOrDefault();
+            var existingUserLogin = existingUser.Login;
 
-                var userService = access.UserService;
-                var auth = access.AuthorizationService;
-                // 0. Assign initial roles
-                await auth.AddRole(access.CurrentUser.ID, "admin");
-                await auth.AddRole(access.CurrentUser.ID, "cook");
+            var result = await service.Exists(existingUserLogin);
 
-                var userID = await userService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
-                Assert.IsTrue(await auth.AddRole(userID, "operator"));
-                Assert.IsTrue(await auth.AddRole(userID, "cook"));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator", "cook" }, (await auth.GetAllRoles()).ToArray());
-
-                // 1. Remove user - operator role should be deleted
-                Assert.IsTrue(await userService.Delete(userID));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "cook" }, (await auth.GetAllRoles()).ToArray());
-            }
+            Assert.IsTrue(result);
         }
 
         [TestMethod]
-        public async Task Can_add_and_remove_new_users()
+        public async Task ExistsLogin_NotExistingUser_ReturnsFalse()
         {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-                Assert.IsNotNull(access.UserService);
+            var notExistingUserLogin = "dsgfsdgsgfsgreg4334g";
 
-                var userService = access.UserService;
+            var result = await service.Exists(notExistingUserLogin);
 
-                var userCreds = new List<UserToCreateDto>
-                {
-                    new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"),
-                    new UserToCreateDto("itaranov", "321", "Ivan Taranov"),
-                    new UserToCreateDto("ppshezdetsky", "333", "Pshek Pshezdetsky")
-                };
-
-                // Add new users
-                var userID1 = await userService.Add(userCreds[1]);
-                var userID2 = await userService.Add(userCreds[2]);
-
-                Assert.IsTrue(userID1.IsValid);
-                Assert.IsTrue(userID2.IsValid);
-
-                var users = await userService.GetAllUsers();
-                Assert.AreEqual(3, users.Count());
-                foreach (var user in users)
-                {
-                    var creds = userCreds.Single(x => x.Login == user.Login);
-                    Assert.AreEqual(creds.Name, user.Name);
-                }
-
-                // Remove first user
-                Assert.IsTrue(await userService.Delete(userID1));
-                Assert.AreEqual(2, (await userService.GetAllUsers()).Count());
-
-                // Try remove already removed user
-                Assert.IsFalse(await userService.Delete(userID1));
-                Assert.AreEqual(2, (await userService.GetAllUsers()).Count());
-
-                // Remove second user
-                Assert.IsTrue(await userService.Delete(userID2));
-                Assert.AreEqual(1, (await userService.GetAllUsers()).Count());
-            }
+            Assert.IsFalse(result);
         }
 
-        [TestMethod]
-        public async Task Can_user_delete_himself()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //[TestMethod]
+        //public async Task Check_get_current_user()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var result = await access.UserService.Delete(access.CurrentUser.ID);
-                Assert.IsTrue(result);
+        //        var comparer = new UserComparer(ignoreIDs: true);
+        //        var current = new UserDto((ID<UserDto>)0, "vpupkin", "Vasily Pupkin");
+        //        Assert.IsTrue(comparer.Equals(access.CurrentUser, current));
+        //    }
+        //}
 
-                var comparer = new UserComparer(ignoreIDs: false);
-                Assert.IsTrue(comparer.Equals(access.CurrentUser, UserDto.Anonymous));
+        //[TestMethod]
+        //[ExpectedException(typeof(InvalidDataException))]
+        //public async Task Can_not_add_user_with_duplicate_login()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var roles = await access.AuthorizationService.GetUserRoles(access.CurrentUser.ID);
-                Assert.IsTrue(roles.Count() == 0);
-            }
-        }
+        //        await access.UserService.Add(new UserToCreateDto("vpupkin", "312", "Vladimir Pupkin"));
+        //        Assert.Fail();
+        //    }
+        //}
 
-        [TestMethod]
-        public async Task Can_update_self_user_data()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //[TestMethod]
+        //public async Task Are_user_specific_roles_deleted_when_user_is_deleted()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        Assert.IsNotNull(access.AuthorizationService);
 
-                await access.UserService.Update(new UserDto(access.CurrentUser.ID, "vpopkin", "Vasily Popkin"));
+        //        var userService = access.UserService;
+        //        var auth = access.AuthorizationService;
+        //        // 0. Assign initial roles
+        //        await auth.AddRole(access.CurrentUser.ID, "admin");
+        //        await auth.AddRole(access.CurrentUser.ID, "cook");
 
-                Assert.AreEqual("vpopkin", access.CurrentUser.Login);
-                Assert.AreEqual("Vasily Popkin", access.CurrentUser.Name);
-            }
-        }
+        //        var userID = await userService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //        Assert.IsTrue(await auth.AddRole(userID, "operator"));
+        //        Assert.IsTrue(await auth.AddRole(userID, "cook"));
+        //        CollectionAssert.AreEquivalent(new string[] { "admin", "operator", "cook" }, (await auth.GetAllRoles()).ToArray());
 
-        [TestMethod]
-        public async Task Can_update_another_user_data()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        // 1. Remove user - operator role should be deleted
+        //        Assert.IsTrue(await userService.Delete(userID));
+        //        CollectionAssert.AreEquivalent(new string[] { "admin", "cook" }, (await auth.GetAllRoles()).ToArray());
+        //    }
+        //}
 
-                var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //[TestMethod]
+        //public async Task Can_add_and_remove_new_users()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        Assert.IsNotNull(access.UserService);
 
-                Assert.IsTrue(await access.UserService.Exists("itaranov"));
-                Assert.IsFalse(await access.UserService.Exists("bwillis"));
+        //        var userService = access.UserService;
 
-                await access.UserService.Update(new UserDto(userID, "bwillis", "Bruce Willis"));
+        //        var userCreds = new List<UserToCreateDto>
+        //        {
+        //            new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"),
+        //            new UserToCreateDto("itaranov", "321", "Ivan Taranov"),
+        //            new UserToCreateDto("ppshezdetsky", "333", "Pshek Pshezdetsky")
+        //        };
 
-                Assert.IsFalse(await access.UserService.Exists("itaranov"));
-                Assert.IsTrue(await access.UserService.Exists("bwillis"));
-            }
-        }
+        //        // Add new users
+        //        var userID1 = await userService.Add(userCreds[1]);
+        //        var userID2 = await userService.Add(userCreds[2]);
 
-        [TestMethod]
-        public async Task Can_verify_password()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        Assert.IsTrue(userID1.IsValid);
+        //        Assert.IsTrue(userID2.IsValid);
 
-                Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "123"));
-                Assert.IsFalse(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
-            }
-        }
+        //        var users = await userService.GetAllUsers();
+        //        Assert.AreEqual(3, users.Count());
+        //        foreach (var user in users)
+        //        {
+        //            var creds = userCreds.Single(x => x.Login == user.Login);
+        //            Assert.AreEqual(creds.Name, user.Name);
+        //        }
 
-        [TestMethod]
-        public async Task Can_update_password()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        // Remove first user
+        //        Assert.IsTrue(await userService.Delete(userID1));
+        //        Assert.AreEqual(2, (await userService.GetAllUsers()).Count());
 
-                await access.UserService.UpdatePassword(access.CurrentUser.ID, "321");
-                Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
-                Assert.IsFalse(await access.UserService.VerifyPassword(access.CurrentUser.ID, "123"));
-            }
-        }
+        //        // Try remove already removed user
+        //        Assert.IsFalse(await userService.Delete(userID1));
+        //        Assert.AreEqual(2, (await userService.GetAllUsers()).Count());
 
-        [TestMethod]
-        public async Task Can_find_by_id()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        // Remove second user
+        //        Assert.IsTrue(await userService.Delete(userID2));
+        //        Assert.AreEqual(1, (await userService.GetAllUsers()).Count());
+        //    }
+        //}
 
-                var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //[TestMethod]
+        //public async Task Can_user_delete_himself()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                var user = await access.UserService.Find(userID);
-                Assert.AreEqual("itaranov", user.Login);
-                Assert.AreEqual("Ivan Taranov", user.Name);
-            }
-        }
+        //        var result = await access.UserService.Delete(access.CurrentUser.ID);
+        //        Assert.IsTrue(result);
 
-        [TestMethod]
-        public async Task Can_find_by_login()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        var comparer = new UserComparer(ignoreIDs: false);
+        //        Assert.IsTrue(comparer.Equals(access.CurrentUser, UserDto.Anonymous));
 
-                var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //        var roles = await access.AuthorizationService.GetUserRoles(access.CurrentUser.ID);
+        //        Assert.IsTrue(roles.Count() == 0);
+        //    }
+        //}
 
-                var user = await access.UserService.Find("itaranov");
-                Assert.AreEqual("itaranov", user.Login);
-                Assert.AreEqual("Ivan Taranov", user.Name);
-            }
-        }
+        //[TestMethod]
+        //public async Task Can_update_self_user_data()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-        [TestMethod]
-        public async Task Can_check_existing_by_id()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        await access.UserService.Update(new UserDto(access.CurrentUser.ID, "vpopkin", "Vasily Popkin"));
 
-                Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
+        //        Assert.AreEqual("vpopkin", access.CurrentUser.Login);
+        //        Assert.AreEqual("Vasily Popkin", access.CurrentUser.Name);
+        //    }
+        //}
 
-                var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //[TestMethod]
+        //public async Task Can_update_another_user_data()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
-                Assert.IsTrue(await access.UserService.Exists(userID));
+        //        var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
 
-                await access.UserService.Delete(userID);
+        //        Assert.IsTrue(await access.UserService.Exists("itaranov"));
+        //        Assert.IsFalse(await access.UserService.Exists("bwillis"));
 
-                Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
-                Assert.IsFalse(await access.UserService.Exists(userID));
-            }
-        }
+        //        await access.UserService.Update(new UserDto(userID, "bwillis", "Bruce Willis"));
 
-        [TestMethod]
-        public async Task Can_check_existing_by_login()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
-            {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        //        Assert.IsFalse(await access.UserService.Exists("itaranov"));
+        //        Assert.IsTrue(await access.UserService.Exists("bwillis"));
+        //    }
+        //}
 
-                Assert.IsTrue(await access.UserService.Exists("vpupkin"));
-                Assert.IsFalse(await access.UserService.Exists("itaranov"));
+        //[TestMethod]
+        //public async Task Can_verify_password()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
 
-                await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+        //        Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "123"));
+        //        Assert.IsFalse(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
+        //    }
+        //}
 
-                Assert.IsTrue(await access.UserService.Exists("vpupkin"));
-                Assert.IsTrue(await access.UserService.Exists("itaranov"));
-            }
-        }
+        //[TestMethod]
+        //public async Task Can_update_password()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+
+        //        await access.UserService.UpdatePassword(access.CurrentUser.ID, "321");
+        //        Assert.IsTrue(await access.UserService.VerifyPassword(access.CurrentUser.ID, "321"));
+        //        Assert.IsFalse(await access.UserService.VerifyPassword(access.CurrentUser.ID, "123"));
+        //    }
+        //}
+
+        //[TestMethod]
+        //public async Task Can_find_by_id()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+
+        //        var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+
+        //        var user = await access.UserService.Find(userID);
+        //        Assert.AreEqual("itaranov", user.Login);
+        //        Assert.AreEqual("Ivan Taranov", user.Name);
+        //    }
+        //}
+
+        //[TestMethod]
+        //public async Task Can_find_by_login()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+
+        //        var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+
+        //        var user = await access.UserService.Find("itaranov");
+        //        Assert.AreEqual("itaranov", user.Login);
+        //        Assert.AreEqual("Ivan Taranov", user.Name);
+        //    }
+        //}
+
+        //[TestMethod]
+        //public async Task Can_check_existing_by_id()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+
+        //        Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
+
+        //        var userID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+
+        //        Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
+        //        Assert.IsTrue(await access.UserService.Exists(userID));
+
+        //        await access.UserService.Delete(userID);
+
+        //        Assert.IsTrue(await access.UserService.Exists(access.CurrentUser.ID));
+        //        Assert.IsFalse(await access.UserService.Exists(userID));
+        //    }
+        //}
+
+        //[TestMethod]
+        //public async Task Can_check_existing_by_login()
+        //{
+        //    using var transaction = Fixture.Connection.BeginTransaction();
+        //    using (var context = Fixture.CreateContext(transaction))
+        //    {
+        //        var api = new DocumentManagementApi(context);
+        //        var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+
+        //        Assert.IsTrue(await access.UserService.Exists("vpupkin"));
+        //        Assert.IsFalse(await access.UserService.Exists("itaranov"));
+
+        //        await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
+
+        //        Assert.IsTrue(await access.UserService.Exists("vpupkin"));
+        //        Assert.IsTrue(await access.UserService.Exists("itaranov"));
+        //    }
+        //}
     }
 }
