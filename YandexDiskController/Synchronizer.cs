@@ -5,7 +5,6 @@ using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,31 +13,83 @@ namespace MRS.DocumentManagement
 {
     public class Synchronizer
     {
-        private YandexDiskManager yandex;
+        public delegate void AddTransactionDelegate();
+        public event AddTransactionDelegate TransactionsChange;
 
-        public ObservableCollection<TransactionModel> Transactions { get; private set; } = new ObservableCollection<TransactionModel>();
+        public delegate void ProgressChangeDelegate(int current, int total);
+        public event ProgressChangeDelegate ProgressChange;
+
+        private YandexDiskManager yandex;
+        private int total;
+        private int current;
+
+
+        public List<Transaction> Transactions { get; private set; } = new List<Transaction>();
         public ulong Revision { get; private set; }
+        public YandexDiskManager Yandex { get => yandex; set => yandex = value; }
+        public bool Synchronize { get; private set; }
 
         public void AddTransaction(TransType type, ID<ProjectDto> id)
         {
-            Transactions.Add(new TransactionModel() { Type = type, Table = Table.Project, Id = (int)id, Rev = 0 });
+            if (Synchronize) return;
+            Transactions.Add(new Transaction() { Type = type, Table = Table.Project, IdObject = (int)id, Rev = 0 });
+            TransactionsChange();
+            Save(); 
         }
         public void AddTransaction(TransType type, ID<ObjectiveDto> id)
         {
-            Transactions.Add(new TransactionModel() { Type = type, Table = Table.Objective, Id = (int)id, Rev = 0 });
+            if (Synchronize) return;
+            Transactions.Add(new Transaction() { Type = type, Table = Table.Objective, IdObject = (int)id, Rev = 0 });
+            TransactionsChange();
+            Save();
         }
         public void AddTransaction(TransType type, ID<ItemDto> id)
         {
-            Transactions.Add(new TransactionModel() { Type = type, Table = Table.Item, Id = (int)id, Rev = 0 });
+            if (Synchronize) return;
+            Transactions.Add(new Transaction() { Type = type, Table = Table.Item, IdObject = (int)id, Rev = 0 });
+            TransactionsChange();
+            Save();
         }
-        internal async Task<ulong> GetRevisionServerAsync()
+        public async Task<ulong> GetRevisionServerAsync()
         {
-            ChechYandex();
-            Revision = await yandex.GetRevisionAsync();
-            return Revision;
+            return await yandex.GetRevisionAsync();
         }
 
-        private async Task SinchrinizeToServerAsync(Transaction transaction)
+        /// <summary>
+        /// Производит синхронизвцию 
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException">При попытки синхронизации до завершения инициализации</exception>
+        public async Task SynchronizeAsync(ProgressChangeDelegate progressChange)
+        {
+            // 1 Определить список операций Входящих с сервера
+            // 2 Примерить список опрераций входящих с сервера
+            // 3 Определить список операции исходящих на сервер
+            // 4 Применить список операции исходящих на сервер
+            // 5 Добавиь на сервер новые операции
+            // 6 Присвоить ревизии новый номер
+            Synchronize = true;
+            ProgressChange = progressChange;
+            if (yandex == null)
+                throw new ArgumentNullException("Токен не получен, инициализация не завершена!");
+
+            ulong revision = await yandex.GetRevisionAsync();
+            List<Transaction> serverTran = await GetTransactionsServerAsync(revision);
+            List<Transaction> localTran = GetTransactionsLocal(revision);
+            total = serverTran.Count + localTran.Count;
+            current = 0;
+            if (serverTran.Count != 0)
+            {
+                await ApplyTransactionsServerAsync(serverTran);
+                Revision = revision;
+            }
+            if (localTran.Count != 0)
+                await ApplyTransactionsLocalAsync(localTran);
+            Save();
+            Synchronize = false;
+        }
+
+        private async Task SynchronizeToServerAsync(Transaction transaction)
         {
             switch (transaction.Table)
             {
@@ -54,46 +105,48 @@ namespace MRS.DocumentManagement
         {
             var id = new ID<ItemDto>(transaction.IdObject);
             if (transaction.Type == TransType.Update)
-            {
-                //
-                // TODO: Найти проект и нужное задание и item по id на сервере
-                //
-                ProjectDto project = null;
-                ObjectiveDto objective = null;
-                ItemDto item = null;
+            {                
+                (ItemDto item, ObjectiveDto objective, ProjectDto project) = await yandex.GetItemAsync(id);
+                string path = PathManager.GetProjectDir(project);
+                await yandex.DownloadItems(item, path);
                 ObjectModel.SaveItem(item, project, objective);
             }
             else if (transaction.Type == TransType.Delete)
             {
-                //
-                // TODO: Найти проект и нужное задание и item по id но уже на компе
-                //
-                ProjectDto project = null;
-                ObjectiveDto objective = null;
-                ItemDto item = null;
+                (ItemDto item, ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem(id);
                 ObjectModel.DeleteItem(item, project, objective);
             }
         }
+
+
+
         private async Task SinchrinizeObjectiveToServerAsync(Transaction transaction)
         {
             var id = new ID<ObjectiveDto>(transaction.IdObject);
             if (transaction.Type == TransType.Update)
             {
-                //
-                // TODO: Найти проект и нужное задание по id на сервере
-                //
-                ProjectDto project = null;
-                ObjectiveDto objective = null;
-                ObjectModel.SaveObjective(project, objective);
+                (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective(id);
+                if (project == null)
+                {// Значит идем сложным путём
+                    var ids = await yandex.GetProjectsIdAsync();
+                    foreach (var idProj in ids)
+                    {
+                        var proj = await yandex.GetProjectAsync(idProj);
+                        var objec = await yandex.GetObjectiveAsync(proj, id);
+                        if (objec != null)
+                        {
+                            project = proj;
+                            objective = objec;
+                        }
+                    }
+                }
+                    ObjectModel.SaveObjective(objective, project);
             }
             else if (transaction.Type == TransType.Delete)
             {
-                //
-                // TODO: Найти проект и нужное задание по id но уже на компе
-                //
-                ProjectDto project = null;
-                ObjectiveDto objective = null;
-                ObjectModel.DeleteObjective(project, objective);
+                (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective(id);
+                if (project != null)
+                    ObjectModel.DeleteObjective(objective, project);
             }
         }
 
@@ -111,29 +164,50 @@ namespace MRS.DocumentManagement
             }
         }
 
-        private async Task SinchrinizeFromServerAsync(Transaction transaction)
+        /// <summary>
+        /// Применяет одно изменение на закачивая его на сервер 
+        /// </summary>
+        /// <param name="transaction"></param>
+        /// <returns></returns>
+        private async Task SynchrinizeFromServerAsync(Transaction transaction)
         {
             switch (transaction.Table)
             {
-                case Table.Project: await SinchrinizeProjectFromServerAsync(transaction); break;
-                case Table.Objective: await SinchrinizeObjectiveFromServerAsync(transaction); break;
-                case Table.Item: await SinchrinizeItemFromServerAsync(transaction); break;
+                case Table.Project: await SynchrinizeProjectFromServerAsync(transaction); break;
+                case Table.Objective: await SynchrinizeObjectiveFromServerAsync(transaction); break;
+                case Table.Item: await SynchrinizeItemFromServerAsync(transaction); break;
                 default:
                     throw new ArgumentException();
             }
         }
 
-        private Task SinchrinizeItemFromServerAsync(Transaction transaction)
+        private async Task SynchrinizeItemFromServerAsync(Transaction transaction)
         {
-            throw new NotImplementedException();
+            var id = new ID<ItemDto>(transaction.IdObject);
+            if (transaction.Type == TransType.Update)
+            {
+                (ItemDto items, ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem(id);
+                if (project != null)
+                {
+                    await yandex.UploadItemAsync(items, project, objective);
+                    transaction.Sync = true;
+                }
+            }
+            else if (transaction.Type == TransType.Delete)
+            {
+                (ItemDto item, ObjectiveDto objective, ProjectDto project) = await yandex.GetItemAsync(id);
+                        
+                if (project != null)
+                    await yandex.DeleteItem(id, project, objective);
+            }
         }
 
-        private async Task SinchrinizeObjectiveFromServerAsync(Transaction transaction)
+        private async Task SynchrinizeObjectiveFromServerAsync(Transaction transaction)
         {
             var id = new ID<ObjectiveDto>(transaction.IdObject);
             if (transaction.Type == TransType.Update)
             {
-                (ObjectiveDto objective, ProjectDto project) = ObjectiveViewModel.GetObjective(id);
+                (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective(id);
                 if (project != null)
                     await yandex.UploadObjectiveAsync(objective, project);
             }
@@ -149,12 +223,14 @@ namespace MRS.DocumentManagement
                         //
                         // TODO : Надо удалить все Items
                         //
+
+                        break;
                     }
                 }
             }
         }
 
-        private async Task SinchrinizeProjectFromServerAsync(Transaction transaction)
+        private async Task SynchrinizeProjectFromServerAsync(Transaction transaction)
         {
             var id = new ID<ProjectDto>(transaction.IdObject);
             ProjectDto project = await yandex.GetProjectAsync(id);
@@ -181,18 +257,34 @@ namespace MRS.DocumentManagement
             }
         }
 
-        internal async Task SynchronizeAsync()
+
+
+        /// <summary>
+        /// Примерить список опрераций входящих с сервера
+        /// </summary>
+        /// <param name="serverTran"></param>
+        private async Task ApplyTransactionsServerAsync(List<Transaction> transactions)
         {
-            string dirTrans = PathManager.GetTransactionsDir();
-            if (!Directory.Exists(dirTrans)) Directory.CreateDirectory(dirTrans);
-            ChechYandex();
-            ulong revision = await yandex.GetRevisionAsync();
-            List<Transaction> transactions = Transactions.Where(t => t.Rev == 0).Select(t => t.Transaction).ToList();
+            transactions.Sort((x, y) => x.Table.CompareTo(y.Table));
+            foreach (var transaction in transactions)
+            {
+                await SynchronizeToServerAsync(transaction);
+                current++;
+                ProgressChange?.Invoke(current, total);
+            }
+        }
+
+        /// <summary>
+        /// Определить список операций Входящих с сервера
+        /// </summary>
+        /// <returns></returns>
+        private async Task<List<Transaction>> GetTransactionsServerAsync(ulong revision)
+        {
+            List<Transaction> transactions = new List<Transaction>();
             if (revision > Revision)
             {
                 // Скачиваем изменения с сервера
                 List<DateTime> dates = await yandex.GetRevisionsDatesAsync();
-                List<Transaction> serverTransactions = new List<Transaction>();
                 foreach (var date in dates)
                 {
                     var trans = await yandex.GetTransactionsAsync(date);
@@ -201,7 +293,8 @@ namespace MRS.DocumentManagement
                     {
                         if (tran.Rev > Revision)
                         {
-                            serverTransactions.Add(tran);
+                            tran.Server = true;
+                            transactions.Add(tran);
                         }
                         else
                         {
@@ -209,81 +302,130 @@ namespace MRS.DocumentManagement
                             break;
                         }
                     }
+                    SaveTrans(trans, date);
                     if (stop) break;
                 }
-                // Пирменяем изменения сервера
-                foreach (var transaction in serverTransactions)
-                {
-                    await SinchrinizeToServerAsync(transaction);
-                }
-
             }
-            if (transactions.Count > 0)
-            {
-                foreach (var transaction in transactions)
-                {
-                    await SinchrinizeFromServerAsync(transaction);
-                }
-                List<Transaction> serverTranNow = await yandex.GetTransactionsAsync(DateTime.Now);
-                serverTranNow.AddRange(transactions);
-                await yandex.SetTransactionsAsync(DateTime.Now, serverTranNow);
-                //revision++;
-
-                Revision = ++revision;
-                yandex.SetRevisionAsync(Revision);
-                serverTranNow.ForEach(x => x.Rev = revision);
-                string filename = PathManager.GetTransactionFile(DateTime.Now);
-                string json = JsonConvert.SerializeObject(serverTranNow, Formatting.Indented);
-                File.WriteAllText(filename, json);
-                foreach (var item in Transactions.ToArray())
-                {
-                    if (item.Rev != 0)
-                        Transactions.Remove(item);
-                }
-            }
+            //Revision = revision;
+            return transactions;
         }
 
-        private void ChechYandex()
+        /// <summary>
+        /// Применить список операции исходящих на сервер
+        /// Добавиь на сервер новые операции
+        /// Присвоить ревизии новый номер
+        /// </summary>
+        /// <param name="serverTran"></param>
+        private async Task ApplyTransactionsLocalAsync(List<Transaction> transactions)
         {
-            if (yandex == null)
+            Revision = await yandex.GetRevisionAsync() + 1;
+            // Применить список операции исходящих на сервер
+            foreach (var transaction in transactions)
             {
-                yandex = new YandexDiskManager(MainViewModel.AccessToken);
-                yandex.TempDir = MainViewModel.TEMP_DIR;
-                Task.Delay(10);
+                transaction.Rev = Revision;
+                await SynchrinizeFromServerAsync(transaction);
+                transaction.Sync = true;
+                transaction.Server = true;
+                current++;
+                ProgressChange?.Invoke(current, total);
             }
+            //  Добавиь на сервер новые операции
+            List<Transaction> serverTranNow = await yandex.GetTransactionsAsync(DateTime.Now);
+            serverTranNow.AddRange(transactions);
+            await yandex.SetTransactionsAsync(DateTime.Now, serverTranNow);
+            SaveTrans(serverTranNow, DateTime.Now);
+            // Присвоить ревизии новый номер
+            yandex.SetRevisionAsync(Revision);
         }
 
-        public void Load()
+        /// <summary>
+        /// Определить список операции исходящих на сервер
+        /// </summary>
+        /// <returns></returns>
+        private List<Transaction> GetTransactionsLocal(ulong revision)
         {
-            string dirTrans = PathManager.GetTransactionsDir();
-            if (!Directory.Exists(dirTrans)) return;
-            string filename = PathManager.GetRevisionFile();
-            if (File.Exists(filename))
+            List<Transaction> result = new List<Transaction>();
+            var transDir = new DirectoryInfo(PathManager.GetTransactionsDir());
+            foreach (var file in transDir.GetFiles())
             {
-                string text = File.ReadAllText(filename);
-                if (ulong.TryParse(text, out ulong rev))
+                List<Transaction> transaction = GetTransactions(file.FullName);
+                foreach (var trans in transaction)
                 {
-                    Revision = rev;
-                }
-            }
-            filename = PathManager.GetTransactionFile();
-            if (File.Exists(filename))
-            {
-                string jcon = File.ReadAllText(filename);
-                List<TransactionModel> list = JsonConvert.DeserializeObject<List<TransactionModel>>(jcon);
-                foreach (var item in list)
-                {
-                    if (!item.Sync)
+                    if (trans.Rev > revision)
                     {
-                        Transactions.Add(item);
+                        result.Add(trans);
                     }
                 }
             }
+            return Transactions.Where(x => x.Rev == 0 && !x.Server).ToList();
         }
 
 
+        public async Task<List<Transaction>> GetAllTransactionAsync()
+        {
+            List<Transaction> transactions = Transactions.ToList();
+
+            ulong revision = await yandex.GetRevisionAsync();
+            // Скачиваем изменения с сервера
+            List<DateTime> dates = await yandex.GetRevisionsDatesAsync();
+            foreach (var date in dates)
+            {
+                var trans = await yandex.GetTransactionsAsync(date);
+                foreach (var tran in trans)
+                {
+                    tran.Server = true;
+                    transactions.Add(tran);
+                }
+                SaveTrans(trans, date);
+            }
+            return transactions;
+        }
+
+
+
+        public async Task<List<Transaction>> GetNonSyncTransactionAsync()
+        {
+            ulong revision = await yandex.GetRevisionAsync();
+            List<Transaction> transactions = GetTransactionsLocal(revision);
+            List<Transaction> transactionsServer = await GetTransactionsServerAsync(revision);
+            transactions.AddRange(transactionsServer);
+            return transactions;
+        }
+
+
+
+        public void Initialize(string accessToken)
+        {
+            if (yandex == null)
+            {
+                yandex = new YandexDiskManager(accessToken);
+                yandex.TempDir = PathManager.TEMP_DIR;
+                Task.Delay(5000);
+            }
+        }
+        public void Load()
+        {
+            var list = GetLocalTransaction();
+            Transactions.Clear();
+            Transactions.AddRange(list);
+            Revision = GetLocalRevision();
+        }
+
+        private void SaveTrans(List<Transaction> trans, DateTime date)
+        {
+            string dirTrans = PathManager.GetTransactionsDir();
+            if (!Directory.Exists(dirTrans)) Directory.CreateDirectory(dirTrans);
+
+            string filename = PathManager.GetTransactionFile(date);
+
+            string json = JsonConvert.SerializeObject(trans, Formatting.Indented);
+            File.WriteAllText(filename, json);
+        }
+
         public void Save()
         {
+            var list = Transactions.Where(x => x.Rev == 0 && !x.Server).ToList();
+
             string dirTrans = PathManager.GetTransactionsDir();
             if (!Directory.Exists(dirTrans)) Directory.CreateDirectory(dirTrans);
 
@@ -291,8 +433,69 @@ namespace MRS.DocumentManagement
             File.WriteAllText(filename, Revision.ToString());
             filename = PathManager.GetTransactionFile();
 
-            string json = JsonConvert.SerializeObject(Transactions, Formatting.Indented);
+            string json = JsonConvert.SerializeObject(list, Formatting.Indented);
             File.WriteAllText(filename, json);
+        }
+        public List<Transaction> GetLocalTransaction()
+        {
+            string dirTrans = PathManager.GetTransactionsDir();
+            if (Directory.Exists(dirTrans))
+            {
+                string filename = PathManager.GetTransactionFile();
+                if (File.Exists(filename))
+                {
+                    string jcon = File.ReadAllText(filename);
+                    List<Transaction> list = JsonConvert.DeserializeObject<List<Transaction>>(jcon);
+                    return list;
+                }
+            }
+            return new List<Transaction>();
+        }
+
+        public List<Transaction> GetTransactions(DateTime date)
+        {
+            string dirTrans = PathManager.GetTransactionsDir();
+            if (Directory.Exists(dirTrans))
+            {
+                string filename = PathManager.GetTransactionFile(date);
+                return GetTransactions(filename);
+            }
+            return new List<Transaction>();
+        }
+        public List<Transaction> GetTransactions(string filename)
+        {
+            if (File.Exists(filename))
+            {
+                try
+                {
+
+                    string jcon = File.ReadAllText(filename);
+                    List<Transaction> list = JsonConvert.DeserializeObject<List<Transaction>>(jcon);
+                    return list;
+                }
+                catch { }
+                
+            }
+            return new List<Transaction>();
+        }
+
+
+        private ulong GetLocalRevision()
+        {
+            string dirTrans = PathManager.GetTransactionsDir();
+            if (Directory.Exists(dirTrans))
+            {
+                string filename = PathManager.GetRevisionFile();
+                if (File.Exists(filename))
+                {
+                    string text = File.ReadAllText(filename);
+                    if (ulong.TryParse(text, out ulong rev))
+                    {
+                        return rev;
+                    }
+                }
+            }
+            return 0;
         }
     }
 }

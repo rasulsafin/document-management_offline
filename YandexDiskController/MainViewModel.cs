@@ -16,9 +16,10 @@ namespace MRS.DocumentManagement
 {
     
 
-    internal partial class MainViewModel : BaseViewModel
+    internal class MainViewModel : BaseViewModel
     {
-        public static string TEMP_DIR = "Temp";
+        public static string AccessToken { get; private set; }
+        
         public static CoolLogger logger = new CoolLogger("logApp");
 
         #region Binding
@@ -96,6 +97,7 @@ namespace MRS.DocumentManagement
 
         public MainViewModel(Dispatcher dispatcher)
         {
+            if (!Directory.Exists(PathManager.APP_DIR)) Directory.CreateDirectory(PathManager.APP_DIR);
             this.dispatcher = dispatcher;
             instanse = this;
             CreateDirCommand = new HCommand(CreateDir);
@@ -107,10 +109,19 @@ namespace MRS.DocumentManagement
             RefreshCommand = new HCommand(Refresh);
             MoveCommand = new HCommand(Move);
 
+            Auth.LoadActions.Add(Initialize); 
+            //Auth.LoadActions.Add(InitializeManager); 
+
             Auth.StartAuth();
-            if (!Directory.Exists(PathManager.APP_DIR)) Directory.CreateDirectory(PathManager.APP_DIR);
 
             SelectedTab = Properties.Settings.Default.SelectedTab;
+        }
+
+        private void Initialize(string accessToken)
+        {
+            AccessToken = accessToken;
+            controller = new YandexDiskController(AccessToken);
+            RootDir();
         }
 
         public void CloseApp()

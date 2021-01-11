@@ -28,9 +28,11 @@ namespace MRS.DocumentManagement.Contols
         public HCommand CreateCommand { get; }
         public HCommand DeleteCommand { get; private set; }
         public HCommand RenameCommand { get; }
+        public HCommand CreateSampleProjectCommand { get; }
         public HCommand ServerUnloadCommand { get; }
         public HCommand ServerDownloadCommand { get; }
         public HCommand OpenFileCommand { get; }
+        public HCommand ISResetCommand { get; }
         public HCommand UpdateCommand { get; }
         #endregion       
         
@@ -41,13 +43,48 @@ namespace MRS.DocumentManagement.Contols
             UpdateCommand = new HCommand(Update);
             DeleteCommand = new HCommand(DeleteProject);
             RenameCommand = new HCommand(RenameProject);
-            ServerUnloadCommand = new HCommand(ServerUnload);
-            ServerDownloadCommand = new HCommand(ServerDownload);
+
+            CreateSampleProjectCommand = new HCommand(CreateSampleProject);
+            //ServerUnloadCommand = new HCommand(ServerUnload);
+            //ServerDownloadCommand = new HCommand(ServerDownload);
             OpenFileCommand = new HCommand(OpenFile);
-
-            
-
+            ISResetCommand = new HCommand(ISReset);
             Update();
+        }
+
+        private void CreateSampleProject()
+        {
+            string[] names;            
+
+            string namesFile = "ProjectsName.txt";
+            if (!File.Exists(namesFile))
+            {
+                if (WinBox.ShowQuestion("Файл с именами не существует создать его?"))
+                {
+                    OpenHelper.Geany(namesFile);
+                }
+                return;
+            }
+            else
+            {
+                names = File.ReadAllLines(namesFile);
+
+                Random random = new Random();
+                int index = random.Next(0, names.Length);
+                ProjectModel project = new ProjectModel();
+                project.Title = names[index];
+                project.ID = ++Properties.Settings.Default.ProjectNextId;
+                Projects.Add(project);
+                ObjectModel.SaveProject(project.dto);
+                Properties.Settings.Default.Save();
+            }
+
+        }
+
+        private void ISReset()
+        {
+            Properties.Settings.Default.ProjectNextId = 0;
+            Properties.Settings.Default.Save();
         }
 
         private void OpenFile()
@@ -87,7 +124,7 @@ namespace MRS.DocumentManagement.Contols
 
         private void Update()
         {
-            ObjectModel.UpdateProject();                     
+            ObjectModel.UpdateProjects();                     
         }        
 
         private void DeleteProject()
@@ -130,37 +167,26 @@ namespace MRS.DocumentManagement.Contols
 
 
         
-        private async void ServerDownload()
-        {
-            ChechYandex();
-            List<ProjectDto> list = await yandex.DownloadProjects();
+        //private async void ServerDownload()
+        //{
+        //    ChechYandex();
+        //    List<ProjectDto> list = await yandex.DownloadProjects();
 
-            Projects.Clear();
-            foreach (var item in list)
-            {
-                Projects.Add(new ProjectModel(item));
-            }
-        }
+        //    Projects.Clear();
+        //    foreach (var item in list)
+        //    {
+        //        Projects.Add(new ProjectModel(item));
+        //    }
+        //}
 
-        private async void ServerUnload()
-        {
-            ChechYandex();
-            if (SelectProject != null)
-            {
-                await yandex.UnloadProject(SelectProject.dto);
-            }
-
-
-        }
-
-        private void ChechYandex()
-        {
-            if (yandex == null)
-            {
-                yandex = new YandexDiskManager(MainViewModel.AccessToken);
-                yandex.TempDir = MainViewModel.TEMP_DIR;
-            }
-        }
+        //private async void ServerUnload()
+        //{
+        //    ChechYandex();
+        //    if (SelectProject != null)
+        //    {
+        //        await yandex.UnloadProject(SelectProject.dto);
+        //    }
+        //}        
 
     }
 }

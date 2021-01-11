@@ -28,12 +28,13 @@
                                 <TextBlock Text="{Binding ID}"/>
                                 <TextBlock Text=" "/>
                                 <TextBlock Text="{Binding Name}"/>
-                            </StackPanel>
-                            <StackPanel Orientation="Horizontal">
-                                <TextBlock Text="{Binding ExternalItemId}"/>
-                                <TextBlock Text="  "/>
+                                <TextBlock Text="   "/>
                                 <TextBlock Text="{Binding ItemType}"/>
                             </StackPanel>
+                                <TextBlock Text="{Binding ExternalItemId}"/>
+                            <!--<StackPanel Orientation="Horizontal">
+                                <TextBlock Text="  "/>
+                            </StackPanel>-->
                         </StackPanel>
                     </Border>
                 </DataTemplate>
@@ -91,6 +92,8 @@
                         <WrapPanel Orientation="Horizontal">
                             <Button Command="{Binding AddItemsCommand}">Добавить</Button>
                             <Button Command="{Binding DelItemsCommand}">Удалить</Button>
+                            <Button Command="{Binding FindItemIdCommand}">Найти по ID</Button>
+                            <Button Command="{Binding ZeroIdCommand}">Обнулить ID</Button>
                         </WrapPanel>
 
                         <!--<WrapPanel Orientation="Horizontal">

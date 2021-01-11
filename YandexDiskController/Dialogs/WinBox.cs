@@ -41,12 +41,7 @@ namespace WPFStorage.Dialogs
                 model.PressOk = true;
             }
         }
-
-        internal static void ShowMessage(object p)
-        {
-            throw new NotImplementedException();
-        }
-
+        
         /// <summary>
         /// Окно сообщения пользователю, может закрытся через <c>timeout</c> миллисекунд 
         /// </summary>

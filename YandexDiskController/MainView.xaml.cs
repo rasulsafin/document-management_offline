@@ -28,6 +28,7 @@ namespace MRS.DocumentManagement
             InitializeComponent();
             DataContext = Model = new MainViewModel(this.Dispatcher);
             Closed += MainView_Closed;
+            Loaded += Auth.Loaded;
         }
 
         private void MainView_Closed(object sender, EventArgs e)

@@ -1,28 +1,35 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace MRS.DocumentManagement
 {
-    internal partial class MainViewModel
+    public static class Auth
     {
+        private const string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
+        private const string CLIENT_Secret = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
+        public static List<Action<string>> LoadActions = new List<Action<string>>();
+
         public static string AccessToken { get; private set; }
 
-        static class Auth
+        public static async void StartAuth()
         {
-            private const string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
-            private const string CLIENT_Secret = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
+            YandexDiskAuth auth = new YandexDiskAuth();
+            var result = await auth.GetDiskSdkToken();
+            AccessToken = result;            
+        }
 
-            public static async void StartAuth()
+        internal static async void Loaded(object sender, RoutedEventArgs e)
+        {
+            while (AccessToken == null)
+                await Task.Delay(100);
+
+            foreach (var action in LoadActions)
             {
-                YandexDiskAuth auth = new YandexDiskAuth();
-                var result = await auth.GetDiskSdkToken();
-                MainViewModel.AccessToken = result;
-                
-
-                controller = new YandexDiskController(AccessToken);
-                MainViewModel.Instanse.RootDir();
+                action.Invoke(AccessToken);
             }
-            
-        }        
-
+        }
     }
 }

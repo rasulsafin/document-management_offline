@@ -45,6 +45,7 @@
                     <!--<TextBlock Text="{Binding StatusOperation, UpdateSourceTrigger=PropertyChanged}"/>-->
                     <WrapPanel>
                         <Button Command="{Binding GetObjectiveForIdCommand}">Открыть по ID</Button>
+                        <Button Command="{Binding ZeroIdCommand}">Обнулить ID</Button>
                         <!--<Button Command="{Binding LoadProjectOfflineCommand}">Загрузить проекты</Button>-->
                         <!--<Button Command="{Binding LoadObjectiveOfflineCommand}">Загрузить задания</Button>-->
                         <!--<Button Command="{Binding SaveObjectiveOfflineCommand}">Записать задания</Button>-->
@@ -73,12 +74,13 @@
                     <Button Margin="6,1,6,1" Command="{Binding AddObjectiveOfflineCommand}">Добавить задание</Button>
                     <Button Margin="6,1,6,1" Command="{Binding UpdateObjectiveOfflineCommand}">Редактировать выбранное задание</Button>
                     <Button Margin="6,1,6,1" Command="{Binding DeleteObjectiveOfflineCommand}" Content="Удалить задание"/>
+                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="1" Content="Добавить 1 задание"/>
                     <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="10" Content="Добавить 10 записей задание"/>
                     <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="100" Content="Добавить 100 записей задание"/>
                 </StackPanel>
             </Expander>
 
-            <Expander Header="Online" IsExpanded="True">
+            <Expander Header="Online" IsExpanded="false">
                 <StackPanel>
 
                     <WrapPanel>

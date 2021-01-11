@@ -42,6 +42,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                             logger.Message(message);
                             return new FileNotFoundException(message, web);
                         }
+                        if (http.StatusCode == HttpStatusCode.Conflict)
+                        {
+                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
+                            logger.Message(message);
+                            return new FileNotFoundException(message, web);
+                        }
                     }
                 }
             }
@@ -51,6 +57,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
 
         #region PROPFIND 
+        /// <summary>
+        /// Возвращает список элементов
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        /// <exception cref="FileNotFoundException" />
+        /// <exception cref="TimeoutException" />
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
         {
             try
@@ -208,22 +221,22 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <summary>
         /// Скачивание файла (GET)
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="currentPath"></param>
+        /// <param name="href">путь на диске</param>
+        /// <param name="currentPath">Файл локальный  </param>
         /// <param name="updateProgress"></param>
         /// <returns></returns>
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/get.html/</remarks>
-        public async Task<bool> DownloadFileAsync(string path, string currentPath, Action<ulong, ulong> updateProgress = null)
+        public async Task<bool> DownloadFileAsync(string href, string currentPath, Action<ulong, ulong> updateProgress = null)
         {
             try
             {
                 //string newPath = YandexHelper.NewPath(path, nameDir);
-                logger.Message($"path={path}; currentPath={currentPath}; ");
-                HttpWebRequest request = YandexHelper.RequestDownloadFile(accessToken, path);
+                logger.Message($"path={href}; currentPath={currentPath}; ");
+                HttpWebRequest request = YandexHelper.RequestDownloadFile(accessToken, href);
                 using (WebResponse response = await request.GetResponseAsync())
                 {
                     var length = response.ContentLength;
-                    logger.Message($"length={length}");
+                    //logger.Message($"length={length}");
                     using (var writer = File.OpenWrite(currentPath))
                     {
                         using (var reader = response.GetResponseStream())
@@ -285,12 +298,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <summary>
         /// Загрузить файл на сервер
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="fileName"></param>
+        /// <param name="href">Путь к файлу на диске </param>
+        /// <param name="fileName">Путь к файлу на компьюткрк</param>
         /// <param name="progressChenge"></param>
         /// <returns></returns>
         /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
-        public async Task<bool> LoadFileAsync(string path, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<bool> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
@@ -298,7 +311,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 //logger.Message($"path={path}; fileName={fileName}; ");
                 FileInfo fileInfo = new FileInfo(fileName);
 
-                string diskName = YandexHelper.FileName(path, fileInfo.Name);
+                string diskName = YandexHelper.FileName(href, fileInfo.Name);
                 //logger.Message($"diskName={diskName}; ");
 
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);

@@ -20,17 +20,19 @@
                 <Button Command="{Binding CreateCommand}" Margin="3">Создать проект</Button>
                 <Button Command="{Binding DeleteCommand}" Margin="3">Удалить проект</Button>
                 <Button Command="{Binding RenameCommand}" Margin="3">Переименовать проект</Button>
-                <Button Command="{Binding UpdateCommand}" Margin="3">О<!--<Button Command="{Binding UpdateCommand}" Margin="3">Обновить</Button>-->бновить</Button>
-                                
+                <Button Command="{Binding UpdateCommand}" Margin="3">Обновить</Button>
+                <Button Command="{Binding ISResetCommand}" Margin="3">Обнулить счетчик ID </Button>
+
             </WrapPanel>
-            <Separator Margin="3"/>
+            <!--<Separator Margin="3"/>
             <WrapPanel>
                 <Button Command="{Binding ServerUnloadCommand}" Margin="3">Отправить выбранный проект на сервер</Button>
                 <Button Command="{Binding ServerDownloadCommand}" Margin="3">Поучить проект с сервера</Button>                
-            </WrapPanel>
+            </WrapPanel>-->
             <Separator Margin="3"/>
             <WrapPanel>
                 <Button Command="{Binding OpenFileCommand}" Margin="3">Открыть файл проекта</Button>
+                <Button Command="{Binding CreateSampleProjectCommand}" Margin="3">Создать случайный проект</Button>
                 <!--<Button Command="{Binding XMLUnPackCommand}" Margin="3">Pаспоковать из json</Button>-->                
             </WrapPanel>
         </StackPanel>

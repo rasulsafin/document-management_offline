@@ -17,30 +17,32 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         private static readonly string PROJ_FILE = "project_{0}.json";
         private static readonly string OBJ_FILE = "objective_{0}.json";
         private static readonly string ITM_FILE = "item_{0}.json";
+        private static readonly string ITM_OBJ_FILE = "item_{0}_{1}.json";
         private static readonly string REVISION_FILE = "Revision.json";
 
-        public static string GetItemsFile(ProjectDto project, ItemDto item)
+        public static string GetItemsFile(ProjectDto project, ItemDto item) => GetItemsFile(project, item.ID);
+        public static string GetItemsFile(ProjectDto project, ID<ItemDto> id)
         {
             string itemDir = GetItemsDir(project);
-            return YandexHelper.FileName(itemDir, string.Format(ITM_FILE, item.ID));
+            return YandexHelper.FileName(itemDir, string.Format(ITM_FILE, id));
         }
 
-        public static string GetItemsFile(ProjectDto project, ObjectiveDto objective, ItemDto item)
-        {
-            string itemDir = GetItemsDir(project, objective);
-            return YandexHelper.FileName(itemDir, string.Format(ITM_FILE, item.ID));
-        }
+        public static string GetItemsFile(ProjectDto project, ObjectiveDto objective, ItemDto item) => GetItemsFile(project, objective.ID, item.ID);
 
-        public static string GetItemsDir(ProjectDto project, ObjectiveDto objective)
+        public static string GetItemsFile(ProjectDto project, ID<ObjectiveDto> idObjective, ID<ItemDto> id)
         {
-            string projDir = GetProjectDir(project);
-            return YandexHelper.DirectoryName(projDir, $"{objective.ID}_" + ITM_DIR);
+            string itemDir = GetItemsDir(project);
+            return YandexHelper.FileName(itemDir, string.Format(ITM_OBJ_FILE, id, idObjective));
         }
+        //public static string GetItemsDir(ProjectDto project, ObjectiveDto objective) => GetItemsDir(project, objective.ID);
 
-        public static string GetRevisionFile()
-        {
-            return YandexHelper.DirectoryName(GetTransactionsDir(), REVISION_FILE);
-        }
+        //public static string GetItemsDir(ProjectDto project)
+        //{
+        //    string projDir = GetProjectDir(project);
+        //    return YandexHelper.DirectoryName(projDir, $"{ITM_DIR}");
+        //}
+
+        public static string GetRevisionFile() => YandexHelper.DirectoryName(GetTransactionsDir(), REVISION_FILE);
 
         public static string GetItemsDir(ProjectDto project)
         {
@@ -88,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return YandexHelper.FileName(GetTransactionsDir(), date.ToString("yyyy-MM-dd") + ".json");
         }
 
-        internal static bool TryParseTransaction(string text, out DateTime date)
+        public static bool TryParseTransaction(string text, out DateTime date)
         {
             string str = text.Replace(".json", "");
             if (DateTime.TryParse(str, out DateTime dat))
@@ -112,7 +114,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return false;
         }
 
-        internal static bool TryParseProjectId(string str, out ID<ProjectDto> id)
+        public static bool TryParseProjectId(string str, out ID<ProjectDto> id)
         {
             string text = str.Replace("project_", "").Replace(".json", "");
             if (int.TryParse(text, out int num))
@@ -121,6 +123,33 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 return true;
             }
             id = ID<ProjectDto>.InvalidID;
+            return false;
+        }
+        public static bool TryParseItemId(string str, out ID<ItemDto> idItem, out ID<ObjectiveDto> idObjective)
+        {
+            string[] texts = str.Replace("item_", "").Replace(".json", "").Split('_');
+            if (texts.Length == 1)
+            {
+                if (int.TryParse(texts[0], out int num))
+                {
+                    idItem = new ID<ItemDto>(num);
+                    idObjective = ID<ObjectiveDto>.InvalidID;
+                    return true;
+                }
+            }
+
+            if (texts.Length == 2)
+            {
+                if (int.TryParse(texts[0], out int numItem) && int.TryParse(texts[1], out int numObjective))
+                {
+                    idItem = new ID<ItemDto>(numItem);
+                    idObjective = new ID<ObjectiveDto>(numObjective);
+                    return true;
+                }
+            }
+
+            idItem = ID<ItemDto>.InvalidID;
+            idObjective = ID<ObjectiveDto>.InvalidID;
             return false;
         }
     }

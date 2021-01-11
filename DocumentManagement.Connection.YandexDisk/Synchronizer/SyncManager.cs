@@ -22,6 +22,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizer
 
         [JsonIgnore]
         public bool Sync { get; set; }
+        /// <summary>
+        /// Изменение на сервере
+        /// </summary>
+        [JsonIgnore]
+        public bool Server { get; set; }
     }
 
     public enum TransType
