@@ -5,7 +5,6 @@ using System.Xml.Serialization;
 namespace MRS.DocumentManagement.Models
 {
 
-
     public class ProjectModel : BaseViewModel
     {
 

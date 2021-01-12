@@ -24,7 +24,16 @@ namespace MRS.DocumentManagement.Contols
         public ProjectModel SelectProject { get => selectProject; set { selectProject = value; OnPropertyChanged(); } }
         public bool OpenTempFile { get => openTempFile; set { openTempFile = value; OnPropertyChanged(); } }
 
-
+        public int NextId
+        {
+            get => Properties.Settings.Default.ProjectNextId;
+            set
+            {
+                Properties.Settings.Default.ProjectNextId = value;
+                Properties.Settings.Default.Save();
+                OnPropertyChanged();
+            }
+        }
         public HCommand CreateCommand { get; }
         public HCommand DeleteCommand { get; private set; }
         public HCommand RenameCommand { get; }
@@ -75,7 +84,7 @@ namespace MRS.DocumentManagement.Contols
                 project.Title = names[index];
                 project.ID = ++Properties.Settings.Default.ProjectNextId;
                 Projects.Add(project);
-                ObjectModel.SaveProject(project.dto);
+                ObjectModel.SaveProjects();
                 Properties.Settings.Default.Save();
             }
 
@@ -83,8 +92,7 @@ namespace MRS.DocumentManagement.Contols
 
         private void ISReset()
         {
-            Properties.Settings.Default.ProjectNextId = 0;
-            Properties.Settings.Default.Save();
+            NextId = 1;
         }
 
         private void OpenFile()
@@ -109,10 +117,10 @@ namespace MRS.DocumentManagement.Contols
             {
                 ProjectModel project = new ProjectModel();
                 project.Title = name;
-                project.ID = ++Properties.Settings.Default.ProjectNextId;
+                project.ID = NextId++;
                 Projects.Add(project);
-                ObjectModel.SaveProject(project.dto);
-                Properties.Settings.Default.Save();
+                ObjectModel.SaveProjects();
+                ObjectModel.Synchronizer.Update(project.dto.ID);
 
             }
             Update();
@@ -133,8 +141,9 @@ namespace MRS.DocumentManagement.Contols
                 WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
             else if (WinBox.ShowQuestion($"Удалить проект '{SelectProject.Title}'?"))
             {
-                ObjectModel.DeleteProject(SelectProject.dto.ID);                
-                
+                ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
+                Projects.Remove(SelectProject);
+                ObjectModel.SaveProjects();
                 SelectProject = null;
             }
         }
@@ -152,41 +161,14 @@ namespace MRS.DocumentManagement.Contols
                 defautValue: SelectProject.Title))
             {
 
-                //SelectProject.Title = name;
+                ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
+                ObjectModel.SaveProjects();
 
-                ObjectModel.RenameProject(SelectProject.dto.ID, name);
-                //string fileName = PathManager.GetProjectFile(SelectProject.dto);
-                //string json = JsonConvert.SerializeObject(SelectProject.dto, Formatting.Indented);
-                //File.WriteAllText(fileName, json);
-
-
+                //ObjectModel.RenameProject(SelectProject.dto.ID, name);
                 
-
+                
             }
         }
-
-
-        
-        //private async void ServerDownload()
-        //{
-        //    ChechYandex();
-        //    List<ProjectDto> list = await yandex.DownloadProjects();
-
-        //    Projects.Clear();
-        //    foreach (var item in list)
-        //    {
-        //        Projects.Add(new ProjectModel(item));
-        //    }
-        //}
-
-        //private async void ServerUnload()
-        //{
-        //    ChechYandex();
-        //    if (SelectProject != null)
-        //    {
-        //        await yandex.UnloadProject(SelectProject.dto);
-        //    }
-        //}        
 
     }
 }

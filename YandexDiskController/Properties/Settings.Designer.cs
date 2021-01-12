@@ -70,5 +70,17 @@ namespace MRS.DocumentManagement.Properties {
                 this["ProjectNextId"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public int UserNextId {
+            get {
+                return ((int)(this["UserNextId"]));
+            }
+            set {
+                this["UserNextId"] = value;
+            }
+        }
     }
 }

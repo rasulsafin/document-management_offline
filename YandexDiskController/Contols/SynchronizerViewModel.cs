@@ -44,13 +44,12 @@ namespace MRS.DocumentManagement.Contols
         public SynchronizerViewModel()
         {
             synchronizer = ObjectModel.Synchronizer;
-            synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
+            //synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
             SynchronizeCommand = new HCommand(SynchronizeAsync);
             RevisionCommand = new HCommand(GetRevision);
             ShowAllTransactionCommand = new HCommand(ShowAllTransactionAsync);
             instanse = this;
             Auth.LoadActions.Add(Initialize);
-
         }
 
         private void Synchronizer_TransactionsChange()
@@ -62,35 +61,35 @@ namespace MRS.DocumentManagement.Contols
         {
             synchronizer.Initialize(accessToken);
             synchronizer.Load();
-            SetLocalTransactionAsync();
+            //SetLocalTransactionAsync();
         }
 
         private async void ShowAllTransactionAsync()
         {
-            if (ShowAllTransactionContent == ALL_TRANSACTION)
-            {
-                ShowAllTransactionContent = NON_SYNC_TRANSACTION;
-                await SetAllTransactionAsync();
-            }
-            else if (ShowAllTransactionContent == NON_SYNC_TRANSACTION)
-            {
-                ShowAllTransactionContent = LOCAL_TRANSACTION;
-                await SetNonSyncTransactionAsync();
-            }
-            else if (ShowAllTransactionContent == LOCAL_TRANSACTION)
-            {
-                ShowAllTransactionContent = ALL_TRANSACTION;
-                SetLocalTransactionAsync();
-            }
+            //if (ShowAllTransactionContent == ALL_TRANSACTION)
+            //{
+            //    ShowAllTransactionContent = NON_SYNC_TRANSACTION;
+            //    await SetAllTransactionAsync();
+            //}
+            //else if (ShowAllTransactionContent == NON_SYNC_TRANSACTION)
+            //{
+            //    ShowAllTransactionContent = LOCAL_TRANSACTION;
+            //    await SetNonSyncTransactionAsync();
+            //}
+            //else if (ShowAllTransactionContent == LOCAL_TRANSACTION)
+            //{
+            //    ShowAllTransactionContent = ALL_TRANSACTION;
+            //    SetLocalTransactionAsync();
+            //}
         }
 
         private void SetLocalTransactionAsync()
         {
-            Transactions.Clear();
-            foreach (var item in synchronizer.Transactions)
-            {
-                Transactions.Add(new TransactionModel(item));
-            }
+            //Transactions.Clear();
+            //foreach (var item in synchronizer.Transactions)
+            //{
+            //    Transactions.Add(new TransactionModel(item));
+            //}
         }
 
         private async Task SetAllTransactionAsync()
@@ -114,14 +113,14 @@ namespace MRS.DocumentManagement.Contols
 
         private async void SynchronizeAsync()
         {
+                //WinBox.ShowMessage("Синхронизация более не существует!");
             try
             {
                 SyncProcces = true;
-                await synchronizer.SynchronizeAsync(ProgressChange);
+                await synchronizer.SyncTableAsync(ProgressChange);
                 SyncProcces = false;
-                synchronizer.Save();
-                //WinBox.ShowMessage("Синхронизация произведена!");
-                SetLocalTransactionAsync();
+                //synchronizer.Save();
+                //SetLocalTransactionAsync();
             }
             catch (ArgumentNullException ane)
             {

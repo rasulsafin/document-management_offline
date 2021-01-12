@@ -10,13 +10,47 @@ using System.Linq;
 
 namespace MRS.DocumentManagement
 {
+    /// <summary>Код от сюда должен перекачивать в yandexManager</summary>
     public static class ObjectModel
     {
         public static ObservableCollection<ProjectModel> Projects { get; set; } = new ObservableCollection<ProjectModel>();
         public static ObservableCollection<ObjectiveModel> Objectives { get; set; } = new ObservableCollection<ObjectiveModel>();
         public static ObservableCollection<ItemModel> Items { get; set; } = new ObservableCollection<ItemModel>();
+        public static ObservableCollection<UserModel> Users { get; set; } = new ObservableCollection<UserModel>();
         public static Synchronizer Synchronizer { get; set; } = new Synchronizer();
 
+        #region User
+        public static void UpdateUsers()
+        {
+            var list = GetUsers();
+            Users.Clear();
+            foreach (var item in list)
+            {
+                Users.Add((UserModel)item);
+            }
+        }
+        public static List<UserDto> GetUsers()
+        {
+            List<UserDto> users = new List<UserDto>();
+            FileInfo usrFile = new FileInfo(PathManager.GetUsersFile());
+            if (usrFile.Exists)
+            {
+                string json = File.ReadAllText(usrFile.FullName);
+                List<UserDto> _users = JsonConvert.DeserializeObject<List<UserDto>>(json);
+                users.AddRange(_users);
+            }
+            return users;
+        }
+
+        public static void SaveUsers(List<UserDto> users = null)
+        {
+            if (users == null)
+                users = Users.Select(x => x.dto).ToList();
+            string json = JsonConvert.SerializeObject(users);
+            string path = PathManager.GetUsersFile();
+            File.WriteAllText(path, json);
+        }
+        #endregion
         #region Project
         public static void UpdateProjects()
         {
@@ -30,76 +64,30 @@ namespace MRS.DocumentManagement
         public static List<ProjectDto> GetProjects()
         {
             List<ProjectDto> projects = new List<ProjectDto>();
-            DirectoryInfo projDir = new DirectoryInfo(PathManager.GetProjectsDir());
-            if (projDir.Exists)
+            FileInfo projFile = new FileInfo(PathManager.GetProjectsFile());
+            if (projFile.Exists)
             {
-                foreach (var item in projDir.GetFiles())
-                {
-                    if (item.Name.StartsWith("project"))
-                    {
-                        string json = File.ReadAllText(item.FullName);
-                        ProjectDto dto = JsonConvert.DeserializeObject<ProjectDto>(json);
-                        projects.Add(dto);
-                    }
-                }
+                string json = File.ReadAllText(projFile.FullName);
+                List<ProjectDto> _projects = JsonConvert.DeserializeObject<List<ProjectDto>>(json);
+                projects.AddRange(_projects);
             }
             return projects;
         }
-        public static ProjectDto GetProject(ID<ProjectDto> id)
+        public static void SaveProjects(List<ProjectDto> projects = null)
         {
-            if (!Directory.Exists(PathManager.GetProjectsDir())) return null;
-            try
-            {
-                string filename = PathManager.GetProjectFile(id);
-                string json = File.ReadAllText(filename);
-                ProjectDto dto = JsonConvert.DeserializeObject<ProjectDto>(json);
-                return dto;
-            }
-            catch (FileNotFoundException) { }
-            return null;
+            if (projects == null)
+                projects = Projects.Select(x => x.dto).ToList();
+            string json = JsonConvert.SerializeObject(projects);
+            string path = PathManager.GetProjectsFile();
+            File.WriteAllText(path, json);
         }
-        public static void SaveProject(ProjectDto project)
-        {
-            if (!Directory.Exists(PathManager.GetProjectsDir())) 
-                Directory.CreateDirectory(PathManager.GetProjectsDir());
-            string fileName = PathManager.GetProjectFile(project);
 
-            string json = JsonConvert.SerializeObject(project, Formatting.Indented);
-            File.WriteAllText(fileName, json);
-            Synchronizer.AddTransaction(TransType.Update, project.ID);
-        }
-        public static void DeleteProject(ID<ProjectDto> id)
-        {
-            if (!Directory.Exists(PathManager.GetProjectsDir())) return;
-            var project = Projects.First(x => x.ID == (int)id);
-            string fileName = PathManager.GetProjectFile(project.dto);
-            string dirName = PathManager.GetProjectDir(project.dto);
-            File.Delete(fileName);
-            if (Directory.Exists(dirName))
-                Directory.Delete(dirName, true);
-            Projects.Remove(project);
-            Synchronizer.AddTransaction(TransType.Delete, id);
-        }
-        public static void RenameProject(ID<ProjectDto> id, string newName)
-        {
-            var project = Projects.First(x => x.dto.ID == id);
-
-            string oldDirName = PathManager.GetProjectDir(project.dto);
-            project.Title = newName;
-            SaveProject(project.dto);
-            var newDirName = PathManager.GetProjectDir(project.dto);
-            if (Directory.Exists(oldDirName))
-                Directory.Move(oldDirName, newName);
-            else
-                Directory.CreateDirectory(newName);            
-        }
         #endregion
         #region Objective
         public static void UpdateObjectives(ProjectDto project)
         {
-            string objDir = PathManager.GetObjectivesDir(project);
+            //string objDir = PathManager.GetObjectivesDir(project);
             var list = GetObjectives(project);
-            //list.Sort((x, y) => ((int)x.ID).CompareTo((int)y.ID));
 
             Objectives.Clear();
             foreach (ObjectiveDto item in list)
@@ -113,107 +101,61 @@ namespace MRS.DocumentManagement
 
             string dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) return result;
-
-            string dirObj = PathManager.GetObjectivesDir(project);
-            if (!Directory.Exists(dirObj)) return result;
-
-            DirectoryInfo dirInfoObj = new DirectoryInfo(dirObj);
-
-            foreach (var item in dirInfoObj.GetFiles())
+            try
             {
-                if (item.Name.StartsWith("objective"))
-                {
-                    var json = File.ReadAllText(item.FullName);
-                    ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
-                    result.Add(objective);
-                }
+                string path = PathManager.GetObjectivesFile(project);
+                var json = File.ReadAllText(path);
+                List<ObjectiveDto> objectives = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
+                result.AddRange(objectives);
             }
+            catch (FileNotFoundException){}
             return result;
         }
-        public static void SaveObjective(ObjectiveDto objective, ProjectDto project)
+        public static void SaveObjectives(ProjectDto project, List<ObjectiveDto> objectives = null)
         {
             string dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
 
-            string dirObj = PathManager.GetObjectivesDir(project);
-            if (!Directory.Exists(dirObj)) Directory.CreateDirectory(dirObj);
+            if (objectives == null)
+                objectives = Objectives.Select(x => x.dto).ToList();
 
-            string filename = PathManager.GetObjectiveFile(objective, project);
-            var json = JsonConvert.SerializeObject(objective, Formatting.Indented);
-            File.WriteAllText(filename, json);
-            Synchronizer.AddTransaction(TransType.Update, objective.ID);
-        }
-        public static void DeleteObjective(ObjectiveDto objective, ProjectDto project)
-        {
-            string filename = PathManager.GetObjectiveFile(objective, project);
-            File.Delete(filename);
-            Synchronizer.AddTransaction(TransType.Delete, objective.ID);
-        }
-        public static (ObjectiveDto objective, ProjectDto project) GetObjective(ID<ObjectiveDto> id)
-        {
-            var projects = Projects.Select(x => x.dto).ToList();
-            foreach (var project in projects)
-            {
-                var dir = PathManager.GetObjectivesDir(project);
-                DirectoryInfo dirInfoObj = new DirectoryInfo(dir);
-                if (dirInfoObj.Exists)
-                {
-                    foreach (var item in dirInfoObj.GetFiles())
-                    {
-                        if (PathManager.TryParseObjectiveId(item.Name, out ID<ObjectiveDto> _id) && id == _id)
-                        {
-                            var json = File.ReadAllText(item.FullName);
-                            ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
-                            return (objective, project);
-                        }
-                    }
-                }
-            }
-            return (null, null);
-        }
-
+            string filename = PathManager.GetObjectivesFile(project);
+            var json = JsonConvert.SerializeObject(objectives);
+            File.WriteAllText(filename, json);            
+        }        
+        //public static (ObjectiveDto objective, ProjectDto project) GetObjective(ID<ObjectiveDto> id)
+        //{
+        //    //var projects = Projects.Select(x => x.dto).ToList();
+        //    //foreach (var project in projects)
+        //    //{
+        //    //    var dir = PathManager.GetObjectivesDir(project);
+        //    //    DirectoryInfo dirInfoObj = new DirectoryInfo(dir);
+        //    //    if (dirInfoObj.Exists)
+        //    //    {
+        //    //        foreach (var item in dirInfoObj.GetFiles())
+        //    //        {
+        //    //            if (PathManager.TryParseObjectiveId(item.Name, out ID<ObjectiveDto> _id) && id == _id)
+        //    //            {
+        //    //                var json = File.ReadAllText(item.FullName);
+        //    //                ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
+        //    //                return (objective, project);
+        //    //            }
+        //    //        }
+        //    //    }
+        //    //}
+        //    return (null, null);
+        //}
 
         #endregion
-
         #region Item
-        public static void UpdateItems(ProjectDto project, ObjectiveDto objective =  null)
-        {            
+        public static void UpdateItems(ProjectDto project, ObjectiveDto objective = null)
+        {
             List<ItemDto> collection = GetItems(project, objective);
             Items.Clear();
             foreach (ItemDto item in collection)
             {
                 Items.Add((ItemModel)item);
             }
-        }
-        public static void SaveItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
-        {
-            var dirProj = PathManager.GetProjectDir(project);
-            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
-
-            var dirItems = PathManager.GetItemsDir(project);
-            if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
-
-            string path = PathManager.GetItemFile(item, project, objective);
-
-
-            string json = JsonConvert.SerializeObject(item, Formatting.Indented);
-            File.WriteAllText(path, json);
-            Synchronizer.AddTransaction(TransType.Update, item.ID);
-        }        
-        public static void DeleteItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
-        {
-            var dirProj = PathManager.GetProjectDir(project);
-            if (!Directory.Exists(dirProj)) return;
-
-            var dirItems = PathManager.GetItemsDir(project);
-            if (!Directory.Exists(dirItems)) return;
-
-            string path = PathManager.GetItemFile(item, project, objective);
-            //string path = objective == null
-            //        ? PathManager.GetItemFile(item, project, objective)
-            //        : PathManager.GetItemFile(item, project);            
-            File.Delete(path);
-            Synchronizer.AddTransaction(TransType.Delete, item.ID);
         }
         public static List<ItemDto> GetItems(ProjectDto project, ObjectiveDto objective = null)
         {
@@ -241,40 +183,73 @@ namespace MRS.DocumentManagement
             {
                 readFiles(result, dir, ID<ObjectiveDto>.InvalidID);
             }
-            else 
+            else
             {
-                readFiles(result, dir, objective.ID);                
+                readFiles(result, dir, objective.ID);
             }
             return result;
         }
-        public static (ItemDto items, ObjectiveDto objective, ProjectDto project) GetItem(ID<ItemDto> id)
+        public static void SaveItems(ProjectDto project, ObjectiveDto objective = null)
         {
-            var projects = Projects.Select(x => x.dto).ToList();
-            foreach (var project in projects)
-            {
-                var fileName = PathManager.GetItemFile(id, project);
-                if (File.Exists(fileName))
-                {
-                    var json = File.ReadAllText(fileName);
-                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-                    return (item, null, project);
-                }
+            var dirProj = PathManager.GetProjectDir(project);
+            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
+            
+            List<ItemDto> items = Items.Select(x=>x.dto).ToList();
 
-                var objectives = GetObjectives(project);
-                foreach (var objective in objectives)
-                {
-                    fileName = PathManager.GetItemFile(id, project, objective);
-                    if (File.Exists(fileName))
-                    {
-                        var json = File.ReadAllText(fileName);
-                        ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-                        return (item, objective, project);
-                    }
-                }
-                
-            }
-            return (null, null, null);
+            string path = "";
+            if (objective == null)
+                path = PathManager.GetItemsFile(project);
+            else
+                path = PathManager.GetItemsFile(objective, project);
+
+
+            string json = JsonConvert.SerializeObject(items);
+            File.WriteAllText(path, json);
         }
+        //public static void DeleteItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
+        //{
+        //    var dirProj = PathManager.GetProjectDir(project);
+        //    if (!Directory.Exists(dirProj)) return;
+
+        //    var dirItems = PathManager.GetItemsDir(project);
+        //    if (!Directory.Exists(dirItems)) return;
+
+        //    string path = PathManager.GetItemFile(item, project, objective);
+
+        //    File.Delete(path);
+        //    if (objective == null)
+        //        Synchronizer.Update(item.ID, project.ID);
+        //    else
+        //        Synchronizer.Update(item.ID, objective.ID, project.ID);
+        //}
+        //public static (ItemDto items, ObjectiveDto objective, ProjectDto project) GetItem(ID<ItemDto> id)
+        //{
+        //    var projects = Projects.Select(x => x.dto).ToList();
+        //    foreach (var project in projects)
+        //    {
+        //        var fileName = PathManager.GetItemFile(id, project);
+        //        if (File.Exists(fileName))
+        //        {
+        //            var json = File.ReadAllText(fileName);
+        //            ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+        //            return (item, null, project);
+        //        }
+
+        //        var objectives = GetObjectives(project);
+        //        foreach (var objective in objectives)
+        //        {
+        //            fileName = PathManager.GetItemFile(id, project, objective);
+        //            if (File.Exists(fileName))
+        //            {
+        //                var json = File.ReadAllText(fileName);
+        //                ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+        //                return (item, objective, project);
+        //            }
+        //        }
+
+        //    }
+        //    return (null, null, null);
+        //}
         #endregion
 
 

@@ -1,18 +1,87 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Models;
+using System;
 using System.Collections.ObjectModel;
 using WPFStorage.Base;
+using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement.Contols
 {
     public class UserViewModel : BaseViewModel
     {
-        private static readonly string DIR_NAME = "data";
-        private static readonly string FILE_NAME = "users.xml";
-        private static readonly string TEMP_DIR = "Temp.Yandex";
         YandexDiskManager yandex;
+        private UserModel selectedUser;
 
-        public ObservableCollection<UserDto> Users { get; set; } = new ObservableCollection<UserDto>();
+        public ObservableCollection<UserModel> Users { get; set; } = ObjectModel.Users;
+        public UserModel SelectedUser { get => selectedUser; set { selectedUser = value; OnPropertyChanged(); } }
+        public int NextId
+        {
+            get => Properties.Settings.Default.UserNextId;
+            set
+            {
+                Properties.Settings.Default.UserNextId = value;
+                Properties.Settings.Default.Save();
+                OnPropertyChanged();
+            }
+        }
 
+        public HCommand AddUserCommand { get; }
+        public HCommand DelUserCommand { get; }
+        public HCommand ZeroIdCommand { get; }
+        public HCommand EditUserCommand { get; }
+        public HCommand UpdateCommand { get; }
+
+        public UserViewModel()
+        {
+            AddUserCommand = new HCommand(AddUser);
+            DelUserCommand = new HCommand(DelUser);
+            ZeroIdCommand = new HCommand(ZeroId);
+            EditUserCommand = new HCommand(EditUser);
+            UpdateCommand = new HCommand(Update);
+            SelectedUser = new UserModel();
+            Update();
+        }
+
+        private void Update()
+        {
+            ObjectModel.UpdateUsers();
+        }
+
+        private void EditUser()
+        {
+            if (SelectedUser != null)
+            {
+                ObjectModel.Synchronizer.Update(SelectedUser.dto.ID);
+                ObjectModel.SaveUsers();
+            }
+        }
+
+        private void ZeroId()
+        {
+            NextId = 1;
+        }
+
+        private void DelUser()
+        {
+            if (SelectedUser != null)
+            {
+                if (WinBox.ShowQuestion($"Удалить пользователя {SelectedUser.Name}?", "Удаление"))
+                {
+                    ObjectModel.Synchronizer.Update(SelectedUser.dto.ID);
+                    Users.Remove(SelectedUser);
+                    ObjectModel.SaveUsers();
+                }
+            }
+        }
+
+        private void AddUser()
+        {
+            UserModel model = new UserModel(SelectedUser.dto);
+            model.ID = NextId++;
+            Users.Add(model);
+            ObjectModel.SaveUsers();
+            ObjectModel.Synchronizer.Update(model.dto.ID);
+        }
     }
 }

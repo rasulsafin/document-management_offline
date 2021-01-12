@@ -8,16 +8,19 @@ namespace MRS.DocumentManagement
     {
         public static readonly string APP_DIR;
 
+        private static readonly string PROJS_FILE = "projects.json";
+        private static readonly string USERS_FILE = "users.json";
+        private static readonly string OBJS_FILE = "objectives.json";
+        private static readonly string ITEMS_FILE = "items.json";
+        private static readonly string ITEMS_OBJ_FILE = "items_{0}.json";
+
         private static readonly string PROJ_DIR = "Projects";
         private static readonly string TYRANS_DIR = "Transactions";
 
-        private static readonly string OBJ_DIR = "Objectives";
-
         private static readonly string ITM_DIR = "Items";
-
+        private static readonly string OBJ_DIR = "Objectives";
         private static readonly string PROJ_FILE = "project_{0}.json";
         private static readonly string OBJ_FILE = "objective_{0}.json";
-        private static readonly string ITM_FILE = "item_{0}.json";
         private static readonly string ITM_OBJ_FILE = "item_{0}_{1}.json";
         private static readonly string REVISION_FILE = "Revision.json";
         private static readonly string TANSLATION_FILE = "Transactions.json";
@@ -30,20 +33,35 @@ namespace MRS.DocumentManagement
             DirectoryInfo directory = new DirectoryInfo("BRIO MRS");
             APP_DIR = directory.FullName;
         }
-
-        public static string GetItemFile(ItemDto item, ProjectDto project, ObjectiveDto objective = null) => GetItemFile(item.ID, project, objective);
-        public static string GetItemFile(ID<ItemDto> id, ProjectDto project, ObjectiveDto objective = null)
+        public static string GetItemsFile(ProjectDto project)
         {
-            if (objective == null)
-                return Path.Combine(GetItemsDir(project), string.Format(ITM_FILE, id));
-            return Path.Combine(GetItemsDir(project), string.Format(ITM_OBJ_FILE, id, objective.ID.ToString()));            
+            return Path.Combine(GetProjectDir(project), ITEMS_FILE);
         }
+
+        public static string GetItemsFile(ObjectiveDto objective, ProjectDto project)
+        {
+            return Path.Combine(GetProjectDir(project), string.Format(ITEMS_OBJ_FILE, objective.ID));
+        }
+
+        public static string GetObjectivesFile(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJS_FILE);
+        public static string GetUsersFile() => Path.Combine(APP_DIR, USERS_FILE);
+        public static string GetProjectsFile() => Path.Combine(APP_DIR, PROJS_FILE);
+        public static string GetProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
+
+        #region old
+        //public static string GetItemFile(ItemDto item, ProjectDto project, ObjectiveDto objective = null) => GetItemFile(item.ID, project, objective);
+        //public static string GetItemFile(ID<ItemDto> id, ProjectDto project, ObjectiveDto objective = null)
+        //{
+        //    if (objective == null)
+        //        return Path.Combine(GetItemsDir(project), string.Format(ITM_FILE, id));
+        //    return Path.Combine(GetItemsDir(project), string.Format(ITM_OBJ_FILE, id, objective.ID.ToString()));
+        //}
 
         public static string GetItemsDir(ProjectDto project)
         {
             string projDir = GetProjectDir(project);
             //if (objective == null)
-                return Path.Combine(projDir, ITM_DIR);
+            return Path.Combine(projDir, ITM_DIR);
             //return Path.Combine(projDir, ITM_DIR + $"_{objective.ID}");
         }
 
@@ -54,12 +72,11 @@ namespace MRS.DocumentManagement
         public static string GetTransactionsDir() => Path.Combine(APP_DIR, TYRANS_DIR);
 
 
-        public static string GetObjectivesDir(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJ_DIR);
-        public static string GetObjectiveFile(ObjectiveDto objective, ProjectDto project) => Path.Combine(GetObjectivesDir(project), string.Format(OBJ_FILE, objective.ID));
+        //public static string GetObjectivesDir(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJ_DIR);
+        //public static string GetObjectiveFile(ObjectiveDto objective, ProjectDto project) => Path.Combine(GetObjectivesDir(project), string.Format(OBJ_FILE, objective.ID));
 
 
 
-        public static string GetProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
         public static string GetProjectFile(ID<ProjectDto> id) => Path.Combine(GetProjectsDir(), string.Format(PROJ_FILE, id));
         public static string GetProjectFile(ProjectDto project) => GetProjectFile(project.ID);
         public static string GetProjectsDir() => Path.Combine(APP_DIR, PROJ_DIR);
@@ -94,7 +111,7 @@ namespace MRS.DocumentManagement
                 if (int.TryParse(texts[0], out int numItem) && int.TryParse(texts[1], out int numObjective))
                 {
                     idItem = new ID<ItemDto>(numItem);
-                    idObjective = new  ID<ObjectiveDto>(numObjective);
+                    idObjective = new ID<ObjectiveDto>(numObjective);
                     return true;
                 }
             }
@@ -115,6 +132,11 @@ namespace MRS.DocumentManagement
             date = DateTime.MinValue;
             return false;
         }
+
+        
+
+
+        #endregion
 
     }
 }

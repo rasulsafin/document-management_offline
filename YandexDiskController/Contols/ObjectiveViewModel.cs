@@ -62,6 +62,17 @@ namespace MRS.DocumentManagement.Contols
         public double ProgressMax { get => progressMax; set { progressMax = value; OnPropertyChanged(); } }
         public string StatusOperation { get => statusOperation; set { statusOperation = value; OnPropertyChanged(); } }
 
+        public int NextId
+        {
+            get => Properties.Settings.Default.ObjectiveNextId;
+            set
+            {
+                Properties.Settings.Default.ObjectiveNextId = value;
+                Properties.Settings.Default.Save();
+                OnPropertyChanged();
+            }
+        }
+
         public HCommand UpdateProjectsCommand { get; }
         public HCommand<bool> LocalDBCommand { get; }
         public HCommand LoadProjectOfflineCommand { get; }
@@ -77,7 +88,7 @@ namespace MRS.DocumentManagement.Contols
         public HCommand GetIDCommand { get; }
         public HCommand UpdateObjectiveOfflineCommand { get; }
         public HCommand GetObjectiveForIdCommand { get; }
-        public HCommand<int> AddObjectivesCommand { get; } 
+        public HCommand<int> AddObjectivesCommand { get; }
         #endregion
 
         public ObjectiveViewModel()
@@ -101,19 +112,18 @@ namespace MRS.DocumentManagement.Contols
 
 
             UpdateProjects();
+            //UpdateObjectives();
         }
 
         private void ZeroId()
         {
-            Properties.Settings.Default.ObjectiveNextId = 0;
-            Properties.Settings.Default.Save();
+            NextId = 1;
         }
 
         private void CreateObjective()
         {
             ObjectiveModel model = new ObjectiveModel();
-            model.ID = ++Properties.Settings.Default.ObjectiveNextId;
-            Properties.Settings.Default.Save();
+            model.ID = NextId++;
             model.ProjectID = SelectedProject.ID;
             model.CreationDate = DateTime.Now;
             model.DueDate = DateTime.Now;
@@ -125,46 +135,152 @@ namespace MRS.DocumentManagement.Contols
             Objectives.Add(model);
             //SaveObjective(SelectedProject.dto, model.dto);
 
-            ObjectModel.SaveObjective(model.dto, SelectedProject.dto);
+            ObjectModel.SaveObjectives(SelectedProject.dto);
+            ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
         }
+        private void UpdateObjectiveOffline()
+        {
+            SelectedObjective.Title = EditObjective.Title;
+            SelectedObjective.Description = EditObjective.Description;
+            SelectedObjective.Status = EditObjective.Status;
+            SelectedObjective.DueDate = DateTime.Now;
 
+            ObjectModel.SaveObjectives(SelectedProject.dto);
+            ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
+        }
+        private void ChengeStatusOffline()
+        {
+            if (EditObjective == null)
+                return;
+
+            string[] collect = Enum.GetNames<ObjectiveStatus>();
+            var newVal = WinBox.SelectorBox(collect);
+
+            var status = Enum.Parse<ObjectiveStatus>(newVal);
+
+            EditObjective.Status = status;
+            SelectedObjective.Status = status;
+            ObjectModel.SaveObjectives(SelectedProject.dto);
+            ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
+        }
+        private void UpdateObjectives()
+        {
+            if (SelectedProject != null)
+            {
+                ObjectModel.UpdateObjectives(SelectedProject.dto);
+            }
+        }
+        private void DeleteObjective()
+        {
+            if (SelectedObjective != null)
+            {
+                if (WinBox.ShowQuestion($"Удалить задание {SelectedObjective.Title}?", "Удаление"))
+                {
+                    ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
+                    Objectives.Remove(SelectedObjective);
+                    ObjectModel.SaveObjectives(SelectedProject.dto);
+                }
+            }
+        }
+        private void UpdateProjects()
+        {
+            ObjectModel.UpdateProjects();
+        }
+        private void AddObjectives(int obj)
+        {
+            string[] names;
+            string[] discriptions;
+
+            string namesFile = "Names.txt";
+            if (!File.Exists(namesFile))
+            {
+                if (WinBox.ShowQuestion("Файл с именами не существует создать его?"))
+                {
+                    OpenHelper.Geany(namesFile);
+                }
+                return;
+            }
+            else
+            {
+                names = File.ReadAllLines(namesFile);
+            }
+
+            string discriptionsFile = "Discriptions.txt";
+            if (!File.Exists(discriptionsFile))
+            {
+                if (WinBox.ShowQuestion("Файл с описаниями не существует создать его?"))
+                {
+                    OpenHelper.Geany(discriptionsFile);
+                }
+                return;
+            }
+            else
+            {
+                discriptions = File.ReadAllLines(discriptionsFile);
+            }
+            if (discriptions == null || names == null) return;
+
+            Random random = new Random();
+
+            for (int i = 0; i < obj; i++)
+            {
+                ObjectiveModel model = new ObjectiveModel();
+
+                model.ID = NextId++;
+
+                model.ProjectID = SelectedProject.ID;
+                model.CreationDate = DateTime.Now;
+                model.DueDate = DateTime.Now;
+
+                int index = random.Next(0, names.Length);
+
+                model.Title = names[index];
+
+                index = random.Next(0, discriptions.Length);
+                model.Description = discriptions[index];
+
+                model.Status = (ObjectiveStatus)random.Next(0, 4);
+                Objectives.Add(model);
+                ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
+            }
+            ObjectModel.SaveObjectives(SelectedProject.dto);
+            //SaveObjectiveOffline();
+        }
         private void GetObjectiveForID()
         {
-            if (WinBox.ShowInput(
-                title: "Открыть задачу",
-                question: "Введи id",
-                input: out string input,
-                okText: "Открыть", cancelText: "Отмена",
-                defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
-                ))
-            {
-                if (int.TryParse(input, out int id))
-                {
-                    (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective((ID<ObjectiveDto>)id);
-                    string message = "ObjectiveDto:\n";
-                    if (objective != null)
-                    {
-                        message += $"ID={objective.ID}\n";
-                        message += $"ProjectID={objective.ProjectID}\n";
-                        message += $"Title={objective.Title}\n";
-                        message += $"Status={objective.Status}\n";
-                        message += $"Description={objective.Description}\n";
-                        message += $"CreationDate={objective.CreationDate}\n";
-                        message += $"DueDate={objective.DueDate}\n";
-                    }
-                    message += $"project:\n";
-                    if (project != null)
-                    {
-                        message += $"ID={project.ID}\n";
-                        message += $"Title={project.Title}\n";
-                    }
-                    WinBox.ShowMessage(message);
-                }
-            }    
+            WinBox.ShowMessage("Эта кнопка больше ничего не делает");
+            //if (WinBox.ShowInput(
+            //    title: "Открыть задачу",
+            //    question: "Введи id",
+            //    input: out string input,
+            //    okText: "Открыть", cancelText: "Отмена",
+            //    defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
+            //    ))
+            //{
+            //    if (int.TryParse(input, out int id))
+            //    {
+            //        (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective((ID<ObjectiveDto>)id);
+            //        string message = "ObjectiveDto:\n";
+            //        if (objective != null)
+            //        {
+            //            message += $"ID={objective.ID}\n";
+            //            message += $"ProjectID={objective.ProjectID}\n";
+            //            message += $"Title={objective.Title}\n";
+            //            message += $"Status={objective.Status}\n";
+            //            message += $"Description={objective.Description}\n";
+            //            message += $"CreationDate={objective.CreationDate}\n";
+            //            message += $"DueDate={objective.DueDate}\n";
+            //        }
+            //        message += $"project:\n";
+            //        if (project != null)
+            //        {
+            //            message += $"ID={project.ID}\n";
+            //            message += $"Title={project.Title}\n";
+            //        }
+            //        WinBox.ShowMessage(message);
+            //    }
+            //}
         }
-
-        
-
         private async void GetIDAsync()
         {
             //ChechYandex();
@@ -210,13 +326,6 @@ namespace MRS.DocumentManagement.Contols
             //    //ProgressVisible = false;
             //}
         }
-
-        public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
-        {
-            throw new NotImplementedException();
-        }
-        
-
         private async void DownloadFromServerAsync()
         {
             WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
@@ -251,149 +360,36 @@ namespace MRS.DocumentManagement.Contols
             //}
         }
 
-        private void UpdateObjectiveOffline()
+        public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
         {
-            SelectedObjective.Title = EditObjective.Title;
-            SelectedObjective.Description = EditObjective.Description;
-            SelectedObjective.Status = EditObjective.Status;
-            SelectedObjective.DueDate = DateTime.Now;
-
-            ObjectModel.SaveObjective(SelectedObjective.dto, SelectedProject.dto);
-        }
-
-        private void ChengeStatusOffline()
-        {
-            if (EditObjective == null)
-                return;
-
-            string[] collect = Enum.GetNames<ObjectiveStatus>();
-            var newVal = WinBox.SelectorBox(collect);
-
-            var status = Enum.Parse<ObjectiveStatus>(newVal);
-
-            EditObjective.Status = status;
-            ObjectModel.SaveObjective(SelectedObjective.dto, SelectedProject.dto);
-        }
-
-        private void UpdateObjectives()
-        {
-            if (SelectedProject != null)
-            {
-                ObjectModel.UpdateObjectives(SelectedProject.dto);
-                //SelectedObjective = Objectives.First();
-
-            }
-        }
-
-        private void DeleteObjective()
-        {
-            if (SelectedObjective != null)
-            {
-                if (WinBox.ShowQuestion($"Удалить задание {SelectedObjective.Title}?", "Удаление"))
-                {
-                    ObjectModel.DeleteObjective(SelectedObjective.dto, SelectedProject.dto);
-                    Objectives.Remove(SelectedObjective);
-                    
-                }
-            }
-        }
-
-
-        
-
-        private void UpdateProjects()
-        {
-            ObjectModel.UpdateProjects();            
-        }
-
-        
-
-        public static List<ObjectiveDto> GetObjectives(ProjectDto project)
-        {
-            var result = new List<ObjectiveDto>();
-
-            string dirProj = PathManager.GetProjectDir(project);
-            if (!Directory.Exists(dirProj)) return result;
-
-            string dirObj = PathManager.GetObjectivesDir(project);
-            if (!Directory.Exists(dirObj)) return result;
-
-            DirectoryInfo dirInfoObj = new DirectoryInfo(dirObj);
-
-            foreach (var item in dirInfoObj.GetFiles())
-            {
-                if (item.Name.StartsWith("objective"))
-                {
-                    var json = File.ReadAllText(item.FullName);
-                    ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
-                    result.Add(objective);
-                }
-            }
-            return result;
-        }
-        private void AddObjectives(int obj)
-        {
-            string[] names;
-            string[] discriptions;
-
-            string namesFile = "Names.txt";
-            if (!File.Exists(namesFile))
-            {
-                if (WinBox.ShowQuestion("Файл с именами не существует создать его?"))
-                {
-                    OpenHelper.Geany(namesFile);
-                }
-                return;
-            }
-            else
-            {
-                names = File.ReadAllLines(namesFile);
-            }
-
-            string discriptionsFile = "Discriptions.txt";
-            if (!File.Exists(discriptionsFile))
-            {
-                if (WinBox.ShowQuestion("Файл с описаниями не существует создать его?"))
-                {
-                    OpenHelper.Geany(discriptionsFile);
-                }
-                return;
-            }
-            else
-            {
-                discriptions = File.ReadAllLines(discriptionsFile);
-            }
-            if (discriptions == null || names == null) return;
-
-            Random random = new Random();
-
-            for (int i = 0; i < obj; i++)
-            {
-                ObjectiveModel model = new ObjectiveModel();
-                
-                model.ID = ++Properties.Settings.Default.ObjectiveNextId;
-
-                model.ProjectID = SelectedProject.ID;
-                model.CreationDate = DateTime.Now;
-                model.DueDate = DateTime.Now;
-
-                int index = random.Next(0, names.Length);
-
-                model.Title = names[index];
-
-                index = random.Next(0, discriptions.Length);
-                model.Description = discriptions[index];
-
-                model.Status = (ObjectiveStatus)random.Next(0, 4);
-                Objectives.Add(model);
-                ObjectModel.SaveObjective(model.dto, SelectedProject.dto);
-            }
-                Properties.Settings.Default.Save();
-            //SaveObjectiveOffline();
+            throw new NotImplementedException();
         }
 
 
 
-        
+        //public static List<ObjectiveDto> GetObjectives(ProjectDto project)
+        //{
+        //    var result = new List<ObjectiveDto>();
+
+        //    string dirProj = PathManager.GetProjectDir(project);
+        //    if (!Directory.Exists(dirProj)) return result;
+
+        //    string dirObj = PathManager.GetObjectivesDir(project);
+        //    if (!Directory.Exists(dirObj)) return result;
+
+        //    DirectoryInfo dirInfoObj = new DirectoryInfo(dirObj);
+
+        //    foreach (var item in dirInfoObj.GetFiles())
+        //    {
+        //        if (item.Name.StartsWith("objective"))
+        //        {
+        //            var json = File.ReadAllText(item.FullName);
+        //            ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
+        //            result.Add(objective);
+        //        }
+        //    }
+        //    return result;
+        //}
+
     }
 }

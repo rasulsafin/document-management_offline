@@ -40,7 +40,8 @@ namespace MRS.DocumentManagement.Contols
         public ProjectModel SelectedProject
         {
             get => selectedProject;
-            set {
+            set
+            {
                 if (value != null)
                 {
                     selectedProject = value;
@@ -53,6 +54,17 @@ namespace MRS.DocumentManagement.Contols
         public ObjectiveModel SelectedObjective { get => selectedObjective; set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
         public ItemModel SelectedItem { get => selectedItem; set { selectedItem = value; OnPropertyChanged(); } }
         public bool ToObjective { get => toObjective; set { toObjective = value; OnPropertyChanged(); } }
+
+        public int NextId
+        {
+            get => Properties.Settings.Default.ItemNextId;
+            set
+            {
+                Properties.Settings.Default.ItemNextId = value;
+                Properties.Settings.Default.Save();
+                OnPropertyChanged();
+            }
+        }
 
         public HCommand AddItemsCommand { get; }
         public HCommand DelItemsCommand { get; }
@@ -70,7 +82,7 @@ namespace MRS.DocumentManagement.Contols
         public ItemViewModel()
         {
             AddItemsCommand = new HCommand(AddItem);
-            DelItemsCommand = new HCommand(DelItems);
+            DelItemsCommand = new HCommand(DelItem);
             GetIdCommand = new HCommand(GetIDsAsync);
             FindItemIdCommand = new HCommand(FindItemId);
             ZeroIdCommand = new HCommand(ZeroId);
@@ -90,8 +102,8 @@ namespace MRS.DocumentManagement.Contols
 
         private void AddItem()
         {
-            var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
-            if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
+            //var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
+            //if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
 
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Выберете файл";
@@ -99,8 +111,8 @@ namespace MRS.DocumentManagement.Contols
             if (ofd.ShowDialog() == true)
             {
                 ItemModel model = new ItemModel();
-                model.ID = ++Properties.Settings.Default.ItemNextId;
-                Properties.Settings.Default.Save();
+                model.ID = NextId++;
+                
                 FileInfo file = new FileInfo(ofd.FileName);
                 try
                 {
@@ -116,75 +128,94 @@ namespace MRS.DocumentManagement.Contols
                 Items.Add(model);
 
                 if (ToObjective)
-                    ObjectModel.SaveItem(model.dto, SelectedProject.dto, SelectedObjective.dto);
+                {
+                    ObjectModel.SaveItems(SelectedProject.dto, SelectedObjective.dto);
+                    ObjectModel.Synchronizer.Update(model.dto.ID, SelectedObjective.dto.ID, SelectedProject.dto.ID);
+                }
                 else
-                    ObjectModel.SaveItem(model.dto, SelectedProject.dto);
-                
+                {
+                    ObjectModel.SaveItems(SelectedProject.dto);
+                    ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
+                }
             }
         }
-        private void DelItems()
+        private void DelItem()
         {
             if (SelectedItem == null) WinBox.ShowMessage("Нет выбранного элемента.");
             else
             {
                 if (WinBox.ShowQuestion($"Вы действительно хотите удалить элемент '{SelectedItem.Name}'"))
                 {
-                    Items.Remove(SelectedItem);
+                    if (ToObjective)
+                    {
+                        ObjectModel.Synchronizer.Update(SelectedItem.dto.ID, SelectedObjective.dto.ID, SelectedProject.dto.ID);
+                        Items.Remove(SelectedItem);
+                        ObjectModel.SaveItems(SelectedProject.dto, SelectedObjective.dto);
+                    }
+                    else
+                    {
+                        ObjectModel.SaveItems(SelectedProject.dto);
+                        Items.Remove(SelectedItem);
+                        ObjectModel.Synchronizer.Update(SelectedItem.dto.ID, SelectedProject.dto.ID);
+                    }
+
                     SelectedItem = null;
+                    UpdateItems();
                 }
             }
         }
         private void FindItemId()
         {
-            if (WinBox.ShowInput(
-                title: "Открыть елемент",
-                question: "Введи id",
-                input: out string input,
-                okText: "Открыть", cancelText: "Отмена",
-                defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
-                ))
-            {
-                if (int.TryParse(input, out int id))
-                {
-                    (ItemDto item,  ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem((ID<ItemDto>)id);
-                    
-                    string message = "ObjectiveDto:\n";
-                    if (item != null)
-                    {
-                        message += $"ID={item.ID}\n";
-                        message += $"Name={item.Name}\n";
-                        message += $"ItemType={item.ItemType}\n";
-                        message += $"ExternalItemId={item.ExternalItemId}\n";
-                        //message += $"ID={item.}\n";
-                    }
+            WinBox.ShowMessage("Эта кнопка более не работает!");
+            //if (WinBox.ShowInput(
+            //    title: "Открыть елемент",
+            //    question: "Введи id",
+            //    input: out string input,
+            //    okText: "Открыть", cancelText: "Отмена",
+            //    defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
+            //    ))
+            //{
+            //    if (int.TryParse(input, out int id))
+            //    {
+            //        (ItemDto item, ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem((ID<ItemDto>)id);
 
-                    message += "ObjectiveDto:\n";
-                    if (objective != null)
-                    {
-                        message += $"ID={objective.ID}\n";
-                        message += $"ProjectID={objective.ProjectID}\n";
-                        message += $"Title={objective.Title}\n";
-                        message += $"Status={objective.Status}\n";
-                        message += $"Description={objective.Description}\n";
-                        message += $"CreationDate={objective.CreationDate}\n";
-                        message += $"DueDate={objective.DueDate}\n";
-                    }
+            //        string message = "ObjectiveDto:\n";
+            //        if (item != null)
+            //        {
+            //            message += $"ID={item.ID}\n";
+            //            message += $"Name={item.Name}\n";
+            //            message += $"ItemType={item.ItemType}\n";
+            //            message += $"ExternalItemId={item.ExternalItemId}\n";
+            //            //message += $"ID={item.}\n";
+            //        }
 
-                    message += $"project:\n";
-                    if (project != null)
-                    {
-                        message += $"ID={project.ID}\n";
-                        message += $"Title={project.Title}\n";
-                    }
-                    WinBox.ShowMessage(message);
-                }
-            }
+            //        message += "ObjectiveDto:\n";
+            //        if (objective != null)
+            //        {
+            //            message += $"ID={objective.ID}\n";
+            //            message += $"ProjectID={objective.ProjectID}\n";
+            //            message += $"Title={objective.Title}\n";
+            //            message += $"Status={objective.Status}\n";
+            //            message += $"Description={objective.Description}\n";
+            //            message += $"CreationDate={objective.CreationDate}\n";
+            //            message += $"DueDate={objective.DueDate}\n";
+            //        }
+
+            //        message += $"project:\n";
+            //        if (project != null)
+            //        {
+            //            message += $"ID={project.ID}\n";
+            //            message += $"Title={project.Title}\n";
+            //        }
+            //        WinBox.ShowMessage(message);
+            //    }
+            //}
         }
 
         private async void GetIDsAsync()
         {
             ChechYandex();
-            if (SelectedProject == null) 
+            if (SelectedProject == null)
             {
                 WinBox.ShowMessage("Нет выбранного проекта.");
                 return;
@@ -245,10 +276,6 @@ namespace MRS.DocumentManagement.Contols
             ////}
         }
 
-
-
-       
-
         private static ItemTypeDto GetItemTypeDto(string extension)
         {
             if (MEDIA_EXTENTION.Contains(extension))
@@ -270,7 +297,7 @@ namespace MRS.DocumentManagement.Contols
             {
                 SelectedProject = Projects.First();
                 SelectedObjective = Objectives.First();
-                
+
                 ObjectModel.UpdateObjectives(SelectedProject.dto);
                 //UpdateItems();
             }
@@ -284,7 +311,7 @@ namespace MRS.DocumentManagement.Contols
                 if (ToObjective)
                 {
                     if (SelectedObjective != null)
-                    ObjectModel.UpdateItems(SelectedProject.dto, SelectedObjective.dto);
+                        ObjectModel.UpdateItems(SelectedProject.dto, SelectedObjective.dto);
                 }
                 else
                     ObjectModel.UpdateItems(SelectedProject.dto);
@@ -301,7 +328,7 @@ namespace MRS.DocumentManagement.Contols
         }
         #endregion
 
-        
+
 
     }
 }

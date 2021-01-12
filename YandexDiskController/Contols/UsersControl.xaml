@@ -12,9 +12,93 @@
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        
-        
-        
-        <GridSplitter Grid.Column="1" Width="3" Margin="3"/>
+
+        <Border Grid.Column="2">
+            <StackPanel  VerticalAlignment="Top" >
+                <Expander Header="Offline" IsExpanded="true">
+                    <StackPanel>
+                        <WrapPanel Orientation="Horizontal" DataContext="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
+                            <Label  Width="100">Id</Label>
+                            <TextBlock Text="{Binding Id, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal" DataContext="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
+                            <Label  Width="100">Login</Label>
+                            <TextBox Text="{Binding Login, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="150"
+                                     />
+
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal" DataContext="{Binding SelectedUser, UpdateSourceTrigger=PropertyChanged}">
+                            <Label Width="100">Name</Label>
+                            <TextBox Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                     Width="150"
+                                     />
+
+                        </WrapPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding AddUserCommand}">Добавить</Button>
+                            <Button Command="{Binding DelUserCommand}">Удалить</Button>
+                            <Button Command="{Binding EditUserCommand}">Редактировать</Button>
+                            <!--<Button Command="{Binding FindItemIdCommand}">Найти по ID</Button>-->
+                            <Button Command="{Binding ZeroIdCommand}">
+                                <Button.Content>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock>Обнулить ID(</TextBlock>
+                                        <TextBlock Text="{Binding NextId, UpdateSourceTrigger=PropertyChanged}"/>
+                                        <TextBlock>)</TextBlock>
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                            <Button Command="{Binding UpdateCommand}">Обновить</Button>
+                        </WrapPanel>
+
+                        <!--<WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding SaveFileCommand}">Записать в файл</Button>
+                            <Button Command="{Binding LoadFileCommand}">Прочитать из файла</Button>
+                        </WrapPanel>-->
+                    </StackPanel>
+
+                </Expander>
+                
+                <!--<Expander Header="On line" IsExpanded="false">
+                    <StackPanel>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding UnloadCommand}">Загрузить выбранный файл на сервер</Button>
+                            <Button Command="{Binding GetIdCommand}">Получить список Id</Button>
+                        </WrapPanel>
+
+                    </StackPanel>
+                </Expander>-->
+                
+            </StackPanel>
+        </Border>
+
+        <ListBox Grid.Column="0" ItemsSource="{Binding Users, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                 SelectedValue="{Binding SelectedUser, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border>
+                        <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding ID}"/>
+                                <TextBlock Text=" "/>
+                                <TextBlock Text="{Binding Login}"/>
+                            </StackPanel>
+                            <TextBlock Text="{Binding Name}" TextWrapping="Wrap"/>
+                            <!--<StackPanel Orientation="Horizontal">
+                                <TextBlock Text="Создано:"/>
+                                <TextBlock Text="{Binding CreationDate, StringFormat=\{0:g\}}"/>
+                                <TextBlock Text="   Статус:"/>
+                                <TextBlock Text="{Binding Status}"/>
+                            </StackPanel>-->
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+
+        </ListBox>
+
+        <GridSplitter Grid.Column="1" Width="3" Margin="3" HorizontalAlignment="Center" VerticalAlignment="Stretch" />
     </Grid>
 </UserControl>
