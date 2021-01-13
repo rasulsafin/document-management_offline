@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement
         private YandexDiskController controller;
         private int total;
         private int current;
-        public Revisions Revisions { get; private set; }
+        public Revisions Revisions { get; private set; } = new Revisions();
 
 
         public async void Initialize(string accessToken)
@@ -57,77 +57,47 @@ namespace MRS.DocumentManagement
 
         private void SaveRevisions()
         {
+            string dirName = PathManager.GetRevisionsDir();
+            if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
             string fileName = PathManager.GetRevisionFile();
-            string str = JsonConvert.SerializeObject(Revisions);
+            string str = JsonConvert.SerializeObject(Revisions, Formatting.Indented);
             File.WriteAllText(fileName, str);
         }
 
         #region Update Table
         public void Update(ID<ProjectDto> id)
         {
-            if (Synchronize) return;
-            if (!Revisions.Projects.ContainsKey((int)id))
-            {
-                Revisions.Projects.Add((int)id, 0);
-            }
-            Revisions.Projects[(int)id]++;
+            if (Syncing) return;
+            Revisions.UpdateProject((int)id);
             SaveRevisions();
         }
         public void Update(ID<UserDto> id)
         {
-            if (Synchronize) return;
-            if (!Revisions.Users.ContainsKey((int)id))
-            {
-                Revisions.Users.Add((int)id, 0);
-            }
-            Revisions.Users[(int)id]++;
+            if (Syncing) return;
+            Revisions.UpdateUser((int)id);
             SaveRevisions();
         }
         public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
-            if (Synchronize) return;
-            if (!Revisions.Objectives.ContainsKey((int)idProj))
-            {
-                Revisions.Objectives.Add((int)idProj, new Dictionary<int, ulong>());
-                Revisions.Objectives[(int)idProj].Add((int)id, 0);
-            }
-            else
-            {
-                if (!Revisions.Objectives[(int)idProj].ContainsKey((int)id))
-                    Revisions.Objectives[(int)idProj].Add((int)id, 0);
-            }
-            Revisions.Objectives[(int)idProj][(int)id]++;
+            if (Syncing) return;
+            Revisions.UpdateObjective((int)idProj, (int)id);
             SaveRevisions();
         }
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            if (Synchronize) return;
-            if (!Revisions.ItemsProject.ContainsKey((int)idProj))
-                Revisions.ItemsProject.Add((int)idProj, new Dictionary<int, ulong>());
-            if (!Revisions.ItemsProject[(int)idProj].ContainsKey((int)id))
-                Revisions.ItemsProject[(int)idProj].Add((int)id, 0);
-            Revisions.ItemsProject[(int)idProj][(int)id]++;
+            if (Syncing) return;
+            Revisions.UpdateItem((int)idProj, (int)id);
             SaveRevisions();
         }
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
-            if (Synchronize) return;
-            if (!Revisions.ItemsObjective.ContainsKey((int)idProj))
-            {
-                Revisions.ItemsObjective.Add((int)idProj, new Dictionary<int, Dictionary<int, ulong>>());
-            }
-            if (!Revisions.ItemsObjective[(int)idProj].ContainsKey((int)idObj))
-            {
-                Revisions.ItemsObjective[(int)idProj].Add((int)idObj, new Dictionary<int, ulong>());
-            }
-            if (!Revisions.ItemsObjective[(int)idProj][(int)idObj].ContainsKey((int)id))
-            {
-                Revisions.ItemsObjective[(int)idProj][(int)idObj].Add((int)id, 0);
-            }
-            Revisions.ItemsObjective[(int)idProj][(int)idObj][(int)id]++;
+            if (Syncing) return;
+            Revisions.UpdateItem((int)idProj, (int)idObj, (int)id);
             SaveRevisions();
         }
         #endregion
+
+
 
         internal async Task SyncTableAsync(ProgressChangeDelegate progressChange)
         {
@@ -135,63 +105,210 @@ namespace MRS.DocumentManagement
             int current = 0;
             Revisions revisions = await yandex.GetRevisionsAsync();
             total = GetCount(Revisions);
-            progressChange?.Invoke(current, total);
-            current = await SyncProject(progressChange, total, current, revisions);
-            current = await SyncUser(progressChange, total, current, revisions);
-            current = await SyncObjectives(progressChange, total, current, revisions);
-            current = await SyncItems(progressChange, total, current, revisions);
+            Progress<int> progress = new Progress<int>();
+            progress.ProgressChanged += (s, p) =>
+            {
+                current += p;
+                progressChange?.Invoke(current, total);
+            };
+
+            await Synchronize(progress, new ProjectSynchronizer(yandex),  revisions);
+            await Synchronize(progress, new UserSynchronizer(yandex),  revisions);
+            //current = await SyncProject(progressChange, total, current, revisions);
+            //current = await SyncObjectives(progressChange, total, current, revisions);
+            //current = await SyncItems(progressChange, total, current, revisions);
 
             await yandex.SetRevisionsAsync(Revisions);
             SaveRevisions();
+        }
+        private async Task Synchronize(IProgress<int> progress, ISynchronizer synchro, Revisions remoreRevisions)
+        {
+            List<int> download = new List<int>();
+            List<int> unload = new List<int>();
+            List<Revision> local = synchro.GetRevision(Revisions);
+            List<Revision> remote = synchro.GetRevision(remoreRevisions);
+            CompareRevision(download, unload, local, remote, progress);                        
+            synchro.LoadLocalCollect();
+
+            if (download.Count > 0)
+            {
+                //надо скачать
+                foreach (int num in download)
+                {
+                    if (await synchro.RemoteExistAsync(num))
+                    {
+                        await synchro.DownloadAndUpdateAsync(num);
+                    }
+                    else 
+                    {
+                        synchro.DeleteLocal(num);
+                    }
+
+                    var subSynchronizes = synchro.GetSubSynchronizes(num);
+                    if (subSynchronizes != null)
+                    {
+                        foreach (var subSynchronize in subSynchronizes)
+                        {
+                            await Synchronize(progress, subSynchronize, remoreRevisions);
+                        }
+                    }
+                    progress.Report(1);
+                }
+            }
+            if (unload.Count > 0)
+            {
+                //надо загрузить
+                foreach (int num in unload)
+                {
+                    if ( synchro.LocalExist(num))
+                    {
+                        await synchro.UpdateRemoteAsync(num);
+                    }
+                    else
+                    {
+                        await synchro.DeleteRemoteAsync(num);
+                    }
+
+                    var subSynchronizes = synchro.GetSubSynchronizes(num);
+                    if (subSynchronizes != null)
+                    {
+                        foreach (var subSynchronize in subSynchronizes)
+                        {
+                            await Synchronize(progress, subSynchronize, remoreRevisions);
+                        }
+                    }
+                    progress.Report(1);
+                }
+            }
+            synchro.SaveLocalCollect();            
+        }
+        private static void CompareRevision(List<int> download, List<int> unload,
+            List<Revision> local, List<Revision> remote, IProgress<int> progress)
+        {
+            foreach (var localRev in local)
+            {
+                // Находим совподения
+                var remoteRev = remote.Find(r => r.ID == localRev.ID);
+                if (remoteRev == null)
+                {
+                    // Загружаем на сервер
+                    unload.Add(localRev.ID);
+                }
+                else if (localRev < remoteRev)
+                {
+                    // Скачиваем с сервера
+                    download.Add(localRev.ID);
+                    remote.Remove(remoteRev);
+                    localRev.Rev = remoteRev.Rev;
+                }
+                else if (localRev > remoteRev)
+                {
+                    // Загружаем на сервер
+                    unload.Add(localRev.ID);
+                    remote.Remove(remoteRev);
+                }
+                else if (localRev.Equals(remoteRev))
+                {
+                    // Пропускаем 
+                    progress.Report(1);
+                }
+            }
+            foreach (var remoteRev in remote)
+            {
+                // Скачиваем с сервера
+                download.Add(remoteRev.ID);
+                local.Add(remoteRev);
+            }
+        }
+
+
+        private static int CompareRevision(ProgressChangeDelegate progressChange, int total, int current, Dictionary<int, ulong> remote, Dictionary<int, ulong> local, List<int> download, List<int> unload)
+        {
+            foreach (var localObj in local)
+            {
+                var localKey = localObj.Key;
+                var localRev = localObj.Value;
+                if (remote.ContainsKey(localKey))
+                {
+                    var servRev = remote[localKey];
+                    if (servRev < localRev)
+                    {
+                        remote.Remove(localKey);
+                    }
+                    else if (servRev > localRev)
+                    {
+                        // Скачиваем с сервера
+                        download.Add(localKey);
+                        local[localKey] = servRev;
+                        continue;
+                    }
+                    else if (servRev == localRev)
+                    {
+                        remote.Remove(localKey);
+                        progressChange?.Invoke(++current, total);
+                        continue;
+                    }
+                }
+                // Загружаем на сервер
+                unload.Add(localKey);
+            }
+            foreach (var item in remote)
+            {
+                var servKey = item.Key;
+                // Скачиваем с сервера
+                download.Add(servKey);
+            }
+
+            return current;
         }
 
         private async Task<int> SyncItems(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
         {
             #region Project => Item
-            foreach (var remoteProject in revisions.ItemsProject)
-            {
-                if (!Revisions.ItemsProject.ContainsKey(remoteProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
-                    Revisions.ItemsProject.Add(remoteProject.Key, new Dictionary<int, ulong>());
-                }
-            }
-            foreach (var localProject in Revisions.ItemsProject)
-            {
-                ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
-                var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
-                if (!revisions.ItemsProject.ContainsKey(localProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на сервере этой таблици нет, то тупое копирование
-                    revisions.ItemsProject.Add(localProject.Key, new Dictionary<int, ulong>());
-                }
-                Dictionary<int, ulong> remoteItems = revisions.ItemsProject[localProject.Key];
-                Dictionary<int, ulong> localItems = localProject.Value;
+            //foreach (var remoteProject in revisions.ItemsProject)
+            //{
+            //    if (!Revisions.ItemsProject.ContainsKey(remoteProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+            //        Revisions.ItemsProject.Add(remoteProject.Key, new Dictionary<int, ulong>());
+            //    }
+            //}
+            //foreach (var localProject in Revisions.ItemsProject)
+            //{
+            //    ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
+            //    var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
+            //    if (!revisions.ItemsProject.ContainsKey(localProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на сервере этой таблици нет, то тупое копирование
+            //        revisions.ItemsProject.Add(localProject.Key, new Dictionary<int, ulong>());
+            //    }
+            //    Dictionary<int, ulong> remoteItems = revisions.ItemsProject[localProject.Key];
+            //    Dictionary<int, ulong> localItems = localProject.Value;
 
-                current = await SyncItemsProject(progressChange, total, current, project, remoteItems, localItems);
-            } 
+            //    current = await SyncItemsProject(progressChange, total, current, project, remoteItems, localItems);
+            //} 
             #endregion
-            foreach (var remoteProject in revisions.ItemsObjective)
-            {
-                if (!Revisions.ItemsObjective.ContainsKey(remoteProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
-                    Revisions.ItemsObjective.Add(remoteProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
-                }
-            }
-            foreach (var localProject in Revisions.ItemsObjective)
-            {
-                ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
-                var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
+            //foreach (var remoteProject in revisions.ItemsObjective)
+            //{
+            //    if (!Revisions.ItemsObjective.ContainsKey(remoteProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+            //        Revisions.ItemsObjective.Add(remoteProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
+            //    }
+            //}
+            //foreach (var localProject in Revisions.ItemsObjective)
+            //{
+            //    ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
+            //    var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
 
-                if (!revisions.ItemsObjective.ContainsKey(localProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
-                    Revisions.ItemsObjective.Add(localProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
-                }
+            //    if (!revisions.ItemsObjective.ContainsKey(localProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+            //        Revisions.ItemsObjective.Add(localProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
+            //    }
 
 
-            }
+            //}
 
             return current;
             //
@@ -266,71 +383,32 @@ namespace MRS.DocumentManagement
             return current;
         }
 
-        private static int CompareRevision(ProgressChangeDelegate progressChange, int total, int current, Dictionary<int, ulong> remote, Dictionary<int, ulong> local, List<int> download, List<int> unload)
-        {
-            foreach (var localObj in local)
-            {
-                var localKey = localObj.Key;
-                var localRev = localObj.Value;
-                if (remote.ContainsKey(localKey))
-                {
-                    var servRev = remote[localKey];
-                    if (servRev < localRev)
-                    {
-                        remote.Remove(localKey);
-                    }
-                    else if (servRev > localRev)
-                    {
-                        // Скачиваем с сервера
-                        download.Add(localKey);
-                        local[localKey] = servRev;
-                        continue;
-                    }
-                    else if (servRev == localRev)
-                    {
-                        remote.Remove(localKey);
-                        progressChange?.Invoke(++current, total);
-                        continue;
-                    }
-                }
-                // Загружаем на сервер
-                unload.Add(localKey);
-            }
-            foreach (var item in remote)
-            {
-                var servKey = item.Key;
-                // Скачиваем с сервера
-                download.Add(servKey);
-            }
-
-            return current;
-        }
 
         private async Task<int> SyncObjectives(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
         {
-            foreach (var remoteProject in revisions.Objectives)
-            {
-                if (!Revisions.Objectives.ContainsKey(remoteProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
-                    Revisions.Objectives.Add(remoteProject.Key, new Dictionary<int, ulong>());
-                }
-            }
+            //foreach (var remoteProject in revisions.Objectives)
+            //{
+            //    if (!Revisions.Objectives.ContainsKey(remoteProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+            //        Revisions.Objectives.Add(remoteProject.Key, new Dictionary<int, ulong>());
+            //    }
+            //}
 
-            foreach (var localProject in Revisions.Objectives)
-            {
-                ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
-                var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
-                if (!revisions.Objectives.ContainsKey(localProject.Key))
-                {
-                    // TODO : Сделать хитрее, если на сервере этой таблици нет, то тупое копирование
-                    revisions.Objectives.Add(localProject.Key, new Dictionary<int, ulong>());
-                }
-                Dictionary<int, ulong> remoteObjectives = revisions.Objectives[localProject.Key];
-                Dictionary<int, ulong> localObjectives = localProject.Value;
+            //foreach (var localProject in Revisions.Objectives)
+            //{
+            //    ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
+            //    var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
+            //    if (!revisions.Objectives.ContainsKey(localProject.Key))
+            //    {
+            //        // TODO : Сделать хитрее, если на сервере этой таблици нет, то тупое копирование
+            //        revisions.Objectives.Add(localProject.Key, new Dictionary<int, ulong>());
+            //    }
+            //    Dictionary<int, ulong> remoteObjectives = revisions.Objectives[localProject.Key];
+            //    Dictionary<int, ulong> localObjectives = localProject.Value;
 
-                current = await SyncObjective(progressChange, total, current, project, remoteObjectives, localObjectives);
-            }
+            //    current = await SyncObjective(progressChange, total, current, project, remoteObjectives, localObjectives);
+            //}
 
             return current;
         }
@@ -383,137 +461,59 @@ namespace MRS.DocumentManagement
 
         private async Task<int> SyncProject(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
         {
-            List<int> download = new List<int>();
-            List<int> unload = new List<int>();
-            current = CompareRevision(progressChange, total, current, revisions.Projects, Revisions.Projects, download, unload);
-            List<ProjectDto> projects = ObjectModel.GetProjects();
-            if (download.Count > 0)
-            {
-                //надо скачать
-                foreach (int num in download)
-                {
-                    var id = (ID<ProjectDto>)num;
-                    ProjectDto dto = await yandex.GetProjectAsync(id);
-                    if (dto == null)
-                    {
-                        projects.RemoveAll(x => x.ID == id);
-                    }
-                    else
-                    {
-                        int index = projects.FindIndex(x => x.ID == id);
-                        if (index < 0)
-                            projects.Add(dto);
-                        else
-                            projects[index] = dto;
-                    }
-                    progressChange?.Invoke(++current, total);
-                }
-            }
-            if (unload.Count > 0)
-            {
-                //надо загрузить
-                foreach (int num in unload)
-                {
-                    var id = (ID<ProjectDto>)num;
-                    ProjectDto dto = projects.Find(x => x.ID == id);
-                    if (dto == null)
-                        await yandex.DeleteProject(id);
-                    else
-                        await yandex.UnloadProject(dto);
-                    progressChange?.Invoke(++current, total);
-                }
-            }
-            ObjectModel.SaveProjects(projects);
-            return current;
-        }
-        private async Task<int> SyncUser(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
-        {
-            List<int> download = new List<int>();
-            List<int> unload = new List<int>();
-            current = CompareRevision(progressChange, total, current, revisions.Users, Revisions.Users, download, unload);
-
-            //foreach (var item in Revisions.Users)
+            //List<int> download = new List<int>();
+            //List<int> unload = new List<int>();
+            //current = CompareRevision(progressChange, total, current, revisions.Projects, Revisions.Projects, download, unload);
+            //List<ProjectDto> projects = ObjectModel.GetProjects();
+            //if (download.Count > 0)
             //{
-            //    var localKey = item.Key;
-            //    var localRev = item.Value;
-            //    if (revisions.Users.ContainsKey(localKey))
+            //    //надо скачать
+            //    foreach (int num in download)
             //    {
-            //        var servRev = revisions.Users[localKey];
-            //        if (servRev < localRev)
+            //        var id = (ID<ProjectDto>)num;
+            //        ProjectDto dto = await yandex.GetProjectAsync(id);
+            //        if (dto == null)
             //        {
-            //            revisions.Users.Remove(localKey);
+            //            projects.RemoveAll(x => x.ID == id);
             //        }
-            //        else if (servRev > localRev)
+            //        else
             //        {
-            //            // Скачиваем с сервера
-            //            download.Add(localKey);
-            //            Revisions.Users[localKey] = servRev;
-            //            continue;
+            //            int index = projects.FindIndex(x => x.ID == id);
+            //            if (index < 0)
+            //                projects.Add(dto);
+            //            else
+            //                projects[index] = dto;
             //        }
-            //        else if (servRev == localRev)
-            //        {
-            //            revisions.Users.Remove(localKey);
-            //            progressChange?.Invoke(++current, total);
-            //            continue;
-            //        }
+            //        progressChange?.Invoke(++current, total);
             //    }
-            //    // Загружаем на сервер
-            //    unload.Add(localKey);
             //}
-            //foreach (var item in revisions.Users)
+            //if (unload.Count > 0)
             //{
-            //    var servKey = item.Key;
-            //    // Скачиваем с сервера
-            //    download.Add(servKey);
+            //    //надо загрузить
+            //    foreach (int num in unload)
+            //    {
+            //        var id = (ID<ProjectDto>)num;
+            //        ProjectDto dto = projects.Find(x => x.ID == id);
+            //        if (dto == null)
+            //            await yandex.DeleteProject(id);
+            //        else
+            //            await yandex.UnloadProject(dto);
+            //        progressChange?.Invoke(++current, total);
+            //    }
             //}
-
-            List<UserDto> users = ObjectModel.GetUsers();
-            if (download.Count > 0)
-            {
-                //надо скачать
-                foreach (int num in download)
-                {
-                    var id = (ID<UserDto>)num;
-                    UserDto dto = await yandex.GetUserAsync(id);
-                    if (dto == null)
-                    {
-                        users.RemoveAll(x => x.ID == id);
-                    }
-                    else
-                    {
-                        int index = users.FindIndex(x => x.ID == id);
-                        if (index < 0)
-                            users.Add(dto);
-                        else
-                            users[index] = dto;
-                    }
-                    progressChange?.Invoke(++current, total);
-                }
-            }
-            if (unload.Count > 0)
-            {
-                //надо загрузить
-                foreach (int num in unload)
-                {
-                    var id = (ID<UserDto>)num;
-                    UserDto dto = users.Find(x => x.ID == id);
-                    if (dto == null)
-                        await yandex.DeleteUser(id);
-                    else
-                        await yandex.UnloadUser(dto);
-                    progressChange?.Invoke(++current, total);
-                }
-            }
-            ObjectModel.SaveUsers(users);
+            //ObjectModel.SaveProjects(projects);
             return current;
         }
+
+
+
 
         private int GetCount(Revisions revisions)
         {
             int result = revisions.Projects.Count + revisions.Users.Count;
-            result += revisions.Objectives.Sum(x => x.Value.Count);
-            result += revisions.ItemsProject.Sum(x => x.Value.Count);
-            result += revisions.ItemsObjective.Sum(x => x.Value.Sum(q => q.Value.Count));
+            result += (int)revisions.Projects.Sum(x => x.Objectives?.Count);
+            result += (int)revisions.Projects.Sum(x => x.Items?.Count);
+            result += (int)revisions.Projects.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
             return result;
         }
 
@@ -522,7 +522,7 @@ namespace MRS.DocumentManagement
         public ulong Revision { get; private set; }
         public List<Transaction> Transactions { get; private set; } = new List<Transaction>();
         public YandexDiskManager Yandex { get => yandex; set => yandex = value; }
-        public bool Synchronize { get; private set; }
+        public bool Syncing { get; private set; }
         public void Load()
         {
             //var list = GetLocalTransaction();
@@ -842,7 +842,7 @@ namespace MRS.DocumentManagement
         private List<Transaction> GetTransactionsLocal(ulong revision)
         {
             List<Transaction> result = new List<Transaction>();
-            var transDir = new DirectoryInfo(PathManager.GetTransactionsDir());
+            var transDir = new DirectoryInfo(PathManager.GetRevisionsDir());
             foreach (var file in transDir.GetFiles())
             {
                 List<Transaction> transaction = GetTransactions(file.FullName);
@@ -885,16 +885,16 @@ namespace MRS.DocumentManagement
             return null;
         }
 
-        private void SaveTrans(List<Transaction> trans, DateTime date)
-        {
-            string dirTrans = PathManager.GetTransactionsDir();
-            if (!Directory.Exists(dirTrans)) Directory.CreateDirectory(dirTrans);
+        //private void SaveTrans(List<Transaction> trans, DateTime date)
+        //{
+        //    //string dirTrans = PathManager.GetRevisionsDir();
+        //    //if (!Directory.Exists(dirTrans)) Directory.CreateDirectory(dirTrans);
 
-            string filename = PathManager.GetTransactionFile(date);
+        //    //string filename = PathManager.GetRevisionsDir(date);
 
-            string json = JsonConvert.SerializeObject(trans, Formatting.Indented);
-            File.WriteAllText(filename, json);
-        }
+        //    //string json = JsonConvert.SerializeObject(trans, Formatting.Indented);
+        //    //File.WriteAllText(filename, json);
+        //}
         public void Save()
         {
             //var list = Transactions.Where(x => x.Rev == 0 && !x.Server).ToList();
@@ -909,31 +909,31 @@ namespace MRS.DocumentManagement
             //string json = JsonConvert.SerializeObject(list, Formatting.Indented);
             //File.WriteAllText(filename, json);
         }
-        public List<Transaction> GetLocalTransaction()
-        {
-            string dirTrans = PathManager.GetTransactionsDir();
-            if (Directory.Exists(dirTrans))
-            {
-                string filename = PathManager.GetTransactionFile();
-                if (File.Exists(filename))
-                {
-                    string jcon = File.ReadAllText(filename);
-                    List<Transaction> list = JsonConvert.DeserializeObject<List<Transaction>>(jcon);
-                    return list;
-                }
-            }
-            return new List<Transaction>();
-        }
-        public List<Transaction> GetTransactions(DateTime date)
-        {
-            string dirTrans = PathManager.GetTransactionsDir();
-            if (Directory.Exists(dirTrans))
-            {
-                string filename = PathManager.GetTransactionFile(date);
-                return GetTransactions(filename);
-            }
-            return new List<Transaction>();
-        }
+        //public List<Transaction> GetLocalTransaction()
+        //{
+        //    string dirTrans = PathManager.GetRevisionsDir();
+        //    if (Directory.Exists(dirTrans))
+        //    {
+        //        string filename = PathManager.GetTransactionFile();
+        //        if (File.Exists(filename))
+        //        {
+        //            string jcon = File.ReadAllText(filename);
+        //            List<Transaction> list = JsonConvert.DeserializeObject<List<Transaction>>(jcon);
+        //            return list;
+        //        }
+        //    }
+        //    return new List<Transaction>();
+        //}
+        //public List<Transaction> GetTransactions(DateTime date)
+        //{
+        //    string dirTrans = PathManager.GetRevisionsDir();
+        //    if (Directory.Exists(dirTrans))
+        //    {
+        //        string filename = PathManager.GetTransactionFile(date);
+        //        return GetTransactions(filename);
+        //    }
+        //    return new List<Transaction>();
+        //}
         public List<Transaction> GetTransactions(string filename)
         {
             if (File.Exists(filename))
@@ -952,7 +952,7 @@ namespace MRS.DocumentManagement
         }
         private ulong GetLocalRevision()
         {
-            string dirTrans = PathManager.GetTransactionsDir();
+            string dirTrans = PathManager.GetRevisionsDir();
             if (Directory.Exists(dirTrans))
             {
                 string filename = PathManager.GetRevisionFile();
@@ -969,4 +969,6 @@ namespace MRS.DocumentManagement
         }
         #endregion
     }
+
+
 }

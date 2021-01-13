@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement
         private static readonly string ITEMS_OBJ_FILE = "items_{0}.json";
 
         private static readonly string PROJ_DIR = "Projects";
-        private static readonly string TYRANS_DIR = "Transactions";
+        private static readonly string REV_DIR = "Revisions";
 
         private static readonly string ITM_DIR = "Items";
         private static readonly string OBJ_DIR = "Objectives";
@@ -66,10 +66,10 @@ namespace MRS.DocumentManagement
         }
 
 
-        public static string GetRevisionFile() => Path.Combine(GetTransactionsDir(), REVISION_FILE);
-        public static string GetTransactionFile(DateTime date) => Path.Combine(GetTransactionsDir(), date.ToString("yyyy-MM-dd") + ".json");
-        public static string GetTransactionFile() => Path.Combine(GetTransactionsDir(), TANSLATION_FILE);
-        public static string GetTransactionsDir() => Path.Combine(APP_DIR, TYRANS_DIR);
+        public static string GetRevisionFile() => Path.Combine(GetRevisionsDir(), REVISION_FILE);
+        //public static string GetTransactionFile(DateTime date) => Path.Combine(GetRevisionsDir(), date.ToString("yyyy-MM-dd") + ".json");
+        //public static string GetTransactionFile() => Path.Combine(GetRevisionsDir(), TANSLATION_FILE);
+        public static string GetRevisionsDir() => Path.Combine(APP_DIR, REV_DIR);
 
 
         //public static string GetObjectivesDir(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJ_DIR);

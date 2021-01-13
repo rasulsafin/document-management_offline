@@ -51,7 +51,9 @@ namespace MRS.DocumentManagement.Contols
                 }
             }
         }
-        public ObjectiveModel SelectedObjective { get => selectedObjective; set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
+        public ObjectiveModel SelectedObjective { 
+            get => selectedObjective; 
+            set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
         public ItemModel SelectedItem { get => selectedItem; set { selectedItem = value; OnPropertyChanged(); } }
         public bool ToObjective { get => toObjective; set { toObjective = value; OnPropertyChanged(); } }
 

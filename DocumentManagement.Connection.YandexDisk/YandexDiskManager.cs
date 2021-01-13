@@ -48,7 +48,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
 
-                string path = PathManager.GetUsersDir();
+                string path = PathManager.GetProjectsDir();
                 if (!list.Any(
                     x => x.IsDirectory && x.Href == path
                     ))

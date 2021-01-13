@@ -159,35 +159,19 @@ namespace MRS.DocumentManagement
         }
         public static List<ItemDto> GetItems(ProjectDto project, ObjectiveDto objective = null)
         {
-            static void readFiles(List<ItemDto> result, DirectoryInfo dir, ID<ObjectiveDto> tagret)
+            try
             {
-                foreach (var file in dir.GetFiles())
-                {
-                    if (PathManager.TryParseItemId(file.Name, out ID<ItemDto> idItem, out ID<ObjectiveDto> idObjective))
-                    {
-                        if (idObjective == tagret)
-                        {
-                            var json = File.ReadAllText(file.FullName);
-                            ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-                            result.Add(item);
-                        }
-                    }
-                }
+                string path = "";
+                if (objective == null)
+                    path = PathManager.GetItemsFile(project);
+                else
+                    path = PathManager.GetItemsFile(objective, project);
+                var json = File.ReadAllText(path);
+                List<ItemDto> items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
+                return items;
             }
-
-            var dirItem = PathManager.GetItemsDir(project);
-            if (!Directory.Exists(dirItem)) return new List<ItemDto>();
-            var result = new List<ItemDto>();
-            DirectoryInfo dir = new DirectoryInfo(dirItem);
-            if (objective == null)
-            {
-                readFiles(result, dir, ID<ObjectiveDto>.InvalidID);
-            }
-            else
-            {
-                readFiles(result, dir, objective.ID);
-            }
-            return result;
+            catch{}
+            return new List<ItemDto>();
         }
         public static void SaveItems(ProjectDto project, ObjectiveDto objective = null)
         {
