@@ -1,10 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace MRS.DocumentManagement.Database.Migrations
+namespace DocumentManagement.Database.Migrations
 {
-    public partial class CreateDatabase : Migration
+    public partial class CreateSqlLiteDb : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,9 +11,10 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "ConnectionInfos",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    AuthFieldNames = table.Column<string>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    AuthFieldNames = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -25,10 +25,11 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "Items",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Path = table.Column<string>(nullable: true),
-                    ItemType = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    ItemType = table.Column<int>(type: "INTEGER", nullable: false),
+                    ExternalItemId = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -39,9 +40,9 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "ObjectiveTypes",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -52,9 +53,9 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "Projects",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -62,13 +63,26 @@ namespace MRS.DocumentManagement.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "EnumDms",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(nullable: true),
-                    ConnectionInfoID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: true),
+                    ConnectionInfoID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -85,14 +99,13 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Login = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    PasswordHash = table.Column<byte[]>(nullable: true),
-                    PasswordSalt = table.Column<byte[]>(nullable: true),
-                    Role = table.Column<string>(nullable: true),
-                    ConnectionInfoID = table.Column<int>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Login = table.Column<string>(type: "TEXT", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    PasswordHash = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    PasswordSalt = table.Column<byte[]>(type: "BLOB", nullable: false),
+                    ConnectionInfoID = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -109,10 +122,10 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "BimElements",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ItemID = table.Column<int>(nullable: false),
-                    GlobalID = table.Column<string>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ItemID = table.Column<int>(type: "INTEGER", nullable: false),
+                    GlobalID = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -129,8 +142,8 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "ProjectItems",
                 columns: table => new
                 {
-                    ProjectID = table.Column<int>(nullable: false),
-                    ItemID = table.Column<int>(nullable: false)
+                    ProjectID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ItemID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -153,10 +166,10 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "EnumDmValues",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Value = table.Column<string>(nullable: true),
-                    EnumDmID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Value = table.Column<string>(type: "TEXT", nullable: true),
+                    EnumDmID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -173,33 +186,21 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "Objectives",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProjectID = table.Column<int>(nullable: false),
-                    ParentObjectiveID = table.Column<int>(nullable: true),
-                    AuthorID = table.Column<int>(nullable: true),
-                    CreationDate = table.Column<DateTime>(nullable: false),
-                    DueDate = table.Column<DateTime>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Description = table.Column<string>(nullable: true),
-                    Status = table.Column<int>(nullable: false),
-                    ObjectiveTypeID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProjectID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentObjectiveID = table.Column<int>(type: "INTEGER", nullable: true),
+                    AuthorID = table.Column<int>(type: "INTEGER", nullable: true),
+                    CreationDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    DueDate = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Description = table.Column<string>(type: "TEXT", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
+                    ObjectiveTypeID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Objectives", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Objectives_Users_AuthorID",
-                        column: x => x.AuthorID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_Objectives_ObjectiveTypes_ObjectiveTypeID",
-                        column: x => x.ObjectiveTypeID,
-                        principalTable: "ObjectiveTypes",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Objectives_Objectives_ParentObjectiveID",
                         column: x => x.ParentObjectiveID,
@@ -207,19 +208,31 @@ namespace MRS.DocumentManagement.Database.Migrations
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
+                        name: "FK_Objectives_ObjectiveTypes_ObjectiveTypeID",
+                        column: x => x.ObjectiveTypeID,
+                        principalTable: "ObjectiveTypes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Objectives_Projects_ProjectID",
                         column: x => x.ProjectID,
                         principalTable: "Projects",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Objectives_Users_AuthorID",
+                        column: x => x.AuthorID,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
                 name: "UserProjects",
                 columns: table => new
                 {
-                    UserID = table.Column<int>(nullable: false),
-                    ProjectID = table.Column<int>(nullable: false)
+                    UserID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProjectID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -239,11 +252,35 @@ namespace MRS.DocumentManagement.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    UserID = table.Column<int>(type: "INTEGER", nullable: false),
+                    RoleID = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => new { x.UserID, x.RoleID });
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Roles_RoleID",
+                        column: x => x.RoleID,
+                        principalTable: "Roles",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Users_UserID",
+                        column: x => x.UserID,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "UserEnumDmValues",
                 columns: table => new
                 {
-                    EnumDmValueID = table.Column<int>(nullable: false),
-                    UserID = table.Column<int>(nullable: false)
+                    EnumDmValueID = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -263,23 +300,23 @@ namespace MRS.DocumentManagement.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BimElementObjective",
+                name: "BimElementObjectives",
                 columns: table => new
                 {
-                    ObjectiveID = table.Column<int>(nullable: false),
-                    BimElementID = table.Column<int>(nullable: false)
+                    ObjectiveID = table.Column<int>(type: "INTEGER", nullable: false),
+                    BimElementID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BimElementObjective", x => new { x.BimElementID, x.ObjectiveID });
+                    table.PrimaryKey("PK_BimElementObjectives", x => new { x.BimElementID, x.ObjectiveID });
                     table.ForeignKey(
-                        name: "FK_BimElementObjective_BimElements_BimElementID",
+                        name: "FK_BimElementObjectives_BimElements_BimElementID",
                         column: x => x.BimElementID,
                         principalTable: "BimElements",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BimElementObjective_Objectives_ObjectiveID",
+                        name: "FK_BimElementObjectives_Objectives_ObjectiveID",
                         column: x => x.ObjectiveID,
                         principalTable: "Objectives",
                         principalColumn: "ID",
@@ -290,12 +327,12 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "DynamicFields",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ObjectiveID = table.Column<int>(nullable: false),
-                    Key = table.Column<string>(nullable: true),
-                    Type = table.Column<string>(nullable: true),
-                    Value = table.Column<string>(nullable: true)
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ObjectiveID = table.Column<int>(type: "INTEGER", nullable: false),
+                    Key = table.Column<string>(type: "TEXT", nullable: true),
+                    Type = table.Column<string>(type: "TEXT", nullable: true),
+                    Value = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -312,8 +349,8 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "ObjectiveItems",
                 columns: table => new
                 {
-                    ObjectiveID = table.Column<int>(nullable: false),
-                    ItemID = table.Column<int>(nullable: false)
+                    ObjectiveID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ItemID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -333,8 +370,8 @@ namespace MRS.DocumentManagement.Database.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_BimElementObjective_ObjectiveID",
-                table: "BimElementObjective",
+                name: "IX_BimElementObjectives_ObjectiveID",
+                table: "BimElementObjectives",
                 column: "ObjectiveID");
 
             migrationBuilder.CreateIndex(
@@ -356,6 +393,12 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "IX_EnumDmValues_EnumDmID",
                 table: "EnumDmValues",
                 column: "EnumDmID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_Name",
+                table: "Items",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ObjectiveItems_ItemID",
@@ -383,9 +426,21 @@ namespace MRS.DocumentManagement.Database.Migrations
                 column: "ProjectID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ObjectiveTypes_Name",
+                table: "ObjectiveTypes",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ProjectItems_ProjectID",
                 table: "ProjectItems",
                 column: "ProjectID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Roles_Name",
+                table: "Roles",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserEnumDmValues_UserID",
@@ -398,15 +453,26 @@ namespace MRS.DocumentManagement.Database.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_UserRoles_RoleID",
+                table: "UserRoles",
+                column: "RoleID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_ConnectionInfoID",
                 table: "Users",
                 column: "ConnectionInfoID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Login",
+                table: "Users",
+                column: "Login",
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BimElementObjective");
+                name: "BimElementObjectives");
 
             migrationBuilder.DropTable(
                 name: "DynamicFields");
@@ -424,6 +490,9 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "UserProjects");
 
             migrationBuilder.DropTable(
+                name: "UserRoles");
+
+            migrationBuilder.DropTable(
                 name: "BimElements");
 
             migrationBuilder.DropTable(
@@ -433,16 +502,19 @@ namespace MRS.DocumentManagement.Database.Migrations
                 name: "EnumDmValues");
 
             migrationBuilder.DropTable(
-                name: "Items");
+                name: "Roles");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Items");
 
             migrationBuilder.DropTable(
                 name: "ObjectiveTypes");
 
             migrationBuilder.DropTable(
                 name: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "EnumDms");

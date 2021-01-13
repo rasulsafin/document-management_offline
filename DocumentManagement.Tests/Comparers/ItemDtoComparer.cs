@@ -1,15 +1,15 @@
-﻿using MRS.DocumentManagement.Database.Models;
+﻿using MRS.DocumentManagement.Interface.Dtos;
 using System.Diagnostics.CodeAnalysis;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal class ItemComparer : AbstractModelComparer<Item>
+    internal class ItemDtoComparer : AbstractModelComparer<ItemDto>
     {
-        public ItemComparer(bool ignoreIDs = false) : base(ignoreIDs)
+        public ItemDtoComparer(bool ignoreIDs = false) : base(ignoreIDs)
         {
         }
 
-        public override bool NotNullEquals([DisallowNull] Item x, [DisallowNull] Item y)
+        public override bool NotNullEquals([DisallowNull] ItemDto x, [DisallowNull] ItemDto y)
         {
             var dataEquals = x.ItemType == y.ItemType && x.Name == y.Name;
             if (!IgnoreIDs)

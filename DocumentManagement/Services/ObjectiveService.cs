@@ -44,6 +44,7 @@ namespace MRS.DocumentManagement.Services
                 {
                     dbBim = mapper.Map<BimElement>(bim);
                     context.BimElements.Add(dbBim);
+                    await context.SaveChangesAsync();
                 }
                 objective.BimElements.Add(new BimElementObjective
                 {
@@ -53,7 +54,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             objective.Items = new List<ObjectiveItem>();
-            foreach (var item in data.Items)
+            foreach (var item in data.Items ?? Enumerable.Empty<ItemDto>())
             {
                 await LinkItem(item, objective);
             }
@@ -78,6 +79,8 @@ namespace MRS.DocumentManagement.Services
                 .Include(x => x.Author)
                 .Include(x => x.ObjectiveType)
                 .Include(x => x.DynamicFields)
+                .Include(x => x.Items)
+                .ThenInclude(x => x.Item)
                 .Include(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)
                 .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
@@ -97,6 +100,10 @@ namespace MRS.DocumentManagement.Services
                 .ThenInclude(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+
+            if (dbProject == null)
+                return Enumerable.Empty<ObjectiveToListDto>();
+
             return dbProject.Objectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
         }
 
@@ -131,7 +138,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
 
             objective = mapper.Map(objData, objective);
-            
+
             var objectiveFields = objective.DynamicFields;
             var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
             var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int) f.ID != x.ID)).ToList();
@@ -197,9 +204,9 @@ namespace MRS.DocumentManagement.Services
 
             objective.Items = new List<ObjectiveItem>();
             var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
-            var itemsToUnlink = objectiveItems.Where(o => objData.Items.Any(i => (int)i.ID == o.ItemID));
+            var itemsToUnlink = objectiveItems.Where(o => objData.Items?.Any(i => (int)i.ID == o.ItemID) ?? true);
 
-            foreach (var item in objData.Items)
+            foreach (var item in objData.Items ?? Enumerable.Empty<ItemDto>())
             {
                 await LinkItem(item, objective);
             }
@@ -216,7 +223,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Objective objective)
         {
-            var dbItem = await itemHelper.CheckItemToLink(context, item, objective.GetType(), objective.ID);
+            var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
 

@@ -1,25 +1,27 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Threading.Tasks;
-using AutoMapper;
 
 namespace MRS.DocumentManagement.Utility
 {
     public class ItemHelper
     {
-        private readonly IMapper mapper;
-
-        public ItemHelper(IMapper mapper) 
-            => this.mapper = mapper;
-
-
-        public async Task<Item> CheckItemToLink(DMContext context, ItemDto item, Type itemParentType, int parentId)
+        public async Task<Item> CheckItemToLink(DMContext context, IMapper mapper, ItemDto item, Type itemParentType, int parentId)
         {
             var dbItem = await context.Items
                     .FirstOrDefaultAsync(i => i.ID == (int)item.ID);
+
+            if (dbItem == null)
+            {
+                dbItem = mapper.Map<Item>(item);
+                context.Items.Add(dbItem);
+                await context.SaveChangesAsync();
+                return dbItem;
+            }
 
             bool alreadyLinked = false;
 
@@ -37,12 +39,6 @@ namespace MRS.DocumentManagement.Utility
 
             if (alreadyLinked)
                 return null;
-
-            if (dbItem == null)
-            {
-                dbItem = mapper.Map<Item>(item);
-                context.Items.Add(dbItem);
-            }
 
             return dbItem;
         }

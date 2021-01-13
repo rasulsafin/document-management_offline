@@ -1,14 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Services;
-using System.Linq;
-using AutoMapper;
-using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -16,11 +16,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly CryptographyHelper cryptographyHelper;
 
-        public AuthorizationService(DMContext context, IMapper mapper)
+        public AuthorizationService(DMContext context, IMapper mapper, CryptographyHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
+            cryptographyHelper = helper;
         }
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
@@ -112,7 +114,7 @@ namespace MRS.DocumentManagement.Services
             if (dbUser == null)
                 return null;
 
-            if (!Utility.CryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
+            if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
                 return null;
 
             var dtoUser = mapper.Map<UserDto>(dbUser);

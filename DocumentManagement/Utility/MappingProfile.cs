@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -20,7 +21,9 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<Objective, ObjectiveToListDto>();
-            CreateMap<Objective, ObjectiveDto>();
+            CreateMap<Objective, ObjectiveDto>()
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
+                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<ConnectionInfo, RemoteConnectionInfoDto>()
                 .ForMember(d => d.ServiceName, o => o.MapFrom(x => x.Name))
                 .ForMember(d => d.AuthFieldNames, o => o.MapFrom(x => DecodeAuthFieldNames(x.AuthFieldNames)));
@@ -28,6 +31,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Project, ProjectDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
+            CreateMap<BimElement, BimElementDto>();
         }
         private void CreateMapToModel()
         {
@@ -42,6 +46,7 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Items, o => o.Ignore());
             CreateMap<BimElementDto, BimElement>();
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
+            CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
             CreateMap<ItemDto, Item>();
         }

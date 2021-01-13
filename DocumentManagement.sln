@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Tests", "DocumentManagement.Tests\DocumentManagement.Tests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.IntegrationTests", "DocumentManagement.Tests\DocumentManagement.IntegrationTests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
 	EndProjectSection
@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Interfac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Database", "DocumentManagement.Database\DocumentManagement.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
