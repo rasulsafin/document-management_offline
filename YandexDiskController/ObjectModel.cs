@@ -206,6 +206,23 @@ namespace MRS.DocumentManagement
             string json = JsonConvert.SerializeObject(items);
             File.WriteAllText(path, json);
         }
+
+        public static void SaveItems(ProjectDto project, List<ItemDto> items)
+        {
+            var dirProj = PathManager.GetProjectDir(project);
+            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
+            string path =  PathManager.GetItemsFile(project);
+            string json = JsonConvert.SerializeObject(items);
+            File.WriteAllText(path, json);
+        }
+        public static void SaveItems(ProjectDto project, ObjectiveDto objective, List<ItemDto> items)
+        {
+            var dirProj = PathManager.GetProjectDir(project);
+            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
+            string path = PathManager.GetItemsFile(objective, project);
+            string json = JsonConvert.SerializeObject(items);
+            File.WriteAllText(path, json);
+        }
         //public static void DeleteItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
         //{
         //    var dirProj = PathManager.GetProjectDir(project);

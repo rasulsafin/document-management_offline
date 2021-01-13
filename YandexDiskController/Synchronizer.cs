@@ -147,6 +147,7 @@ namespace MRS.DocumentManagement
 
         private async Task<int> SyncItems(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
         {
+            #region Project => Item
             foreach (var remoteProject in revisions.ItemsProject)
             {
                 if (!Revisions.ItemsProject.ContainsKey(remoteProject.Key))
@@ -168,6 +169,28 @@ namespace MRS.DocumentManagement
                 Dictionary<int, ulong> localItems = localProject.Value;
 
                 current = await SyncItemsProject(progressChange, total, current, project, remoteItems, localItems);
+            } 
+            #endregion
+            foreach (var remoteProject in revisions.ItemsObjective)
+            {
+                if (!Revisions.ItemsObjective.ContainsKey(remoteProject.Key))
+                {
+                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+                    Revisions.ItemsObjective.Add(remoteProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
+                }
+            }
+            foreach (var localProject in Revisions.ItemsObjective)
+            {
+                ID<ProjectDto> idProj = new ID<ProjectDto>(localProject.Key);
+                var project = ObjectModel.Projects.First(x => x.dto.ID == idProj).dto;
+
+                if (!revisions.ItemsObjective.ContainsKey(localProject.Key))
+                {
+                    // TODO : Сделать хитрее, если на компе этой таблици нет, то тупое копирование
+                    Revisions.ItemsObjective.Add(localProject.Key, new Dictionary<int, Dictionary<int, ulong>>());
+                }
+
+
             }
 
             return current;
@@ -200,6 +223,11 @@ namespace MRS.DocumentManagement
                     }
                     else
                     {
+                        // TODO: Сортировка по папочкам
+                        string path = Path.Combine(PathManager.GetProjectDir(project), dto.Name);
+                        await yandex.DownloadItem(dto, path);
+                        dto.ExternalItemId = path;
+
                         int index = items.FindIndex(x => x.ID == id);
                         if (index < 0)
                         {
@@ -207,6 +235,7 @@ namespace MRS.DocumentManagement
                         }
                         else
                         {
+                            // TODO: Удалить старый файл?                            
                             items[index] = dto;
                         }
                     }
@@ -221,9 +250,15 @@ namespace MRS.DocumentManagement
                     var id = (ID<ItemDto>)num;
                     ItemDto dto = items.Find(x => x.ID == id);
                     if (dto == null)
-                        await yandex.DeleteObjective(project, id);
+                    {
+                        // TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него 
+                        await yandex.DeleteItem(project, id);
+                    }
                     else
-                        await yandex.UploadObjectiveAsync(project, dto);
+                    {
+                        // TODO: Тотже вопрос, если есть старый файл куда его?
+                        await yandex.UploadItemAsync(project, dto);
+                    }
                     progressChange?.Invoke(++current, total);
                 }
             }
@@ -305,41 +340,6 @@ namespace MRS.DocumentManagement
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
             current = CompareRevision(progressChange, total, current, remoteObjectives, localObjectives, download, unload);
-            //foreach (var localObj in localObjectives)
-            //{
-            //    var localKey = localObj.Key;
-            //    var localRev = localObj.Value;
-            //    if (remoteObjectives.ContainsKey(localKey))
-            //    {
-            //        var servRev = remoteObjectives[localKey];
-            //        if (servRev < localRev)
-            //        {
-            //            remoteObjectives.Remove(localKey);
-            //        }
-            //        else if (servRev > localRev)
-            //        {
-            //            // Скачиваем с сервера
-            //            download.Add(localKey);
-            //            localObjectives[localKey] = servRev;
-            //            continue;
-            //        }
-            //        else if (servRev == localRev)
-            //        {
-            //            remoteObjectives.Remove(localKey);
-            //            progressChange?.Invoke(++current, total);
-            //            continue;
-            //        }
-            //    }
-            //    // Загружаем на сервер
-            //    unload.Add(localKey);
-            //}
-            //foreach (var item in remoteObjectives)
-            //{
-            //    var servKey = item.Key;
-            //    // Скачиваем с сервера
-            //    download.Add(servKey);
-            //}
-
             List<ObjectiveDto> objectives = ObjectModel.GetObjectives(project);
             if (download.Count > 0)
             {
@@ -385,40 +385,7 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            foreach (var item in Revisions.Projects)
-            {
-                var localKey = item.Key;
-                var localRev = item.Value;
-                if (revisions.Projects.ContainsKey(localKey))
-                {
-                    var servRev = revisions.Projects[localKey];
-                    if (servRev < localRev)
-                    {
-                        revisions.Projects.Remove(localKey);
-                    }
-                    else if (servRev > localRev)
-                    {
-                        // Скачиваем с сервера
-                        download.Add(localKey);
-                        Revisions.Projects[localKey] = servRev;
-                        continue;
-                    }
-                    else if (servRev == localRev)
-                    {
-                        revisions.Projects.Remove(localKey);
-                        progressChange?.Invoke(++current, total);
-                        continue;
-                    }
-                }
-                // Загружаем на сервер
-                unload.Add(localKey);
-            }
-            foreach (var item in revisions.Projects)
-            {
-                var servKey = item.Key;
-                // Скачиваем с сервера
-                download.Add(servKey);
-            }
+            current = CompareRevision(progressChange, total, current, revisions.Projects, Revisions.Projects, download, unload);
             List<ProjectDto> projects = ObjectModel.GetProjects();
             if (download.Count > 0)
             {
@@ -463,40 +430,43 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            foreach (var item in Revisions.Users)
-            {
-                var localKey = item.Key;
-                var localRev = item.Value;
-                if (revisions.Users.ContainsKey(localKey))
-                {
-                    var servRev = revisions.Users[localKey];
-                    if (servRev < localRev)
-                    {
-                        revisions.Users.Remove(localKey);
-                    }
-                    else if (servRev > localRev)
-                    {
-                        // Скачиваем с сервера
-                        download.Add(localKey);
-                        Revisions.Users[localKey] = servRev;
-                        continue;
-                    }
-                    else if (servRev == localRev)
-                    {
-                        revisions.Users.Remove(localKey);
-                        progressChange?.Invoke(++current, total);
-                        continue;
-                    }
-                }
-                // Загружаем на сервер
-                unload.Add(localKey);
-            }
-            foreach (var item in revisions.Users)
-            {
-                var servKey = item.Key;
-                // Скачиваем с сервера
-                download.Add(servKey);
-            }
+            current = CompareRevision(progressChange, total, current, revisions.Users, Revisions.Users, download, unload);
+
+            //foreach (var item in Revisions.Users)
+            //{
+            //    var localKey = item.Key;
+            //    var localRev = item.Value;
+            //    if (revisions.Users.ContainsKey(localKey))
+            //    {
+            //        var servRev = revisions.Users[localKey];
+            //        if (servRev < localRev)
+            //        {
+            //            revisions.Users.Remove(localKey);
+            //        }
+            //        else if (servRev > localRev)
+            //        {
+            //            // Скачиваем с сервера
+            //            download.Add(localKey);
+            //            Revisions.Users[localKey] = servRev;
+            //            continue;
+            //        }
+            //        else if (servRev == localRev)
+            //        {
+            //            revisions.Users.Remove(localKey);
+            //            progressChange?.Invoke(++current, total);
+            //            continue;
+            //        }
+            //    }
+            //    // Загружаем на сервер
+            //    unload.Add(localKey);
+            //}
+            //foreach (var item in revisions.Users)
+            //{
+            //    var servKey = item.Key;
+            //    // Скачиваем с сервера
+            //    download.Add(servKey);
+            //}
+
             List<UserDto> users = ObjectModel.GetUsers();
             if (download.Count > 0)
             {
@@ -545,7 +515,6 @@ namespace MRS.DocumentManagement
             result += revisions.ItemsProject.Sum(x => x.Value.Count);
             result += revisions.ItemsObjective.Sum(x => x.Value.Sum(q => q.Value.Count));
             return result;
-
         }
 
 

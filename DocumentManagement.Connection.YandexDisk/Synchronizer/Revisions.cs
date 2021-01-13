@@ -6,8 +6,8 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizer
     {
         public Revisions()
         {
-            Projects = new Dictionary<int, ulong>(); ;
-            Users = new Dictionary<int, ulong>(); ;
+            Projects = new Dictionary<int, ulong>(); 
+            Users = new Dictionary<int, ulong>(); 
             Objectives = new Dictionary<int, Dictionary<int, ulong>>();
             ItemsProject = new Dictionary<int, Dictionary<int, ulong>>();
             ItemsObjective = new Dictionary<int, Dictionary<int, Dictionary<int, ulong>>>();
