@@ -29,14 +29,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
 
 
-        public static string GetItemsFile(ProjectDto project, ItemDto item) => GetItemsFile(project, item.ID);
-        public static string GetItemsFile(ProjectDto project, ID<ItemDto> id)
+        public static string GetItemFile(ProjectDto project, ItemDto item) => GetItemFile(project, item.ID);
+        public static string GetItemFile(ProjectDto project, ID<ItemDto> id)
         {
             string itemDir = GetItemsDir(project);
             return YandexHelper.FileName(itemDir, string.Format(ITM_FILE, id));
         }
-        public static string GetItemsFile(ProjectDto project, ObjectiveDto objective, ItemDto item) => GetItemsFile(project, objective.ID, item.ID);
-        public static string GetItemsFile(ProjectDto project, ID<ObjectiveDto> idObjective, ID<ItemDto> id)
+        public static string GetItemFile(ProjectDto project, ObjectiveDto objective, ItemDto item) => GetItemFile(project, objective.ID, item.ID);
+        public static string GetItemFile(ProjectDto project, ID<ObjectiveDto> idObjective, ID<ItemDto> id)
         {
             string itemDir = GetItemsDir(project);
             return YandexHelper.FileName(itemDir, string.Format(ITM_OBJ_FILE, id, idObjective));

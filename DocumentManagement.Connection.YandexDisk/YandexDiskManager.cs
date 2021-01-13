@@ -464,14 +464,24 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
         #endregion
         #region items
-        public Task<ItemDto> GetItemAsync(ProjectDto project, ID<ItemDto> id)
+        public async Task<ItemDto> GetItemAsync(ProjectDto project, ID<ItemDto> id)
         {
-            throw new NotImplementedException("Тоби пизда, не реализовано!");
+            if (await CheckDirItems(project))
+            {
+                try
+                {
+                    var fileName = PathManager.GetItemFile(project, id);
+                    string json = await controller.GetContentAsync(fileName);
+                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+                    return item;
+
+                }
+                catch (FileNotFoundException){}
+            }
+            return null;
         }
 
-        /// <summary>
-        /// Зыгрузить 
-        /// </summary>
+        /// <summary>Скачать</summary>
         /// <param name="item">item указывающий на файл</param>
         /// <param name="path">Папака в которую записывается файл</param>
         /// <param name="progressChenge"></param>
@@ -564,7 +574,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 // 2. Загрузить item
                 await CheckDirItems(project);
                 //
-                // TODO: Сортировка файлов по папоскам будет осуществлятся здесь 
+                // TODO: Сортировка файлов по папочкам будет осуществлятся здесь 
                 //
                 string path = PathManager.GetProjectDir(project);
                 string diskName = YandexHelper.FileName(path, fileInfo.Name);
@@ -572,10 +582,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 item.ExternalItemId = diskName;
                 if (objective == null)
                 {
-                    path = PathManager.GetItemsFile(project, item);
+                    path = PathManager.GetItemFile(project, item);
                 }
                 else
-                    path = PathManager.GetItemsFile(project, objective, item);
+                    path = PathManager.GetItemFile(project, objective, item);
                 string json = JsonConvert.SerializeObject(item);
                 await controller.SetContentAsync(path, json, progressChenge);
             }
@@ -588,10 +598,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 string path;
                 if (objective == null)
                 {
-                    path = PathManager.GetItemsFile(project, id);
+                    path = PathManager.GetItemFile(project, id);
                 }
                 else
-                    path = PathManager.GetItemsFile(project, objective.ID, id);
+                    path = PathManager.GetItemFile(project, objective.ID, id);
 
                 await controller.DeleteAsync(path);
             }

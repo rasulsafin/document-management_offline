@@ -181,40 +181,8 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            foreach (var localObj in localItems)
-            {
-                var localKey = localObj.Key;
-                var localRev = localObj.Value;
-                if (remoteItems.ContainsKey(localKey))
-                {
-                    var servRev = remoteItems[localKey];
-                    if (servRev < localRev)
-                    {
-                        remoteItems.Remove(localKey);
-                    }
-                    else if (servRev > localRev)
-                    {
-                        // Скачиваем с сервера
-                        download.Add(localKey);
-                        localItems[localKey] = servRev;
-                        continue;
-                    }
-                    else if (servRev == localRev)
-                    {
-                        remoteItems.Remove(localKey);
-                        progressChange?.Invoke(++current, total);
-                        continue;
-                    }
-                }
-                // Загружаем на сервер
-                unload.Add(localKey);
-            }
-            foreach (var item in remoteItems)
-            {
-                var servKey = item.Key;
-                // Скачиваем с сервера
-                download.Add(servKey);
-            }
+            current = CompareRevision(progressChange, total, current, remoteItems, localItems, download, unload);
+
             List<ItemDto> items = ObjectModel.GetItems(project);
             if (download.Count > 0)
             {
@@ -225,15 +193,22 @@ namespace MRS.DocumentManagement
                     ItemDto dto = await yandex.GetItemAsync(project, id);
                     if (dto == null)
                     {
+                        //
+                        // TODO: Удаление item и файла?
+                        //
                         items.RemoveAll(x => x.ID == id);
                     }
                     else
                     {
                         int index = items.FindIndex(x => x.ID == id);
                         if (index < 0)
+                        {
                             items.Add(dto);
+                        }
                         else
+                        {
                             items[index] = dto;
+                        }
                     }
                     progressChange?.Invoke(++current, total);
                 }
@@ -253,6 +228,46 @@ namespace MRS.DocumentManagement
                 }
             }
             ObjectModel.SaveItems(project, items);
+            return current;
+        }
+
+        private static int CompareRevision(ProgressChangeDelegate progressChange, int total, int current, Dictionary<int, ulong> remote, Dictionary<int, ulong> local, List<int> download, List<int> unload)
+        {
+            foreach (var localObj in local)
+            {
+                var localKey = localObj.Key;
+                var localRev = localObj.Value;
+                if (remote.ContainsKey(localKey))
+                {
+                    var servRev = remote[localKey];
+                    if (servRev < localRev)
+                    {
+                        remote.Remove(localKey);
+                    }
+                    else if (servRev > localRev)
+                    {
+                        // Скачиваем с сервера
+                        download.Add(localKey);
+                        local[localKey] = servRev;
+                        continue;
+                    }
+                    else if (servRev == localRev)
+                    {
+                        remote.Remove(localKey);
+                        progressChange?.Invoke(++current, total);
+                        continue;
+                    }
+                }
+                // Загружаем на сервер
+                unload.Add(localKey);
+            }
+            foreach (var item in remote)
+            {
+                var servKey = item.Key;
+                // Скачиваем с сервера
+                download.Add(servKey);
+            }
+
             return current;
         }
 
@@ -289,40 +304,42 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            foreach (var localObj in localObjectives)
-            {
-                var localKey = localObj.Key;
-                var localRev = localObj.Value;
-                if (remoteObjectives.ContainsKey(localKey))
-                {
-                    var servRev = remoteObjectives[localKey];
-                    if (servRev < localRev)
-                    {
-                        remoteObjectives.Remove(localKey);
-                    }
-                    else if (servRev > localRev)
-                    {
-                        // Скачиваем с сервера
-                        download.Add(localKey);
-                        localObjectives[localKey] = servRev;
-                        continue;
-                    }
-                    else if (servRev == localRev)
-                    {
-                        remoteObjectives.Remove(localKey);
-                        progressChange?.Invoke(++current, total);
-                        continue;
-                    }
-                }
-                // Загружаем на сервер
-                unload.Add(localKey);
-            }
-            foreach (var item in remoteObjectives)
-            {
-                var servKey = item.Key;
-                // Скачиваем с сервера
-                download.Add(servKey);
-            }
+            current = CompareRevision(progressChange, total, current, remoteObjectives, localObjectives, download, unload);
+            //foreach (var localObj in localObjectives)
+            //{
+            //    var localKey = localObj.Key;
+            //    var localRev = localObj.Value;
+            //    if (remoteObjectives.ContainsKey(localKey))
+            //    {
+            //        var servRev = remoteObjectives[localKey];
+            //        if (servRev < localRev)
+            //        {
+            //            remoteObjectives.Remove(localKey);
+            //        }
+            //        else if (servRev > localRev)
+            //        {
+            //            // Скачиваем с сервера
+            //            download.Add(localKey);
+            //            localObjectives[localKey] = servRev;
+            //            continue;
+            //        }
+            //        else if (servRev == localRev)
+            //        {
+            //            remoteObjectives.Remove(localKey);
+            //            progressChange?.Invoke(++current, total);
+            //            continue;
+            //        }
+            //    }
+            //    // Загружаем на сервер
+            //    unload.Add(localKey);
+            //}
+            //foreach (var item in remoteObjectives)
+            //{
+            //    var servKey = item.Key;
+            //    // Скачиваем с сервера
+            //    download.Add(servKey);
+            //}
+
             List<ObjectiveDto> objectives = ObjectModel.GetObjectives(project);
             if (download.Count > 0)
             {
