@@ -25,18 +25,10 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        [Route("user/{userID}")]
-        public async Task<IActionResult> AddToUser([FromRoute] int userID, [FromBody] string title)
+        public async Task<IActionResult> Add([FromBody] ProjectToCreateDto project)
         {
-            var projectId = await service.AddToUser(new ID<UserDto>(userID), title);
-            return ValidateId(projectId);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> Add([FromBody] string title)
-        {
-            var projectId = await service.Add(title);
-            return ValidateId(projectId);
+            var projectToReturn = await service.Add(project);
+            return ValidateFoundObject(projectToReturn);
         }
 
         [HttpDelete]
