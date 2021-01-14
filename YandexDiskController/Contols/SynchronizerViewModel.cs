@@ -30,6 +30,7 @@ namespace MRS.DocumentManagement.Contols
         private Synchronizer synchronizer;
 
         public HCommand SynchronizeCommand { get; }
+        public HCommand SynchronizeAllCommand { get; }
         public HCommand RevisionCommand { get; }
         public HCommand ShowAllTransactionCommand { get; }
 
@@ -46,69 +47,39 @@ namespace MRS.DocumentManagement.Contols
             synchronizer = ObjectModel.Synchronizer;
             //synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
             SynchronizeCommand = new HCommand(SynchronizeAsync);
+            SynchronizeAllCommand = new HCommand(SynchronizeAll);
             RevisionCommand = new HCommand(GetRevision);
-            ShowAllTransactionCommand = new HCommand(ShowAllTransactionAsync);
+            
             instanse = this;
             Auth.LoadActions.Add(Initialize);
         }
 
-        private void Synchronizer_TransactionsChange()
+        private void SynchronizeAll()
         {
-            SetLocalTransactionAsync();
+            foreach (var item in synchronizer.Revisions.Users)
+                item.Rev++;
+            foreach (var proj in synchronizer.Revisions.Projects)
+            {
+                proj.Rev++;
+                foreach (var item in proj.Items)
+                    item.Rev++;
+                foreach (var obj in proj.Objectives)
+                {
+                    proj.Rev++;
+                    foreach (var item in proj.Items)
+                        item.Rev++;
+                }
+            }
+            SynchronizeAsync();
         }
+
+        
 
         private void Initialize(string accessToken)
         {
             synchronizer.Initialize(accessToken);
-            synchronizer.Load();
+            //synchronizer.Load();
             //SetLocalTransactionAsync();
-        }
-
-        private async void ShowAllTransactionAsync()
-        {
-            //if (ShowAllTransactionContent == ALL_TRANSACTION)
-            //{
-            //    ShowAllTransactionContent = NON_SYNC_TRANSACTION;
-            //    await SetAllTransactionAsync();
-            //}
-            //else if (ShowAllTransactionContent == NON_SYNC_TRANSACTION)
-            //{
-            //    ShowAllTransactionContent = LOCAL_TRANSACTION;
-            //    await SetNonSyncTransactionAsync();
-            //}
-            //else if (ShowAllTransactionContent == LOCAL_TRANSACTION)
-            //{
-            //    ShowAllTransactionContent = ALL_TRANSACTION;
-            //    SetLocalTransactionAsync();
-            //}
-        }
-
-        private void SetLocalTransactionAsync()
-        {
-            //Transactions.Clear();
-            //foreach (var item in synchronizer.Transactions)
-            //{
-            //    Transactions.Add(new TransactionModel(item));
-            //}
-        }
-
-        private async Task SetAllTransactionAsync()
-        {
-            List<Transaction> list = await synchronizer.GetAllTransactionAsync();
-            Transactions.Clear();
-            foreach (var item in list)
-            {
-                Transactions.Add(new TransactionModel(item));
-            }
-        }
-        private async Task SetNonSyncTransactionAsync()
-        {
-            List<Transaction> list = await synchronizer.GetNonSyncTransactionAsync();
-            Transactions.Clear();
-            foreach (var item in list)
-            {
-                Transactions.Add(new TransactionModel(item));
-            }
         }
 
         private async void SynchronizeAsync()
@@ -121,10 +92,11 @@ namespace MRS.DocumentManagement.Contols
                 SyncProcces = false;
                 //synchronizer.Save();
                 //SetLocalTransactionAsync();
+                WinBox.ShowMessage("Успех. Синхронизация выполнена.");
             }
             catch (ArgumentNullException ane)
             {
-                WinBox.ShowMessage("Синхронизация не выполнена. Нет входа в аккаунт");
+                WinBox.ShowMessage("Синхронизация не выполнена. Нет входа в аккаунт:\n"+ane.Message);
             }
             catch (Exception ex)
             {
@@ -140,7 +112,8 @@ namespace MRS.DocumentManagement.Contols
 
         private async void GetRevision()
         {
-            WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
+            WinBox.ShowMessage("Эта кнопка болше не работает!");
+            //WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
         }
 
 

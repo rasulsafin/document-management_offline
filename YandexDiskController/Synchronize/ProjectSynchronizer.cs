@@ -2,6 +2,7 @@
 using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,12 +25,24 @@ namespace MRS.DocumentManagement
                 revisions.Projects = new List<ProjectRevision>();
             return revisions.Projects.Select(x => (Revision)x).ToList();
         }
+
+        public void SetRevision(Revisions revisions, List<Revision> projectRevs)
+        {
+            foreach (var rev in projectRevs)
+            {
+                var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
+                if (index < 0)
+                    revisions.Projects.Add(new ProjectRevision(rev.ID, rev.Rev));
+                else
+                    revisions.Projects[index].Rev = rev.Rev;                
+            }
+        }
         public List<ISynchronizer> GetSubSynchronizes(int idProject)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
 
             var _id = (ID<ProjectDto>)idProject;
-            if (localProject.ID != _id)
+            if (localProject?.ID != _id)
                 localProject = projects.Find(x => x.ID == _id);
             subSynchronizes.Add(new ItemsSynchronizer(yandex, localProject));
             subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
@@ -48,7 +61,7 @@ namespace MRS.DocumentManagement
         {
             var _id = (ID<ProjectDto>)id;
             remoteProject = await yandex.GetProjectAsync(_id);
-            return remoteProject == null;
+            return remoteProject != null;
         }
         public void DeleteLocal(int id)
         {
@@ -58,13 +71,16 @@ namespace MRS.DocumentManagement
         public async Task DownloadAndUpdateAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
-            if (remoteProject.ID == _id)
+            if (remoteProject.ID != _id)
                 remoteProject = await yandex.GetProjectAsync(_id);
             var index = projects.FindIndex(x => (int)x.ID == id);
             if (index < 0)
                 projects.Add(remoteProject);
             else
                 projects[index] = remoteProject;
+
+            var dirName = PathManager.GetProjectDir(remoteProject);
+            if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
         }
         public bool LocalExist(int id)
         {
@@ -73,10 +89,11 @@ namespace MRS.DocumentManagement
             return localProject != null;
         }
 
-        public Task DeleteRemoteAsync(int id)
+        public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
-            throw new System.NotImplementedException();
+            // TODO: Удалять файлы item objective? 
+            await yandex.DeleteProject( _id);
         }
         public async Task UpdateRemoteAsync(int id)
         {
@@ -85,5 +102,7 @@ namespace MRS.DocumentManagement
                 localProject = projects.Find(x => x.ID == _id);
             await yandex.UnloadProject(localProject);
         }
+
+        
     }
 }

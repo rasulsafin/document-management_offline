@@ -126,7 +126,7 @@ namespace MRS.DocumentManagement
 
         public void CloseApp()
         {
-            ObjectModel.Synchronizer.Save();
+            //ObjectModel.Synchronizer.Save();
             Properties.Settings.Default.SelectedTab = SelectedTab;
             Properties.Settings.Default.Save();
         }

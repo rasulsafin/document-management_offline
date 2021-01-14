@@ -25,6 +25,17 @@ namespace MRS.DocumentManagement
                 revisions.Users = new List<Revision>();
             return revisions.Users;
         }
+        public void SetRevision(Revisions revisions, List<Revision> userRevs)
+        {
+            foreach (var rev in userRevs)
+            {
+                var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
+                if (index < 0)
+                    revisions.Users.Add(new Revision(rev.ID, rev.Rev));
+                else
+                    revisions.Users[index].Rev = rev.Rev;
+            }
+        }
 
         public List<ISynchronizer> GetSubSynchronizes(int id) => null;
 

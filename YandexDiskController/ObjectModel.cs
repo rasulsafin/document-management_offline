@@ -166,6 +166,7 @@ namespace MRS.DocumentManagement
                     path = PathManager.GetItemsFile(project);
                 else
                     path = PathManager.GetItemsFile(objective, project);
+                if (!File.Exists(path)) return new List<ItemDto>();
                 var json = File.ReadAllText(path);
                 List<ItemDto> items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
                 return items;

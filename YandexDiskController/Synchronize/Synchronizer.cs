@@ -65,6 +65,7 @@ namespace MRS.DocumentManagement
         }
 
         #region Update Table
+        public bool Syncing { get; private set; }
         public void Update(ID<ProjectDto> id)
         {
             if (Syncing) return;
@@ -104,7 +105,7 @@ namespace MRS.DocumentManagement
             int total = 0;
             int current = 0;
             Revisions revisions = await yandex.GetRevisionsAsync();
-            total = GetCount(Revisions);
+            total = GetCount(Revisions)+ GetCount(revisions);
             Progress<int> progress = new Progress<int>();
             progress.ProgressChanged += (s, p) =>
             {
@@ -128,6 +129,7 @@ namespace MRS.DocumentManagement
             List<Revision> local = synchro.GetRevision(Revisions);
             List<Revision> remote = synchro.GetRevision(remoreRevisions);
             CompareRevision(download, unload, local, remote, progress);                        
+            synchro.SetRevision(Revisions, local);
             synchro.LoadLocalCollect();
 
             if (download.Count > 0)
@@ -211,17 +213,37 @@ namespace MRS.DocumentManagement
                 {
                     // Пропускаем 
                     progress.Report(1);
+                    remote.Remove(remoteRev);
                 }
+                progress.Report(1);
             }
             foreach (var remoteRev in remote)
             {
                 // Скачиваем с сервера
                 download.Add(remoteRev.ID);
-                local.Add(remoteRev);
+                local.Add(remoteRev);                
             }
+        }
+        
+        private int GetCount(Revisions revisions)
+        {
+            int? result = 0;
+            result += revisions.Projects?.Count + revisions.Users?.Count;
+            result += revisions.Projects?.Sum(x => x.Objectives?.Count);
+            result += revisions.Projects?.Sum(x => x.Items?.Count);
+            result += revisions.Projects?.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
+            return result ?? 0 ;
         }
 
 
+
+
+
+
+
+
+
+        #region old
         private static int CompareRevision(ProgressChangeDelegate progressChange, int total, int current, Dictionary<int, ulong> remote, Dictionary<int, ulong> local, List<int> download, List<int> unload)
         {
             foreach (var localObj in local)
@@ -261,7 +283,6 @@ namespace MRS.DocumentManagement
 
             return current;
         }
-
         private async Task<int> SyncItems(ProgressChangeDelegate progressChange, int total, int current, Revisions revisions)
         {
             #region Project => Item
@@ -321,7 +342,7 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            current = CompareRevision(progressChange, total, current, remoteItems, localItems, download, unload);
+            //current = CompareRevision(progressChange, total, current, remoteItems, localItems, download, unload);
 
             List<ItemDto> items = ObjectModel.GetItems(project);
             if (download.Count > 0)
@@ -417,7 +438,7 @@ namespace MRS.DocumentManagement
         {
             List<int> download = new List<int>();
             List<int> unload = new List<int>();
-            current = CompareRevision(progressChange, total, current, remoteObjectives, localObjectives, download, unload);
+            //current = CompareRevision(progressChange, total, current, remoteObjectives, localObjectives, download, unload);
             List<ObjectiveDto> objectives = ObjectModel.GetObjectives(project);
             if (download.Count > 0)
             {
@@ -504,25 +525,10 @@ namespace MRS.DocumentManagement
             //ObjectModel.SaveProjects(projects);
             return current;
         }
-
-
-
-
-        private int GetCount(Revisions revisions)
-        {
-            int result = revisions.Projects.Count + revisions.Users.Count;
-            result += (int)revisions.Projects.Sum(x => x.Objectives?.Count);
-            result += (int)revisions.Projects.Sum(x => x.Items?.Count);
-            result += (int)revisions.Projects.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
-            return result;
-        }
-
-
-        #region old
         public ulong Revision { get; private set; }
         public List<Transaction> Transactions { get; private set; } = new List<Transaction>();
         public YandexDiskManager Yandex { get => yandex; set => yandex = value; }
-        public bool Syncing { get; private set; }
+        
         public void Load()
         {
             //var list = GetLocalTransaction();
@@ -552,11 +558,11 @@ namespace MRS.DocumentManagement
         //    TransactionsChange();
         //    Save();
         //}
-        public async Task<ulong> GetRevisionServerAsync()
-        {
-            //return await yandex.GetRevisionAsync();
-            return 0;
-        }
+        //public async Task<ulong> GetRevisionServerAsync()
+        //{
+        //    return await yandex.GetRevisionAsync();
+        //    //return 0;
+        //}
 
 
         /// <summary>
@@ -595,14 +601,14 @@ namespace MRS.DocumentManagement
 
         private async Task SynchronizeToServerAsync(Transaction transaction)
         {
-            switch (transaction.Table)
-            {
-                case Table.Project: await SinchrinizeProjectToServerAsync(transaction); break;
-                case Table.Objective: await SinchrinizeObjectiveToServerAsync(transaction); break;
-                case Table.Item: await SinchrinizeItemToServerAsync(transaction); break;
-                default:
-                    throw new ArgumentException();
-            }
+            //switch (transaction.Table)
+            //{
+            //    case Table.Project: await SinchrinizeProjectToServerAsync(transaction); break;
+            //    case Table.Objective: await SinchrinizeObjectiveToServerAsync(transaction); break;
+            //    case Table.Item: await SinchrinizeItemToServerAsync(transaction); break;
+            //    default:
+            //        throw new ArgumentException();
+            //}
         }
 
         private async Task SinchrinizeItemToServerAsync(Transaction transaction)
@@ -673,14 +679,14 @@ namespace MRS.DocumentManagement
         /// <returns></returns>
         private async Task SynchrinizeFromServerAsync(Transaction transaction)
         {
-            switch (transaction.Table)
-            {
-                case Table.Project: await SynchrinizeProjectFromServerAsync(transaction); break;
-                case Table.Objective: await SynchrinizeObjectiveFromServerAsync(transaction); break;
-                case Table.Item: await SynchrinizeItemFromServerAsync(transaction); break;
-                default:
-                    throw new ArgumentException();
-            }
+            //switch (transaction.Table)
+            //{
+            //    case Table.Project: await SynchrinizeProjectFromServerAsync(transaction); break;
+            //    case Table.Objective: await SynchrinizeObjectiveFromServerAsync(transaction); break;
+            //    case Table.Item: await SynchrinizeItemFromServerAsync(transaction); break;
+            //    default:
+            //        throw new ArgumentException();
+            //}
         }
         private async Task SynchrinizeItemFromServerAsync(Transaction transaction)
         {
@@ -762,13 +768,13 @@ namespace MRS.DocumentManagement
         /// <param name="serverTran"></param>
         private async Task ApplyTransactionsServerAsync(List<Transaction> transactions)
         {
-            transactions.Sort((x, y) => x.Table.CompareTo(y.Table));
-            foreach (var transaction in transactions)
-            {
-                await SynchronizeToServerAsync(transaction);
-                current++;
-                ProgressChange?.Invoke(current, total);
-            }
+            //transactions.Sort((x, y) => x.Table.CompareTo(y.Table));
+            //foreach (var transaction in transactions)
+            //{
+            //    await SynchronizeToServerAsync(transaction);
+            //    current++;
+            //    ProgressChange?.Invoke(current, total);
+            //}
         }
 
         /// <summary>
@@ -841,24 +847,25 @@ namespace MRS.DocumentManagement
         /// <returns></returns>
         private List<Transaction> GetTransactionsLocal(ulong revision)
         {
-            List<Transaction> result = new List<Transaction>();
-            var transDir = new DirectoryInfo(PathManager.GetRevisionsDir());
-            foreach (var file in transDir.GetFiles())
-            {
-                List<Transaction> transaction = GetTransactions(file.FullName);
-                foreach (var trans in transaction)
-                {
-                    if (trans.Rev > revision)
-                    {
-                        result.Add(trans);
-                    }
-                }
-            }
-            return Transactions.Where(x => x.Rev == 0 && !x.Server).ToList();
+            //List<Transaction> result = new List<Transaction>();
+            //var transDir = new DirectoryInfo(PathManager.GetRevisionsDir());
+            //foreach (var file in transDir.GetFiles())
+            //{
+            //    List<Transaction> transaction = GetTransactions(file.FullName);
+            //    foreach (var trans in transaction)
+            //    {
+            //        if (trans.Rev > revision)
+            //        {
+            //            result.Add(trans);
+            //        }
+            //    }
+            //}
+            //return Transactions.Where(x => x.Rev == 0 && !x.Server).ToList();
+            return null;
         }
         public async Task<List<Transaction>> GetAllTransactionAsync()
         {
-            List<Transaction> transactions = Transactions.ToList();
+            List<Transaction> transactions = new List<Transaction>(); //Transactions.ToList();
 
             //ulong revision = await yandex.GetRevisionAsync();
             //// Скачиваем изменения с сервера

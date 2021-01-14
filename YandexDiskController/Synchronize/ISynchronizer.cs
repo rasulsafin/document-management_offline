@@ -69,6 +69,17 @@ namespace MRS.DocumentManagement
         /// <param name="id"></param>
         /// <returns></returns>
         List<ISynchronizer> GetSubSynchronizes(int id);
+        /// <summary>
+        /// Получить список ревизий 
+        /// </summary>
+        /// <param name="revisions"></param>
+        /// <returns></returns>
         List<Revision> GetRevision(Revisions revisions);
+        /// <summary>
+        /// Установить список ревизий обратно
+        /// </summary>
+        /// <param name="revisions"></param>
+        /// <param name="local"></param>
+        void SetRevision(Revisions revisions, List<Revision> local);
     }
 }
