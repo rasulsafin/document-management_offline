@@ -1,9 +1,7 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
-using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement
+namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
 {
     public interface ISynchronizer
     {
@@ -74,12 +72,14 @@ namespace MRS.DocumentManagement
         /// </summary>
         /// <param name="revisions"></param>
         /// <returns></returns>
-        List<Revision> GetRevision(Revisions revisions);
+        List<Revision> GetRevisions(Revisions revisions);
+
         /// <summary>
-        /// Установить список ревизий обратно
+        /// Установить обновленную ревизию
         /// </summary>
         /// <param name="revisions"></param>
         /// <param name="local"></param>
-        void SetRevision(Revisions revisions, List<Revision> local);
+        void SetRevision(Revisions revisions, Revision rev);
+
     }
 }

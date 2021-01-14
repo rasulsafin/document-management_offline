@@ -1,7 +1,6 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -20,24 +19,33 @@ namespace MRS.DocumentManagement
         {
             this.yandex = yandex;
         }
-        public List<Revision> GetRevision(Revisions revisions)
+        public List<Revision> GetRevisions(Revisions revisions)
         {
             if (revisions.Projects == null) 
                 revisions.Projects = new List<ProjectRevision>();
             return revisions.Projects.Select(x => (Revision)x).ToList();
         }
 
-        public void SetRevision(Revisions revisions, List<Revision> projectRevs)
+        public void SetRevision(Revisions revisions, Revision rev)
         {
-            foreach (var rev in projectRevs)
-            {
-                var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
-                if (index < 0)
-                    revisions.Projects.Add(new ProjectRevision(rev.ID, rev.Rev));
-                else
-                    revisions.Projects[index].Rev = rev.Rev;                
-            }
+            var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
+            if (index < 0)
+                revisions.Projects.Add(new ProjectRevision(rev.ID, rev.Rev));
+            else
+                revisions.Projects[index].Rev = rev.Rev;
         }
+
+        //public void SetRevision(Revisions revisions, List<Revision> projectRevs)
+        //{
+        //    foreach (var rev in projectRevs)
+        //    {
+        //        var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
+        //        if (index < 0)
+        //            revisions.Projects.Add(new ProjectRevision(rev.ID, rev.Rev));
+        //        else
+        //            revisions.Projects[index].Rev = rev.Rev;                
+        //    }
+        //}
         public List<ISynchronizer> GetSubSynchronizes(int idProject)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();

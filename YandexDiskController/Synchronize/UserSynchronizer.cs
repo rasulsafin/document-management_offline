@@ -1,5 +1,5 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -19,22 +19,31 @@ namespace MRS.DocumentManagement
         }
 
 
-        public List<Revision> GetRevision(Revisions revisions)
+        public List<Revision> GetRevisions(Revisions revisions)
         {
             if (revisions.Users == null)
                 revisions.Users = new List<Revision>();
             return revisions.Users;
         }
-        public void SetRevision(Revisions revisions, List<Revision> userRevs)
+        //public void SetRevision(Revisions revisions, List<Revision> userRevs)
+        //{
+        //    foreach (var rev in userRevs)
+        //    {
+        //        var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
+        //        if (index < 0)
+        //            revisions.Users.Add(new Revision(rev.ID, rev.Rev));
+        //        else
+        //            revisions.Users[index].Rev = rev.Rev;
+        //    }
+        //}
+
+        public void SetRevision(Revisions revisions, Revision rev)
         {
-            foreach (var rev in userRevs)
-            {
-                var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
-                if (index < 0)
-                    revisions.Users.Add(new Revision(rev.ID, rev.Rev));
-                else
-                    revisions.Users[index].Rev = rev.Rev;
-            }
+            var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
+            if (index < 0)
+                revisions.Users.Add(new Revision(rev.ID, rev.Rev));
+            else
+                revisions.Users[index].Rev = rev.Rev;
         }
 
         public List<ISynchronizer> GetSubSynchronizes(int id) => null;
@@ -72,5 +81,7 @@ namespace MRS.DocumentManagement
             await yandex.UnloadUser(localUser);
         }
         public async Task DeleteRemoteAsync(int id) => await yandex.DeleteUser((ID<UserDto>)id);
+
+        
     }
 }

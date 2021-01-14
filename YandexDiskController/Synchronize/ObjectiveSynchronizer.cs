@@ -1,5 +1,5 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement
             this.project = localProject;
         }
 
-        public List<Revision> GetRevision(Revisions revisions)
+        public List<Revision> GetRevisions(Revisions revisions)
         {
             int idProj = (int)project.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
@@ -31,28 +31,45 @@ namespace MRS.DocumentManagement
                 projectRev.Objectives = new List<ObjectiveRevision>();
             return projectRev.Objectives.Select(x => (Revision)x).ToList();
         }
-        public void SetRevision(Revisions revisions, List<Revision> objectiveRevs)
+
+        public void SetRevision(Revisions revisions, Revision rev)
         {
             int idProj = (int)project.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
             if (projectRev.Objectives == null)
-                if (projectRev.Objectives == null)
-                    projectRev.Objectives = new List<ObjectiveRevision>();
-            foreach (var rev in objectiveRevs)
-            {
-                var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
-                if (index < 0)
-                    projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
-                else
-                    projectRev.Objectives[index].Rev = rev.Rev;
-            }
+                projectRev.Objectives = new List<ObjectiveRevision>();
+            var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
+            if (index < 0)
+                projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
+            else
+                projectRev.Objectives[index].Rev = rev.Rev;
         }
+        //public void SetRevision(Revisions revisions, List<Revision> objectiveRevs)
+        //{
+        //    int idProj = (int)project.ID;
+        //    var projectRev = revisions.Projects.Find(x => x.ID == idProj);
+        //    if (projectRev != null)
+        //    {
+                
+        //            if (projectRev.Objectives == null)
+        //                projectRev.Objectives = new List<ObjectiveRevision>();
+        //        foreach (var rev in objectiveRevs)
+        //        {
+        //            var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
+        //            if (index < 0)
+        //                projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
+        //            else
+        //                projectRev.Objectives[index].Rev = rev.Rev;
+        //        }
+        //    }
+        //}
         public List<ISynchronizer> GetSubSynchronizes(int idObj)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
             
             FindLocalObjective(idObj);
-            subSynchronizes.Add(new ItemsSynchronizer(yandex, project, localObj));
+            if (localObj != null)
+                subSynchronizes.Add(new ItemsSynchronizer(yandex, project, localObj));
             //subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
             return subSynchronizes;
         }
@@ -122,5 +139,6 @@ namespace MRS.DocumentManagement
             await yandex.DeleteObjective(project, _id);
         }
 
+        
     }
 }

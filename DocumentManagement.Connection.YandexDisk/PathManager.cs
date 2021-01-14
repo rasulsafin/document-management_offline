@@ -25,6 +25,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         
         public static string GetRevisionsFile() => YandexHelper.DirectoryName(GetRevisionsDir(), REVISION_FILE);
+
+        public static string GetLocalRevisionFile()
+        {
+            return REVISION_FILE;
+        }
+
         public static string GetRevisionsDir() => YandexHelper.DirectoryName(APP_DIR, REV_DIR);
 
 

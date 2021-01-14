@@ -1,13 +1,6 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
-using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -31,6 +24,7 @@ namespace MRS.DocumentManagement.Contols
 
         public HCommand SynchronizeCommand { get; }
         public HCommand SynchronizeAllCommand { get; }
+        public HCommand StopSyncCommand { get; }
         public HCommand RevisionCommand { get; }
         public HCommand ShowAllTransactionCommand { get; }
 
@@ -48,14 +42,22 @@ namespace MRS.DocumentManagement.Contols
             //synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
             SynchronizeCommand = new HCommand(SynchronizeAsync);
             SynchronizeAllCommand = new HCommand(SynchronizeAll);
+            StopSyncCommand = new HCommand(StopSync);
             RevisionCommand = new HCommand(GetRevision);
             
             instanse = this;
             Auth.LoadActions.Add(Initialize);
         }
 
+        private void StopSync()
+        {
+            synchronizer.StopSync();
+        }
+
         private void SynchronizeAll()
         {
+            if (SyncProcces)
+                WinBox.ShowMessage("Синхронизация уже запущена!");
             foreach (var item in synchronizer.Revisions.Users)
                 item.Rev++;
             foreach (var proj in synchronizer.Revisions.Projects)
@@ -84,9 +86,10 @@ namespace MRS.DocumentManagement.Contols
 
         private async void SynchronizeAsync()
         {
-                //WinBox.ShowMessage("Синхронизация более не существует!");
+            if (SyncProcces)                
+                WinBox.ShowMessage("Синхронизация уже запущена!");
             try
-            {
+            {                
                 SyncProcces = true;
                 await synchronizer.SyncTableAsync(ProgressChange);
                 SyncProcces = false;
@@ -105,9 +108,9 @@ namespace MRS.DocumentManagement.Contols
 
         }
 
-        private void ProgressChange(int current, int total)
+        private void ProgressChange(int current, int total, string message)
         {
-            ProgressText = $"{current}/{total}";
+            ProgressText = $"{current}/{total} {message}";
         }
 
         private async void GetRevision()

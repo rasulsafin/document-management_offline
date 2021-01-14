@@ -1,18 +1,11 @@
-﻿using Microsoft.Win32;
-using WPFStorage.Base;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using WPFStorage.Dialogs;
+﻿using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Windows;
-using System.Text;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
+using WPFStorage.Base;
+using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement.Contols
 {

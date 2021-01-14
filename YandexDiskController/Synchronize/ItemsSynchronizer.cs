@@ -1,8 +1,7 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement
@@ -27,11 +26,11 @@ namespace MRS.DocumentManagement
             this.objective = objective;
         }
 
-        public List<Revision> GetRevision(Revisions revisions)
+        public List<Revision> GetRevisions(Revisions revisions)
         {
             var idPro = (int)project.ID;
             var projectRev = revisions.Projects.Find(pr => pr.ID == idPro);
-            if (projectRev == null) 
+            if (projectRev == null)
                 return new List<Revision>();
             if (objective == null)
             {
@@ -39,7 +38,7 @@ namespace MRS.DocumentManagement
                     projectRev.Items = new List<Revision>();
                 return projectRev.Items;
             }
-            else 
+            else
             {
                 var idObj = (int)objective.ID;
                 var objectiveRev = projectRev.Objectives.Find(o => o.ID == idObj);
@@ -50,37 +49,75 @@ namespace MRS.DocumentManagement
                 return objectiveRev.Items;
             }
         }
-
-        public void SetRevision(Revisions revisions, List<Revision> itemsRevs)
+        public void SetRevision(Revisions revisions, Revision rev)
         {
             int idProj = (int)project.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
             if (objective == null)
             {
-                CopyRevision(itemsRevs, projectRev);
+                CopyRevision(rev, projectRev);
             }
             else
             {
                 var idObj = (int)objective.ID;
                 var objectiveRev = projectRev.Objectives.Find(o => o.ID == idObj);
 
-                CopyRevision(itemsRevs, objectiveRev);                
+                if (objectiveRev != null)
+                {
+                    CopyRevision(rev, objectiveRev);
+                }
             }
-        }
-
-        private static void CopyRevision(List<Revision> itemsRevs, ObjectiveRevision revision)
-        {
-            if (revision.Items == null)
-                revision.Items = new List<Revision>();
-            foreach (var rev in itemsRevs)
+            void CopyRevision(Revision rev, ObjectiveRevision revision)
             {
+                if (revision.Items == null)
+                    revision.Items = new List<Revision>();
+
                 var index = revision.Items.FindIndex(x => x.ID == rev.ID);
                 if (index < 0)
                     revision.Items.Add(new Revision(rev.ID, rev.Rev));
                 else
                     revision.Items[index].Rev = rev.Rev;
+
             }
         }
+
+
+        //public void SetRevision(Revisions revisions, List<Revision> itemsRevs)
+        //{
+        //    int idProj = (int)project.ID;
+        //    var projectRev = revisions.Projects.Find(x => x.ID == idProj);
+        //    if (projectRev != null)
+        //    {
+        //        if (objective == null)
+        //        {
+        //            CopyRevision(itemsRevs, projectRev);
+        //        }
+        //        else
+        //        {
+        //            var idObj = (int)objective.ID;
+        //            var objectiveRev = projectRev.Objectives.Find(o => o.ID == idObj);
+
+        //            if (objectiveRev != null)
+        //            {
+        //                CopyRevision(itemsRevs, objectiveRev);
+        //            }
+        //        }
+        //    }
+        //}
+
+        //private static void CopyRevision(List<Revision> itemsRevs, ObjectiveRevision revision)
+        //{
+        //    if (revision.Items == null)
+        //        revision.Items = new List<Revision>();
+        //    foreach (var rev in itemsRevs)
+        //    {
+        //        var index = revision.Items.FindIndex(x => x.ID == rev.ID);
+        //        if (index < 0)
+        //            revision.Items.Add(new Revision(rev.ID, rev.Rev));
+        //        else
+        //            revision.Items[index].Rev = rev.Rev;
+        //    }
+        //}
 
         public List<ISynchronizer> GetSubSynchronizes(int id) => null;
 
@@ -131,7 +168,7 @@ namespace MRS.DocumentManagement
                 string path = PathManager.GetProjectDir(project);
                 //
                 await yandex.DownloadItem(remoteItem, path);
-                
+
             }
             else
             {
@@ -160,7 +197,7 @@ namespace MRS.DocumentManagement
             if (objective == null)
                 await yandex.UploadItemAsync(project, localItem);
             else
-                await yandex.UploadItemAsync(project, objective,  localItem);
+                await yandex.UploadItemAsync(project, objective, localItem);
 
         }
         public async Task DeleteRemoteAsync(int id)
@@ -172,6 +209,7 @@ namespace MRS.DocumentManagement
             else
                 await yandex.DeleteItem(project, objective, _id);
         }
+
 
     }
 }
