@@ -183,24 +183,28 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 {
                     var length = response.ContentLength;
                     logger.Message($"length={length}");
-                    List<string> result = new List<string>();
+                    //List<string> result = new List<string>();
+                    StringBuilder builder = new StringBuilder();
                     using (var reader = response.GetResponseStream())
                     {
                         const int BUFFER_LENGTH = 4096;
                         var total = (ulong)response.ContentLength;
                         ulong current = 0;
                         var buffer = new byte[BUFFER_LENGTH];
-                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        while (count > 0)
+                        var count = 0;
+                        do
                         {
-                            result.Add(Encoding.UTF8.GetString(buffer));
-                            current += (ulong)count;
-                            updateProgress?.Invoke(current, total);
+                            //result.Add(Encoding.UTF8.GetString(buffer));
                             count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        }
-                    }
+                            current += (ulong)count;
+                            builder.Append(Encoding.UTF8.GetString(buffer, 0, count));
+                            updateProgress?.Invoke(current, total);
 
-                    return string.Concat(result);
+                            //count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        } while (count > 0);
+                    }
+                    //var res = string.Concat(result);
+                    return builder.ToString();
                 }
             }
             catch (DirectoryNotFoundException)
@@ -270,6 +274,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
         #endregion
         #region Delete file and directory
+        /// <summary>
+        /// Удаление файла или каталога по указанному пути
+        /// </summary>
+        /// <param name="path">путь по которому надо удалить файл или каталок</param>
+        /// <returns>успех операции</returns>
+        /// <exception cref="FileNotFoundException" ></exception>
         public async Task<bool> DeleteAsync(string path)
         {
             try

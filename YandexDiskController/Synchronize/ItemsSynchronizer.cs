@@ -43,6 +43,10 @@ namespace MRS.DocumentManagement
             {
                 var idObj = (int)objective.ID;
                 var objectiveRev = projectRev.Objectives.Find(o => o.ID == idObj);
+                if (objectiveRev == null)
+                    return new List<Revision>();
+                if (objectiveRev.Items == null)
+                    objectiveRev.Items = new List<Revision>();
                 return objectiveRev.Items;
             }
         }

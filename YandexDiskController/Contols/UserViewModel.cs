@@ -77,11 +77,24 @@ namespace MRS.DocumentManagement.Contols
 
         private void AddUser()
         {
-            UserModel model = new UserModel(SelectedUser.dto);
-            model.ID = NextId++;
-            Users.Add(model);
-            ObjectModel.SaveUsers();
-            ObjectModel.Synchronizer.Update(model.dto.ID);
+            if (SelectedUser != null)
+            {
+                UserModel model = new UserModel(SelectedUser.dto);
+                model.ID = NextId++;
+                Users.Add(model);
+                ObjectModel.SaveUsers();
+                ObjectModel.Synchronizer.Update(model.dto.ID);
+            }
+            else
+            {
+                UserModel model = new UserModel();
+                model.ID = NextId++;
+                model.Login = "newUser";
+                model.Name = "Новый пользователь";
+                Users.Add(model);
+                ObjectModel.SaveUsers();
+                ObjectModel.Synchronizer.Update(model.dto.ID);
+            }
         }
     }
 }

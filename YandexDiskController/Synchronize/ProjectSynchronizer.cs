@@ -1,6 +1,7 @@
 ﻿using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Connection.YandexDisk.Synchronizer;
 using MRS.DocumentManagement.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,8 +45,11 @@ namespace MRS.DocumentManagement
             var _id = (ID<ProjectDto>)idProject;
             if (localProject?.ID != _id)
                 localProject = projects.Find(x => x.ID == _id);
-            subSynchronizes.Add(new ItemsSynchronizer(yandex, localProject));
-            subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+            if (localProject != null) //throw new Exception($"Нету такого проекта! idProject={idProject}");
+            {// проект не удален!!!
+                subSynchronizes.Add(new ItemsSynchronizer(yandex, localProject));
+                subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+            }
             return subSynchronizes;
         }
         public void LoadLocalCollect()

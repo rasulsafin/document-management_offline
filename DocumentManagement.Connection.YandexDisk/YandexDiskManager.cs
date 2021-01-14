@@ -160,9 +160,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
             return result;
         }
-
-
-
         private async void Initialize()
         {
             IEnumerable<DiskElement> list = await controller.GetListAsync();
@@ -340,7 +337,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             if (await CheckProjectsDir())
             {
                 string path = PathManager.GetProjectFile(id);
-                await controller.DeleteAsync(path);
+                try
+                {
+                    await controller.DeleteAsync(path);
+                }
+                catch (FileNotFoundException)// Нахуя его удалять если его и так нет
+                { }
             }
         }
 
@@ -610,7 +612,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <param name="objective"></param>
         /// <param name="progressChenge"></param>
         /// <returns></returns>
-        public async Task UploadItemAsync(ProjectDto project, ItemDto item, ObjectiveDto objective, Action<ulong, ulong> progressChenge = null)
+        public async Task UploadItemAsync(ProjectDto project, ObjectiveDto objective, ItemDto item, Action<ulong, ulong> progressChenge = null)
         {
             // 1. Загрузить файл
             // 2. Загрузить item
@@ -638,6 +640,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 //
                 // TODO: Сортировка файлов по папочкам будет осуществлятся здесь 
                 //
+                await CheckDirItems(project);
                 string path = PathManager.GetProjectDir(project);
                 string diskName = YandexHelper.FileName(path, fileInfo.Name);
                 await controller.LoadFileAsync(path, item.ExternalItemId, progressChenge);
@@ -652,7 +655,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             if (await CheckDirItems(project))
             {
                 string path = PathManager.GetItemFile(project, id);
-                await controller.DeleteAsync(path);
+                try
+                {
+                    await controller.DeleteAsync(path);
+                }
+                catch (FileNotFoundException) { }
             }
         }
         public async Task DeleteItem(ProjectDto project, ObjectiveDto objective, ID<ItemDto> id)
@@ -660,7 +667,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             if (await CheckDirItems(project))
             {
                 string path = PathManager.GetItemFile(project, objective.ID, id);
-                await controller.DeleteAsync(path);
+                try
+                {
+                    await controller.DeleteAsync(path);
+                }
+                catch (FileNotFoundException) { }
             }
         }
 

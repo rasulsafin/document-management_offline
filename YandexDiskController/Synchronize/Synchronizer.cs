@@ -128,6 +128,10 @@ namespace MRS.DocumentManagement
             List<int> unload = new List<int>();
             List<Revision> local = synchro.GetRevision(Revisions);
             List<Revision> remote = synchro.GetRevision(remoreRevisions);
+
+            if (local == null) local = new List<Revision>();
+            if (remote == null) remote = new List<Revision>();
+
             CompareRevision(download, unload, local, remote, progress);                        
             synchro.SetRevision(Revisions, local);
             synchro.LoadLocalCollect();
@@ -187,6 +191,7 @@ namespace MRS.DocumentManagement
         private static void CompareRevision(List<int> download, List<int> unload,
             List<Revision> local, List<Revision> remote, IProgress<int> progress)
         {
+            
             foreach (var localRev in local)
             {
                 // Находим совподения

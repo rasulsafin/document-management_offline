@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Contols
                 {
                     selectedProject = value;
                     ObjectModel.UpdateObjectives(selectedProject.dto);
-                    UpdateItems();
+                    ToObjective = false;
                     OnPropertyChanged();
                 }
             }
@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Contols
             get => selectedObjective; 
             set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
         public ItemModel SelectedItem { get => selectedItem; set { selectedItem = value; OnPropertyChanged(); } }
-        public bool ToObjective { get => toObjective; set { toObjective = value; OnPropertyChanged(); } }
+        public bool ToObjective { get => toObjective; set { toObjective = value; UpdateItems(); OnPropertyChanged(); } }
 
         public int NextId
         {
