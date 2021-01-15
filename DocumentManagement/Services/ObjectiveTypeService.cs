@@ -6,23 +6,26 @@ using MRS.DocumentManagement.Interface.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ObjectiveTypeService : IObjectiveTypeService
     {
         private readonly DMContext context;
+        private readonly IMapper mapper;
 
-        public ObjectiveTypeService(DMContext context)
+        public ObjectiveTypeService(DMContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
             try 
             {
-                var objType = new Database.Models.ObjectiveType()
+                var objType = new Database.Models.ObjectiveType
                 {
                     Name = typeName
                 };
@@ -39,36 +42,20 @@ namespace MRS.DocumentManagement.Services
         public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
             var dbObjective = await context.ObjectiveTypes.FindAsync((int)id);
-            if (dbObjective == null)
-                return null;
-            return new ObjectiveTypeDto() 
-            {
-                ID = (ID<ObjectiveTypeDto>)dbObjective.ID,
-                Name = dbObjective.Name
-            };
+            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
             var dbObjective = await context.ObjectiveTypes
                 .FirstOrDefaultAsync(x => x.Name == typename);
-            if (dbObjective == null)
-                return null;
-            return new ObjectiveTypeDto()
-            {
-                ID = (ID<ObjectiveTypeDto>)dbObjective.ID,
-                Name = dbObjective.Name
-            };
+            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetAllObjectiveTypes()
         {
             var db = await context.ObjectiveTypes.ToListAsync();
-            return db.Select(x => new ObjectiveTypeDto()
-            {
-                ID = (ID<ObjectiveTypeDto>)x.ID,
-                Name = x.Name
-            }).ToList();
+            return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)

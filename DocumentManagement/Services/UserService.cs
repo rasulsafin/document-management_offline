@@ -7,16 +7,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Services
 {
     public class UserService : IUserService
     {
         protected readonly DMContext context;
+        protected readonly IMapper mapper;
 
-        public UserService(DMContext context)
+        public UserService(DMContext context, IMapper mapper)
         {
             this.context = context;
+            this.mapper = mapper;
         }
 
         private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
@@ -33,13 +37,9 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 Utility.CryptographyHelper.CreatePasswordHash(data.Password, out byte[] passHash, out byte[] passSalt);
-                var user = new Database.Models.User()
-                {
-                    Login = data.Login,
-                    Name = data.Name,
-                    PasswordHash = passHash,
-                    PasswordSalt = passSalt
-                };
+                var user = mapper.Map<User>(data);
+                user.PasswordHash = passHash;
+                user.PasswordSalt = passSalt;
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
                 return new ID<UserDto>(user.ID);
@@ -87,37 +87,20 @@ namespace MRS.DocumentManagement.Services
         public async Task<UserDto> Find(ID<UserDto> userID)
         {
             var dbUser = await context.Users.FindAsync((int)userID);
-            if (dbUser != null)
-            {
-                return new UserDto((ID<UserDto>)dbUser.ID, dbUser.Login, dbUser.Name);
-            }
-            else 
-            {
-                return null;
-            }
+            return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
         }
 
         public async Task<UserDto> Find(string login)
         {
             login = login.Trim();
             var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
-            if (dbUser != null)
-            {
-                return new UserDto((ID<UserDto>)dbUser.ID, dbUser.Login, dbUser.Name);
-            }
-            else
-            {
-                return null;
-            }
+            return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
-            var dbUsers = await context.Users
-                .Select(x => new { x.ID, x.Login, x.Name })
-                .ToListAsync();
-            return dbUsers.Select(x => new UserDto((ID<UserDto>)x.ID, x.Login, x.Name))
-                .ToList();
+            var dbUsers = await context.Users.ToListAsync();
+            return dbUsers.Select(x => mapper.Map<UserDto>(x)).ToList();
         }
 
         public virtual async Task<bool> Update(UserDto user)

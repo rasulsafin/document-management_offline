@@ -1,10 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface.Services;
 using System.Linq;
+using AutoMapper;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -13,8 +15,13 @@ namespace MRS.DocumentManagement.Services
     public class AuthorizationService : IAuthorizationService
     {
         private readonly DMContext context;
+        private readonly IMapper mapper;
 
-        public AuthorizationService(DMContext context) => this.context = context;
+        public AuthorizationService(DMContext context, IMapper mapper)
+        {
+            this.context = context;
+            this.mapper = mapper;
+        }
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
@@ -108,10 +115,10 @@ namespace MRS.DocumentManagement.Services
             if (!Utility.CryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
                 return null;
 
-            var dtoUser = new UserDto(new ID<UserDto>(dbUser.ID), username, dbUser.Name);
+            var dtoUser = mapper.Map<UserDto>(dbUser);
 
             if (dbUser.Roles != null && dbUser.Roles.Count > 0)
-                dtoUser.Role = new RoleDto { Name = dbUser.Roles.FirstOrDefault().Role.Name, User = dtoUser };
+                dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
 
             return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
         }
