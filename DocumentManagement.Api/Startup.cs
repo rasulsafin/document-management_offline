@@ -55,6 +55,7 @@ namespace MRS.DocumentManagement.Api
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
+            services.AddSingleton<Sinchronizator>();
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
