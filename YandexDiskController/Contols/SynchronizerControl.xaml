@@ -21,7 +21,8 @@
         <WrapPanel Grid.Row="1">
             <Button Command="{Binding SynchronizeCommand}">Синхронизировать</Button>
             <Button Command="{Binding StopSyncCommand}">Остановить</Button>
-            <Button Command="{Binding SynchronizeAllCommand}">Синхронизировать Всё</Button>
+            <Button Command="{Binding UploadAllCommand}">Загрузить всё</Button>
+            <Button Command="{Binding DownloadAllCommand}">Скачать всё</Button>
             <Button Command="{Binding RevisionCommand}">Узнать Revision</Button>
             <Button Command="{Binding ShowAllTransactionCommand}" Content="{Binding ShowAllTransactionContent}"></Button>
             <TextBlock Text="{Binding ProgressText, UpdateSourceTrigger=PropertyChanged}" Visibility="{Binding SyncProcces, Converter={StaticResource boolToVisuble}}"/>

@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDiskManager
+    public class DiskManager 
     {
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
         private string accessToken;
-        private YandexDiskController controller;
+        private IDiskController controller;
         private bool projectsDirCreate;
         private bool transactionsDirCreate;
         private bool usersDirCreate;
@@ -27,10 +27,20 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         public string TempDir { get; set; }
 
         #region Инициализация
-        public YandexDiskManager(string accessToken)
+        public DiskManager(string accessToken)
         {
             this.accessToken = accessToken;
+            //
+            // TODO: Продумать как менять диски 
+            //
             controller = new YandexDiskController(accessToken);
+            //controller = new GoogleDiskController(accessToken);
+            Initialize();
+        }
+
+        public DiskManager(IDiskController controller)
+        {            
+            this.controller = controller;            
             Initialize();
         }
 
@@ -176,7 +186,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         #endregion
         #region Revision
-        public async Task<Revisions> GetRevisionsAsync()
+        public async Task<RevisionCollection> GetRevisionsAsync()
         {
             if (await CheckRevisionsDir())
             {
@@ -184,14 +194,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 {
                     string path = PathManager.GetRevisionsFile();
                     string json = await controller.GetContentAsync(path);
-                    Revisions revisions = JsonConvert.DeserializeObject<Revisions>(json);
+                    RevisionCollection revisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
                     return revisions;
                 }
                 catch (FileNotFoundException) { }
             }
-            return new Revisions();
+            return new RevisionCollection();
         }
-        public async Task SetRevisionsAsync(Revisions revisions)
+        public async Task SetRevisionsAsync(RevisionCollection revisions)
         {
             await CheckRevisionsDir();
             string path = PathManager.GetRevisionsFile();

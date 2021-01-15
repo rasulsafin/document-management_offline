@@ -1,4 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
+﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,16 +15,17 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
     {
         public delegate void ProgressChangeDelegate(int current, int total, string message);
         public event ProgressChangeDelegate ProgressChange;
-        private YandexDiskManager yandex;
+        private DiskManager diskManager;
         private int total;
         private int current;
-        public Revisions Revisions { get; private set; } = new Revisions();
+        public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
+        public bool NeedStopSync { get; private set; }
 
         public async void Initialize(string accessToken)
         {
-            if (yandex == null)
+            if (diskManager == null)
             {
-                yandex = new YandexDiskManager(accessToken);                
+                diskManager = new DiskManager(accessToken);                
                 await LoadRevisions();
             }
         }
@@ -34,11 +36,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
             try
             {
                 string json = await File.ReadAllTextAsync(fileName);
-                Revisions = JsonConvert.DeserializeObject<Revisions>(json);
+                Revisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
             }
             catch
             {
-                Revisions = new Revisions();
+                Revisions = new RevisionCollection();
                 SaveRevisions();
             }
         }
@@ -78,10 +80,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
         }
         #endregion
 
-        public async Task SyncTableAsync(ProgressChangeDelegate progressChange)
+        public void StopSync()
         {
-            Revisions revisions = await yandex.GetRevisionsAsync();
-            total = GetCount(Revisions) + GetCount(revisions);
+            NeedStopSync = true;
+        }
+
+        public async Task SyncTableAsync(ProgressChangeDelegate progressChange, DMContext context)
+        {
+            RevisionCollection revisions = await diskManager.GetRevisionsAsync();            
             Progress<(int, int, string)> progress = new Progress<(int, int, string)>();
             progress.ProgressChanged += (s, p) =>
             {
@@ -89,87 +95,116 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 progressChange?.Invoke(current, total, message);
             };
 
-            await Synchronize(progress, new UserSynchronizer(yandex), revisions);
-            await Synchronize(progress, new ProjectSynchronizer(yandex), revisions);
+            await Synchronize(progress, new UserSynchronizer(diskManager, context), revisions);
+            await Synchronize(progress, new ProjectSynchronizer(diskManager), revisions);
 
-            await yandex.SetRevisionsAsync(Revisions);
+            await diskManager.SetRevisionsAsync(Revisions);
             SaveRevisions();
         }
 
 
 
-        private static void CompareRevision(List<int> download, List<int> unload,
-            List<Revision> local, List<Revision> remote, IProgress<(int, int, string)> progress)
+        private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
         {
+            progress.Report((current, Revisions.Total, "Подготовка данных"));
+            //List<int> download = new List<int>();
+            //List<int> unload = new List<int>();
 
+            List<Revision> local = synchro.GetRevisions(Revisions);
+            List<Revision> remote = synchro.GetRevisions(remoreRevisions);
+
+            total += local.Count;
+            total += remote.Count;
+            if (Revisions.Total < total) Revisions.Total = total;
+            if (local == null) local = new List<Revision>();
+            if (remote == null) remote = new List<Revision>();
+
+            synchro.LoadLocalCollect();
+            progress.Report((current, Revisions.Total, "Подготовка завершена"));
             foreach (var localRev in local)
             {
+                progress.Report((current, Revisions.Total, "Загрузка"));
+                if (NeedStopSync) break;
                 // Находим совподения
                 var remoteRev = remote.Find(r => r.ID == localRev.ID);
                 if (remoteRev == null)
                 {
-                    // Загружаем на сервер
-                    unload.Add(localRev.ID);
+                    // Загружаем на сервер                    
+                    await synchro.UpdateRemoteAsync(localRev.ID);
+                    var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                    if (subSynchronizes != null)
+                    {
+                        foreach (var subSynchronize in subSynchronizes)
+                        {
+                            await Synchronize(progress, subSynchronize, remoreRevisions);
+                        }
+                    }
                 }
                 else if (localRev < remoteRev)
                 {
                     // Скачиваем с сервера
-                    download.Add(localRev.ID);
+                    if (await synchro.RemoteExistAsync(localRev.ID))
+                    {
+                        await synchro.DownloadAndUpdateAsync(localRev.ID);
+                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                        if (subSynchronizes != null)
+                        {
+                            foreach (var subSynchronize in subSynchronizes)
+                            {
+                                await Synchronize(progress, subSynchronize, remoreRevisions);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        synchro.DeleteLocal(localRev.ID);
+                    }
+                    if (!NeedStopSync)
+                        synchro.SetRevision(Revisions, remoteRev);
+
                     remote.Remove(remoteRev);
-                    localRev.Rev = remoteRev.Rev;
+                    //localRev.Rev = remoteRev.Rev;
                 }
                 else if (localRev > remoteRev)
                 {
                     // Загружаем на сервер
-                    unload.Add(localRev.ID);
+
+                    if (synchro.LocalExist(localRev.ID))
+                    {
+                        await synchro.UpdateRemoteAsync(localRev.ID);
+
+                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                        if (subSynchronizes != null)
+                        {
+                            foreach (var subSynchronize in subSynchronizes)
+                            {
+                                await Synchronize(progress, subSynchronize, remoreRevisions);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        await synchro.DeleteRemoteAsync(localRev.ID);
+                    }
                     remote.Remove(remoteRev);
                 }
                 else if (localRev.Equals(remoteRev))
                 {
-                    // Пропускаем 
-                    // TODO : Продумать как лучше выташить прогрксс
-                    //progress.Report(1);
+                    // Пропускаем                     
                     remote.Remove(remoteRev);
                 }
-                //progress.Report(1);
+
+                progress.Report((++current, Revisions.Total, "Загрузка"));
             }
             foreach (var remoteRev in remote)
             {
-                // Скачиваем с сервера
-                download.Add(remoteRev.ID);
-                local.Add(remoteRev);
-            }
-        }
-
-        private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, Revisions remoreRevisions)
-        {
-            List<int> download = new List<int>();
-            List<int> unload = new List<int>();
-            List<Revision> local = synchro.GetRevisions(Revisions);
-            List<Revision> remote = synchro.GetRevisions(remoreRevisions);
-
-            if (local == null) local = new List<Revision>();
-            if (remote == null) remote = new List<Revision>();
-
-            CompareRevision(download, unload, local, remote, progress);
-            //synchro.SetRevision(Revisions, local);
-            synchro.LoadLocalCollect();
-
-            if (download.Count > 0)
-            {
-                //надо скачать
-                foreach (int num in download)
+                if (NeedStopSync) break;
+                // Скачиваем с сервера                
+                if (await synchro.RemoteExistAsync(remoteRev.ID))
                 {
-                    if (await synchro.RemoteExistAsync(num))
-                    {
-                        await synchro.DownloadAndUpdateAsync(num);
-                    }
-                    else
-                    {
-                        synchro.DeleteLocal(num);
-                    }
+                    await synchro.DownloadAndUpdateAsync(remoteRev.ID);
 
-                    var subSynchronizes = synchro.GetSubSynchronizes(num);
+                    var subSynchronizes = synchro.GetSubSynchronizes(remoteRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)
@@ -177,38 +212,22 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                             await Synchronize(progress, subSynchronize, remoreRevisions);
                         }
                     }
-                    //progress.Report(1);
                 }
-            }
-            if (unload.Count > 0)
-            {
-                //надо загрузить
-                foreach (int num in unload)
+                else
                 {
-                    if (synchro.LocalExist(num))
-                    {
-                        await synchro.UpdateRemoteAsync(num);
-                    }
-                    else
-                    {
-                        await synchro.DeleteRemoteAsync(num);
-                    }
-
-                    var subSynchronizes = synchro.GetSubSynchronizes(num);
-                    if (subSynchronizes != null)
-                    {
-                        foreach (var subSynchronize in subSynchronizes)
-                        {
-                            await Synchronize(progress, subSynchronize, remoreRevisions);
-                        }
-                    }
-                    //progress.Report(1);
+                    synchro.DeleteLocal(remoteRev.ID);
                 }
+                progress.Report((++current, Revisions.Total, "Загрузка"));
+
+                if (!NeedStopSync)
+                    synchro.SetRevision(Revisions, remoteRev);
+                //local.Add(remoteRev);
             }
+            progress.Report((current, Revisions.Total, "Сохранение результатов"));
             synchro.SaveLocalCollect();
         }
 
-        private int GetCount(Revisions revisions)
+        private int GetCount(RevisionCollection revisions)
         {
             int? result = 0;
             result += revisions.Projects?.Count + revisions.Users?.Count;

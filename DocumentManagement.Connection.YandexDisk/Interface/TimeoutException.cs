@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection
 {
     public class TimeoutException : Exception
     {

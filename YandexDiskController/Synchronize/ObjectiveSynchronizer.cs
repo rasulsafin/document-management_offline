@@ -9,19 +9,19 @@ namespace MRS.DocumentManagement
 {
     internal class ObjectiveSynchronizer : ISynchronizer
     {
-        private YandexDiskManager yandex;        
+        private DiskManager yandex;        
         private ProjectDto project;
         private List<ObjectiveDto> objectives;
         private ObjectiveDto remoteObj;
         private ObjectiveDto localObj;
 
-        public ObjectiveSynchronizer(YandexDiskManager yandex, ProjectDto localProject)
+        public ObjectiveSynchronizer(DiskManager yandex, ProjectDto localProject)
         {
             this.yandex = yandex;
             this.project = localProject;
         }
 
-        public List<Revision> GetRevisions(Revisions revisions)
+        public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             int idProj = (int)project.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement
             return projectRev.Objectives.Select(x => (Revision)x).ToList();
         }
 
-        public void SetRevision(Revisions revisions, Revision rev)
+        public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             int idProj = (int)project.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);

@@ -5,9 +5,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
 {
     internal class ProjectSynchronizer : ISynchronizer
     {
-        private YandexDiskManager yandex;
+        private DiskManager yandex;
 
-        public ProjectSynchronizer(YandexDiskManager yandex)
+        public ProjectSynchronizer(DiskManager yandex)
         {
             this.yandex = yandex;
         }
@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
             throw new System.NotImplementedException();
         }
 
-        public List<Revision> GetRevisions(Revisions revisions)
+        public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             throw new System.NotImplementedException();
         }
@@ -57,12 +57,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
             throw new System.NotImplementedException();
         }
 
-        public void SetRevision(Revisions revisions, List<Revision> local)
+        public void SetRevision(RevisionCollection revisions, List<Revision> local)
         {
             throw new System.NotImplementedException();
         }
 
-        public void SetRevision(Revisions revisions, Revision rev)
+        public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             throw new System.NotImplementedException();
         }

@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Contols
 {
     public class UserViewModel : BaseViewModel
     {
-        YandexDiskManager yandex;
+        DiskManager yandex;
         private UserModel selectedUser;
 
         public ObservableCollection<UserModel> Users { get; set; } = ObjectModel.Users;

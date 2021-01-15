@@ -10,7 +10,7 @@ using System.Xml;
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     /// <summary>Нижний уровень взаимодействия с сервисом YandexDisk</summary>
-    public class YandexDiskController
+    public class YandexDiskController : IDiskController
     {
 
         public static CoolLogger logger = new CoolLogger("controller");
@@ -84,7 +84,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 throw WebExceptionHandler(ex);
 
-            }            
+            }
         }
 
 
@@ -381,7 +381,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html</remarks>
         public async Task<bool> CopyAsync(string originPath, string copyPath)
         {
-            try 
+            try
             {
                 throw new NotImplementedException();
             }

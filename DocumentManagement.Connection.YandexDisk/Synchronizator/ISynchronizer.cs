@@ -72,14 +72,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
         /// </summary>
         /// <param name="revisions"></param>
         /// <returns></returns>
-        List<Revision> GetRevisions(Revisions revisions);
+        List<Revision> GetRevisions(RevisionCollection revisions);
 
         /// <summary>
         /// Установить обновленную ревизию
         /// </summary>
         /// <param name="revisions"></param>
         /// <param name="local"></param>
-        void SetRevision(Revisions revisions, Revision rev);
+        void SetRevision(RevisionCollection revisions, Revision rev);
 
     }
 }

@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Contols
         private static readonly string OBJECTIVE_FILE = "objective.json";
         private static readonly string PROJECT_FILE = "projects.json";
         private static readonly string TEMP_DIR = "Temp.Yandex";
-        YandexDiskManager yandex;
+        DiskManager yandex;
         ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;
         private ObjectiveModel editObjective = new ObjectiveModel();

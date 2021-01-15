@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
 {
-    public class Revisions
+    public class RevisionCollection
     {
         public int Total { get; set; }
 

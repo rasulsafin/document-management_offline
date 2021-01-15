@@ -10,23 +10,23 @@ namespace MRS.DocumentManagement
 {
     public class ProjectSynchronizer : ISynchronizer
     {
-        private YandexDiskManager yandex;
+        private DiskManager yandex;
         private List<ProjectDto> projects;
         private ProjectDto remoteProject;
         private ProjectDto localProject;
 
-        public ProjectSynchronizer(YandexDiskManager yandex)
+        public ProjectSynchronizer(DiskManager yandex)
         {
             this.yandex = yandex;
         }
-        public List<Revision> GetRevisions(Revisions revisions)
+        public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             if (revisions.Projects == null) 
                 revisions.Projects = new List<ProjectRevision>();
             return revisions.Projects.Select(x => (Revision)x).ToList();
         }
 
-        public void SetRevision(Revisions revisions, Revision rev)
+        public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
             if (index < 0)

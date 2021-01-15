@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Contols
         private static readonly string ITEM_FILE = "items.json";
         #endregion
         #region bending
-        YandexDiskManager yandex;
+        DiskManager yandex;
         bool toObjective;
         private ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;

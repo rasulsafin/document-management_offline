@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Contols
     {
 
         #region Bending and data
-        YandexDiskManager yandex;
+        DiskManager yandex;
         ProjectModel selectProject;
         bool openTempFile = false;
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;

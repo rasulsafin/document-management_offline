@@ -9,35 +9,24 @@ namespace MRS.DocumentManagement
     public class UserSynchronizer : ISynchronizer
     {
         private List<UserDto> users;
-        private YandexDiskManager yandex;
+        private DiskManager disk;
         private UserDto remoteUser;
         private UserDto localUser;
 
-        public UserSynchronizer(YandexDiskManager yandex)
+        public UserSynchronizer(DiskManager disk)
         {
-            this.yandex = yandex;
+            this.disk = disk;
         }
 
 
-        public List<Revision> GetRevisions(Revisions revisions)
+        public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             if (revisions.Users == null)
                 revisions.Users = new List<Revision>();
             return revisions.Users;
-        }
-        //public void SetRevision(Revisions revisions, List<Revision> userRevs)
-        //{
-        //    foreach (var rev in userRevs)
-        //    {
-        //        var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
-        //        if (index < 0)
-        //            revisions.Users.Add(new Revision(rev.ID, rev.Rev));
-        //        else
-        //            revisions.Users[index].Rev = rev.Rev;
-        //    }
-        //}
+        }       
 
-        public void SetRevision(Revisions revisions, Revision rev)
+        public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
             if (index < 0)
@@ -53,13 +42,13 @@ namespace MRS.DocumentManagement
 
         public async Task<bool> RemoteExistAsync(int id)
         {
-            remoteUser = await yandex.GetUserAsync((ID<UserDto>)id);
+            remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
             return remoteUser != null;
         }
         public async Task DownloadAndUpdateAsync(int id)
         {
             if ((int)remoteUser.ID != id)
-                remoteUser = await yandex.GetUserAsync((ID<UserDto>)id);
+                remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
             var index = users.FindIndex(x => (int)x.ID == id);
             if (index < 0) 
                 users.Add(remoteUser);
@@ -78,9 +67,9 @@ namespace MRS.DocumentManagement
         {
             if ((int)localUser.ID != id)
                 localUser = users.Find(x => (int)x.ID == id);
-            await yandex.UnloadUser(localUser);
+            await disk.UnloadUser(localUser);
         }
-        public async Task DeleteRemoteAsync(int id) => await yandex.DeleteUser((ID<UserDto>)id);
+        public async Task DeleteRemoteAsync(int id) => await disk.DeleteUser((ID<UserDto>)id);
 
         
     }
