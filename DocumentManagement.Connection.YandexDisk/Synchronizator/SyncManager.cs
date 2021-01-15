@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class SyncManager
     {
@@ -96,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
             };
 
             await Synchronize(progress, new UserSynchronizer(diskManager, context), revisions);
-            await Synchronize(progress, new ProjectSynchronizer(diskManager), revisions);
+            await Synchronize(progress, new ProjectSynchronizer(diskManager, context), revisions);
 
             await diskManager.SetRevisionsAsync(Revisions);
             SaveRevisions();
@@ -131,7 +131,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 {
                     // Загружаем на сервер                    
                     await synchro.UpdateRemoteAsync(localRev.ID);
-                    var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)
@@ -143,21 +143,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 else if (localRev < remoteRev)
                 {
                     // Скачиваем с сервера
-                    if (await synchro.RemoteExistAsync(localRev.ID))
+                    if (await synchro.RemoteExist(localRev.ID))
                     {
                         await synchro.DownloadAndUpdateAsync(localRev.ID);
-                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
-                        if (subSynchronizes != null)
-                        {
-                            foreach (var subSynchronize in subSynchronizes)
-                            {
-                                await Synchronize(progress, subSynchronize, remoreRevisions);
-                            }
-                        }
+                        await SubSinchronize(progress, synchro, remoreRevisions, localRev);
                     }
                     else
                     {
-                        synchro.DeleteLocal(localRev.ID);
+                        await synchro.DeleteLocalAsync(localRev.ID);
                     }
                     if (!NeedStopSync)
                         synchro.SetRevision(Revisions, remoteRev);
@@ -169,18 +162,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 {
                     // Загружаем на сервер
 
-                    if (synchro.LocalExist(localRev.ID))
+                    if (await synchro.LocalExist(localRev.ID))
                     {
                         await synchro.UpdateRemoteAsync(localRev.ID);
-
-                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
-                        if (subSynchronizes != null)
-                        {
-                            foreach (var subSynchronize in subSynchronizes)
-                            {
-                                await Synchronize(progress, subSynchronize, remoreRevisions);
-                            }
-                        }
+                        await SubSinchronize(progress, synchro, remoreRevisions, localRev);
                     }
                     else
                     {
@@ -200,22 +185,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
             {
                 if (NeedStopSync) break;
                 // Скачиваем с сервера                
-                if (await synchro.RemoteExistAsync(remoteRev.ID))
+                if (await synchro.RemoteExist(remoteRev.ID))
                 {
                     await synchro.DownloadAndUpdateAsync(remoteRev.ID);
-
-                    var subSynchronizes = synchro.GetSubSynchronizes(remoteRev.ID);
-                    if (subSynchronizes != null)
-                    {
-                        foreach (var subSynchronize in subSynchronizes)
-                        {
-                            await Synchronize(progress, subSynchronize, remoreRevisions);
-                        }
-                    }
+                    await SubSinchronize(progress, synchro, remoreRevisions, remoteRev);
                 }
                 else
                 {
-                    synchro.DeleteLocal(remoteRev.ID);
+                    await synchro.DeleteLocalAsync(remoteRev.ID);
                 }
                 progress.Report((++current, Revisions.Total, "Загрузка"));
 
@@ -224,7 +201,19 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 //local.Add(remoteRev);
             }
             progress.Report((current, Revisions.Total, "Сохранение результатов"));
-            synchro.SaveLocalCollect();
+            await synchro.SaveLocalCollectAsync();
+        }
+
+        private async Task SubSinchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions, Revision localRev)
+        {
+            var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
+            if (subSynchronizes != null)
+            {
+                foreach (var subSynchronize in subSynchronizes)
+                {
+                    await Synchronize(progress, subSynchronize, remoreRevisions);
+                }
+            }
         }
 
         private int GetCount(RevisionCollection revisions)

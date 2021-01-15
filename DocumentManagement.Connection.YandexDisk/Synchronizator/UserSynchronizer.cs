@@ -5,16 +5,17 @@ using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     internal class UserSynchronizer : ISynchronizer
     {
         private DiskManager disk;
         private DMContext context;
-        private DbSet<User> users;
+        //private DbSet<User> users;
         private UserDto remoteUser;
+        private User localUser;
 
-        public UserSynchronizer(DiskManager yandex, DMContext context)
+        public UserSynchronizer(DiskManager yandex, DMContext context/*, IMapper mapper*/)
         {
             this.disk = yandex;
             this.context = context;
@@ -36,64 +37,88 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
                 revisions.Users[index].Rev = rev.Rev;
         }
 
-        public List<ISynchronizer> GetSubSynchronizes(int id) => null;
+        public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
 
 
         public void LoadLocalCollect()
         {
-            users = context.Users;
+            //users = context.Users;
         }
-        public void SaveLocalCollect()
+        public async Task SaveLocalCollectAsync()
         {
-            context.SaveChanges();
+            await context.SaveChangesAsync();
         }
 
 
-        public async Task<bool> RemoteExistAsync(int id)
+        public async Task<bool> RemoteExist(int id)
         {
-            remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
+            await Download(id);
             return remoteUser != null;
         }
+
+        private async Task Download(int id)
+        {
+            if ((int)remoteUser?.ID != id)
+                remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
+        }
+
         public async Task DownloadAndUpdateAsync(int id)
         {
-            if ((int)remoteUser.ID != id)
-                remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
-
-
-
-            var user = await users.FirstAsync();
-            //user.
-            throw new System.NotImplementedException();
-        }
-        public void DeleteLocal(int id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public Task DeleteRemoteAsync(int id)
-        {
-            throw new System.NotImplementedException();
-        }
-
-
-        
-
-        
-
-
-
-        public bool LocalExist(int id)
-        {
-            throw new System.NotImplementedException();
+            await Download(id);
+            if (await LocalExist(id))
+            {
+                localUser.Login = remoteUser.Login;
+                localUser.Name = remoteUser.Name;
+            }
+            else
+            {
+                // TODO: Циклическая зависимость
+                //var user = mapper.Map<User>(remoteUser);
+                localUser = new User()
+                {
+                    ID = (int)remoteUser.ID
+                    ,
+                    Login = remoteUser.Login
+                    ,
+                    Name = remoteUser.Name
+                    // TODO: С ролями не понятка
+                    //,Role = remoteUser.Role
+                };
+                context.Users.Add(localUser);
+            }
         }
 
-
-
-        
-
-        public Task UpdateRemoteAsync(int id)
+        private async Task Find(int id)
         {
-            throw new System.NotImplementedException();
+            if (localUser?.ID != id)
+                localUser = await context.Users.FindAsync(id);
+        }
+
+        public async Task DeleteLocalAsync(int id)
+        {            
+            if (await LocalExist(id))
+                context.Users.Remove(localUser);
+        }
+
+        public async Task<bool> LocalExist(int id)
+        {
+            await Find(id);
+            return localUser != null;
+        }
+
+        public async Task DeleteRemoteAsync(int id) => await disk.DeleteUser((ID<UserDto>)id);
+
+        public async Task UpdateRemoteAsync(int id)
+        {
+            await Find(id);
+            UserDto user = new UserDto()
+            {
+                ID = (ID<UserDto>)localUser.ID
+                ,Name = localUser.Name
+                ,Login = localUser.Login
+            
+            };
+            await disk.UnloadUser(user);
         }
     }
 }

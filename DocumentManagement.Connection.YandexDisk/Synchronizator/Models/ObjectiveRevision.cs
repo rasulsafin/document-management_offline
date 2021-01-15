@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class ObjectiveRevision : Revision
     {

@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
+﻿using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using System;
@@ -12,10 +12,7 @@ namespace MRS.DocumentManagement.Contols
     public class ObjectiveViewModel : BaseViewModel
     {
         #region Data and bending
-        private static readonly string DIR_NAME = "data";
-        private static readonly string OBJECTIVE_FILE = "objective.json";
-        private static readonly string PROJECT_FILE = "projects.json";
-        private static readonly string TEMP_DIR = "Temp.Yandex";
+        
         DiskManager yandex;
         ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;

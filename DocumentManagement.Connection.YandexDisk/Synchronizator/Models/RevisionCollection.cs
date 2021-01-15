@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class RevisionCollection
     {

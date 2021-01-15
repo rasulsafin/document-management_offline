@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class Revision : IComparable<Revision>
     {

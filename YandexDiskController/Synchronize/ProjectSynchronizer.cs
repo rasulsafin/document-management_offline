@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.IO;
@@ -35,18 +35,8 @@ namespace MRS.DocumentManagement
                 revisions.Projects[index].Rev = rev.Rev;
         }
 
-        //public void SetRevision(Revisions revisions, List<Revision> projectRevs)
-        //{
-        //    foreach (var rev in projectRevs)
-        //    {
-        //        var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
-        //        if (index < 0)
-        //            revisions.Projects.Add(new ProjectRevision(rev.ID, rev.Rev));
-        //        else
-        //            revisions.Projects[index].Rev = rev.Rev;                
-        //    }
-        //}
-        public List<ISynchronizer> GetSubSynchronizes(int idProject)
+        
+        public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idProject)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
 
@@ -64,18 +54,18 @@ namespace MRS.DocumentManagement
         {
             projects = ObjectModel.GetProjects();
         }
-        public void SaveLocalCollect()
+        public async Task SaveLocalCollectAsync()
         {
             ObjectModel.SaveProjects(projects);
         }
 
-        public async Task<bool> RemoteExistAsync(int id)
+        public async Task<bool> RemoteExist(int id)
         {
             var _id = (ID<ProjectDto>)id;
             remoteProject = await yandex.GetProjectAsync(_id);
             return remoteProject != null;
         }
-        public void DeleteLocal(int id)
+        public async Task DeleteLocalAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
             projects.RemoveAll(x => x.ID == _id);
@@ -94,7 +84,7 @@ namespace MRS.DocumentManagement
             var dirName = PathManager.GetProjectDir(remoteProject);
             if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
         }
-        public bool LocalExist(int id)
+        public async Task<bool> LocalExist(int id)
         {
             var _id = (ID<ProjectDto>)id;
             localProject = projects.Find(x => x.ID == _id);

@@ -35,10 +35,10 @@ namespace MRS.DocumentManagement
                 revisions.Users[index].Rev = rev.Rev;
         }
 
-        public List<ISynchronizer> GetSubSynchronizes(int id) => null;
+        public List<ISynchronizer> GetSubSynchronizesAsync(int id) => null;
 
         public void LoadLocalCollect() => users = ObjectModel.GetUsers();
-        public void SaveLocalCollect() => ObjectModel.SaveUsers(users);
+        public async Task SaveLocalCollectAsync() => ObjectModel.SaveUsers(users);
 
         public async Task<bool> RemoteExistAsync(int id)
         {
@@ -55,10 +55,10 @@ namespace MRS.DocumentManagement
             else 
                 users[index] = remoteUser;
         }
-        public void DeleteLocal(int id) => users.RemoveAll(x => (int)x.ID == id);
+        public async Task DeleteLocalAsync(int id) => users.RemoveAll(x => (int)x.ID == id);
 
 
-        public bool LocalExist(int id)
+        public async Task<bool> LocalExist(int id)
         {
             localUser = users.Find(x => (int)x.ID == id);
             return localUser != null;

@@ -153,7 +153,7 @@ namespace MRS.DocumentManagement
                 {
                     // Загружаем на сервер                    
                     await synchro.UpdateRemoteAsync(localRev.ID);
-                    var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                    var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)
@@ -168,7 +168,7 @@ namespace MRS.DocumentManagement
                     if (await synchro.RemoteExistAsync(localRev.ID))
                     {
                         await synchro.DownloadAndUpdateAsync(localRev.ID);
-                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                        var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
                             foreach (var subSynchronize in subSynchronizes)
@@ -179,7 +179,7 @@ namespace MRS.DocumentManagement
                     }
                     else
                     {                        
-                        synchro.DeleteLocal(localRev.ID);
+                        synchro.DeleteLocalAsync(localRev.ID);
                     }
                     if (!NeedStopSync)
                         synchro.SetRevision(Revisions, remoteRev);
@@ -195,7 +195,7 @@ namespace MRS.DocumentManagement
                     {
                         await synchro.UpdateRemoteAsync(localRev.ID);
                         
-                        var subSynchronizes = synchro.GetSubSynchronizes(localRev.ID);
+                        var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
                             foreach (var subSynchronize in subSynchronizes)
@@ -226,7 +226,7 @@ namespace MRS.DocumentManagement
                 {
                     await synchro.DownloadAndUpdateAsync(remoteRev.ID);
 
-                    var subSynchronizes = synchro.GetSubSynchronizes(remoteRev.ID);
+                    var subSynchronizes = synchro.GetSubSynchronizesAsync(remoteRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)
@@ -237,7 +237,7 @@ namespace MRS.DocumentManagement
                 }
                 else
                 {
-                    synchro.DeleteLocal(remoteRev.ID);
+                    synchro.DeleteLocalAsync(remoteRev.ID);
                 }
                 progress.Report((++current, Revisions.Total, "Загрузка"));
 
@@ -246,7 +246,7 @@ namespace MRS.DocumentManagement
                 //local.Add(remoteRev);
             }
             progress.Report((current, Revisions.Total, "Сохранение результатов"));
-            synchro.SaveLocalCollect();
+            synchro.SaveLocalCollectAsync();
         }
 
         //private static void CompareRevision(List<int> download, List<int> unload,

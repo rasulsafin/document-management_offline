@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Linq;
@@ -44,26 +44,9 @@ namespace MRS.DocumentManagement
             else
                 projectRev.Objectives[index].Rev = rev.Rev;
         }
-        //public void SetRevision(Revisions revisions, List<Revision> objectiveRevs)
-        //{
-        //    int idProj = (int)project.ID;
-        //    var projectRev = revisions.Projects.Find(x => x.ID == idProj);
-        //    if (projectRev != null)
-        //    {
-                
-        //            if (projectRev.Objectives == null)
-        //                projectRev.Objectives = new List<ObjectiveRevision>();
-        //        foreach (var rev in objectiveRevs)
-        //        {
-        //            var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
-        //            if (index < 0)
-        //                projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
-        //            else
-        //                projectRev.Objectives[index].Rev = rev.Rev;
-        //        }
-        //    }
-        //}
-        public List<ISynchronizer> GetSubSynchronizes(int idObj)
+        
+
+        public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idObj)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
             
@@ -85,14 +68,14 @@ namespace MRS.DocumentManagement
         {
             objectives = ObjectModel.GetObjectives(project);
         }
-        public void SaveLocalCollect()
+        public async Task SaveLocalCollectAsync()
         {
             ObjectModel.SaveObjectives(project, objectives);
         }
 
 
 
-        public async Task<bool> RemoteExistAsync(int id)
+        public async Task<bool> RemoteExist(int id)
         {
             await FindRemoteObjective(id);
             return remoteObj != null;
@@ -114,14 +97,14 @@ namespace MRS.DocumentManagement
             if (remoteObj?.ID != _id)
                 remoteObj = await yandex.GetObjectiveAsync(project, _id);
         }
-        public void DeleteLocal(int id)
+        public async Task DeleteLocalAsync(int id)
         {
             var _id = (ID<ObjectiveDto>)id;
             objectives.RemoveAll(x => x.ID == _id);
         }
 
 
-        public bool LocalExist(int id)
+        public async Task<bool> LocalExist(int id)
         {
             
             FindLocalObjective(id);

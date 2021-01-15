@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public interface ISynchronizer
     {
@@ -15,22 +15,22 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
         /// Вызывается один раз в конце работы, предназначент для сохранения коллекции объектов 
         /// или отключения от базы данных
         /// </summary>
-        void SaveLocalCollect();
+        Task SaveLocalCollectAsync();
 
         /// <summary>
         /// Возвращает существование записи id в удаленной коллекции, 
         /// <para>
         /// желательно сохранить полученую запись сразу после выполнения 
         /// будет вызвано <see cref="DownloadAndUpdateAsync(int)"/> 
-        /// или <see cref="DeleteLocal(int)"/>         
+        /// или <see cref="DeleteLocalAsync(int)"/>         
         /// </para> 
         /// </summary>        
-        Task<bool> RemoteExistAsync(int id);
+        Task<bool> RemoteExist(int id);
         /// <summary>
-        /// Удалить запись id из локальной коллекции
+        /// Удалить запись из локальной коллекции
         /// </summary>
         /// <param name="id"></param>
-        void DeleteLocal(int id);
+        Task DeleteLocalAsync(int id);
 
         /// <summary>
         /// Загрузить запись с идентификатором id и добавить или обновить в локальную колекцию
@@ -48,7 +48,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        bool LocalExist(int id);
+        Task<bool> LocalExist(int id);
         /// <summary>
         /// Удалить запись id из удаленной коллекции
         /// </summary>
@@ -66,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronizator
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        List<ISynchronizer> GetSubSynchronizes(int id);
+        Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id);
         /// <summary>
         /// Получить список ревизий 
         /// </summary>

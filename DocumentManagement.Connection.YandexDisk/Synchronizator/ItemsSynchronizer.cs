@@ -1,29 +1,27 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizator;
+﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement
+namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     internal class ItemsSynchronizer : ISynchronizer
     {
-        private DiskManager yandex;
+        private DiskManager disk;
+        private DMContext context;
         private ProjectDto project;
-        private List<ItemDto> items;
+        private ObjectiveDto objective;
         private ItemDto remoteItem;
-        private ItemDto localItem;
-        private ObjectiveDto objective = null;
+        private Item localItem;
 
-        public ItemsSynchronizer(DiskManager yandex, ProjectDto localProject)
-        {
-            this.yandex = yandex;
-            this.project = localProject;
-        }
+        public ItemsSynchronizer(DiskManager disk, DMContext context, ProjectDto project) : this(disk, context, project, null){}
 
-        public ItemsSynchronizer(DiskManager yandex, ProjectDto localProject, ObjectiveDto objective) : this(yandex, localProject)
+        public ItemsSynchronizer(DiskManager disk, DMContext context,  ProjectDto project, ObjectiveDto objectiveDto)
         {
-            this.objective = objective;
+            this.disk = disk;
+            this.project = project;
+            this.objective = objectiveDto;
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
@@ -85,95 +83,108 @@ namespace MRS.DocumentManagement
 
         public void LoadLocalCollect()
         {
-            if (objective == null)
-                items = ObjectModel.GetItems(project);
-            else
-                items = ObjectModel.GetItems(project, objective);
+            //if (objective == null)
+            //    items = ObjectModel.GetItems(project);
+            //else
+            //    items = ObjectModel.GetItems(project, objective);
         }
 
         public async Task SaveLocalCollectAsync()
         {
-            if (objective == null)
-                ObjectModel.SaveItems(project, items);
-            else
-                ObjectModel.SaveItems(project, objective, items);
-
+            await context.SaveChangesAsync();
         }
 
         public async Task<bool> RemoteExist(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            await GetItem(_id);
-
+            
+            await Download(id);
             return remoteItem != null;
         }
-
-        private async Task GetItem(ID<ItemDto> _id)
+        private async Task Download(int id)
         {
+            var _id = (ID<ItemDto>)id;
             if (objective == null)
-                remoteItem = await yandex.GetItemAsync(project, _id);
+                remoteItem = await disk.GetItemAsync(project, _id);
             else
-                remoteItem = await yandex.GetItemAsync(project, objective.ID, _id);
+                remoteItem = await disk.GetItemAsync(project, objective.ID, _id);
         }
 
         public async Task DownloadAndUpdateAsync(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            if (remoteItem.ID != _id)
-                await GetItem(_id);
-            int index = items.FindIndex(x => x.ID == _id);
-            if (index < 0)
-            {
-                items.Add(remoteItem);
-                //
+            await Download(id);
+            if (await LocalExist(id))
+            {                
                 // TODO: Раскидывать файлы по папочкам здесь!!! 
-                string path = PathManager.GetProjectDir(project);
-                //
-                await yandex.DownloadItem(remoteItem, path);
+                // TODO: Удалить старый файл? 
+                string path = PathManager.GetProjectDir(project);                
+                await disk.DownloadItem(remoteItem, path);
 
+                
             }
             else
             {
-                // TODO: Удалить старый файл?                            
-                items[index] = remoteItem;
+                string path = PathManager.GetProjectDir(project);
+                await disk.DownloadItem(remoteItem, path);
+                context.Items.Add(Convert(remoteItem));
             }
         }
         public async Task DeleteLocalAsync(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            items.RemoveAll(x => x.ID == _id);
+            if (await LocalExist(id))
+                context.Items.Remove(localItem);
         }
+
 
         public async Task<bool> LocalExist(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            localItem = items.Find(x => x.ID == _id);
+            await Find(id);
             return localItem != null;
+        }
+
+        private async Task Find(int id)
+        {
+            if (localItem?.ID != id)
+                localItem =await context.Items.FindAsync(id);
         }
         public async Task UpdateRemoteAsync(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            if (localItem.ID != _id)
-                localItem = items.Find(x => x.ID == _id);
-            // TODO: Тотже вопрос, если есть старый файл куда его?
+            await Find(id);            
             if (objective == null)
-                await yandex.UploadItemAsync(project, localItem);
+                await disk.UploadItemAsync(project, Convert(localItem));
             else
-                await yandex.UploadItemAsync(project, objective, localItem);
-
+                await disk.UploadItemAsync(project, objective, Convert(localItem));
         }
+
+
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ItemDto>)id;
             // TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него 
             if (objective == null)
-                await yandex.DeleteItem(project, _id);
+                await disk.DeleteItem(project, _id);
             else
-                await yandex.DeleteItem(project, objective, _id);
+                await disk.DeleteItem(project, objective, _id);
         }
-              
-              
 
-        
+        private ItemDto Convert(Item model)
+        {
+            return new ItemDto()
+            { 
+                ID = new ID<ItemDto>(model.ID)
+                ,Name = model.Name
+                ,ExternalItemId= model.ExternalItemId
+                ,ItemType= (ItemTypeDto)model.ItemType                
+            };
+        }
+        private Item Convert(ItemDto dto)
+        {
+            return new Item()
+            {
+                ID = (int)dto.ID
+                ,Name = dto.Name
+                ,ExternalItemId = dto.ExternalItemId
+                ,ItemType = (int)dto.ItemType
+            };
+        }
     }
 }

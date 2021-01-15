@@ -16,11 +16,13 @@ namespace MRS.DocumentManagement.Services
     {
         protected readonly DMContext context;
         protected readonly IMapper mapper;
+        private readonly ISyncService synchronizator;
 
-        public UserService(DMContext context, IMapper mapper)
+        public UserService(DMContext context, IMapper mapper/*, ISyncService synchronizator*/)
         {
             this.context = context;
             this.mapper = mapper;
+            //this.synchronizator = Se;
         }
 
         private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
@@ -28,7 +30,7 @@ namespace MRS.DocumentManagement.Services
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
             if(user == null)
-                throw new ArgumentException($"User with key {userID} not found");
+                throw new ArgumentException($"User with key {userID} not found");            
             return user;
         }
 
@@ -42,7 +44,10 @@ namespace MRS.DocumentManagement.Services
                 user.PasswordSalt = passSalt;
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
-                return new ID<UserDto>(user.ID);
+
+                var userID = new ID<UserDto>(user.ID);
+                synchronizator.AddChange(userID);
+                return userID;
             }
             catch (DbUpdateException ex)
             {
@@ -69,7 +74,7 @@ namespace MRS.DocumentManagement.Services
                 context.Roles.RemoveRange(orphanRoles);
                 await context.SaveChangesAsync();
             }
-
+            synchronizator.AddChange(userID);
             return true;
         }
 
@@ -111,6 +116,7 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
+                synchronizator.AddChange(user.ID);
                 return true;
             }
             catch

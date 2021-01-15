@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Api
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
-            services.AddSingleton<Sinchronizator>();
+
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
@@ -79,6 +79,7 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddScoped<ISyncService, Synchronizator>();
             services.AddScoped<ItemHelper>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
@@ -86,7 +87,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveService, ObjectiveService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
-            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IUserService, UserService>();            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

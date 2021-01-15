@@ -1,10 +1,11 @@
 ﻿#define TEST
 
+using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.IO;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace MRS.DocumentManagement.Connection
 {
     public static class PathManager
     {
