@@ -1,5 +1,5 @@
 ﻿using Microsoft.Win32;
-using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using System.Collections.Generic;

@@ -2,6 +2,7 @@
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace MRS.DocumentManagement.Models
 {
@@ -11,6 +12,8 @@ namespace MRS.DocumentManagement.Models
         public static explicit operator ObjectiveModel(ObjectiveDto ident) => new ObjectiveModel(ident);
 
         public ObjectiveDto dto;
+        private List<ItemDto> items;
+
         public ObjectiveModel(ObjectiveDto dto)
         {
             this.dto = dto;
@@ -77,7 +80,6 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
-
         public string Description
         {
             get => dto.Description;
@@ -87,7 +89,6 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
-
         public DateTime CreationDate
         {
             get => dto.CreationDate;
@@ -97,7 +98,6 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
-
         public DateTime DueDate
         {
             get => dto.DueDate;
@@ -117,14 +117,65 @@ namespace MRS.DocumentManagement.Models
             }
         }
 
-        public IEnumerable<ItemDto> Items
+        public ObservableCollection<ItemModel> GetItems()
         {
-            get => dto.Items;
-            set
+            var _items = new ObservableCollection<ItemModel>();
+            _items.CollectionChanged += Items_CollectionChanged;
+            foreach (var item in dto.Items)
             {
-                dto.Items = value;
-                OnPropertyChanged();
+                _items.Add(new ItemModel(item));
+            }
+            return _items;
+        }
+
+        private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+
+            }
+            if (e.OldItems != null)
+            {
+
             }
         }
+
+        public ItemModel GetItem(ID<ItemDto> itemID)
+        {
+            if (itemID.IsValid && dto.Items != null)
+            {
+                foreach (var item in dto.Items)
+                {
+                    if (item.ID == itemID)
+                        return new ItemModel(item);
+                }
+            }
+            return null;
+        }
+
+        public void SetItem(ItemModel item)
+        {
+            ID<ItemDto> itemID = item.dto.ID;
+            if (itemID.IsValid)
+            {
+                if (dto.Items == null)
+                    dto.Items = items = new List<ItemDto>();
+                foreach (var itemDto in dto.Items)
+                {
+                    if (itemDto.ID == itemID)
+                    {
+                        itemDto.ExternalItemId = item.ExternalItemId;
+                        itemDto.ItemType = item.ItemType;
+                        itemDto.Name = item.Name;
+                    }
+                }
+                items.Add(item.dto);
+            }
+        }
+
+
+        public ObservableCollection<ObjectiveModel> SubObjectives { get; set; } = new ObservableCollection<ObjectiveModel>();
+
+
     }
 }

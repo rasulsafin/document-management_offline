@@ -86,13 +86,46 @@ namespace MRS.DocumentManagement
         {
             //string objDir = PathManager.GetObjectivesDir(project);
             var list = GetObjectives(project);
-
+            var buf = new List<ObjectiveModel>();
             Objectives.Clear();
-            foreach (ObjectiveDto item in list)
+            for (int i = 0; i < list.Count; i++)
             {
-                Objectives.Add(new ObjectiveModel(item));
+                ObjectiveDto item = list[i];
+                buf.Add(new ObjectiveModel(item));
             }
+
+            for (int i = 0; buf.Count != 0;)
+            {
+                ObjectiveModel model = buf[i];                
+                    ObjectiveModel parent = FindParent(model.ParentObjectiveID);
+                    if (parent == null)
+                        Objectives.Add(model);
+                    else
+                        parent.SubObjectives.Add(model);                
+                buf.RemoveAt(i);
+            }
+
+            ObjectiveModel FindParent(int? parentID)
+            {
+                if (parentID != null)
+                {                    
+                    foreach (var item in Objectives)
+                    {
+                        if (item.ID == parentID)
+                            return item;
+                    }
+                    foreach (var item in buf)
+                    {
+                        if (item.ID == parentID)
+                            return item;
+                    }
+                }
+                return null;
+            }
+
         }
+
+
         public static List<ObjectiveDto> GetObjectives(ProjectDto project)
         {
             var result = new List<ObjectiveDto>();
@@ -106,7 +139,7 @@ namespace MRS.DocumentManagement
                 List<ObjectiveDto> objectives = JsonConvert.DeserializeObject<List<ObjectiveDto>>(json);
                 result.AddRange(objectives);
             }
-            catch (FileNotFoundException){}
+            catch (FileNotFoundException) { }
             return result;
         }
         public static void SaveObjectives(ProjectDto project, List<ObjectiveDto> objectives = null)
@@ -119,8 +152,8 @@ namespace MRS.DocumentManagement
 
             string filename = PathManager.GetObjectivesFile(project);
             var json = JsonConvert.SerializeObject(objectives);
-            File.WriteAllText(filename, json);            
-        }        
+            File.WriteAllText(filename, json);
+        }
         //public static (ObjectiveDto objective, ProjectDto project) GetObjective(ID<ObjectiveDto> id)
         //{
         //    //var projects = Projects.Select(x => x.dto).ToList();
@@ -169,15 +202,15 @@ namespace MRS.DocumentManagement
                 List<ItemDto> items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
                 return items;
             }
-            catch{}
+            catch { }
             return new List<ItemDto>();
         }
         public static void SaveItems(ProjectDto project, ObjectiveDto objective = null)
         {
             var dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
-            
-            List<ItemDto> items = Items.Select(x=>x.dto).ToList();
+
+            List<ItemDto> items = Items.Select(x => x.dto).ToList();
 
             string path = "";
             if (objective == null)
@@ -194,7 +227,7 @@ namespace MRS.DocumentManagement
         {
             var dirProj = PathManager.GetProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
-            string path =  PathManager.GetItemsFile(project);
+            string path = PathManager.GetItemsFile(project);
             string json = JsonConvert.SerializeObject(items);
             File.WriteAllText(path, json);
         }

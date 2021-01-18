@@ -18,11 +18,14 @@ namespace MRS.DocumentManagement.Services
         protected readonly IMapper mapper;
         private readonly ISyncService synchronizator;
 
-        public UserService(DMContext context, IMapper mapper/*, ISyncService synchronizator*/)
+        public UserService(DMContext context
+            , IMapper mapper
+            , ISyncService synchronizator
+            )
         {
             this.context = context;
             this.mapper = mapper;
-            //this.synchronizator = Se;
+            this.synchronizator = synchronizator;
         }
 
         private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
@@ -42,6 +45,7 @@ namespace MRS.DocumentManagement.Services
                 var user = mapper.Map<User>(data);
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
+                //context.Users.
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 

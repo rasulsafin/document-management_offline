@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -35,12 +35,12 @@ namespace MRS.DocumentManagement
                 revisions.Users[index].Rev = rev.Rev;
         }
 
-        public List<ISynchronizer> GetSubSynchronizesAsync(int id) => null;
+        public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
 
         public void LoadLocalCollect() => users = ObjectModel.GetUsers();
         public async Task SaveLocalCollectAsync() => ObjectModel.SaveUsers(users);
 
-        public async Task<bool> RemoteExistAsync(int id)
+        public async Task<bool> RemoteExist(int id)
         {
             remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
             return remoteUser != null;

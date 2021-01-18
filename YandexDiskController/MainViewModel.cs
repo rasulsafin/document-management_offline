@@ -11,6 +11,7 @@ using System.Windows.Threading;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using WPFStorage.Dialogs;
 using WPFStorage.Base;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement
 {
@@ -188,7 +189,7 @@ namespace MRS.DocumentManagement
                         WinBox.ShowMessage("Ошибка загрузки файла!");
                     }
                 }
-                catch (Connection.YandexDisk.TimeoutException)
+                catch (Connection.TimeoutException)
                 {
                     WinBox.ShowMessage("Время ожидания сервера вышло!");
                 }

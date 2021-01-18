@@ -53,9 +53,9 @@
                     </WrapPanel>
                 </StackPanel>
             </Expander>
-            <Expander Header="Add and Edit " IsExpanded="False">
+            <Expander Header="Edit " IsExpanded="False">
                 <StackPanel x:Name="add">
-                    <StackPanel HorizontalAlignment="Left">
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                         <TextBlock Width="100" > Заголовок</TextBlock>
                         <TextBox Width="200" Text="{Binding EditObjective.Title, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                     </StackPanel>
@@ -71,17 +71,25 @@
                         <Button Margin="6" Command="{Binding ChengeStatusOfflineCommand}">Изменить статус</Button>
 
                     </StackPanel>
-                    <Button Margin="6,1,6,1" Command="{Binding AddObjectiveOfflineCommand}">Добавить задание</Button>
-                    <Button Margin="6,1,6,1" Command="{Binding UpdateObjectiveOfflineCommand}">Редактировать выбранное задание</Button>
-                    <Button Margin="6,1,6,1" Command="{Binding DeleteObjectiveOfflineCommand}" Content="Удалить задание"/>
-                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="1" Content="Добавить 1 задание"/>
-                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="10" Content="Добавить 10 записей задание"/>
-                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="100" Content="Добавить 100 записей задание"/>
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                        <TextBlock Width="100" >ID Родителя</TextBlock>
+                        <TextBox Width="200" Text="{Binding EditObjective.ParentObjectiveID, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
+                    </StackPanel>
+                    <WrapPanel>
+                        
+                    <Button Margin="2,1,2,1" Command="{Binding AddObjectiveOfflineCommand}">Добавить задание</Button>
+                    <Button Margin="2,1,2,1" Command="{Binding UpdateObjectiveOfflineCommand}">Редактировать выбранное задание</Button>
+                        <Button Margin="2,1,2,1" Command="{Binding DeleteObjectiveOfflineCommand}" Content="Удалить задание"/>
+                        
+                    </WrapPanel>
                 </StackPanel>
             </Expander>
 
-            <Expander Header="Online" IsExpanded="false">
+            <Expander Header="Манипуляции" IsExpanded="false">
                 <StackPanel>
+                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="1" Content="Добавить 1 задание"/>
+                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="10" Content="Добавить 10 записей задание"/>
+                    <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="100" Content="Добавить 100 записей задание"/>
 
                     <WrapPanel>
                         <Button Command="{Binding GetIDCommand}">Получить все id</Button>
@@ -100,11 +108,11 @@
 
 
         </StackPanel>
-
-        <ListBox Grid.Column="0" ItemsSource="{Binding Objectives, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
-                 SelectedValue="{Binding SelectedObjective, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
+                 
+        <TreeView Grid.Column="0" ItemsSource="{Binding Objectives, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                  SelectedItemChanged="TreeView_SelectedItemChanged"  >
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate ItemsSource="{Binding Path=SubObjectives}">
                     <Border>
                         <StackPanel Orientation="Vertical">
                             <StackPanel Orientation="Horizontal">
@@ -121,10 +129,30 @@
                             </StackPanel>
                         </StackPanel>
                     </Border>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
+                    <!--<HierarchicalDataTemplate.ItemTemplate>
+                        <HierarchicalDataTemplate ItemsSource="{Binding }">
+                            <Border>
+                                <StackPanel Orientation="Vertical">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding ID}"/>
+                                        <TextBlock Text=" "/>
+                                        <TextBlock Text="{Binding Title}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding Description}" TextWrapping="Wrap"/>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="Создано:"/>
+                                        <TextBlock Text="{Binding CreationDate, StringFormat=\{0:g\}}"/>
+                                        <TextBlock Text="   Статус:"/>
+                                        <TextBlock Text="{Binding Status}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+                        </HierarchicalDataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>-->
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
 
-        </ListBox>
+        </TreeView>
         <GridSplitter Grid.Column="1" Width="3" Margin="3"  HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
     </Grid>
 </UserControl>

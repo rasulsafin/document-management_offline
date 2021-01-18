@@ -41,7 +41,14 @@ namespace MRS.DocumentManagement.Contols
             set
             {
                 selectedObjective = value;
-                EditObjective = selectedObjective;
+                if (EditObjective == null) EditObjective = new ObjectiveModel();
+                EditObjective.AuthorID = selectedObjective.AuthorID;
+                EditObjective.CreationDate = selectedObjective.CreationDate;
+                EditObjective.Description = selectedObjective.Description;
+                EditObjective.DueDate = selectedObjective.DueDate;
+                EditObjective.ID = selectedObjective.ID;
+                EditObjective.Items = selectedObjective.ID;
+                UpdateObjectives();
                 OnPropertyChanged();
             }
         }
@@ -100,9 +107,7 @@ namespace MRS.DocumentManagement.Contols
             GetIDCommand = new HCommand(GetIDAsync);
             AddObjectivesCommand = new HCommand<int>(AddObjectives);
 
-
-            UpdateProjects();
-            //UpdateObjectives();
+            UpdateProjects();            
         }
 
         private void ZeroId()
@@ -112,18 +117,18 @@ namespace MRS.DocumentManagement.Contols
 
         private void CreateObjective()
         {
+            var title = EditObjective.Title;
+            var description = EditObjective.Description;
             ObjectiveModel model = new ObjectiveModel();
             model.ID = NextId++;
             model.ProjectID = SelectedProject.ID;
             model.CreationDate = DateTime.Now;
             model.DueDate = DateTime.Now;
-            model.Title = EditObjective.Title;
+            model.Title = title;
             model.Description = EditObjective.Description;
-            model.Status = ObjectiveStatus.Undefined;
-            //obj.TaskType = new ObjectiveTypeDto();            
+            model.Status = ObjectiveStatus.Undefined;                    
 
             Objectives.Add(model);
-            //SaveObjective(SelectedProject.dto, model.dto);
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
@@ -134,6 +139,7 @@ namespace MRS.DocumentManagement.Contols
             SelectedObjective.Description = EditObjective.Description;
             SelectedObjective.Status = EditObjective.Status;
             SelectedObjective.DueDate = DateTime.Now;
+            SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
@@ -234,152 +240,31 @@ namespace MRS.DocumentManagement.Contols
                 ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
             }
             ObjectModel.SaveObjectives(SelectedProject.dto);
-            //SaveObjectiveOffline();
+            
         }
         private void GetObjectiveForID()
         {
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает");
-            //if (WinBox.ShowInput(
-            //    title: "Открыть задачу",
-            //    question: "Введи id",
-            //    input: out string input,
-            //    okText: "Открыть", cancelText: "Отмена",
-            //    defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
-            //    ))
-            //{
-            //    if (int.TryParse(input, out int id))
-            //    {
-            //        (ObjectiveDto objective, ProjectDto project) = ObjectModel.GetObjective((ID<ObjectiveDto>)id);
-            //        string message = "ObjectiveDto:\n";
-            //        if (objective != null)
-            //        {
-            //            message += $"ID={objective.ID}\n";
-            //            message += $"ProjectID={objective.ProjectID}\n";
-            //            message += $"Title={objective.Title}\n";
-            //            message += $"Status={objective.Status}\n";
-            //            message += $"Description={objective.Description}\n";
-            //            message += $"CreationDate={objective.CreationDate}\n";
-            //            message += $"DueDate={objective.DueDate}\n";
-            //        }
-            //        message += $"project:\n";
-            //        if (project != null)
-            //        {
-            //            message += $"ID={project.ID}\n";
-            //            message += $"Title={project.Title}\n";
-            //        }
-            //        WinBox.ShowMessage(message);
-            //    }
-            //}
+            WinBox.ShowMessage("Эта кнопка больше ничего не делает");            
         }
         private async void GetIDAsync()
-        {
-            //ChechYandex();
-            //try
-            //{
-            //    List<ID<ObjectiveDto>> list = await yandex.GetObjectivesIdAsync(SelectedProject.dto);
-            //    StringBuilder message = new StringBuilder();
-            //    for (int i = 0; i < list.Count; i++)
-            //    {
-            //        if (i != 0) message.Append(',');
-            //        if (i % 10 == 0) message.Append('\n');
-            //        message.Append(list[i].ToString());
-            //    }
-            //    WinBox.ShowMessage(message.ToString());
-            //}
-            //catch (FileNotFoundException fileNot)
-            //{
-            //    WinBox.ShowMessage("Папка проекта отсутвует на диске!");
-            //}
-            //catch (Exception ex)
-            //{
-            //    WinBox.ShowMessage(ex.Message);
-            //}
+        {            
             WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
         }
 
         private async void UploadToServerAsync()
         {
             WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
-            //ChechYandex();
-            //if (WinBox.ShowQuestion($"Загрузить Objective '{SelectedObjective.Title}' на диск?"))
-            //{
-            //    //var objs = Objectives.Select(x => x.dto).ToArray();
-            //    //    ProgressMax = objs.Length;
-            //    //ProgressVisible = true;
-            //    //ProgressValue =0;
-
-            //    //foreach (var item in objs)
-            //    //{
-            //    await yandex.UploadObjectiveAsync(SelectedObjective.dto, SelectedProject.dto);
-            //    //ProgressValue++;
-            //    //}
-            //    //ProgressVisible = false;
-            //}
+            
         }
         private async void DownloadFromServerAsync()
         {
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
-            //ChechYandex();
-            //if (WinBox.ShowInput(
-            //    title: "Скачивание...",
-            //    question: "Введите id оbjective которую надо скачать с диска?",
-            //    input: out string text,
-            //    okText: "Скачать",
-            //    cancelText: "Отмена"))
-            //{
-            //    if (int.TryParse(text, out int num))
-            //    {
-            //        ID<ObjectiveDto> id = (ID<ObjectiveDto>)num;
-            //        ObjectiveDto objective = await yandex.GetObjectiveAsync(SelectedProject.dto, id);
-            //        Objectives.Add((ObjectiveModel)objective);
-            //    }
-
-            //    //ProgressVisible = true;
-            //    //ObjectiveDto[] collect = await yandex.GetObjectiveAsync(SelectedProject.dto);
-            //    //ProgressVisible = false;
-            //    //if (collect == null)
-            //    //    WinBox.ShowMessage("Скачивание завершилось провалом!");
-            //    //else
-            //    //{
-            //    //    Objectives.Clear();
-            //    //    foreach (ObjectiveDto item in collect)
-            //    //    {
-            //    //        Objectives.Add(new ObjectiveModel(item));
-            //    //    }
-            //    //}
-            //}
+            WinBox.ShowMessage("Эта кнопка больше ничего не делает!");            
         }
 
         public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
         {
             throw new NotImplementedException();
-        }
-
-
-
-        //public static List<ObjectiveDto> GetObjectives(ProjectDto project)
-        //{
-        //    var result = new List<ObjectiveDto>();
-
-        //    string dirProj = PathManager.GetProjectDir(project);
-        //    if (!Directory.Exists(dirProj)) return result;
-
-        //    string dirObj = PathManager.GetObjectivesDir(project);
-        //    if (!Directory.Exists(dirObj)) return result;
-
-        //    DirectoryInfo dirInfoObj = new DirectoryInfo(dirObj);
-
-        //    foreach (var item in dirInfoObj.GetFiles())
-        //    {
-        //        if (item.Name.StartsWith("objective"))
-        //        {
-        //            var json = File.ReadAllText(item.FullName);
-        //            ObjectiveDto objective = JsonConvert.DeserializeObject<ObjectiveDto>(json);
-        //            result.Add(objective);
-        //        }
-        //    }
-        //    return result;
-        //}
+        }       
 
     }
 }

@@ -1,4 +1,5 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using System;

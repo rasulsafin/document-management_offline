@@ -1,4 +1,5 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.YandexDisk;
 using System;
 using System.Collections.ObjectModel;
 using WPFStorage.Base;

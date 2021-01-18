@@ -1,11 +1,11 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronizator;
+﻿using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement
@@ -153,7 +153,7 @@ namespace MRS.DocumentManagement
                 {
                     // Загружаем на сервер                    
                     await synchro.UpdateRemoteAsync(localRev.ID);
-                    var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
+                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)
@@ -165,10 +165,10 @@ namespace MRS.DocumentManagement
                 else if (localRev < remoteRev)
                 {
                     // Скачиваем с сервера
-                    if (await synchro.RemoteExistAsync(localRev.ID))
+                    if (await synchro.RemoteExist(localRev.ID))
                     {
                         await synchro.DownloadAndUpdateAsync(localRev.ID);
-                        var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
+                        var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
                             foreach (var subSynchronize in subSynchronizes)
@@ -191,11 +191,11 @@ namespace MRS.DocumentManagement
                 {
                     // Загружаем на сервер
 
-                    if (synchro.LocalExist(localRev.ID))
+                    if (await synchro.LocalExist(localRev.ID))
                     {
                         await synchro.UpdateRemoteAsync(localRev.ID);
                         
-                        var subSynchronizes = synchro.GetSubSynchronizesAsync(localRev.ID);
+                        var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
                             foreach (var subSynchronize in subSynchronizes)
@@ -222,11 +222,11 @@ namespace MRS.DocumentManagement
             {
                 if (NeedStopSync) break;
                 // Скачиваем с сервера                
-                if (await synchro.RemoteExistAsync(remoteRev.ID))
+                if (await synchro.RemoteExist(remoteRev.ID))
                 {
                     await synchro.DownloadAndUpdateAsync(remoteRev.ID);
 
-                    var subSynchronizes = synchro.GetSubSynchronizesAsync(remoteRev.ID);
+                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(remoteRev.ID);
                     if (subSynchronizes != null)
                     {
                         foreach (var subSynchronize in subSynchronizes)

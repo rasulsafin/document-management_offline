@@ -15,12 +15,18 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
-        
-        public ProjectService(DMContext context, IMapper mapper, ItemHelper itemHelper)
+        private readonly ISyncService synchronizator;
+
+        public ProjectService(DMContext context
+            , IMapper mapper
+            , ItemHelper itemHelper
+            , ISyncService synchronizator
+            )
         {
             this.context = context;
             this.mapper = mapper;
             this.itemHelper = itemHelper;
+            this.synchronizator = synchronizator;
         }
 
         public async Task<ID<ProjectDto>> AddToUser(ID<UserDto> owner, string title)
@@ -43,7 +49,11 @@ namespace MRS.DocumentManagement.Services
             };
             context.Update(project);
             await context.SaveChangesAsync();
-            return (ID<ProjectDto>)project.ID;
+
+            var projectID = new ID<ProjectDto>(project.ID);
+            synchronizator.AddChange(projectID);
+            return projectID;
+            //return (ID<ProjectDto>)project.ID;
         }
 
         public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
@@ -113,13 +123,15 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Projects.Remove(project);
             await context.SaveChangesAsync();
+
+            synchronizator.AddChange(projectID);
             return true;
         }
 
         public async Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
             var project = await context.Projects.Include(x => x.Users)
-                .FirstOrDefaultAsync(x => x.ID == (int) projectID);
+                .FirstOrDefaultAsync(x => x.ID == (int)projectID);
             if (project == null)
                 return false;
             foreach (var user in users)
@@ -144,6 +156,8 @@ namespace MRS.DocumentManagement.Services
             project.Title = projectData.Title;
             context.Projects.Update(project);
             await context.SaveChangesAsync();
+
+            synchronizator.AddChange(projectID);
             return true;
         }
 
@@ -153,7 +167,9 @@ namespace MRS.DocumentManagement.Services
             await context.Projects.AddAsync(project);
             await context.SaveChangesAsync();
 
-            return (ID<ProjectDto>)project.ID;
+            var projectID = new ID<ProjectDto>(project.ID);
+            synchronizator.AddChange(projectID);
+            return projectID;
         }
 
         private async Task LinkItem(ItemDto item, Database.Models.Project project)
@@ -167,6 +183,8 @@ namespace MRS.DocumentManagement.Services
                 ProjectID = project.ID,
                 ItemID = dbItem.ID
             });
+            var projectID = new ID<ProjectDto>(project.ID);
+            synchronizator.AddChange(item.ID, projectID);
         }
 
         private async Task<bool> UnlinkItem(ID<ItemDto> itemID, ID<ProjectDto> projectID)
@@ -179,6 +197,8 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ProjectItems.Remove(link);
             await context.SaveChangesAsync();
+
+            synchronizator.AddChange(itemID, projectID);
             return true;
         }
     }

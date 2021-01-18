@@ -17,12 +17,18 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
+        private readonly ISyncService synchronizator;
 
-        public ObjectiveService(DMContext context, IMapper mapper, ItemHelper itemHelper)
+        public ObjectiveService(DMContext context
+            , IMapper mapper
+            , ItemHelper itemHelper
+            , ISyncService synchronizator
+            )
         {
             this.context = context;
             this.mapper = mapper;
             this.itemHelper = itemHelper;
+            this.synchronizator = synchronizator;
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
@@ -68,6 +74,8 @@ namespace MRS.DocumentManagement.Services
 
             await context.SaveChangesAsync();
 
+            var objectiveID = new ID<ObjectiveDto>(objective.ID);
+            synchronizator.AddChange(objectiveID, data.ProjectID);
             return mapper.Map<ObjectiveToListDto>(objective);
         }
 
@@ -114,6 +122,8 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Objectives.Remove(objective);
             await context.SaveChangesAsync();
+            var projectID = new ID<ProjectDto>(objective.ProjectID);
+            synchronizator.AddChange(objectiveID, projectID);
             return true;
         }
 
@@ -211,6 +221,9 @@ namespace MRS.DocumentManagement.Services
 
             context.Update(objective);
             await context.SaveChangesAsync();
+
+            var projectID = new ID<ProjectDto>(objective.ProjectID);
+            synchronizator.AddChange(objData.ID, projectID);
             return true;
         }
 
@@ -225,6 +238,10 @@ namespace MRS.DocumentManagement.Services
                 ObjectiveID = objective.ID,
                 ItemID = dbItem.ID
             });
+
+            var projectID = new ID<ProjectDto>(objective.ProjectID);
+            var objectiveID = new ID<ObjectiveDto>(objective.ID);
+            synchronizator.AddChange(item.ID, objectiveID, projectID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
@@ -237,6 +254,12 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
+
+            var projectID = new ID<ProjectDto>(link.Objective.ProjectID);
+            var _objectiveID = new ID<ObjectiveDto>(objectiveID);
+            var _itemID = new ID<ItemDto>(itemID);
+            synchronizator.AddChange(_itemID, _objectiveID, projectID);
+
             return true;
         }
     }
