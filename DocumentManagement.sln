@@ -16,7 +16,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Interfac
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Database", "DocumentManagement.Database\DocumentManagement.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
