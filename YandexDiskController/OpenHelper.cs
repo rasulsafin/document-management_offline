@@ -20,10 +20,12 @@ namespace MRS.DocumentManagement.Contols
         {
             
             var select = WinBox.SelectorBox(
-                    new[] { 
+                    new[]
+                    { 
                         "Удалить файл", 
                         "Посмотреть", 
-                        "Закрыть приложение" },
+                        "Закрыть приложение"
+                    },
                     "При загрузки файла призошла ошибка:\n" + ex.Message, "Ошибка", 5000);
 
             if (select == "Посмотреть")

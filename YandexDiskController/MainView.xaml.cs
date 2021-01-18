@@ -56,28 +56,29 @@ namespace MRS.DocumentManagement
             }
         }
 
-        int count=0;
+        private int count=0;
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             count++;
             if (count > 1) 
             {
-                //WinBox.ShowMessage($"TabItem_IsEnabledChanged" +
+                // WinBox.ShowMessage($"TabItem_IsEnabledChanged" +
                 //    $"\n{e.AddedItems.Count}" +
                 //    $"\n{e.RemovedItems.Count}");
             }
-            //if (sender is FrameworkElement element)
-            //try
-            //{
-            //WinBox.ShowMessage($"TabItem_IsEnabledChanged");
-            //}
-            //catch
-            //{ }
+
+            // if (sender is FrameworkElement element)
+            // try
+            // {
+            // WinBox.ShowMessage($"TabItem_IsEnabledChanged");
+            // }
+            // catch
+            // { }
         }
 
-        //private void TabItem_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
-        //{
+        // private void TabItem_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        // {
         //    WinBox.ShowMessage($"TabItem_IsEnabledChanged");
-        //}
+        // }
     }
 }

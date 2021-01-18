@@ -1,9 +1,9 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement
 {
@@ -53,7 +53,8 @@ namespace MRS.DocumentManagement
             FindLocalObjective(idObj);
             if (localObj != null)
                 subSynchronizes.Add(new ItemsSynchronizer(yandex, project, localObj));
-            //subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+
+            // subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
             return subSynchronizes;
         }
 
@@ -118,6 +119,7 @@ namespace MRS.DocumentManagement
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ObjectiveDto>)id;
+
             // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него 
             await yandex.DeleteObjective(project, _id);
         }

@@ -1,12 +1,12 @@
-﻿using Microsoft.Win32;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using Microsoft.Win32;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -17,41 +17,68 @@ namespace MRS.DocumentManagement.Contols
         #region Const
         private static readonly string MEDIA_EXTENTION = ".avi .wav .mp4 .mpg .mpeg .jpg .jpeg .png";
         private static readonly string MODELS_EXTENTION = ".ifc .ifczip .bim ";
-        private static readonly string DIR_NAME = "data";
-        private static readonly string TEMP_DIR = "Temp.Yandex";
-        private static readonly string OBJECTIVE_FILE = "objective.json";
-        private static readonly string PROJECT_FILE = "projects.json";
-        private static readonly string ITEM_FILE = "items.json";
         #endregion
         #region bending
-        DiskManager yandex;
-        bool toObjective;
+        private DiskManager yandex;
+        private bool toObjective;
         private ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;
         private ItemModel selectedItem;
 
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
+
         public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
+
         public ObservableCollection<ItemModel> Items { get; set; } = ObjectModel.Items;
+
         public ProjectModel SelectedProject
         {
-            get => selectedProject;
+            get => ObjectModel.SelectedProject;
             set
             {
                 if (value != null)
                 {
-                    selectedProject = value;
-                    ObjectModel.UpdateObjectives(selectedProject.dto);
+                    ObjectModel.SelectedProject = value;
+                    // ObjectModel.UpdateObjectives(ObjectModel.SelectedProject.dto);
                     ToObjective = false;
                     OnPropertyChanged();
+                    OnPropertyChanged("SelectedObjective");
+                    OnPropertyChanged("Objectives");
+                    OnPropertyChanged("Items");
                 }
             }
         }
-        public ObjectiveModel SelectedObjective { 
-            get => selectedObjective; 
-            set { selectedObjective = value; UpdateItems(); OnPropertyChanged(); } }
-        public ItemModel SelectedItem { get => selectedItem; set { selectedItem = value; OnPropertyChanged(); } }
-        public bool ToObjective { get => toObjective; set { toObjective = value; UpdateItems(); OnPropertyChanged(); } }
+
+        public ObjectiveModel SelectedObjective
+        {
+            get => ObjectModel.SelectedObjective;
+            set
+            {
+                ObjectModel.SelectedObjective = value;
+                UpdateItems();
+                OnPropertyChanged();
+                OnPropertyChanged("Items");
+            }
+        }
+
+        public ItemModel SelectedItem
+        {
+            get => ObjectModel.SelectedItem; set
+            {
+                ObjectModel.SelectedItem = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ToObjective
+        {
+            get => toObjective; set
+            {
+                toObjective = value;
+                UpdateItems();
+                OnPropertyChanged();
+            }
+        }
 
         public int NextId
         {
@@ -65,16 +92,21 @@ namespace MRS.DocumentManagement.Contols
         }
 
         public HCommand AddItemsCommand { get; }
+
         public HCommand DelItemsCommand { get; }
+
         public HCommand UnloadCommand { get; }
+
         public HCommand GetIdCommand { get; }
+
         public HCommand FindItemIdCommand { get; }
+
         public HCommand ZeroIdCommand { get; }
 
-        //public HCommand RenItemsCommand { get; }
-        //public HCommand SaveFileCommand { get; }
-        //public HCommand LoadFileCommand { get; }
-        //public HCommand DownloadCommand { get; }
+        // public HCommand RenItemsCommand { get; }
+        // public HCommand SaveFileCommand { get; }
+        // public HCommand LoadFileCommand { get; }
+        // public HCommand DownloadCommand { get; }
         #endregion
 
         public ItemViewModel()
@@ -84,10 +116,11 @@ namespace MRS.DocumentManagement.Contols
             GetIdCommand = new HCommand(GetIDsAsync);
             FindItemIdCommand = new HCommand(FindItemId);
             ZeroIdCommand = new HCommand(ZeroId);
-            //UnloadCommand = new HCommand(UnloadAsync);
-            //SaveFileCommand = new HCommand(SaveFile);
-            //LoadFileCommand = new HCommand(LoadFile);
-            //DownloadCommand = new HCommand(DownloadAsync);
+
+            // UnloadCommand = new HCommand(UnloadAsync);
+            // SaveFileCommand = new HCommand(SaveFile);
+            // LoadFileCommand = new HCommand(LoadFile);
+            // DownloadCommand = new HCommand(DownloadAsync);
 
             Initilization();
         }
@@ -100,8 +133,8 @@ namespace MRS.DocumentManagement.Contols
 
         private void AddItem()
         {
-            //var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
-            //if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
+            // var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
+            // if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
 
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Выберете файл";
@@ -110,7 +143,7 @@ namespace MRS.DocumentManagement.Contols
             {
                 ItemModel model = new ItemModel();
                 model.ID = NextId++;
-                
+
                 FileInfo file = new FileInfo(ofd.FileName);
                 try
                 {
@@ -137,9 +170,13 @@ namespace MRS.DocumentManagement.Contols
                 }
             }
         }
+
         private void DelItem()
         {
-            if (SelectedItem == null) WinBox.ShowMessage("Нет выбранного элемента.");
+            if (SelectedItem == null)
+            {
+                WinBox.ShowMessage("Нет выбранного элемента.");
+            }
             else
             {
                 if (WinBox.ShowQuestion($"Вы действительно хотите удалить элемент '{SelectedItem.Name}'"))
@@ -162,22 +199,24 @@ namespace MRS.DocumentManagement.Contols
                 }
             }
         }
+
         private void FindItemId()
         {
             WinBox.ShowMessage("Эта кнопка более не работает!");
-            //if (WinBox.ShowInput(
+
+            // if (WinBox.ShowInput(
             //    title: "Открыть елемент",
             //    question: "Введи id",
             //    input: out string input,
             //    okText: "Открыть", cancelText: "Отмена",
             //    defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
             //    ))
-            //{
+            // {
             //    if (int.TryParse(input, out int id))
             //    {
             //        (ItemDto item, ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem((ID<ItemDto>)id);
 
-            //        string message = "ObjectiveDto:\n";
+            // string message = "ObjectiveDto:\n";
             //        if (item != null)
             //        {
             //            message += $"ID={item.ID}\n";
@@ -187,7 +226,7 @@ namespace MRS.DocumentManagement.Contols
             //            //message += $"ID={item.}\n";
             //        }
 
-            //        message += "ObjectiveDto:\n";
+            // message += "ObjectiveDto:\n";
             //        if (objective != null)
             //        {
             //            message += $"ID={objective.ID}\n";
@@ -199,7 +238,7 @@ namespace MRS.DocumentManagement.Contols
             //            message += $"DueDate={objective.DueDate}\n";
             //        }
 
-            //        message += $"project:\n";
+            // message += $"project:\n";
             //        if (project != null)
             //        {
             //            message += $"ID={project.ID}\n";
@@ -207,70 +246,71 @@ namespace MRS.DocumentManagement.Contols
             //        }
             //        WinBox.ShowMessage(message);
             //    }
-            //}
+            // }
         }
 
         private async void GetIDsAsync()
         {
-            ChechYandex();
-            if (SelectedProject == null)
-            {
-                WinBox.ShowMessage("Нет выбранного проекта.");
-                return;
-            }
+            WinBox.ShowMessage("Эта кнопка более не работает!");
+            // ChechYandex();
+            // if (SelectedProject == null)
+            // {
+            //    WinBox.ShowMessage("Нет выбранного проекта.");
+            //    return;
+            // }
 
-            List<ID<ItemDto>> ids = ToObjective ? await yandex.GetItemsIdAsync(SelectedProject.dto, SelectedObjective.dto.ID)
-                : await yandex.GetItemsIdAsync(SelectedProject.dto);
+            // List<ID<ItemDto>> ids = ToObjective ? await yandex.GetItemsIdAsync(SelectedProject.dto, SelectedObjective.dto.ID)
+            //    : await yandex.GetItemsIdAsync(SelectedProject.dto);
 
-            StringBuilder message = new StringBuilder();
-            for (int i = 0; i < ids.Count; i++)
-            {
-                if (i != 0) message.Append(',');
-                if (i % 10 == 0) message.Append('\n');
-                message.Append(ids[i].ToString());
-            }
-            WinBox.ShowMessage(message.ToString());
+            // StringBuilder message = new StringBuilder();
+            // for (int i = 0; i < ids.Count; i++)
+            // {
+            //    if (i != 0) message.Append(',');
+            //    if (i % 10 == 0) message.Append('\n');
+            //    message.Append(ids[i].ToString());
+            // }
+            // WinBox.ShowMessage(message.ToString());
         }
 
         private async void DownloadAsync()
         {
-            //ChechYandex();
-            //string message = ToObjective ? $"Скачать список item-ов в задание [{SelectedObjective.Title}] c сервера ?"
+            // ChechYandex();
+            // string message = ToObjective ? $"Скачать список item-ов в задание [{SelectedObjective.Title}] c сервера ?"
             //    : $"Скачать список item-ов в проекте [{SelectedProject.Title}] с сервера?";
-            //if (WinBox.ShowQuestion(message))
-            //{
+            // if (WinBox.ShowQuestion(message))
+            // {
             //    List<ItemDto> collect = await yandex.GetItemsAsync(SelectedProject.dto, ToObjective ? SelectedObjective.dto : null);
             //    Items.Clear();
             //    foreach (ItemDto item in collect)
             //    {
             //        Items.Add((ItemModel)item);
             //    }
-            //}
+            // }
         }
 
         private async void UnloadAsync()
         {
-            //ChechYandex();
+            // ChechYandex();
             ////string message = ToObjective ? $"Загрузить файл на сервер в проект [{SelectedProject.Title}] и задание [{SelectedObjective.Title}]?"
             ////    : $"Загрузить файл на сервер в проект [{SelectedProject.Title}]?";
             ////if (WinBox.ShowQuestion(message))
             ////{
-            //OpenFileDialog ofd = new OpenFileDialog();
-            //ofd.Title = "Выберете файл";
-            //ofd.Multiselect = false;
-            //if (ofd.ShowDialog() == true)
-            //{
+            // OpenFileDialog ofd = new OpenFileDialog();
+            // ofd.Title = "Выберете файл";
+            // ofd.Multiselect = false;
+            // if (ofd.ShowDialog() == true)
+            // {
             //    FileInfo file = new FileInfo(ofd.FileName);
             //    ItemDto item = new ItemDto();
             //    item.Name = ofd.SafeFileName;
             //    item.ID = (ID<ItemDto>)(Items.Count + 1);
             //    item.ItemType = GetItemTypeDto(file.Extension);
 
-            //    if (!ToObjective)
+            // if (!ToObjective)
             //        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto);
             //    else
             //        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto, SelectedObjective.dto);
-            //}
+            // }
             ////}
         }
 
@@ -285,10 +325,12 @@ namespace MRS.DocumentManagement.Contols
                 return ItemTypeDto.Bim;
             }
             else
+            {
                 return ItemTypeDto.File;
+            }
         }
 
-        #region Инициализация 
+        #region Инициализация
         private void Initilization()
         {
             try
@@ -297,7 +339,8 @@ namespace MRS.DocumentManagement.Contols
                 SelectedObjective = Objectives.First();
 
                 ObjectModel.UpdateObjectives(SelectedProject.dto);
-                //UpdateItems();
+
+                // UpdateItems();
             }
             catch { }
         }
@@ -312,21 +355,21 @@ namespace MRS.DocumentManagement.Contols
                         ObjectModel.UpdateItems(SelectedProject.dto, SelectedObjective.dto);
                 }
                 else
+                {
                     ObjectModel.UpdateItems(SelectedProject.dto);
+                }
             }
         }
 
-        private void ChechYandex()
-        {
-            if (yandex == null)
-            {
-                //yandex = new YandexDiskManager(MainViewModel.AccessToken);
-                yandex.TempDir = TEMP_DIR;
-            }
-        }
+        // private void ChechYandex()
+        // {
+        //    if (yandex == null)
+        //    {
+        //        // yandex = new YandexDiskManager(MainViewModel.AccessToken);
+        //        yandex.TempDir = TEMP_DIR;
+        //    }
+        // }
         #endregion
-
-
 
     }
 }

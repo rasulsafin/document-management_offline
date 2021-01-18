@@ -1,8 +1,8 @@
-﻿using MRS.DocumentManagement.Connection;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement
 {
@@ -125,9 +125,11 @@ namespace MRS.DocumentManagement
             if (index < 0)
             {
                 items.Add(remoteItem);
+
                 //
                 // TODO: Раскидывать файлы по папочкам здесь!!! 
                 string path = PathManager.GetProjectDir(project);
+
                 //
                 await yandex.DownloadItem(remoteItem, path);
 
@@ -155,6 +157,7 @@ namespace MRS.DocumentManagement
             var _id = (ID<ItemDto>)id;
             if (localItem.ID != _id)
                 localItem = items.Find(x => x.ID == _id);
+
             // TODO: Тотже вопрос, если есть старый файл куда его?
             if (objective == null)
                 await yandex.UploadItemAsync(project, localItem);
@@ -165,6 +168,7 @@ namespace MRS.DocumentManagement
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ItemDto>)id;
+
             // TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него 
             if (objective == null)
                 await yandex.DeleteItem(project, _id);

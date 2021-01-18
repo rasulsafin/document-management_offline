@@ -1,9 +1,9 @@
-﻿using MRS.DocumentManagement.Connection;
+﻿using System;
+using System.Collections.ObjectModel;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
-using System;
-using System.Collections.ObjectModel;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -11,11 +11,18 @@ namespace MRS.DocumentManagement.Contols
 {
     public class UserViewModel : BaseViewModel
     {
-        DiskManager yandex;
+        private DiskManager yandex;
         private UserModel selectedUser;
 
         public ObservableCollection<UserModel> Users { get; set; } = ObjectModel.Users;
-        public UserModel SelectedUser { get => selectedUser; set { selectedUser = value; OnPropertyChanged(); } }
+        public UserModel SelectedUser
+        {
+            get => selectedUser; set
+        {
+            selectedUser = value;
+            OnPropertyChanged();
+        }
+        }
         public int NextId
         {
             get => Properties.Settings.Default.UserNextId;

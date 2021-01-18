@@ -58,7 +58,8 @@ namespace WPFStorage.Dialogs
             if (!string.IsNullOrWhiteSpace(title)) model.Title = title;
             model.SetVisibility(true, false, false);
             ShowDialogModel(model);
-            //return model.Input;
+
+            // return model.Input;
         }
 
         /// <summary>

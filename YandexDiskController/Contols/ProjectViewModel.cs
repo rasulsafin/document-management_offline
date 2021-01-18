@@ -1,9 +1,9 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Models;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -11,14 +11,44 @@ namespace MRS.DocumentManagement.Contols
 {
     public class ProjectViewModel : BaseViewModel
     {
-
         #region Bending and data
-        DiskManager yandex;
-        ProjectModel selectProject;
-        bool openTempFile = false;
+        private DiskManager yandex;
+        private ProjectModel selectProject;
+        private bool openTempFile = false;
+
+        public ProjectViewModel()
+        {
+            CreateCommand = new HCommand(CreateProject);
+            UpdateCommand = new HCommand(Update);
+            DeleteCommand = new HCommand(DeleteProject);
+            RenameCommand = new HCommand(RenameProject);
+
+            CreateSampleProjectCommand = new HCommand(CreateSampleProject);
+
+            OpenFileCommand = new HCommand(OpenFile);
+            ISResetCommand = new HCommand(IDReset);
+            Update();
+        }
+
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
-        public ProjectModel SelectProject { get => selectProject; set { selectProject = value; OnPropertyChanged(); } }
-        public bool OpenTempFile { get => openTempFile; set { openTempFile = value; OnPropertyChanged(); } }
+
+        public ProjectModel SelectProject
+        {
+            get => ObjectModel.SelectedProject; set
+            {
+                ObjectModel.SelectedProject = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool OpenTempFile
+        {
+            get => openTempFile; set
+            {
+                openTempFile = value;
+                OnPropertyChanged();
+            }
+        }
 
         public int NextId
         {
@@ -30,36 +60,29 @@ namespace MRS.DocumentManagement.Contols
                 OnPropertyChanged();
             }
         }
+
         public HCommand CreateCommand { get; }
+
         public HCommand DeleteCommand { get; private set; }
+
         public HCommand RenameCommand { get; }
+
         public HCommand CreateSampleProjectCommand { get; }
+
         public HCommand ServerUnloadCommand { get; }
+
         public HCommand ServerDownloadCommand { get; }
+
         public HCommand OpenFileCommand { get; }
+
         public HCommand ISResetCommand { get; }
+
         public HCommand UpdateCommand { get; }
-        #endregion       
-        
-
-        public ProjectViewModel()
-        {
-            CreateCommand = new HCommand(CreateProject);
-            UpdateCommand = new HCommand(Update);
-            DeleteCommand = new HCommand(DeleteProject);
-            RenameCommand = new HCommand(RenameProject);
-
-            CreateSampleProjectCommand = new HCommand(CreateSampleProject);
-            //ServerUnloadCommand = new HCommand(ServerUnload);
-            //ServerDownloadCommand = new HCommand(ServerDownload);
-            OpenFileCommand = new HCommand(OpenFile);
-            ISResetCommand = new HCommand(ISReset);
-            Update();
-        }
+        #endregion
 
         private void CreateSampleProject()
         {
-            string[] names;            
+            string[] names;
 
             string namesFile = "ProjectsName.txt";
             if (!File.Exists(namesFile))
@@ -68,6 +91,7 @@ namespace MRS.DocumentManagement.Contols
                 {
                     OpenHelper.Geany(namesFile);
                 }
+
                 return;
             }
             else
@@ -78,15 +102,13 @@ namespace MRS.DocumentManagement.Contols
                 int index = random.Next(0, names.Length);
                 ProjectModel project = new ProjectModel();
                 project.Title = names[index];
-                project.ID = ++Properties.Settings.Default.ProjectNextId;
+                project.ID = NextId++;
                 Projects.Add(project);
                 ObjectModel.SaveProjects();
-                Properties.Settings.Default.Save();
             }
-
         }
 
-        private void ISReset()
+        private void IDReset()
         {
             NextId = 1;
         }
@@ -117,24 +139,26 @@ namespace MRS.DocumentManagement.Contols
                 Projects.Add(project);
                 ObjectModel.SaveProjects();
                 ObjectModel.Synchronizer.Update(project.dto.ID);
-
             }
+
             Update();
         }
 
-
-
-        
-
         private void Update()
         {
-            ObjectModel.UpdateProjects();                     
-        }        
+            ObjectModel.UpdateProjects();
+            if (SelectProject == null && Projects.Count>0)
+            {
+                SelectProject = Projects.First();
+            }
+        }
 
         private void DeleteProject()
         {
             if (SelectProject == null)
+            {
                 WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
+            }
             else if (WinBox.ShowQuestion($"Удалить проект '{SelectProject.Title}'?"))
             {
                 ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
@@ -147,7 +171,9 @@ namespace MRS.DocumentManagement.Contols
         private void RenameProject()
         {
             if (SelectProject == null)
+            {
                 WinBox.ShowMessage($"Не могу выполнить операцию. Нет выбранного проект.");
+            }
             else if (WinBox.ShowInput(
                 question: "Введите новое название проекта:",
                 input: out string name,
@@ -156,15 +182,11 @@ namespace MRS.DocumentManagement.Contols
                 cancelText: "Отменить",
                 defautValue: SelectProject.Title))
             {
-
                 ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
                 ObjectModel.SaveProjects();
 
-                //ObjectModel.RenameProject(SelectProject.dto.ID, name);
-                
-                
+                // ObjectModel.RenameProject(SelectProject.dto.ID, name);
             }
         }
-
     }
 }

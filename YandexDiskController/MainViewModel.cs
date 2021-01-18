@@ -1,6 +1,4 @@
-﻿using MRS.DocumentManagement.Contols;
-using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -8,10 +6,12 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using WPFStorage.Dialogs;
-using WPFStorage.Base;
+using Microsoft.Win32;
 using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Contols;
+using WPFStorage.Base;
+using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement
 {
@@ -26,8 +26,8 @@ namespace MRS.DocumentManagement
         #region Binding
         public string NameApp { get; private set; } = "Controller";
         
-        static MainViewModel instanse;
-        static YandexDiskController controller;
+        private static MainViewModel instanse;
+        private static YandexDiskController controller;
         private ObservableCollection<DiskElement> folderItems = new ObservableCollection<DiskElement>();
         private Dispatcher dispatcher;
         private string path;
@@ -70,29 +70,106 @@ namespace MRS.DocumentManagement
             }
         }
 
-        public string Title { get => title; set { title = value; OnPropertyChanged(); } }
+        public string Title
+        {
+            get => title; set
+        {
+            title = value;
+            OnPropertyChanged();
+        }
+        }
 
-        public bool InfoMode { get => infoMode; set { infoMode = value; OnPropertyChanged(); } }
-        public bool DownloadProgress { get => downloadProgress; set { downloadProgress = value; OnPropertyChanged(); } }
-        public double CurrentByte { get => currentByte; set { currentByte = value; OnPropertyChanged(); } }
-        public double TotalByte { get => totalByte; set { totalByte = value; OnPropertyChanged(); } }
+        public bool InfoMode
+        {
+            get => infoMode; set
+        {
+            infoMode = value;
+            OnPropertyChanged();
+        }
+        }
+        public bool DownloadProgress
+        {
+            get => downloadProgress; set
+        {
+            downloadProgress = value;
+            OnPropertyChanged();
+        }
+        }
+        public double CurrentByte
+        {
+            get => currentByte; set
+        {
+            currentByte = value;
+            OnPropertyChanged();
+        }
+        }
+        public double TotalByte
+        {
+            get => totalByte; set
+        {
+            totalByte = value;
+            OnPropertyChanged();
+        }
+        }
         public DiskElement SelectionElement { get; private set; }
 
-        ProjectViewModel projects = new ProjectViewModel();
-        UserViewModel users = new UserViewModel();
-        ObjectiveViewModel objectives = new ObjectiveViewModel();
-        ItemViewModel items = new ItemViewModel();
-        SynchronizerViewModel synchronizer = new SynchronizerViewModel();
+        private ProjectViewModel projects = new ProjectViewModel();
+        private UserViewModel users = new UserViewModel();
+        private ObjectiveViewModel objectives = new ObjectiveViewModel();
+        private ItemViewModel items = new ItemViewModel();
+        private SynchronizerViewModel synchronizer = new SynchronizerViewModel();
         private int selectedTab;
 
-        public ProjectViewModel Projects { get => projects; set { projects = value; OnPropertyChanged(); } }
+        public ProjectViewModel Projects
+        {
+            get => projects; set
+        {
+            projects = value;
+            OnPropertyChanged();
+        }
+        }
 
-        public ObjectiveViewModel Objectives { get => objectives; set { objectives = value; OnPropertyChanged(); } }
+        public ObjectiveViewModel Objectives
+        {
+            get => objectives; set
+        {
+            objectives = value;
+            OnPropertyChanged();
+        }
+        }
 
-        public UserViewModel Users { get => users; set { users = value; OnPropertyChanged(); } }
-        public ItemViewModel Items { get => items; set { items = value; OnPropertyChanged(); } }
-        public SynchronizerViewModel Synchronizer { get => synchronizer; set { synchronizer = value; OnPropertyChanged(); } }
-        public int SelectedTab { get => selectedTab; set { selectedTab = value; OnPropertyChanged(); } }
+        public UserViewModel Users
+        {
+            get => users; set
+        {
+            users = value;
+            OnPropertyChanged();
+        }
+        }
+        public ItemViewModel Items
+        {
+            get => items; set
+        {
+            items = value;
+            OnPropertyChanged();
+        }
+        }
+        public SynchronizerViewModel Synchronizer
+        {
+            get => synchronizer; set
+        {
+            synchronizer = value;
+            OnPropertyChanged();
+        }
+        }
+        public int SelectedTab
+        {
+            get => selectedTab; set
+        {
+            selectedTab = value;
+            OnPropertyChanged();
+        }
+        }
 
         #endregion
 
@@ -111,7 +188,8 @@ namespace MRS.DocumentManagement
             MoveCommand = new HCommand(Move);
 
             Auth.LoadActions.Add(Initialize); 
-            //Auth.LoadActions.Add(InitializeManager); 
+
+            // Auth.LoadActions.Add(InitializeManager); 
 
             Auth.StartAuth();
 
@@ -127,7 +205,7 @@ namespace MRS.DocumentManagement
 
         public void CloseApp()
         {
-            //ObjectModel.Synchronizer.Save();
+            // ObjectModel.Synchronizer.Save();
             Properties.Settings.Default.SelectedTab = SelectedTab;
             Properties.Settings.Default.Save();
         }
@@ -161,10 +239,11 @@ namespace MRS.DocumentManagement
                 bool res = await controller.DeleteAsync(SelectionElement.Href);
                 stopwatch.Stop();
                 logger.Message($"Удаление выполнено t={stopwatch.ElapsedMilliseconds} мс") ;
-                //if (res)
+
+                // if (res)
                 Task.Run(()=>RefreshFolder());
 
-                //WinBox.ShowMessage($"Время выполнения: {stopwatch.ElapsedMilliseconds} мс");
+                // WinBox.ShowMessage($"Время выполнения: {stopwatch.ElapsedMilliseconds} мс");
             }
         }
 
@@ -261,7 +340,9 @@ namespace MRS.DocumentManagement
         private async void Move()
         {
             if (SelectionElement == null)
+            {
                 WinBox.ShowMessage("Не могу выполнить операцию, нет выбранного элемента!");
+            }
             else if (WinBox.ShowInput(
                 question: $"Введите новое название папки '{SelectionElement.DisplayName}':",
                 input: out string nameDir,
@@ -310,7 +391,9 @@ namespace MRS.DocumentManagement
                         }
                     }
                     else
+                    {
                         return;
+                    }
                 }
                 try
                 {
@@ -320,7 +403,8 @@ namespace MRS.DocumentManagement
                 {
                     Process.Start(new ProcessStartInfo("explorer.exe", " /select, " + tempPath));
                 }
-                //Process.Start("C:\\Windows\\System32\\notepad.exe", tempPath.Trim());
+
+                // Process.Start("C:\\Windows\\System32\\notepad.exe", tempPath.Trim());
             }
         }
 
@@ -358,7 +442,8 @@ namespace MRS.DocumentManagement
                         message += $"  LastModified={element.Mulca_file_url}\n";
                         message += $"  LastModified={element.Status}\n";
                         message += $"  File_url={element.File_url}\n";
-                        //message += $"  LastModified={element.}\n"; 
+
+                        // message += $"  LastModified={element.}\n"; 
                     }
                 }
                 WinBox.ShowMessage(message, "Информация");

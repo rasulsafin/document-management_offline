@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.YandexDisk;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -9,17 +9,38 @@ namespace MRS.DocumentManagement.Contols
 {
     public class SynchronizerViewModel : BaseViewModel
     {
-        //const string ALL_TRANSACTION = "Все операции";
-        //const string NON_SYNC_TRANSACTION = "Не Синхронизированные операции";
-        //const string LOCAL_TRANSACTION = "Локальные операции";
+        // const string ALL_TRANSACTION = "Все операции";
+        // const string NON_SYNC_TRANSACTION = "Не Синхронизированные операции";
+        // const string LOCAL_TRANSACTION = "Локальные операции";
 
         public static SynchronizerViewModel Instanse { get => instanse; }
 
         public ulong Revision { get; set; }
-        private string showAllTransactionContent;//= ALL_TRANSACTION;
-        public string ShowAllTransactionContent { get => showAllTransactionContent; set { showAllTransactionContent = value; OnPropertyChanged(); } }
-        public string ProgressText { get => progressText; private set { progressText = value; OnPropertyChanged(); } }
-        public bool SyncProcces { get => syncProcces; private set { syncProcces = value; OnPropertyChanged(); } }
+        private string showAllTransactionContent;// = ALL_TRANSACTION;
+        public string ShowAllTransactionContent
+        {
+            get => showAllTransactionContent; set
+        {
+            showAllTransactionContent = value;
+            OnPropertyChanged();
+        }
+        }
+        public string ProgressText
+        {
+            get => progressText; private set
+        {
+            progressText = value;
+            OnPropertyChanged();
+        }
+        }
+        public bool SyncProcces
+        {
+            get => syncProcces; private set
+        {
+            syncProcces = value;
+            OnPropertyChanged();
+        }
+        }
 
         private Synchronizer synchronizer;
 
@@ -42,7 +63,8 @@ namespace MRS.DocumentManagement.Contols
         public SynchronizerViewModel()
         {
             synchronizer = ObjectModel.Synchronizer;
-            //synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
+
+            // synchronizer.TransactionsChange += Synchronizer_TransactionsChange;
             SynchronizeCommand = new HCommand(SynchronizeAsync);
             UploadAllCommand = new HCommand(UploadAll);
             DownloadAllCommand = new HCommand(DownloadAll);
@@ -111,8 +133,9 @@ namespace MRS.DocumentManagement.Contols
         private void Initialize(string accessToken)
         {
             synchronizer.Initialize(accessToken);
-            //synchronizer.Load();
-            //SetLocalTransactionAsync();
+
+            // synchronizer.Load();
+            // SetLocalTransactionAsync();
         }
 
         private async void SynchronizeAsync()
@@ -124,8 +147,9 @@ namespace MRS.DocumentManagement.Contols
                 SyncProcces = true;
                 await synchronizer.SyncTableAsync(ProgressChange);
                 SyncProcces = false;
-                //synchronizer.Save();
-                //SetLocalTransactionAsync();
+
+                // synchronizer.Save();
+                // SetLocalTransactionAsync();
                 WinBox.ShowMessage("Успех. Синхронизация выполнена.");
             }
             catch (ArgumentNullException ane)
@@ -147,7 +171,8 @@ namespace MRS.DocumentManagement.Contols
         private async void GetRevision()
         {
             WinBox.ShowMessage("Эта кнопка болше не работает!");
-            //WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
+
+            // WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
         }
 
 

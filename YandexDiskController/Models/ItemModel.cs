@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
+using MRS.DocumentManagement.Interface.Dtos;
 using WPFStorage.Base;
 
 namespace MRS.DocumentManagement.Models

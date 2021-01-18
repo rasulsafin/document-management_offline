@@ -1,9 +1,8 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Models;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
 
@@ -12,52 +11,119 @@ namespace MRS.DocumentManagement.Contols
     public class ObjectiveViewModel : BaseViewModel
     {
         #region Data and bending
-        
-        DiskManager yandex;
-        ProjectModel selectedProject;
+        // private ProjectModel selectedProject;
         private ObjectiveModel selectedObjective;
         private ObjectiveModel editObjective = new ObjectiveModel();
-        bool isLocalDB = true;
+        private bool isLocalDB = true;
         private string statusOperation;
         private bool progressVisible;
         private double progressMax;
         private double progressValue;
 
+        public ObjectiveViewModel()
+        {
+            ZeroIdCommand = new HCommand(ZeroId);
+            AddObjectiveOfflineCommand = new HCommand(AddObjective);
+
+            // UpdateProjectsCommand = new HCommand(UpdateProjects);
+            DeleteObjectiveOfflineCommand = new HCommand(DeleteObjective);
+            LoadObjectiveOfflineCommand = new HCommand(UpdateObjectives);
+            ChengeStatusOfflineCommand = new HCommand(ChengeStatusOffline);
+            UpdateObjectiveOfflineCommand = new HCommand(UpdateObjectiveOffline);
+            AddObjectivesCommand = new HCommand<int>(AddObjectives);
+        }
+
         public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
+
+        public ObservableCollection<UserModel> Users { get; set; } = ObjectModel.Users;
+
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
+
         public ProjectModel SelectedProject
         {
-            get => selectedProject;
+            get => ObjectModel.SelectedProject;
             set
             {
-                selectedProject = value;
-                UpdateObjectives();
+                ObjectModel.SelectedProject = value;
                 OnPropertyChanged();
             }
         }
+
         public ObjectiveModel SelectedObjective
         {
-            get => selectedObjective;
+            get => ObjectModel.SelectedObjective;
             set
             {
-                selectedObjective = value;
+                ObjectModel.SelectedObjective = value;
                 if (EditObjective == null) EditObjective = new ObjectiveModel();
                 EditObjective.AuthorID = selectedObjective.AuthorID;
                 EditObjective.CreationDate = selectedObjective.CreationDate;
                 EditObjective.Description = selectedObjective.Description;
                 EditObjective.DueDate = selectedObjective.DueDate;
                 EditObjective.ID = selectedObjective.ID;
-                EditObjective.Items = selectedObjective.ID;
-                UpdateObjectives();
+                EditObjective.ObjectiveTypeID = selectedObjective.ObjectiveTypeID;
+                EditObjective.ParentObjectiveID = selectedObjective.ParentObjectiveID;
+                EditObjective.Status = selectedObjective.Status;
+                EditObjective.Title = selectedObjective.Title;
+                OnPropertyChanged();
+                OnPropertyChanged("Objectives");
+            }
+        }
+
+        public ObjectiveModel EditObjective
+        {
+            get => editObjective; set
+            {
+                // CheckNullSelectProject();
+                editObjective = value;
                 OnPropertyChanged();
             }
         }
-        public ObjectiveModel EditObjective { get => editObjective; set { editObjective = value; OnPropertyChanged(); } }
-        public bool IsLocalDB { get => isLocalDB; set { isLocalDB = value; OnPropertyChanged(); } }
-        public bool ProgressVisible { get => progressVisible; set { progressVisible = value; OnPropertyChanged(); } }
-        public double ProgressValue { get => progressValue; set { progressValue = value; OnPropertyChanged(); } }
-        public double ProgressMax { get => progressMax; set { progressMax = value; OnPropertyChanged(); } }
-        public string StatusOperation { get => statusOperation; set { statusOperation = value; OnPropertyChanged(); } }
+
+        public bool IsLocalDB
+        {
+            get => isLocalDB; set
+            {
+                isLocalDB = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool ProgressVisible
+        {
+            get => progressVisible; set
+            {
+                progressVisible = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double ProgressValue
+        {
+            get => progressValue; set
+            {
+                progressValue = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double ProgressMax
+        {
+            get => progressMax; set
+            {
+                progressMax = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string StatusOperation
+        {
+            get => statusOperation; set
+            {
+                statusOperation = value;
+                OnPropertyChanged();
+            }
+        }
 
         public int NextId
         {
@@ -71,43 +137,42 @@ namespace MRS.DocumentManagement.Contols
         }
 
         public HCommand UpdateProjectsCommand { get; }
+
         public HCommand<bool> LocalDBCommand { get; }
+
         public HCommand LoadProjectOfflineCommand { get; }
+
         public HCommand ZeroIdCommand { get; }
+
         public HCommand AddObjectiveOfflineCommand { get; }
+
         public HCommand LoadObjectiveOfflineCommand { get; }
+
         public HCommand SaveObjectiveOfflineCommand { get; }
+
         public HCommand ChengeStatusOfflineCommand { get; }
+
         public HCommand DeleteObjectiveOfflineCommand { get; }
+
         public HCommand OpenFileOfflineCommand { get; }
+
         public HCommand UploadObjectiveCommand { get; }
+
         public HCommand DownloadObjectiveCommand { get; }
+
         public HCommand GetIDCommand { get; }
+
         public HCommand UpdateObjectiveOfflineCommand { get; }
+
         public HCommand GetObjectiveForIdCommand { get; }
+
         public HCommand<int> AddObjectivesCommand { get; }
+
         #endregion
 
-        public ObjectiveViewModel()
+        public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
         {
-            ZeroIdCommand = new HCommand(ZeroId);
-            AddObjectiveOfflineCommand = new HCommand(CreateObjective);
-
-            UpdateProjectsCommand = new HCommand(UpdateProjects);
-            DeleteObjectiveOfflineCommand = new HCommand(DeleteObjective);
-            LoadObjectiveOfflineCommand = new HCommand(UpdateObjectives);
-            //SaveObjectiveOfflineCommand = new HCommand(SaveObjectiveOffline);
-            ChengeStatusOfflineCommand = new HCommand(ChengeStatusOffline);
-            UpdateObjectiveOfflineCommand = new HCommand(UpdateObjectiveOffline);
-
-            GetObjectiveForIdCommand = new HCommand(GetObjectiveForID);
-
-            UploadObjectiveCommand = new HCommand(UploadToServerAsync);
-            DownloadObjectiveCommand = new HCommand(DownloadFromServerAsync);
-            GetIDCommand = new HCommand(GetIDAsync);
-            AddObjectivesCommand = new HCommand<int>(AddObjectives);
-
-            UpdateProjects();            
+            throw new NotImplementedException();
         }
 
         private void ZeroId()
@@ -115,35 +180,52 @@ namespace MRS.DocumentManagement.Contols
             NextId = 1;
         }
 
-        private void CreateObjective()
+        private void AddObjective()
         {
+            // CheckNullSelectProject();
             var title = EditObjective.Title;
             var description = EditObjective.Description;
-            ObjectiveModel model = new ObjectiveModel();
-            model.ID = NextId++;
-            model.ProjectID = SelectedProject.ID;
-            model.CreationDate = DateTime.Now;
-            model.DueDate = DateTime.Now;
-            model.Title = title;
-            model.Description = EditObjective.Description;
-            model.Status = ObjectiveStatus.Undefined;                    
-
+            var projectID = SelectedProject.ID;
+            ObjectiveModel model = CreateModel(title, description, projectID);
             Objectives.Add(model);
-
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
         }
+
+        private ObjectiveModel CreateModel(string title, string description, int projectID)
+        {
+            // CheckNullSelectProject();
+            ObjectiveModel model = new ObjectiveModel();
+            model.ID = NextId++;
+            model.ProjectID = projectID;
+            model.CreationDate = DateTime.Now;
+            model.DueDate = DateTime.Now;
+            model.Title = title;
+            model.Description = description;
+            model.Status = ObjectiveStatus.Undefined;
+            return model;
+        }
+
         private void UpdateObjectiveOffline()
         {
+            // CheckNullSelectProject();
             SelectedObjective.Title = EditObjective.Title;
             SelectedObjective.Description = EditObjective.Description;
             SelectedObjective.Status = EditObjective.Status;
             SelectedObjective.DueDate = DateTime.Now;
             SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
+            SelectedObjective.AuthorID = EditObjective.AuthorID;
+            SelectedObjective.ObjectiveTypeID = EditObjective.ObjectiveTypeID;
+            SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
         }
+
+        // private void CheckNullSelectProject()
+        // {
+        //    if (SelectedProject == null) WinBox.ShowMessage("Внимание! Пе выбран проект");
+        // }
         private void ChengeStatusOffline()
         {
             if (EditObjective == null)
@@ -159,6 +241,7 @@ namespace MRS.DocumentManagement.Contols
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
         }
+
         private void UpdateObjectives()
         {
             if (SelectedProject != null)
@@ -166,6 +249,7 @@ namespace MRS.DocumentManagement.Contols
                 ObjectModel.UpdateObjectives(SelectedProject.dto);
             }
         }
+
         private void DeleteObjective()
         {
             if (SelectedObjective != null)
@@ -178,10 +262,7 @@ namespace MRS.DocumentManagement.Contols
                 }
             }
         }
-        private void UpdateProjects()
-        {
-            ObjectModel.UpdateProjects();
-        }
+
         private void AddObjectives(int obj)
         {
             string[] names;
@@ -194,6 +275,7 @@ namespace MRS.DocumentManagement.Contols
                 {
                     OpenHelper.Geany(namesFile);
                 }
+
                 return;
             }
             else
@@ -208,63 +290,31 @@ namespace MRS.DocumentManagement.Contols
                 {
                     OpenHelper.Geany(discriptionsFile);
                 }
+
                 return;
             }
             else
             {
                 discriptions = File.ReadAllLines(discriptionsFile);
             }
+
             if (discriptions == null || names == null) return;
 
             Random random = new Random();
 
             for (int i = 0; i < obj; i++)
             {
-                ObjectiveModel model = new ObjectiveModel();
-
-                model.ID = NextId++;
-
-                model.ProjectID = SelectedProject.ID;
-                model.CreationDate = DateTime.Now;
-                model.DueDate = DateTime.Now;
-
                 int index = random.Next(0, names.Length);
-
-                model.Title = names[index];
-
+                string title = names[index];
                 index = random.Next(0, discriptions.Length);
-                model.Description = discriptions[index];
-
+                string description = discriptions[index];
+                ObjectiveModel model = CreateModel(title, description, SelectedProject.ID);
                 model.Status = (ObjectiveStatus)random.Next(0, 4);
                 Objectives.Add(model);
                 ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
             }
+
             ObjectModel.SaveObjectives(SelectedProject.dto);
-            
         }
-        private void GetObjectiveForID()
-        {
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает");            
-        }
-        private async void GetIDAsync()
-        {            
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
-        }
-
-        private async void UploadToServerAsync()
-        {
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает!");
-            
-        }
-        private async void DownloadFromServerAsync()
-        {
-            WinBox.ShowMessage("Эта кнопка больше ничего не делает!");            
-        }
-
-        public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
-        {
-            throw new NotImplementedException();
-        }       
-
     }
 }

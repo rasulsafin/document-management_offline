@@ -1,6 +1,6 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System;
+﻿using System;
 using System.IO;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement
 {
@@ -49,31 +49,35 @@ namespace MRS.DocumentManagement
         public static string GetProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 
         #region old
-        //public static string GetItemFile(ItemDto item, ProjectDto project, ObjectiveDto objective = null) => GetItemFile(item.ID, project, objective);
-        //public static string GetItemFile(ID<ItemDto> id, ProjectDto project, ObjectiveDto objective = null)
-        //{
+
+        // public static string GetItemFile(ItemDto item, ProjectDto project, ObjectiveDto objective = null) => GetItemFile(item.ID, project, objective);
+        // public static string GetItemFile(ID<ItemDto> id, ProjectDto project, ObjectiveDto objective = null)
+        // {
         //    if (objective == null)
         //        return Path.Combine(GetItemsDir(project), string.Format(ITM_FILE, id));
         //    return Path.Combine(GetItemsDir(project), string.Format(ITM_OBJ_FILE, id, objective.ID.ToString()));
-        //}
+        // }
 
         public static string GetItemsDir(ProjectDto project)
         {
             string projDir = GetProjectDir(project);
-            //if (objective == null)
+
+            // if (objective == null)
             return Path.Combine(projDir, ITM_DIR);
-            //return Path.Combine(projDir, ITM_DIR + $"_{objective.ID}");
+
+            // return Path.Combine(projDir, ITM_DIR + $"_{objective.ID}");
         }
 
 
         public static string GetRevisionFile() => Path.Combine(GetRevisionsDir(), REVISION_FILE);
-        //public static string GetTransactionFile(DateTime date) => Path.Combine(GetRevisionsDir(), date.ToString("yyyy-MM-dd") + ".json");
-        //public static string GetTransactionFile() => Path.Combine(GetRevisionsDir(), TANSLATION_FILE);
+
+        // public static string GetTransactionFile(DateTime date) => Path.Combine(GetRevisionsDir(), date.ToString("yyyy-MM-dd") + ".json");
+        // public static string GetTransactionFile() => Path.Combine(GetRevisionsDir(), TANSLATION_FILE);
         public static string GetRevisionsDir() => Path.Combine(APP_DIR, REV_DIR);
 
 
-        //public static string GetObjectivesDir(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJ_DIR);
-        //public static string GetObjectiveFile(ObjectiveDto objective, ProjectDto project) => Path.Combine(GetObjectivesDir(project), string.Format(OBJ_FILE, objective.ID));
+        // public static string GetObjectivesDir(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJ_DIR);
+        // public static string GetObjectiveFile(ObjectiveDto objective, ProjectDto project) => Path.Combine(GetObjectivesDir(project), string.Format(OBJ_FILE, objective.ID));
 
 
 

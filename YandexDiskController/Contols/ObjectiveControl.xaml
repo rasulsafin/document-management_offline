@@ -75,6 +75,23 @@
                         <TextBlock Width="100" >ID Родителя</TextBlock>
                         <TextBox Width="200" Text="{Binding EditObjective.ParentObjectiveID, Mode=TwoWay, UpdateSourceTrigger=Default}"/>
                     </StackPanel>
+                    <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
+                        <TextBlock Width="100" >Автор</TextBlock>
+                        <ComboBox ItemsSource="{Binding Users}" 
+                                  SelectedValue="{Binding SelectedObjective.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  Width="200">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding ID}"/>
+                                        <TextBlock Text=" "/>
+                                        <TextBlock Text="{Binding Name}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+                    
                     <WrapPanel>
                         
                     <Button Margin="2,1,2,1" Command="{Binding AddObjectiveOfflineCommand}">Добавить задание</Button>

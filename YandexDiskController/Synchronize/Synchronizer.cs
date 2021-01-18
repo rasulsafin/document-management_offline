@@ -1,12 +1,12 @@
-﻿using MRS.DocumentManagement.Connection;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement
 {
@@ -33,7 +33,8 @@ namespace MRS.DocumentManagement
                 yandex = new DiskManager(accessToken);
                 controller = new YandexDiskController(accessToken);
                 yandex.TempDir = PathManager.TEMP_DIR;
-                //await Task.Delay(5000);
+
+                // await Task.Delay(5000);
                 await LoadRevisions();
             }
         }
@@ -129,8 +130,9 @@ namespace MRS.DocumentManagement
         private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
         {
             progress.Report((current, Revisions.Total, "Подготовка данных"));
-            //List<int> download = new List<int>();
-            //List<int> unload = new List<int>();
+
+            // List<int> download = new List<int>();
+            // List<int> unload = new List<int>();
 
             List<Revision> local = synchro.GetRevisions(Revisions);
             List<Revision> remote = synchro.GetRevisions(remoreRevisions);
@@ -147,6 +149,7 @@ namespace MRS.DocumentManagement
             {
                 progress.Report((current, Revisions.Total, "Загрузка"));
                 if (NeedStopSync) break;
+
                 // Находим совподения
                 var remoteRev = remote.Find(r => r.ID == localRev.ID);
                 if (remoteRev == null)
@@ -185,7 +188,8 @@ namespace MRS.DocumentManagement
                         synchro.SetRevision(Revisions, remoteRev);
 
                     remote.Remove(remoteRev);
-                    //localRev.Rev = remoteRev.Rev;
+
+                    // localRev.Rev = remoteRev.Rev;
                 }
                 else if (localRev > remoteRev)
                 {
@@ -221,6 +225,7 @@ namespace MRS.DocumentManagement
             foreach (var remoteRev in remote)
             {
                 if (NeedStopSync) break;
+
                 // Скачиваем с сервера                
                 if (await synchro.RemoteExist(remoteRev.ID))
                 {
@@ -243,17 +248,18 @@ namespace MRS.DocumentManagement
 
                 if (!NeedStopSync)
                     synchro.SetRevision(Revisions, remoteRev);
-                //local.Add(remoteRev);
+
+                // local.Add(remoteRev);
             }
             progress.Report((current, Revisions.Total, "Сохранение результатов"));
             synchro.SaveLocalCollectAsync();
         }
 
-        //private static void CompareRevision(List<int> download, List<int> unload,
+        // private static void CompareRevision(List<int> download, List<int> unload,
         //    List<Revision> local, List<Revision> remote/*, IProgress<int> progress*/)
-        //{
+        // {
 
-        //    foreach (var localRev in local)
+        // foreach (var localRev in local)
         //    {
         //        if (NeedStopSync) break;
         //        // Находим совподения
@@ -291,16 +297,16 @@ namespace MRS.DocumentManagement
         //        download.Add(remoteRev.ID);
         //        local.Add(remoteRev);
         //    }
-        //}
+        // }
 
-        //private int GetCount(Revisions revisions)
-        //{
+        // private int GetCount(Revisions revisions)
+        // {
         //    int? result = 0;
         //    result += revisions.Projects?.Count + revisions.Users?.Count;
         //    result += revisions.Projects?.Sum(x => x.Objectives?.Count);
         //    result += revisions.Projects?.Sum(x => x.Items?.Count);
         //    result += revisions.Projects?.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
         //    return result ?? 0;
-        //}
+        // }
     }
 }

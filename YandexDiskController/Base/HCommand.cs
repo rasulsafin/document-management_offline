@@ -53,7 +53,10 @@ namespace WPFStorage.Base
         {
             try
             {
-                if (parameter is T parameterT) _method.Invoke(parameterT);
+                if (parameter is T parameterT)
+                {
+                    _method.Invoke(parameterT);
+                }
                 else if (parameter is string s_parameter)
                 {
                     System.Reflection.ParameterInfo[] pars = _method.Method.GetParameters();

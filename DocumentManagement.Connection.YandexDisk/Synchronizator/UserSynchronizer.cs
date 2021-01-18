@@ -111,13 +111,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public async Task UpdateRemoteAsync(int id)
         {
             await Find(id);
-            UserDto user = new UserDto()
-            {
-                ID = (ID<UserDto>)localUser.ID
-                ,Name = localUser.Name
-                ,Login = localUser.Login
-            
-            };
+            UserDto user = new UserDto(
+                id: new ID<UserDto>(localUser.ID),
+                login: localUser.Login,
+                name: localUser.Name);
             await disk.UnloadUser(user);
         }
     }

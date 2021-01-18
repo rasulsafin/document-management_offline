@@ -1,8 +1,8 @@
-﻿using MRS.DocumentManagement.Connection;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement
 {

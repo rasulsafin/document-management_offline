@@ -1,5 +1,4 @@
-﻿using WPFStorage.Dialogs;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement.Contols
 {
@@ -33,13 +33,14 @@ namespace MRS.DocumentManagement.Contols
         {
             if (DataContext is ProjectViewModel model)
             {
-                //WinBox.ShowMessage("Загрузился. Модель есть!");
+                // WinBox.ShowMessage("Загрузился. Модель есть!");
                 Model = model;
             }
-            //else 
-            //{
+
+            // else 
+            // {
             //    WinBox.ShowMessage("Загрузился. Модель нет!");
-            //}
+            // }
         }
     }
 }

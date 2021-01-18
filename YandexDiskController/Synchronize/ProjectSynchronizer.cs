@@ -1,10 +1,10 @@
-﻿using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement
 {
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement
             var _id = (ID<ProjectDto>)idProject;
             if (localProject?.ID != _id)
                 localProject = projects.Find(x => x.ID == _id);
-            if (localProject != null) //throw new Exception($"Нету такого проекта! idProject={idProject}");
+            if (localProject != null) // throw new Exception($"Нету такого проекта! idProject={idProject}");
             {// проект не удален!!!
                 subSynchronizes.Add(new ItemsSynchronizer(yandex, localProject));
                 subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
@@ -94,6 +94,7 @@ namespace MRS.DocumentManagement
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
+
             // TODO: Удалять файлы item objective? 
             await yandex.DeleteProject( _id);
         }

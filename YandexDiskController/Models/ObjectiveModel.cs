@@ -1,18 +1,16 @@
-﻿using WPFStorage.Base;
-using MRS.DocumentManagement.Interface.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using MRS.DocumentManagement.Interface.Dtos;
+using WPFStorage.Base;
 
 namespace MRS.DocumentManagement.Models
 {
     public class ObjectiveModel : BaseViewModel
     {
-
-        public static explicit operator ObjectiveModel(ObjectiveDto ident) => new ObjectiveModel(ident);
-
         public ObjectiveDto dto;
         private List<ItemDto> items;
+        private UserModel author;
 
         public ObjectiveModel(ObjectiveDto dto)
         {
@@ -33,6 +31,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public int AuthorID
         {
             get => (int)dto.AuthorID;
@@ -40,8 +39,38 @@ namespace MRS.DocumentManagement.Models
             {
                 dto.AuthorID = (ID<UserDto>)value;
                 OnPropertyChanged();
+                OnPropertyChanged("Author");
             }
         }
+
+        public UserModel Author
+        {
+            get
+            {
+                if (author == null)
+                {
+                    foreach (var user in ObjectModel.Users)
+                    {
+                        if (user.ID == AuthorID)
+                        {
+                            author = user;
+                            break;
+                        }
+                    }
+                }
+
+                return author;
+            }
+
+            set
+            {
+                author = value;
+                dto.AuthorID = (ID<UserDto>)author.ID;
+                OnPropertyChanged();
+                OnPropertyChanged("AuthorID");
+            }
+        }
+
         public int ObjectiveTypeID
         {
             get => (int)dto.ObjectiveTypeID;
@@ -71,6 +100,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public string Title
         {
             get => dto.Title;
@@ -80,6 +110,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public string Description
         {
             get => dto.Description;
@@ -89,6 +120,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public DateTime CreationDate
         {
             get => dto.CreationDate;
@@ -98,6 +130,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public DateTime DueDate
         {
             get => dto.DueDate;
@@ -107,6 +140,7 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
+
         public ObjectiveStatus Status
         {
             get => dto.Status;
@@ -117,27 +151,20 @@ namespace MRS.DocumentManagement.Models
             }
         }
 
+        public ObservableCollection<ObjectiveModel> SubObjectives { get; set; } = new ObservableCollection<ObjectiveModel>();
+
+        public static explicit operator ObjectiveModel(ObjectiveDto ident) => new ObjectiveModel(ident);
+
         public ObservableCollection<ItemModel> GetItems()
         {
-            var _items = new ObservableCollection<ItemModel>();
-            _items.CollectionChanged += Items_CollectionChanged;
+            var itemsCollect = new ObservableCollection<ItemModel>();
+            itemsCollect.CollectionChanged += Items_CollectionChanged;
             foreach (var item in dto.Items)
             {
-                _items.Add(new ItemModel(item));
+                itemsCollect.Add(new ItemModel(item));
             }
-            return _items;
-        }
 
-        private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-        {
-            if (e.NewItems != null)
-            {
-
-            }
-            if (e.OldItems != null)
-            {
-
-            }
+            return itemsCollect;
         }
 
         public ItemModel GetItem(ID<ItemDto> itemID)
@@ -150,6 +177,7 @@ namespace MRS.DocumentManagement.Models
                         return new ItemModel(item);
                 }
             }
+
             return null;
         }
 
@@ -169,13 +197,20 @@ namespace MRS.DocumentManagement.Models
                         itemDto.Name = item.Name;
                     }
                 }
+
                 items.Add(item.dto);
             }
         }
 
+        private void Items_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+        {
+            if (e.NewItems != null)
+            {
+            }
 
-        public ObservableCollection<ObjectiveModel> SubObjectives { get; set; } = new ObservableCollection<ObjectiveModel>();
-
-
+            if (e.OldItems != null)
+            {
+            }
+        }
     }
 }
