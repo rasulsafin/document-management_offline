@@ -15,17 +15,16 @@ using WPFStorage.Dialogs;
 
 namespace MRS.DocumentManagement
 {
-    
 
     internal class MainViewModel : BaseViewModel
     {
         public static string AccessToken { get; private set; }
-        
+
         public static CoolLogger logger = new CoolLogger("logApp");
 
         #region Binding
         public string NameApp { get; private set; } = "Controller";
-        
+
         private static MainViewModel instanse;
         private static YandexDiskController controller;
         private ObservableCollection<DiskElement> folderItems = new ObservableCollection<DiskElement>();
@@ -39,19 +38,29 @@ namespace MRS.DocumentManagement
         private double totalByte;
 
         public static MainViewModel Instanse { get => instanse; }
+
         public static YandexDiskController Controller { get => controller; }
+
         public HCommand CreateDirCommand { get; }
+
         public HCommand RootDirCommand { get; }
+
         public HCommand BackDirCommand { get; }
+
         public HCommand DebugCommand { get; }
+
         public HCommand LoadFileCommand { get; }
+
         public HCommand DeleteCommand { get; }
+
         public HCommand RefreshCommand { get; }
+
         public HCommand MoveCommand { get; }
 
         public ObservableCollection<DiskElement> FolderItems
         {
             get { return this.folderItems; }
+
             set
             {
                 this.folderItems = value;
@@ -87,6 +96,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public bool DownloadProgress
         {
             get => downloadProgress; set
@@ -95,6 +105,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public double CurrentByte
         {
             get => currentByte; set
@@ -103,6 +114,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public double TotalByte
         {
             get => totalByte; set
@@ -111,6 +123,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public DiskElement SelectionElement { get; private set; }
 
         private ProjectViewModel projects = new ProjectViewModel();
@@ -146,6 +159,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public ItemViewModel Items
         {
             get => items; set
@@ -154,6 +168,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public SynchronizerViewModel Synchronizer
         {
             get => synchronizer; set
@@ -162,6 +177,7 @@ namespace MRS.DocumentManagement
             OnPropertyChanged();
         }
         }
+
         public int SelectedTab
         {
             get => selectedTab; set
@@ -187,9 +203,9 @@ namespace MRS.DocumentManagement
             RefreshCommand = new HCommand(Refresh);
             MoveCommand = new HCommand(Move);
 
-            Auth.LoadActions.Add(Initialize); 
+            Auth.LoadActions.Add(Initialize);
 
-            // Auth.LoadActions.Add(InitializeManager); 
+            // Auth.LoadActions.Add(InitializeManager);
 
             Auth.StartAuth();
 
@@ -224,7 +240,7 @@ namespace MRS.DocumentManagement
                 return;
             }
 
-            var question = "";
+            var question = string.Empty;
             if (SelectionElement.IsDirectory)
                 question = $"Удалить директорию {SelectionElement.DisplayName}?";
             else
@@ -232,7 +248,7 @@ namespace MRS.DocumentManagement
 
             if (WinBox.ShowQuestion(question))
             {
-                
+
                 logger.Message("Запуск таймера!");
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
@@ -302,6 +318,7 @@ namespace MRS.DocumentManagement
                 await Task.Delay(300);
                 CurrentByte = i;
             }
+
             await Task.Delay(3000);
             DownloadProgress = false;
         }
@@ -329,7 +346,7 @@ namespace MRS.DocumentManagement
                 input: out string nameDir,
                 title: "Создание папки",
                 okText: "Создать", cancelText: "Отмена"))
-            {// Создать папку 
+            {// Создать папку
                 bool res = await controller.CreateDirAsync(Path, nameDir);
                 if (res)
                     await RefreshFolder();
@@ -337,6 +354,7 @@ namespace MRS.DocumentManagement
                     WinBox.ShowMessage("Каталог не создан!");
             }
         }
+
         private async void Move()
         {
             if (SelectionElement == null)
@@ -349,16 +367,14 @@ namespace MRS.DocumentManagement
                 title: "Переименование папки",
                 defautValue: SelectionElement.DisplayName,
                 okText: "Перименовать", cancelText: "Отмена"))
-            {// Создать папку 
+            {// Создать папку
                 bool res = await controller.MoveAsync(SelectionElement.Href, YandexHelper.DirectoryName(Path, nameDir));
                 if (res)
                     await RefreshFolder();
                 else
                     WinBox.ShowMessage("Каталог не переименован!");
             }
-
         }
-
 
         internal async void SelectItemAsync(int selectedIndex)
         {
@@ -395,6 +411,7 @@ namespace MRS.DocumentManagement
                         return;
                     }
                 }
+
                 try
                 {
                     Process.Start(tempPath);
@@ -423,9 +440,10 @@ namespace MRS.DocumentManagement
                 if (obj is DiskElement lastElement)
                     SelectionElement = lastElement;
             }
+
             if (InfoMode)
             {
-                var message = "";
+                var message = string.Empty;
                 foreach (var item in e.AddedItems)
                 {
                     if (item is DiskElement element)
@@ -443,12 +461,14 @@ namespace MRS.DocumentManagement
                         message += $"  LastModified={element.Status}\n";
                         message += $"  File_url={element.File_url}\n";
 
-                        // message += $"  LastModified={element.}\n"; 
+                        // message += $"  LastModified={element.}\n";
                     }
                 }
+
                 WinBox.ShowMessage(message, "Информация");
             }
         }
+
         private void SetFolderItems(IEnumerable<DiskElement> items)
         {
             FolderItems.Clear();

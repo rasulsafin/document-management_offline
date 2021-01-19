@@ -4,14 +4,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class ProjectRevision : ObjectiveRevision
     {
-        //public static implicit operator Revision(ProjectRevision project) 
-        //{
+        // public static implicit operator Revision(ProjectRevision project)
+        // {
         //    return (Revision)project;
-        //}
+        // }
 
-        public ProjectRevision(int id, ulong rev = 0) : base(id, rev){}
+        public ProjectRevision(int id, ulong rev = 0) : base(id, rev) { }
         public List<ObjectiveRevision> Objectives { get; set; }
-        
+
 
         public void UpdateObjective(int id)
         {
@@ -29,6 +29,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 objective = new ObjectiveRevision(id);
                 Objectives.Add(objective);
             }
+
             return objective;
         }
 

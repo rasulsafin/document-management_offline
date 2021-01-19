@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class DiskManager 
+    public class DiskManager
     {
         public static CoolLogger logger = new CoolLogger("YandexDisk");
 
@@ -33,24 +33,24 @@ namespace MRS.DocumentManagement.Connection
         {
             this.accessToken = accessToken;
             //
-            // TODO: Продумать как менять диски 
+            // TODO: Продумать как менять диски
             //
             controller = new YandexDiskController(accessToken);
-            //controller = new GoogleDiskController(accessToken);
+            // controller = new GoogleDiskController(accessToken);
             Initialize();
         }
 
         public DiskManager(IDiskController controller)
-        {            
-            this.controller = controller;            
+        {
+            this.controller = controller;
             Initialize();
         }
 
         /// <summary>
         /// Возвращает есть ли папка проектов
-        /// если нет Создает папку проектов и возвращает false
+        /// если нет Создает папку проектов и возвращает false.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         private async Task<bool> CheckProjectsDir()
         {
             bool result = true;
@@ -66,10 +66,13 @@ namespace MRS.DocumentManagement.Connection
                     await controller.CreateDirAsync("/", path);
                     result = false;
                 }
+
                 projectsDirCreate = true;
             }
+
             return result;
         }
+
         private async Task<bool> CheckUsersDir()
         {
             bool result = true;
@@ -85,10 +88,13 @@ namespace MRS.DocumentManagement.Connection
                     await controller.CreateDirAsync("/", path);
                     result = false;
                 }
+
                 usersDirCreate = true;
             }
+
             return result;
         }
+
         private async Task<bool> CheckDirProject(ProjectDto project)
         {
             bool result = true;
@@ -103,10 +109,13 @@ namespace MRS.DocumentManagement.Connection
                     await controller.CreateDirAsync("/", path);
                     result = false;
                 }
+
                 projects.Add((int)project.ID);
             }
+
             return result;
         }
+
         private async Task<bool> CheckRevisionsDir()
         {
             bool result = true;
@@ -122,10 +131,13 @@ namespace MRS.DocumentManagement.Connection
                     await controller.CreateDirAsync("/", path);
                     result = false;
                 }
+
                 transactionsDirCreate = true;
             }
+
             return result;
         }
+
         private async Task<bool> CheckDirObjectives(ProjectDto project)
         {
             bool result = true;
@@ -140,36 +152,42 @@ namespace MRS.DocumentManagement.Connection
                     await controller.CreateDirAsync("/", path);
                     result = false;
                 }
+
                 objectives.Add((int)project.ID);
             }
+
             return result;
         }
-        /// <summary>
-        /// Проверка наличия папки Items принадлежащих проекту
-        /// </summary>
-        /// <param name="project"></param>
-        /// <returns></returns>
-        private async Task<bool> CheckDirItems(ProjectDto project)
-        {
-            bool result = true;
-            if (!items.Any(x => x == (int)project.ID))
-            {
-                if (await CheckDirProject(project))
-                {
-                    IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetProjectDir(project));
-                    string path = PathManager.GetItemsDir(project);
-                    if (!list.Any(
-                        x => x.IsDirectory && x.Href == path
-                        ))
-                    {
-                        await controller.CreateDirAsync("/", path);
-                        result = false;
-                    }
-                    items.Add((int)project.ID);
-                }
-            }
-            return result;
-        }
+
+        ///// <summary>
+        ///// Проверка наличия папки Items принадлежащих проекту.
+        ///// </summary>
+        ///// <param name="project"></param>
+        ///// <returns></returns>
+        // private async Task<bool> CheckDirItems(ProjectDto project)
+        // {
+        //    bool result = true;
+        //    if (!items.Any(x => x == (int)project.ID))
+        //    {
+        //        if (await CheckDirProject(project))
+        //        {
+        //            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetProjectDir(project));
+        //            string path = PathManager.GetItemsDir(project);
+        //            if (!list.Any(
+        //                x => x.IsDirectory && x.Href == path
+        //                ))
+        //            {
+        //                await controller.CreateDirAsync("/", path);
+        //                result = false;
+        //            }
+
+        // items.Add((int)project.ID);
+        //        }
+        //    }
+
+        // return result;
+        // }
+
         private async void Initialize()
         {
             IEnumerable<DiskElement> list = await controller.GetListAsync();
@@ -179,11 +197,12 @@ namespace MRS.DocumentManagement.Connection
             {
                 await controller.CreateDirAsync("/", PathManager.APP_DIR);
             }
-            //if (!await CheckTransactionsDir())
-            //{
+
+            // if (!await CheckTransactionsDir())
+            // {
             //    await controller.SetContentAsync(PathManager.GetRevisionFile(), "0");
-            //}
-            //await CheckProjectsDir();
+            // }
+            // await CheckProjectsDir();
         }
 
         #endregion
@@ -201,8 +220,10 @@ namespace MRS.DocumentManagement.Connection
                 }
                 catch (FileNotFoundException) { }
             }
+
             return new RevisionCollection();
         }
+
         public async Task SetRevisionsAsync(RevisionCollection revisions)
         {
             await CheckRevisionsDir();
@@ -211,19 +232,15 @@ namespace MRS.DocumentManagement.Connection
             await controller.SetContentAsync(path, json);
         }
 
-
-
-
-
-        //public async Task<List<DateTime>> GetRevisionsDatesAsync()
-        //{
+        // public async Task<List<DateTime>> GetRevisionsDatesAsync()
+        // {
         //    var result = new List<DateTime>();
         //    if (await CheckRevisionsDir())
         //    {
         //        string path = PathManager.GetRevisionsDir();
         //        var list = await controller.GetListAsync(path);
 
-        //        foreach (DiskElement element in list)
+        // foreach (DiskElement element in list)
         //        {
         //            if (PathManager.TryParseTransaction(element.DisplayName, out DateTime date))
         //            {
@@ -232,16 +249,16 @@ namespace MRS.DocumentManagement.Connection
         //        }
         //    }
         //    return result;
-        //}
-        //public async Task SetTransactionsAsync(DateTime date, List<Transaction> transactions)
-        //{
+        // }
+        // public async Task SetTransactionsAsync(DateTime date, List<Transaction> transactions)
+        // {
         //    await CheckRevisionsDir();
         //    string path = PathManager.GetTransactionsFile(date);
         //    string json = JsonConvert.SerializeObject(transactions);
         //    await controller.SetContentAsync(path, json);
-        //}
-        //public async Task<List<Transaction>> GetTransactionsAsync(DateTime date)
-        //{
+        // }
+        // public async Task<List<Transaction>> GetTransactionsAsync(DateTime date)
+        // {
         //    string path = PathManager.GetTransactionsFile(date);
         //    try
         //    {
@@ -254,16 +271,16 @@ namespace MRS.DocumentManagement.Connection
         //    catch (JsonReaderException)
         //    { }
         //    return new List<Transaction>();
-        //}
+        // }
 
-        //public async void SetRevisionAsync(ulong revision)
-        //{
+        // public async void SetRevisionAsync(ulong revision)
+        // {
         //    await CheckRevisionsDir();
         //    string path = PathManager.GetRevisionFile();
         //    await controller.SetContentAsync(path, revision.ToString());
-        //}
-        //public async Task<ulong> GetRevisionAsync()
-        //{
+        // }
+        // public async Task<ulong> GetRevisionAsync()
+        // {
         //    if (await CheckRevisionsDir())
         //    {
         //        try
@@ -279,7 +296,7 @@ namespace MRS.DocumentManagement.Connection
         //        { }
         //    }
         //    return 0;
-        //}
+        // }
         #endregion
         #region Users
         public async Task<UserDto> GetUserAsync(ID<UserDto> id)
@@ -295,8 +312,10 @@ namespace MRS.DocumentManagement.Connection
                 }
                 catch (FileNotFoundException) { }
             }
+
             return null;
         }
+
         public async Task UnloadUser(UserDto user)
         {
             await CheckUsersDir();
@@ -304,6 +323,7 @@ namespace MRS.DocumentManagement.Connection
             var json = JsonConvert.SerializeObject(user);
             await controller.SetContentAsync(path, json);
         }
+
         public async Task DeleteUser(ID<UserDto> id)
         {
             if (await CheckUsersDir())
@@ -331,9 +351,11 @@ namespace MRS.DocumentManagement.Connection
                 }
                 catch (FileNotFoundException) { }
             }
+
             return null;
         }
-        /// <summary>Загрузить проект на диск</summary>
+
+        /// <summary>Загрузить проект на диск.</summary>
         public async Task UnloadProject(ProjectDto project)
         {
             await CheckProjectsDir();
@@ -341,7 +363,8 @@ namespace MRS.DocumentManagement.Connection
             var json = JsonConvert.SerializeObject(project);
             await controller.SetContentAsync(path, json);
         }
-        /// <summary>Удаляет файт проекта</summary>
+
+        /// <summary>Удаляет файт проекта.</summary>
         public async Task DeleteProject(ID<ProjectDto> id)
         {
             if (await CheckProjectsDir())
@@ -355,7 +378,6 @@ namespace MRS.DocumentManagement.Connection
                 { }
             }
         }
-
 
         public async Task<List<ID<ProjectDto>>> GetProjectsIdAsync()
         {
@@ -372,24 +394,28 @@ namespace MRS.DocumentManagement.Connection
                     }
                 }
             }
+
             return result;
         }
-        /// <summary>Создает папку проекта</summary>
+
+        /// <summary>Создает папку проекта.</summary>
         public async Task CreateProjectDir(ProjectDto project)
         {
-            //await CheckProjectsDir();
+            // await CheckProjectsDir();
             string path = PathManager.GetProjectDir(project);
             await controller.CreateDirAsync("/", path);
         }
-        /// <summary>Удаляет папку проекта</summary>
+
+        /// <summary>Удаляет папку проекта.</summary>
         public async Task DeleteProjectDir(ProjectDto project)
         {
 
             string path = PathManager.GetProjectDir(project);
             await controller.DeleteAsync(path);
         }
-        //public async Task RenameProjectDir(ProjectDto projectOld, ProjectDto projectNew)
-        //{
+
+        // public async Task RenameProjectDir(ProjectDto projectOld, ProjectDto projectNew)
+        // {
         //    await CheckProjectsDir();
         //    string pathOld = PathManager.GetProjectDir(projectOld);
         //    string pathNew = PathManager.GetProjectDir(projectNew);
@@ -402,7 +428,7 @@ namespace MRS.DocumentManagement.Connection
         //    {
         //        await controller.CreateDirAsync("/", pathNew);
         //    }
-        //}
+        // }
 
         #endregion
         #region Objective
@@ -420,6 +446,7 @@ namespace MRS.DocumentManagement.Connection
                 { }
             }
         }
+
         public async Task<List<ID<ObjectiveDto>>> GetObjectivesIdAsync(ProjectDto project)
         {
             List<ID<ObjectiveDto>> result = new List<ID<ObjectiveDto>>();
@@ -436,9 +463,11 @@ namespace MRS.DocumentManagement.Connection
                     }
                 }
             }
+
             return result;
-            //throw new NotImplementedException();
+            // throw new NotImplementedException();
         }
+
         public async Task UploadObjectiveAsync(ProjectDto project, ObjectiveDto objective, Action<ulong, ulong> progressChenge = null)
         {
             await CheckDirProject(project);
@@ -448,6 +477,7 @@ namespace MRS.DocumentManagement.Connection
             string json = JsonConvert.SerializeObject(objective);
             await controller.SetContentAsync(path, json, progressChenge);
         }
+
         public async Task<ObjectiveDto> GetObjectiveAsync(ProjectDto project, ID<ObjectiveDto> id)
         {
             try
@@ -471,224 +501,207 @@ namespace MRS.DocumentManagement.Connection
                     throw;
                 }
             }
-            //return null;
+
+            // return null;
 
         }
         #endregion
         #region items
-        public async Task<ItemDto> GetItemAsync(ProjectDto project, ID<ItemDto> id)
+        public async Task<List<ItemDto>> GetItemsAsync(ProjectDto project)
         {
-            if (await CheckDirItems(project))
+            List<ItemDto> result = new List<ItemDto>();
+            if (await CheckDirProject(project))
             {
-                try
-                {
-                    var fileName = PathManager.GetItemFile(project, id);
-                    string json = await controller.GetContentAsync(fileName);
-                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-                    return item;
-
-                }
-                catch (FileNotFoundException) { }
+                string fileName = PathManager.GetItemsFile(project);
+                string json = await controller.GetContentAsync(fileName);
+                List<ItemDto> items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
+                return items;
             }
-            return null;
-        }
-        public async Task<ItemDto> GetItemAsync(ProjectDto project, ID<ObjectiveDto> idObj, ID<ItemDto> id)
-        {
-            if (await CheckDirItems(project))
-            {
-                try
-                {
-                    var fileName = PathManager.GetItemFile(project, idObj, id);
-                    string json = await controller.GetContentAsync(fileName);
-                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-                    return item;
 
-                }
-                catch (FileNotFoundException) { }
-            }
-            return null;
+            return result;
         }
 
-        /// <summary>Скачать</summary>
-        /// <param name="item">item указывающий на файл</param>
-        /// <param name="path">Папака в которую записывается файл</param>
-        /// <param name="progressChenge"></param>
-        /// <returns></returns>
-        public async Task DownloadItem(ItemDto item, string path, Action<ulong, ulong> progressChenge = null)
+        public async Task SetItemsAsync(ProjectDto project, List<ItemDto> items)
+        {
+            await CheckDirProject(project);
+            string fileName = PathManager.GetItemsFile(project);
+            string json = JsonConvert.SerializeObject(items);
+            await controller.SetContentAsync(fileName, json);
+        }
+
+        /// <summary>Скачать.</summary>
+        /// <param name="item">item указывающий на файл.</param>
+        /// <param name="path">Папака в которую записывается файл.</param>
+        /// <param name="progressChenge"> x. </param>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        public async Task DownloadItemFile(ItemDto item, string path, Action<ulong, ulong> progressChenge = null)
         {
             string fileName = Path.Combine(path, item.Name);
             await controller.DownloadFileAsync(item.ExternalItemId, fileName, progressChenge);
             item.ExternalItemId = fileName;
         }
-        public async Task<List<ID<ItemDto>>> GetItemsIdAsync(ProjectDto project)
-        {
-            List<ID<ItemDto>> result = new List<ID<ItemDto>>();
-            var dirName = PathManager.GetItemsDir(project);
-            if (await CheckDirItems(project))
-            {
-                var listFile = await controller.GetListAsync(dirName);
-                foreach (var item in listFile)
-                {
-                    if (PathManager.TryParseItemId(item.DisplayName, out ID<ItemDto> id, out ID<ObjectiveDto> idObjective))
-                    {
-                        result.Add(id);
-                    }
-                }
-            }
-            return result;
-        }
-        public async Task<List<ID<ItemDto>>> GetItemsIdAsync(ProjectDto project, ID<ObjectiveDto> idObjective)
-        {
-            List<ID<ItemDto>> result = new List<ID<ItemDto>>();
-            var dirName = PathManager.GetItemsDir(project);
-            if (await CheckDirItems(project))
-            {
-                var listFile = await controller.GetListAsync(dirName);
-
-                foreach (var item in listFile)
-                {
-                    if (PathManager.TryParseItemId(item.DisplayName, out ID<ItemDto> id, out ID<ObjectiveDto> idObj))
-                    {
-                        if (idObj == idObjective)
-                            result.Add(id);
-                    }
-                }
-            }
-            return result;
-        }
-        public async Task<(ItemDto item, ObjectiveDto objective, ProjectDto project)> GetItemAsync(ID<ItemDto> id)
-        {
-            //var listId = await GetProjectsIdAsync();
-            //foreach (var idProject in listId)
-            //{
-            //    var project = await GetProjectAsync(idProject);
-            //    var dirName = PathManager.GetItemsDir(project);
-            //    if (await CheckDirItems(project))
-            //    {
-            //        var listFile = await controller.GetListAsync(dirName);
-
-            //        foreach (var element in listFile)
-            //        {
-            //            if (PathManager.TryParseItemId(element.DisplayName, out ID<ItemDto> idItem, out ID<ObjectiveDto> idObj))
-            //            {
-            //                if (idItem == id)
-            //                {// Запись найдена
-
-            //                    ObjectiveDto objective = null;
-            //                    string path = element.Href;
-            //                    string json = await controller.GetContentAsync(path);
-            //                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-
-            //                    if (idObj != ID<ObjectiveDto>.InvalidID)
-            //                    {
-            //                        objective = await GetObjectiveAsync(project, idObj);
-            //                    }
-
-            //                    return (item, objective, project);
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
-            //// Запись не найдена
-            return (null, null, null);
-        }
-        
-        /// <summary>
-        /// Загружает item и файл на который он указывает
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="item"></param>
-        /// <param name="progressChenge"></param>
-        /// <returns></returns>
-        public async Task UploadItemAsync(ProjectDto project, ItemDto item, Action<ulong, ulong> progressChenge = null)
-        {
-            // 1. Загрузить файл
-            // 2. Загрузить item
-            if (await UnloadFileItem(project, item, progressChenge))
-            {
-                await CheckDirItems(project);
-                string path = PathManager.GetItemFile(project, item);
-                string json = JsonConvert.SerializeObject(item);
-                await controller.SetContentAsync(path, json, progressChenge);
-            }
-        }
 
         /// <summary>
-        /// Загружает item и файл на который он указывает
+        /// Загружает  файл на который указывает item.
         /// </summary>
-        /// <param name="project"></param>
-        /// <param name="item"></param>
-        /// <param name="objective"></param>
-        /// <param name="progressChenge"></param>
-        /// <returns></returns>
-        public async Task UploadItemAsync(ProjectDto project, ObjectiveDto objective, ItemDto item, Action<ulong, ulong> progressChenge = null)
-        {
-            // 1. Загрузить файл
-            // 2. Загрузить item
-            if (await UnloadFileItem(project, item, progressChenge))
-            {
-                await CheckDirItems(project);
-                string path = PathManager.GetItemFile(project, objective, item);
-                string json = JsonConvert.SerializeObject(item);
-                await controller.SetContentAsync(path, json, progressChenge);
-            }
-        }
-        
-        /// <summary>
-        /// Загружает файл на который он указывает item
-        /// </summary>
-        /// <param name="project"></param>
-        /// <param name="item"></param>
-        /// <param name="progressChenge"></param>
-        /// <returns></returns>
-        public async Task<bool> UnloadFileItem(ProjectDto project, ItemDto item, Action<ulong, ulong> progressChenge)
+        /// <param name="project"> x. </param>
+        /// <param name="item"> x. </param>
+        /// <param name="progressChenge"> x. </param>
+        /// <returns>  x. </returns>
+        public async Task<bool> UnloadFileItem(ProjectDto project, ItemDto item, Action<ulong, ulong> progressChenge = null)
         {
             FileInfo fileInfo = new FileInfo(item.ExternalItemId);
             if (fileInfo.Exists)
             {
                 //
-                // TODO: Сортировка файлов по папочкам будет осуществлятся здесь 
+                // TODO: Сортировка файлов по папочкам будет осуществлятся здесь
                 //
-                await CheckDirItems(project);
+                // await CheckDirItems(project);
                 string path = PathManager.GetProjectDir(project);
                 string diskName = YandexHelper.FileName(path, fileInfo.Name);
                 await controller.LoadFileAsync(path, item.ExternalItemId, progressChenge);
                 item.ExternalItemId = diskName;
                 return true;
             }
+
             return false;
         }
 
-        public async Task DeleteItem(ProjectDto project, ID<ItemDto> id)
-        {
-            if (await CheckDirItems(project))
-            {
-                string path = PathManager.GetItemFile(project, id);
-                try
-                {
-                    await controller.DeleteAsync(path);
-                }
-                catch (FileNotFoundException) { }
-            }
-        }
-        public async Task DeleteItem(ProjectDto project, ObjectiveDto objective, ID<ItemDto> id)
-        {
-            if (await CheckDirItems(project))
-            {
-                string path = PathManager.GetItemFile(project, objective.ID, id);
-                try
-                {
-                    await controller.DeleteAsync(path);
-                }
-                catch (FileNotFoundException) { }
-            }
-        }
+        // public async Task<ItemDto> GetItemAsync(ProjectDto project, ID<ObjectiveDto> idObj, ID<ItemDto> id)
+        // {
+        //    if (await CheckDirItems(project))
+        //    {
+        //        try
+        //        {
+        //            var fileName = PathManager.GetItemFile(project, idObj, id);
+        //            string json = await controller.GetContentAsync(fileName);
+        //            ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+        //            return item;
+        // }
+        //        catch (FileNotFoundException) { }
+        //    }
+        //    return null;
+        // }
+        // public async Task<List<ID<ItemDto>>> GetItemsIdAsync(ProjectDto project, ID<ObjectiveDto> idObjective)
+        // {
+        //    List<ID<ItemDto>> result = new List<ID<ItemDto>>();
+        //    var dirName = PathManager.GetItemsDir(project);
+        //    if (await CheckDirItems(project))
+        //    {
+        //        var listFile = await controller.GetListAsync(dirName);
+        // foreach (var item in listFile)
+        //        {
+        //            if (PathManager.TryParseItemId(item.DisplayName, out ID<ItemDto> id, out ID<ObjectiveDto> idObj))
+        //            {
+        //                if (idObj == idObjective)
+        //                    result.Add(id);
+        //            }
+        //        }
+        //    }
+        //    return result;
+        // }
+        // public async Task<(ItemDto item, ObjectiveDto objective, ProjectDto project)> GetItemAsync(ID<ItemDto> id)
+        // {
+        //    //var listId = await GetProjectsIdAsync();
+        //    //foreach (var idProject in listId)
+        //    //{
+        //    //    var project = await GetProjectAsync(idProject);
+        //    //    var dirName = PathManager.GetItemsDir(project);
+        //    //    if (await CheckDirItems(project))
+        //    //    {
+        //    //        var listFile = await controller.GetListAsync(dirName);
+        // //        foreach (var element in listFile)
+        //    //        {
+        //    //            if (PathManager.TryParseItemId(element.DisplayName, out ID<ItemDto> idItem, out ID<ObjectiveDto> idObj))
+        //    //            {
+        //    //                if (idItem == id)
+        //    //                {// Запись найдена
+        // //                    ObjectiveDto objective = null;
+        //    //                    string path = element.Href;
+        //    //                    string json = await controller.GetContentAsync(path);
+        //    //                    ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+        // //                    if (idObj != ID<ObjectiveDto>.InvalidID)
+        //    //                    {
+        //    //                        objective = await GetObjectiveAsync(project, idObj);
+        //    //                    }
+        // //                    return (item, objective, project);
+        //    //                }
+        //    //            }
+        //    //        }
+        //    //    }
+        //    //}
+        //    //// Запись не найдена
+        //    return (null, null, null);
+        // }
+        // public async Task<ItemDto> GetItemAsync(ProjectDto project, ID<ItemDto> id)
+        // {
+        //    if (await CheckDirItems(project))
+        //    {
+        //        try
+        //        {
+        //            var fileName = PathManager.GetItemFile(project, id);
+        //            string json = await controller.GetContentAsync(fileName);
+        //            ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
+        //            return item;
+        // }
+        //        catch (FileNotFoundException) { }
+        //    }
+        //    return null;
+        // }
+        ///// <summary>
+        ///// Загружает item и файл на который он указывает
+        ///// </summary>
+        ///// <param name="project"></param>
+        ///// <param name="item"></param>
+        ///// <param name="objective"></param>
+        ///// <param name="progressChenge"></param>
+        ///// <returns></returns>
+        // public async Task UploadItemAsync(ProjectDto project, ObjectiveDto objective, ItemDto item, Action<ulong, ulong> progressChenge = null)
+        // {
+        //    // 1. Загрузить файл
+        //    // 2. Загрузить item
+        //    if (await UnloadFileItem(project, item, progressChenge))
+        //    {
+        //        await CheckDirItems(project);
+        //        string path = PathManager.GetItemFile(project, objective, item);
+        //        string json = JsonConvert.SerializeObject(item);
+        //        await controller.SetContentAsync(path, json, progressChenge);
+        //    }
+        // }
+        ///// <summary>
+        ///// Загружает файл на который он указывает item
+        ///// </summary>
+        ///// <param name="project"></param>
+        ///// <param name="item"></param>
+        ///// <param name="progressChenge"></param>
+        ///// <returns></returns>
+        //
+        // public async Task DeleteItem(ProjectDto project, ID<ItemDto> id)
+        // {
+        //    if (await CheckDirItems(project))
+        //    {
+        //        string path = PathManager.GetItemFile(project, id);
+        //        try
+        //        {
+        //            await controller.DeleteAsync(path);
+        //        }
+        //        catch (FileNotFoundException) { }
+        //    }
+        // }
+        // public async Task DeleteItem(ProjectDto project, ObjectiveDto objective, ID<ItemDto> id)
+        // {
+        //    if (await CheckDirItems(project))
+        //    {
+        //        string path = PathManager.GetItemFile(project, objective.ID, id);
+        //        try
+        //        {
+        //            await controller.DeleteAsync(path);
+        //        }
+        //        catch (FileNotFoundException) { }
+        //    }
+        // }
 
         #endregion
-
-
-
 
     }
 
@@ -696,7 +709,7 @@ namespace MRS.DocumentManagement.Connection
     public class CoolLogger
     {
         private FileInfo logFile;
-        //private StreamWriter log;
+        // private StreamWriter log;
 
         public CoolLogger(string name)
         {
@@ -722,7 +735,7 @@ namespace MRS.DocumentManagement.Connection
 
         public void Save()
         {
-            //logFile
+            // logFile
         }
 
         public void Error(System.Exception ex)
@@ -753,7 +766,7 @@ namespace MRS.DocumentManagement.Connection
 
         public void Open()
         {
-            //System.Diagnostics.Process.Start(logFile.FullName);
+            // System.Diagnostics.Process.Start(logFile.FullName);
             Process.Start("C:\\Windows\\System32\\notepad.exe", logFile.FullName.Trim());
         }
     }

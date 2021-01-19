@@ -73,8 +73,6 @@ namespace WPFStorage.Base
                     else
                         MessageBox.Show($"не удалось привести параметр {parameter} к типу { (typeof(T)).FullName }");
                 }
-
-
             }
             catch (Exception ex)
             {

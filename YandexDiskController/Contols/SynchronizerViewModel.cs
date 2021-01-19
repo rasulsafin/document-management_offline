@@ -16,7 +16,9 @@ namespace MRS.DocumentManagement.Contols
         public static SynchronizerViewModel Instanse { get => instanse; }
 
         public ulong Revision { get; set; }
+
         private string showAllTransactionContent;// = ALL_TRANSACTION;
+
         public string ShowAllTransactionContent
         {
             get => showAllTransactionContent; set
@@ -25,6 +27,7 @@ namespace MRS.DocumentManagement.Contols
             OnPropertyChanged();
         }
         }
+
         public string ProgressText
         {
             get => progressText; private set
@@ -33,6 +36,7 @@ namespace MRS.DocumentManagement.Contols
             OnPropertyChanged();
         }
         }
+
         public bool SyncProcces
         {
             get => syncProcces; private set
@@ -45,11 +49,17 @@ namespace MRS.DocumentManagement.Contols
         private Synchronizer synchronizer;
 
         public HCommand SynchronizeCommand { get; }
+
         public HCommand UploadAllCommand { get; }
+
         public HCommand SynchronizeAllCommand { get; }
+
         public HCommand DownloadAllCommand { get; }
+
         public HCommand StopSyncCommand { get; }
+
         public HCommand RevisionCommand { get; }
+
         public HCommand ShowAllTransactionCommand { get; }
 
         private static SynchronizerViewModel instanse;
@@ -58,7 +68,6 @@ namespace MRS.DocumentManagement.Contols
         private string progressText;
 
         public ObservableCollection<TransactionModel> Transactions { get; set; } = new ObservableCollection<TransactionModel>();
-
 
         public SynchronizerViewModel()
         {
@@ -96,6 +105,7 @@ namespace MRS.DocumentManagement.Contols
                                 item.Rev = 0;
                     }
             }
+
             SynchronizeAsync();
         }
 
@@ -125,10 +135,9 @@ namespace MRS.DocumentManagement.Contols
                                 item.Rev++;
                     }
             }
+
             SynchronizeAsync();
         }
-
-
 
         private void Initialize(string accessToken)
         {
@@ -160,7 +169,6 @@ namespace MRS.DocumentManagement.Contols
             {
                 WinBox.ShowMessage($"Другая ошибка:{ex.Message}");
             }
-
         }
 
         private void ProgressChange(int current, int total, string message)
@@ -174,12 +182,5 @@ namespace MRS.DocumentManagement.Contols
 
             // WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
         }
-
-
-
-
-
-
-
     }
 }

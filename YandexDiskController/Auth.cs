@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement
         {
             YandexDiskAuth auth = new YandexDiskAuth();
             var result = await auth.GetDiskSdkToken();
-            AccessToken = result;            
+            AccessToken = result;
         }
 
         internal static async void Loaded(object sender, RoutedEventArgs e)

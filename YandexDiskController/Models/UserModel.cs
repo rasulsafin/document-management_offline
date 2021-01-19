@@ -14,9 +14,10 @@ namespace MRS.DocumentManagement.Models
         {
             this.dto = dto;
         }
+
         public UserModel()
         {
-            this.dto = new UserDto(ID<UserDto>.InvalidID, "", "");
+            this.dto = new UserDto(ID<UserDto>.InvalidID, string.Empty, string.Empty);
         }
 
         public int ID

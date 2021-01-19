@@ -4,7 +4,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class ObjectiveRevision : Revision
     {
-        public ObjectiveRevision(int id, ulong rev = 0) : base(id, rev){}
+        public ObjectiveRevision(int id, ulong rev = 0) : base(id, rev) { }
 
         public List<Revision> Items { get; set; }
 
@@ -17,6 +17,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 objective = new Revision(id);
                 Items.Add(objective);
             }
+
             return objective;
         }
 

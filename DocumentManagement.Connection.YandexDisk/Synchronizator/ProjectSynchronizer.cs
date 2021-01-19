@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
     {
         private DiskManager disk;
         private DMContext context;
-        //private DbSet<Project> projects;
+        // private DbSet<Project> projects;
         private ProjectDto remoteProject;
         private Project localProject;
 
@@ -28,6 +28,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 revisions.Projects = new List<ProjectRevision>();
             return revisions.Projects.Select(x => (Revision)x).ToList();
         }
+
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             var index = revisions.Projects.FindIndex(x => x.ID == rev.ID);
@@ -41,19 +42,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
 
-            if (! await LocalExist(idProject))
+            if (!await LocalExist(idProject))
             {// проект не удален!!!
                 ProjectDto project = Convert(localProject);
                 subSynchronizes.Add(new ItemsSynchronizer(disk, context, project));
                 subSynchronizes.Add(new ObjectiveSynchronizer(disk, context, project));
             }
+
             return subSynchronizes;
         }
 
         public void LoadLocalCollect()
         {
-            //projects = context.Projects;
+            // projects = context.Projects;
         }
+
         public async Task SaveLocalCollectAsync()
         {
             await context.SaveChangesAsync();
@@ -64,17 +67,20 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await Download(id);
             return remoteProject != null;
         }
+
         private async Task Download(int id)
         {
             var _id = (ID<ProjectDto>)id;
             if (remoteProject?.ID != _id)
                 remoteProject = await disk.GetProjectAsync(_id);
         }
+
         public async Task DeleteLocalAsync(int id)
         {
             if (await LocalExist(id))
                 context.Projects.Remove(localProject);
         }
+
         public async Task DownloadAndUpdateAsync(int id)
         {
             await Download(id);
@@ -87,9 +93,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 localProject = new Project
                 {
                     ID = (int)remoteProject.ID,
-                    Title = remoteProject.Title
+                    Title = remoteProject.Title,
                 };
-            }                
+            }
         }
 
         private async Task Find(int id)
@@ -97,6 +103,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (localProject?.ID != id)
                 localProject = await context.Projects.FindAsync(id);
         }
+
         public async Task<bool> LocalExist(int id)
         {
             await Find(id);
@@ -106,14 +113,15 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
-            // TODO: Удалять файлы item и objective? 
+            // TODO: Удалять файлы item и objective?
             await disk.DeleteProject(_id);
         }
+
         public async Task UpdateRemoteAsync(int id)
         {
             if (await LocalExist(id))
             {
-                
+
                 await disk.UnloadProject(Convert(localProject));
             }
         }
@@ -123,7 +131,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return new ProjectDto
             {
                 ID = new ID<ProjectDto>(project.ID),
-                Title = project.Title
+                Title = project.Title,
             };
         }
     }

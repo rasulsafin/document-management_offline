@@ -11,6 +11,7 @@ namespace MRS.DocumentManagement.Contols
         {
             Process.Start(@"c:\Program Files (x86)\Geany\bin\geany.exe", $"\"{fileName}\"");
         }
+
         internal static void Notepad(string fileName)
         {
             Process.Start("C:\\Windows\\System32\\notepad.exe", $"\"{fileName}\"") ;
@@ -18,12 +19,12 @@ namespace MRS.DocumentManagement.Contols
 
         internal static void LoadExeption(Exception ex, string fileName)
         {
-            
+
             var select = WinBox.SelectorBox(
                     new[]
-                    { 
-                        "Удалить файл", 
-                        "Посмотреть", 
+                    {
+                        "Удалить файл",
+                        "Посмотреть",
                         "Закрыть приложение"
                     },
                     "При загрузки файла призошла ошибка:\n" + ex.Message, "Ошибка", 5000);

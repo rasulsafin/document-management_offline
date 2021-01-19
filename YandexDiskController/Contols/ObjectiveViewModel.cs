@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
@@ -12,7 +13,7 @@ namespace MRS.DocumentManagement.Contols
     {
         #region Data and bending
         // private ProjectModel selectedProject;
-        private ObjectiveModel selectedObjective;
+        // private ObjectiveModel selectedObjective;
         private ObjectiveModel editObjective = new ObjectiveModel();
         private bool isLocalDB = true;
         private string statusOperation;
@@ -45,6 +46,7 @@ namespace MRS.DocumentManagement.Contols
             set
             {
                 ObjectModel.SelectedProject = value;
+                SelectedObjective = Objectives.First();
                 OnPropertyChanged();
             }
         }
@@ -56,15 +58,23 @@ namespace MRS.DocumentManagement.Contols
             {
                 ObjectModel.SelectedObjective = value;
                 if (EditObjective == null) EditObjective = new ObjectiveModel();
-                EditObjective.AuthorID = selectedObjective.AuthorID;
-                EditObjective.CreationDate = selectedObjective.CreationDate;
-                EditObjective.Description = selectedObjective.Description;
-                EditObjective.DueDate = selectedObjective.DueDate;
-                EditObjective.ID = selectedObjective.ID;
-                EditObjective.ObjectiveTypeID = selectedObjective.ObjectiveTypeID;
-                EditObjective.ParentObjectiveID = selectedObjective.ParentObjectiveID;
-                EditObjective.Status = selectedObjective.Status;
-                EditObjective.Title = selectedObjective.Title;
+                if (ObjectModel.SelectedObjective != null)
+                {
+                    EditObjective.AuthorID = ObjectModel.SelectedObjective.AuthorID;
+                    EditObjective.CreationDate = ObjectModel.SelectedObjective.CreationDate;
+                    EditObjective.Description = ObjectModel.SelectedObjective.Description;
+                    EditObjective.DueDate = ObjectModel.SelectedObjective.DueDate;
+                    EditObjective.ID = ObjectModel.SelectedObjective.ID;
+                    EditObjective.ObjectiveTypeID = ObjectModel.SelectedObjective.ObjectiveTypeID;
+                    EditObjective.ParentObjectiveID = ObjectModel.SelectedObjective.ParentObjectiveID;
+                    EditObjective.Status = ObjectModel.SelectedObjective.Status;
+                    EditObjective.Title = ObjectModel.SelectedObjective.Title;
+                }
+                else
+                {
+                    EditObjective = new ObjectiveModel();
+                }
+
                 OnPropertyChanged();
                 OnPropertyChanged("Objectives");
             }
@@ -203,6 +213,9 @@ namespace MRS.DocumentManagement.Contols
             model.Title = title;
             model.Description = description;
             model.Status = ObjectiveStatus.Undefined;
+
+            if (EditObjective.Author != null)
+                model.Author = EditObjective.Author;
             return model;
         }
 
@@ -220,6 +233,7 @@ namespace MRS.DocumentManagement.Contols
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
+            UpdateObjectives();
         }
 
         // private void CheckNullSelectProject()
@@ -257,8 +271,10 @@ namespace MRS.DocumentManagement.Contols
                 if (WinBox.ShowQuestion($"Удалить задание {SelectedObjective.Title}?", "Удаление"))
                 {
                     ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
-                    Objectives.Remove(SelectedObjective);
+
+                    SelectedObjective.ID = -1;
                     ObjectModel.SaveObjectives(SelectedProject.dto);
+                    UpdateObjectives();
                 }
             }
         }
@@ -310,11 +326,15 @@ namespace MRS.DocumentManagement.Contols
                 string description = discriptions[index];
                 ObjectiveModel model = CreateModel(title, description, SelectedProject.ID);
                 model.Status = (ObjectiveStatus)random.Next(0, 4);
+                if (SelectedObjective != null)
+                    model.ParentObjectiveID = SelectedObjective.ID;
                 Objectives.Add(model);
+
                 ObjectModel.Synchronizer.Update(model.dto.ID, SelectedProject.dto.ID);
             }
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
+            UpdateObjectives();
         }
     }
 }

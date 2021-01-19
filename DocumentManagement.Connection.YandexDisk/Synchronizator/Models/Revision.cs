@@ -12,8 +12,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public static bool operator >(Revision rev1, Revision rev2) => rev1.Rev > rev2.Rev;
         public static bool operator <(Revision rev1, Revision rev2) => rev1.Rev < rev2.Rev;
-        //public static bool operator ==(Revision rev1, Revision rev2) => rev1.Equals(rev2);
-        //public static bool operator !=(Revision rev1, Revision rev2) => !rev1.Equals(rev2);
+        // public static bool operator ==(Revision rev1, Revision rev2) => rev1.Equals(rev2);
+        // public static bool operator !=(Revision rev1, Revision rev2) => !rev1.Equals(rev2);
 
         public Revision(int id, ulong rev = 0)
         {
@@ -40,6 +40,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             {
                 return ID == rev.ID && Rev == rev.Rev;
             }
+
             return false;
         }
 

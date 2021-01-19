@@ -47,7 +47,11 @@ namespace MRS.DocumentManagement.Models
         {
             get
             {
-                if (author == null)
+                if (AuthorID == 0)
+                {
+                    author = null;
+                }
+                else if (author == null || author.ID != AuthorID)
                 {
                     foreach (var user in ObjectModel.Users)
                     {

@@ -57,7 +57,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             var url = URI_API_YANDEX + pathNewDirectory;
             var request = WebRequest.CreateHttp(url);
             request.Method = "MKCOL";
-            request.Accept = "*/*";            
+            request.Accept = "*/*";
             request.Headers["Authorization"] = "OAuth " + accessToken;
             return request;
         }
@@ -129,6 +129,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #endregion
     }
 
-   
+
 
 }

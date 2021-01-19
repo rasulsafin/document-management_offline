@@ -15,9 +15,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private ItemDto remoteItem;
         private Item localItem;
 
-        public ItemsSynchronizer(DiskManager disk, DMContext context, ProjectDto project) : this(disk, context, project, null){}
+        public ItemsSynchronizer(DiskManager disk, DMContext context, ProjectDto project) : this(disk, context, project, null) { }
 
-        public ItemsSynchronizer(DiskManager disk, DMContext context,  ProjectDto project, ObjectiveDto objectiveDto)
+        public ItemsSynchronizer(DiskManager disk, DMContext context, ProjectDto project, ObjectiveDto objectiveDto)
         {
             this.disk = disk;
             this.project = project;
@@ -47,6 +47,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 return objectiveRev.Items;
             }
         }
+
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             int idProj = (int)project.ID;
@@ -65,6 +66,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     CopyRevision(rev, objectiveRev);
                 }
             }
+
             void CopyRevision(Revision rev, ObjectiveRevision revision)
             {
                 if (revision.Items == null)
@@ -83,9 +85,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void LoadLocalCollect()
         {
-            //if (objective == null)
+            // if (objective == null)
             //    items = ObjectModel.GetItems(project);
-            //else
+            // else
             //    items = ObjectModel.GetItems(project, objective);
         }
 
@@ -94,40 +96,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await context.SaveChangesAsync();
         }
 
-        public async Task<bool> RemoteExist(int id)
+        public Task<bool> RemoteExist(int id)
         {
-            
-            await Download(id);
-            return remoteItem != null;
-        }
-        private async Task Download(int id)
-        {
-            var _id = (ID<ItemDto>)id;
-            if (objective == null)
-                remoteItem = await disk.GetItemAsync(project, _id);
-            else
-                remoteItem = await disk.GetItemAsync(project, objective.ID, _id);
+            return Task.FromResult(true);
         }
 
         public async Task DownloadAndUpdateAsync(int id)
         {
-            await Download(id);
-            if (await LocalExist(id))
-            {                
-                // TODO: Раскидывать файлы по папочкам здесь!!! 
-                // TODO: Удалить старый файл? 
-                string path = PathManager.GetProjectDir(project);                
-                await disk.DownloadItem(remoteItem, path);
-
-                
-            }
-            else
-            {
-                string path = PathManager.GetProjectDir(project);
-                await disk.DownloadItem(remoteItem, path);
-                context.Items.Add(Convert(remoteItem));
-            }
+            //
+            // TODO : Проверить есть ли такой файл уже
+            //
+            var path = PathManager.GetProjectDir(project);
+            await Find(id);
+            await disk.DownloadItemFile(Convert(localItem), path);
         }
+
         public async Task DeleteLocalAsync(int id)
         {
             if (await LocalExist(id))
@@ -144,47 +127,47 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private async Task Find(int id)
         {
             if (localItem?.ID != id)
-                localItem =await context.Items.FindAsync(id);
+                localItem = await context.Items.FindAsync(id);
         }
+
         public async Task UpdateRemoteAsync(int id)
         {
-            await Find(id);            
-            if (objective == null)
-                await disk.UploadItemAsync(project, Convert(localItem));
-            else
-                await disk.UploadItemAsync(project, objective, Convert(localItem));
-        }
+            await Find(id);
+            await disk.UnloadFileItem(project, Convert(localItem));
+            }
 
-
-        public async Task DeleteRemoteAsync(int id)
+        public Task DeleteRemoteAsync(int id)
         {
-            var _id = (ID<ItemDto>)id;
-            // TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него 
-            if (objective == null)
-                await disk.DeleteItem(project, _id);
-            else
-                await disk.DeleteItem(project, objective, _id);
+            // var _id = (ID<ItemDto>)id;
+            //// TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него
+            // if (objective == null)
+            //    await disk.DeleteItem(project, _id);
+            // else
+            //    await disk.DeleteItem(project, objective, _id);
+            return Task.CompletedTask;
         }
 
         private ItemDto Convert(Item model)
         {
             return new ItemDto()
-            { 
-                ID = new ID<ItemDto>(model.ID)
-                ,Name = model.Name
-                ,ExternalItemId= model.ExternalItemId
-                ,ItemType= (ItemTypeDto)model.ItemType                
+            {
+                ID = new ID<ItemDto>(model.ID),
+                Name = model.Name,
+                ExternalItemId = model.ExternalItemId,
+                ItemType = (ItemTypeDto)model.ItemType,
             };
         }
+
         private Item Convert(ItemDto dto)
         {
             return new Item()
             {
-                ID = (int)dto.ID
-                ,Name = dto.Name
-                ,ExternalItemId = dto.ExternalItemId
-                ,ItemType = (int)dto.ItemType
+                ID = (int)dto.ID,
+                Name = dto.Name,
+                ExternalItemId = dto.ExternalItemId,
+                ItemType = (int)dto.ItemType,
             };
         }
+
     }
 }

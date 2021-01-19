@@ -34,6 +34,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 projectRev.Objectives = new List<ObjectiveRevision>();
             return projectRev.Objectives.Select(x => (Revision)x).ToList();
         }
+
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             int idProj = (int)project.ID;
@@ -57,8 +58,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void LoadLocalCollect()
         {
-            
+
         }
+
         public async Task SaveLocalCollectAsync()
         {
             await context.SaveChangesAsync();
@@ -71,11 +73,12 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (remoteObj?.ID != _id)
                 remoteObj = await disk.GetObjectiveAsync(project, _id);
         }
+
         private async Task Find(int id)
         {
             if (localObj?.ID != id)
             {
-                int projectID = (int)project.ID;                
+                int projectID = (int)project.ID;
                 localObj = await context.Objectives.FirstAsync(o => o.ProjectID == projectID && o.ID == id);
             }
         }
@@ -85,6 +88,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await Download(id);
             return remoteObj != null;
         }
+
         public async Task DownloadAndUpdateAsync(int id)
         {
             await Download(id);
@@ -106,9 +110,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
 
                 // TODO : ???
-                //localObj.Items = remoteObj.Items;
-                //localObj.BimElements = remoteObj.BimElements;
-                //localObj.DynamicFields = remoteObj.DynamicFields;
+                // localObj.Items = remoteObj.Items;
+                // localObj.BimElements = remoteObj.BimElements;
+                // localObj.DynamicFields = remoteObj.DynamicFields;
 
             }
             else
@@ -129,6 +133,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await Find(id);
             return localObj != null;
         }
+
         public async Task UpdateRemoteAsync(int id)
         {
             await Find(id);
@@ -139,7 +144,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ObjectiveDto>)id;
-            // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него 
+            // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него
             await disk.DeleteObjective(project, _id);
         }
 
@@ -160,9 +165,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 Description = objective.Description,
 
                 CreationDate = objective.CreationDate,
-                DueDate = objective.DueDate
+                DueDate = objective.DueDate,
             };
         }
+
         private Objective Convert(ObjectiveDto objective)
         {
             return new Objective()
@@ -179,7 +185,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 Description = objective.Description,
 
                 CreationDate = objective.CreationDate,
-                DueDate = objective.DueDate
+                DueDate = objective.DueDate,
             };
         }
     }

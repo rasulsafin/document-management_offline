@@ -14,8 +14,8 @@ namespace MRS.DocumentManagement.Converters
                 if (bvalue)
                     return Visibility.Visible;
             }
-            return Visibility.Collapsed;
 
+            return Visibility.Collapsed;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

@@ -1,5 +1,3 @@
 ﻿namespace MRS.DocumentManagement.Contols
 {
-    
-    
 }

@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Models
             }
         }
 
-        public bool IsObjective 
+        public bool IsObjective
         {
             get => isObjective;
             set
@@ -71,6 +71,5 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
-    
 }
 }

@@ -19,9 +19,10 @@ namespace MRS.DocumentManagement
         {
             this.yandex = yandex;
         }
+
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            if (revisions.Projects == null) 
+            if (revisions.Projects == null)
                 revisions.Projects = new List<ProjectRevision>();
             return revisions.Projects.Select(x => (Revision)x).ToList();
         }
@@ -35,46 +36,48 @@ namespace MRS.DocumentManagement
                 revisions.Projects[index].Rev = rev.Rev;
         }
 
-        
         public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idProject)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
+            Find(idProject);
+            await Download(idProject);
 
-            var _id = (ID<ProjectDto>)idProject;
-            if (localProject?.ID != _id)
-                localProject = projects.Find(x => x.ID == _id);
-            if (localProject != null) // throw new Exception($"Нету такого проекта! idProject={idProject}");
-            {// проект не удален!!!
-                subSynchronizes.Add(new ItemsSynchronizer(yandex, localProject));
-                subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
-            }
+            // if (localProject != null) // throw new Exception($"Нету такого проекта! idProject={idProject}");
+            // {// проект не удален!!!
+            subSynchronizes.Add(new ItemsSynchronizer(yandex, remoteProject, localProject));
+            subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+
+            // }
             return subSynchronizes;
         }
+
         public void LoadLocalCollect()
         {
             projects = ObjectModel.GetProjects();
         }
-        public async Task SaveLocalCollectAsync()
+
+        public Task SaveLocalCollectAsync()
         {
             ObjectModel.SaveProjects(projects);
+            return Task.CompletedTask;
         }
 
         public async Task<bool> RemoteExist(int id)
         {
-            var _id = (ID<ProjectDto>)id;
-            remoteProject = await yandex.GetProjectAsync(_id);
+            await Download(id);
             return remoteProject != null;
         }
-        public async Task DeleteLocalAsync(int id)
+
+        public Task DeleteLocalAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
             projects.RemoveAll(x => x.ID == _id);
+            return Task.CompletedTask;
         }
+
         public async Task DownloadAndUpdateAsync(int id)
         {
-            var _id = (ID<ProjectDto>)id;
-            if (remoteProject.ID != _id)
-                remoteProject = await yandex.GetProjectAsync(_id);
+            await Download(id);
             var index = projects.FindIndex(x => (int)x.ID == id);
             if (index < 0)
                 projects.Add(remoteProject);
@@ -84,28 +87,39 @@ namespace MRS.DocumentManagement
             var dirName = PathManager.GetProjectDir(remoteProject);
             if (!Directory.Exists(dirName)) Directory.CreateDirectory(dirName);
         }
-        public async Task<bool> LocalExist(int id)
+
+        public Task<bool> LocalExist(int id)
         {
-            var _id = (ID<ProjectDto>)id;
-            localProject = projects.Find(x => x.ID == _id);
-            return localProject != null;
+            Find(id);
+            return Task.FromResult(localProject != null);
         }
 
         public async Task DeleteRemoteAsync(int id)
         {
             var _id = (ID<ProjectDto>)id;
 
-            // TODO: Удалять файлы item objective? 
-            await yandex.DeleteProject( _id);
+            // TODO: Удалять файлы item objective?
+            await yandex.DeleteProject(_id);
         }
+
         public async Task UpdateRemoteAsync(int id)
         {
-            var _id = (ID<ProjectDto>)id;
-            if (localProject.ID != _id)
-                localProject = projects.Find(x => x.ID == _id);
+            Find(id);
             await yandex.UnloadProject(localProject);
         }
 
-        
+        private void Find(int id)
+        {
+            var _id = (ID<ProjectDto>)id;
+            if (localProject?.ID != _id)
+                localProject = projects.Find(x => x.ID == _id);
+        }
+
+        private async Task Download(int id)
+        {
+            var _id = (ID<ProjectDto>)id;
+            if (remoteProject?.ID != _id)
+                remoteProject = await yandex.GetProjectAsync(_id);
+        }
     }
 }

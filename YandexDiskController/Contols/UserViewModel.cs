@@ -15,6 +15,7 @@ namespace MRS.DocumentManagement.Contols
         private UserModel selectedUser;
 
         public ObservableCollection<UserModel> Users { get; set; } = ObjectModel.Users;
+
         public UserModel SelectedUser
         {
             get => selectedUser; set
@@ -23,6 +24,7 @@ namespace MRS.DocumentManagement.Contols
             OnPropertyChanged();
         }
         }
+
         public int NextId
         {
             get => Properties.Settings.Default.UserNextId;
@@ -35,9 +37,13 @@ namespace MRS.DocumentManagement.Contols
         }
 
         public HCommand AddUserCommand { get; }
+
         public HCommand DelUserCommand { get; }
+
         public HCommand ZeroIdCommand { get; }
+
         public HCommand EditUserCommand { get; }
+
         public HCommand UpdateCommand { get; }
 
         public UserViewModel()

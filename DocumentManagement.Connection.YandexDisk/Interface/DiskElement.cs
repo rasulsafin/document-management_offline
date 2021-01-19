@@ -22,12 +22,12 @@ namespace MRS.DocumentManagement.Connection
         private string file_url;
         private string getetag;
 
-        public string DisplayName { get => displayname;}
-        public DateTime LastModified { get => lastmodified;}
+        public string DisplayName { get => displayname; }
+        public DateTime LastModified { get => lastmodified; }
         public string ContentLength { get => getcontentlength; set => getcontentlength = value; }
         public string ContentType { get => getcontenttype; set => getcontenttype = value; }
         public bool IsDirectory { get; private set; }
-        public string Status { get => status;  }
+        public string Status { get => status; }
         public string Creationdate { get => creationdate; set => creationdate = value; }
         public string Resourcetype { get => resourcetype; set => resourcetype = value; }
         public string Href { get => href; set => href = value; }
@@ -55,6 +55,7 @@ namespace MRS.DocumentManagement.Connection
                 else
                     Console.WriteLine($"GetElements: Неизвестный тип [{node.GetType().Name}]");
             }
+
             return result;
         }
 
@@ -73,6 +74,7 @@ namespace MRS.DocumentManagement.Connection
                 else
                     Console.WriteLine($"GetElement: Неизвестный тип [{node.GetType().Name}]");
             }
+
             return result;
         }
 

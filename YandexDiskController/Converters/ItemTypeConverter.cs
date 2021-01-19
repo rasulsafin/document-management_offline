@@ -12,6 +12,7 @@ namespace MRS.DocumentManagement.Converters
             {
                 return "directory";
             }
+
             return value;
         }
 
@@ -20,6 +21,4 @@ namespace MRS.DocumentManagement.Converters
             throw new NotImplementedException();
         }
     }
-
-
 }

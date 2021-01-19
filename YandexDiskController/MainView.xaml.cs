@@ -50,17 +50,18 @@ namespace MRS.DocumentManagement
                 case Key.F6: Model.MoveCommand.Execute(null); break;
                 case Key.F8: Model.DeleteCommand.Execute(null); break;
                 case Key.F11: Model.DebugCommand.Execute(null); break;
-                
+
                 default:
                     break;
             }
         }
 
         private int count=0;
+
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             count++;
-            if (count > 1) 
+            if (count > 1)
             {
                 // WinBox.ShowMessage($"TabItem_IsEnabledChanged" +
                 //    $"\n{e.AddedItems.Count}" +

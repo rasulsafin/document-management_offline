@@ -1,7 +1,7 @@
 ﻿namespace MRS.DocumentManagement.Connection.GoogleDisk
 {
-    public class GoogleDiskAuth 
-    { 
-    
+    public class GoogleDiskAuth
+    {
+
     }
 }

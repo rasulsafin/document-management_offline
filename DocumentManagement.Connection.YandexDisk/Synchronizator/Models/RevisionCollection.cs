@@ -19,6 +19,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 rev = new Revision(id);
                 Users.Add(rev);
             }
+
             rev.Incerment();
         }
 
@@ -44,7 +45,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void UpdateObjective(int idProj, int id)
         {
-            ProjectRevision project = FindProject(idProj);            
+            ProjectRevision project = FindProject(idProj);
             project.UpdateObjective(id);
         }
 

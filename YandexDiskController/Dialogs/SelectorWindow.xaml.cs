@@ -24,6 +24,7 @@ namespace WPFStorage.Dialogs
     public class SelectorViewModel: BaseViewModel
     {
         private string title = "Окно ввода";
+
         public string Title
         {
             get => title; set
@@ -34,6 +35,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string question = "Вопрос";
+
         public string Question
         {
             get => question; set
@@ -44,6 +46,7 @@ namespace WPFStorage.Dialogs
         }
 
         private List<string> items;
+
         public List<string> Items
         {
             get => items; set
@@ -54,8 +57,11 @@ namespace WPFStorage.Dialogs
         }
 
         public HCommand<string> SelectItem { get; }
+
         public string Select { get; private set; }
+
         public bool IsResult { get; internal set; }
+
         public int Timeout { get; internal set; }
 
         internal Action Close;
@@ -64,7 +70,6 @@ namespace WPFStorage.Dialogs
         public SelectorViewModel()
         {
             SelectItem = new HCommand<string>(SelectItemMethod);
-           
         }
 
         private void SelectItemMethod(string obj)

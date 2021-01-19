@@ -10,36 +10,36 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         private static readonly string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
         private static readonly string CLIENT_Secret = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
         private static readonly string RETURN_URL = @"http://localhost:8000/oauth/";
-        //internal delegate void NewBearerDelegate(dynamic bearer);
-        //internal Action<object, GenericSdkEventArgs<string>> AuthCompleted;
-        //private HttpListener httpListener;
+        // internal delegate void NewBearerDelegate(dynamic bearer);
+        // internal Action<object, GenericSdkEventArgs<string>> AuthCompleted;
+        // private HttpListener httpListener;
 
         public string access_token;
         public string token_type;
         public int expires_in;
 
         /// <summary>
-        /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html
+        /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
         /// </summary>
-        /// <returns></returns>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         public async Task<string> GetDiskSdkToken()
         {
-            //Task<HttpListenerContext> getting = null;
+            // Task<HttpListenerContext> getting = null;
 
-            //if (httpListener == null || !httpListener.IsListening)
-            //{
-                if (!HttpListener.IsSupported)
+            // if (httpListener == null || !httpListener.IsListening)
+            // {
+            if (!HttpListener.IsSupported)
                 throw new Exception("The listener is not supported.");
-                var httpListener = new HttpListener();
-                httpListener.Prefixes.Add(RETURN_URL);
-                httpListener.Start();
-            //}
+            var httpListener = new HttpListener();
+            httpListener.Prefixes.Add(RETURN_URL);
+            httpListener.Start();
+            // }
 
             // stage 1, 2, 3
             // var oauthUrl = $"https://oauth.yandex.ru/authorize?response_type=token&client_id={CLIENT_ID}";
             var oauthUrl = $"https://oauth.yandex.ru/authorize?response_type=token&client_id={CLIENT_ID}";
 
-            YandexHelper.OpenBrowser(oauthUrl);            
+            YandexHelper.OpenBrowser(oauthUrl);
             string result = string.Empty;
 
             try
@@ -52,6 +52,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     // stage 5
                     SetResponse(context, responseStage5);
                 }
+
                 // stage 6
                 context = await httpListener.GetContextAsync();
                 access_token = context.Request.QueryString["access_token"];
@@ -79,9 +80,10 @@ window.close();
             {
                 httpListener.Stop();
             }
+
             return result;
         }
-        
+
 
         private void SetResponse(HttpListenerContext context, string responseString)
         {
@@ -92,7 +94,7 @@ window.close();
             response.StatusCode = 200;
             response.OutputStream.Write(buffer, 0, buffer.Length);
             response.OutputStream.Close();
-        }       
+        }
 
     }
 }

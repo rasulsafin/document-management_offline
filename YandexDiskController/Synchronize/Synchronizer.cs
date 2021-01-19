@@ -11,20 +11,21 @@ using Newtonsoft.Json;
 namespace MRS.DocumentManagement
 {
     /// <summary>
-    /// Код от сюда перекачует в SyncManager 
+    /// Код от сюда перекачует в SyncManager
     /// </summary>
     public class Synchronizer
     {
-        
+
         public delegate void ProgressChangeDelegate(int current, int total, string message);
+
         public event ProgressChangeDelegate ProgressChange;
 
         private DiskManager yandex;
         private YandexDiskController controller;
         private int total;
         private int current;
-        public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
 
+        public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
 
         public async void Initialize(string accessToken)
         {
@@ -65,6 +66,7 @@ namespace MRS.DocumentManagement
 
         #region Update Table
         public bool Syncing { get; private set; }
+
         public bool NeedStopSync { get; private set; }
 
         public void Update(ID<ProjectDto> id)
@@ -73,24 +75,28 @@ namespace MRS.DocumentManagement
             Revisions.UpdateProject((int)id);
             SaveRevisions();
         }
+
         public void Update(ID<UserDto> id)
         {
             if (Syncing) return;
             Revisions.UpdateUser((int)id);
             SaveRevisions();
         }
+
         public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
             Revisions.UpdateObjective((int)idProj, (int)id);
             SaveRevisions();
         }
+
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
             Revisions.UpdateItem((int)idProj, (int)id);
             SaveRevisions();
         }
+
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
@@ -98,7 +104,6 @@ namespace MRS.DocumentManagement
             SaveRevisions();
         }
         #endregion
-
 
         public async Task SyncTableAsync(ProgressChangeDelegate progressChange)
         {
@@ -125,7 +130,6 @@ namespace MRS.DocumentManagement
         {
             NeedStopSync = true;
         }
-
 
         private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
         {
@@ -154,7 +158,7 @@ namespace MRS.DocumentManagement
                 var remoteRev = remote.Find(r => r.ID == localRev.ID);
                 if (remoteRev == null)
                 {
-                    // Загружаем на сервер                    
+                    // Загружаем на сервер
                     await synchro.UpdateRemoteAsync(localRev.ID);
                     var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                     if (subSynchronizes != null)
@@ -170,7 +174,6 @@ namespace MRS.DocumentManagement
                     // Скачиваем с сервера
                     if (await synchro.RemoteExist(localRev.ID))
                     {
-                        await synchro.DownloadAndUpdateAsync(localRev.ID);
                         var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
@@ -179,11 +182,14 @@ namespace MRS.DocumentManagement
                                 await Synchronize(progress, subSynchronize, remoreRevisions);
                             }
                         }
+
+                        await synchro.DownloadAndUpdateAsync(localRev.ID);
                     }
                     else
-                    {                        
+                    {
                         synchro.DeleteLocalAsync(localRev.ID);
                     }
+
                     if (!NeedStopSync)
                         synchro.SetRevision(Revisions, remoteRev);
 
@@ -197,8 +203,6 @@ namespace MRS.DocumentManagement
 
                     if (await synchro.LocalExist(localRev.ID))
                     {
-                        await synchro.UpdateRemoteAsync(localRev.ID);
-                        
                         var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
                         if (subSynchronizes != null)
                         {
@@ -207,26 +211,31 @@ namespace MRS.DocumentManagement
                                 await Synchronize(progress, subSynchronize, remoreRevisions);
                             }
                         }
+
+                        await synchro.UpdateRemoteAsync(localRev.ID);
+
                     }
                     else
                     {
                         await synchro.DeleteRemoteAsync(localRev.ID);
                     }
+
                     remote.Remove(remoteRev);
                 }
                 else if (localRev.Equals(remoteRev))
                 {
-                    // Пропускаем                     
+                    // Пропускаем
                     remote.Remove(remoteRev);
                 }
-                
+
                 progress.Report((++current, Revisions.Total, "Загрузка"));
             }
+
             foreach (var remoteRev in remote)
             {
                 if (NeedStopSync) break;
 
-                // Скачиваем с сервера                
+                // Скачиваем с сервера
                 if (await synchro.RemoteExist(remoteRev.ID))
                 {
                     await synchro.DownloadAndUpdateAsync(remoteRev.ID);
@@ -242,8 +251,9 @@ namespace MRS.DocumentManagement
                 }
                 else
                 {
-                    synchro.DeleteLocalAsync(remoteRev.ID);
+                    await synchro.DeleteLocalAsync(remoteRev.ID);
                 }
+
                 progress.Report((++current, Revisions.Total, "Загрузка"));
 
                 if (!NeedStopSync)
@@ -251,8 +261,9 @@ namespace MRS.DocumentManagement
 
                 // local.Add(remoteRev);
             }
+
             progress.Report((current, Revisions.Total, "Сохранение результатов"));
-            synchro.SaveLocalCollectAsync();
+            await synchro.SaveLocalCollectAsync();
         }
 
         // private static void CompareRevision(List<int> download, List<int> unload,
@@ -284,7 +295,7 @@ namespace MRS.DocumentManagement
         //        }
         //        else if (localRev.Equals(remoteRev))
         //        {
-        //            // Пропускаем 
+        //            // Пропускаем
         //            //progress.Report(1);
         //            remote.Remove(remoteRev);
         //        }

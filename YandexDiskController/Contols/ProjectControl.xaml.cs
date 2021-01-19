@@ -37,7 +37,7 @@ namespace MRS.DocumentManagement.Contols
                 Model = model;
             }
 
-            // else 
+            // else
             // {
             //    WinBox.ShowMessage("Загрузился. Модель нет!");
             // }

@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Contols
 
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
 
-        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
+        public ObservableCollection<ObjectiveModel> Objectives { get; set; } = new ObservableCollection<ObjectiveModel>();
 
         public ObservableCollection<ItemModel> Items { get; set; } = ObjectModel.Items;
 
@@ -39,11 +39,16 @@ namespace MRS.DocumentManagement.Contols
                 if (value != null)
                 {
                     ObjectModel.SelectedProject = value;
-                    // ObjectModel.UpdateObjectives(ObjectModel.SelectedProject.dto);
+                    Objectives.Clear();
+                    foreach (var objective in ObjectModel.GetObjectives(SelectedProject.dto))
+                    {
+                        Objectives.Add(new ObjectiveModel(objective));
+                    }
+
                     ToObjective = false;
                     OnPropertyChanged();
-                    OnPropertyChanged("SelectedObjective");
-                    OnPropertyChanged("Objectives");
+                    //OnPropertyChanged("SelectedObjective");
+                    //OnPropertyChanged("Objectives");
                     OnPropertyChanged("Items");
                 }
             }

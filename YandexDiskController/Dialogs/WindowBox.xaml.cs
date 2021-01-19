@@ -31,6 +31,7 @@ namespace WPFStorage.Dialogs
     public class InputBoxModel : BaseViewModel
     {
         private string title = "Окно ввода";
+
         public string Title
         {
             get => title; set
@@ -41,6 +42,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string question = "Введите текст";
+
         public string Question
         {
             get => question; set
@@ -51,6 +53,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string input;
+
         public string Input
         {
             get => input; set
@@ -61,6 +64,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string okText = "Ввод";
+
         public string OkText
         {
             get => okText; set
@@ -71,6 +75,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string cancelText = "Отмена";
+
         public string CancelText
         {
             get => cancelText; set
@@ -81,6 +86,7 @@ namespace WPFStorage.Dialogs
         }
 
         private string button3Text;
+
         public string Button3Text
         {
             get => button3Text; set
@@ -91,6 +97,7 @@ namespace WPFStorage.Dialogs
         }
 
         private HorizontalAlignment questionAlignment;
+
         public HorizontalAlignment QuestionAlignment
         {
             get => questionAlignment; set
@@ -101,6 +108,7 @@ namespace WPFStorage.Dialogs
         }
 
         private HorizontalAlignment buttonsAlignment;
+
         public HorizontalAlignment ButtonsAlignment
         {
             get => buttonsAlignment; set
@@ -109,8 +117,11 @@ namespace WPFStorage.Dialogs
             OnPropertyChanged();
         }
         }
+
         public bool PressOk { get; set; }
+
         private long timeout;
+
         public long Timeout
         {
             get => timeout; set
@@ -121,10 +132,15 @@ namespace WPFStorage.Dialogs
         }
 
         public HCommand OkCommand { get; private set; }
+
         public HCommand CancelCommand { get; private set; }
+
         public HCommand Button3Command { get; private set; }
+
         public Action Close { get; internal set; }
+
         public Action Success { get; internal set; }
+
         public Visibility[] Visibilities
         {
             get => visibilities; set
@@ -133,7 +149,6 @@ namespace WPFStorage.Dialogs
             OnPropertyChanged();
         }
         }
-
 
         private Visibility[] visibilities = new Visibility[4];
         private DispatcherTimer timer;
@@ -153,6 +168,7 @@ namespace WPFStorage.Dialogs
         }
 
         private void Ok() => Success?.Invoke();
+
         private void Cancel() => Close?.Invoke();
 
         private void Button3()

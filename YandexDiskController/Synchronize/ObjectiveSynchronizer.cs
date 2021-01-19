@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement
 {
     internal class ObjectiveSynchronizer : ISynchronizer
     {
-        private DiskManager yandex;        
+        private DiskManager yandex;
         private ProjectDto project;
         private List<ObjectiveDto> objectives;
         private ObjectiveDto remoteObj;
@@ -27,6 +27,7 @@ namespace MRS.DocumentManagement
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
             if (projectRev == null)
                 return new List<Revision>();
+
             if (projectRev.Objectives == null)
                 projectRev.Objectives = new List<ObjectiveRevision>();
             return projectRev.Objectives.Select(x => (Revision)x).ToList();
@@ -38,92 +39,91 @@ namespace MRS.DocumentManagement
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
             if (projectRev.Objectives == null)
                 projectRev.Objectives = new List<ObjectiveRevision>();
+
             var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
             if (index < 0)
                 projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
             else
                 projectRev.Objectives[index].Rev = rev.Rev;
         }
-        
 
         public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idObj)
         {
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
-            
-            FindLocalObjective(idObj);
-            if (localObj != null)
-                subSynchronizes.Add(new ItemsSynchronizer(yandex, project, localObj));
 
-            // subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+            await Download(idObj);
+            Find(idObj);
+            subSynchronizes.Add(new ItemsSynchronizer(yandex, project, remoteObj, localObj));
+
             return subSynchronizes;
-        }
-
-        private void FindLocalObjective(int id)
-        {
-            var _id = (ID<ObjectiveDto>)id;
-            if (localObj?.ID != _id)
-                localObj = objectives.Find(x => x.ID == _id);
         }
 
         public void LoadLocalCollect()
         {
             objectives = ObjectModel.GetObjectives(project);
         }
-        public async Task SaveLocalCollectAsync()
+
+        public Task SaveLocalCollectAsync()
         {
             ObjectModel.SaveObjectives(project, objectives);
+            return Task.CompletedTask;
         }
-
-
 
         public async Task<bool> RemoteExist(int id)
         {
-            await FindRemoteObjective(id);
+            await Download(id);
             return remoteObj != null;
         }
+
         public async Task DownloadAndUpdateAsync(int id)
         {
-            await FindRemoteObjective(id);
+            await Download(id);
             var index = objectives.FindIndex(x => (int)x.ID == id);
             if (index < 0)
                 objectives.Add(remoteObj);
             else
                 objectives[index] = remoteObj;
-
-
         }
-        private async Task FindRemoteObjective(int id)
+
+        public Task DeleteLocalAsync(int id)
+        {
+            var id1 = (ID<ObjectiveDto>)id;
+            objectives.RemoveAll(x => x.ID == id1);
+            return Task.CompletedTask;
+        }
+
+        public Task<bool> LocalExist(int id)
+        {
+            Find(id);
+            return Task.FromResult(localObj != null);
+        }
+
+        public async Task UpdateRemoteAsync(int id)
+        {
+            Find(id);
+            await yandex.UploadObjectiveAsync(project, localObj);
+        }
+
+        public async Task DeleteRemoteAsync(int id)
+        {
+            var id1 = (ID<ObjectiveDto>)id;
+
+            // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него
+            await yandex.DeleteObjective(project, id1);
+        }
+
+        private void Find(int id)
+        {
+            var id1 = (ID<ObjectiveDto>)id;
+            if (localObj?.ID != id1)
+                localObj = objectives.Find(x => x.ID == id1);
+        }
+
+        private async Task Download(int id)
         {
             var _id = (ID<ObjectiveDto>)id;
             if (remoteObj?.ID != _id)
                 remoteObj = await yandex.GetObjectiveAsync(project, _id);
         }
-        public async Task DeleteLocalAsync(int id)
-        {
-            var _id = (ID<ObjectiveDto>)id;
-            objectives.RemoveAll(x => x.ID == _id);
-        }
-
-
-        public async Task<bool> LocalExist(int id)
-        {
-            
-            FindLocalObjective(id);
-            return localObj != null;
-        }
-        public async Task UpdateRemoteAsync(int id)
-        {
-            FindLocalObjective(id);            
-            await yandex.UploadObjectiveAsync(project, localObj);
-        }
-        public async Task DeleteRemoteAsync(int id)
-        {
-            var _id = (ID<ObjectiveDto>)id;
-
-            // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него 
-            await yandex.DeleteObjective(project, _id);
-        }
-
-        
     }
 }

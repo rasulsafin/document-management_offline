@@ -9,9 +9,9 @@ namespace WPFStorage.Dialogs
     public static class WinBox
     {
         public static string SelectorBox(
-            string[] collect, 
-            string question = "Выберите один из вариантов:", 
-            string title="Окно выбора", 
+            string[] collect,
+            string question = "Выберите один из вариантов:",
+            string title="Окно выбора",
             int timeout=0)
         {
             SelectorViewModel model = new SelectorViewModel();
@@ -24,7 +24,7 @@ namespace WPFStorage.Dialogs
         }
 
         private static void SelectorBoxModel(SelectorViewModel model)
-        {            
+        {
             SelectorWindow window = new SelectorWindow(model);
             bool? res = window.ShowDialog();
             if (res == true)
@@ -32,6 +32,7 @@ namespace WPFStorage.Dialogs
                 model.IsResult = true;
             }
         }
+
         private static void ShowDialogModel(InputBoxModel model)
         {
             WindowBox window = new WindowBox(model);
@@ -41,9 +42,9 @@ namespace WPFStorage.Dialogs
                 model.PressOk = true;
             }
         }
-        
+
         /// <summary>
-        /// Окно сообщения пользователю, может закрытся через <c>timeout</c> миллисекунд 
+        /// Окно сообщения пользователю, может закрытся через <c>timeout</c> миллисекунд
         /// </summary>
         /// <param name="message">Текст мообщение</param>
         /// <param name="title">Текст заголовка окна</param>
@@ -85,7 +86,6 @@ namespace WPFStorage.Dialogs
             input = model.Input;
             return model.PressOk;
         }
-
 
         /// <summary>
         /// Окно вопроса с двумя кнопками выбора.

@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
     {
         private DiskManager disk;
         private DMContext context;
-        //private DbSet<User> users;
+        // private DbSet<User> users;
         private UserDto remoteUser;
         private User localUser;
 
@@ -42,8 +42,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void LoadLocalCollect()
         {
-            //users = context.Users;
+            // users = context.Users;
         }
+
         public async Task SaveLocalCollectAsync()
         {
             await context.SaveChangesAsync();
@@ -73,16 +74,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             else
             {
                 // TODO: Циклическая зависимость
-                //var user = mapper.Map<User>(remoteUser);
+                // var user = mapper.Map<User>(remoteUser);
                 localUser = new User()
                 {
-                    ID = (int)remoteUser.ID
-                    ,
-                    Login = remoteUser.Login
-                    ,
-                    Name = remoteUser.Name
+                    ID = (int)remoteUser.ID,
+                    Login = remoteUser.Login,
+                    Name = remoteUser.Name,
                     // TODO: С ролями не понятка
-                    //,Role = remoteUser.Role
+                    // ,Role = remoteUser.Role
                 };
                 context.Users.Add(localUser);
             }
@@ -95,7 +94,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         }
 
         public async Task DeleteLocalAsync(int id)
-        {            
+        {
             if (await LocalExist(id))
                 context.Users.Remove(localUser);
         }

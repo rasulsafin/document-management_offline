@@ -78,7 +78,7 @@
                     <StackPanel HorizontalAlignment="Left" Orientation="Horizontal">
                         <TextBlock Width="100" >Автор</TextBlock>
                         <ComboBox ItemsSource="{Binding Users}" 
-                                  SelectedValue="{Binding SelectedObjective.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                  SelectedValue="{Binding EditObjective.Author, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
                                   Width="200">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
