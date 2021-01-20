@@ -6,12 +6,12 @@ namespace MRS.DocumentManagement.Interface.Services
 {
     public interface IProjectService
     {
-        Task<IEnumerable<ProjectDto>> GetAllProjects();
-        Task<IEnumerable<ProjectDto>> GetUserProjects(ID<UserDto> userID);
-        Task<ID<ProjectDto>> AddToUser(ID<UserDto> owner, string title);
-        Task<ID<ProjectDto>> Add(string title);
+        Task<IEnumerable<ProjectToListDto>> GetAllProjects();
+        Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID);
+
+        Task<ProjectToListDto> Add(ProjectToCreateDto projectToCreate);
         Task<bool> Remove(ID<ProjectDto> projectID);
-        Task<bool> Update(ProjectDto projectData);
+        Task<bool> Update(ProjectDto project);
         Task<ProjectDto> Find(ID<ProjectDto> projectID);
 
         Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID);

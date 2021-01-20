@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Database;
+﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MRS.DocumentManagement.Database.Models;
+using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -29,25 +30,22 @@ namespace MRS.DocumentManagement.Services
             this.synchronizator = synchronizator;
         }
 
-        public async Task<ID<ProjectDto>> AddToUser(ID<UserDto> owner, string title)
+        public async Task<ProjectToListDto> Add(ProjectToCreateDto projectToCreate)
         {
-            var userID = (int)owner;
-            var user = context.Users.Find(userID);
-            if (user == null)
-                return ID<ProjectDto>.InvalidID;
-            var project = new Database.Models.Project { Title = title };
-            await context.Projects.AddAsync(project);
-            await context.SaveChangesAsync();
+            var ownerID = (int)projectToCreate.AuthorID;
 
-            project.Users = new List<Database.Models.UserProject>
+            var user = context.Users.Find(ownerID);
+            if (user == null)
+                return default;
+
+            var projectToDb = mapper.Map<Project>(projectToCreate);
+            projectToDb.Items = new List<ProjectItem>();
+            foreach (var item in projectToCreate.Items)
             {
-                new Database.Models.UserProject
-                {
-                    UserID = userID,
-                    ProjectID = project.ID
-                }
-            };
-            context.Update(project);
+                await LinkItem(item, projectToDb);
+            }
+
+            await context.Projects.AddAsync(projectToDb);
             await context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(project.ID);
@@ -56,28 +54,20 @@ namespace MRS.DocumentManagement.Services
             //return (ID<ProjectDto>)project.ID;
         }
 
-        public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
-        {
-            var project = await context.Projects.Include(x => x.Users)
-                .FirstOrDefaultAsync(x => x.ID == (int)projectID);
-            if (project == null)
-                return false;
-            if (project.Users == null)
-                project.Users = new List<Database.Models.UserProject>();
-            foreach (var user in users)
-            {
-                if (!project.Users.Any(x => x.ProjectID == project.ID && x.UserID == (int)user))
-                {
-                    project.Users.Add(new Database.Models.UserProject
+            projectToDb.Users = new List<UserProject>
                     {
-                        ProjectID = project.ID,
-                        UserID = (int)user
-                    });
-                }
-            }
-            context.Update(project);
+                        new UserProject
+                        {
+                            UserID = ownerID,
+                            ProjectID = projectToDb.ID
+                        }
+                    };
+            context.Update(projectToDb);
             await context.SaveChangesAsync();
-            return true;
+
+            var res = mapper.Map<ProjectToListDto>(projectToDb);
+
+            return res;
         }
 
         public async Task<ProjectDto> Find(ID<ProjectDto> projectID)
@@ -88,13 +78,13 @@ namespace MRS.DocumentManagement.Services
             return mapper.Map<ProjectDto>(dbProject);
         }
 
-        public async Task<IEnumerable<ProjectDto>> GetAllProjects()
+        public async Task<IEnumerable<ProjectToListDto>> GetAllProjects()
         {
             var dbProjects = await context.Projects.ToListAsync();
-            return dbProjects.Select(x => mapper.Map<ProjectDto>(x)).ToList();
+            return dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
         }
 
-        public async Task<IEnumerable<ProjectDto>> GetUserProjects(ID<UserDto> userID)
+        public async Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID)
         {
             var iuserID = (int)userID;
             var dbProjects = await context.Users
@@ -103,7 +93,7 @@ namespace MRS.DocumentManagement.Services
                 .Select(x => x.Project)
                 .ToListAsync();
 
-            var userProjects = dbProjects.Select(x => mapper.Map<ProjectDto>(x)).ToList();
+            var userProjects = dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
             return userProjects;
         }
 
@@ -114,6 +104,30 @@ namespace MRS.DocumentManagement.Services
                 .Select(x => x.User)
                 .ToListAsync();
             return usersDb.Select(x => mapper.Map<UserDto>(x)).ToList();
+        }
+
+        public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
+        {
+            var project = await context.Projects.Include(x => x.Users)
+                .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+            if (project == null)
+                return false;
+            if (project.Users == null)
+                project.Users = new List<UserProject>();
+            foreach (var user in users)
+            {
+                if (!project.Users.Any(x => x.ProjectID == project.ID && x.UserID == (int)user))
+                {
+                    project.Users.Add(new UserProject
+                    {
+                        ProjectID = project.ID,
+                        UserID = (int)user
+                    });
+                }
+            }
+            context.Update(project);
+            await context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> Remove(ID<ProjectDto> projectID)
@@ -147,29 +161,43 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        public async Task<bool> Update(ProjectDto projectData)
+        public async Task<bool> Update(ProjectDto project)
         {
-            var projectID = projectData.ID;
-            var project = await context.Projects.FindAsync((int)projectID);
-            if (project == null)
+            var projectID = project.ID;
+            var projectFromDb = await context.Projects.FindAsync((int)projectID);
+            if (projectFromDb == null)
                 return false;
-            project.Title = projectData.Title;
-            context.Projects.Update(project);
+
+            projectFromDb = mapper.Map(project, projectFromDb);
+
+            projectFromDb.Items = new List<ProjectItem>();
+            var projectItems = context.ProjectItems.Where(i => i.ProjectID == projectFromDb.ID).ToList();
+            var itemsToUnlink = projectItems.Where(o => project.Items.Any(i => (int)i.ID == o.ItemID));
+
+            foreach (var item in project.Items)
+            {
+                await LinkItem(item, projectFromDb);
+            }
+
+            foreach (var item in itemsToUnlink)
+            {
+                await UnlinkItem(item.ItemID, projectFromDb.ID);
+            }
+
+            context.Projects.Update(projectFromDb);
             await context.SaveChangesAsync();
 
             synchronizator.AddChange(projectID);
             return true;
         }
 
-        public async Task<ID<ProjectDto>> Add(string title)
+        private async Task LinkItem(ItemDto item, Project project)
         {
             var project = new Database.Models.Project { Title = title };
             await context.Projects.AddAsync(project);
             await context.SaveChangesAsync();
 
-            var projectID = new ID<ProjectDto>(project.ID);
-            synchronizator.AddChange(projectID);
-            return projectID;
+            return (ID<ProjectDto>)project.ID;
         }
 
         private async Task LinkItem(ItemDto item, Database.Models.Project project)
@@ -178,7 +206,7 @@ namespace MRS.DocumentManagement.Services
             if (dbItem == null)
                 return;
 
-            project.Items.Add(new Database.Models.ProjectItem
+            project.Items.Add(new ProjectItem
             {
                 ProjectID = project.ID,
                 ItemID = dbItem.ID
@@ -187,7 +215,7 @@ namespace MRS.DocumentManagement.Services
             synchronizator.AddChange(item.ID, projectID);
         }
 
-        private async Task<bool> UnlinkItem(ID<ItemDto> itemID, ID<ProjectDto> projectID)
+        private async Task<bool> UnlinkItem(int itemID, int projectID)
         {
             var link = await context.ProjectItems
                 .Where(x => x.ItemID == (int)itemID)
