@@ -1,11 +1,10 @@
-﻿using MRS.DocumentManagement.Connection.YandexDisk;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.YandexDisk;
 
 namespace MRS.DocumentManagement.Connection.GoogleDisk
 {
-
     public class GoogleDiskController : IDiskController
     {
         private string accessToken;
@@ -36,6 +35,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDisk
         }
 
         public Task<string> GetContentAsync(string path, Action<ulong, ulong> updateProgress = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DiskElement> GetInfoAsync(string path = "/")
         {
             throw new NotImplementedException();
         }

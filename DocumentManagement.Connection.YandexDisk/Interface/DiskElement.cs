@@ -6,8 +6,6 @@ namespace MRS.DocumentManagement.Connection
 {
     public class DiskElement
     {
-
-
         private string status;
         private string creationdate;
         private string displayname;
@@ -23,17 +21,29 @@ namespace MRS.DocumentManagement.Connection
         private string getetag;
 
         public string DisplayName { get => displayname; }
+
         public DateTime LastModified { get => lastmodified; }
+
         public string ContentLength { get => getcontentlength; set => getcontentlength = value; }
+
         public string ContentType { get => getcontenttype; set => getcontenttype = value; }
+
         public bool IsDirectory { get; private set; }
+
         public string Status { get => status; }
+
         public string Creationdate { get => creationdate; set => creationdate = value; }
+
         public string Resourcetype { get => resourcetype; set => resourcetype = value; }
+
         public string Href { get => href; set => href = value; }
+
         public string Mulca_file_url { get => mulca_file_url; set => mulca_file_url = value; }
+
         public string Mulca_digest_url { get => mulca_digest_url; set => mulca_digest_url = value; }
+
         public string File_url { get => file_url; set => file_url = value; }
+
         public string Getetag { get => getetag; set => getetag = value; }
 
         #region Create
@@ -50,16 +60,20 @@ namespace MRS.DocumentManagement.Connection
                         result.Add(item);
                     }
                     else
+                    {
                         Console.WriteLine($"GetElements: Неизвестный тег [{element.Name}]");
+                    }
                 }
                 else
+                {
                     Console.WriteLine($"GetElements: Неизвестный тип [{node.GetType().Name}]");
+                }
             }
 
             return result;
         }
 
-        private static DiskElement GetElement(XmlElement root)
+        internal static DiskElement GetElement(XmlElement root)
         {
             DiskElement result = new DiskElement();
             foreach (var node in root.ChildNodes)
@@ -68,11 +82,14 @@ namespace MRS.DocumentManagement.Connection
                 {
                     if (element.Name == "d:href") result.href = GetValueElement(element);
                     else if (element.Name == "d:propstat") GetPropstat(result, element);
+                    else if (element.Name == "d:response") result = GetElement(element);
                     else
                         Console.WriteLine($"GetElement: Неизвестный тег [{element.Name}]");
                 }
                 else
+                {
                     Console.WriteLine($"GetElement: Неизвестный тип [{node.GetType().Name}]");
+                }
             }
 
             return result;
@@ -95,7 +112,9 @@ namespace MRS.DocumentManagement.Connection
                         Console.WriteLine($"GetPropstat: Неизвестный тег [{element.Name}]");
                 }
                 else
+                {
                     Console.WriteLine($"GetPropstat: Неизвестный тип [{node.GetType().Name}]");
+                }
             }
         }
 
@@ -119,7 +138,9 @@ namespace MRS.DocumentManagement.Connection
                         Console.WriteLine($"GetProp: Неизвестный тег [{element.Name}]");
                 }
                 else
+                {
                     Console.WriteLine($"GetProp: Неизвестный тип [{node.GetType().Name}]");
+                }
             }
         }
 
@@ -140,9 +161,13 @@ namespace MRS.DocumentManagement.Connection
                         Console.WriteLine($"GetResourcetype: Неизвестный тег [{element.Name}]");
                 }
                 else if (node is XmlText text)
+                {
                     result.resourcetype = text.Value;
+                }
                 else
+                {
                     Console.WriteLine($"GetResourcetype: Неизвестный тип [{node.GetType().Name}]");
+                }
             }
         }
         #endregion

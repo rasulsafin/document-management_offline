@@ -1,7 +1,9 @@
 ﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
@@ -77,13 +79,12 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     revision.Items.Add(new Revision(rev.ID, rev.Rev));
                 else
                     revision.Items[index].Rev = rev.Rev;
-
             }
         }
 
         public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
 
-        public void LoadLocalCollect()
+        public void LoadCollection()
         {
             // if (objective == null)
             //    items = ObjectModel.GetItems(project);
@@ -101,22 +102,34 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return Task.FromResult(true);
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public async Task DownloadRemote(int id)
         {
             //
             // TODO : Проверить есть ли такой файл уже
             //
-            var path = PathManager.GetProjectDir(project);
-            await Find(id);
-            await disk.DownloadItemFile(Convert(localItem), path);
+            // await FindRemote(id);
+            var item = Convert(remoteItem);
+            bool needDownload = false;
+
+            (ulong contentLength, DateTime remoteLastWrile) =  await disk.GetInfoFile(project, remoteItem);
+            FileInfo local = new FileInfo(item.ExternalItemId);
+
+            needDownload = local.LastWriteTime < remoteLastWrile && contentLength != 0;
+
+            if (needDownload)
+            {
+                string path = PathManager.GetLocalProjectDir(project);
+                await disk.DownloadItemFile(remoteItem, path);
+            }
         }
 
-        public async Task DeleteLocalAsync(int id)
+
+
+        public async Task DeleteLocal(int id)
         {
             if (await LocalExist(id))
                 context.Items.Remove(localItem);
         }
-
 
         public async Task<bool> LocalExist(int id)
         {
@@ -130,13 +143,19 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 localItem = await context.Items.FindAsync(id);
         }
 
-        public async Task UpdateRemoteAsync(int id)
+        //private Task FindRemote(int id)
+        //{
+        //    if (localItem?.ID != id)
+        //        localItem = await context.Items.FindAsync(id);
+        //}
+
+        public async Task UploadLocal(int id)
         {
             await Find(id);
             await disk.UnloadFileItem(project, Convert(localItem));
-            }
+        }
 
-        public Task DeleteRemoteAsync(int id)
+        public Task DeleteRemote(int id)
         {
             // var _id = (ID<ItemDto>)id;
             //// TODO: Удалять файлы? Сначало понять ссылаются ли другие item на него
@@ -169,5 +188,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             };
         }
 
+        public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

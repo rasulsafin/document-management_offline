@@ -19,7 +19,6 @@ namespace MRS.DocumentManagement.Contols
 
         internal static void LoadExeption(Exception ex, string fileName)
         {
-
             var select = WinBox.SelectorBox(
                     new[]
                     {

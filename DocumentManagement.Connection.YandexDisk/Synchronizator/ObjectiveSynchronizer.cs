@@ -23,7 +23,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             this.project = project;
         }
 
-
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             int idProj = (int)project.ID;
@@ -56,16 +55,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return subSynchronizes;
         }
 
-        public void LoadLocalCollect()
+        public void LoadCollection()
         {
-
         }
 
         public async Task SaveLocalCollectAsync()
         {
             await context.SaveChangesAsync();
         }
-
 
         private async Task Download(int id)
         {
@@ -89,7 +86,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return remoteObj != null;
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public async Task DownloadRemote(int id)
         {
             await Download(id);
             if (await LocalExist(id))
@@ -108,25 +105,22 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 localObj.CreationDate = remoteObj.CreationDate;
                 localObj.DueDate = remoteObj.DueDate;
 
-
                 // TODO : ???
                 // localObj.Items = remoteObj.Items;
                 // localObj.BimElements = remoteObj.BimElements;
                 // localObj.DynamicFields = remoteObj.DynamicFields;
-
             }
             else
+            {
                 context.Objectives.Add(Convert(remoteObj));
+            }
         }
 
-
-        public async Task DeleteLocalAsync(int id)
+        public async Task DeleteLocal(int id)
         {
             if (await LocalExist(id))
                 context.Objectives.Remove(localObj);
         }
-
-
 
         public async Task<bool> LocalExist(int id)
         {
@@ -134,20 +128,18 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return localObj != null;
         }
 
-        public async Task UpdateRemoteAsync(int id)
+        public async Task UploadLocal(int id)
         {
             await Find(id);
             await disk.UploadObjectiveAsync(project, Convert(localObj));
         }
 
-
-        public async Task DeleteRemoteAsync(int id)
+        public async Task DeleteRemote(int id)
         {
             var _id = (ID<ObjectiveDto>)id;
             // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него
             await disk.DeleteObjective(project, _id);
         }
-
 
         private ObjectiveDto Convert(Objective objective)
         {
@@ -187,6 +179,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 CreationDate = objective.CreationDate,
                 DueDate = objective.DueDate,
             };
+        }
+
+        public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

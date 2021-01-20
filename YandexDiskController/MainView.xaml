@@ -31,6 +31,7 @@
                         <Button  Command="{Binding MoveCommand}">Переименовать (F6)</Button>
                         <Button Command="{Binding CreateDirCommand}">Создать папку (F7)</Button>
                         <Button Command="{Binding DeleteCommand}">Удалить (F8)</Button>
+                        
                         <CheckBox Margin="5,0" VerticalAlignment="Center" IsChecked="{Binding InfoMode, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">Инфо</CheckBox>
                         <TextBlock Text="{Binding CurrentByte}" Margin="5"/>
                         <TextBlock Text="{Binding TotalByte}" Margin="5"/>

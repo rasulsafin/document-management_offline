@@ -1,24 +1,26 @@
-﻿using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class SyncManager
     {
-        public delegate void ProgressChangeDelegate(int current, int total, string message);
-        public event ProgressChangeDelegate ProgressChange;
         private DiskManager diskManager;
         private int total;
         private int current;
+
+        public delegate void ProgressChangeDelegate(int current, int total, string message);
+
+        public event ProgressChangeDelegate ProgressChange;
+
         public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
+
         public bool NeedStopSync { get; private set; }
 
         public async void Initialize(string accessToken)
@@ -30,58 +32,67 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        private async Task LoadRevisions()
-        {
-            string fileName = PathManager.GetLocalRevisionFile();
-            try
-            {
-                string json = await File.ReadAllTextAsync(fileName);
-                Revisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
-            }
-            catch
-            {
-                Revisions = new RevisionCollection();
-                SaveRevisions();
-            }
-        }
-
-        private void SaveRevisions()
-        {
-            string fileName = PathManager.GetLocalRevisionFile();
-            string str = JsonConvert.SerializeObject(Revisions);
-            File.WriteAllText(fileName, str);
-        }
-
         #region Update Table
         public void Update(ID<ProjectDto> id)
         {
-            Revisions.UpdateProject((int)id);
+            Revisions.GetProject((int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ProjectDto> id)
+        {
+            Revisions.GetProject((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<UserDto> id)
         {
-            Revisions.UpdateUser((int)id);
+            Revisions.GetUser((int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<UserDto> id)
+        {
+            Revisions.GetUser((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.UpdateObjective((int)idProj, (int)id);
+            Revisions.GetObjective((int)idProj, (int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
+        {
+            Revisions.GetObjective((int)idProj, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.UpdateItem((int)idProj, (int)id);
+            Revisions.GetItem((int)idProj, (int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
+        {
+            Revisions.GetItem((int)idProj, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
-            Revisions.UpdateItem((int)idProj, (int)idObj, (int)id);
+            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Incerment();
             SaveRevisions();
         }
+
+        public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        {
+            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Delete();
+            SaveRevisions();
+        }
+
         #endregion
 
         public void StopSync()
@@ -106,133 +117,31 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             SaveRevisions();
         }
 
-
-
-        private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
+        private Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
         {
-            progress.Report((current, Revisions.Total, "Подготовка данных"));
-            // List<int> download = new List<int>();
-            // List<int> unload = new List<int>();
-
-            List<Revision> local = synchro.GetRevisions(Revisions);
-            List<Revision> remote = synchro.GetRevisions(remoreRevisions);
-
-            total += local.Count;
-            total += remote.Count;
-            if (Revisions.Total < total) Revisions.Total = total;
-            if (local == null) local = new List<Revision>();
-            if (remote == null) remote = new List<Revision>();
-
-            synchro.LoadLocalCollect();
-            progress.Report((current, Revisions.Total, "Подготовка завершена"));
-            foreach (var localRev in local)
-            {
-                progress.Report((current, Revisions.Total, "Загрузка"));
-                if (NeedStopSync) break;
-                // Находим совподения
-                var remoteRev = remote.Find(r => r.ID == localRev.ID);
-                if (remoteRev == null)
-                {
-                    // Загружаем на сервер
-                    await synchro.UpdateRemoteAsync(localRev.ID);
-                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
-                    if (subSynchronizes != null)
-                    {
-                        foreach (var subSynchronize in subSynchronizes)
-                        {
-                            await Synchronize(progress, subSynchronize, remoreRevisions);
-                        }
-                    }
-                }
-                else if (localRev < remoteRev)
-                {
-                    // Скачиваем с сервера
-                    if (await synchro.RemoteExist(localRev.ID))
-                    {
-                        await synchro.DownloadAndUpdateAsync(localRev.ID);
-                        await SubSinchronize(progress, synchro, remoreRevisions, localRev);
-                    }
-                    else
-                    {
-                        await synchro.DeleteLocalAsync(localRev.ID);
-                    }
-
-                    if (!NeedStopSync)
-                        synchro.SetRevision(Revisions, remoteRev);
-
-                    remote.Remove(remoteRev);
-                    // localRev.Rev = remoteRev.Rev;
-                }
-                else if (localRev > remoteRev)
-                {
-                    // Загружаем на сервер
-
-                    if (await synchro.LocalExist(localRev.ID))
-                    {
-                        await synchro.UpdateRemoteAsync(localRev.ID);
-                        await SubSinchronize(progress, synchro, remoreRevisions, localRev);
-                    }
-                    else
-                    {
-                        await synchro.DeleteRemoteAsync(localRev.ID);
-                    }
-
-                    remote.Remove(remoteRev);
-                }
-                else if (localRev.Equals(remoteRev))
-                {
-                    // Пропускаем
-                    remote.Remove(remoteRev);
-                }
-
-                progress.Report((++current, Revisions.Total, "Загрузка"));
-            }
-
-            foreach (var remoteRev in remote)
-            {
-                if (NeedStopSync) break;
-                // Скачиваем с сервера
-                if (await synchro.RemoteExist(remoteRev.ID))
-                {
-                    await synchro.DownloadAndUpdateAsync(remoteRev.ID);
-                    await SubSinchronize(progress, synchro, remoreRevisions, remoteRev);
-                }
-                else
-                {
-                    await synchro.DeleteLocalAsync(remoteRev.ID);
-                }
-
-                progress.Report((++current, Revisions.Total, "Загрузка"));
-
-                if (!NeedStopSync)
-                    synchro.SetRevision(Revisions, remoteRev);
-                // local.Add(remoteRev);
-            }
-
-            progress.Report((current, Revisions.Total, "Сохранение результатов"));
-            await synchro.SaveLocalCollectAsync();
+            return Task.CompletedTask;
         }
 
-        private async Task SubSinchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions, Revision localRev)
+        private async Task LoadRevisions()
         {
-            var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
-            if (subSynchronizes != null)
+            string fileName = PathManager.GetLocalRevisionFile();
+            try
             {
-                foreach (var subSynchronize in subSynchronizes)
-                {
-                    await Synchronize(progress, subSynchronize, remoreRevisions);
-                }
+                string json = await File.ReadAllTextAsync(fileName);
+                Revisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
+            }
+            catch
+            {
+                Revisions = new RevisionCollection();
+                SaveRevisions();
             }
         }
 
-        private int GetCount(RevisionCollection revisions)
+        private void SaveRevisions()
         {
-            int? result = 0;
-            result += revisions.Projects?.Count + revisions.Users?.Count;
-            result += revisions.Projects?.Sum(x => x.Objectives?.Count);
-            result += revisions.Projects?.Sum(x => x.Items?.Count);
-            result += revisions.Projects?.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
-            return result ?? 0;
+            string fileName = PathManager.GetLocalRevisionFile();
+            string str = JsonConvert.SerializeObject(Revisions);
+            File.WriteAllText(fileName, str);
         }
     }
 }

@@ -336,6 +336,7 @@ namespace MRS.DocumentManagement.Connection
                 catch (FileNotFoundException) { }
             }
         }
+
         #endregion
         #region Projects
         public async Task<ProjectDto> GetProjectAsync(ID<ProjectDto> id)
@@ -409,7 +410,6 @@ namespace MRS.DocumentManagement.Connection
         /// <summary>Удаляет папку проекта.</summary>
         public async Task DeleteProjectDir(ProjectDto project)
         {
-
             string path = PathManager.GetProjectDir(project);
             await controller.DeleteAsync(path);
         }
@@ -503,10 +503,29 @@ namespace MRS.DocumentManagement.Connection
             }
 
             // return null;
-
         }
         #endregion
         #region items
+
+        public async Task<(ulong contentLength, DateTime editDate)> GetInfoFile(ProjectDto project, ItemDto item)
+        {
+            var path = YandexHelper.FileName(PathManager.GetProjectDir(project), item.Name);
+            ulong contentLength = 0;
+            DateTime editDate = DateTime.MinValue;
+            try
+            {
+                var info = await controller.GetInfoAsync(path);
+                if (ulong.TryParse(info.ContentLength, out ulong length))
+                    contentLength = length;
+                editDate = info.LastModified;
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return (contentLength, editDate);
+        }
+
         public async Task<List<ItemDto>> GetItemsAsync(ProjectDto project)
         {
             List<ItemDto> result = new List<ItemDto>();
@@ -544,10 +563,10 @@ namespace MRS.DocumentManagement.Connection
         /// <summary>
         /// Загружает  файл на который указывает item.
         /// </summary>
-        /// <param name="project"> x. </param>
-        /// <param name="item"> x. </param>
-        /// <param name="progressChenge"> x. </param>
-        /// <returns>  x. </returns>
+        /// <param name="project"> x </param>
+        /// <param name="item"> xf </param>
+        /// <param name="progressChenge"> xf. </param>
+        /// <returns>  xd </returns>
         public async Task<bool> UnloadFileItem(ProjectDto project, ItemDto item, Action<ulong, ulong> progressChenge = null)
         {
             FileInfo fileInfo = new FileInfo(item.ExternalItemId);

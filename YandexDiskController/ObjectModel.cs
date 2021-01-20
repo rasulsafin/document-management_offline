@@ -176,7 +176,7 @@ namespace MRS.DocumentManagement
         {
             var result = new List<ObjectiveDto>();
 
-            string dirProj = PathManager.GetProjectDir(project);
+            string dirProj = PathManager.GetLocalProjectDir(project);
             if (!Directory.Exists(dirProj)) return result;
             try
             {
@@ -194,7 +194,7 @@ namespace MRS.DocumentManagement
 
         public static void SaveObjectives(ProjectDto project, List<ObjectiveDto> objectives = null)
         {
-            string dirProj = PathManager.GetProjectDir(project);
+            string dirProj = PathManager.GetLocalProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
 
             if (objectives == null)
@@ -251,7 +251,7 @@ namespace MRS.DocumentManagement
 
         public static void SaveItems(ProjectDto project)
         {
-            var dirProj = PathManager.GetProjectDir(project);
+            var dirProj = PathManager.GetLocalProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
 
             List<ItemDto> items = Items.Select(x => x.dto).ToList();
@@ -269,7 +269,7 @@ namespace MRS.DocumentManagement
 
         public static void SaveItems(ProjectDto project, List<ItemDto> items)
         {
-            var dirProj = PathManager.GetProjectDir(project);
+            var dirProj = PathManager.GetLocalProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
             string path = PathManager.GetItemsFile(project);
             string json = JsonConvert.SerializeObject(items);
@@ -278,7 +278,7 @@ namespace MRS.DocumentManagement
 
         public static void SaveItems(ProjectDto project, ObjectiveDto objective, List<ItemDto> items)
         {
-            var dirProj = PathManager.GetProjectDir(project);
+            var dirProj = PathManager.GetLocalProjectDir(project);
             if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
             objective.Items = items;
             if (SelectedProject.ID == (int)project.ID && SelectedObjective.ID == (int)objective.ID)

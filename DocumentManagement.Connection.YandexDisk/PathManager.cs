@@ -21,12 +21,21 @@ namespace MRS.DocumentManagement.Connection
         private static readonly string ITMS_FILE = "items.json";
         private static readonly string REVISION_FILE = "Revisions.json";
 
-        public static string GetRevisionsFile() => YandexHelper.DirectoryName(GetRevisionsDir(), REVISION_FILE);
+
+
+        public static string GetLocalAppDir() => APP_DIR;
+
+        public static string GetLocalProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 
         public static string GetLocalRevisionFile()
         {
             return REVISION_FILE;
         }
+
+        public static string GetLocalItemFile(ProjectDto project, ItemDto item) => Path.Combine(GetLocalProjectDir(project), item.Name);
+
+        #region Remote
+        public static string GetRevisionsFile() => YandexHelper.DirectoryName(GetRevisionsDir(), REVISION_FILE);
 
         public static string GetRevisionsDir() => YandexHelper.DirectoryName(APP_DIR, REV_DIR);
 
@@ -36,29 +45,6 @@ namespace MRS.DocumentManagement.Connection
             return YandexHelper.FileName(projDir, ITMS_FILE);
         }
 
-        // public static string GetItemFile(ProjectDto project, ItemDto item) => GetItemFile(project, item.ID);
-        // public static string GetItemFile(ProjectDto project, ID<ItemDto> id)
-        // {
-        //    string itemDir = GetItemsDir(project);
-        //    return YandexHelper.FileName(itemDir, string.Format(ITM_FILE, id));
-        // }
-        // public static string GetItemFile(ProjectDto project, ObjectiveDto objective, ItemDto item) => GetItemFile(project, objective.ID, item.ID);
-        // public static string GetItemFile(ProjectDto project, ID<ObjectiveDto> idObjective, ID<ItemDto> id)
-        // {
-        //    string itemDir = GetItemsDir(project);
-        //    return YandexHelper.FileName(itemDir, string.Format(ITM_OBJ_FILE, id, idObjective));
-        // }
-        // public static string GetItemsDir(ProjectDto project)
-        // {
-        //    string projDir = GetProjectDir(project);
-        //    return YandexHelper.DirectoryName(projDir, ITM_DIR);
-        // }
-        // public static string GetItemsDir(ProjectDto project, ObjectiveDto objective) => GetItemsDir(project, objective.ID);
-        // public static string GetItemsDir(ProjectDto project)
-        // {
-        //    string projDir = GetProjectDir(project);
-        //    return YandexHelper.DirectoryName(projDir, $"{ITM_DIR}");
-        // }
         public static string GetObjectivesDir(ProjectDto project)
         {
             string projDir = GetProjectDir(project);
@@ -90,28 +76,8 @@ namespace MRS.DocumentManagement.Connection
 
         public static string GetUserFile(ID<UserDto> id) => YandexHelper.FileName(GetUsersDir(), string.Format(USER_FILE, id));
 
-        public static string GetTransactionsFile(DateTime date)
-        {
-            return YandexHelper.FileName(GetRevisionsDir(), date.ToString("yyyy-MM-dd") + ".json");
-        }
-
-        public static string GetAppDir()
-        {
-            return YandexHelper.DirectoryName("/", APP_DIR);
-        }
-
-        public static bool TryParseTransaction(string text, out DateTime date)
-        {
-            string str = text.Replace(".json", string.Empty);
-            if (DateTime.TryParse(str, out DateTime dat))
-            {
-                date = dat;
-                return true;
-            }
-
-            date = DateTime.MinValue;
-            return false;
-        }
+        public static string GetAppDir() => YandexHelper.DirectoryName("/", APP_DIR);
+        #endregion
 
         public static bool TryParseObjectiveId(string str, out ID<ObjectiveDto> id)
         {

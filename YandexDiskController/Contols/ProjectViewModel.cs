@@ -161,7 +161,7 @@ namespace MRS.DocumentManagement.Contols
             }
             else if (WinBox.ShowQuestion($"Удалить проект '{SelectProject.Title}'?"))
             {
-                ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
+                ObjectModel.Synchronizer.Delete(SelectProject.dto.ID);
                 Projects.Remove(SelectProject);
                 ObjectModel.SaveProjects();
                 SelectProject = null;

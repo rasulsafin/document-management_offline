@@ -96,10 +96,10 @@
                             <Button Command="{Binding ZeroIdCommand}">Обнулить ID</Button>
                         </WrapPanel>
 
-                        <!--<WrapPanel Orientation="Horizontal">
-                            <Button Command="{Binding SaveFileCommand}">Записать в файл</Button>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Command="{Binding AllItemCommand}">Найти все Item проекта</Button>
                             <Button Command="{Binding LoadFileCommand}">Прочитать из файла</Button>
-                        </WrapPanel>-->
+                        </WrapPanel>
                     </StackPanel>
 
                 </Expander>

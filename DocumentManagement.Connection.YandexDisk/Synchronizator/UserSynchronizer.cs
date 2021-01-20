@@ -39,8 +39,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
 
-
-        public void LoadLocalCollect()
+        public void LoadCollection()
         {
             // users = context.Users;
         }
@@ -49,7 +48,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             await context.SaveChangesAsync();
         }
-
 
         public async Task<bool> RemoteExist(int id)
         {
@@ -63,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public async Task DownloadRemote(int id)
         {
             await Download(id);
             if (await LocalExist(id))
@@ -93,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 localUser = await context.Users.FindAsync(id);
         }
 
-        public async Task DeleteLocalAsync(int id)
+        public async Task DeleteLocal(int id)
         {
             if (await LocalExist(id))
                 context.Users.Remove(localUser);
@@ -105,9 +103,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return localUser != null;
         }
 
-        public async Task DeleteRemoteAsync(int id) => await disk.DeleteUser((ID<UserDto>)id);
+        public async Task DeleteRemote(int id) => await disk.DeleteUser((ID<UserDto>)id);
 
-        public async Task UpdateRemoteAsync(int id)
+        public async Task UploadLocal(int id)
         {
             await Find(id);
             UserDto user = new UserDto(
@@ -115,6 +113,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 login: localUser.Login,
                 name: localUser.Name);
             await disk.UnloadUser(user);
+        }
+
+        public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

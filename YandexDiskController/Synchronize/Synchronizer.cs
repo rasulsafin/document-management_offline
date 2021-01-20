@@ -15,7 +15,6 @@ namespace MRS.DocumentManagement
     /// </summary>
     public class Synchronizer
     {
-
         public delegate void ProgressChangeDelegate(int current, int total, string message);
 
         public event ProgressChangeDelegate ProgressChange;
@@ -26,6 +25,10 @@ namespace MRS.DocumentManagement
         private int current;
 
         public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
+
+        public bool Syncing { get; private set; }
+
+        public bool NeedStopSync { get; private set; }
 
         public async void Initialize(string accessToken)
         {
@@ -65,48 +68,86 @@ namespace MRS.DocumentManagement
         }
 
         #region Update Table
-        public bool Syncing { get; private set; }
-
-        public bool NeedStopSync { get; private set; }
-
         public void Update(ID<ProjectDto> id)
         {
             if (Syncing) return;
-            Revisions.UpdateProject((int)id);
+            Revisions.GetProject((int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ProjectDto> id)
+        {
+            if (Syncing) return;
+            Revisions.GetProject((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<UserDto> id)
         {
             if (Syncing) return;
-            Revisions.UpdateUser((int)id);
+            Revisions.GetUser((int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<UserDto> id)
+        {
+            if (Syncing) return;
+            Revisions.GetUser((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.UpdateObjective((int)idProj, (int)id);
+            Revisions.GetObjective((int)idProj, (int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
+        {
+            if (Syncing) return;
+            Revisions.GetObjective((int)idProj, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.UpdateItem((int)idProj, (int)id);
+            Revisions.GetItem((int)idProj, (int)id).Incerment();
+            SaveRevisions();
+        }
+
+        public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
+        {
+            if (Syncing) return;
+            Revisions.GetItem((int)idProj, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.UpdateItem((int)idProj, (int)idObj, (int)id);
+            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Incerment();
             SaveRevisions();
         }
+
+        public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        {
+            if (Syncing) return;
+            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Delete();
+            SaveRevisions();
+        }
+
         #endregion
 
         public async Task SyncTableAsync(ProgressChangeDelegate progressChange)
         {
+            if (yandex == null)
+            {
+                progressChange?.Invoke(-1, -1, "Не возможно выполнить синхронизацию");
+                return;
+            }
+
             RevisionCollection revisions = await yandex.GetRevisionsAsync();
             total = 0; // GetCount(Revisions) + GetCount(revisions);
             current = 0; // GetCount(Revisions) + GetCount(revisions);
@@ -131,15 +172,12 @@ namespace MRS.DocumentManagement
             NeedStopSync = true;
         }
 
-        private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
+        private async Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoteRevisions)
         {
             progress.Report((current, Revisions.Total, "Подготовка данных"));
 
-            // List<int> download = new List<int>();
-            // List<int> unload = new List<int>();
-
             List<Revision> local = synchro.GetRevisions(Revisions);
-            List<Revision> remote = synchro.GetRevisions(remoreRevisions);
+            List<Revision> remote = synchro.GetRevisions(remoteRevisions);
 
             total += local.Count;
             total += remote.Count;
@@ -147,177 +185,105 @@ namespace MRS.DocumentManagement
             if (local == null) local = new List<Revision>();
             if (remote == null) remote = new List<Revision>();
 
-            synchro.LoadLocalCollect();
-            progress.Report((current, Revisions.Total, "Подготовка завершена"));
+            synchro.LoadCollection();
+            progress.Report((current, Revisions.Total, "Синхронизация"));
             foreach (var localRev in local)
             {
-                progress.Report((current, Revisions.Total, "Загрузка"));
                 if (NeedStopSync) break;
-
-                // Находим совподения
                 var remoteRev = remote.Find(r => r.ID == localRev.ID);
-                if (remoteRev == null)
-                {
-                    // Загружаем на сервер
-                    await synchro.UpdateRemoteAsync(localRev.ID);
-                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
-                    if (subSynchronizes != null)
-                    {
-                        foreach (var subSynchronize in subSynchronizes)
-                        {
-                            await Synchronize(progress, subSynchronize, remoreRevisions);
-                        }
-                    }
-                }
-                else if (localRev < remoteRev)
-                {
-                    // Скачиваем с сервера
-                    if (await synchro.RemoteExist(localRev.ID))
-                    {
-                        var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
-                        if (subSynchronizes != null)
-                        {
-                            foreach (var subSynchronize in subSynchronizes)
-                            {
-                                await Synchronize(progress, subSynchronize, remoreRevisions);
-                            }
-                        }
-
-                        await synchro.DownloadAndUpdateAsync(localRev.ID);
-                    }
-                    else
-                    {
-                        synchro.DeleteLocalAsync(localRev.ID);
-                    }
-
-                    if (!NeedStopSync)
-                        synchro.SetRevision(Revisions, remoteRev);
-
-                    remote.Remove(remoteRev);
-
-                    // localRev.Rev = remoteRev.Rev;
-                }
-                else if (localRev > remoteRev)
-                {
-                    // Загружаем на сервер
-
-                    if (await synchro.LocalExist(localRev.ID))
-                    {
-                        var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
-                        if (subSynchronizes != null)
-                        {
-                            foreach (var subSynchronize in subSynchronizes)
-                            {
-                                await Synchronize(progress, subSynchronize, remoreRevisions);
-                            }
-                        }
-
-                        await synchro.UpdateRemoteAsync(localRev.ID);
-
-                    }
-                    else
-                    {
-                        await synchro.DeleteRemoteAsync(localRev.ID);
-                    }
-
-                    remote.Remove(remoteRev);
-                }
-                else if (localRev.Equals(remoteRev))
-                {
-                    // Пропускаем
-                    remote.Remove(remoteRev);
-                }
-
-                progress.Report((++current, Revisions.Total, "Загрузка"));
+                await SyncSingleRevision(progress, synchro, remoteRevisions, localRev, remoteRev);
+                remote.Remove(remoteRev);
             }
 
             foreach (var remoteRev in remote)
             {
                 if (NeedStopSync) break;
-
-                // Скачиваем с сервера
-                if (await synchro.RemoteExist(remoteRev.ID))
-                {
-                    await synchro.DownloadAndUpdateAsync(remoteRev.ID);
-
-                    var subSynchronizes = await synchro.GetSubSynchronizesAsync(remoteRev.ID);
-                    if (subSynchronizes != null)
-                    {
-                        foreach (var subSynchronize in subSynchronizes)
-                        {
-                            await Synchronize(progress, subSynchronize, remoreRevisions);
-                        }
-                    }
-                }
-                else
-                {
-                    await synchro.DeleteLocalAsync(remoteRev.ID);
-                }
-
-                progress.Report((++current, Revisions.Total, "Загрузка"));
-
-                if (!NeedStopSync)
-                    synchro.SetRevision(Revisions, remoteRev);
-
-                // local.Add(remoteRev);
+                var localRev = local.Find(r => r.ID == remoteRev.ID);
+                await SyncSingleRevision(progress, synchro, remoteRevisions, localRev, remoteRev);
             }
 
             progress.Report((current, Revisions.Total, "Сохранение результатов"));
             await synchro.SaveLocalCollectAsync();
         }
 
-        // private static void CompareRevision(List<int> download, List<int> unload,
-        //    List<Revision> local, List<Revision> remote/*, IProgress<int> progress*/)
-        // {
+        private async Task SyncSingleRevision(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoteRevisions, Revision localRev, Revision remoteRev)
+        {
+            // Синхронизация одной записи
+            SyncAction action = await synchro.GetActoin(localRev, remoteRev);
+            switch (action)
+            {
+                case SyncAction.None:
+                    break;
 
-        // foreach (var localRev in local)
-        //    {
-        //        if (NeedStopSync) break;
-        //        // Находим совподения
-        //        var remoteRev = remote.Find(r => r.ID == localRev.ID);
-        //        if (remoteRev == null)
-        //        {
-        //            // Загружаем на сервер
-        //            unload.Add(localRev.ID);
-        //        }
-        //        else if (localRev < remoteRev)
-        //        {
-        //            // Скачиваем с сервера
-        //            download.Add(localRev.ID);
-        //            remote.Remove(remoteRev);
-        //            localRev.Rev = remoteRev.Rev;
-        //        }
-        //        else if (localRev > remoteRev)
-        //        {
-        //            // Загружаем на сервер
-        //            unload.Add(localRev.ID);
-        //            remote.Remove(remoteRev);
-        //        }
-        //        else if (localRev.Equals(remoteRev))
-        //        {
-        //            // Пропускаем
-        //            //progress.Report(1);
-        //            remote.Remove(remoteRev);
-        //        }
-        //        //progress.Report(1);
-        //    }
-        //    foreach (var remoteRev in remote)
-        //    {
-        //        if (NeedStopSync) break;
-        //        // Скачиваем с сервера
-        //        download.Add(remoteRev.ID);
-        //        local.Add(remoteRev);
-        //    }
-        // }
+                case SyncAction.Download:
+                    await DownloadAction(progress, synchro, remoteRevisions, remoteRev);
+                    break;
 
-        // private int GetCount(Revisions revisions)
-        // {
-        //    int? result = 0;
-        //    result += revisions.Projects?.Count + revisions.Users?.Count;
-        //    result += revisions.Projects?.Sum(x => x.Objectives?.Count);
-        //    result += revisions.Projects?.Sum(x => x.Items?.Count);
-        //    result += revisions.Projects?.Sum(x => x.Objectives?.Sum(q => q.Items?.Count));
-        //    return result ?? 0;
-        // }
+                case SyncAction.Upload:
+                    await UploadAction(progress, synchro, remoteRevisions, localRev);
+                    break;
+
+                case SyncAction.Delete:
+                    await DeleteAction(synchro, remoteRevisions, localRev, remoteRev);
+                    break;
+
+                default:
+                    break;
+            }
+
+            progress.Report((++current, Revisions.Total, "Синхронизация"));
+        }
+
+        private async Task DownloadAction(IProgress<(int, int, string)> progress,
+            ISynchronizer synchro,
+            RevisionCollection remoteRevisions,
+            Revision remoteRev)
+        {
+            // Скачиваем с сервера
+            await synchro.DownloadRemote(remoteRev.ID);
+            await SubSynchronize(progress, synchro, remoteRevisions, remoteRev);
+            if (!NeedStopSync)
+                synchro.SetRevision(remoteRevisions, remoteRev);
+        }
+
+        private async Task UploadAction(IProgress<(int, int, string)> progress,
+            ISynchronizer synchro,
+            RevisionCollection remoreRevisions,
+            Revision localRev)
+        {
+            // Загружаем на сервер
+            await SubSynchronize(progress, synchro, remoreRevisions, localRev);
+            await synchro.UploadLocal(localRev.ID);
+            if (!NeedStopSync)
+                synchro.SetRevision(Revisions, localRev);
+        }
+
+
+        private async Task DeleteAction(ISynchronizer synchro, RevisionCollection remoteRevisions, Revision localRev, Revision remoteRev)
+        {
+            if (!localRev.IsDelete)
+            {
+                await synchro.DeleteLocal(localRev.ID);
+                synchro.SetRevision(Revisions, remoteRev);
+            }
+
+            if (!remoteRev.IsDelete)
+            {
+                await synchro.DeleteRemote(localRev.ID);
+                synchro.SetRevision(remoteRevisions, remoteRev);
+            }
+        }
+
+        private async Task SubSynchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions, Revision localRev)
+        {
+            var subSynchronizes = await synchro.GetSubSynchronizesAsync(localRev.ID);
+            if (subSynchronizes != null)
+            {
+                foreach (var subSynchronize in subSynchronizes)
+                {
+                    await Synchronize(progress, subSynchronize, remoreRevisions);
+                }
+            }
+        }
     }
 }

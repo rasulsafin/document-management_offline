@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,7 @@ namespace MRS.DocumentManagement
 {
     public class ItemsSynchronizer : ISynchronizer
     {
-        private DiskManager yandex;
+        private DiskManager disk;
         private ProjectDto remoteProject;
         private ProjectDto localProject;
         private ObjectiveDto remoteObj;
@@ -23,7 +24,7 @@ namespace MRS.DocumentManagement
 
         public ItemsSynchronizer(DiskManager yandex, ProjectDto remoteProject, ProjectDto localProject)
         {
-            this.yandex = yandex;
+            this.disk = yandex;
             this.remoteProject = remoteProject;
             this.localProject = localProject;
             toObjective = false;
@@ -31,7 +32,7 @@ namespace MRS.DocumentManagement
 
         public ItemsSynchronizer(DiskManager yandex, ProjectDto actualProject, ObjectiveDto remoteObj, ObjectiveDto localObj)
         {
-            this.yandex = yandex;
+            this.disk = yandex;
             this.remoteProject = actualProject;
             this.localProject = actualProject;
             this.remoteObj = remoteObj;
@@ -46,7 +47,7 @@ namespace MRS.DocumentManagement
             if (projectRev == null)
                 return new List<Revision>();
 
-            if (remoteObj == null)
+            if (!toObjective)
             {
                 if (projectRev.Items == null)
                     projectRev.Items = new List<Revision>();
@@ -54,9 +55,15 @@ namespace MRS.DocumentManagement
             }
             else
             {
+                int idObj = (int)remoteObj.ID;
                 if (projectRev.Objectives == null)
                     projectRev.Objectives = new List<ObjectiveRevision>();
-                return projectRev.Objectives.Select(x => (Revision)x).ToList();
+                var objective = projectRev.Objectives.Find(x => x.ID == idObj);
+                if (objective == null)
+                    return new List<Revision>();
+                if (objective.Items == null)
+                    objective.Items = new List<Revision>();
+                return objective.Items;
             }
         }
 
@@ -65,7 +72,7 @@ namespace MRS.DocumentManagement
             int idProj = (int)remoteProject.ID;
             var projectRev = revisions.Projects.Find(x => x.ID == idProj);
 
-            if (remoteObj == null)
+            if (!toObjective)
             {
                 CopyRevision(rev, projectRev);
             }
@@ -92,9 +99,12 @@ namespace MRS.DocumentManagement
             }
         }
 
-        public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
+        public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id)
+        {
+            return Task.FromResult<List<ISynchronizer>>(null);
+        }
 
-        public void LoadLocalCollect()
+        public void LoadCollection()
         {
             if (toObjective)
             {
@@ -127,62 +137,89 @@ namespace MRS.DocumentManagement
             return Task.CompletedTask;
         }
 
-        public Task<bool> RemoteExist(int id)
+        public async Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
         {
-            Donwload(id);
-            return Task.FromResult(remoteItem != null);
+            if (localRev == null) localRev = new Revision(remoteRev.ID);
+            if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+            if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
+
+            FindRemote(localRev.ID);
+            FindLocal(localRev.ID);
+            if (remoteItem == null) remoteRev.Rev = 0;
+            if (localItem == null) localRev.Rev = 0;
+
+            if (localRev < remoteRev) return SyncAction.Download;
+            if (localRev > remoteRev) return SyncAction.Upload;
+
+            FileInfo localFile = new FileInfo(localItem.ExternalItemId);
+            (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
+
+            if (!localFile.Exists || (date > localFile.LastWriteTime && length != 0))
+                return SyncAction.Download;
+            if (localFile.Exists || date < localFile.LastWriteTime)
+                return SyncAction.Upload;
+
+            return SyncAction.None;
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public async Task DownloadRemote(int id)
         {
-            Donwload(id);
-            var path = PathManager.GetProjectDir(remoteProject);
-            await yandex.DownloadItemFile(remoteItem, path);
-            localItems.Add(remoteItem);
+            FindRemote(id);
+            FindLocal(id);
+
+            var path = PathManager.GetLocalProjectDir(remoteProject);
+            await disk.DownloadItemFile(remoteItem, path);
+
+            if (localItem == null)
+            {
+                localItems.Add(remoteItem);
+            }
+            else
+            {
+                int index = localItems.FindIndex(x => x.ID == remoteItem.ID);
+                localItems[index] = remoteItem;
+            }
         }
 
-        public Task DeleteLocalAsync(int id)
+        public async Task UploadLocal(int id)
+        {
+            FindRemote(id);
+            FindLocal(id);
+
+            await disk.UnloadFileItem(remoteProject, localItem);
+            if (remoteItem == null)
+            {
+                remoteItems.Add(localItem);
+            }
+            else
+            {
+                int index = remoteItems.FindIndex(x => x.ID == remoteItem.ID);
+                remoteItems[index] = localItem;
+            }
+        }
+
+        public Task DeleteLocal(int id)
         {
             var id1 = (ID<ItemDto>)id;
             localItems.RemoveAll(x => x.ID == id1);
             return Task.CompletedTask;
         }
 
-        public Task<bool> LocalExist(int id)
-        {
-            Find(id);
-            return Task.FromResult(localItem != null);
-        }
-
-        public async Task UpdateRemoteAsync(int id)
-        {
-            Find(id);
-            try
-            {
-                // TODO: Проверить файл ли это
-                // Загружаем сам файл
-                await yandex.UnloadFileItem(remoteProject, localItem);
-            }
-            catch (FileNotFoundException)
-            {
-            }
-        }
-
-        public Task DeleteRemoteAsync(int id)
+        public Task DeleteRemote(int id)
         {
             var id1 = (ID<ItemDto>)id;
             remoteItems.RemoveAll(x => x.ID == id1);
             return Task.CompletedTask;
         }
 
-        private void Donwload(int id)
+        private void FindRemote(int id)
         {
             var id1 = (ID<ItemDto>)id;
             if (remoteItem?.ID != id1)
                 remoteItem = remoteItems.First(x => x.ID == id1);
         }
 
-        private void Find(int id)
+        private void FindLocal(int id)
         {
             var id1 = (ID<ItemDto>)id;
             if (localItem?.ID != id1)

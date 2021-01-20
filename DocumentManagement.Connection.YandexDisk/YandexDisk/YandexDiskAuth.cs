@@ -70,7 +70,6 @@ window.close();
                 // === complete ===
                 result = access_token;
                 // ===          ===
-
             }
             catch (Exception sdkEx)
             {
@@ -84,7 +83,6 @@ window.close();
             return result;
         }
 
-
         private void SetResponse(HttpListenerContext context, string responseString)
         {
             var buffer = Encoding.UTF8.GetBytes(responseString);
@@ -95,6 +93,5 @@ window.close();
             response.OutputStream.Write(buffer, 0, buffer.Length);
             response.OutputStream.Close();
         }
-
     }
 }

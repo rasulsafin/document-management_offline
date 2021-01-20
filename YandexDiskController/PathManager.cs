@@ -19,7 +19,6 @@ namespace MRS.DocumentManagement
         private static readonly string ITEMS_FILE = "items.json";
         private static readonly string ITEMS_OBJ_FILE = "items_{0}.json";
 
-
         private static readonly string ITM_DIR = "Items";
         private static readonly string PROJ_FILE = "project_{0}.json";
         private static readonly string OBJ_FILE = "objective_{0}.json";
@@ -37,21 +36,21 @@ namespace MRS.DocumentManagement
 
         public static string GetItemsFile(ProjectDto project)
         {
-            return Path.Combine(GetProjectDir(project), ITEMS_FILE);
+            return Path.Combine(GetLocalProjectDir(project), ITEMS_FILE);
         }
 
         public static string GetItemsFile(ObjectiveDto objective, ProjectDto project)
         {
-            return Path.Combine(GetProjectDir(project), string.Format(ITEMS_OBJ_FILE, objective.ID));
+            return Path.Combine(GetLocalProjectDir(project), string.Format(ITEMS_OBJ_FILE, objective.ID));
         }
 
-        public static string GetObjectivesFile(ProjectDto project) => Path.Combine(GetProjectDir(project), OBJS_FILE);
+        public static string GetObjectivesFile(ProjectDto project) => Path.Combine(GetLocalProjectDir(project), OBJS_FILE);
 
         public static string GetUsersFile() => Path.Combine(APP_DIR, USERS_FILE);
 
         public static string GetProjectsFile() => Path.Combine(APP_DIR, PROJS_FILE);
 
-        public static string GetProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
+        public static string GetLocalProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 
         public static string GetRemoteProjectDir(ProjectDto project) => YandexHelper.DirectoryName(APP_DIR, project.Title);
 
@@ -66,7 +65,7 @@ namespace MRS.DocumentManagement
         // }
         public static string GetItemsDir(ProjectDto project)
         {
-            string projDir = GetProjectDir(project);
+            string projDir = GetLocalProjectDir(project);
 
             // if (objective == null)
             return Path.Combine(projDir, ITM_DIR);

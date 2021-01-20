@@ -155,7 +155,6 @@ namespace WPFStorage.Dialogs
 
         public InputBoxModel()
         {
-
             OkCommand = new HCommand(Ok);
             CancelCommand = new HCommand(Cancel);
             Button3Command = new HCommand(Button3);

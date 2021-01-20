@@ -12,51 +12,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     /// <summary>Нижний уровень взаимодействия с сервисом YandexDisk.</summary>
     public class YandexDiskController : IDiskController
     {
-
         public static CoolLogger logger = new CoolLogger("controller");
 
-
         private string accessToken;
-
 
         public YandexDiskController(string accessToken)
         {
             this.accessToken = accessToken;
-
-        }
-
-        private Exception WebExceptionHandler(Exception exception)
-        {
-            if (exception is WebException web)
-            {
-                if (web.Status == WebExceptionStatus.Timeout)
-                {
-                    return new TimeoutException("Время ожидания сервера вышло.", web);
-                }
-                else if (web.Status == WebExceptionStatus.ProtocolError)
-                {
-                    if (web.Response is HttpWebResponse http)
-                    {
-                        if (http.StatusCode == HttpStatusCode.NotFound)
-                        {
-                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
-                            logger.Message(message);
-                            return new FileNotFoundException(message, web);
-                        }
-
-                        if (http.StatusCode == HttpStatusCode.Conflict)
-                        {
-                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
-                            logger.Message(message);
-                            return new FileNotFoundException(message, web);
-                        }
-                    }
-                }
-            }
-
-            logger.Error(exception);
-            logger.Open();
-            return exception;
         }
 
         #region PROPFIND
@@ -64,10 +26,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <summary>
         /// Возвращает список элементов.
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="path">Путь к папке</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="FileNotFoundException" />
-        /// <exception cref="TimeoutException" />
+        /// <exception cref="FileNotFoundException"> Файл отсутвует </exception>
+        /// <exception cref="TimeoutException" > Время ожидание вышло </exception>
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
         {
             try
@@ -88,11 +50,31 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
-
             }
         }
 
+        public async Task<DiskElement> GetInfoAsync(string path = "/")
+        {
+            try
+            {
+                HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
+                WebResponse response = await request.GetResponseAsync();
+                XmlDocument xml = new XmlDocument();
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (XmlReader xmlReader = XmlReader.Create(stream))
+                        xml.Load(xmlReader);
+                }
 
+                response.Close();
+                DiskElement item = DiskElement.GetElement(xml.DocumentElement);
+                return item;
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+            }
+        }
 
         #endregion
         #region Create Directory
@@ -118,7 +100,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
-
             }
         }
         #endregion
@@ -227,7 +208,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
         }
 
-
         #endregion
         #region Download File
 
@@ -312,7 +292,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
-
             }
         }
         #endregion
@@ -378,7 +357,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
-
             }
 
             return false;
@@ -403,7 +381,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
-
             }
         }
         #endregion
@@ -441,5 +418,39 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
         }
         #endregion
+
+        private Exception WebExceptionHandler(Exception exception)
+        {
+            if (exception is WebException web)
+            {
+                if (web.Status == WebExceptionStatus.Timeout)
+                {
+                    return new TimeoutException("Время ожидания сервера вышло.", web);
+                }
+                else if (web.Status == WebExceptionStatus.ProtocolError)
+                {
+                    if (web.Response is HttpWebResponse http)
+                    {
+                        if (http.StatusCode == HttpStatusCode.NotFound)
+                        {
+                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
+                            logger.Message(message);
+                            return new FileNotFoundException(message, web);
+                        }
+
+                        if (http.StatusCode == HttpStatusCode.Conflict)
+                        {
+                            string message = $"Запрашиваемый файл или коталог отсутвует. uri ={http.ResponseUri}";
+                            logger.Message(message);
+                            return new FileNotFoundException(message, web);
+                        }
+                    }
+                }
+            }
+
+            logger.Error(exception);
+            logger.Open();
+            return exception;
+        }
     }
 }

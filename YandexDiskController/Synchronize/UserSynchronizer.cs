@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
@@ -12,6 +13,7 @@ namespace MRS.DocumentManagement
         private DiskManager disk;
         private UserDto remoteUser;
         private UserDto localUser;
+        private List<UserDto> remoteUsers;
 
         public UserSynchronizer(DiskManager disk)
         {
@@ -21,12 +23,14 @@ namespace MRS.DocumentManagement
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             if (revisions.Users == null)
-                revisions.Users = new List<Revision>();
-            return revisions.Users;
+                return new List<Revision>();
+            return new List<Revision>(revisions.Users);
         }
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
+            if (revisions.Users == null)
+                revisions.Users = new List<Revision>();
             var index = revisions.Users.FindIndex(x => x.ID == rev.ID);
             if (index < 0)
                 revisions.Users.Add(new Revision(rev.ID, rev.Rev));
@@ -34,22 +38,34 @@ namespace MRS.DocumentManagement
                 revisions.Users[index].Rev = rev.Rev;
         }
 
-        public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => null;
+        public void LoadCollection() => users = ObjectModel.GetUsers();
 
-        public void LoadLocalCollect() => users = ObjectModel.GetUsers();
-
-        public async Task SaveLocalCollectAsync() => ObjectModel.SaveUsers(users);
-
-        public async Task<bool> RemoteExist(int id)
+        public Task SaveLocalCollectAsync()
         {
-            remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
-            return remoteUser != null;
+            ObjectModel.SaveUsers(users);
+            return Task.CompletedTask;
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public Task<List<ISynchronizer>> GetSubSynchronizesAsync(int id) => Task.FromResult<List<ISynchronizer>>(null);
+
+        public async Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
         {
-            if ((int)remoteUser.ID != id)
-                remoteUser = await disk.GetUserAsync((ID<UserDto>)id);
+            if (localRev == null) localRev = new Revision(remoteRev.ID);
+            if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+            if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
+            await Download(localRev.ID);
+            FindLocal(localRev.ID);
+            if (remoteUser == null) remoteRev.Rev = 0;
+            if (localUser == null) localRev.Rev = 0;
+
+            if (localRev < remoteRev) return SyncAction.Download;
+            if (localRev > remoteRev) return SyncAction.Upload;
+            return SyncAction.None;
+        }
+
+        public async Task DownloadRemote(int id)
+        {
+            await Download(id);
             var index = users.FindIndex(x => (int)x.ID == id);
             if (index < 0)
                 users.Add(remoteUser);
@@ -57,21 +73,35 @@ namespace MRS.DocumentManagement
                 users[index] = remoteUser;
         }
 
-        public async Task DeleteLocalAsync(int id) => users.RemoveAll(x => (int)x.ID == id);
-
-        public async Task<bool> LocalExist(int id)
+        public async Task UploadLocal(int id)
         {
-            localUser = users.Find(x => (int)x.ID == id);
-            return localUser != null;
-        }
-
-        public async Task UpdateRemoteAsync(int id)
-        {
-            if ((int)localUser.ID != id)
-                localUser = users.Find(x => (int)x.ID == id);
+            FindLocal(id);
             await disk.UnloadUser(localUser);
         }
 
-        public async Task DeleteRemoteAsync(int id) => await disk.DeleteUser((ID<UserDto>)id);
+        public Task DeleteLocal(int id)
+        {
+            users.RemoveAll(x => (int)x.ID == id);
+            return Task.CompletedTask;
+        }
+
+
+        public async Task DeleteRemote(int id) => await disk.DeleteUser((ID<UserDto>)id);
+
+        private async Task Download(int id)
+        {
+            var id1 = new ID<UserDto>(id);
+
+            //if (remoteUsers == null) remoteUsers = new List<UserDto>();
+            if (remoteUser.ID != id1)
+                remoteUser = await disk.GetUserAsync(id1);
+        }
+
+        private void FindLocal(int id)
+        {
+            var id1 = new ID<UserDto>(id);
+            if (localUser.ID != id1)
+                localUser = users.Find(x => x.ID == id1);
+        }
     }
 }

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Microsoft.Win32;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -21,9 +21,22 @@ namespace MRS.DocumentManagement.Contols
         #region bending
         private DiskManager yandex;
         private bool toObjective;
-        private ProjectModel selectedProject;
-        private ObjectiveModel selectedObjective;
-        private ItemModel selectedItem;
+
+        public ItemViewModel()
+        {
+            AddItemsCommand = new HCommand(AddItem);
+            DelItemsCommand = new HCommand(DelItem);
+            GetIdCommand = new HCommand(GetIDsAsync);
+            FindItemIdCommand = new HCommand(FindItemId);
+            ZeroIdCommand = new HCommand(ZeroId);
+            AllItemCommand = new HCommand(AllItem);
+
+            // UnloadCommand = new HCommand(UnloadAsync);
+            // SaveFileCommand = new HCommand(SaveFile);
+            // LoadFileCommand = new HCommand(LoadFile);
+            // DownloadCommand = new HCommand(DownloadAsync);
+            Initilization();
+        }
 
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
 
@@ -47,8 +60,9 @@ namespace MRS.DocumentManagement.Contols
 
                     ToObjective = false;
                     OnPropertyChanged();
-                    //OnPropertyChanged("SelectedObjective");
-                    //OnPropertyChanged("Objectives");
+
+                    // OnPropertyChanged("SelectedObjective");
+                    // OnPropertyChanged("Objectives");
                     OnPropertyChanged("Items");
                 }
             }
@@ -108,26 +122,46 @@ namespace MRS.DocumentManagement.Contols
 
         public HCommand ZeroIdCommand { get; }
 
+        public HCommand AllItemCommand { get; }
+
         // public HCommand RenItemsCommand { get; }
         // public HCommand SaveFileCommand { get; }
         // public HCommand LoadFileCommand { get; }
         // public HCommand DownloadCommand { get; }
         #endregion
 
-        public ItemViewModel()
+        private static ItemTypeDto GetItemTypeDto(string extension)
         {
-            AddItemsCommand = new HCommand(AddItem);
-            DelItemsCommand = new HCommand(DelItem);
-            GetIdCommand = new HCommand(GetIDsAsync);
-            FindItemIdCommand = new HCommand(FindItemId);
-            ZeroIdCommand = new HCommand(ZeroId);
+            if (MEDIA_EXTENTION.Contains(extension))
+            {
+                return ItemTypeDto.Media;
+            }
+            else if (MODELS_EXTENTION.Contains(extension))
+            {
+                return ItemTypeDto.Bim;
+            }
+            else
+            {
+                return ItemTypeDto.File;
+            }
+        }
 
-            // UnloadCommand = new HCommand(UnloadAsync);
-            // SaveFileCommand = new HCommand(SaveFile);
-            // LoadFileCommand = new HCommand(LoadFile);
-            // DownloadCommand = new HCommand(DownloadAsync);
+        private void AllItem()
+        {
+            Items.Clear();
+            AddCollect(SelectedProject.dto.Items);
+            foreach (var obj in Objectives)
+            {
+                AddCollect(obj.dto.Items);
+            }
 
-            Initilization();
+            void AddCollect(IEnumerable<ItemDto> items)
+            {
+                foreach (var item in items)
+                {
+                    Items.Add(new ItemModel(item));
+                }
+            }
         }
 
         private void ZeroId()
@@ -140,7 +174,6 @@ namespace MRS.DocumentManagement.Contols
         {
             // var dirItems = PathManager.GetItemsDir(SelectedProject.dto);
             // if (!Directory.Exists(dirItems)) Directory.CreateDirectory(dirItems);
-
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Выберете файл";
             ofd.Multiselect = false;
@@ -152,10 +185,12 @@ namespace MRS.DocumentManagement.Contols
                 FileInfo file = new FileInfo(ofd.FileName);
                 try
                 {
-                    string path = PathManager.GetProjectDir(SelectedProject.dto);
+                    string path = PathManager.GetLocalProjectDir(SelectedProject.dto);
                     file = file.CopyTo(Path.Combine(path, file.Name));
                 }
-                catch { }
+                catch
+                {
+                }
 
                 model.Name = file.Name;
                 model.ExternalItemId = file.FullName;
@@ -208,131 +243,11 @@ namespace MRS.DocumentManagement.Contols
         private void FindItemId()
         {
             WinBox.ShowMessage("Эта кнопка более не работает!");
-
-            // if (WinBox.ShowInput(
-            //    title: "Открыть елемент",
-            //    question: "Введи id",
-            //    input: out string input,
-            //    okText: "Открыть", cancelText: "Отмена",
-            //    defautValue: SelectedObjective == null ? "" : SelectedObjective.ID.ToString()
-            //    ))
-            // {
-            //    if (int.TryParse(input, out int id))
-            //    {
-            //        (ItemDto item, ObjectiveDto objective, ProjectDto project) = ObjectModel.GetItem((ID<ItemDto>)id);
-
-            // string message = "ObjectiveDto:\n";
-            //        if (item != null)
-            //        {
-            //            message += $"ID={item.ID}\n";
-            //            message += $"Name={item.Name}\n";
-            //            message += $"ItemType={item.ItemType}\n";
-            //            message += $"ExternalItemId={item.ExternalItemId}\n";
-            //            //message += $"ID={item.}\n";
-            //        }
-
-            // message += "ObjectiveDto:\n";
-            //        if (objective != null)
-            //        {
-            //            message += $"ID={objective.ID}\n";
-            //            message += $"ProjectID={objective.ProjectID}\n";
-            //            message += $"Title={objective.Title}\n";
-            //            message += $"Status={objective.Status}\n";
-            //            message += $"Description={objective.Description}\n";
-            //            message += $"CreationDate={objective.CreationDate}\n";
-            //            message += $"DueDate={objective.DueDate}\n";
-            //        }
-
-            // message += $"project:\n";
-            //        if (project != null)
-            //        {
-            //            message += $"ID={project.ID}\n";
-            //            message += $"Title={project.Title}\n";
-            //        }
-            //        WinBox.ShowMessage(message);
-            //    }
-            // }
         }
 
-        private async void GetIDsAsync()
+        private void GetIDsAsync()
         {
             WinBox.ShowMessage("Эта кнопка более не работает!");
-            // ChechYandex();
-            // if (SelectedProject == null)
-            // {
-            //    WinBox.ShowMessage("Нет выбранного проекта.");
-            //    return;
-            // }
-
-            // List<ID<ItemDto>> ids = ToObjective ? await yandex.GetItemsIdAsync(SelectedProject.dto, SelectedObjective.dto.ID)
-            //    : await yandex.GetItemsIdAsync(SelectedProject.dto);
-
-            // StringBuilder message = new StringBuilder();
-            // for (int i = 0; i < ids.Count; i++)
-            // {
-            //    if (i != 0) message.Append(',');
-            //    if (i % 10 == 0) message.Append('\n');
-            //    message.Append(ids[i].ToString());
-            // }
-            // WinBox.ShowMessage(message.ToString());
-        }
-
-        private async void DownloadAsync()
-        {
-            // ChechYandex();
-            // string message = ToObjective ? $"Скачать список item-ов в задание [{SelectedObjective.Title}] c сервера ?"
-            //    : $"Скачать список item-ов в проекте [{SelectedProject.Title}] с сервера?";
-            // if (WinBox.ShowQuestion(message))
-            // {
-            //    List<ItemDto> collect = await yandex.GetItemsAsync(SelectedProject.dto, ToObjective ? SelectedObjective.dto : null);
-            //    Items.Clear();
-            //    foreach (ItemDto item in collect)
-            //    {
-            //        Items.Add((ItemModel)item);
-            //    }
-            // }
-        }
-
-        private async void UnloadAsync()
-        {
-            // ChechYandex();
-            ////string message = ToObjective ? $"Загрузить файл на сервер в проект [{SelectedProject.Title}] и задание [{SelectedObjective.Title}]?"
-            ////    : $"Загрузить файл на сервер в проект [{SelectedProject.Title}]?";
-            ////if (WinBox.ShowQuestion(message))
-            ////{
-            // OpenFileDialog ofd = new OpenFileDialog();
-            // ofd.Title = "Выберете файл";
-            // ofd.Multiselect = false;
-            // if (ofd.ShowDialog() == true)
-            // {
-            //    FileInfo file = new FileInfo(ofd.FileName);
-            //    ItemDto item = new ItemDto();
-            //    item.Name = ofd.SafeFileName;
-            //    item.ID = (ID<ItemDto>)(Items.Count + 1);
-            //    item.ItemType = GetItemTypeDto(file.Extension);
-
-            // if (!ToObjective)
-            //        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto);
-            //    else
-            //        await yandex.UnloadItemAsync(item, ofd.FileName, SelectedProject.dto, SelectedObjective.dto);
-            // }
-            ////}
-        }
-
-        private static ItemTypeDto GetItemTypeDto(string extension)
-        {
-            if (MEDIA_EXTENTION.Contains(extension))
-            {
-                return ItemTypeDto.Media;
-            }
-            else if (MODELS_EXTENTION.Contains(extension))
-            {
-                return ItemTypeDto.Bim;
-            }
-            else
-            {
-                return ItemTypeDto.File;
-            }
         }
 
         #region Инициализация
@@ -347,7 +262,9 @@ namespace MRS.DocumentManagement.Contols
 
                 // UpdateItems();
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         private void UpdateItems()
@@ -365,15 +282,6 @@ namespace MRS.DocumentManagement.Contols
                 }
             }
         }
-
-        // private void ChechYandex()
-        // {
-        //    if (yandex == null)
-        //    {
-        //        // yandex = new YandexDiskManager(MainViewModel.AccessToken);
-        //        yandex.TempDir = TEMP_DIR;
-        //    }
-        // }
         #endregion
 
     }

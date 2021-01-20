@@ -11,6 +11,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     public static class YandexHelper
     {
         private static readonly string URI_API_YANDEX = "https://webdav.yandex.ru/";
+
         #region Multu Platform Open Browser
         public static void OpenBrowser(string url)
         {
@@ -128,7 +129,4 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
         #endregion
     }
-
-
-
 }

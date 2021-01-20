@@ -10,8 +10,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         // }
 
         public ProjectRevision(int id, ulong rev = 0) : base(id, rev) { }
-        public List<ObjectiveRevision> Objectives { get; set; }
 
+        public List<ObjectiveRevision> Objectives { get; set; }
 
         public void UpdateObjective(int id)
         {

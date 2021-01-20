@@ -12,7 +12,6 @@ namespace MRS.DocumentManagement.Contols
         // const string ALL_TRANSACTION = "Все операции";
         // const string NON_SYNC_TRANSACTION = "Не Синхронизированные операции";
         // const string LOCAL_TRANSACTION = "Локальные операции";
-
         public static SynchronizerViewModel Instanse { get => instanse; }
 
         public ulong Revision { get; set; }

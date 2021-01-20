@@ -4,10 +4,8 @@ using WPFStorage.Base;
 
 namespace MRS.DocumentManagement.Models
 {
-
     public class ProjectModel : BaseViewModel
     {
-
         public static explicit operator ProjectModel(ProjectDto ident) => new ProjectModel(ident);
 
         [XmlIgnore]

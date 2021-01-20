@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return subSynchronizes;
         }
 
-        public void LoadLocalCollect()
+        public void LoadCollection()
         {
             // projects = context.Projects;
         }
@@ -75,13 +75,13 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 remoteProject = await disk.GetProjectAsync(_id);
         }
 
-        public async Task DeleteLocalAsync(int id)
+        public async Task DeleteLocal(int id)
         {
             if (await LocalExist(id))
                 context.Projects.Remove(localProject);
         }
 
-        public async Task DownloadAndUpdateAsync(int id)
+        public async Task DownloadRemote(int id)
         {
             await Download(id);
             if (await LocalExist(id))
@@ -110,18 +110,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return localProject != null;
         }
 
-        public async Task DeleteRemoteAsync(int id)
+        public async Task DeleteRemote(int id)
         {
             var _id = (ID<ProjectDto>)id;
             // TODO: Удалять файлы item и objective?
             await disk.DeleteProject(_id);
         }
 
-        public async Task UpdateRemoteAsync(int id)
+        public async Task UploadLocal(int id)
         {
             if (await LocalExist(id))
             {
-
                 await disk.UnloadProject(Convert(localProject));
             }
         }
@@ -133,6 +132,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 ID = new ID<ProjectDto>(project.ID),
                 Title = project.Title,
             };
+        }
+
+        public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
