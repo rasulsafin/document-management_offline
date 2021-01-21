@@ -86,6 +86,8 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
+
+            services.AddSingleton<CryptographyHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

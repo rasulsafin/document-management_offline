@@ -58,16 +58,6 @@ namespace MRS.DocumentManagement.Database
 				.HasIndex(x => x.Name)
 				.IsUnique(true);
 
-			// Items should have unique paths
-			// TODO: Windows paths are case-insensitive,
-			// and EF string comparison depends on used SQL provider
-			// property collation should be defined to specify behaviour
-			// EF 5.0 only, unfortunately
-			// https://docs.microsoft.com/en-us/ef/core/miscellaneous/collations-and-case-sensitivity
-			modelBuilder.Entity<Item>()
-				.HasIndex(x => x.Name)
-				.IsUnique(true);
-
 			modelBuilder.Entity<ObjectiveType>()
 				.HasIndex(x => x.Name)
 				.IsUnique(true);
