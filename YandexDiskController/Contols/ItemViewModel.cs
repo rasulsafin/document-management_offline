@@ -223,15 +223,15 @@ namespace MRS.DocumentManagement.Contols
                 {
                     if (ToObjective)
                     {
-                        ObjectModel.Synchronizer.Update(SelectedItem.dto.ID, SelectedObjective.dto.ID, SelectedProject.dto.ID);
-                        Items.Remove(SelectedItem);
+                        ObjectModel.Synchronizer.Delete(SelectedItem.dto.ID, SelectedObjective.dto.ID, SelectedProject.dto.ID);
                         ObjectModel.SaveItems(SelectedProject.dto, SelectedObjective.dto);
+                        Items.Remove(SelectedItem);
                     }
                     else
                     {
+                        ObjectModel.Synchronizer.Delete(SelectedItem.dto.ID, SelectedProject.dto.ID);
                         ObjectModel.SaveItems(SelectedProject.dto);
                         Items.Remove(SelectedItem);
-                        ObjectModel.Synchronizer.Update(SelectedItem.dto.ID, SelectedProject.dto.ID);
                     }
 
                     SelectedItem = null;

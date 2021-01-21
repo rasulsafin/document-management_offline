@@ -21,6 +21,14 @@ namespace MRS.DocumentManagement
         private ItemDto remoteItem;
         private ItemDto localItem;
         private bool toObjective;
+        private long localLength;
+        private long remoteLength;
+        private DateTime localDate;
+        private string localPath;
+        private DateTime remoteDate;
+        private string remotePath;
+        private int infoId;
+
 
         public ItemsSynchronizer(DiskManager yandex, ProjectDto remoteProject, ProjectDto localProject)
         {
@@ -28,6 +36,8 @@ namespace MRS.DocumentManagement
             this.remoteProject = remoteProject;
             this.localProject = localProject;
             toObjective = false;
+            if (remoteProject == null) throw new NullReferenceException("remoteProject is null");
+            if (localProject == null) throw new NullReferenceException("localProject is null");
         }
 
         public ItemsSynchronizer(DiskManager yandex, ProjectDto actualProject, ObjectiveDto remoteObj, ObjectiveDto localObj)
@@ -37,8 +47,12 @@ namespace MRS.DocumentManagement
             this.localProject = actualProject;
             this.remoteObj = remoteObj;
             this.localObj = localObj;
+            if (remoteObj == null) throw new NullReferenceException("remoteObj is null");
+            if (localObj == null) throw new NullReferenceException("localObj is null");
             toObjective = true;
         }
+
+        public string NameElement { get; set; }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
@@ -70,7 +84,7 @@ namespace MRS.DocumentManagement
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             int idProj = (int)remoteProject.ID;
-            var projectRev = revisions.Projects.Find(x => x.ID == idProj);
+            var projectRev = revisions.GetProject(idProj);
 
             if (!toObjective)
             {
@@ -79,23 +93,14 @@ namespace MRS.DocumentManagement
             else
             {
                 int idObj = (int)remoteObj.ID;
-                var index = projectRev.Objectives.FindIndex(x => x.ID == idObj);
-                if (index < 0)
-                    projectRev.Objectives.Add(new ObjectiveRevision(idObj) { Items = new List<Revision>() { rev } });
-                else
-                    CopyRevision(rev, projectRev.Objectives[index]);
+                var objective = projectRev.FindObjetive(idObj);
+                CopyRevision(rev, objective);
             }
 
             void CopyRevision(Revision rev, ObjectiveRevision revision)
             {
-                if (revision.Items == null)
-                    revision.Items = new List<Revision>();
-
-                var index = revision.Items.FindIndex(x => x.ID == rev.ID);
-                if (index < 0)
-                    revision.Items.Add(new Revision(rev.ID, rev.Rev));
-                else
-                    revision.Items[index].Rev = rev.Rev;
+                var editRev = revision.FindItem(rev.ID);
+                editRev.Rev = rev.Rev;
             }
         }
 
@@ -104,7 +109,7 @@ namespace MRS.DocumentManagement
             return Task.FromResult<List<ISynchronizer>>(null);
         }
 
-        public void LoadCollection()
+        public Task LoadCollection()
         {
             if (toObjective)
             {
@@ -119,32 +124,37 @@ namespace MRS.DocumentManagement
 
             if (remoteItems == null) remoteItems = new List<ItemDto>();
             if (localItems == null) localItems = new List<ItemDto>();
+            return Task.CompletedTask;
         }
 
-        public Task SaveLocalCollectAsync()
+        public async Task SaveCollectionAsync()
         {
             if (toObjective)
             {
-                if (localObj.Items == null) localObj.Items = new List<ItemDto>();
                 localObj.Items = localItems;
+                remoteObj.Items = remoteItems;
+                await disk.UploadObjectiveAsync(localProject, remoteObj);
             }
             else
             {
-                if (localProject.Items == null) localProject.Items = new List<ItemDto>();
                 localProject.Items = localItems;
+                remoteProject.Items = remoteItems;
+                await disk.UnloadProject(localProject);
             }
-
-            return Task.CompletedTask;
         }
 
         public async Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
         {
             if (localRev == null) localRev = new Revision(remoteRev.ID);
             if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+            FindLocal(localRev.ID);
+            if (toObjective)
+                NameElement = $"proj({localProject.ID}) obj({localObj.ID}) item({localItem?.ExternalItemId})";
+            else
+                NameElement = $"proj({localProject.ID}) item({localItem?.ExternalItemId})";
             if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
 
             FindRemote(localRev.ID);
-            FindLocal(localRev.ID);
             if (remoteItem == null) remoteRev.Rev = 0;
             if (localItem == null) localRev.Rev = 0;
 
@@ -153,12 +163,11 @@ namespace MRS.DocumentManagement
 
             if (remoteItem != null && localItem != null)
             {
-                FileInfo localFile = new FileInfo(localItem.ExternalItemId);
-                (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
+                await GetInfoOfFiles(localRev.ID);
 
-                if (!localFile.Exists || (date > localFile.LastWriteTime && length != 0))
+                if (remoteLength > 0 && (localDate < remoteDate))
                     return SyncAction.Download;
-                if (localFile.Exists || date < localFile.LastWriteTime)
+                if (localLength > 0 && (localDate > remoteDate))
                     return SyncAction.Upload;
             }
 
@@ -167,12 +176,10 @@ namespace MRS.DocumentManagement
 
         public async Task DownloadRemote(int id)
         {
-            FindRemote(id);
-            FindLocal(id);
-
-            var path = PathManager.GetLocalProjectDir(remoteProject);
+            await GetInfoOfFiles(id);
             try
             {
+                var path = PathManager.GetLocalProjectDir(remoteProject);
                 await disk.DownloadItemFile(remoteItem, path);
                 if (localItem == null)
                 {
@@ -188,12 +195,13 @@ namespace MRS.DocumentManagement
             { // Файл удален с сервера но отметки об удалении нет
                 // TODO: Тут надо предлжить действие на выбор, или удалить локальный файл если он есть или загрузить локальный
                 // Пока по умолчанию востанавливаем отсутвующие файлы
-                if (localItem != null && localItem.ExternalItemId != null)
+                if (localLength > 0)
                 {
-                    FileInfo localFile = new FileInfo(localItem.ExternalItemId);
+                    FileInfo localFile = new FileInfo(localPath);
                     if (localFile.Exists)
                     {
-                        await disk.UnloadFileItem(remoteProject, localItem);
+                        remoteItem.ExternalItemId = localPath;
+                        await disk.UnloadFileItem(remoteProject, remoteItem);
                     }
                 }
             }
@@ -201,8 +209,7 @@ namespace MRS.DocumentManagement
 
         public async Task UploadLocal(int id)
         {
-            FindRemote(id);
-            FindLocal(id);
+            await GetInfoOfFiles(id);
             try
             {
                 await disk.UnloadFileItem(remoteProject, localItem);
@@ -220,14 +227,11 @@ namespace MRS.DocumentManagement
             {// Файл удален локально, но отметки об удалении нет
                 // TODO: Тут надо предлжить действие на выбор, или удалить локальный файл если он есть или загрузить локальный
                 // Пока по умолчанию востанавливаем отсутвующие файлы
-                if (remoteItem != null && remoteItem.ExternalItemId != null)
+                if (remoteLength > 0)
                 {
-                    (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
-                    if (length > 0)
-                    {
-                        var path = PathManager.GetLocalProjectDir(remoteProject);
-                        await disk.DownloadItemFile(remoteItem, path);
-                    }
+                    var path = PathManager.GetLocalProjectDir(remoteProject);
+                    localItem.ExternalItemId = remotePath;
+                    await disk.DownloadItemFile(localItem, path);
                 }
             }
         }
@@ -244,6 +248,39 @@ namespace MRS.DocumentManagement
             var id1 = (ID<ItemDto>)id;
             remoteItems.RemoveAll(x => x.ID == id1);
             return Task.CompletedTask;
+        }
+
+        private async Task GetInfoOfFiles(int id)
+        {
+            if (infoId == id) return;
+            infoId = id;
+            FindRemote(id);
+            FindLocal(id);
+
+            localLength = -1;
+            localDate = DateTime.MinValue;
+            localPath = string.Empty;
+            if (localItem != null)
+            {
+                FileInfo localFile = new FileInfo(localItem.ExternalItemId);
+                if (localFile.Exists)
+                {
+                    localLength = localFile.Length;
+                    localDate = localFile.LastWriteTime;
+                    localPath = localFile.FullName;
+                }
+            }
+
+            remoteLength = -1;
+            remoteDate = DateTime.MinValue;
+            remotePath = string.Empty;
+            if (remoteItem != null)
+            {
+                (long length, DateTime date, string path) = await disk.GetInfoFile(remoteProject, remoteItem);
+                remoteLength = length;
+                remoteDate = date;
+                remotePath = path;
+            }
         }
 
         private void FindRemote(int id)

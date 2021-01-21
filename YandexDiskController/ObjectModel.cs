@@ -225,20 +225,28 @@ namespace MRS.DocumentManagement
             }
 
             Items.Clear();
-            foreach (ItemDto item in collection)
+            if (collection != null)
             {
-                Items.Add((ItemModel)item);
+                foreach (ItemDto item in collection)
+                {
+                    Items.Add((ItemModel)item);
+                }
             }
         }
 
         public static List<ItemDto> GetItems(ProjectDto project)
         {
-            string path = string.Empty;
-            path = PathManager.GetItemsFile(project);
-            if (!File.Exists(path)) return new List<ItemDto>();
-            var json = File.ReadAllText(path);
-            List<ItemDto> items = JsonConvert.DeserializeObject<List<ItemDto>>(json);
-            return items;
+            if (project.Items == null) project.Items = new List<ItemDto>();
+            return project.Items?.ToList();
+        }
+
+        public static List<ItemDto> GetItems(ID<ProjectDto> id)
+        {
+            var list = GetProjects();
+            var proj = list.Find(x => x.ID == id);
+            if (proj != null)
+                return GetItems(proj);
+            return null;
         }
 
         public static List<ItemDto> GetItems(ProjectDto project, ID<ObjectiveDto> objectiveID)
@@ -246,19 +254,14 @@ namespace MRS.DocumentManagement
             if (SelectedProject.ID == (int)project.ID || SelectedObjective.ID == (int)objectiveID)
                 return SelectedObjective.dto.Items.ToList();
             ObjectiveDto objective = GetObjectives(project).Find(x => x.ID == objectiveID);
+            if (objective == null || objective.Items == null) return new List<ItemDto>();
             return objective.Items.ToList();
         }
 
         public static void SaveItems(ProjectDto project)
         {
-            var dirProj = PathManager.GetLocalProjectDir(project);
-            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
-
             List<ItemDto> items = Items.Select(x => x.dto).ToList();
-            string path = string.Empty;
-            path = PathManager.GetItemsFile(project);
-            string json = JsonConvert.SerializeObject(items);
-            File.WriteAllText(path, json);
+            SaveItems(project, items);
         }
 
         public static void SaveItems(ProjectDto project, ObjectiveDto objective)
@@ -269,11 +272,16 @@ namespace MRS.DocumentManagement
 
         public static void SaveItems(ProjectDto project, List<ItemDto> items)
         {
-            var dirProj = PathManager.GetLocalProjectDir(project);
-            if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
-            string path = PathManager.GetItemsFile(project);
-            string json = JsonConvert.SerializeObject(items);
-            File.WriteAllText(path, json);
+            // var dirProj = PathManager.GetLocalProjectDir(project);
+            // if (!Directory.Exists(dirProj)) Directory.CreateDirectory(dirProj);
+            project.Items = items;
+            var projects = GetProjects();
+            var index = projects.FindIndex(x => x.ID == project.ID);
+            if (index < 0)
+                projects.Add(project);
+            else
+                projects[index] = project;
+            SaveProjects(projects);
         }
 
         public static void SaveItems(ProjectDto project, ObjectiveDto objective, List<ItemDto> items)
@@ -302,50 +310,6 @@ namespace MRS.DocumentManagement
             }
         }
 
-        // public static void DeleteItem(ItemDto item, ProjectDto project, ObjectiveDto objective = null)
-        // {
-        //    var dirProj = PathManager.GetProjectDir(project);
-        //    if (!Directory.Exists(dirProj)) return;
-
-        // var dirItems = PathManager.GetItemsDir(project);
-        //    if (!Directory.Exists(dirItems)) return;
-
-        // string path = PathManager.GetItemFile(item, project, objective);
-
-        // File.Delete(path);
-        //    if (objective == null)
-        //        Synchronizer.Update(item.ID, project.ID);
-        //    else
-        //        Synchronizer.Update(item.ID, objective.ID, project.ID);
-        // }
-        // public static (ItemDto items, ObjectiveDto objective, ProjectDto project) GetItem(ID<ItemDto> id)
-        // {
-        //    var projects = Projects.Select(x => x.dto).ToList();
-        //    foreach (var project in projects)
-        //    {
-        //        var fileName = PathManager.GetItemFile(id, project);
-        //        if (File.Exists(fileName))
-        //        {
-        //            var json = File.ReadAllText(fileName);
-        //            ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-        //            return (item, null, project);
-        //        }
-
-        // var objectives = GetObjectives(project);
-        //        foreach (var objective in objectives)
-        //        {
-        //            fileName = PathManager.GetItemFile(id, project, objective);
-        //            if (File.Exists(fileName))
-        //            {
-        //                var json = File.ReadAllText(fileName);
-        //                ItemDto item = JsonConvert.DeserializeObject<ItemDto>(json);
-        //                return (item, objective, project);
-        //            }
-        //        }
-
-        // }
-        //    return (null, null, null);
-        // }
         private static void Objectives_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)

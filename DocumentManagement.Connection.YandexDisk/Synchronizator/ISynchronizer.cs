@@ -9,17 +9,23 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
     public interface ISynchronizer
     {
         /// <summary>
+        /// Название файла или элемента который сейчас синхронизируется
+        /// </summary>
+        string NameElement { get; set; }
+
+        /// <summary>
         /// Вызывается один раз в начале работы, предназначент для получения коллекции объектов
         /// или подключения к базе данных.
         /// </summary>
-        void LoadCollection();
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        Task LoadCollection();
 
         /// <summary>
         /// Вызывается один раз в конце работы, предназначент для сохранения коллекции объектов
         /// или отключения от базы данных.
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task SaveLocalCollectAsync();
+        Task SaveCollectionAsync();
 
         /// <summary>
         /// Получить список ревизий.
@@ -77,27 +83,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         /// <param name="id">id записи.</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task DeleteRemote(int id);
-
-        ///// <summary>
-        ///// Возвращает существование записи id в удаленной коллекции,.
-        ///// <para>
-        ///// желательно сохранить полученую запись сразу после выполнения
-        ///// будет вызвано <see cref="DownloadRemote(int)"/>
-        ///// или <see cref="DeleteLocal(int)"/>.
-        ///// </para>
-        ///// </summary>
-        ///// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        // Task<bool> RemoteExist(int id);
-        ///// <summary>
-        ///// Возвращает существование записи id в локальной коллекции,.
-        ///// <para>
-        ///// желательно сохранить полученую запись сразу после выполнения
-        ///// будет вызвано <see cref="UploadLocal(int)"/>
-        ///// или <see cref="DeleteRemote(int)"/>.
-        ///// </para>
-        ///// </summary>
-        ///// <param name="id">id записи.</param>
-        ///// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        // Task<bool> LocalExist(int id);
+        
     }
 }

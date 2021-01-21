@@ -51,6 +51,7 @@
                                 </Button.Content>
                             </Button>
                             <Button Command="{Binding UpdateCommand}">Обновить</Button>
+                            <Button Command="{Binding SampleCommand}">Случайный пользователь</Button>
                         </WrapPanel>
 
                         <!--<WrapPanel Orientation="Horizontal">

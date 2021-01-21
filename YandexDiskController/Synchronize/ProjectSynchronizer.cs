@@ -20,6 +20,8 @@ namespace MRS.DocumentManagement
             this.yandex = yandex;
         }
 
+        public string NameElement { get; set; }
+
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             if (revisions.Projects == null)
@@ -40,16 +42,17 @@ namespace MRS.DocumentManagement
         {
             if (localRev == null) localRev = new Revision(remoteRev.ID);
             if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+            FindLocal(localRev.ID);
+            NameElement = $"proj({localProject.ID}))";
             if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
 
             await Download(localRev.ID);
-            FindLocal(localRev.ID);
             if (remoteProject == null) remoteRev.Rev = 0;
             if (localProject == null) localRev.Rev = 0;
 
             if (localRev < remoteRev) return SyncAction.Download;
             if (localRev > remoteRev) return SyncAction.Upload;
-            return SyncAction.None;
+            return SyncAction.SubSync;
         }
 
         public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idProject)
@@ -57,18 +60,25 @@ namespace MRS.DocumentManagement
             List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
             await Download(idProject);
             FindLocal(idProject);
+            if (remoteProject == null) remoteProject = new ProjectDto() { ID = new ID<ProjectDto>(idProject) };
+            if (localProject == null) localProject = new ProjectDto() { ID = new ID<ProjectDto>(idProject) };
 
-            subSynchronizes.Add(new ItemsSynchronizer(yandex, remoteProject, localProject));
+            if ((localProject.Items != null || remoteProject.Items != null)
+                && (localProject.Items.Count() > 0 || remoteProject.Items.Count() > 0))
+                subSynchronizes.Add(new ItemsSynchronizer(yandex, remoteProject, localProject));
+            
             subSynchronizes.Add(new ObjectiveSynchronizer(yandex, localProject));
+
             return subSynchronizes;
         }
 
-        public void LoadCollection()
+        public Task LoadCollection()
         {
             projects = ObjectModel.GetProjects();
+            return Task.CompletedTask;
         }
 
-        public Task SaveLocalCollectAsync()
+        public Task SaveCollectionAsync()
         {
             ObjectModel.SaveProjects(projects);
             return Task.CompletedTask;

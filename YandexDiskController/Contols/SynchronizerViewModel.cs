@@ -29,6 +29,7 @@ namespace MRS.DocumentManagement.Contols
             DownloadAllCommand = new HCommand(DownloadAll);
             StopSyncCommand = new HCommand(StopSync);
             RevisionCommand = new HCommand(GetRevision);
+            UpdateRevCommand = new HCommand(UpdateRev);
 
             instanse = this;
             Auth.LoadActions.Add(Initialize);
@@ -79,12 +80,54 @@ namespace MRS.DocumentManagement.Contols
 
         public HCommand RevisionCommand { get; }
 
+        public HCommand UpdateRevCommand { get; }
+
         public HCommand ShowAllTransactionCommand { get; }
 
         public ObservableCollection<TransactionModel> Transactions { get; set; } = new ObservableCollection<TransactionModel>();
 
         #endregion
         #region private method
+        private void UpdateRev()
+        {
+            void RevCheck(Connection.Synchronizator.Revision rev)
+            {
+                if (rev.Rev == 0) rev.Incerment();
+            }
+
+            var revs = ObjectModel.Synchronizer.Revisions;
+            foreach (var item in ObjectModel.Users)
+            {
+                var rev = revs.GetUser(item.ID);
+                RevCheck(rev);
+            }
+
+            foreach (var project in ObjectModel.Projects)
+            {
+                var revP = revs.GetProject(project.ID);
+                RevCheck(revP);
+                foreach (var item in ObjectModel.GetItems(project.dto))
+                {
+                    var rev = revP.FindItem((int)item.ID);
+                    RevCheck(rev);
+                }
+
+                foreach (var obj in ObjectModel.GetObjectives(project.dto))
+                {
+                    var revO = revP.FindObjetive((int)obj.ID);
+                    RevCheck(revO);
+
+                    foreach (var item in ObjectModel.GetItems(project.dto, obj.ID))
+                    {
+                        var rev = revO.FindItem((int)item.ID);
+                        RevCheck(rev);
+                    }
+                }
+            }
+
+            ObjectModel.Synchronizer.SaveRevisions();
+        }
+
         private void DownloadAll()
         {
             if (SyncProcces)
@@ -196,7 +239,7 @@ namespace MRS.DocumentManagement.Contols
             WinBox.ShowMessage("Эта кнопка болше не работает!");
 
             // WinBox.ShowMessage((await synchronizer.GetRevisionServerAsync()).ToString());
-        } 
+        }
         #endregion
     }
 }

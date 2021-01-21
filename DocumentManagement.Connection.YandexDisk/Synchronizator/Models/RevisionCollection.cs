@@ -44,6 +44,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 rev = new Revision(id);
                 Users.Add(rev);
             }
+
             return rev;
         }
     }

@@ -28,7 +28,7 @@ namespace WPFStorage.Base
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Ошибка метода '{_method.Method.Name}', модуля '{_method.Target.GetType().Name}'. {ex.Message}");
+                MessageBox.Show($"Ошибка метода '{_method.Method.Name}', модуля '{_method.Target.GetType().Name}'. {ex.Message}\n{ex.StackTrace}");
             }
         }
     }

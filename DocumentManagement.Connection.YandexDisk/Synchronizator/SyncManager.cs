@@ -110,8 +110,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 progressChange?.Invoke(current, total, message);
             };
 
-            await Synchronize(progress, new UserSynchronizer(diskManager, context), revisions);
-            await Synchronize(progress, new ProjectSynchronizer(diskManager, context), revisions);
+            //await Synchronize(progress, new UserSynchronizer(diskManager, context), revisions);
+            //await Synchronize(progress, new ProjectSynchronizer(diskManager, context), revisions);
 
             await diskManager.SetRevisionsAsync(Revisions);
             SaveRevisions();

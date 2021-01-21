@@ -21,6 +21,9 @@ namespace MRS.DocumentManagement
             this.project = localProject;
         }
 
+
+        public string NameElement { get; set; }
+
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             int idProj = (int)project.ID;
@@ -36,25 +39,22 @@ namespace MRS.DocumentManagement
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             int idProj = (int)project.ID;
-            var projectRev = revisions.Projects.Find(x => x.ID == idProj);
-            if (projectRev.Objectives == null)
-                projectRev.Objectives = new List<ObjectiveRevision>();
+            var projectRev = revisions.GetProject(idProj);
 
-            var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
-            if (index < 0)
-                projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
-            else
-                projectRev.Objectives[index].Rev = rev.Rev;
+            var objectiveRev = projectRev.FindObjetive(rev.ID);
+            objectiveRev.Rev = rev.Rev;
         }
 
         public async Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
         {
             if (localRev == null) localRev = new Revision(remoteRev.ID);
             if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+
+            Find(localRev.ID);
+            NameElement = $"proj({project.ID}) obj({localObj.ID})";
             if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
 
             await Download(localRev.ID);
-            Find(localRev.ID);
             if (remoteObj == null) remoteRev.Rev = 0;
             if (localObj == null) localRev.Rev = 0;
 
@@ -69,19 +69,26 @@ namespace MRS.DocumentManagement
 
             await Download(idObj);
             Find(idObj);
-            subSynchronizes.Add(new ItemsSynchronizer(disk, project, remoteObj, localObj));
+            if (remoteObj == null) remoteObj = new ObjectiveDto() { ID = new ID<ObjectiveDto>(idObj) };
+            if (localObj == null) localObj = new ObjectiveDto() { ID = new ID<ObjectiveDto>(idObj) };
+
+            if ((localObj.Items != null || remoteObj.Items != null)
+                && (localObj.Items.Count() > 0 || remoteObj.Items.Count() > 0))
+                subSynchronizes.Add(new ItemsSynchronizer(disk, project, remoteObj, localObj));
 
             return subSynchronizes;
         }
 
-        public void LoadCollection()
+        public Task LoadCollection()
         {
             objectives = ObjectModel.GetObjectives(project);
+            return Task.CompletedTask;
         }
 
-        public Task SaveLocalCollectAsync()
+        public Task SaveCollectionAsync()
         {
             ObjectModel.SaveObjectives(project, objectives);
+            // ObjectModel.SaveObjectives(project, objectives);
             return Task.CompletedTask;
         }
 

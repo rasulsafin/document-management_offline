@@ -46,6 +46,7 @@ namespace MRS.DocumentManagement.Contols
             set
             {
                 ObjectModel.SelectedProject = value;
+                if (Objectives.Count > 0)
                 SelectedObjective = Objectives.First();
                 OnPropertyChanged();
             }
@@ -216,6 +217,7 @@ namespace MRS.DocumentManagement.Contols
 
             if (EditObjective.Author != null)
                 model.Author = EditObjective.Author;
+            model.ParentObjectiveID = EditObjective.ParentObjectiveID;
             return model;
         }
 
@@ -229,7 +231,7 @@ namespace MRS.DocumentManagement.Contols
             SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
             SelectedObjective.AuthorID = EditObjective.AuthorID;
             SelectedObjective.ObjectiveTypeID = EditObjective.ObjectiveTypeID;
-            SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
+            // SelectedObjective.ParentObjectiveID = EditObjective.ParentObjectiveID;
 
             ObjectModel.SaveObjectives(SelectedProject.dto);
             ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
@@ -270,7 +272,7 @@ namespace MRS.DocumentManagement.Contols
             {
                 if (WinBox.ShowQuestion($"Удалить задание {SelectedObjective.Title}?", "Удаление"))
                 {
-                    ObjectModel.Synchronizer.Update(SelectedObjective.dto.ID, SelectedProject.dto.ID);
+                    ObjectModel.Synchronizer.Delete(SelectedObjective.dto.ID, SelectedProject.dto.ID);
 
                     SelectedObjective.ID = -1;
                     ObjectModel.SaveObjectives(SelectedProject.dto);

@@ -8,182 +8,184 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    internal class ObjectiveSynchronizer : ISynchronizer
-    {
-        private DiskManager disk;
-        private DMContext context;
-        private ProjectDto project;
-        private ObjectiveDto remoteObj;
-        private Objective localObj;
+    // internal class ObjectiveSynchronizer : ISynchronizer
+    // {
+    //    private DiskManager disk;
+    //    private DMContext context;
+    //    private ProjectDto project;
+    //    private ObjectiveDto remoteObj;
+    //    private Objective localObj;
 
-        public ObjectiveSynchronizer(DiskManager disk, DMContext context, ProjectDto project)
-        {
-            this.disk = disk;
-            this.context = context;
-            this.project = project;
-        }
+    // public string NameElement { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
 
-        public List<Revision> GetRevisions(RevisionCollection revisions)
-        {
-            int idProj = (int)project.ID;
-            var projectRev = revisions.Projects.Find(x => x.ID == idProj);
-            if (projectRev == null)
-                return new List<Revision>();
-            if (projectRev.Objectives == null)
-                projectRev.Objectives = new List<ObjectiveRevision>();
-            return projectRev.Objectives.Select(x => (Revision)x).ToList();
-        }
+    // public ObjectiveSynchronizer(DiskManager disk, DMContext context, ProjectDto project)
+    //    {
+    //        this.disk = disk;
+    //        this.context = context;
+    //        this.project = project;
+    //    }
 
-        public void SetRevision(RevisionCollection revisions, Revision rev)
-        {
-            int idProj = (int)project.ID;
-            var projectRev = revisions.Projects.Find(x => x.ID == idProj);
-            if (projectRev.Objectives == null)
-                projectRev.Objectives = new List<ObjectiveRevision>();
-            var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
-            if (index < 0)
-                projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
-            else
-                projectRev.Objectives[index].Rev = rev.Rev;
-        }
+    // public List<Revision> GetRevisions(RevisionCollection revisions)
+    //    {
+    //        int idProj = (int)project.ID;
+    //        var projectRev = revisions.Projects.Find(x => x.ID == idProj);
+    //        if (projectRev == null)
+    //            return new List<Revision>();
+    //        if (projectRev.Objectives == null)
+    //            projectRev.Objectives = new List<ObjectiveRevision>();
+    //        return projectRev.Objectives.Select(x => (Revision)x).ToList();
+    //    }
 
-        public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idObj)
-        {
-            List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
-            if (await LocalExist(idObj))
-                subSynchronizes.Add(new ItemsSynchronizer(disk, context, project, Convert(localObj)));
-            return subSynchronizes;
-        }
+    // public void SetRevision(RevisionCollection revisions, Revision rev)
+    //    {
+    //        int idProj = (int)project.ID;
+    //        var projectRev = revisions.Projects.Find(x => x.ID == idProj);
+    //        if (projectRev.Objectives == null)
+    //            projectRev.Objectives = new List<ObjectiveRevision>();
+    //        var index = projectRev.Objectives.FindIndex(x => x.ID == rev.ID);
+    //        if (index < 0)
+    //            projectRev.Objectives.Add(new ObjectiveRevision(rev.ID, rev.Rev));
+    //        else
+    //            projectRev.Objectives[index].Rev = rev.Rev;
+    //    }
 
-        public void LoadCollection()
-        {
-        }
+    // public async Task<List<ISynchronizer>> GetSubSynchronizesAsync(int idObj)
+    //    {
+    //        List<ISynchronizer> subSynchronizes = new List<ISynchronizer>();
+    //        if (await LocalExist(idObj))
+    //            subSynchronizes.Add(new ItemsSynchronizer(disk, context, project, Convert(localObj)));
+    //        return subSynchronizes;
+    //    }
 
-        public async Task SaveLocalCollectAsync()
-        {
-            await context.SaveChangesAsync();
-        }
+    // public void LoadCollection()
+    //    {
+    //    }
 
-        private async Task Download(int id)
-        {
-            var _id = (ID<ObjectiveDto>)id;
-            if (remoteObj?.ID != _id)
-                remoteObj = await disk.GetObjectiveAsync(project, _id);
-        }
+    // public async Task SaveLocalCollectAsync()
+    //    {
+    //        await context.SaveChangesAsync();
+    //    }
 
-        private async Task Find(int id)
-        {
-            if (localObj?.ID != id)
-            {
-                int projectID = (int)project.ID;
-                localObj = await context.Objectives.FirstAsync(o => o.ProjectID == projectID && o.ID == id);
-            }
-        }
+    // private async Task Download(int id)
+    //    {
+    //        var _id = (ID<ObjectiveDto>)id;
+    //        if (remoteObj?.ID != _id)
+    //            remoteObj = await disk.GetObjectiveAsync(project, _id);
+    //    }
 
-        public async Task<bool> RemoteExist(int id)
-        {
-            await Download(id);
-            return remoteObj != null;
-        }
+    // private async Task Find(int id)
+    //    {
+    //        if (localObj?.ID != id)
+    //        {
+    //            int projectID = (int)project.ID;
+    //            localObj = await context.Objectives.FirstAsync(o => o.ProjectID == projectID && o.ID == id);
+    //        }
+    //    }
 
-        public async Task DownloadRemote(int id)
-        {
-            await Download(id);
-            if (await LocalExist(id))
-            {
-                localObj.ID = (int)remoteObj.ID;
-                localObj.AuthorID = (int)remoteObj.AuthorID;
-                localObj.ProjectID = (int)remoteObj.ProjectID;
-                localObj.ObjectiveTypeID = (int)remoteObj.ObjectiveTypeID;
-                localObj.ParentObjectiveID = (int)remoteObj.ParentObjectiveID;
+    // public async Task<bool> RemoteExist(int id)
+    //    {
+    //        await Download(id);
+    //        return remoteObj != null;
+    //    }
 
-                localObj.Status = (int)remoteObj.Status;
+    // public async Task DownloadRemote(int id)
+    //    {
+    //        await Download(id);
+    //        if (await LocalExist(id))
+    //        {
+    //            localObj.ID = (int)remoteObj.ID;
+    //            localObj.AuthorID = (int)remoteObj.AuthorID;
+    //            localObj.ProjectID = (int)remoteObj.ProjectID;
+    //            localObj.ObjectiveTypeID = (int)remoteObj.ObjectiveTypeID;
+    //            localObj.ParentObjectiveID = (int)remoteObj.ParentObjectiveID;
 
-                localObj.Title = remoteObj.Title;
-                localObj.Description = remoteObj.Description;
+    // localObj.Status = (int)remoteObj.Status;
 
-                localObj.CreationDate = remoteObj.CreationDate;
-                localObj.DueDate = remoteObj.DueDate;
+    // localObj.Title = remoteObj.Title;
+    //            localObj.Description = remoteObj.Description;
 
-                // TODO : ???
-                // localObj.Items = remoteObj.Items;
-                // localObj.BimElements = remoteObj.BimElements;
-                // localObj.DynamicFields = remoteObj.DynamicFields;
-            }
-            else
-            {
-                context.Objectives.Add(Convert(remoteObj));
-            }
-        }
+    // localObj.CreationDate = remoteObj.CreationDate;
+    //            localObj.DueDate = remoteObj.DueDate;
 
-        public async Task DeleteLocal(int id)
-        {
-            if (await LocalExist(id))
-                context.Objectives.Remove(localObj);
-        }
+    // // TODO : ???
+    //            // localObj.Items = remoteObj.Items;
+    //            // localObj.BimElements = remoteObj.BimElements;
+    //            // localObj.DynamicFields = remoteObj.DynamicFields;
+    //        }
+    //        else
+    //        {
+    //            context.Objectives.Add(Convert(remoteObj));
+    //        }
+    //    }
 
-        public async Task<bool> LocalExist(int id)
-        {
-            await Find(id);
-            return localObj != null;
-        }
+    // public async Task DeleteLocal(int id)
+    //    {
+    //        if (await LocalExist(id))
+    //            context.Objectives.Remove(localObj);
+    //    }
 
-        public async Task UploadLocal(int id)
-        {
-            await Find(id);
-            await disk.UploadObjectiveAsync(project, Convert(localObj));
-        }
+    // public async Task<bool> LocalExist(int id)
+    //    {
+    //        await Find(id);
+    //        return localObj != null;
+    //    }
 
-        public async Task DeleteRemote(int id)
-        {
-            var _id = (ID<ObjectiveDto>)id;
-            // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него
-            await disk.DeleteObjective(project, _id);
-        }
+    // public async Task UploadLocal(int id)
+    //    {
+    //        await Find(id);
+    //        await disk.UploadObjectiveAsync(project, Convert(localObj));
+    //    }
 
-        private ObjectiveDto Convert(Objective objective)
-        {
-            return new ObjectiveDto()
-            {
-                ID = (ID<ObjectiveDto>)objective.ID,
-                AuthorID = (ID<UserDto>)objective.AuthorID,
-                ProjectID = (ID<ProjectDto>)objective.ProjectID,
-                ObjectiveTypeID = (ID<ObjectiveTypeDto>)objective.ObjectiveTypeID,
-                ParentObjectiveID = (ID<ObjectiveDto>)objective.ParentObjectiveID,
+    // public async Task DeleteRemote(int id)
+    //    {
+    //        var _id = (ID<ObjectiveDto>)id;
+    //        // TODO: Удалять items файлы? Сначало понять ссылаются ли другие item на него
+    //        await disk.DeleteObjective(project, _id);
+    //    }
 
-                Status = (ObjectiveStatus)objective.Status,
+    // private ObjectiveDto Convert(Objective objective)
+    //    {
+    //        return new ObjectiveDto()
+    //        {
+    //            ID = (ID<ObjectiveDto>)objective.ID,
+    //            AuthorID = (ID<UserDto>)objective.AuthorID,
+    //            ProjectID = (ID<ProjectDto>)objective.ProjectID,
+    //            ObjectiveTypeID = (ID<ObjectiveTypeDto>)objective.ObjectiveTypeID,
+    //            ParentObjectiveID = (ID<ObjectiveDto>)objective.ParentObjectiveID,
 
-                Title = objective.Title,
-                Description = objective.Description,
+    // Status = (ObjectiveStatus)objective.Status,
 
-                CreationDate = objective.CreationDate,
-                DueDate = objective.DueDate,
-            };
-        }
+    // Title = objective.Title,
+    //            Description = objective.Description,
 
-        private Objective Convert(ObjectiveDto objective)
-        {
-            return new Objective()
-            {
-                ID = (int)objective.ID,
-                AuthorID = (int)objective.AuthorID,
-                ProjectID = (int)objective.ProjectID,
-                ObjectiveTypeID = (int)objective.ObjectiveTypeID,
-                ParentObjectiveID = (int)objective.ParentObjectiveID,
+    // CreationDate = objective.CreationDate,
+    //            DueDate = objective.DueDate,
+    //        };
+    //    }
 
-                Status = (int)objective.Status,
+    // private Objective Convert(ObjectiveDto objective)
+    //    {
+    //        return new Objective()
+    //        {
+    //            ID = (int)objective.ID,
+    //            AuthorID = (int)objective.AuthorID,
+    //            ProjectID = (int)objective.ProjectID,
+    //            ObjectiveTypeID = (int)objective.ObjectiveTypeID,
+    //            ParentObjectiveID = (int)objective.ParentObjectiveID,
 
-                Title = objective.Title,
-                Description = objective.Description,
+    // Status = (int)objective.Status,
 
-                CreationDate = objective.CreationDate,
-                DueDate = objective.DueDate,
-            };
-        }
+    // Title = objective.Title,
+    //            Description = objective.Description,
 
-        public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
-        {
-            throw new System.NotImplementedException();
-        }
-    }
+    // CreationDate = objective.CreationDate,
+    //            DueDate = objective.DueDate,
+    //        };
+    //    }
+
+    // public Task<SyncAction> GetActoin(Revision localRev, Revision remoteRev)
+    //    {
+    //        throw new System.NotImplementedException();
+    //    }
+    // }
 }

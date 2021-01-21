@@ -105,6 +105,7 @@ namespace MRS.DocumentManagement.Contols
                 project.ID = NextId++;
                 Projects.Add(project);
                 ObjectModel.SaveProjects();
+                ObjectModel.Synchronizer.Update(project.dto.ID);
             }
         }
 
@@ -182,9 +183,9 @@ namespace MRS.DocumentManagement.Contols
                 cancelText: "Отменить",
                 defautValue: SelectProject.Title))
             {
+                SelectProject.Title = name;
                 ObjectModel.Synchronizer.Update(SelectProject.dto.ID);
                 ObjectModel.SaveProjects();
-
                 // ObjectModel.RenameProject(SelectProject.dto.ID, name);
             }
         }

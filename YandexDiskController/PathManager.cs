@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement
 
         public static string GetLocalProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 
-        public static string GetRemoteProjectDir(ProjectDto project) => YandexHelper.DirectoryName(APP_DIR, project.Title);
+        public static string GetRemoteProjectDir(ProjectDto project) => YandexHelper.DirectoryName(APP_DIR_REMOTE, project.Title);
 
         #region old
 

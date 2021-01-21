@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement
 {
     public class UserSynchronizer : ISynchronizer
     {
-        private List<UserDto> users;
+        private List<UserDto> localUsers;
         private DiskManager disk;
         private UserDto remoteUser;
         private UserDto localUser;
@@ -19,6 +19,8 @@ namespace MRS.DocumentManagement
         {
             this.disk = disk;
         }
+
+        public string NameElement { get; set; }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
@@ -38,11 +40,16 @@ namespace MRS.DocumentManagement
                 revisions.Users[index].Rev = rev.Rev;
         }
 
-        public void LoadCollection() => users = ObjectModel.GetUsers();
-
-        public Task SaveLocalCollectAsync()
+        public Task LoadCollection()
         {
-            ObjectModel.SaveUsers(users);
+            localUsers = ObjectModel.GetUsers();
+            // remoteUsers = await disk.Get
+            return Task.CompletedTask;
+        }
+
+        public Task SaveCollectionAsync()
+        {
+            ObjectModel.SaveUsers(localUsers);
             return Task.CompletedTask;
         }
 
@@ -52,9 +59,10 @@ namespace MRS.DocumentManagement
         {
             if (localRev == null) localRev = new Revision(remoteRev.ID);
             if (remoteRev == null) remoteRev = new Revision(localRev.ID);
+            FindLocal(localRev.ID);
+            NameElement = $"user({localUser?.ID}))";
             if (localRev.IsDelete || remoteRev.IsDelete) return SyncAction.Delete;
             await Download(localRev.ID);
-            FindLocal(localRev.ID);
             if (remoteUser == null) remoteRev.Rev = 0;
             if (localUser == null) localRev.Rev = 0;
 
@@ -66,11 +74,11 @@ namespace MRS.DocumentManagement
         public async Task DownloadRemote(int id)
         {
             await Download(id);
-            var index = users.FindIndex(x => (int)x.ID == id);
+            var index = localUsers.FindIndex(x => (int)x.ID == id);
             if (index < 0)
-                users.Add(remoteUser);
+                localUsers.Add(remoteUser);
             else
-                users[index] = remoteUser;
+                localUsers[index] = remoteUser;
         }
 
         public async Task UploadLocal(int id)
@@ -81,7 +89,7 @@ namespace MRS.DocumentManagement
 
         public Task DeleteLocal(int id)
         {
-            users.RemoveAll(x => (int)x.ID == id);
+            localUsers.RemoveAll(x => (int)x.ID == id);
             return Task.CompletedTask;
         }
 
@@ -99,7 +107,7 @@ namespace MRS.DocumentManagement
         {
             var id1 = new ID<UserDto>(id);
             if (localUser?.ID != id1)
-                localUser = users.Find(x => x.ID == id1);
+                localUser = localUsers.Find(x => x.ID == id1);
         }
     }
 }
