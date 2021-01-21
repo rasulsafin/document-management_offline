@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -51,6 +51,7 @@ namespace MRS.DocumentManagement.Services
 
             dbItem.ItemType = (int)item.ItemType;
             dbItem.Name = item.Name;
+            dbItem.ExternalItemId = item.ExternalItemId;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
             return true;

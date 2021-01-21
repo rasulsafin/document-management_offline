@@ -177,7 +177,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Project project)
         {
-            var dbItem = await itemHelper.CheckItemToLink(context, item, project.GetType(), project.ID);
+            var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project.GetType(), project.ID);
             if (dbItem == null)
                 return;
 
