@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Contols
 
         internal static void Notepad(string fileName)
         {
-            Process.Start("C:\\Windows\\System32\\notepad.exe", $"\"{fileName}\"") ;
+            Process.Start("C:\\Windows\\System32\\notepad.exe", $"\"{fileName}\"");
         }
 
         internal static void LoadExeption(Exception ex, string fileName)

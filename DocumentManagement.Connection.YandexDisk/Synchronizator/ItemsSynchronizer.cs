@@ -1,10 +1,10 @@
-﻿using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {

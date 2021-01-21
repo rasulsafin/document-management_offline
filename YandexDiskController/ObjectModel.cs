@@ -349,6 +349,7 @@ namespace MRS.DocumentManagement
         private static void Objectives_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             if (e.NewItems != null)
+            {
                 foreach (object item in e.NewItems)
                 {
                     if (item is ObjectiveModel model)
@@ -361,6 +362,7 @@ namespace MRS.DocumentManagement
                     //    objectiveDtoList.Add(dto);
                     // }
                 }
+            }
         }
         #endregion
 

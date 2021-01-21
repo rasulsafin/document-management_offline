@@ -6,5 +6,6 @@
         Download,
         Upload,
         Delete,
+        SubSync,
     }
 }

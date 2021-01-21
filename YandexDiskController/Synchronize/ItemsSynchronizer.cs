@@ -151,13 +151,16 @@ namespace MRS.DocumentManagement
             if (localRev < remoteRev) return SyncAction.Download;
             if (localRev > remoteRev) return SyncAction.Upload;
 
-            FileInfo localFile = new FileInfo(localItem.ExternalItemId);
-            (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
+            if (remoteItem != null && localItem != null)
+            {
+                FileInfo localFile = new FileInfo(localItem.ExternalItemId);
+                (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
 
-            if (!localFile.Exists || (date > localFile.LastWriteTime && length != 0))
-                return SyncAction.Download;
-            if (localFile.Exists || date < localFile.LastWriteTime)
-                return SyncAction.Upload;
+                if (!localFile.Exists || (date > localFile.LastWriteTime && length != 0))
+                    return SyncAction.Download;
+                if (localFile.Exists || date < localFile.LastWriteTime)
+                    return SyncAction.Upload;
+            }
 
             return SyncAction.None;
         }
@@ -168,16 +171,31 @@ namespace MRS.DocumentManagement
             FindLocal(id);
 
             var path = PathManager.GetLocalProjectDir(remoteProject);
-            await disk.DownloadItemFile(remoteItem, path);
-
-            if (localItem == null)
+            try
             {
-                localItems.Add(remoteItem);
+                await disk.DownloadItemFile(remoteItem, path);
+                if (localItem == null)
+                {
+                    localItems.Add(remoteItem);
+                }
+                else
+                {
+                    int index = localItems.FindIndex(x => x.ID == remoteItem.ID);
+                    localItems[index] = remoteItem;
+                }
             }
-            else
-            {
-                int index = localItems.FindIndex(x => x.ID == remoteItem.ID);
-                localItems[index] = remoteItem;
+            catch (FileNotFoundException)
+            { // Файл удален с сервера но отметки об удалении нет
+                // TODO: Тут надо предлжить действие на выбор, или удалить локальный файл если он есть или загрузить локальный
+                // Пока по умолчанию востанавливаем отсутвующие файлы
+                if (localItem != null && localItem.ExternalItemId != null)
+                {
+                    FileInfo localFile = new FileInfo(localItem.ExternalItemId);
+                    if (localFile.Exists)
+                    {
+                        await disk.UnloadFileItem(remoteProject, localItem);
+                    }
+                }
             }
         }
 
@@ -185,16 +203,32 @@ namespace MRS.DocumentManagement
         {
             FindRemote(id);
             FindLocal(id);
-
-            await disk.UnloadFileItem(remoteProject, localItem);
-            if (remoteItem == null)
+            try
             {
-                remoteItems.Add(localItem);
+                await disk.UnloadFileItem(remoteProject, localItem);
+                if (remoteItem == null)
+                {
+                    remoteItems.Add(localItem);
+                }
+                else
+                {
+                    int index = remoteItems.FindIndex(x => x.ID == remoteItem.ID);
+                    remoteItems[index] = localItem;
+                }
             }
-            else
-            {
-                int index = remoteItems.FindIndex(x => x.ID == remoteItem.ID);
-                remoteItems[index] = localItem;
+            catch (FileNotFoundException)
+            {// Файл удален локально, но отметки об удалении нет
+                // TODO: Тут надо предлжить действие на выбор, или удалить локальный файл если он есть или загрузить локальный
+                // Пока по умолчанию востанавливаем отсутвующие файлы
+                if (remoteItem != null && remoteItem.ExternalItemId != null)
+                {
+                    (ulong length, DateTime date) = await disk.GetInfoFile(remoteProject, remoteItem);
+                    if (length > 0)
+                    {
+                        var path = PathManager.GetLocalProjectDir(remoteProject);
+                        await disk.DownloadItemFile(remoteItem, path);
+                    }
+                }
             }
         }
 
@@ -216,7 +250,7 @@ namespace MRS.DocumentManagement
         {
             var id1 = (ID<ItemDto>)id;
             if (remoteItem?.ID != id1)
-                remoteItem = remoteItems.First(x => x.ID == id1);
+                remoteItem = remoteItems.Find(x => x.ID == id1);
         }
 
         private void FindLocal(int id)

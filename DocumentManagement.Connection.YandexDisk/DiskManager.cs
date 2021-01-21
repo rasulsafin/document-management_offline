@@ -1,15 +1,15 @@
 ﻿#define TEST
 
-using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {

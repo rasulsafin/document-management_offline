@@ -91,16 +91,14 @@ namespace MRS.DocumentManagement
         private async Task Download(int id)
         {
             var id1 = new ID<UserDto>(id);
-
-            //if (remoteUsers == null) remoteUsers = new List<UserDto>();
-            if (remoteUser.ID != id1)
+            if (remoteUser?.ID != id1)
                 remoteUser = await disk.GetUserAsync(id1);
         }
 
         private void FindLocal(int id)
         {
             var id1 = new ID<UserDto>(id);
-            if (localUser.ID != id1)
+            if (localUser?.ID != id1)
                 localUser = users.Find(x => x.ID == id1);
         }
     }

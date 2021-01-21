@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
