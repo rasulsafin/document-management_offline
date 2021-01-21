@@ -18,6 +18,8 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateMap<User, UserDto>();
             CreateMap<Project, ProjectDto>();
+            CreateMap<Project, ProjectToListDto>();
+               // .ForMember(d => d.ID, a => a.MapFrom(x => x.ID));
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<Objective, ObjectiveToListDto>();
@@ -35,7 +37,11 @@ namespace MRS.DocumentManagement.Utility
         }
         private void CreateMapToModel()
         {
-            CreateMap<ID<ObjectiveDto>?, int?>().ConvertUsing<IDNullableIntTypeConverter<ObjectiveDto>>();
+            CreateMap<ProjectDto, Project>();
+            CreateMap<ProjectToCreateDto, Project>()
+                .ForMember(d => d.Items, opt => opt.Ignore());
+            CreateMap<ID<ObjectiveDto>?, int?>()
+                .ConvertUsing<IDNullableIntTypeConverter<ObjectiveDto>>();
             CreateMap<ObjectiveToCreateDto, Objective>()
                 .ForMember(d => d.DynamicFields, opt => opt.Ignore())
                 .ForMember(d => d.BimElements, opt => opt.Ignore())
@@ -48,7 +54,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
-            CreateMap<ItemDto, Item>();
+            CreateMap<ItemDto, Item>();           
         }
 
         private static List<string> DecodeAuthFieldNames(string encoded)
