@@ -35,10 +35,10 @@ namespace WPFStorage.Dialogs
         public string Title
         {
             get => title; set
-        {
-            title = value;
-            OnPropertyChanged();
-        }
+            {
+                title = value;
+                OnPropertyChanged();
+            }
         }
 
         private string question = "Введите текст";
@@ -46,10 +46,10 @@ namespace WPFStorage.Dialogs
         public string Question
         {
             get => question; set
-        {
-            question = value;
-            OnPropertyChanged();
-        }
+            {
+                question = value;
+                OnPropertyChanged();
+            }
         }
 
         private string input;
@@ -57,10 +57,10 @@ namespace WPFStorage.Dialogs
         public string Input
         {
             get => input; set
-        {
-            input = value;
-            OnPropertyChanged();
-        }
+            {
+                input = value;
+                OnPropertyChanged();
+            }
         }
 
         private string okText = "Ввод";
@@ -68,10 +68,10 @@ namespace WPFStorage.Dialogs
         public string OkText
         {
             get => okText; set
-        {
-            okText = value;
-            OnPropertyChanged();
-        }
+            {
+                okText = value;
+                OnPropertyChanged();
+            }
         }
 
         private string cancelText = "Отмена";
@@ -79,10 +79,10 @@ namespace WPFStorage.Dialogs
         public string CancelText
         {
             get => cancelText; set
-        {
-            cancelText = value;
-            OnPropertyChanged();
-        }
+            {
+                cancelText = value;
+                OnPropertyChanged();
+            }
         }
 
         private string button3Text;
@@ -90,10 +90,10 @@ namespace WPFStorage.Dialogs
         public string Button3Text
         {
             get => button3Text; set
-        {
-            button3Text = value;
-            OnPropertyChanged();
-        }
+            {
+                button3Text = value;
+                OnPropertyChanged();
+            }
         }
 
         private HorizontalAlignment questionAlignment;
@@ -101,10 +101,10 @@ namespace WPFStorage.Dialogs
         public HorizontalAlignment QuestionAlignment
         {
             get => questionAlignment; set
-        {
-            questionAlignment = value;
-            OnPropertyChanged();
-        }
+            {
+                questionAlignment = value;
+                OnPropertyChanged();
+            }
         }
 
         private HorizontalAlignment buttonsAlignment;
@@ -112,10 +112,10 @@ namespace WPFStorage.Dialogs
         public HorizontalAlignment ButtonsAlignment
         {
             get => buttonsAlignment; set
-        {
-            buttonsAlignment = value;
-            OnPropertyChanged();
-        }
+            {
+                buttonsAlignment = value;
+                OnPropertyChanged();
+            }
         }
 
         public bool PressOk { get; set; }
@@ -125,10 +125,10 @@ namespace WPFStorage.Dialogs
         public long Timeout
         {
             get => timeout; set
-        {
-            timeout = value;
-            OnPropertyChanged();
-        }
+            {
+                timeout = value;
+                OnPropertyChanged();
+            }
         }
 
         public HCommand OkCommand { get; private set; }
@@ -144,10 +144,10 @@ namespace WPFStorage.Dialogs
         public Visibility[] Visibilities
         {
             get => visibilities; set
-        {
-            visibilities = value;
-            OnPropertyChanged();
-        }
+            {
+                visibilities = value;
+                OnPropertyChanged();
+            }
         }
 
         private Visibility[] visibilities = new Visibility[4];

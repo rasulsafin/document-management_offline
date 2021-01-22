@@ -124,8 +124,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
     //        // }
     //    }
 
-
-
     // public async Task DeleteLocal(int id)
     //    {
     //        if (await LocalExist(id))

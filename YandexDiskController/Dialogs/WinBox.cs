@@ -11,8 +11,8 @@ namespace WPFStorage.Dialogs
         public static string SelectorBox(
             string[] collect,
             string question = "Выберите один из вариантов:",
-            string title="Окно выбора",
-            int timeout=0)
+            string title = "Окно выбора",
+            int timeout = 0)
         {
             SelectorViewModel model = new SelectorViewModel();
             model.Question = question;

@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 namespace MRS.DocumentManagement.Utility
 {
 
-    public class Synchronizator : Interface.Services.ISyncService
+    public class SyncService : Interface.Services.ISyncService
     {        
         private readonly DMContext context;
         private static SyncManager SyncManager;
@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement.Utility
         private string Message;
         private static bool initialise = false;
 
-        public Synchronizator(DMContext context)
+        public SyncService(DMContext context)
         {
             this.context = context;
             if (!initialise)
@@ -29,7 +29,7 @@ namespace MRS.DocumentManagement.Utility
             SyncManager = new SyncManager();
             YandexDiskAuth auth = new YandexDiskAuth();
             string accessToken = await auth.GetDiskSdkToken();
-            SyncManager.Initialize(accessToken);
+            await SyncManager.Initialize(accessToken);
             initialise = true;
         }
 
@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Utility
 
         public void AddChange(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
-            SyncManager.Update(id, idProj);
+            SyncManager.Update(id);
         }
 
         public void AddChange(ID<ItemDto> id, ID<ProjectDto> idProj)
@@ -53,12 +53,12 @@ namespace MRS.DocumentManagement.Utility
             SyncManager.Update(id, idProj);
         }
 
-        public void AddChange(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        public void AddChange(ID<ItemDto> id, ID<ObjectiveDto> idObj)
         {
-            SyncManager.Update(id, idObj, idProj);
+            SyncManager.Update(id, idObj);
         }
 
-        public async void StartSyncAsync() => await SyncManager.SyncTableAsync(progressChenge, context);
+        public async void StartSyncAsync() => await SyncManager.StartSync(progressChenge, context);
 
         public void StopSyncAsync() => SyncManager.StopSync();
 

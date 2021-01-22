@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class SyncManager
     {
-        private DiskManager diskManager;
+        private DiskManager disk;
         private int total;
         private int current;
 
@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public bool NeedStopSync { get; private set; }
 
-        public async void Initialize(string accessToken)
+        public async Task Initialize(string accessToken)
         {
             if (diskManager == null)
             {
@@ -57,39 +57,39 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             SaveRevisions();
         }
 
-        public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
+        public void Update(ID<ObjectiveDto> id)
         {
-            Revisions.GetObjective((int)idProj, (int)id).Incerment();
+            Revisions.GetObjective((int)id).Incerment();
             SaveRevisions();
         }
 
-        public void Delete(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
+        public void Delete(ID<ObjectiveDto> id)
         {
-            Revisions.GetObjective((int)idProj, (int)id).Delete();
+            Revisions.GetObjective((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.GetItem((int)idProj, (int)id).Incerment();
+            Revisions.GetProject((int)idProj).GetItem((int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.GetItem((int)idProj, (int)id).Delete();
+            Revisions.GetProject((int)idProj).GetItem((int)id).Delete();
             SaveRevisions();
         }
 
-        public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj)
         {
-            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Incerment();
+            Revisions.GetObjective((int)idObj).GetItem((int)id).Incerment();
             SaveRevisions();
         }
 
-        public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj)
         {
-            Revisions.GetItem((int)idProj, (int)idObj, (int)id).Delete();
+            Revisions.GetObjective((int)idObj).GetItem((int)id).Delete();
             SaveRevisions();
         }
 
@@ -100,24 +100,16 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             NeedStopSync = true;
         }
 
-        public async Task SyncTableAsync(ProgressChangeDelegate progressChange, DMContext context)
+        public async Task StartSync(ProgressChangeDelegate progressChange, DMContext context)
         {
-            RevisionCollection revisions = await diskManager.GetRevisionsAsync();
-            Progress<(int, int, string)> progress = new Progress<(int, int, string)>();
-            progress.ProgressChanged += (s, p) =>
-            {
-                (int current, int total, string message) = p;
-                progressChange?.Invoke(current, total, message);
-            };
+            RevisionCollection remote = await disk.Pull<RevisionCollection>("revisions");
+            var actions = SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
+            var actions = SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
 
-            //await Synchronize(progress, new UserSynchronizer(diskManager, context), revisions);
-            //await Synchronize(progress, new ProjectSynchronizer(diskManager, context), revisions);
-
-            await diskManager.SetRevisionsAsync(Revisions);
-            SaveRevisions();
+            
         }
 
-        private Task Synchronize(IProgress<(int, int, string)> progress, ISynchronizer synchro, RevisionCollection remoreRevisions)
+        private Task Synchronize(IProgress<(int, int, string)> progress, ISynchroTable synchro, RevisionCollection remoreRevisions)
         {
             return Task.CompletedTask;
         }
@@ -142,6 +134,40 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             string fileName = PathManager.GetLocalRevisionFile();
             string str = JsonConvert.SerializeObject(Revisions);
             File.WriteAllText(fileName, str);
+        }
+    }
+
+    public class UserSychro : ISynchroTable
+    {
+        private DiskManager disk;
+        private DMContext context;
+
+        public UserSychro(DiskManager disk, DMContext context)
+        {
+            this.disk = disk;
+            this.context = context;
+        }
+
+        List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
+        {
+            if (revisions.Users == null)
+                revisions.Users = new List<Revision>();
+            return revisions.Users;
+        }
+
+        Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
+        {
+            revisions.GetUser(rev.ID).Rev = rev.Rev;
+        }
+
+        SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
+        {
+            return action;
         }
     }
 }

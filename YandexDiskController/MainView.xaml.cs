@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement
             }
         }
 
-        private int count=0;
+        private int count = 0;
 
         private void TabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

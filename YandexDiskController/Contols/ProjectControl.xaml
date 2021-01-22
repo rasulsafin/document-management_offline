@@ -33,6 +33,8 @@
             <WrapPanel>
                 <Button Command="{Binding OpenFileCommand}" Margin="3">Открыть файл проекта</Button>
                 <Button Command="{Binding CreateSampleProjectCommand}" Margin="3">Создать случайный проект</Button>
+                <Button Command="{Binding PushCommand}" Margin="3">Отправить проект</Button>
+                <Button Command="{Binding PullCommand}" Margin="3">Получить проект</Button>
                 <!--<Button Command="{Binding XMLUnPackCommand}" Margin="3">Pаспоковать из json</Button>-->                
             </WrapPanel>
         </StackPanel>

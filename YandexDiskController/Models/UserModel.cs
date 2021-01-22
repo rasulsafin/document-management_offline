@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Models
             get => (int)dto.ID;
             set
             {
-                dto= new UserDto(new ID<UserDto>(value), dto.Login, dto.Name);
+                dto = new UserDto(new ID<UserDto>(value), dto.Login, dto.Name);
                 OnPropertyChanged();
             }
         }

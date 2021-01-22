@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
 using WPFStorage.Dialogs;
@@ -12,7 +13,7 @@ namespace MRS.DocumentManagement.Contols
     public class ProjectViewModel : BaseViewModel
     {
         #region Bending and data
-        private DiskManager yandex;
+        private DiskManager disk;
         private ProjectModel selectProject;
         private bool openTempFile = false;
 
@@ -27,7 +28,16 @@ namespace MRS.DocumentManagement.Contols
 
             OpenFileCommand = new HCommand(OpenFile);
             ISResetCommand = new HCommand(IDReset);
+            PushCommand = new HCommand(Push);
+            PullCommand = new HCommand(PullAsync);
             Update();
+
+            Auth.LoadActions.Add(Initialization);
+        }
+
+        private void Initialization(string token)
+        {
+            disk = new DiskManager(token);
         }
 
         public ObservableCollection<ProjectModel> Projects { get; set; } = ObjectModel.Projects;
@@ -77,8 +87,63 @@ namespace MRS.DocumentManagement.Contols
 
         public HCommand ISResetCommand { get; }
 
+        public HCommand PushCommand { get; }
+
+        public HCommand PullCommand { get; }
+
         public HCommand UpdateCommand { get; }
         #endregion
+
+        private async void PullAsync()
+        {
+            if (WinBox.ShowInput(
+            question: "Введите ID проекта для скачивания:",
+            input: out string text,
+            title: "Выбор проекта",
+            okText: "Скачать",
+            cancelText: "Отменить",
+            defautValue: "-1"))
+            {
+                ProjectDto project = await disk.Pull<ProjectDto>(text);
+                if (project == null)
+                {
+                    WinBox.ShowMessage("Проект не существует на удаленном устройстве!");
+                    return;
+                }
+
+                var model = Projects.FirstOrDefault(x => x.ID == (int)project.ID);
+                Projects.Remove(model);
+
+                Projects.Add(new ProjectModel(project));
+                SelectProject = Projects.Last();
+            }
+        }
+
+        private async void Push()
+        {
+            if (SelectProject == null)
+            {
+                if (WinBox.ShowInput(
+                question: "Нет выбранного проекта для отправки.\nВведите ID проекта:",
+                input: out string text,
+                title: "Выпор проекта",
+                okText: "Отправить",
+                cancelText: "Отменить",
+                defautValue: "-1") && int.TryParse(text, out int id))
+                {
+                    SelectProject = Projects.FirstOrDefault(p => p.ID == id);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (!await disk.Push<ProjectDto>(SelectProject.dto, SelectProject.ID.ToString()))
+            {
+                WinBox.ShowMessage("Отправить не удалось!");
+            }
+        }
 
         private void CreateSampleProject()
         {
@@ -148,7 +213,7 @@ namespace MRS.DocumentManagement.Contols
         private void Update()
         {
             ObjectModel.UpdateProjects();
-            if (SelectProject == null && Projects.Count>0)
+            if (SelectProject == null && Projects.Count > 0)
             {
                 SelectProject = Projects.First();
             }

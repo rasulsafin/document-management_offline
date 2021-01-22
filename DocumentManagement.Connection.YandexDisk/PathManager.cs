@@ -10,6 +10,8 @@ namespace MRS.DocumentManagement.Connection
     public static class PathManager
     {
         public static readonly string APP_DIR = "BRIO MRS";
+        public static readonly string TABLE_DIR = "Tables";
+
         private static readonly string REV_DIR = "Revisions";
         private static readonly string PROJ_DIR = "Projects";
         private static readonly string USERS_DIR = "Users";
@@ -19,11 +21,18 @@ namespace MRS.DocumentManagement.Connection
         private static readonly string PROJ_FILE = "project_{0}.json";
         private static readonly string OBJ_FILE = "objective_{0}.json";
         private static readonly string ITMS_FILE = "items.json";
+        private static readonly string REC_FILE = "{0}.json";
         private static readonly string REVISION_FILE = "Revisions.json";
 
-
-
         public static string GetLocalAppDir() => APP_DIR;
+
+        public static string GetTablesDir() => YandexHelper.DirectoryName(APP_DIR, TABLE_DIR);
+
+        public static string GetTableDir(string tableName) => YandexHelper.DirectoryName(GetTablesDir(), tableName);
+
+        public static string GetRecordFile(string tableName, string id) => YandexHelper.FileName(GetTableDir(tableName), string.Format(REC_FILE, id));
+
+        public static string GetGlobalRecordFile(string tableName, string id) => YandexHelper.FileName(GetTablesDir(), string.Format(REC_FILE, id));
 
         public static string GetLocalProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 

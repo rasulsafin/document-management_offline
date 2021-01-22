@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Models;
 using WPFStorage.Base;
@@ -20,6 +21,7 @@ namespace MRS.DocumentManagement.Contols
         private bool progressVisible;
         private double progressMax;
         private double progressValue;
+        private DiskManager disk;
 
         public ObjectiveViewModel()
         {
@@ -32,6 +34,14 @@ namespace MRS.DocumentManagement.Contols
             ChengeStatusOfflineCommand = new HCommand(ChengeStatusOffline);
             UpdateObjectiveOfflineCommand = new HCommand(UpdateObjectiveOffline);
             AddObjectivesCommand = new HCommand<int>(AddObjectives);
+            PushCommand = new HCommand(Push);
+
+            Auth.LoadActions.Add(Initialization);
+        }
+
+        private void Initialization(string token)
+        {
+            disk = new DiskManager(token);
         }
 
         public ObservableCollection<ObjectiveModel> Objectives { get; set; } = ObjectModel.Objectives;
@@ -47,7 +57,7 @@ namespace MRS.DocumentManagement.Contols
             {
                 ObjectModel.SelectedProject = value;
                 if (Objectives.Count > 0)
-                SelectedObjective = Objectives.First();
+                    SelectedObjective = Objectives.First();
                 OnPropertyChanged();
             }
         }
@@ -179,6 +189,8 @@ namespace MRS.DocumentManagement.Contols
 
         public HCommand<int> AddObjectivesCommand { get; }
 
+        public HCommand PushCommand { get; }
+
         #endregion
 
         public static void DeleteObjective(ProjectDto project, ObjectiveDto objective)
@@ -189,6 +201,32 @@ namespace MRS.DocumentManagement.Contols
         private void ZeroId()
         {
             NextId = 1;
+        }
+
+        private async void Push()
+        {
+            if (SelectedObjective == null)
+            {
+                if (WinBox.ShowInput(
+                question: "Нет выбранного задания для отправки.\nВведите ID задания:",
+                input: out string text,
+                title: "Выбор задания",
+                okText: "Отправить",
+                cancelText: "Отменить",
+                defautValue: "-1") && int.TryParse(text, out int id))
+                {
+                    SelectedObjective = Objectives.FirstOrDefault(p => p.ID == id);
+                }
+                else
+                {
+                    return;
+                }
+            }
+
+            if (!await disk.Push<ObjectiveDto>(SelectedObjective.dto, SelectedObjective.ID.ToString()))
+            {
+                WinBox.ShowMessage("Отправить не удалось!");
+            }
         }
 
         private void AddObjective()

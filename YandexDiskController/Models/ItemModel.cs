@@ -71,5 +71,5 @@ namespace MRS.DocumentManagement.Models
                 OnPropertyChanged();
             }
         }
-}
+    }
 }

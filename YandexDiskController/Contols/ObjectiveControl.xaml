@@ -101,7 +101,6 @@
                     </WrapPanel>
                 </StackPanel>
             </Expander>
-
             <Expander Header="Манипуляции" IsExpanded="false">
                 <StackPanel>
                     <Button Margin="6,1,6,1" Command="{Binding AddObjectivesCommand}" CommandParameter="1" Content="Добавить 1 задание"/>
@@ -111,8 +110,8 @@
                     <WrapPanel>
                         <Button Command="{Binding GetIDCommand}">Получить все id</Button>
                         <Separator Margin="4"/>
-                        <Button Command="{Binding UploadObjectiveCommand}">Отправить выбранное задание</Button>
-                        <Button Command="{Binding DownloadObjectiveCommand}">Загрузить по id</Button>
+                        <Button Command="{Binding PushCommand}">Отправить задание</Button>
+                        <!--<Button Command="{Binding PullCommand}">Получить задание</Button>-->
                     </WrapPanel>
                     <ProgressBar 
                         Height="7" Margin="5"
@@ -122,8 +121,6 @@
                         Minimum="0"/>
                 </StackPanel>
             </Expander>
-
-
         </StackPanel>
                  
         <TreeView Grid.Column="0" ItemsSource="{Binding Objectives, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 

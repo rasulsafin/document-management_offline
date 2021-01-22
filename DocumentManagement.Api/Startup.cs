@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddScoped<ISyncService, Synchronizator>();
+            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ItemHelper>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();

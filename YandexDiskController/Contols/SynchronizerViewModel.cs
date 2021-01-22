@@ -90,74 +90,74 @@ namespace MRS.DocumentManagement.Contols
         #region private method
         private void UpdateRev()
         {
-            void RevCheck(Connection.Synchronizator.Revision rev)
-            {
-                if (rev.Rev == 0) rev.Incerment();
-            }
+            //void RevCheck(Connection.Synchronizator.Revision rev)
+            //{
+            //    if (rev.Rev == 0) rev.Incerment();
+            //}
 
-            var revs = ObjectModel.Synchronizer.Revisions;
-            foreach (var item in ObjectModel.Users)
-            {
-                var rev = revs.GetUser(item.ID);
-                RevCheck(rev);
-            }
+            //var revs = ObjectModel.Synchronizer.Revisions;
+            //foreach (var item in ObjectModel.Users)
+            //{
+            //    var rev = revs.GetUser(item.ID);
+            //    RevCheck(rev);
+            //}
 
-            foreach (var project in ObjectModel.Projects)
-            {
-                var revP = revs.GetProject(project.ID);
-                RevCheck(revP);
-                foreach (var item in ObjectModel.GetItems(project.dto))
-                {
-                    var rev = revP.FindItem((int)item.ID);
-                    RevCheck(rev);
-                }
+            //foreach (var project in ObjectModel.Projects)
+            //{
+            //    var revP = revs.GetProject(project.ID);
+            //    RevCheck(revP);
+            //    foreach (var item in ObjectModel.GetItems(project.dto))
+            //    {
+            //        var rev = revP.FindItem((int)item.ID);
+            //        RevCheck(rev);
+            //    }
 
-                foreach (var obj in ObjectModel.GetObjectives(project.dto))
-                {
-                    var revO = revP.FindObjetive((int)obj.ID);
-                    RevCheck(revO);
+            //    foreach (var obj in ObjectModel.GetObjectives(project.dto))
+            //    {
+            //        var revO = revP.FindObjetive((int)obj.ID);
+            //        RevCheck(revO);
 
-                    foreach (var item in ObjectModel.GetItems(project.dto, obj.ID))
-                    {
-                        var rev = revO.FindItem((int)item.ID);
-                        RevCheck(rev);
-                    }
-                }
-            }
+            //        foreach (var item in ObjectModel.GetItems(project.dto, obj.ID))
+            //        {
+            //            var rev = revO.FindItem((int)item.ID);
+            //            RevCheck(rev);
+            //        }
+            //    }
+            //}
 
-            ObjectModel.Synchronizer.SaveRevisions();
+            //ObjectModel.Synchronizer.SaveRevisions();
         }
 
         private void DownloadAll()
         {
-            if (SyncProcces)
-                WinBox.ShowMessage("Синхронизация уже запущена!");
-            foreach (var item in synchronizer.Revisions.Users)
-                item.Rev = 0;
-            foreach (var proj in synchronizer.Revisions.Projects)
-            {
-                proj.Rev = 0;
-                if (proj.Items != null)
-                {
-                    foreach (var item in proj.Items)
-                        item.Rev = 0;
-                }
+            //if (SyncProcces)
+            //    WinBox.ShowMessage("Синхронизация уже запущена!");
+            //foreach (var item in synchronizer.Revisions.Users)
+            //    item.Rev = 0;
+            //foreach (var proj in synchronizer.Revisions.Projects)
+            //{
+            //    proj.Rev = 0;
+            //    if (proj.Items != null)
+            //    {
+            //        foreach (var item in proj.Items)
+            //            item.Rev = 0;
+            //    }
 
-                if (proj.Objectives != null)
-                {
-                    foreach (var obj in proj.Objectives)
-                    {
-                        proj.Rev = 0;
-                        if (obj.Items != null)
-                        {
-                            foreach (var item in obj.Items)
-                                item.Rev = 0;
-                        }
-                    }
-                }
-            }
+            //    if (proj.Objectives != null)
+            //    {
+            //        foreach (var obj in proj.Objectives)
+            //        {
+            //            proj.Rev = 0;
+            //            if (obj.Items != null)
+            //            {
+            //                foreach (var item in obj.Items)
+            //                    item.Rev = 0;
+            //            }
+            //        }
+            //    }
+            //}
 
-            SynchronizeAsync();
+            //SynchronizeAsync();
         }
 
         private void StopSync()
@@ -167,32 +167,32 @@ namespace MRS.DocumentManagement.Contols
 
         private void UploadAll()
         {
-            if (SyncProcces)
-                WinBox.ShowMessage("Синхронизация уже запущена!");
-            foreach (var item in synchronizer.Revisions.Users)
-                item.Rev++;
-            foreach (var proj in synchronizer.Revisions.Projects)
-            {
-                proj.Rev++;
-                if (proj.Items != null)
-                {
-                    foreach (var item in proj.Items)
-                        item.Rev++;
-                }
+            //if (SyncProcces)
+            //    WinBox.ShowMessage("Синхронизация уже запущена!");
+            //foreach (var item in synchronizer.Revisions.Users)
+            //    item.Rev++;
+            //foreach (var proj in synchronizer.Revisions.Projects)
+            //{
+            //    proj.Rev++;
+            //    if (proj.Items != null)
+            //    {
+            //        foreach (var item in proj.Items)
+            //            item.Rev++;
+            //    }
 
-                if (proj.Objectives != null)
-                {
-                    foreach (var obj in proj.Objectives)
-                    {
-                        proj.Rev++;
-                        if (obj.Items != null)
-                        {
-                            foreach (var item in obj.Items)
-                                item.Rev++;
-                        }
-                    }
-                }
-            }
+            //    if (proj.Objectives != null)
+            //    {
+            //        foreach (var obj in proj.Objectives)
+            //        {
+            //            proj.Rev++;
+            //            if (obj.Items != null)
+            //            {
+            //                foreach (var item in obj.Items)
+            //                    item.Rev++;
+            //            }
+            //        }
+            //    }
+            //}
 
             SynchronizeAsync();
         }

@@ -20,10 +20,10 @@ namespace MRS.DocumentManagement.Contols
         public UserModel SelectedUser
         {
             get => selectedUser; set
-        {
-            selectedUser = value;
-            OnPropertyChanged();
-        }
+            {
+                selectedUser = value;
+                OnPropertyChanged();
+            }
         }
 
         public HCommand SampleCommand { get; }

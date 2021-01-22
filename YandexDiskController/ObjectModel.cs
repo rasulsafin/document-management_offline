@@ -36,8 +36,11 @@ namespace MRS.DocumentManagement
             set
             {
                 selectedProject = value;
-                UpdateObjectives(selectedProject.dto);
-                UpdateItems(selectedProject.dto);
+                if (selectedProject != null)
+                {
+                    UpdateObjectives(selectedProject.dto);
+                    UpdateItems(selectedProject.dto);
+                }
             }
         }
 
@@ -127,6 +130,11 @@ namespace MRS.DocumentManagement
         #region Objective
         public static void UpdateObjectives(ProjectDto project)
         {
+            if (project == null)
+            {
+                Objectives.Clear();
+                return;
+            }
             Objectives.CollectionChanged -= Objectives_CollectionChanged;
             // string objDir = PathManager.GetObjectivesDir(project);
             objectiveDtoList = GetObjectives(project);
@@ -212,16 +220,19 @@ namespace MRS.DocumentManagement
         public static void UpdateItems(ProjectDto project, ObjectiveDto objective = null)
         {
             List<ItemDto> collection = new List<ItemDto>();
-            if (objective == null)
+            if (project != null)
             {
-                collection = GetItems(project);
-            }
-            else
-            {
-                if (objective.Items == null)
-                    objective.Items = collection;
+                if (objective == null)
+                {
+                    collection = GetItems(project);
+                }
                 else
-                    collection = objective.Items.ToList();
+                {
+                    if (objective.Items == null)
+                        objective.Items = collection;
+                    else
+                        collection = objective.Items.ToList();
+                }
             }
 
             Items.Clear();

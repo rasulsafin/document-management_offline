@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement
 {
     internal class MainViewModel : BaseViewModel
     {
-        public static CoolLogger Logger = new CoolLogger("logApp");
+        // public static CoolLogger Logger = new CoolLogger("logApp");
         private static MainViewModel instanse;
         private static YandexDiskController controller;
         private ObservableCollection<DiskElement> folderItems = new ObservableCollection<DiskElement>();
@@ -335,7 +335,7 @@ namespace MRS.DocumentManagement
 
         private async void DeleteMethod()
         {
-            Logger.Message("Начинаю удалять!");
+            // Logger.Message("Начинаю удалять!");
             if (SelectionElement == null)
             {
                 WinBox.ShowMessage("Не возможно выполнить действие, объект не выбран!", timeout: 1500);
@@ -350,13 +350,13 @@ namespace MRS.DocumentManagement
 
             if (WinBox.ShowQuestion(question))
             {
-                Logger.Message("Запуск таймера!");
+                // Logger.Message("Запуск таймера!");
                 Stopwatch stopwatch = new Stopwatch();
                 stopwatch.Start();
                 bool res = await controller.DeleteAsync(SelectionElement.Href);
                 stopwatch.Stop();
-                Logger.Message($"Удаление выполнено t={stopwatch.ElapsedMilliseconds} мс");
 
+                // Logger.Message($"Удаление выполнено t={stopwatch.ElapsedMilliseconds} мс");
                 await RefreshFolder();
             }
         }
@@ -399,10 +399,11 @@ namespace MRS.DocumentManagement
 
         private async Task RefreshFolder()
         {
-            Logger.Message("Обновляю");
+            // Logger.Message("Обновляю");
             var items = await controller.GetListAsync(Path);
             SetFolderItems(items);
-            Logger.Message("Обновил");
+
+            // Logger.Message("Обновил");
         }
 
         private async void DebugMethod()

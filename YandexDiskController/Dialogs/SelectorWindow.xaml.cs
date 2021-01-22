@@ -21,17 +21,17 @@ namespace WPFStorage.Dialogs
         }
     }
 
-    public class SelectorViewModel: BaseViewModel
+    public class SelectorViewModel : BaseViewModel
     {
         private string title = "Окно ввода";
 
         public string Title
         {
             get => title; set
-        {
-            title = value;
-            OnPropertyChanged();
-        }
+            {
+                title = value;
+                OnPropertyChanged();
+            }
         }
 
         private string question = "Вопрос";
@@ -39,10 +39,10 @@ namespace WPFStorage.Dialogs
         public string Question
         {
             get => question; set
-        {
-            question = value;
-            OnPropertyChanged();
-        }
+            {
+                question = value;
+                OnPropertyChanged();
+            }
         }
 
         private List<string> items;
@@ -50,10 +50,10 @@ namespace WPFStorage.Dialogs
         public List<string> Items
         {
             get => items; set
-        {
-            items = value;
-            OnPropertyChanged();
-        }
+            {
+                items = value;
+                OnPropertyChanged();
+            }
         }
 
         public HCommand<string> SelectItem { get; }

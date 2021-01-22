@@ -13,7 +13,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         // internal delegate void NewBearerDelegate(dynamic bearer);
         // internal Action<object, GenericSdkEventArgs<string>> AuthCompleted;
         // private HttpListener httpListener;
-
         public string access_token;
         public string token_type;
         public int expires_in;
