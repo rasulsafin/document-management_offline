@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace MRS.DocumentManagement.Database.Migrations
+namespace DocumentManagement.Database.Migrations
 {
     public partial class ItemNameNotUnique : Migration
     {

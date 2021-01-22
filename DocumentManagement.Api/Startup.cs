@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Api
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<Database.DMContext>(options => options.UseNpgsql(connection));
+            services.AddDbContext<Database.DMContext>(options => options.UseSqlite(connection));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>

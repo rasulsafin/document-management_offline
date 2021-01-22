@@ -138,7 +138,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
 
             objective = mapper.Map(objData, objective);
-            
+
             var objectiveFields = objective.DynamicFields;
             var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
             var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int) f.ID != x.ID)).ToList();

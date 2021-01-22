@@ -43,14 +43,13 @@ namespace MRS.DocumentManagement.Tests
                 && fieldsMatched
                 && x.ProjectID == y.ProjectID
                 && x.ParentObjectiveID == y.ParentObjectiveID
-                //&& userComparer.Equals(x.AuthorID, y.AuthorID)
+                && x.AuthorID == y.AuthorID
                 && x.CreationDate == y.CreationDate
                 && x.DueDate == y.DueDate
                 && x.Title == y.Title
                 && x.Description == y.Description
                 && x.Status == y.Status
-                && x.ObjectiveType.ID == y.ObjectiveType.ID
-                && x.ObjectiveType.Name == y.ObjectiveType.Name;
+                && x.ObjectiveTypeID == y.ObjectiveTypeID;
         }
     }
 }
