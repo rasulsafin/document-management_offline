@@ -29,11 +29,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         /// </summary>
         /// <param name="id">id записи.</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task<List<ISynchroTable>> GetSubSynchroList(int id);
-        Task Download(int id);
-        Task Upload(int id);
-        Task DeleteLocal(int id);
-        Task DeleteRemote(int id);
+        Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action);
+        Task Download(SyncAction action);
+        Task Upload(SyncAction action);
+        Task DeleteLocal(SyncAction action);
+        Task DeleteRemote(SyncAction action);
         SyncAction SpecialSynchronization(SyncAction action);
         Task Special(SyncAction action);
     }

@@ -17,7 +17,14 @@ namespace DocumentManagement.Connection.Tests
 
         public static void EqualList<T>(List<T> expected, List<T> actual, Action<T, T> equalAction)
         {
-            Assert.AreEqual(expected.Count, actual.Count, "Не совподает число этементов");
+            if (expected == null)
+            {
+                Assert.IsNull(actual);
+                return;
+            }
+
+            Assert.IsNotNull(actual, "Переданная коллекция null");
+            Assert.AreEqual(expected.Count, actual.Count, "Не совподает число элементов");
             for (int i = 0; i < actual.Count; i++)
             {
                 equalAction(expected[i], actual[i]);
@@ -26,6 +33,14 @@ namespace DocumentManagement.Connection.Tests
 
         public static void EqualRevisionCollection(RevisionCollection expected, RevisionCollection actual)
         {
+            if (expected == null)
+            {
+                Assert.IsNull(actual);
+                return;
+            }
+
+            Assert.IsNotNull(actual, "Переданная коллекция null");
+
             EqualList(expected.Users, actual.Users, EqualRevision);
             EqualList(expected.Objectives, actual.Objectives, EqualRevisionChildsItem);
             EqualList(expected.Projects, actual.Projects, EqualRevisionChildsItem);

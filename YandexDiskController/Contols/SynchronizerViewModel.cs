@@ -90,20 +90,20 @@ namespace MRS.DocumentManagement.Contols
         #region private method
         private void UpdateRev()
         {
-            //void RevCheck(Connection.Synchronizator.Revision rev)
-            //{
+            // void RevCheck(Connection.Synchronizator.Revision rev)
+            // {
             //    if (rev.Rev == 0) rev.Incerment();
-            //}
+            // }
 
-            //var revs = ObjectModel.Synchronizer.Revisions;
-            //foreach (var item in ObjectModel.Users)
-            //{
+            // var revs = ObjectModel.Synchronizer.Revisions;
+            // foreach (var item in ObjectModel.Users)
+            // {
             //    var rev = revs.GetUser(item.ID);
             //    RevCheck(rev);
-            //}
+            // }
 
-            //foreach (var project in ObjectModel.Projects)
-            //{
+            // foreach (var project in ObjectModel.Projects)
+            // {
             //    var revP = revs.GetProject(project.ID);
             //    RevCheck(revP);
             //    foreach (var item in ObjectModel.GetItems(project.dto))
@@ -112,30 +112,30 @@ namespace MRS.DocumentManagement.Contols
             //        RevCheck(rev);
             //    }
 
-            //    foreach (var obj in ObjectModel.GetObjectives(project.dto))
+            // foreach (var obj in ObjectModel.GetObjectives(project.dto))
             //    {
             //        var revO = revP.FindObjetive((int)obj.ID);
             //        RevCheck(revO);
 
-            //        foreach (var item in ObjectModel.GetItems(project.dto, obj.ID))
+            // foreach (var item in ObjectModel.GetItems(project.dto, obj.ID))
             //        {
             //            var rev = revO.FindItem((int)item.ID);
             //            RevCheck(rev);
             //        }
             //    }
-            //}
+            // }
 
-            //ObjectModel.Synchronizer.SaveRevisions();
+            // ObjectModel.Synchronizer.SaveRevisions();
         }
 
         private void DownloadAll()
         {
-            //if (SyncProcces)
+            // if (SyncProcces)
             //    WinBox.ShowMessage("Синхронизация уже запущена!");
-            //foreach (var item in synchronizer.Revisions.Users)
+            // foreach (var item in synchronizer.Revisions.Users)
             //    item.Rev = 0;
-            //foreach (var proj in synchronizer.Revisions.Projects)
-            //{
+            // foreach (var proj in synchronizer.Revisions.Projects)
+            // {
             //    proj.Rev = 0;
             //    if (proj.Items != null)
             //    {
@@ -143,7 +143,7 @@ namespace MRS.DocumentManagement.Contols
             //            item.Rev = 0;
             //    }
 
-            //    if (proj.Objectives != null)
+            // if (proj.Objectives != null)
             //    {
             //        foreach (var obj in proj.Objectives)
             //        {
@@ -155,9 +155,9 @@ namespace MRS.DocumentManagement.Contols
             //            }
             //        }
             //    }
-            //}
+            // }
 
-            //SynchronizeAsync();
+            // SynchronizeAsync();
         }
 
         private void StopSync()
@@ -167,12 +167,12 @@ namespace MRS.DocumentManagement.Contols
 
         private void UploadAll()
         {
-            //if (SyncProcces)
+            // if (SyncProcces)
             //    WinBox.ShowMessage("Синхронизация уже запущена!");
-            //foreach (var item in synchronizer.Revisions.Users)
+            // foreach (var item in synchronizer.Revisions.Users)
             //    item.Rev++;
-            //foreach (var proj in synchronizer.Revisions.Projects)
-            //{
+            // foreach (var proj in synchronizer.Revisions.Projects)
+            // {
             //    proj.Rev++;
             //    if (proj.Items != null)
             //    {
@@ -180,7 +180,7 @@ namespace MRS.DocumentManagement.Contols
             //            item.Rev++;
             //    }
 
-            //    if (proj.Objectives != null)
+            // if (proj.Objectives != null)
             //    {
             //        foreach (var obj in proj.Objectives)
             //        {
@@ -192,7 +192,7 @@ namespace MRS.DocumentManagement.Contols
             //            }
             //        }
             //    }
-            //}
+            // }
 
             SynchronizeAsync();
         }

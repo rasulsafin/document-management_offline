@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        public static async Task RunActionAsync(SyncAction action,
+        public static async Task RunAction(SyncAction action,
             ISynchroTable synchro,
             RevisionCollection local,
             RevisionCollection remote)
@@ -97,6 +97,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     Revision localRev2 = synchro.GetRevisions(local).Find(r => r.ID == id);
                     await synchro.DeleteLocal(id);
                     synchro.SetRevision(remote, localRev2);
+                    break;
                 case TypeSyncAction.DeleteRemote:
                     Revision remoteRev2 = synchro.GetRevisions(remote).Find(r => r.ID == id);
                     await synchro.DeleteRemote(id);

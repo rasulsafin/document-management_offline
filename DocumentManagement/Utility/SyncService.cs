@@ -70,6 +70,11 @@ namespace MRS.DocumentManagement.Utility
         }
 
         public (int current, int total, string step) GetSyncProgress() => (Current, Total, Message);
+
+        public void AddChange(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
+        {
+            SyncManager.Update(id, idObj);
+        }
     }
 
 }

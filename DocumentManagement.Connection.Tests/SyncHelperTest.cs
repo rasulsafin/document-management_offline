@@ -169,19 +169,38 @@ namespace DocumentManagement.Connection.Tests
 
         internal class SubSyncSyncro : ISynchroTable
         {
+            Task ISynchroTable.DeleteLocal(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            Task ISynchroTable.DeleteRemote(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            Task ISynchroTable.Download(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
                 return revisions.Users;
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
+            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
             {
                 throw new System.NotImplementedException();
             }
 
 
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            Task ISynchroTable.Special(SyncAction action)
             {
                 throw new System.NotImplementedException();
             }
@@ -193,17 +212,45 @@ namespace DocumentManagement.Connection.Tests
                 return action;
             }
 
+            Task ISynchroTable.Upload(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
         }
 
         internal class UserSyncro : ISynchroTable
         {
+            public Task DeleteLocal(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task DeleteRemote(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task Download(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task Special(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public Task Upload(SyncAction action)
+            {
+                throw new System.NotImplementedException();
+            }
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
                 return revisions.Users;
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
+            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
             {
                 throw new System.NotImplementedException();
             }

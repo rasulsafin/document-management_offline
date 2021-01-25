@@ -13,7 +13,7 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class DiskManager
+    public class DiskManager : IDiskManager
     {
         // public static CoolLogger logger = new CoolLogger(typeof(DiskManager).Name);
 
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection
                 string json = JsonConvert.SerializeObject(@object);
                 return await controller.SetContentAsync(path, json);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
             }
 
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Connection
         private async Task<bool> CheckTableDir(string tableName)
         {
             bool res = tables.Any(x => x == tableName);
-            if (res)return true;
+            if (res) return true;
             IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
             foreach (DiskElement element in list)
             {

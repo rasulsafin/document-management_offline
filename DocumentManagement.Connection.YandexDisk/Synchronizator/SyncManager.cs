@@ -25,9 +25,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public async Task Initialize(string accessToken)
         {
-            if (diskManager == null)
+            if (disk == null)
             {
-                diskManager = new DiskManager(accessToken);
+                disk = new DiskManager(accessToken);
                 await LoadRevisions();
             }
         }
@@ -103,10 +103,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public async Task StartSync(ProgressChangeDelegate progressChange, DMContext context)
         {
             RevisionCollection remote = await disk.Pull<RevisionCollection>("revisions");
-            var actions = SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
-            var actions = SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
 
-            
+            List<SyncAction> syncActions = SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
+            var actions = SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
+            syncActions.AddRange(actions);
         }
 
         private Task Synchronize(IProgress<(int, int, string)> progress, ISynchroTable synchro, RevisionCollection remoreRevisions)
@@ -134,40 +134,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             string fileName = PathManager.GetLocalRevisionFile();
             string str = JsonConvert.SerializeObject(Revisions);
             File.WriteAllText(fileName, str);
-        }
-    }
-
-    public class UserSychro : ISynchroTable
-    {
-        private DiskManager disk;
-        private DMContext context;
-
-        public UserSychro(DiskManager disk, DMContext context)
-        {
-            this.disk = disk;
-            this.context = context;
-        }
-
-        List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
-        {
-            if (revisions.Users == null)
-                revisions.Users = new List<Revision>();
-            return revisions.Users;
-        }
-
-        Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
-        {
-            throw new NotImplementedException();
-        }
-
-        void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
-        {
-            revisions.GetUser(rev.ID).Rev = rev.Rev;
-        }
-
-        SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
-        {
-            return action;
         }
     }
 }
