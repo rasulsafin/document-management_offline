@@ -229,24 +229,28 @@ namespace DocumentManagement.Connection.Tests
         internal class UserSyncro : ISynchroTable
         {
             public bool RunDownload { get; private set; }
+
             public bool RunUpload { get; private set; }
+
             public bool RunDeleteRemote { get; private set; }
+
             public bool RunDeleteLocal { get; private set; }
+
             public bool RunSpecial { get; private set; }
 
-            public Task DeleteLocal(int id)
+            public Task DeleteLocal(SyncAction action)
             {
                 RunDeleteLocal = true;
                 return Task.CompletedTask;
             }
 
-            public Task DeleteRemote(int id)
+            public Task DeleteRemote(SyncAction action)
             {
                 RunDeleteRemote = true;
                 return Task.CompletedTask;
             }
 
-            public Task Download(int id)
+            public Task Download(SyncAction action)
             {
                 RunDownload = true;
                 return Task.CompletedTask;
@@ -258,7 +262,7 @@ namespace DocumentManagement.Connection.Tests
                 return Task.CompletedTask;
             }
 
-            public Task Upload(int id)
+            public Task Upload(SyncAction action)
             {
                 RunUpload = true;
                 return Task.CompletedTask;
@@ -269,9 +273,9 @@ namespace DocumentManagement.Connection.Tests
                 return revisions.Users;
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
+            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
             {
-                return Task.FromResult<List<ISynchroTable>>(null);
+                throw new System.NotImplementedException();
             }
 
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)

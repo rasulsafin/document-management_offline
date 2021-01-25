@@ -291,15 +291,15 @@ namespace MRS.DocumentManagement
 
         private async Task SubSynchronize(IProgress<(int, int, string)> progress, ISynchroTable synchro, RevisionCollection remoteRevisions, Revision localRev)
         {
-            var subSynchronizes = await synchro.GetSubSynchroList(localRev.ID);
-            if (subSynchronizes != null)
-            {
-                foreach (var subSynchronize in subSynchronizes)
-                {
-                    if (NeedStopSync) break;
-                    await Synchronize(progress, subSynchronize, remoteRevisions);
-                }
-            }
+            //var subSynchronizes = await synchro.GetSubSynchroList(localRev.ID);
+            //if (subSynchronizes != null)
+            //{
+            //    foreach (var subSynchronize in subSynchronizes)
+            //    {
+            //        if (NeedStopSync) break;
+            //        await Synchronize(progress, subSynchronize, remoteRevisions);
+            //    }
+            //}
         }
     }
 }

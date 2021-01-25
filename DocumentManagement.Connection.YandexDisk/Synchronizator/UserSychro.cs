@@ -4,17 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
 
-
     public class UserSychro : ISynchroTable
     {
         private IDiskManager disk;
         private DMContext context;
+        private User local;
+        private UserSyncModel remote;
 
         public UserSychro(IDiskManager disk, DMContext context)
         {
@@ -22,29 +24,36 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             this.context = context;
         }
 
-        public Task DeleteLocal(SyncAction action)
+        public async Task DeleteLocal(SyncAction action)
         {
-            throw new NotImplementedException();
+            local = await GetLocal(action.ID);
+            context.Users.Remove(local);
+            context.SaveChanges();
         }
 
-        public Task DeleteRemote(SyncAction action)
+
+        public async Task DeleteRemote(SyncAction action)
         {
-            throw new NotImplementedException();
+            await disk.Delete<UserDto>(action.ID.ToString());
         }
 
-        public Task Download(SyncAction action)
+        public async Task Download(SyncAction action)
         {
-            throw new NotImplementedException();
+            remote = await GetRemote(action.ID);
+            local = await GetLocal(action.ID);
+            remote.Update(local);
         }
+
 
         public Task Special(SyncAction action)
         {
             throw new NotImplementedException();
         }
 
-        public Task Upload(SyncAction action)
+        public async Task Upload(SyncAction action)
         {
-            throw new NotImplementedException();
+            remote = new UserSyncModel(await GetLocal(action.ID));
+            disk.Push(remote, action.ID.ToString());
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
@@ -68,5 +77,49 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             return action;
         }
+
+        private async Task<User> GetLocal(int id)
+        {
+            if (local?.ID != id)
+            {
+                local = await context.Users.FindAsync(id);
+            }
+            return local;
+        }
+
+        private async Task<UserSyncModel> GetRemote(int id)
+        {
+            if (remote?.ID != id)
+            {
+                remote = await disk.Pull<UserSyncModel>(id.ToString());
+            }
+
+            return remote;
+        }
+
+        internal class UserSyncModel
+        {
+            public UserSyncModel()
+            { }
+
+            public UserSyncModel(User local)
+            {
+                ID = local.ID;
+                Login = local.Login;
+                Name = local.Name;
+                //ID = local.;
+            }
+
+            public int ID { get; set; }
+            public string Login { get; set; }
+            public string Name { get; set; }
+
+            internal void Update(User local)
+            {
+                local.Login = Login;
+                local.Name = Name;
+            }
+        }
     }
+
 }

@@ -15,17 +15,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             this.context = context;
         }
 
-        Task ISynchroTable.DeleteLocal(int id)
+        Task ISynchroTable.DeleteLocal(SyncAction action)
         {
             throw new System.NotImplementedException();
         }
 
-        Task ISynchroTable.DeleteRemote(int id)
+        Task ISynchroTable.DeleteRemote(SyncAction action)
         {
             throw new System.NotImplementedException();
         }
 
-        Task ISynchroTable.Download(int id)
+        Task ISynchroTable.Download(SyncAction action)
         {
             throw new System.NotImplementedException();
         }
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             throw new System.NotImplementedException();
         }
 
-        Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(int id)
+        Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
         {
             throw new System.NotImplementedException();
         }
@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             throw new System.NotImplementedException();
         }
 
-        Task ISynchroTable.Upload(int id)
+        Task ISynchroTable.Upload(SyncAction action)
         {
             throw new System.NotImplementedException();
         }

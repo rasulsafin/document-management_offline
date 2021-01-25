@@ -56,6 +56,7 @@ namespace DocumentManagement.Connection.Tests
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5]
         };
+
         private static readonly User HEISENBERG_USER = new User
         {
             Login = "IAmTheDangerous",
@@ -63,6 +64,7 @@ namespace DocumentManagement.Connection.Tests
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5]
         };
+
         private static readonly User SCHREDINGER_USER = new User
         {
             Login = "loveDogs1932",
@@ -70,6 +72,7 @@ namespace DocumentManagement.Connection.Tests
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5]
         };
+
         private static readonly User PAULI_USER = new User
         {
             Login = "principlesHater",
@@ -165,6 +168,7 @@ namespace DocumentManagement.Connection.Tests
             Description = "everything wrong! redo!!!",
             Status = ObjectiveStatus.Open
         };
+
         private static readonly ObjectiveToCreateDto FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
             CreationDate = DateTime.Now,
@@ -173,6 +177,7 @@ namespace DocumentManagement.Connection.Tests
             Description = "ASAP: everything wrong! redo!!!",
             Status = ObjectiveStatus.InProgress
         };
+
         private static readonly ObjectiveToCreateDto SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
             CreationDate = DateTime.Now,
@@ -220,6 +225,7 @@ namespace DocumentManagement.Connection.Tests
             Description = "everything wrong! redo!!!",
             Status = (int)ObjectiveStatus.Open
         };
+
         private static readonly Objective FIRST_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
             CreationDate = DateTime.Now,
@@ -228,6 +234,7 @@ namespace DocumentManagement.Connection.Tests
             Description = "ASAP: everything wrong! redo!!!",
             Status = (int)ObjectiveStatus.InProgress
         };
+
         private static readonly Objective SECOND_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
             CreationDate = DateTime.Now,
@@ -267,12 +274,14 @@ namespace DocumentManagement.Connection.Tests
             ItemType = 0,
             Name = "File element"
         };
+
         private static readonly Item BIM_ITEM = new Item
         {
             ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
             Name = "Bim element"
         };
+
         private static readonly Item MEDIA_ITEM = new Item
         {
             ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
@@ -307,6 +316,7 @@ namespace DocumentManagement.Connection.Tests
 
         private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
             new DynamicFieldToCreateDto("dropdown1", "dropdown", "1,2,3");
+
         private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DATE =
             new DynamicFieldToCreateDto("datetime2", "datetime", DateTime.Now.ToString(CultureInfo.InvariantCulture));
         #endregion
@@ -330,6 +340,7 @@ namespace DocumentManagement.Connection.Tests
 
         private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =
             new DynamicField { Key = "dropdown1", Type = "dropdown", Value = "1,2,3" };
+
         private static readonly DynamicField DYNAMIC_FIELD_DATE =
             new DynamicField { Key = "datetime2", Type = "datetime", Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
         #endregion

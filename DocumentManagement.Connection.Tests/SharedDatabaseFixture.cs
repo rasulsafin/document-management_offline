@@ -12,6 +12,7 @@ namespace DocumentManagement.Connection.Tests
         private static bool _databaseInitialized;
 
         public DMContext Context { get; }
+
         private DbConnection Connection { get; set; }
 
         private DbContextOptions<DMContext> options;

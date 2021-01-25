@@ -85,22 +85,22 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     break;
                 case TypeSyncAction.Download:
                     Revision remoteRev1 = synchro.GetRevisions(remote).Find(r => r.ID == id);
-                    await synchro.Download(id);
+                    await synchro.Download(action);
                     synchro.SetRevision(local, remoteRev1);
                     break;
                 case TypeSyncAction.Upload:
                     Revision localRev1 = synchro.GetRevisions(local).Find(r => r.ID == id);
-                    await synchro.Upload(id);
+                    await synchro.Upload(action);
                     synchro.SetRevision(remote, localRev1);
                     break;
                 case TypeSyncAction.DeleteLocal:
                     Revision localRev2 = synchro.GetRevisions(local).Find(r => r.ID == id);
-                    await synchro.DeleteLocal(id);
+                    await synchro.DeleteLocal(action);
                     synchro.SetRevision(remote, localRev2);
                     break;
                 case TypeSyncAction.DeleteRemote:
                     Revision remoteRev2 = synchro.GetRevisions(remote).Find(r => r.ID == id);
-                    await synchro.DeleteRemote(id);
+                    await synchro.DeleteRemote(action);
                     synchro.SetRevision(local, remoteRev2);
                     break;
                 case TypeSyncAction.Special:
@@ -110,7 +110,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             if (action.SpecialSynchronization)
             {
-                var subSynchroList = await synchro.GetSubSynchroList(action.ID);
+                var subSynchroList = await synchro.GetSubSynchroList(action);
                 // TODO Выполнить внутренюю синхронизация
                 await synchro.Special(action);
             }
