@@ -1,6 +1,7 @@
 ﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -34,10 +35,27 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await disk.Delete<ItemDto>(action.ID.ToString());
         }
 
-        public Task Download(SyncAction action)
+        public async Task Download(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            await GetRemote(action.ID);
+            await GetLocal(action.ID);
+            if (remote != null)
+            {
+                if (local == null)
+                {
+                    context.Items.Add(Convert(remote));
+                }
+                else
+                {
+                    local.ItemType = (int)remote.ItemType;
+                    local.Name = remote.Name;
+                    local.ExternalItemId = remote.ExternalItemId;
+                }
+
+                context.SaveChanges();
+            }
         }
+
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
@@ -61,28 +79,52 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public SyncAction SpecialSynchronization(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            return action;
         }
 
-        public Task Upload(SyncAction action)
+        public async Task Upload(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            await GetLocal(action.ID);
+            if (local != null)
+            {
+                await disk.Push(Convert(local), action.ID.ToString());
+            }
+        }
+
+        private ItemDto Convert(Item item)
+        {
+            return new ItemDto()
+            {
+                ID = (ID<ItemDto>)item.ID,
+                ItemType = (ItemTypeDto)item.ItemType,
+                Name = item.Name,
+                ExternalItemId = item.ExternalItemId,
+            };
+        }
+
+        private Item Convert(ItemDto item)
+        {
+            return new Item()
+            {
+                ID = (int)item.ID,
+                ItemType = (int)item.ItemType,
+                Name = item.Name,
+                ExternalItemId = item.ExternalItemId,
+            };
         }
 
         private async Task GetLocal(int id)
         {
-            if (local?.ID == id)
+            if (local?.ID != id)
                 local = await context.Items.FindAsync(id);
         }
 
         private async Task GetRemote(int id)
         {
-            if (remote?.ID == new ID<ItemDto>(id))
+            if (remote?.ID != new ID<ItemDto>(id))
                 remote = await disk.Pull<ItemDto>(id.ToString());
         }
     }
 
-    internal class ItemSync
-    {
-    }
+
 }

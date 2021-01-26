@@ -24,6 +24,7 @@ namespace DocumentManagement.Connection.Tests
         public ProjectDto Project { get; set; }
 
         public UserSynchro.UserSync User { get; set; }
+        public ItemDto Item { get; set; }
 
         public Task Delete<T>(string id)
         {
@@ -48,6 +49,8 @@ namespace DocumentManagement.Connection.Tests
                     return Task.FromResult(prj);
                 if (User is T usr)
                     return Task.FromResult(usr);
+                if (Item is T itm)
+                    return Task.FromResult(itm);
             }
 
             return Task.FromResult<T>(default);
@@ -69,6 +72,12 @@ namespace DocumentManagement.Connection.Tests
                 if (@object is UserSynchro.UserSync usr)
                 {
                     User = usr;
+                    return Task.FromResult(true);
+                }
+
+                if (@object is ItemDto itm)
+                {
+                    Item = itm;
                     return Task.FromResult(true);
                 }
             }

@@ -48,17 +48,17 @@ namespace DocumentManagement.Connection.Tests
                 context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
                 context.Items.AddRange(MockData.DEFAULT_ITEMS);
                 context.SaveChanges();
-                var project = context.Projects.FirstOrDefault();
-                var items = context.Items.ToList();
-                foreach (var item in items)
-                {
-                    var link = new ProjectItem();
-                    link.ItemID = item.ID;
-                    link.ProjectID = project.ID;
-                    project.Items.Add(link);
-                }
+                //var project = context.Projects.FirstOrDefault();
+                //var items = context.Items.ToList();
+                //foreach (var item in items)
+                //{
+                //    var link = new ProjectItem();
+                //    link.ItemID = item.ID;
+                //    link.ProjectID = project.ID;
+                //    project.Items.Add(link);
+                //}
 
-                context.SaveChanges();
+                //context.SaveChanges();
             });
 
             Revisions = new RevisionCollection();
@@ -164,6 +164,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction();
             action.ID = id;
             await sychro.DeleteLocal(action);
+            Fixture.Context.SaveChanges();
 
             Item item = Fixture.Context.Items.Find(id);
             Assert.IsNull(item);
@@ -194,8 +195,8 @@ namespace DocumentManagement.Connection.Tests
         {
             // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
             int id = 1;
-            var project = Fixture.Context.Projects.Find(id);
-            ProjectDto expected = mapper.Map<ProjectDto>(project);
+            var item = Fixture.Context.Items.Find(id);
+            ItemDto expected = mapper.Map<ItemDto>(item);
             SyncAction action = new SyncAction();
             action.ID = id;
 
@@ -205,7 +206,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPull);
             Assert.IsTrue(disk.RunPush);
             Assert.AreEqual(id, disk.LastId);
-            ProjectDto actual = disk.Project;
+            ItemDto actual = disk.Item;
             AssertHelper.EqualDto(expected, actual);
         }
 
@@ -218,25 +219,26 @@ namespace DocumentManagement.Connection.Tests
 
         private async Task DownloadTest(int id)
         {
-            disk.Project = new ProjectDto()
+            disk.Item = new ItemDto()
             {
-                ID = (ID<ProjectDto>)id,
-                Title = "Замок кащея",
-                Items = new List<ItemDto>(),
+                ID = (ID<ItemDto>)id,
+                Name= "Замок кащея",
+                ExternalItemId = "Замок кащея",
+                ItemType = ItemTypeDto.File,
             };
-            ProjectDto expected = disk.Project;
+            ItemDto expected = disk.Item;
 
             SyncAction action = new SyncAction();
             action.ID = id;
             await sychro.Download(action);
-
+            
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
             Assert.AreEqual(id, disk.LastId);
 
-            var project = Fixture.Context.Projects.Find(id);
-            ProjectDto actual = mapper.Map<ProjectDto>(project);
+            var item = Fixture.Context.Items.Find(id);
+            ItemDto actual = mapper.Map<ItemDto>(item);
 
             AssertHelper.EqualDto(expected, actual);
         }
@@ -244,7 +246,7 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public async Task DownloadTestNotExist()
         {
-            int id = 3;
+            int id = 5;
             await DownloadTest(id);
         }
 

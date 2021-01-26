@@ -86,7 +86,7 @@ namespace DocumentManagement.Connection.Tests
             EqualEnumerable(expected.Items, actual.Items, EqualDto);
         }
 
-        private static void EqualDto(ItemDto expected, ItemDto actual)
+        public static void EqualDto(ItemDto expected, ItemDto actual)
         {
             if (NUllComparer(expected, actual)) return;
             Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта ItemDto");

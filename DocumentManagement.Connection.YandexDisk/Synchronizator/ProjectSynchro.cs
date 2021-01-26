@@ -67,9 +67,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
         {
-            List<ISynchroTable> synchros = new List<ISynchroTable>();
-            synchros.Add(new ItemSynchro(disk, context));
-            return Task.FromResult(synchros);
+            return Task.FromResult<List<ISynchroTable>>(null);
+
+            // List<ISynchroTable> synchros = new List<ISynchroTable>();
+            // synchros.Add(new ItemSynchro(disk, context));
+            // return Task.FromResult(synchros);
         }
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
