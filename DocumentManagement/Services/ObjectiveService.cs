@@ -17,6 +17,7 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
+        private readonly ReportHelper reportHelper = new ReportHelper();
 
         public ObjectiveService(DMContext context, IMapper mapper, ItemHelper itemHelper)
         {
@@ -74,19 +75,49 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
         {
-            var dbObjective = await context.Objectives
-                .Include(x => x.Project)
-                .Include(x => x.Author)
-                .Include(x => x.ObjectiveType)
-                .Include(x => x.DynamicFields)
-                .Include(x => x.Items)
-                .ThenInclude(x => x.Item)
-                .Include(x => x.BimElements)
-                .ThenInclude(x => x.BimElement)
-                .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
+            var dbObjective = await Get(objectiveID);
             if (dbObjective == null)
                 return null;
+
             return mapper.Map<ObjectiveDto>(dbObjective);
+        }
+
+        public async Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        {
+            int count = 0;
+            DateTime date = DateTime.Now.Date;
+
+            var reportCount = await context.ReportCounts.FindAsync(userID);
+            if (reportCount != null)
+            {
+                if (reportCount.Date == date)
+                    count = reportCount.Count;
+            }
+            else
+            {
+                reportCount = new ReportCount() { UserID = userID, Count = count, Date = date };
+                await context.AddAsync(reportCount);
+            }
+
+            reportCount.Count = ++count;
+            reportCount.Date = date;
+            await context.SaveChangesAsync();
+
+            string reportID = $"{date.ToString("ddMMyyyy")}-{count}";
+
+            List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
+            var objNum = 1;
+            foreach (var objectiveId in objectiveIds)
+            {
+                var objective = await Get(objectiveId);
+                var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
+                objectiveToReport.ID = $"{reportID}/{objNum++}";
+                objectives.Add(objectiveToReport);
+            }
+
+            var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+
+            return true;
         }
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
@@ -95,7 +126,7 @@ namespace MRS.DocumentManagement.Services
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.DynamicFields)
                 .Include(x => x.Objectives)
-                .ThenInclude(x=>x.ObjectiveType)
+                .ThenInclude(x => x.ObjectiveType)
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)
@@ -245,6 +276,21 @@ namespace MRS.DocumentManagement.Services
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
             return true;
+        }
+
+        private async Task<Objective> Get(ID<ObjectiveDto> objectiveID)
+        {
+            var dbObjective = await context.Objectives
+               .Include(x => x.Project)
+               .Include(x => x.Author)
+               .Include(x => x.ObjectiveType)
+               .Include(x => x.DynamicFields)
+               .Include(x => x.Items)
+               .ThenInclude(x => x.Item)
+               .Include(x => x.BimElements)
+               .ThenInclude(x => x.BimElement)
+               .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
+            return dbObjective;
         }
     }
 }

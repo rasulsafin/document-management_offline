@@ -2,6 +2,7 @@
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -60,6 +61,14 @@ namespace MRS.DocumentManagement.Api.Controllers
             return Forbid();
             //var dynamicFields = await service.GetRequiredDynamicFields(new ID<ObjectiveDto>(objectiveID));
             //return ValidateCollection(dynamicFields);
+        }
+
+        [HttpPost]
+        [Route("report")]
+        public async Task<IActionResult> GenerateReport([FromBody] IEnumerable<ID<ObjectiveDto>> data, [FromQuery] string path, [FromQuery] int userID, [FromQuery] string projectName)
+        {
+            var result = await service.GenerateReport(data, path, userID, projectName);
+            return ValidateFoundRelatedResult(result);
         }
     }
 }

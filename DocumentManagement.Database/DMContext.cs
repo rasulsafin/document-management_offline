@@ -16,6 +16,7 @@ namespace MRS.DocumentManagement.Database
         public DbSet<EnumDm> EnumDms { get; set; }
         public DbSet<EnumDmValue> EnumDmValues { get; set; }
 		public DbSet<Role> Roles { get; set; }
+        public DbSet<ReportCount> ReportCounts { get; set; }
 
         public DbSet<ProjectItem> ProjectItems { get; set; }
         public DbSet<ObjectiveItem> ObjectiveItems { get; set; }
@@ -23,6 +24,8 @@ namespace MRS.DocumentManagement.Database
         public DbSet<UserEnumDmValue> UserEnumDmValues { get; set; }
 		public DbSet<BimElementObjective> BimElementObjectives { get; set; }
 		public DbSet<UserRole> UserRoles { get; set; }
+
+		
 
         public DMContext() 
         {			
@@ -54,6 +57,9 @@ namespace MRS.DocumentManagement.Database
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Login)
 				.IsUnique(true);
+
+            modelBuilder.Entity<ReportCount>()
+                .HasKey(x => x.UserID);
 
 			// Roles have unique names
 			modelBuilder.Entity<Role>()
