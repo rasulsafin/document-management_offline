@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Tests\DocumentManagement.IntegrationTests.csproj" />
     <ProjectReference Include="..\DocumentManagement\DocumentManagement.csproj" />
   </ItemGroup>
 

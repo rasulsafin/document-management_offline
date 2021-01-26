@@ -10,7 +10,7 @@ namespace DocumentManagement.Connection.Tests
     public class SyncHelperAnalysisTest
     {
         [TestMethod]
-        public void AnalysisDownloadTest()
+        public async Task AnalysisDownloadTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetUser(1).Rev = 30;
@@ -18,7 +18,7 @@ namespace DocumentManagement.Connection.Tests
             RevisionCollection local = new RevisionCollection();
             local.GetUser(2).Rev = 10;
 
-            List<SyncAction> actual = SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
@@ -40,7 +40,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void AnalysisNoneActionTest()
+        public async Task AnalysisNoneActionTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetUser(1).Rev = 10;
@@ -50,7 +50,7 @@ namespace DocumentManagement.Connection.Tests
             local.GetUser(1).Rev = 10;
             local.GetUser(2).Rev = 10;
 
-            List<SyncAction> actual = SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
 
             List<SyncAction> expected = new List<SyncAction>(){
                 new SyncAction()
@@ -71,7 +71,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void AnalysisDeleteTest()
+        public async Task AnalysisDeleteTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetUser(1).Rev = 30;
@@ -80,7 +80,7 @@ namespace DocumentManagement.Connection.Tests
             RevisionCollection local = new RevisionCollection();
             local.GetUser(2).Rev = 10;
 
-            List<SyncAction> actual = SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
@@ -102,7 +102,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void AnalysisUploadTest()
+        public async Task AnalysisUploadTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetUser(1).Rev = 30;
@@ -112,7 +112,7 @@ namespace DocumentManagement.Connection.Tests
             local.GetUser(1).Rev = 100;
             local.GetUser(2).Rev = 100;
 
-            List<SyncAction> actual = SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
@@ -134,7 +134,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void AnalysisSubSyncTest()
+        public async Task AnalysisSubSyncTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetUser(1).Rev = 1;
@@ -144,7 +144,7 @@ namespace DocumentManagement.Connection.Tests
             local.GetUser(1).Rev = 1;
             local.GetUser(2).Rev = 1;
 
-            List<SyncAction> actual = SyncHelper.Analysis(local, remote, new SubSyncSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new SubSyncSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
@@ -191,7 +191,7 @@ namespace DocumentManagement.Connection.Tests
 
             Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
             {
-                throw new System.NotImplementedException();
+                return Task.FromResult<List<ISynchroTable>>(null);
             }
 
 
@@ -252,7 +252,7 @@ namespace DocumentManagement.Connection.Tests
 
             Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
             {
-                throw new System.NotImplementedException();
+                return Task.FromResult<List<ISynchroTable>>(null);
             }
 
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)

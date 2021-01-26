@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
     public class SyncHelper
     {
-        public static List<SyncAction> Analysis(RevisionCollection local, RevisionCollection remote, ISynchroTable synchro)
+        public static async Task<List<SyncAction>> Analysis(RevisionCollection local, RevisionCollection remote, ISynchroTable synchro)
         {
             var result = new List<SyncAction>();
             List<Revision> localRevs = synchro.GetRevisions(local);
@@ -49,6 +49,16 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
                 action = synchro.SpecialSynchronization(action);
                 result.Add(action);
+
+                List<ISynchroTable> subSynchros = await synchro.GetSubSynchroList(action);
+                if (subSynchros != null)
+                {
+                    foreach (var subSynchro in subSynchros)
+                    {
+                        List<SyncAction> subActions = await Analysis(local, remote, subSynchro);
+                        result.AddRange(subActions);
+                    }
+                }
 
                 if (remoteRev != null)
                     remoteRevs.Remove(remoteRev);

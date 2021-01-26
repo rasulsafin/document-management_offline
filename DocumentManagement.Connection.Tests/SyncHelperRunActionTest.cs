@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
@@ -175,9 +176,12 @@ namespace DocumentManagement.Connection.Tests
             };
 
             var synchro = new UserSyncro();
-            await SyncHelper.RunAction(action, synchro, local, remote);
+            await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
+             {
+                 await SyncHelper.RunAction(action, synchro, local, remote);
+             });
 
-            local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
+            // local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
             RevisionCollection expected = new RevisionCollection();
             expected.GetUser(1).Rev = 10;
             expected.GetUser(2).Rev = 10;
@@ -186,7 +190,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(synchro.RunDeleteRemote);
             Assert.IsFalse(synchro.RunDownload);
             Assert.IsFalse(synchro.RunUpload);
-            Assert.IsTrue(synchro.RunSpecial);
+            // Assert.IsTrue(synchro.RunSpecial);
             AssertHelper.EqualRevisionCollection(expected, local);
         }
 

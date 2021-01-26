@@ -104,8 +104,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             RevisionCollection remote = await disk.Pull<RevisionCollection>("revisions");
 
-            List<SyncAction> syncActions = SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
-            var actions = SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
+            List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
+            var actions = await SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
             syncActions.AddRange(actions);
         }
 

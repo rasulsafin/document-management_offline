@@ -10,7 +10,6 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-
     public class UserSychro : ISynchroTable
     {
         private IDiskManager disk;
@@ -31,7 +30,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             context.SaveChanges();
         }
 
-
         public async Task DeleteRemote(SyncAction action)
         {
             await disk.Delete<UserDto>(action.ID.ToString());
@@ -41,9 +39,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             remote = await GetRemote(action.ID);
             local = await GetLocal(action.ID);
-            remote.Update(local);
+            if (local != null)
+            {
+                remote.Update(local);
+            }
+            else
+            {
+                local = new User()
+                {
+                    ID = remote.ID,
+                    Login = remote.Login,
+                    Name = remote.Name,
+                };
+                context.Users.Add(local);
+            }
         }
-
 
         public Task Special(SyncAction action)
         {
@@ -53,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public async Task Upload(SyncAction action)
         {
             remote = new UserSyncModel(await GetLocal(action.ID));
-            disk.Push(remote, action.ID.ToString());
+            await disk.Push(remote, action.ID.ToString());
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
@@ -84,6 +94,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             {
                 local = await context.Users.FindAsync(id);
             }
+
             return local;
         }
 
@@ -97,7 +108,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return remote;
         }
 
-        internal class UserSyncModel
+        public class UserSyncModel
         {
             public UserSyncModel()
             { }
@@ -107,12 +118,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 ID = local.ID;
                 Login = local.Login;
                 Name = local.Name;
-                //ID = local.;
             }
 
             public int ID { get; set; }
+
             public string Login { get; set; }
+
             public string Name { get; set; }
+
+            public UserDto ToDto()
+            {
+                return new UserDto(
+                    id: new ID<UserDto>(ID),
+                    login: Login,
+                    name: Name);
+            }
 
             internal void Update(User local)
             {
@@ -121,5 +141,4 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
     }
-
 }
