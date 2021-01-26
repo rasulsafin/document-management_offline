@@ -1,176 +1,294 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Services;
+using MRS.DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Utility;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class AuthorizationTests
     {
-        public static SharedDatabaseFixture Fixture { get; private set; }
+        private static SharedDatabaseFixture Fixture { get; set; }
+
+        private static AuthorizationService service;
+        private static IMapper mapper;
 
         [ClassInitialize]
-        public static void Setup(TestContext _)
+        public static void ClassSetup(TestContext _)
         {
-            Fixture = new SharedDatabaseFixture();
-        }
-
-        [ClassCleanup]
-        public static void Cleanup()
-        {
-            Fixture.Dispose();
-        }
-
-        [TestMethod]
-        public async Task Can_login_to_current_fixture()
-        {
-            await using var transaction = Fixture.Connection.BeginTransaction();
-            await using var context = Fixture.CreateContext(transaction);
-            var api = new DocumentManagementApi(context);
-            await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-            var access = await api.Login("vpupkin", "123");
-            Assert.IsNotNull(access);
-            Assert.IsTrue(access.CurrentUser.ID.IsValid);
-            Assert.AreEqual("vpupkin", access.CurrentUser.Login);
-            Assert.AreEqual("Vasily Pupkin", access.CurrentUser.Name);
-        }
-
-        [TestMethod]
-        public async Task Can_add_and_remove_roles()
-        {
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
+            var mapperConfig = new MapperConfiguration(mc =>
             {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-                Assert.IsNotNull(access.AuthorizationService);
-
-                var user = access.CurrentUser;
-                var auth = access.AuthorizationService;
-                // 0. Query roles
-                var roles = await auth.GetAllRoles();
-                Assert.IsNotNull(roles);
-                Assert.AreEqual(0, roles.Count());
-
-                // 1. Add new role
-                var result = await auth.AddRole(user.ID, "admin");
-                Assert.IsTrue(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEqual(new string[] { "admin" }, roles.ToArray());
-
-                // 2. Try add same role
-                result = await auth.AddRole(user.ID, "admin");
-                Assert.IsFalse(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEqual(new string[] { "admin" }, roles.ToArray());
-
-                // 3. Add new role
-                result = await auth.AddRole(user.ID, "operator");
-                Assert.IsTrue(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator" }, roles.ToArray());
-
-                // 4. Remove role
-                result = await auth.RemoveRole(user.ID, "operator");
-                Assert.IsTrue(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEquivalent(new string[] { "admin" }, roles.ToArray());
-
-                // 5. Try remove role again
-                result = await auth.RemoveRole(user.ID, "operator");
-                Assert.IsFalse(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEquivalent(new string[] { "admin" }, roles.ToArray());
-
-                // 6. Remove non-existent role
-                result = await auth.RemoveRole(user.ID, "somerole");
-                Assert.IsFalse(result);
-                roles = await auth.GetAllRoles();
-                CollectionAssert.AreEquivalent(new string[] { "admin" }, roles.ToArray());
-
-                // 7. Remove last role
-                result = await auth.RemoveRole(user.ID, "admin");
-                Assert.IsTrue(result);
-                roles = await auth.GetAllRoles();
-                Assert.AreEqual(0, roles.Count());
-            }
+                mc.AddProfile(new MappingProfile());
+            });
+            mapper = mapperConfig.CreateMapper();
         }
 
-        [TestMethod]
-        public async Task Can_query_roles_from_several_users()
+        [TestInitialize]
+        public void Setup()
         {
-            async Task AssertRoles(IAuthorizationService auth, ID<UserDto> id, params string[] roles)
+            Fixture = new SharedDatabaseFixture(context =>
             {
-                var eroles = roles ?? Enumerable.Empty<string>();
-                CollectionAssert.AreEquivalent(eroles.ToArray(), (await auth.GetUserRoles(id)).ToArray());
-                foreach (var role in eroles)
+                context.Database.EnsureDeleted();
+                context.Database.EnsureCreated();
+
+                var users = MockData.DEFAULT_USERS;
+                var roles = MockData.DEFAULT_ROLES;
+                context.Users.AddRange(users);
+                context.Roles.AddRange(roles);
+                context.SaveChanges();
+
+                if (users.Count >= 3 && roles.Count >= 2)
                 {
-                    Assert.IsTrue(await auth.IsInRole(id, role));
+                    var userRoles = new List<UserRole>
+                    {
+                        new UserRole { UserID = users[0].ID, RoleID = roles[0].ID },
+                        new UserRole { UserID = users[1].ID, RoleID = roles[0].ID },
+                        new UserRole { UserID = users[2].ID, RoleID = roles[1].ID }
+                    };
+                    context.UserRoles.AddRange(userRoles);
+                    context.SaveChanges();
                 }
-            }
+            });
 
-            using var transaction = Fixture.Connection.BeginTransaction();
-            using (var context = Fixture.CreateContext(transaction))
+            service = new AuthorizationService(Fixture.Context, mapper, new CryptographyHelper());
+        }
+
+        [TestCleanup]
+        public void Cleanup() => Fixture.Dispose();
+
+        [TestMethod]
+        public async Task AddRole_ExistingUserAndExistingRole_ReturnsTrueWithoutAddingRole()
+        {
+            var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count == 1);
+            var userId = existingUser.ID;
+            var currentRole = existingUser.Roles.First().Role;
+            var roleToAdd = Fixture.Context.Roles.First(r => r != currentRole);
+            var rolesCount = Fixture.Context.Roles.Count();
+
+            var result = await service.AddRole(new ID<UserDto>(userId), roleToAdd.Name);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(existingUser.Roles.Any(r => r.Role == roleToAdd));
+            Assert.AreEqual(rolesCount, Fixture.Context.Roles.Count());
+        }
+
+        [TestMethod]
+        public async Task AddRole_ExistingUserAndNotExistingRole_ReturnsTrueAndAddsRole()
+        {
+            var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count == 1);
+            var userId = existingUser.ID;
+            var currentRole = existingUser.Roles.First().Role;
+            var roleToAdd = $"newRole{Guid.NewGuid()}";
+            var rolesCount = Fixture.Context.Roles.Count();
+
+            var result = await service.AddRole(new ID<UserDto>(userId), roleToAdd);
+
+            Assert.IsTrue(result);
+            Assert.IsTrue(existingUser.Roles.Any(r => r.Role.Name == roleToAdd));
+            Assert.AreEqual(rolesCount + 1, Fixture.Context.Roles.Count());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task AddRole_NotExistingUser_RaisesArgumentException()
+        {
+            var userId = ID<UserDto>.InvalidID;
+            var role = "admin";
+
+            await service.AddRole(userId, role);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task AddRole_UserAlreadyInRole_ReturnsFalse()
+        {
+            var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count > 0);
+            var usersId = new ID<UserDto>(existingUser.ID);
+            var usersRole = existingUser.Roles.First().Role.Name;
+
+            var result = await service.AddRole(usersId, usersRole);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task GetAllRoles_NormalWay_ReturnsAllRolesNames()
+        {
+            var contextRoles = Fixture.Context.Roles.Select(r => r.Name).ToList();
+
+            var result = await service.GetAllRoles();
+
+            contextRoles.ForEach(r =>
             {
-                var api = new DocumentManagementApi(context);
-                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-                Assert.IsNotNull(access.AuthorizationService);
+                Assert.IsTrue(result.Any(resRole => resRole.Equals(r)));
+            });
+        }
 
-                var admin = access.CurrentUser;
-                var auth = access.AuthorizationService;
-                // 0. Add another user
-                var operID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
-                Assert.IsTrue(operID.IsValid);
+        [TestMethod]
+        public async Task GetUserRoles_ExistingUser_ReturnsAllUsersRolesNames()
+        {
+            var existingUser = Fixture.Context.Users.First(u => u.Roles.Count > 0);
+            var existingUserRolesNames = existingUser.Roles.Select(r => r.Role.Name).ToList();
 
-                // 1. Add admin role
-                Assert.IsTrue(await auth.AddRole(admin.ID, "admin"));
-                CollectionAssert.AreEquivalent(new string[] { "admin" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin");
-                await AssertRoles(auth, operID, null);
+            var result = await service.GetUserRoles(new ID<UserDto>(existingUser.ID));
 
-                // 2. Add operator role
-                Assert.IsTrue(await auth.AddRole(operID, "operator"));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin");
-                await AssertRoles(auth, operID, "operator");
+            existingUserRolesNames.ForEach(r =>
+            {
+                Assert.IsTrue(result.Any(resRole => resRole.Equals(r)));
+            });
+        }
 
-                // 3. Add new role to both
-                Assert.IsTrue(await auth.AddRole(admin.ID, "cook"));
-                Assert.IsTrue(await auth.AddRole(operID, "cook"));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator", "cook" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin", "cook");
-                await AssertRoles(auth, operID, "operator", "cook");
+        [TestMethod]
+        public async Task GetUserRoles_NotExistingUser_ReturnsEmptyEnumerable()
+        {
+            var result = await service.GetUserRoles(ID<UserDto>.InvalidID);
 
-                Assert.IsFalse(await auth.IsInRole(admin.ID, "operator"));
-                Assert.IsFalse(await auth.IsInRole(operID, "admin"));
+            Assert.IsFalse(result.Any());
+        }
 
-                // 4. Remove role from admin
-                Assert.IsTrue(await auth.RemoveRole(admin.ID, "cook"));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator", "cook" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin");
-                await AssertRoles(auth, operID, "operator", "cook");
+        [TestMethod]
+        public async Task IsInRole_ExistingUserInTheRole_ReturnsTrue()
+        {
+            var existingUser = Fixture.Context.Users.First(u => u.Roles.Count > 0);
+            var userRole = existingUser.Roles.First().Role.Name;
 
-                Assert.IsFalse(await auth.IsInRole(admin.ID, "cook"));
+            var result = await service.IsInRole(new ID<UserDto>(existingUser.ID), userRole);
 
-                // 5. Remove role from operator
-                Assert.IsTrue(await auth.RemoveRole(operID, "cook"));
-                CollectionAssert.AreEquivalent(new string[] { "admin", "operator" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin");
-                await AssertRoles(auth, operID, "operator");
+            Assert.IsTrue(result);
+        }
 
-                Assert.IsFalse(await auth.IsInRole(operID, "cook"));
+        [TestMethod]
+        public async Task IsInRole_ExistingUserNotInTheRole_ReturnsFalse()
+        {
+            var existingUser = Fixture.Context.Users.First(u => u.Roles.Count == 1);
+            var userRole = existingUser.Roles.First().Role;
+            var notUserRole = Fixture.Context.Roles.First(r => r != userRole);
 
-                // 6. Remove last role from operator
-                Assert.IsTrue(await auth.RemoveRole(operID, "operator"));
-                CollectionAssert.AreEquivalent(new string[] { "admin" }, (await auth.GetAllRoles()).ToArray());
-                await AssertRoles(auth, admin.ID, "admin");
-                await AssertRoles(auth, operID, null);
-            }
+            var result = await service.IsInRole(new ID<UserDto>(existingUser.ID), notUserRole.Name);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task IsInRole_NotExistingUser_ReturnsFalse()
+        {
+            var role = Fixture.Context.Roles.First();
+
+            var result = await service.IsInRole(ID<UserDto>.InvalidID, role.Name);
+
+            Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task RemoveRole_RoleWithExistingSingleUser_ReturnsTrueAndRemovesRoleWithEmptyUsersList()
+        {
+            var singleUserRole = Fixture.Context.UserRoles.First(r => r.Role.Users.Count == 1).Role;
+            var user = singleUserRole.Users.First().User;
+
+            var result = await service.RemoveRole(new ID<UserDto>(user.ID), singleUserRole.Name);
+
+            Assert.IsTrue(result);
+            Assert.IsFalse(user.Roles.Any(r => r.Role == singleUserRole));
+            Assert.IsFalse(Fixture.Context.Roles.Any(r => r == singleUserRole));
+            Assert.IsFalse(Fixture.Context.UserRoles.Any(ur => ur.Role == singleUserRole));
+        }
+
+        [TestMethod]
+        public async Task RemoveRole_RoleWithExistingMultipleUser_ReturnsTrueAndDoenstRemoveRole()
+        {
+            var multipleUsersRole = Fixture.Context.UserRoles.First(r => r.Role.Users.Count > 1).Role;
+            var user = multipleUsersRole.Users.First().User;
+
+            var result = await service.RemoveRole(new ID<UserDto>(user.ID), multipleUsersRole.Name);
+
+            Assert.IsTrue(result);
+            Assert.IsFalse(user.Roles.Any(r => r.Role == multipleUsersRole));
+            Assert.IsTrue(Fixture.Context.Roles.Contains(multipleUsersRole));
+            Assert.IsTrue(Fixture.Context.UserRoles.Any(ur => ur.Role == multipleUsersRole));
+        }
+
+        [TestMethod]
+        public async Task RemoveRole_NotExistingUser_ReturnsFalseAndDoesntRemoveRole()
+        {
+            var role = Fixture.Context.Roles.First();
+
+            var result = await service.RemoveRole(ID<UserDto>.InvalidID, role.Name);
+
+            Assert.IsFalse(result);
+            Assert.IsTrue(Fixture.Context.Roles.Contains(role));
+            Assert.IsTrue(Fixture.Context.UserRoles.Any(ur => ur.Role == role));
+        }
+
+        [TestMethod]
+        public async Task RemoveRole_ExistingUserWithoutRole_ReturnsFalseAndDoesntRemoveRole()
+        {
+            var existingUser = Fixture.Context.Users.First(u => u.Roles.Count == 1);
+            var userRole = existingUser.Roles.First().Role;
+            var notUserRole = Fixture.Context.Roles.First(r => r != userRole);
+
+            var result = await service.RemoveRole(new ID<UserDto>(existingUser.ID), notUserRole.Name);
+
+            Assert.IsFalse(result);
+            Assert.IsTrue(Fixture.Context.Roles.Contains(notUserRole));
+            Assert.IsTrue(Fixture.Context.UserRoles.Any(ur => ur.Role == notUserRole));
+        }
+
+        [TestMethod]
+        public async Task Login_ExistingUserWithCorrectPasswordAndWithRole_ReturnsValidatedUserWithRoles()
+        {
+            var user = Fixture.Context.Users.First(u => u.Roles.Any());
+            var username = user.Login;
+            var password = "pass";
+            var userPassHash = user.PasswordHash;
+            var userPassSalt = user.PasswordSalt;
+            var mockedCryptographyHelper = new Mock<CryptographyHelper>();
+            mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(password, userPassHash, userPassSalt)).Returns(true);
+            var mockedService = new AuthorizationService(Fixture.Context, mapper, mockedCryptographyHelper.Object);
+
+            var result = await mockedService.Login(username, password);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.IsValidationSuccessful);
+            Assert.IsTrue(result.User.Login == username);
+            Assert.AreEqual(user.Roles.First().Role.Name, result.User.Role.Name);
+        }
+
+        [TestMethod]
+        public async Task Login_NotExistingUser_ReturnsNull()
+        {
+            var username = $"notExistingLogin{Guid.NewGuid()}";
+            var password = "pass";
+
+            var result = await service.Login(username, password);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        public async Task Login_ExistingUserWithInvalidPassword_ReturnsNull()
+        {
+            var user = Fixture.Context.Users.First(u => u.Roles.Any());
+            var username = user.Login;
+            var password = "pass";
+            var userPassHash = user.PasswordHash;
+            var userPassSalt = user.PasswordSalt;
+            var mockedCryptographyHelper = new Mock<CryptographyHelper>();
+            mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(password, userPassHash, userPassSalt)).Returns(false);
+            var mockedService = new AuthorizationService(Fixture.Context, mapper, mockedCryptographyHelper.Object);
+
+            var result = await mockedService.Login(username, password);
+
+            Assert.IsNull(result);
         }
     }
 }

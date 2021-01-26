@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Api
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<Database.DMContext>(options => options.UseNpgsql(connection));
+            services.AddDbContext<Database.DMContext>(options => options.UseSqlite(connection));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -87,7 +87,9 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveService, ObjectiveService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
-            services.AddScoped<IUserService, UserService>();            
+            services.AddScoped<IUserService, UserService>();
+
+            services.AddSingleton<CryptographyHelper>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

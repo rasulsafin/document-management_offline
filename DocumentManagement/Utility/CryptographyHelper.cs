@@ -1,32 +1,29 @@
 ﻿using System;
+using System.Linq;
 using System.Security.Cryptography;
 
 namespace MRS.DocumentManagement.Utility
 {
-    internal static class CryptographyHelper
+    public class CryptographyHelper
     {
-        public static bool VerifyPasswordHash(string password, ReadOnlySpan<byte> passwordHash, ReadOnlySpan<byte> passwordSalt)
+        public virtual bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password) || passwordHash.Length == 0 || passwordSalt.Length == 0)
                 return false;
 
-            using (var hmac = new HMACSHA512(passwordSalt.ToArray()))
-            {
-                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-                return passwordHash.SequenceEqual(computedHash);
-            }
+            using var hmac = new HMACSHA512(passwordSalt);
+            var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            return passwordHash.SequenceEqual(computedHash);
         }
 
-        public static void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public virtual void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-            if (string.IsNullOrEmpty(password))
+            if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must not be empty", nameof(password));
 
-            using (var hmac = new HMACSHA512())
-            {
-                passwordSalt = hmac.Key;
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
+            using var hmac = new HMACSHA512();
+            passwordSalt = hmac.Key;
+            passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
         }
     }
 }

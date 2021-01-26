@@ -1,7 +1,5 @@
-﻿using System;
-using System.Security.Cryptography.X509Certificates;
+﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace MRS.DocumentManagement.Database
 {
@@ -31,16 +29,20 @@ namespace MRS.DocumentManagement.Database
         }
 
         public DMContext(DbContextOptions<DMContext> opt) : base(opt)
-        { 
+        {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            if(!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseNpgsql("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
-            }
-        }
+			// To Update current DB during developing use this line instead of next
+			//optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
+			optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
+
+			//if(!optionsBuilder.IsConfigured)
+			//{
+			//    optionsBuilder.UseNpgsql("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
+			//}
+		}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -55,16 +57,6 @@ namespace MRS.DocumentManagement.Database
 
 			// Roles have unique names
 			modelBuilder.Entity<Role>()
-				.HasIndex(x => x.Name)
-				.IsUnique(true);
-
-			// Items should have unique paths
-			// TODO: Windows paths are case-insensitive,
-			// and EF string comparison depends on used SQL provider
-			// property collation should be defined to specify behaviour
-			// EF 5.0 only, unfortunately
-			// https://docs.microsoft.com/en-us/ef/core/miscellaneous/collations-and-case-sensitivity
-			modelBuilder.Entity<Item>()
 				.HasIndex(x => x.Name)
 				.IsUnique(true);
 

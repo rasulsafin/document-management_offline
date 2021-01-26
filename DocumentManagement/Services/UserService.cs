@@ -1,30 +1,33 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
-using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Services
 {
     public class UserService : IUserService
     {
-        protected readonly DMContext context;
-        protected readonly IMapper mapper;
+        private readonly DMContext context;
+        private readonly IMapper mapper;
+        private readonly CryptographyHelper cryptographyHelper;
         private readonly ISyncService synchronizator;
 
         public UserService(DMContext context
             , IMapper mapper
             , ISyncService synchronizator
-            )
+        public UserService(DMContext context, IMapper mapper, CryptographyHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
+            cryptographyHelper = helper;
             this.synchronizator = synchronizator;
         }
 
@@ -32,8 +35,8 @@ namespace MRS.DocumentManagement.Services
         {
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
-            if(user == null)
-                throw new ArgumentException($"User with key {userID} not found");            
+            if (user == null)
+                throw new ArgumentException($"User with key {userID} not found");
             return user;
         }
 
@@ -41,7 +44,7 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
-                Utility.CryptographyHelper.CreatePasswordHash(data.Password, out byte[] passHash, out byte[] passSalt);
+                cryptographyHelper.CreatePasswordHash(data.Password, out byte[] passHash, out byte[] passSalt);
                 var user = mapper.Map<User>(data);
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
@@ -134,7 +137,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var user = await GetUserChecked(userID);
-                Utility.CryptographyHelper.CreatePasswordHash(newPass, out byte[] passHash, out byte[] passSalt);
+                cryptographyHelper.CreatePasswordHash(newPass, out byte[] passHash, out byte[] passSalt);
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
                 await context.SaveChangesAsync();
@@ -148,8 +151,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> VerifyPassword(ID<UserDto> userID, string password)
         {
-            var user = await GetUserChecked(userID);
-            return Utility.CryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
+            try
+            {
+                var user = await GetUserChecked(userID);
+                return cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

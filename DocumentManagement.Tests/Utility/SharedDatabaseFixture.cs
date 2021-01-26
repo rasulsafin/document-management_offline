@@ -1,8 +1,8 @@
-﻿using System;
-using System.Data.Common;
+﻿using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Data.Sqlite;
 using MRS.DocumentManagement.Database;
+using System;
+using System.Data.Common;
 
 namespace MRS.DocumentManagement.Tests.Utility
 {
@@ -11,53 +11,70 @@ namespace MRS.DocumentManagement.Tests.Utility
         private static readonly object _lock = new object();
         private static bool _databaseInitialized;
 
-        public DbConnection Connection { get; }
+        public DMContext Context { get; }
+        private DbConnection Connection { get; set; }
+
+        private DbContextOptions<DMContext> options;
 
         public SharedDatabaseFixture(Action<DMContext> seedAction = null)
         {
-            //Connection = new SqliteConnection("DataSource = file::memory:?cache = shared");
-            Connection = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
+            //Connection = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
+            Context = Seed(seedAction); 
             Connection.Open();
-            Seed(seedAction);
+            //Connection = RelationalOptionsExtension.Extract(options).Connection;
         }
 
         public DMContext CreateContext(DbTransaction transaction = null)
         {
-            //var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseSqlite(Connection).Options);
-            var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseNpgsql(Connection).Options);
+            options = new DbContextOptionsBuilder<DMContext>().UseSqlite(CreateInMemoryDatabase()).Options;
+            var context = new DMContext(options);
+            //var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseNpgsql(Connection).Options);
 
             if (transaction != null)
-            {
                 context.Database.UseTransaction(transaction);
-            }
 
             return context;
         }
 
-        private void Seed(Action<DMContext> seed)
+        public void Dispose()
+        {
+            if (Connection != null)
+                Connection.Dispose();
+
+            if (Context != null)
+                Context.Dispose();
+        }
+
+        private DMContext Seed(Action<DMContext> seed)
         {
             lock (_lock)
             {
-                // FIXME: this check is needed when using shared connection to single database
-                // but SQLite in-memory DB is recreated every time when new connection is set
-                // so this check would prevent database to be initialized correctly
-                if (!_databaseInitialized)
-                {
-                    using (var context = CreateContext())
-                    {
-                        //context.Database.EnsureDeleted();
-                        //context.Database.EnsureCreated();
-                        //context.Database.Migrate();
+                //// FIXME: this check is needed when using shared connection to single database
+                //// but SQLite in-memory DB is recreated every time when new connection is set
+                //// so this check would prevent database to be initialized correctly
+                //if (!_databaseInitialized)
+                //{
+                    DMContext context = CreateContext();
+                    //context.Database.EnsureDeleted();
+                    //context.Database.EnsureCreated();
+                    //context.Database.Migrate();
 
-                        // add initial database data here
-                        seed?.Invoke(context);
-                    }
+                    // add initial database data here
+                    seed?.Invoke(context);
+                    //_databaseInitialized = true;
 
-                    _databaseInitialized = true;
-                }
+                    return context;
+                //}
             }
+            //return null;
         }
 
-        public void Dispose() => Connection.Dispose();
+        private DbConnection CreateInMemoryDatabase()
+        {
+            Connection = new SqliteConnection("Data Source = DocumentManagement.db;Filename=:memory:");
+            //Connection.Open();
+
+            return Connection;
+        }
     }
 }
