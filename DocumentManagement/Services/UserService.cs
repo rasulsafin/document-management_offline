@@ -20,15 +20,15 @@ namespace MRS.DocumentManagement.Services
         private readonly CryptographyHelper cryptographyHelper;
         private readonly ISyncService synchronizator;
 
-        public UserService(DMContext context
-            , IMapper mapper
-            , ISyncService synchronizator
-        public UserService(DMContext context, IMapper mapper, CryptographyHelper helper)
+        public UserService(DMContext context,
+             IMapper mapper,
+             ISyncService synchronizator,
+             CryptographyHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
-            cryptographyHelper = helper;
             this.synchronizator = synchronizator;
+            cryptographyHelper = helper;
         }
 
         private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
