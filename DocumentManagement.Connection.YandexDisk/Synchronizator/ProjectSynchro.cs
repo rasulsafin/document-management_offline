@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Database;
@@ -7,14 +8,14 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    public class ProjectSychro : ISynchroTable
+    public class ProjectSynchro : ISynchroTable
     {
         private IDiskManager disk;
         private DMContext context;
         private Project local;
         private ProjectDto remote;
 
-        public ProjectSychro(IDiskManager disk, DMContext context)
+        public ProjectSynchro(IDiskManager disk, DMContext context)
         {
             this.disk = disk;
             this.context = context;
@@ -67,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
         {
             List<ISynchroTable> synchros = new List<ISynchroTable>();
-            synchros.Add(new ItemSynchro(disk, context, new ID<ProjectDto>(action.ID)));
+            synchros.Add(new ItemSynchro(disk, context));
             return Task.FromResult(synchros);
         }
 
@@ -83,13 +84,43 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public SyncAction SpecialSynchronization(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            return action;
         }
 
-        public Task Upload(SyncAction action)
+        public async Task Upload(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            await GetLocal(action.ID);
+            if (local != null)
+            {
+                remote = new ProjectDto()
+                {
+                    ID = new ID<ProjectDto>(local.ID),
+                    Title = local.Title,
+                };
+                if (local.Items == null)
+                {
+                    remote.Items = new List<ItemDto>();
+                }
+                else
+                {
+                    remote.Items = local.Items?.Select(x => Convert(x.Item));
+                }
+
+                await disk.Push(remote, action.ID.ToString());
+            }
         }
+
+        private ItemDto Convert(Item item)
+        {
+            return new ItemDto()
+            {
+                ID = new ID<ItemDto>(item.ID),
+                ExternalItemId = item.ExternalItemId,
+                ItemType = (ItemTypeDto)item.ItemType,
+                Name = item.Name,
+            };
+        }
+
 
         private async Task GetLocal(int id)
         {

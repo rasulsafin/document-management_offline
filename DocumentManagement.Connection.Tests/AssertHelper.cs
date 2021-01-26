@@ -28,21 +28,21 @@ namespace DocumentManagement.Connection.Tests
             }
         }
 
-
         public static void EqualRevisionCollection(RevisionCollection expected, RevisionCollection actual)
         {
             if (NUllComparer(expected, actual)) return;
             EqualList(expected.Users, actual.Users, EqualRevision);
-            EqualList(expected.Objectives, actual.Objectives, EqualRevisionChildsItem);
-            EqualList(expected.Projects, actual.Projects, EqualRevisionChildsItem);
-        }
-
-        public static void EqualRevisionChildsItem(RevisionChildsItem expected, RevisionChildsItem actual)
-        {
-            if (NUllComparer(expected, actual)) return;
-            EqualRevision(expected, actual);
+            EqualList(expected.Objectives, actual.Objectives, EqualRevision);
+            EqualList(expected.Projects, actual.Projects, EqualRevision);
             EqualList(expected.Items, actual.Items, EqualRevision);
         }
+
+        //public static void EqualRevisionChildsItem(RevisionChildsItem expected, RevisionChildsItem actual)
+        //{
+        //    if (NUllComparer(expected, actual)) return;
+        //    EqualRevision(expected, actual);
+        //    EqualList(expected.Items, actual.Items, EqualRevision);
+        //}
 
         public static void EqualRevision(Revision expected, Revision actual)
         {
@@ -94,6 +94,34 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(expected.ExternalItemId, actual.ExternalItemId, "Не совпали ExternalItemId у объекта ItemDto");
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта ItemDto");
         }
+
+        internal static void EqualISynchro(ISynchroTable expected, ISynchroTable actual)
+        {
+            if (expected is ItemSynchro)
+            {
+                if (!(actual is ItemSynchro))
+                {
+                    Assert.Fail("Типы полученых синхронизаторов не совподают!");
+                }                
+            }
+            if (expected is UserSynchro)
+            {
+                if (!(actual is UserSynchro))
+                {
+                    Assert.Fail("Типы полученых синхронизаторов не совподают!");
+                }
+            }
+
+            if (expected is ProjectSynchro)
+            {
+                if (!(actual is ProjectSynchro))
+                {
+                    Assert.Fail("Типы полученых синхронизаторов не совподают!");
+                }
+            }
+        }
+
+        
 
         public static void EqualEnumerable<T>(IEnumerable<T> expected, IEnumerable<T> actual, Action<T, T> equal)
         {

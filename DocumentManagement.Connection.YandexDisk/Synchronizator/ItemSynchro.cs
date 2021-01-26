@@ -1,31 +1,37 @@
 ﻿using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    internal class ItemSynchro : ISynchroTable
+    public class ItemSynchro : ISynchroTable
     {
         private IDiskManager disk;
         private DMContext context;
-        private ID<ProjectDto> iD;
+        private Item local;
+        private ItemDto remote;
 
-        public ItemSynchro(IDiskManager disk, DMContext context, ID<ProjectDto> iD)
+        public ItemSynchro(IDiskManager disk, DMContext context)
         {
             this.disk = disk;
             this.context = context;
-            this.iD = iD;
         }
 
-        public Task DeleteLocal(SyncAction action)
+        public async Task DeleteLocal(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            await GetLocal(action.ID);
+            if (local != null)
+            {
+                context.Items.Remove(local);
+            }
         }
 
-        public Task DeleteRemote(SyncAction action)
+
+        public async Task DeleteRemote(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            await disk.Delete<ItemDto>(action.ID.ToString());
         }
 
         public Task Download(SyncAction action)
@@ -35,17 +41,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            throw new System.NotImplementedException();
+            return revisions.Items;
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
         {
-            throw new System.NotImplementedException();
+            return Task.FromResult<List<ISynchroTable>>(null);
         }
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            throw new System.NotImplementedException();
+            revisions.GetItem(rev.ID).Rev = rev.Rev;
         }
 
         public Task Special(SyncAction action)
@@ -62,5 +68,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             throw new System.NotImplementedException();
         }
+
+        private async Task GetLocal(int id)
+        {
+            if (local?.ID == id)
+                local = await context.Items.FindAsync(id);
+        }
+
+        private async Task GetRemote(int id)
+        {
+            if (remote?.ID == new ID<ItemDto>(id))
+                remote = await disk.Pull<ItemDto>(id.ToString());
+        }
+    }
+
+    internal class ItemSync
+    {
     }
 }

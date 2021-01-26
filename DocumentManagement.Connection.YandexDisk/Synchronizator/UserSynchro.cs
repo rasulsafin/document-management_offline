@@ -10,14 +10,14 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    public class UserSychro : ISynchroTable
+    public class UserSynchro : ISynchroTable
     {
         private IDiskManager disk;
         private DMContext context;
         private User local;
-        private UserSyncModel remote;
+        private UserSync remote;
 
-        public UserSychro(IDiskManager disk, DMContext context)
+        public UserSynchro(IDiskManager disk, DMContext context)
         {
             this.disk = disk;
             this.context = context;
@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public async Task Upload(SyncAction action)
         {
-            remote = new UserSyncModel(await GetLocal(action.ID));
+            remote = new UserSync(await GetLocal(action.ID));
             await disk.Push(remote, action.ID.ToString());
         }
 
@@ -98,22 +98,22 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return local;
         }
 
-        private async Task<UserSyncModel> GetRemote(int id)
+        private async Task<UserSync> GetRemote(int id)
         {
             if (remote?.ID != id)
             {
-                remote = await disk.Pull<UserSyncModel>(id.ToString());
+                remote = await disk.Pull<UserSync>(id.ToString());
             }
 
             return remote;
         }
 
-        public class UserSyncModel
+        public class UserSync
         {
-            public UserSyncModel()
+            public UserSync()
             { }
 
-            public UserSyncModel(User local)
+            public UserSync(User local)
             {
                 ID = local.ID;
                 Login = local.Login;

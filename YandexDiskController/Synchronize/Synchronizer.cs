@@ -113,28 +113,28 @@ namespace MRS.DocumentManagement
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetProject((int)idProj).GetItem( (int)id).Incerment();
+            Revisions.GetItem( (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetProject((int)idProj).GetItem((int)id).Delete();
+            Revisions.GetItem((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetObjective((int)idObj).GetItem((int)id).Incerment();
+            Revisions.GetItem((int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetObjective((int)idObj).GetItem((int)id).Delete();
+            Revisions.GetItem((int)id).Delete();
             SaveRevisions();
         }
 

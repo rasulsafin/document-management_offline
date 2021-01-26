@@ -71,25 +71,25 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.GetProject((int)idProj).GetItem((int)id).Incerment();
+            Revisions.GetItem((int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
-            Revisions.GetProject((int)idProj).GetItem((int)id).Delete();
+            Revisions.GetItem((int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj)
         {
-            Revisions.GetObjective((int)idObj).GetItem((int)id).Incerment();
+            Revisions.GetItem((int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj)
         {
-            Revisions.GetObjective((int)idObj).GetItem((int)id).Delete();
+            Revisions.GetItem((int)id).Delete();
             SaveRevisions();
         }
 
@@ -104,8 +104,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             RevisionCollection remote = await disk.Pull<RevisionCollection>("revisions");
 
-            List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, new UserSychro(disk, context));
-            var actions = await SyncHelper.Analysis(Revisions, remote, new ProjectSychro(disk, context));
+            List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, new UserSynchro(disk, context));
+            var actions = await SyncHelper.Analysis(Revisions, remote, new ProjectSynchro(disk, context));
             syncActions.AddRange(actions);
         }
 

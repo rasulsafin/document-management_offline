@@ -20,7 +20,7 @@ namespace DocumentManagement.Connection.Tests
 
         private DiskTest disk;
         private static IMapper mapper;
-        private static UserSychro sychro;
+        private static UserSynchro sychro;
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -47,8 +47,11 @@ namespace DocumentManagement.Connection.Tests
             Revisions = new RevisionCollection();
 
             disk = new DiskTest();
-            sychro = new UserSychro(disk, Fixture.Context);
+            sychro = new UserSynchro(disk, Fixture.Context);
         }
+
+        [TestCleanup]
+        public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
         public void GetRevisionsTest()
@@ -97,7 +100,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
             actual.ID = expected.ID = 1;
-            actual.Synchronizer = expected.Synchronizer = nameof(UserSychro);
+            actual.Synchronizer = expected.Synchronizer = nameof(UserSynchro);
             actual.TypeAction = expected.TypeAction = TypeSyncAction.None;
 
             actual = sychro.SpecialSynchronization(actual);
@@ -203,7 +206,7 @@ namespace DocumentManagement.Connection.Tests
         private async Task DownloadTest(int id)
         {
             var user = MockData.DEFAULT_USERS.Find(x => x.ID == id);
-            disk.User = new UserSychro.UserSyncModel()
+            disk.User = new UserSynchro.UserSync()
             {
                 ID = id,
                 Login = "hty007",

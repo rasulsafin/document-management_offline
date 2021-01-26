@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
@@ -13,7 +15,7 @@ namespace DocumentManagement.Connection.Tests
 {
 
     [TestClass]
-    public class ProjectSynchroTest
+    public class ItemSynchroTest
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -21,7 +23,9 @@ namespace DocumentManagement.Connection.Tests
 
         private DiskTest disk;
         private static IMapper mapper;
-        private static ProjectSynchro sychro;
+        private static ItemSynchro sychro;
+
+        public readonly int idProj = 1;
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -42,13 +46,26 @@ namespace DocumentManagement.Connection.Tests
                 context.Database.EnsureCreated();
 
                 context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
+                context.Items.AddRange(MockData.DEFAULT_ITEMS);
+                context.SaveChanges();
+                var project = context.Projects.FirstOrDefault();
+                var items = context.Items.ToList();
+                foreach (var item in items)
+                {
+                    var link = new ProjectItem();
+                    link.ItemID = item.ID;
+                    link.ProjectID = project.ID;
+                    project.Items.Add(link);
+                }
+
                 context.SaveChanges();
             });
 
             Revisions = new RevisionCollection();
+            Revisions.GetProject(idProj).Rev = 5;
 
             disk = new DiskTest();
-            sychro = new ProjectSynchro(disk, Fixture.Context);
+            sychro = new ItemSynchro(disk, Fixture.Context);
         }
 
         [TestCleanup]
@@ -57,9 +74,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisionsTest()
         {
-            Revisions.GetProject(1).Rev = 5;
-            Revisions.GetProject(2).Rev = 5;
-            Revisions.GetProject(3).Delete();
+            Revisions.GetItem(1).Rev = 5;
+            Revisions.GetItem(2).Rev = 5;
+            Revisions.GetItem(3).Delete();
 
             var actual = sychro.GetRevisions(Revisions);
 
@@ -81,14 +98,15 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void SetRevisionTest()
         {
-            Revisions.GetProject(1).Rev = 5;
-            Revisions.GetProject(2).Rev = 5;
-            Revisions.GetProject(3).Delete();
+            int id = 2;
+            Revisions.GetItem(1).Rev = 5;
+            Revisions.GetItem(2).Rev = 5;
+            Revisions.GetItem(3).Delete();
 
-            Revision expected = new Revision(2, 25);
+            Revision expected = new Revision(id, 25);
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetProject(2);
+            var actual = Revisions.GetItem(id);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -101,7 +119,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
             actual.ID = expected.ID = 1;
-            actual.Synchronizer = expected.Synchronizer = nameof(UserSynchro);
+            actual.Synchronizer = expected.Synchronizer = nameof(ItemSynchro);
             actual.TypeAction = expected.TypeAction = TypeSyncAction.None;
 
             actual = sychro.SpecialSynchronization(actual);
@@ -116,16 +134,11 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public async Task GetSubSynchroListTest()
         {
-            int id = 1;
             SyncAction action = new SyncAction();
-            action.ID = id;
-      
-            // List<ISynchroTable> expected = new List<ISynchroTable>();
-            // expected.Add(new ItemSynchro(disk, Fixture.Context, new ID<ProjectDto>(id)));
-            List<ISynchroTable> actual = await sychro.GetSubSynchroList(action);
-            Assert.IsNull(actual);
+            action.ID = 1;
+            var sub = await sychro.GetSubSynchroList(action);
+            Assert.IsNull(sub);
 
-            // AssertHelper.EqualList(expected, actual, AssertHelper.EqualISynchro);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
@@ -152,8 +165,10 @@ namespace DocumentManagement.Connection.Tests
             action.ID = id;
             await sychro.DeleteLocal(action);
 
-            var user = Fixture.Context.Users.Find(id);
-            Assert.IsNull(user);
+            Item item = Fixture.Context.Items.Find(id);
+            Assert.IsNull(item);
+            List<ProjectItem> projItems = Fixture.Context.ProjectItems.Where(x => x.ItemID == id).ToList();
+            Assert.AreEqual(0, projItems.Count);
 
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);

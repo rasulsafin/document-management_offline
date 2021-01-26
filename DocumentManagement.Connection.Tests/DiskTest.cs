@@ -23,7 +23,7 @@ namespace DocumentManagement.Connection.Tests
 
         public ProjectDto Project { get; set; }
 
-        public UserSychro.UserSyncModel User { get; set; }
+        public UserSynchro.UserSync User { get; set; }
 
         public Task Delete<T>(string id)
         {
@@ -66,7 +66,7 @@ namespace DocumentManagement.Connection.Tests
                     return Task.FromResult(true);
                 }
 
-                if (@object is UserSychro.UserSyncModel usr)
+                if (@object is UserSynchro.UserSync usr)
                 {
                     User = usr;
                     return Task.FromResult(true);
