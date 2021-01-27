@@ -48,7 +48,7 @@ namespace DocumentManagement.Connection.Tests
             Revisions = new RevisionCollection();
 
             disk = new DiskTest();
-            sychro = new ProjectSynchro(disk, Fixture.Context);
+            sychro = new ProjectSynchro(disk, Fixture.Context, mapper);
         }
 
         [TestCleanup]
@@ -203,24 +203,29 @@ namespace DocumentManagement.Connection.Tests
 
         private async Task DownloadTest(int id)
         {
-            disk.Project = new ProjectDto()
+            ProjectDto expected = new ProjectDto()
             {
                 ID = (ID<ProjectDto>)id,
                 Title = "Замок кащея",
                 Items = new List<ItemDto>(),
             };
-            ProjectDto expected = disk.Project;
+            await DownloadProjectTest(expected);
+        }
+
+        private async Task DownloadProjectTest(ProjectDto expected)
+        {
+            disk.Project = expected;
 
             SyncAction action = new SyncAction();
-            action.ID = id;
+            action.ID = (int)expected.ID;
             await sychro.Download(action);
 
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
-            Assert.AreEqual(id, disk.LastId);
+            Assert.AreEqual(action.ID, disk.LastId);
 
-            var project = Fixture.Context.Projects.Find(id);
+            var project = Fixture.Context.Projects.Find(action.ID);
             ProjectDto actual = mapper.Map<ProjectDto>(project);
 
             AssertHelper.EqualDto(expected, actual);
@@ -231,6 +236,31 @@ namespace DocumentManagement.Connection.Tests
         {
             int id = 3;
             await DownloadTest(id);
+        }
+
+        [TestMethod]
+        public async Task DownloadTest_ItemCollect()
+        {
+            int id = 2;
+            //ProjectDto expected = new ProjectDto()
+            //{
+            //    ID = (ID<ProjectDto>)id,
+            //    Title = "Замок кащея",
+            //    Items = new List<ItemDto>(),
+            //};
+            var project = Fixture.Context.Projects.Find(id);
+            ProjectDto expected = mapper.Map<ProjectDto>(project);
+            var expItem = new List<ItemDto>();
+            expected.Items = expItem;
+            int num = 1;
+            foreach (var item in MockData.DEFAULT_ITEMS)
+            {
+                var itemDto = mapper.Map<ItemDto>(item);
+                itemDto.ID = (ID<ItemDto>)num++;
+                expItem.Add(itemDto);
+            }
+
+            await DownloadProjectTest(expected);
         }
 
     }

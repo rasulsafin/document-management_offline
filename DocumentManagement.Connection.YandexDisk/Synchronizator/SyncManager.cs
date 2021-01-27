@@ -104,9 +104,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             RevisionCollection remote = await disk.Pull<RevisionCollection>("revisions");
 
-            List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, new UserSynchro(disk, context));
-            var actions = await SyncHelper.Analysis(Revisions, remote, new ProjectSynchro(disk, context));
-            syncActions.AddRange(actions);
+            //List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, new UserSynchro(disk, context));
+            //var actions = await SyncHelper.Analysis(Revisions, remote, new ProjectSynchro(disk, context, mapper));
+            //syncActions.AddRange(actions);
         }
 
         private Task Synchronize(IProgress<(int, int, string)> progress, ISynchroTable synchro, RevisionCollection remoreRevisions)

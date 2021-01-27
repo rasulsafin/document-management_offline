@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -14,9 +15,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private DMContext context;
         private Project local;
         private ProjectDto remote;
+        private IMapper mapper;
 
-        public ProjectSynchro(IDiskManager disk, DMContext context)
+        public ProjectSynchro(IDiskManager disk, DMContext context, IMapper mapper) 
         {
+            this.mapper = mapper;
             this.disk = disk;
             this.context = context;
         }
@@ -40,23 +43,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (remote != null)
             {
-                if (local != null)
-                {
-                    local.Title = remote.Title;
-                }
+                var exist = local != null;
+                if (!exist)
+                    local = mapper.Map<Project>(remote);
                 else
-                {
-                    local = new Project()
-                    {
-                        ID = (int)remote.ID,
-                        Title = remote.Title,
-                    };
+                    local = mapper.Map(remote, local);
 
-                    // TODO: Надо както сделать получше
-                    // Эта коллекция заполнится при синхронизации ItemDto
-                    local.Items = new List<ProjectItem>();
+                await ItemSync();
+
+                if (!exist)
                     context.Projects.Add(local);
-                }
+                await context.SaveChangesAsync();
             }
         }
 
@@ -135,6 +132,34 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             if (remote?.ID != (ID<ProjectDto>)id)
                 remote = await disk.Pull<ProjectDto>(id.ToString());
+        }
+
+        private async Task ItemSync()
+        {
+            // Добавим отсутвуюшие item
+            if (local.Items == null) local.Items = new List<ProjectItem>();
+            local.Items.Clear();
+
+            foreach (var itemDto in remote.Items)
+            {
+                var item = await context.Items.FindAsync((int)itemDto.ID);
+                var existItem = item != null;
+                if (!existItem)
+                {
+                    item = mapper.Map<Item>(itemDto);
+                    item.ItemType = (int)itemDto.ItemType;
+                    context.Items.Add(item);
+                }
+                else
+                {
+                    item = mapper.Map(itemDto, item);
+                    item.ItemType = (int)itemDto.ItemType;
+                    context.Items.Update(item);
+                }
+
+                await context.SaveChangesAsync();
+                local.Items.Add(new ProjectItem() { ProjectID = local.ID, ItemID = item.ID });
+            }
         }
     }
 }

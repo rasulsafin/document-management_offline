@@ -6,45 +6,45 @@ using MRS.DocumentManagement.Database;
 
 namespace DocumentManagement.Connection.Tests
 {
-    //public class SharedDatabaseFixture : IDisposable
-    //{
+    // public class SharedDatabaseFixture : IDisposable
+    // {
     //    private static readonly object _lock = new object();
     //    private static bool _databaseInitialized;
 
-    //    public DMContext Context { get; }
+    // public DMContext Context { get; }
 
-    //    private DbConnection Connection { get; set; }
+    // private DbConnection Connection { get; set; }
 
-    //    private DbContextOptions<DMContext> options;
+    // private DbContextOptions<DMContext> options;
 
-    //    public SharedDatabaseFixture(Action<DMContext> seedAction = null)
+    // public SharedDatabaseFixture(Action<DMContext> seedAction = null)
     //    {
             
-    //        Context = Seed(seedAction);
+    // Context = Seed(seedAction);
     //        // Connection.Open();
     //    }
 
-    //    public DMContext CreateContext(DbTransaction transaction = null)
+    // public DMContext CreateContext(DbTransaction transaction = null)
     //    {
     //        options = new DbContextOptionsBuilder<DMContext>().UseSqlite(CreateInMemoryDatabase()).Options;
     //        var context = new DMContext(options);
 
-    //        if (transaction != null)
+    // if (transaction != null)
     //            context.Database.UseTransaction(transaction);
 
-    //        return context;
+    // return context;
     //    }
 
-    //    public void Dispose()
+    // public void Dispose()
     //    {
     //        if (Connection != null)
     //            Connection.Dispose();
 
-    //        if (Context != null)
+    // if (Context != null)
     //            Context.Dispose();
     //    }
 
-    //    private DMContext Seed(Action<DMContext> seed)
+    // private DMContext Seed(Action<DMContext> seed)
     //    {
     //        lock (_lock)
     //        {
@@ -58,24 +58,24 @@ namespace DocumentManagement.Connection.Tests
     //            //context.Database.EnsureCreated();
     //            //context.Database.Migrate();
 
-    //            Connection.Open();
+    // Connection.Open();
 
-    //            // add initial database data here
+    // // add initial database data here
     //            seed?.Invoke(context);
     //            //_databaseInitialized = true;
 
-    //            return context;
+    // return context;
     //            //}
     //        }
     //        //return null;
     //    }
 
-    //    private DbConnection CreateInMemoryDatabase()
+    // private DbConnection CreateInMemoryDatabase()
     //    {            
     //        Connection = new SqliteConnection("Data Source = DocumentManagement.db;Filename=:memory:");
     //        //Connection.Open();
 
-    //        return Connection;
+    // return Connection;
     //    }
-    //}
+    // }
 }

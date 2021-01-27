@@ -48,17 +48,17 @@ namespace DocumentManagement.Connection.Tests
                 context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
                 context.Items.AddRange(MockData.DEFAULT_ITEMS);
                 context.SaveChanges();
-                //var project = context.Projects.FirstOrDefault();
-                //var items = context.Items.ToList();
-                //foreach (var item in items)
-                //{
+                // var project = context.Projects.FirstOrDefault();
+                // var items = context.Items.ToList();
+                // foreach (var item in items)
+                // {
                 //    var link = new ProjectItem();
                 //    link.ItemID = item.ID;
                 //    link.ProjectID = project.ID;
                 //    project.Items.Add(link);
-                //}
+                // }
 
-                //context.SaveChanges();
+                // context.SaveChanges();
             });
 
             Revisions = new RevisionCollection();

@@ -7,8 +7,8 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace DocumentManagement.Connection.Tests
 {
-    //public static class MockData
-    //{
+    // public static class MockData
+    // {
     //    #region USERS
     //    public static List<User> DEFAULT_USERS => new List<User> {
     //        new User
@@ -41,7 +41,7 @@ namespace DocumentManagement.Connection.Tests
     //        },
     //    };
 
-    //    private static readonly User BOHR_USER = new User
+    // private static readonly User BOHR_USER = new User
     //    {
     //        Login = "NBohr",
     //        Name = "Nils Bohr",
@@ -49,7 +49,7 @@ namespace DocumentManagement.Connection.Tests
     //        PasswordSalt = new byte[5],
     //    };
 
-    //    private static readonly User HEISENBERG_USER = new User
+    // private static readonly User HEISENBERG_USER = new User
     //    {
     //        Login = "IAmTheDangerous",
     //        Name = "Werner Heisenberg",
@@ -57,7 +57,7 @@ namespace DocumentManagement.Connection.Tests
     //        PasswordSalt = new byte[5],
     //    };
 
-    //    private static readonly User SCHREDINGER_USER = new User
+    // private static readonly User SCHREDINGER_USER = new User
     //    {
     //        Login = "loveDogs1932",
     //        Name = "Ervin Schredinger",
@@ -65,7 +65,7 @@ namespace DocumentManagement.Connection.Tests
     //        PasswordSalt = new byte[5],
     //    };
 
-    //    private static readonly User PAULI_USER = new User
+    // private static readonly User PAULI_USER = new User
     //    {
     //        Login = "principlesHater",
     //        Name = "Wolfgang Pauli",
@@ -73,7 +73,7 @@ namespace DocumentManagement.Connection.Tests
     //        PasswordSalt = new byte[5],
     //    };
 
-    //    public static User AdminUser => new User()
+    // public static User AdminUser => new User()
     //    {
     //        Login = "vpupkin",
     //        Name = "Vasily Pupkin",
@@ -81,7 +81,7 @@ namespace DocumentManagement.Connection.Tests
     //        PasswordSalt = new byte[] { 5, 6, 7, 8 },
     //    };
 
-    //    public static User OperatorUser => new User()
+    // public static User OperatorUser => new User()
     //    {
     //        Login = "itaranov",
     //        Name = "Ivan Taranov",
@@ -90,40 +90,40 @@ namespace DocumentManagement.Connection.Tests
     //    };
     //    #endregion
 
-    //    #region ROLES
+    // #region ROLES
     //    public static List<Role> DEFAULT_ROLES => new List<Role>
     //    {
     //        new Role { Name = ADMIN_ROLE.Name },
     //        new Role { Name = USER_ROLE.Name },
     //    };
 
-    //    private static readonly Role ADMIN_ROLE = new Role { Name = "admin" };
+    // private static readonly Role ADMIN_ROLE = new Role { Name = "admin" };
     //    private static readonly Role USER_ROLE = new Role { Name = "user" };
     //    #endregion
 
-    //    #region OBJECTIVE_TYPES
+    // #region OBJECTIVE_TYPES
     //    public static List<ObjectiveType> DEFAULT_OBJECTIVE_TYPES => new List<ObjectiveType>
     //    {
     //        new ObjectiveType { Name = OBJECTIVE_TYPE_ONE.Name },
     //        new ObjectiveType { Name = OBJECTIVE_TYPE_TWO.Name },
     //    };
 
-    //    private static readonly ObjectiveType OBJECTIVE_TYPE_ONE = new ObjectiveType { Name = "FirstOT" };
+    // private static readonly ObjectiveType OBJECTIVE_TYPE_ONE = new ObjectiveType { Name = "FirstOT" };
     //    private static readonly ObjectiveType OBJECTIVE_TYPE_TWO = new ObjectiveType { Name = "SecondOT" };
     //    #endregion
 
-    //    #region PROJECTS
+    // #region PROJECTS
     //    public static List<Project> DEFAULT_PROJECTS => new List<Project>
     //    {
     //        new Project { Title = GLADILOV_STREET.Title },
     //        new Project { Title = FSK.Title },
     //    };
 
-    //    private static readonly Project GLADILOV_STREET = new Project { Title = "Gladilov str. 38a" };
+    // private static readonly Project GLADILOV_STREET = new Project { Title = "Gladilov str. 38a" };
     //    private static readonly Project FSK = new Project { Title = "FSK" };
     //    #endregion
 
-    //    #region OBJECTIVES_TO_CREATE
+    // #region OBJECTIVES_TO_CREATE
     //    public static List<ObjectiveToCreateDto> DEFAULT_OBJECTIVES_TO_CREATE => new List<ObjectiveToCreateDto>
     //    {
     //        new ObjectiveToCreateDto
@@ -152,7 +152,7 @@ namespace DocumentManagement.Connection.Tests
     //        },
     //    };
 
-    //    private static readonly ObjectiveToCreateDto FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
+    // private static readonly ObjectiveToCreateDto FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -161,7 +161,7 @@ namespace DocumentManagement.Connection.Tests
     //        Status = ObjectiveStatus.Open,
     //    };
 
-    //    private static readonly ObjectiveToCreateDto FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
+    // private static readonly ObjectiveToCreateDto FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -170,7 +170,7 @@ namespace DocumentManagement.Connection.Tests
     //        Status = ObjectiveStatus.InProgress,
     //    };
 
-    //    private static readonly ObjectiveToCreateDto SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
+    // private static readonly ObjectiveToCreateDto SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -180,7 +180,7 @@ namespace DocumentManagement.Connection.Tests
     //    };
     //    #endregion
 
-    //    #region OBJECTIVES
+    // #region OBJECTIVES
     //    public static List<Objective> DEFAULT_OBJECTIVES => new List<Objective>
     //    {
     //        new Objective
@@ -209,7 +209,7 @@ namespace DocumentManagement.Connection.Tests
     //        },
     //    };
 
-    //    private static readonly Objective FIRST_TYPE_OPEN_OBJECTIVE = new Objective
+    // private static readonly Objective FIRST_TYPE_OPEN_OBJECTIVE = new Objective
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -218,7 +218,7 @@ namespace DocumentManagement.Connection.Tests
     //        Status = (int)ObjectiveStatus.Open,
     //    };
 
-    //    private static readonly Objective FIRST_TYPE_INPROGRESS_OBJECTIVE = new Objective
+    // private static readonly Objective FIRST_TYPE_INPROGRESS_OBJECTIVE = new Objective
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -227,7 +227,7 @@ namespace DocumentManagement.Connection.Tests
     //        Status = (int)ObjectiveStatus.InProgress,
     //    };
 
-    //    private static readonly Objective SECOND_TYPE_INPROGRESS_OBJECTIVE = new Objective
+    // private static readonly Objective SECOND_TYPE_INPROGRESS_OBJECTIVE = new Objective
     //    {
     //        CreationDate = DateTime.Now,
     //        DueDate = DateTime.MaxValue,
@@ -237,7 +237,7 @@ namespace DocumentManagement.Connection.Tests
     //    };
     //    #endregion
 
-    //    #region ITEMS
+    // #region ITEMS
     //    public static List<Item> DEFAULT_ITEMS => new List<Item>
     //    {
     //        new Item
@@ -260,21 +260,21 @@ namespace DocumentManagement.Connection.Tests
     //        },
     //    };
 
-    //    private static readonly Item FILE_ITEM = new Item
+    // private static readonly Item FILE_ITEM = new Item
     //    {
     //        ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
     //        ItemType = 0,
     //        Name = "File element",
     //    };
 
-    //    private static readonly Item BIM_ITEM = new Item
+    // private static readonly Item BIM_ITEM = new Item
     //    {
     //        ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
     //        ItemType = 1,
     //        Name = "Bim element",
     //    };
 
-    //    private static readonly Item MEDIA_ITEM = new Item
+    // private static readonly Item MEDIA_ITEM = new Item
     //    {
     //        ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
     //        ItemType = 2,
@@ -282,18 +282,18 @@ namespace DocumentManagement.Connection.Tests
     //    };
     //    #endregion
 
-    //    #region BIM_ELEMENTS
+    // #region BIM_ELEMENTS
     //    public static List<BimElement> DEFAULT_BIM_ELEMENTS => new List<BimElement>
     //    {
     //        new BimElement { GlobalID = BIM_ELEMENT_ONE.GlobalID },
     //        new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
     //    };
 
-    //    private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}" };
+    // private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}" };
     //    private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}" };
     //    #endregion
 
-    //    #region DYNAMIC_FIELDS_TO_CREATE_DTO
+    // #region DYNAMIC_FIELDS_TO_CREATE_DTO
     //    public static List<DynamicFieldToCreateDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldToCreateDto>
     //    {
     //        new DynamicFieldToCreateDto(
@@ -306,14 +306,14 @@ namespace DocumentManagement.Connection.Tests
     //            DYNAMIC_FIELD_TO_CREATE_DATE.Value),
     //    };
 
-    //    private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
+    // private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
     //        new DynamicFieldToCreateDto("dropdown1", "dropdown", "1,2,3");
 
-    //    private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DATE =
+    // private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DATE =
     //        new DynamicFieldToCreateDto("datetime2", "datetime", DateTime.Now.ToString(CultureInfo.InvariantCulture));
     //    #endregion
 
-    //    #region DYNAMIC_FIELDS
+    // #region DYNAMIC_FIELDS
     //    public static List<DynamicField> DEFAULT_DYNAMIC_FIELDS => new List<DynamicField>
     //    {
     //        new DynamicField
@@ -330,35 +330,35 @@ namespace DocumentManagement.Connection.Tests
     //        },
     //    };
 
-    //    private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =
+    // private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =
     //        new DynamicField { Key = "dropdown1", Type = "dropdown", Value = "1,2,3" };
 
-    //    private static readonly DynamicField DYNAMIC_FIELD_DATE =
+    // private static readonly DynamicField DYNAMIC_FIELD_DATE =
     //        new DynamicField { Key = "datetime2", Type = "datetime", Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
     //    #endregion
 
-    //    public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
+    // public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
     //    {
     //        Name = "TDMS",
     //        AuthFieldNames = "TDMS field 1; TDMS field 2",
     //    };
 
-    //    public static ConnectionInfo BimConnectionInfo => new ConnectionInfo()
+    // public static ConnectionInfo BimConnectionInfo => new ConnectionInfo()
     //    {
     //        Name = "BIM360",
     //        AuthFieldNames = "Bim field 1; Bim field 2",
     //    };
 
-    //    public static IEnumerable<EnumDm> CreateEnumDms(string prefix, int connectionID, int count = 3)
+    // public static IEnumerable<EnumDm> CreateEnumDms(string prefix, int connectionID, int count = 3)
     //    {
     //        for (int i = 0; i < count; i++)
     //            yield return new EnumDm() { Name = $"{prefix} EnumDm {i + 1}", ConnectionInfoID = connectionID };
     //    }
 
-    //    public static IEnumerable<EnumDmValue> CreateEnumDmValues(int enumDmID, string prefix, int count = 3)
+    // public static IEnumerable<EnumDmValue> CreateEnumDmValues(int enumDmID, string prefix, int count = 3)
     //    {
     //        for (int i = 0; i < count; i++)
     //            yield return new EnumDmValue() { Value = $"{prefix} Value {i + 1}", EnumDmID = enumDmID };
     //    }
-    //}
+    // }
 }

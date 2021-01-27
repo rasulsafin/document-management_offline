@@ -44,9 +44,9 @@ namespace MRS.DocumentManagement.Tests
                 context.Users.AddRange(MockData.DEFAULT_USERS);
                 context.SaveChanges();
             });
-            var mockedSyncService = new Mock<SyncService>();
+            
             service = new UserService(Fixture.Context, mapper,
-                mockedSyncService.Object, new CryptographyHelper());
+                new SyncServiceTest(), new CryptographyHelper());
         }
 
         [TestCleanup]
@@ -241,8 +241,7 @@ namespace MRS.DocumentManagement.Tests
             var passSalt = Guid.NewGuid().ToByteArray();
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
             mockedCryptographyHelper.Setup(m => m.CreatePasswordHash(newPass, out passHash, out passSalt));
-            var mockedSyncService = new Mock<SyncService>();
-            var m_service = new UserService(Fixture.Context, mapper, mockedSyncService.Object, mockedCryptographyHelper.Object);
+            var m_service = new UserService(Fixture.Context, mapper, new SyncServiceTest(), mockedCryptographyHelper.Object);
             var existingUser = await Fixture.Context.Users.FirstAsync();
             var existingUserId = existingUser.ID;
 
@@ -263,9 +262,8 @@ namespace MRS.DocumentManagement.Tests
             var passHash = new byte[8];
             var passSalt = new byte[10];
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
-            var mockedSyncService = new Mock<SyncService>();
             mockedCryptographyHelper.Setup(m => m.CreatePasswordHash(newPass, out passHash, out passSalt));
-            var m_service = new UserService(Fixture.Context, mapper, mockedSyncService.Object, mockedCryptographyHelper.Object);
+            var m_service = new UserService(Fixture.Context, mapper, new SyncServiceTest(), mockedCryptographyHelper.Object);
 
             var result = await m_service.UpdatePassword(ID<UserDto>.InvalidID, newPass);
 
@@ -278,10 +276,9 @@ namespace MRS.DocumentManagement.Tests
             var pass = "pass";
             var existingUser = await Fixture.Context.Users.FirstAsync();
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
-            var mockedSyncService = new Mock<SyncService>();
             mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(pass, existingUser.PasswordHash, existingUser.PasswordSalt))
                                     .Returns(true);
-            var m_service = new UserService(Fixture.Context, mapper, mockedSyncService.Object, mockedCryptographyHelper.Object);
+            var m_service = new UserService(Fixture.Context, mapper, new SyncServiceTest(), mockedCryptographyHelper.Object);
 
             var result = await m_service.VerifyPassword(new ID<UserDto>(existingUser.ID), pass);
 
@@ -295,9 +292,8 @@ namespace MRS.DocumentManagement.Tests
             var passHash = new byte[8];
             var passSalt = new byte[10];
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
-            var mockedSyncService = new Mock<SyncService>();
             mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(pass, passHash, passSalt)).Returns(false);
-            var m_service = new UserService(Fixture.Context, mapper, mockedSyncService.Object, mockedCryptographyHelper.Object);
+            var m_service = new UserService(Fixture.Context, mapper, new SyncServiceTest(), mockedCryptographyHelper.Object);
             var existingUser = await Fixture.Context.Users.FirstAsync();
             var existingUserId = existingUser.ID;
 
