@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,6 +10,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utils.ReportCreator;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -50,7 +52,7 @@ namespace MRS.DocumentManagement.Services
                 objective.BimElements.Add(new BimElementObjective
                 {
                     ObjectiveID = objective.ID,
-                    BimElementID = dbBim.ID
+                    BimElementID = dbBim.ID,
                 });
             }
 
@@ -112,10 +114,21 @@ namespace MRS.DocumentManagement.Services
                 var objective = await Get(objectiveId);
                 var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
                 objectiveToReport.ID = $"{reportID}/{objNum++}";
+
+                foreach (var item in objectiveToReport.Items)
+                {
+                    var newName = Path.Combine(path, item.Name.TrimStart('\\'));
+                    item.Name = newName;
+                }
+
                 objectives.Add(objectiveToReport);
             }
 
+            path = Path.Combine(path, $"Отчет {reportID}.docx");
             var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+
+            ReportCreator reportCreator = new ReportCreator();
+            reportCreator.CreateReport(xmlDoc, path);
 
             return true;
         }
@@ -141,8 +154,8 @@ namespace MRS.DocumentManagement.Services
         public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ObjectiveTypeDto type)
         {
              throw new NotImplementedException();
-            //IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
-            //return Task.FromResult(list);
+            // IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
+            // return Task.FromResult(list);
         }
 
         public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
@@ -206,28 +219,29 @@ namespace MRS.DocumentManagement.Services
                 ).ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
 
-            //rebuild objective's BimElements
+            // rebuild objective's BimElements
             objective.BimElements.Clear();
             foreach (var bim in newBimElements)
             {
-                //see if objective already had this bim element referenced
+                // see if objective already had this bim element referenced
                 var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
                     objective.BimElements.Add(dbBim);
                 }
-                else 
+                else
                 {
-                    //bim element was not referenced. Does it exist?
+                    // bim element was not referenced. Does it exist?
                     var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
-                        //bim element does not exist at all - should be created
+                        // bim element does not exist at all - should be created
                         bimElement = mapper.Map<BimElement>(bim);
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
-                    //add link between bim element and objective
+
+                    // add link between bim element and objective
                     dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
@@ -261,7 +275,7 @@ namespace MRS.DocumentManagement.Services
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
-                ItemID = dbItem.ID
+                ItemID = dbItem.ID,
             });
         }
 

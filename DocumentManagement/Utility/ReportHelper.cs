@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Utility
 
         private static readonly string[] PICTURES_EXTENSIONS = { ".png", ".jpg" };
 
-        internal object Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
+        internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Utility
                 new XElement(CELL,
                     new XElement(HORIZONTAL_ELEMENT,
                             TextElement("ID: ", true),
-                            TextElement($"{objective.ID}")), //{reportId}/{++count}
+                            TextElement($"{objective.ID}")),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Время: ", true),
                              TextElement(objective.CreationDate.ToShortTimeString())),
@@ -57,7 +57,7 @@ namespace MRS.DocumentManagement.Utility
                                           DEFAULT : string.Join(", ", objective.BimElements))),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Пользователь: ", true),
-                             TextElement("Пользователь " + objective.Author)), //TODO: Authorization to db
+                             TextElement(objective.Author)),
                     new XElement(HORIZONTAL_ELEMENT,
                             TextElement("Описание: ", true),
                             TextElement(objective.Description))));

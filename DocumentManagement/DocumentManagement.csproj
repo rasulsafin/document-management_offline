@@ -14,6 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
       <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Utils\DocumentManagement.Utils.csproj" />
     </ItemGroup>
 
 </Project>
