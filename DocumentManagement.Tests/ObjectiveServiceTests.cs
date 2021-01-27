@@ -1,25 +1,24 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Tests.Utility;
-using System;
-using System.Collections.Generic;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Services;
 using AutoMapper;
-using MRS.DocumentManagement.Utility;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Services;
+using MRS.DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class ObjectiveServiceTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
-
         private static ObjectiveService service;
         private static IMapper mapper;
+
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -52,7 +51,6 @@ namespace MRS.DocumentManagement.Tests
                 context.Items.AddRange(items);
                 context.SaveChanges();
 
-
                 if (objectives.Count >= 3 && users.Count >= 2 && projects.Count >= 2 && objectiveTypes.Count >= 2)
                 {
                     objectives[0].AuthorID = users[0].ID;
@@ -83,7 +81,7 @@ namespace MRS.DocumentManagement.Tests
                     context.BimElementObjectives.Add(new BimElementObjective
                     {
                         BimElementID = e.ID,
-                        ObjectiveID = firstObjective.ID
+                        ObjectiveID = firstObjective.ID,
                     });
                 });
                 context.SaveChanges();
@@ -110,7 +108,7 @@ namespace MRS.DocumentManagement.Tests
                 Description = "created for test purpose only",
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
-                ProjectID = new ID<ProjectDto>(project.ID)
+                ProjectID = new ID<ProjectDto>(project.ID),
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -136,8 +134,8 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = existingBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(existingBimElement.ItemID)
-                }
+                    ItemID = new ID<ItemDto>(existingBimElement.ItemID),
+                },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -146,7 +144,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
                 ProjectID = new ID<ProjectDto>(project.ID),
-                BimElements = bimList
+                BimElements = bimList,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -174,8 +172,8 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(1)
-                }
+                    ItemID = new ID<ItemDto>(1),
+                },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -184,7 +182,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
                 ProjectID = new ID<ProjectDto>(project.ID),
-                BimElements = bimList
+                BimElements = bimList,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -213,13 +211,13 @@ namespace MRS.DocumentManagement.Tests
                     new BimElementDto
                     {
                         GlobalID = existingBimElement.GlobalID,
-                        ItemID = new ID<ItemDto>(existingBimElement.ItemID)
+                        ItemID = new ID<ItemDto>(existingBimElement.ItemID),
                     },
                     new BimElementDto
                     {
                         GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                        ItemID = new ID<ItemDto>(1)
-                    }
+                        ItemID = new ID<ItemDto>(1),
+                    },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -228,7 +226,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
                 ProjectID = new ID<ProjectDto>(project.ID),
-                BimElements = bimList
+                BimElements = bimList,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -260,8 +258,8 @@ namespace MRS.DocumentManagement.Tests
                     ExternalItemId = dbItem.ExternalItemId,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name
-                }
+                    Name = dbItem.Name,
+                },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -270,7 +268,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
                 ProjectID = new ID<ProjectDto>(project.ID),
-                Items = items
+                Items = items,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -296,7 +294,7 @@ namespace MRS.DocumentManagement.Tests
             var dynamicFields = new List<DynamicFieldToCreateDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
-                MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1]
+                MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -305,7 +303,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = status,
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(type.ID),
                 ProjectID = new ID<ProjectDto>(project.ID),
-                DynamicFields = dynamicFields
+                DynamicFields = dynamicFields,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -334,13 +332,13 @@ namespace MRS.DocumentManagement.Tests
                     new BimElementDto
                     {
                         GlobalID = existingBimElement.GlobalID,
-                        ItemID = new ID<ItemDto>(existingBimElement.ItemID)
+                        ItemID = new ID<ItemDto>(existingBimElement.ItemID),
                     },
                     new BimElementDto
                     {
                         GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                        ItemID = new ID<ItemDto>(1)
-                    }
+                        ItemID = new ID<ItemDto>(1),
+                    },
             };
             var items = new List<ItemDto>
             {
@@ -349,13 +347,13 @@ namespace MRS.DocumentManagement.Tests
                     ExternalItemId = dbItem.ExternalItemId,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name
-                }
+                    Name = dbItem.Name,
+                },
             };
             var dynamicFields = new List<DynamicFieldToCreateDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
-                MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1]
+                MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
             };
             var objectiveToCreate = new ObjectiveToCreateDto
             {
@@ -366,7 +364,7 @@ namespace MRS.DocumentManagement.Tests
                 ProjectID = new ID<ProjectDto>(project.ID),
                 Items = items,
                 BimElements = bimList,
-                DynamicFields = dynamicFields
+                DynamicFields = dynamicFields,
             };
 
             var result = await service.Add(objectiveToCreate);
@@ -489,7 +487,7 @@ namespace MRS.DocumentManagement.Tests
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(existingObjective.ObjectiveTypeID),
                 ProjectID = new ID<ProjectDto>(existingObjective.ProjectID),
                 Status = newStatus,
-                Title = newTitle
+                Title = newTitle,
             };
 
             var result = await service.Update(changedObjective);
@@ -524,8 +522,8 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Key = $"key{guid}",
                     Type = $"type{guid}",
-                    Value = $"value{guid}"
-                }
+                    Value = $"value{guid}",
+                },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
             var existingDynamicFields = new List<DynamicFieldDto>
@@ -534,8 +532,8 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Key = firstDynamicField.Key,
                     Type = firstDynamicField.Type,
-                    Value = firstDynamicField.Value
-                }
+                    Value = firstDynamicField.Value,
+                },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Count();
@@ -553,7 +551,7 @@ namespace MRS.DocumentManagement.Tests
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(existingObjective.ObjectiveTypeID),
                 ProjectID = new ID<ProjectDto>(existingObjective.ProjectID),
                 Status = newStatus,
-                Title = newTitle
+                Title = newTitle,
             };
 
             var result = await service.Update(changedObjective);
@@ -594,13 +592,13 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = firstBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID)
+                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
                 },
                 new BimElementDto
                 {
                     GlobalID = $"newBimsGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID)
-                }
+                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
+                },
             };
             var newBimElementsCount = changedBimElements.Count - 1;
             var changedObjective = new ObjectiveDto
@@ -614,7 +612,7 @@ namespace MRS.DocumentManagement.Tests
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(existingObjective.ObjectiveTypeID),
                 ProjectID = new ID<ProjectDto>(existingObjective.ProjectID),
                 Status = newStatus,
-                Title = newTitle
+                Title = newTitle,
             };
 
             var result = await service.Update(changedObjective);
@@ -653,8 +651,8 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ItemType = ItemTypeDto.Media,
                     ExternalItemId = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}"
-                }
+                    Name = $"Name{guid}",
+                },
             };
             var firstItem = existingObjective.Items.First().Item;
             var deletingItemsCount = existingObjective.Items.Count - 1;
@@ -665,10 +663,11 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalItemId = firstItem.ExternalItemId,
                     ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name
-                }
+                    Name = firstItem.Name,
+                },
             };
             var startItemsCount = existingObjective.Items.Count;
+            var objectiveItemsLinksCount = Fixture.Context.ObjectiveItems.Count();
             var items = new List<ItemDto>();
             items.AddRange(newItems);
             items.AddRange(existingItems);
@@ -683,7 +682,7 @@ namespace MRS.DocumentManagement.Tests
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(existingObjective.ObjectiveTypeID),
                 ProjectID = new ID<ProjectDto>(existingObjective.ProjectID),
                 Status = newStatus,
-                Title = newTitle
+                Title = newTitle,
             };
 
             var result = await service.Update(changedObjective);
@@ -694,6 +693,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
             Assert.AreEqual(newTitle, updatedObjective.Title);
             Assert.AreEqual(startItemsCount - deletingItemsCount + newItems.Count, updatedObjective.Items.Count);
+            Assert.AreEqual(objectiveItemsLinksCount - deletingItemsCount + newItems.Count, Fixture.Context.ObjectiveItems.Count());
             Assert.AreEqual(updatedObjective.Items.Count, items.Count);
             updatedObjective.Items.Select(oi => oi.Item).ToList().ForEach(i =>
             {
@@ -717,15 +717,16 @@ namespace MRS.DocumentManagement.Tests
                             : ObjectiveStatus.Ready;
             var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
-            #region Dynamic Fields
+
+            // Dynamic fields
             var newDynamicFields = new List<DynamicFieldDto>
             {
                 new DynamicFieldDto
                 {
                     Key = $"key{guid}",
                     Type = $"type{guid}",
-                    Value = $"value{guid}"
-                }
+                    Value = $"value{guid}",
+                },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
             var existingDynamicFields = new List<DynamicFieldDto>
@@ -734,24 +735,24 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Key = firstDynamicField.Key,
                     Type = firstDynamicField.Type,
-                    Value = firstDynamicField.Value
-                }
+                    Value = firstDynamicField.Value,
+                },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Count();
             var dynamicFields = new List<DynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
-            dynamicFields.AddRange(existingDynamicFields); 
-            #endregion
-            #region Items
+            dynamicFields.AddRange(existingDynamicFields);
+
+            // Items
             var newItems = new List<ItemDto>
             {
                 new ItemDto
                 {
                     ItemType = ItemTypeDto.Media,
                     ExternalItemId = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}"
-                }
+                    Name = $"Name{guid}",
+                },
             };
             var firstItem = existingObjective.Items.First().Item;
             var deletingItemsCount = existingObjective.Items.Count - 1;
@@ -762,15 +763,16 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalItemId = firstItem.ExternalItemId,
                     ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name
-                }
+                    Name = firstItem.Name,
+                },
             };
             var startItemsCount = existingObjective.Items.Count;
             var items = new List<ItemDto>();
-            items.AddRange(newItems); 
-            #endregion
-            #region BIM elements
-            items.AddRange(existingItems); var startBimElementsCount = Fixture.Context.BimElementObjectives.Count();
+            items.AddRange(newItems);
+
+            // Bim elements
+            items.AddRange(existingItems);
+            var startBimElementsCount = Fixture.Context.BimElementObjectives.Count();
             var deletingBimElementsCount = existingObjective.BimElements.Count - 1;
             var firstBimElement = existingObjective.BimElements.First().BimElement;
             var changedBimElements = new List<BimElementDto>
@@ -778,16 +780,16 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = firstBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID)
+                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
                 },
                 new BimElementDto
                 {
                     GlobalID = $"newBimsGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID)
-                }
+                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
+                },
             };
-            var newBimElementsCount = changedBimElements.Count - 1; 
-            #endregion
+            var newBimElementsCount = changedBimElements.Count - 1;
+
             var changedObjective = new ObjectiveDto
             {
                 AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
@@ -801,7 +803,7 @@ namespace MRS.DocumentManagement.Tests
                 ObjectiveTypeID = new ID<ObjectiveTypeDto>(existingObjective.ObjectiveTypeID),
                 ProjectID = new ID<ProjectDto>(existingObjective.ProjectID),
                 Status = newStatus,
-                Title = newTitle
+                Title = newTitle,
             };
 
             var result = await service.Update(changedObjective);
@@ -828,234 +830,5 @@ namespace MRS.DocumentManagement.Tests
 
             Assert.IsFalse(result);
         }
-
-        //        // WARNING: Dynamic fields IDs are not set
-        //        private static ObjectiveDto CreateExpectedObjective(ObjectiveToCreateDto o, ID<ObjectiveDto> id, UserDto author, ObjectiveTypeDto type)
-        //        {
-        //            return new ObjectiveDto()
-        //            {
-        //                ID = id,
-        //               // AuthorID = author,
-        //                CreationDate = o.CreationDate,
-        //                DueDate = o.DueDate,
-        //                Title = o.Title,
-        //                Description = o.Description,
-        //                ParentObjectiveID = o.ParentObjectiveID,
-        //                ProjectID = o.ProjectID,
-        //                Status = o.Status,
-        //                ObjectiveType = type,
-        //                BimElements = o.BimElements?.ToList() ?? Enumerable.Empty<BimElementDto>(),
-        //                DynamicFields = o.DynamicFields?
-        //                    .Select(x => new DynamicFieldDto() 
-        //                    {
-        //                        Key = x.Key,
-        //                        Type = x.Type,
-        //                        Value = x.Value
-        //                    }).ToList() ?? Enumerable.Empty<DynamicFieldDto>()
-        //            };
-        //        }
-
-        //        [TestMethod]
-        //        public async Task Complex_objective_test()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var tasktype = await access.ObjectiveTypeService.Add("Задание");
-        //                var errortype = await access.ObjectiveTypeService.Add("Нарушение");
-
-        //                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
-        //                var project2ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 2");
-
-        //                var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
-        //                var dueTime = creationTime.AddDays(1);
-
-        //                // 0. Can add objectives
-        //                var newObjective1 = new ObjectiveToCreateDto()
-        //                {
-        //                    AuthorID = access.CurrentUser.ID,
-        //                    CreationDate = creationTime,
-        //                    DueDate = dueTime,
-        //                    Title = "Make cookies",
-        //                    Description = "Mmm, cookies!",
-        //                    Status = ObjectiveStatus.Open,
-        //                    ObjectiveTypeID = tasktype,
-        //                    ParentObjectiveID = null,
-        //                    ProjectID = project1ID,
-        //                    BimElements = null,
-        //                    DynamicFields = new List<DynamicFieldToCreateDto>()
-        //                    {
-        //                        new DynamicFieldToCreateDto("df1", "type 1", "val 1"),
-        //                        new DynamicFieldToCreateDto("df2", "type 2", "val 2")
-        //                    }
-        //                };
-
-        //                var objective1ID = await access.ObjectiveService.Add(newObjective1);
-        //                Assert.IsTrue(objective1ID.IsValid);
-
-        //                var newObjective2 = new ObjectiveToCreateDto()
-        //                {
-        //                    AuthorID = access.CurrentUser.ID,
-        //                    CreationDate = creationTime,
-        //                    DueDate = dueTime,
-        //                    Title = "Make dough",
-        //                    Description = "Can't make cookies without dough",
-        //                    Status = ObjectiveStatus.Open,
-        //                    ObjectiveTypeID = tasktype,
-        //                    ParentObjectiveID = objective1ID,
-        //                    ProjectID = project1ID
-        //                };
-
-        //                var childObjectiveID = await access.ObjectiveService.Add(newObjective2);
-        //                Assert.IsTrue(childObjectiveID.IsValid);
-
-        //                var newObjective3 = new ObjectiveToCreateDto()
-        //                {
-        //                    AuthorID = access.CurrentUser.ID,
-        //                    CreationDate = creationTime,
-        //                    DueDate = dueTime,
-        //                    Title = "Something is wrong",
-        //                    Description = "Really, something is wrong!",
-        //                    Status = ObjectiveStatus.Ready,
-        //                    ObjectiveTypeID = errortype,
-        //                    ParentObjectiveID = null,
-        //                    ProjectID = project2ID
-        //                };
-
-        //                var objective3ID = await access.ObjectiveService.Add(newObjective3);
-        //                Assert.IsTrue(objective3ID.IsValid);
-
-
-        //                // 1. Can query all objectives
-        //                var currentUser = access.CurrentUser;
-        //                var expected = new ObjectiveDto[]
-        //                {
-        //                    CreateExpectedObjective(newObjective1, objective1ID, currentUser, new ObjectiveTypeDto(){ ID = tasktype, Name = "Задание" }),
-        //                    CreateExpectedObjective(newObjective2, childObjectiveID, currentUser, new ObjectiveTypeDto(){ ID = tasktype, Name = "Задание" }),
-        //                    CreateExpectedObjective(newObjective3, objective3ID, currentUser, new ObjectiveTypeDto(){ ID = errortype, Name = "Нарушение" })
-        //                };
-
-        //                var comparer = new ObjectiveComparer();
-        //                var allObjectives = await access.ObjectiveService.GetAllObjectives();
-        //               // CollectionAssert.That.AreEquivalent(expected, allObjectives.ToArray(), comparer);
-
-        //                //2. Can query objectives by project
-        //                var project1Objectives = await access.ObjectiveService.GetObjectives(project1ID);
-        //                CollectionAssert.That.AreEquivalent(new[] { expected[0], expected[1] }, project1Objectives, comparer);
-
-        //                var project2Objectives = await access.ObjectiveService.GetObjectives(project2ID);
-        //                CollectionAssert.That.AreEquivalent(new[] { expected[2] }, project2Objectives, comparer);
-
-        //                // 2. Can find objective
-        //                var found = await access.ObjectiveService.Find(childObjectiveID);
-        //                Assert.IsTrue(comparer.Equals(expected[1], found));
-
-        //                // 2.1 Can not find not existing objective
-        //                found = await access.ObjectiveService.Find(ID<ObjectiveDto>.InvalidID);
-        //                Assert.IsNull(found);
-
-        //                // 3. Can remove objective
-        //                var isRemoved = await access.ObjectiveService.Remove(childObjectiveID);
-        //                Assert.IsTrue(isRemoved);
-
-        //                // 3.1 Can not remove twice
-        //                isRemoved = await access.ObjectiveService.Remove(childObjectiveID);
-        //                Assert.IsFalse(isRemoved);
-
-        //                // Verify that objective is removed
-        //                //allObjectives = await access.ObjectiveService.GetAllObjectives();
-        //               // CollectionAssert.That.AreEquivalent(new[] { expected[0], expected[2] }, allObjectives, comparer);
-
-        //                project1Objectives = await access.ObjectiveService.GetObjectives(project1ID);
-        //                CollectionAssert.That.AreEquivalent(new[] { expected[0] }, project1Objectives, comparer);
-
-        //                // 4. Can update objective
-        //                var objective = await access.ObjectiveService.Find(objective1ID);
-        //                objective.Status = ObjectiveStatus.Ready;
-        //                await access.ObjectiveService.Update(objective);
-
-        //                var changed = await access.ObjectiveService.Find(objective1ID);
-        //                Assert.AreEqual(ObjectiveStatus.Ready, changed.Status);
-        //            }
-        //        }
-
-        //        [TestMethod]
-        //        public async Task Can_update_bim_elements()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var tasktype = await access.ObjectiveTypeService.Add("Задание");
-        //                var project1ID = await access.ProjectService.AddToUser(access.CurrentUser.ID, "Project 1");
-
-        //                var userProjects = await access.ProjectService.GetUserProjects(access.CurrentUser.ID);
-        //                var item1 = await access.ItemService.Add(new ItemToCreateDto(@"C:\Windows\Temp\abra.tmp", "externalId", ItemTypeDto.File), project1ID);
-
-        //                var creationTime = DateTime.Parse("2020-11-18T10:50:00.0000000Z");
-        //                var dueTime = creationTime.AddDays(1);
-
-        //                var newObjective1 = new ObjectiveToCreateDto()
-        //                {
-        //                    AuthorID = access.CurrentUser.ID,
-        //                    CreationDate = creationTime,
-        //                    DueDate = dueTime,
-        //                    Title = "Make cookies",
-        //                    Description = "Mmm, cookies!",
-        //                    Status = ObjectiveStatus.Open,
-        //                    ObjectiveTypeID = tasktype,
-        //                    ParentObjectiveID = null,
-        //                    ProjectID = project1ID,
-        //                    BimElements = null
-        //                };
-
-        //                var objID = await access.ObjectiveService.Add(newObjective1);
-
-        //                var obj = await access.ObjectiveService.Find(objID);
-        //                Assert.IsNotNull(obj.BimElements);
-        //                Assert.AreEqual(0, obj.BimElements.Count());
-
-        //                obj.BimElements = new List<BimElementDto>()
-        //                {
-        //                    new BimElementDto() { ItemID = item1, GlobalID = "BIM1" },
-        //                    new BimElementDto() { ItemID = item1, GlobalID = "BIM2" }
-        //                };
-        //                await access.ObjectiveService.Update(obj);
-
-        //                var bimComparer = new DelegateComparer<BimElementDto>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
-
-        //                var added = await access.ObjectiveService.Find(objID);
-        //                CollectionAssert.That.AreEquivalent(obj.BimElements, added.BimElements, bimComparer);
-
-        //                obj.BimElements = new List<BimElementDto>()
-        //                {
-        //                    new BimElementDto() { ItemID = item1, GlobalID = "BIM1" },
-        //                    new BimElementDto() { ItemID = item1, GlobalID = "BIM3" },
-        //                    new BimElementDto() { ItemID = item1, GlobalID = "BIM4" }
-        //                };
-        //                await access.ObjectiveService.Update(obj);
-        //                added = await access.ObjectiveService.Find(objID);
-        //                CollectionAssert.That.AreEquivalent(obj.BimElements, added.BimElements, bimComparer);
-        //            }
-        //        }
-
-        //        [TestMethod]
-        //        public async Task Can_query_requred_dynamic_fields()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                //TODO: how to test?
-        //                Assert.Fail();
-        //            }
-        //        }
     }
 }
