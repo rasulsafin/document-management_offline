@@ -6,6 +6,7 @@ using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement
@@ -71,70 +72,70 @@ namespace MRS.DocumentManagement
         public void Update(ID<ProjectDto> id)
         {
             if (Syncing) return;
-            Revisions.GetProject((int)id).Incerment();
+            Revisions.GetRevision(TableRevision.Projects, (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ProjectDto> id)
         {
             if (Syncing) return;
-            Revisions.GetProject((int)id).Delete();
+            Revisions.GetRevision(TableRevision.Projects, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<UserDto> id)
         {
             if (Syncing) return;
-            Revisions.GetUser((int)id).Incerment();
+            Revisions.GetRevision(TableRevision.Users, (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<UserDto> id)
         {
             if (Syncing) return;
-            Revisions.GetUser((int)id).Delete();
+            Revisions.GetRevision(TableRevision.Users, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetObjective((int)id).Incerment();
+            Revisions.GetRevision(TableRevision.Objectives, (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetObjective((int)id).Delete();
+            Revisions.GetRevision(TableRevision.Objectives, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetItem( (int)id).Incerment();
+            Revisions.GetRevision(TableRevision.Items, (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetItem((int)id).Delete();
+            Revisions.GetRevision(TableRevision.Items, (int)id).Delete();
             SaveRevisions();
         }
 
         public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetItem((int)id).Incerment();
+            Revisions.GetRevision(TableRevision.Items, (int)id).Incerment();
             SaveRevisions();
         }
 
         public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
         {
             if (Syncing) return;
-            Revisions.GetItem((int)id).Delete();
+            Revisions.GetRevision(TableRevision.Items, (int)id).Delete();
             SaveRevisions();
         }
 

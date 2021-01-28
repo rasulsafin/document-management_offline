@@ -1,6 +1,7 @@
 ﻿using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -59,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.Items;
+            return revisions.GetRevisions(TableRevision.Items);
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
@@ -69,7 +70,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetItem(rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(TableRevision.Items, rev.ID).Rev = rev.Rev;
         }
 
         public Task Special(SyncAction action)

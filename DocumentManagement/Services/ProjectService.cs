@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(project.ID);
-            synchronizator.AddChange(projectID);
+            synchronizator.Update(TableRevision.Projects, project.ID);
             return projectID;
 
             // return (ID<ProjectDto>)project.ID;
@@ -123,7 +123,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(project.ID);
-            synchronizator.AddChange(projectID);
+            synchronizator.Update(TableRevision.Projects, project.ID);
             return mapper.Map<ProjectToListDto>(projectID);
         }
 
@@ -157,7 +157,7 @@ namespace MRS.DocumentManagement.Services
             context.Projects.Remove(project);
             await context.SaveChangesAsync();
 
-            synchronizator.AddChange(projectID);
+            synchronizator.Update(TableRevision.Projects, (int)projectID, TypeChange.Delete);
             return true;
         }
 
@@ -191,7 +191,7 @@ namespace MRS.DocumentManagement.Services
             context.Projects.Update(project);
             await context.SaveChangesAsync();
 
-            synchronizator.AddChange(projectID);
+            synchronizator.Update(TableRevision.Projects, project.ID);
             return true;
         }
 
@@ -202,7 +202,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(project.ID);
-            synchronizator.AddChange(projectID);
+            synchronizator.Update(TableRevision.Projects, project.ID);
             return projectID;
         }
 
@@ -218,7 +218,7 @@ namespace MRS.DocumentManagement.Services
                 ItemID = dbItem.ID,
             });
             var projectID = new ID<ProjectDto>(project.ID);
-            synchronizator.AddChange(item.ID, projectID);
+            synchronizator.Update(TableRevision.Projects, project.ID);
         }
 
         private async Task<bool> UnlinkItem(ID<ItemDto> itemID, ID<ProjectDto> projectID)
@@ -232,10 +232,8 @@ namespace MRS.DocumentManagement.Services
             context.ProjectItems.Remove(link);
             await context.SaveChangesAsync();
 
-            synchronizator.AddChange(itemID, projectID);
+            synchronizator.Update(TableRevision.Projects, (int)projectID);
             return true;
         }
-
-        
     }
 }

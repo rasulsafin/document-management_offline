@@ -76,7 +76,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             var objectiveID = new ID<ObjectiveDto>(objective.ID);
-            synchronizator.AddChange(objectiveID, data.ProjectID);
+            synchronizator.Update(TableRevision.Objectives, objective.ID);
             return mapper.Map<ObjectiveToListDto>(objective);
         }
 
@@ -118,8 +118,8 @@ namespace MRS.DocumentManagement.Services
         public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ObjectiveTypeDto type)
         {
              throw new NotImplementedException();
-            //IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
-            //return Task.FromResult(list);
+            // IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
+            // return Task.FromResult(list);
         }
 
         public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
@@ -130,7 +130,7 @@ namespace MRS.DocumentManagement.Services
             context.Objectives.Remove(objective);
             await context.SaveChangesAsync();
             var projectID = new ID<ProjectDto>(objective.ProjectID);
-            synchronizator.AddChange(objectiveID, projectID);
+            synchronizator.Update(TableRevision.Objectives, objective.ID, TypeChange.Delete);
             return true;
         }
 
@@ -185,11 +185,11 @@ namespace MRS.DocumentManagement.Services
                 ).ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
 
-            //rebuild objective's BimElements
+            // rebuild objective's BimElements
             objective.BimElements.Clear();
             foreach (var bim in newBimElements)
             {
-                //see if objective already had this bim element referenced
+                // see if objective already had this bim element referenced
                 var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
@@ -197,16 +197,16 @@ namespace MRS.DocumentManagement.Services
                 }
                 else 
                 {
-                    //bim element was not referenced. Does it exist?
+                    // bim element was not referenced. Does it exist?
                     var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
-                        //bim element does not exist at all - should be created
+                        // bim element does not exist at all - should be created
                         bimElement = mapper.Map<BimElement>(bim);
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
-                    //add link between bim element and objective
+                    // add link between bim element and objective
                     dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
@@ -230,7 +230,7 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(objective.ProjectID);
-            synchronizator.AddChange(objData.ID, projectID);
+            synchronizator.Update(TableRevision.Objectives, objective.ID);
             return true;
         }
 
@@ -246,9 +246,8 @@ namespace MRS.DocumentManagement.Services
                 ItemID = dbItem.ID
             });
 
-            var projectID = new ID<ProjectDto>(objective.ProjectID);
             var objectiveID = new ID<ObjectiveDto>(objective.ID);
-            synchronizator.AddChange(item.ID, objectiveID, projectID);
+            synchronizator.Update(TableRevision.Objectives, objective.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
@@ -262,10 +261,10 @@ namespace MRS.DocumentManagement.Services
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
 
-            var projectID = new ID<ProjectDto>(link.Objective.ProjectID);
+            ID<ProjectDto> projectID = new ID<ProjectDto>(link.Objective.ProjectID);
             var _objectiveID = new ID<ObjectiveDto>(objectiveID);
             var _itemID = new ID<ItemDto>(itemID);
-            synchronizator.AddChange(_itemID, _objectiveID, projectID);
+            synchronizator.Update(TableRevision.Objectives, objectiveID);
 
             return true;
         }

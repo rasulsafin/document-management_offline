@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 
@@ -86,9 +87,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisionsTest()
         {
-            Revisions.GetObjective(1).Rev = 5;
-            Revisions.GetObjective(2).Rev = 5;
-            Revisions.GetObjective(3).Delete();
+            Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Objectives, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Objectives, 3).Delete();
 
             var actual = sychro.GetRevisions(Revisions);
 
@@ -111,14 +112,14 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevisionTest()
         {
             int id = 2;
-            Revisions.GetObjective(1).Rev = 5;
-            Revisions.GetObjective(2).Rev = 5;
-            Revisions.GetObjective(3).Delete();
+            Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Objectives, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Objectives, 3).Delete();
 
             Revision expected = new Revision(id, 25);
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetObjective(id);
+            var actual = Revisions.GetRevision(TableRevision.Objectives, id);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);

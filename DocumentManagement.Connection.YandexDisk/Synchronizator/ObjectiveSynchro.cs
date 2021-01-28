@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
@@ -144,7 +145,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.Objectives.ToList();
+            return revisions.GetRevisions(TableRevision.Objectives);
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
@@ -154,7 +155,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetObjective(rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(TableRevision.Objectives, rev.ID).Rev = rev.Rev;
         }
 
         public async Task Special(SyncAction action)

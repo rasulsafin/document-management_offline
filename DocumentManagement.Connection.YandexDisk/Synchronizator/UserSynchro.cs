@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
@@ -68,9 +69,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            if (revisions.Users == null)
-                revisions.Users = new List<Revision>();
-            return revisions.Users;
+            return revisions.GetRevisions(TableRevision.Users);
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
@@ -80,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetUser(rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(TableRevision.Users, rev.ID).Rev = rev.Rev;
         }
 
         public SyncAction SpecialSynchronization(SyncAction action)

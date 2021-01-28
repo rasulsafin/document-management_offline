@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace DocumentManagement.Connection.Tests
 {
@@ -33,10 +34,23 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualRevisionCollection(RevisionCollection expected, RevisionCollection actual)
         {
             if (NUllComparer(expected, actual)) return;
-            EqualList(expected.Users, actual.Users, EqualRevision);
-            EqualList(expected.Objectives, actual.Objectives, EqualRevision);
-            EqualList(expected.Projects, actual.Projects, EqualRevision);
-            EqualList(expected.Items, actual.Items, EqualRevision);
+            EqualRevisions(expected.GetRevisions(TableRevision.Users), actual.GetRevisions(TableRevision.Users));
+            EqualRevisions(expected.GetRevisions(TableRevision.Projects), actual.GetRevisions(TableRevision.Projects));
+            EqualRevisions(expected.GetRevisions(TableRevision.Objectives), actual.GetRevisions(TableRevision.Objectives));
+            EqualRevisions(expected.GetRevisions(TableRevision.Items), actual.GetRevisions(TableRevision.Items));
+        }
+
+        private static void EqualRevisions(List<Revision> expected, List<Revision> actual)
+        {
+            if (NUllComparer(expected, actual)) return;
+            if (expected == null) expected = new List<Revision>();
+            if (actual == null) actual = new List<Revision>();
+            Assert.AreEqual(expected.Count, actual.Count, $"Не совподает число элементов! expected={expected.Count}, actual.Count={actual.Count}");
+            foreach (var expRev in expected)
+            {
+                var actRev = actual.Find(x => x.ID == expRev.ID);
+                EqualRevision(expRev, actRev);
+            }
         }
 
         public static void EqualRevision(Revision expected, Revision actual)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
@@ -14,6 +15,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public ulong Rev { get; set; }
 
+        [JsonIgnore]
         public bool IsDelete => Rev == ulong.MaxValue;
 
         public static bool operator >(Revision rev1, Revision rev2) => rev1.Rev > rev2.Rev;

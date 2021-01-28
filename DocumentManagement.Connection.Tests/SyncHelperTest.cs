@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace DocumentManagement.Connection.Tests
 {
@@ -13,10 +14,10 @@ namespace DocumentManagement.Connection.Tests
         public async Task AnalysisDownloadTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
-            remote.GetUser(1).Rev = 30;
+            remote.GetRevision(TableRevision.Users, 1).Rev = 30;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetUser(2).Rev = 10;
+            local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
@@ -43,12 +44,12 @@ namespace DocumentManagement.Connection.Tests
         public async Task AnalysisNoneActionTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
-            remote.GetUser(1).Rev = 10;
-            remote.GetUser(2).Rev = 10;
+            remote.GetRevision(TableRevision.Users, 1).Rev = 10;
+            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetUser(1).Rev = 10;
-            local.GetUser(2).Rev = 10;
+            local.GetRevision(TableRevision.Users, 1).Rev = 10;
+            local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
 
@@ -74,11 +75,11 @@ namespace DocumentManagement.Connection.Tests
         public async Task AnalysisDeleteTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
-            remote.GetUser(1).Rev = 30;
-            remote.GetUser(2).Delete();
+            remote.GetRevision(TableRevision.Users, 1).Rev = 30;
+            remote.GetRevision(TableRevision.Users, 2).Delete();
 
             RevisionCollection local = new RevisionCollection();
-            local.GetUser(2).Rev = 10;
+            local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
@@ -105,12 +106,12 @@ namespace DocumentManagement.Connection.Tests
         public async Task AnalysisUploadTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
-            remote.GetUser(1).Rev = 30;
-            remote.GetUser(2).Rev = 1;
+            remote.GetRevision(TableRevision.Users, 1).Rev = 30;
+            remote.GetRevision(TableRevision.Users, 2).Rev = 1;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetUser(1).Rev = 100;
-            local.GetUser(2).Rev = 100;
+            local.GetRevision(TableRevision.Users, 1).Rev = 100;
+            local.GetRevision(TableRevision.Users, 2).Rev = 100;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
@@ -137,12 +138,12 @@ namespace DocumentManagement.Connection.Tests
         public async Task AnalysisSubSyncTestAsync()
         {
             RevisionCollection remote = new RevisionCollection();
-            remote.GetUser(1).Rev = 1;
-            remote.GetUser(2).Rev = 1;
+            remote.GetRevision(TableRevision.Users, 1).Rev = 1;
+            remote.GetRevision(TableRevision.Users, 2).Rev = 1;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetUser(1).Rev = 1;
-            local.GetUser(2).Rev = 1;
+            local.GetRevision(TableRevision.Users, 1).Rev = 1;
+            local.GetRevision(TableRevision.Users, 2).Rev = 1;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new SubSyncSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
@@ -186,7 +187,7 @@ namespace DocumentManagement.Connection.Tests
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
-                return revisions.Users;
+                return revisions.GetRevisions(MRS.DocumentManagement.Interface.Services.TableRevision.Users);
             }
 
             Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
@@ -247,7 +248,7 @@ namespace DocumentManagement.Connection.Tests
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
-                return revisions.Users;
+                return revisions.GetRevisions(TableRevision.Users);
             }
 
             Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)

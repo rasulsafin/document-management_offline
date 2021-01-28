@@ -8,6 +8,7 @@ using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 
@@ -62,7 +63,7 @@ namespace DocumentManagement.Connection.Tests
             });
 
             Revisions = new RevisionCollection();
-            Revisions.GetProject(idProj).Rev = 5;
+            Revisions.GetRevision(TableRevision.Projects, idProj).Rev = 5;
 
             disk = new DiskTest();
             sychro = new ItemSynchro(disk, Fixture.Context);
@@ -74,9 +75,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisionsTest()
         {
-            Revisions.GetItem(1).Rev = 5;
-            Revisions.GetItem(2).Rev = 5;
-            Revisions.GetItem(3).Delete();
+            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Items, 3).Delete();
 
             var actual = sychro.GetRevisions(Revisions);
 
@@ -99,14 +100,14 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevisionTest()
         {
             int id = 2;
-            Revisions.GetItem(1).Rev = 5;
-            Revisions.GetItem(2).Rev = 5;
-            Revisions.GetItem(3).Delete();
+            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Items, 3).Delete();
 
             Revision expected = new Revision(id, 25);
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetItem(id);
+            var actual = Revisions.GetRevision(TableRevision.Items, id);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -222,7 +223,7 @@ namespace DocumentManagement.Connection.Tests
             disk.Item = new ItemDto()
             {
                 ID = (ID<ItemDto>)id,
-                Name= "Замок кащея",
+                Name = "Замок кащея",
                 ExternalItemId = "Замок кащея",
                 ItemType = ItemTypeDto.File,
             };

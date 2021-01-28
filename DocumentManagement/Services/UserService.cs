@@ -48,12 +48,12 @@ namespace MRS.DocumentManagement.Services
                 var user = mapper.Map<User>(data);
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
-                //context.Users.
+                // context.Users.
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
 
                 var userID = new ID<UserDto>(user.ID);
-                synchronizator.AddChange(userID);
+                synchronizator.Update(TableRevision.Users, user.ID);
                 return userID;
             }
             catch (DbUpdateException ex)
@@ -81,7 +81,7 @@ namespace MRS.DocumentManagement.Services
                 context.Roles.RemoveRange(orphanRoles);
                 await context.SaveChangesAsync();
             }
-            synchronizator.AddChange(userID);
+            synchronizator.Update(TableRevision.Users, user.ID, TypeChange.Delete);
             return true;
         }
 
@@ -123,7 +123,7 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
-                synchronizator.AddChange(user.ID);
+                synchronizator.Update(TableRevision.Users, storedUser.ID);
                 return true;
             }
             catch

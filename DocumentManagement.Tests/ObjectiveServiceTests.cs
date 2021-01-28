@@ -87,7 +87,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new SyncService(Fixture.Context));
+            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new SyncServiceTest());
         }
 
         [TestCleanup]

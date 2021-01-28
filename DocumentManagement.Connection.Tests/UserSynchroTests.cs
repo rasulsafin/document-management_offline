@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 
@@ -56,9 +57,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisionsTest()
         {
-            Revisions.GetUser(1).Rev = 5;
-            Revisions.GetUser(2).Rev = 5;
-            Revisions.GetUser(3).Delete();
+            Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Users, 3).Delete();
 
             var actual = sychro.GetRevisions(Revisions);
 
@@ -80,14 +81,14 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void SetRevisionTest()
         {
-            Revisions.GetUser(1).Rev = 5;
-            Revisions.GetUser(2).Rev = 5;
-            Revisions.GetUser(3).Delete();
+            Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Users, 3).Delete();
 
             Revision expected = new Revision(2, 25);
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetUser(2);
+            var actual = Revisions.GetRevision(TableRevision.Users, 2);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);

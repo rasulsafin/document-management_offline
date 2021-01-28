@@ -5,7 +5,9 @@ using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 
@@ -57,9 +59,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisionsTest()
         {
-            Revisions.GetProject(1).Rev = 5;
-            Revisions.GetProject(2).Rev = 5;
-            Revisions.GetProject(3).Delete();
+            Revisions.GetRevision(TableRevision.Projects, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Projects, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Projects, 3).Delete();
 
             var actual = sychro.GetRevisions(Revisions);
 
@@ -81,14 +83,14 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void SetRevisionTest()
         {
-            Revisions.GetProject(1).Rev = 5;
-            Revisions.GetProject(2).Rev = 5;
-            Revisions.GetProject(3).Delete();
+            Revisions.GetRevision(TableRevision.Projects, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Projects, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Projects, 3).Delete();
 
             Revision expected = new Revision(2, 25);
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetProject(2);
+            var actual = Revisions.GetRevision(TableRevision.Projects, 2);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -176,10 +178,38 @@ namespace DocumentManagement.Connection.Tests
 
         [TestMethod]
         public async Task UploadTest()
-        {
-            // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
+        {            
             int id = 1;
             var project = Fixture.Context.Projects.Find(id);
+            ProjectDto expected = mapper.Map<ProjectDto>(project);
+            SyncAction action = new SyncAction();
+            action.ID = id;
+
+            await sychro.Upload(action);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsTrue(disk.RunPush);
+            Assert.AreEqual(id, disk.LastId);
+            ProjectDto actual = disk.Project;
+            AssertHelper.EqualDto(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task UploadTest_ItemCollect()
+        {
+            int id = 1;
+            var items = MockData.DEFAULT_ITEMS;            
+            Fixture.Context.Items.AddRange(items);
+            Fixture.Context.SaveChanges();
+            var project = Fixture.Context.Projects.Find(id);
+            if (project.Items == null) project.Items = new List<ProjectItem>();
+            foreach (var item in items)
+            {
+                project.Items.Add(new ProjectItem() { ProjectID = project.ID, ItemID = item.ID });
+            }
+
+            Fixture.Context.SaveChanges();
             ProjectDto expected = mapper.Map<ProjectDto>(project);
             SyncAction action = new SyncAction();
             action.ID = id;

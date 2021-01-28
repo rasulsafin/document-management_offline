@@ -6,6 +6,7 @@ using AutoMapper;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
@@ -17,7 +18,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private ProjectDto remote;
         private IMapper mapper;
 
-        public ProjectSynchro(IDiskManager disk, DMContext context, IMapper mapper) 
+        public ProjectSynchro(IDiskManager disk, DMContext context, IMapper mapper)
         {
             this.mapper = mapper;
             this.disk = disk;
@@ -30,7 +31,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (local != null)
                 context.Projects.Remove(local);
         }
-
 
         public async Task DeleteRemote(SyncAction action)
         {
@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.Projects.Select(pr => (Revision)pr).ToList();
+            return revisions.GetRevisions(TableRevision.Projects).Select(pr => (Revision)pr).ToList();
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetProject(rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(TableRevision.Projects, rev.ID).Rev = rev.Rev;
         }
 
         public Task Special(SyncAction action)
@@ -120,7 +120,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             };
         }
 
-
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
@@ -129,7 +128,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         private async Task GetRemote(int id)
         {
-
             if (remote?.ID != (ID<ProjectDto>)id)
                 remote = await disk.Pull<ProjectDto>(id.ToString());
         }
