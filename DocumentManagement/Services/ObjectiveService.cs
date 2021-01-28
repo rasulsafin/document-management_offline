@@ -49,6 +49,7 @@ namespace MRS.DocumentManagement.Services
                     context.BimElements.Add(dbBim);
                     await context.SaveChangesAsync();
                 }
+
                 objective.BimElements.Add(new BimElementObjective
                 {
                     ObjectiveID = objective.ID,
@@ -154,6 +155,7 @@ namespace MRS.DocumentManagement.Services
         public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ObjectiveTypeDto type)
         {
              throw new NotImplementedException();
+
             // IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
             // return Task.FromResult(list);
         }
@@ -185,7 +187,7 @@ namespace MRS.DocumentManagement.Services
 
             var objectiveFields = objective.DynamicFields;
             var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
-            var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int) f.ID != x.ID)).ToList();
+            var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);
 
             foreach (var field in newFields)
@@ -213,17 +215,17 @@ namespace MRS.DocumentManagement.Services
             var newBimElements = objData.BimElements ?? Enumerable.Empty<BimElementDto>();
             var currentBimLinks = objective.BimElements.ToList();
             var linksToRemove = currentBimLinks
-                .Where(x => !newBimElements.Any(e => 
-                    (int)e.ItemID == x.BimElement.ItemID 
-                    && e.GlobalID == x.BimElement.GlobalID)
-                ).ToList();
+                .Where(x => !newBimElements.Any(e =>
+                    (int)e.ItemID == x.BimElement.ItemID
+                    && e.GlobalID == x.BimElement.GlobalID))
+                .ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
 
-            // rebuild objective's BimElements
+            // Rebuild objective's BimElements
             objective.BimElements.Clear();
             foreach (var bim in newBimElements)
             {
-                // see if objective already had this bim element referenced
+                // See if objective already had this bim element referenced
                 var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
@@ -231,17 +233,17 @@ namespace MRS.DocumentManagement.Services
                 }
                 else
                 {
-                    // bim element was not referenced. Does it exist?
+                    // Bim element was not referenced. Does it exist?
                     var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
-                        // bim element does not exist at all - should be created
+                        // Bim element does not exist at all - should be created
                         bimElement = mapper.Map<BimElement>(bim);
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
 
-                    // add link between bim element and objective
+                    // Add link between bim element and objective
                     dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
