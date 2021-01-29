@@ -175,6 +175,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -189,6 +190,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
             Assert.AreEqual(id, disk.LastId);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -208,6 +210,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(id, disk.LastId);
             ProjectDto actual = disk.Project;
             AssertHelper.EqualDto(expected, actual);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -237,6 +240,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(id, disk.LastId);
             ProjectDto actual = disk.Project;
             AssertHelper.EqualDto(expected, actual);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -269,6 +273,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
             Assert.AreEqual(action.ID, disk.LastId);
+            Assert.IsTrue(action.IsComplete);
 
             var project = Fixture.Context.Projects.Find(action.ID);
             ProjectDto actual = mapper.Map<ProjectDto>(project);

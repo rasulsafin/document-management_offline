@@ -171,6 +171,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -185,6 +186,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
             Assert.AreEqual(id, disk.LastId);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -206,6 +208,7 @@ namespace DocumentManagement.Connection.Tests
             UserDto actual = disk.User.ToDto();
 
             AssertHelper.EqualDto(expected, actual);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -241,6 +244,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
             Assert.AreEqual(id, disk.LastId);
+            Assert.IsTrue(action.IsComplete);
 
             user = Fixture.Context.Users.Find(id);
             UserDto actual = mapper.Map<UserDto>(user);

@@ -16,6 +16,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
     public class SyncManager
     {
         private const string REVISIONS = "revisions";
+        private const int COUNT_TRY = 3;
 #if TEST
         internal
 #else
@@ -104,19 +105,24 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 try
                 {
                     progress.message = "Sync";
-                    List<SyncAction> noComplete = new List<SyncAction>();
-                    foreach (var action in syncActions)
+                    for (int i = 0; i < COUNT_TRY; i++)
                     {
-                        if (NeedStopSync) break;
-                        await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
-                        if (action.IsComplete)
-                            progress.current++;
-                        else
-                            noComplete.Add(action);
+                        List<SyncAction> noComplete = new List<SyncAction>();
+                        foreach (var action in syncActions)
+                        {
+                            if (NeedStopSync) break;
+                            await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
+                            if (action.IsComplete)
+                                progress.current++;
+                            else
+                                noComplete.Add(action);
+                        }
+
+                        if (noComplete.Count == 0) break;
+
+                        syncActions = noComplete;
                     }
 
-                    if (noComplete.Count > 0)
-                        throw new Exception("AAAAAAAA");
                 }
                 catch (Exception ex)
                 {

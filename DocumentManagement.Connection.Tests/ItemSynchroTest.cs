@@ -174,6 +174,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
@@ -189,6 +190,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
 
             // Assert.IsTrue(disk.RunDeleteFile);
             // Assert.IsFalse(disk.RunPullFile);
@@ -211,6 +213,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsTrue(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
 
             // Assert.IsFalse(disk.RunDeleteFile);
             // Assert.IsFalse(disk.RunPullFile);
@@ -278,6 +281,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
 
             // Assert.IsFalse(disk.RunDeleteFile);
             // Assert.IsTrue(disk.RunPullFile);
