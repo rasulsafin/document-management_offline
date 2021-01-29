@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-#region Update Table
+        #region Update Table
         public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
         {
             if (type == TypeChange.Update)
@@ -64,7 +64,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 localRevisions.GetRevision(table, id).Delete();
             SaveRevisions();
         }
-#endregion
+        #endregion
 
         public void StopSync()
         {
@@ -78,7 +78,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public async Task StartSync(DMContext context, IMapper mapper)
         {
-            //ProgressChangeDelegate progressChange,
             progress.current = 0;
             progress.total = 0;
             progress.message = "Analysis";
@@ -92,32 +91,54 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             {
                 new UserSynchro(disk, context),
                 new ProjectSynchro(disk, context, mapper),
+                new ObjectiveTypeSynchro(disk, context, mapper),
                 new ObjectiveSynchro(disk, context, mapper),
                 new ItemSynchro(disk, context),
             };
             List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
-            progress.total = syncActions.Count;
-            progress.current = 0;
-
-            try
+            if (syncActions.Count > 0)
             {
-                progress.message = "Sync";
-                foreach (var action in syncActions)
+                progress.total = syncActions.Count;
+                progress.current = 0;
+
+                try
                 {
-                    if (NeedStopSync) break;
-                    await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
-                    progress.current++;
+                    progress.message = "Sync";
+                    List<SyncAction> noComplete = new List<SyncAction>();
+                    foreach (var action in syncActions)
+                    {
+                        if (NeedStopSync) break;
+                        await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
+                        if (action.IsComplete)
+                            progress.current++;
+                        else
+                            noComplete.Add(action);
+                    }
+
+                    if (noComplete.Count > 0)
+                        throw new Exception("AAAAAAAA");
+                }
+                catch (Exception ex)
+                {
+                    progress.error = ex;
+                }
+                finally
+                {
+                    progress.message = "Save";
+                    await disk.Push(remoteRevisions, REVISIONS);
+                    SaveRevisions();
+                    NowSync = false;
+                    if (progress.error == null)
+                        progress.message = "Complete";
+                    else
+                        progress.message = "Error";
                 }
             }
-            catch (Exception ex)
+            else
             {
-                progress.error = ex;
+                progress.message = "Not Need";
             }
 
-            progress.message = "Save";
-            await disk.Push(remoteRevisions, REVISIONS);
-            SaveRevisions();
-            NowSync = false;
         }
 
         public static async Task FindSyncroRunAction(
@@ -149,14 +170,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 var actions = await SyncHelper.Analysis(local, remote, synchro);
                 syncActions.AddRange(actions);
             }
+
             return syncActions;
         }
 
         private async Task LoadRevisions()
         {
             string fileName = PathManager.GetLocalRevisionFile();
+            FileInfo info = new FileInfo(fileName);
             try
             {
+                Console.WriteLine($"RevisionFile={info.FullName}");
                 string json = await File.ReadAllTextAsync(fileName);
                 localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
             }

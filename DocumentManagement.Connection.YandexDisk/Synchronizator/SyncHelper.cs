@@ -15,8 +15,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public static async Task<List<SyncAction>> Analysis(RevisionCollection local, RevisionCollection remote, ISynchroTable synchro)
         {
             var result = new List<SyncAction>();
-            List<Revision> localRevs = synchro.GetRevisions(local);
-            List<Revision> remoteRevs = synchro.GetRevisions(remote);
+            List<Revision> localRevs = new List<Revision>(synchro.GetRevisions(local));
+            List<Revision> remoteRevs = new List<Revision>(synchro.GetRevisions(remote));
 
             foreach (var localRev in localRevs)
             {

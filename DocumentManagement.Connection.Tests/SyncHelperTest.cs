@@ -54,18 +54,18 @@ namespace DocumentManagement.Connection.Tests
 
             List<SyncAction> expected = new List<SyncAction>()
             {
-                //new SyncAction()
-                //{
+                // new SyncAction()
+                // {
                 //    Synchronizer = nameof(UserSyncro),
                 //    TypeAction = TypeSyncAction.None,
                 //    ID = 1,
-                //},
-                //new SyncAction()
-                //{
+                // },
+                // new SyncAction()
+                // {
                 //    Synchronizer = nameof(UserSyncro),
                 //    TypeAction = TypeSyncAction.None,
                 //    ID = 2,
-                //},
+                // },
             };
 
             AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
@@ -168,6 +168,27 @@ namespace DocumentManagement.Connection.Tests
             AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
         }
 
+        [TestMethod]
+        public async Task AnalysisNoChengeCollectAsync()
+        {
+            RevisionCollection remote = new RevisionCollection();
+            remote.GetRevision(TableRevision.Users, 1).Rev = 1;
+            remote.GetRevision(TableRevision.Users, 2).Rev = 1;
+
+            RevisionCollection local = new RevisionCollection();
+            local.GetRevision(TableRevision.Users, 1).Rev = 1;
+            local.GetRevision(TableRevision.Users, 2).Rev = 1;
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Users, 1).Rev = 1;
+            expected.GetRevision(TableRevision.Users, 2).Rev = 1;
+
+            List<SyncAction> syncActions = await SyncHelper.Analysis(local, remote, new SubSyncSyncro());
+
+            AssertHelper.EqualRevisionCollection(expected, local);
+            AssertHelper.EqualRevisionCollection(expected, remote);
+        }
+
         internal class SubSyncSyncro : ISynchroTable
         {
             public void CheckDBRevision(RevisionCollection local)
@@ -199,7 +220,6 @@ namespace DocumentManagement.Connection.Tests
             {
                 return Task.FromResult<List<ISynchroTable>>(null);
             }
-
 
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
             {

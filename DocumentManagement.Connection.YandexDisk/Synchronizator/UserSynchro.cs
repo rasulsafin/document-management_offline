@@ -29,17 +29,21 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             local = await GetLocal(action.ID);
             context.Users.Remove(local);
             context.SaveChanges();
+            action.IsComplete = true;
         }
 
         public async Task DeleteRemote(SyncAction action)
         {
             await disk.Delete<UserDto>(action.ID.ToString());
+            action.IsComplete = true;
         }
 
         public async Task Download(SyncAction action)
         {
             remote = await GetRemote(action.ID);
             local = await GetLocal(action.ID);
+            action.IsComplete = true;
+
             if (local != null)
             {
                 remote.Update(local);
@@ -65,7 +69,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             remote = new UserSync(await GetLocal(action.ID));
             await disk.Push(remote, action.ID.ToString());
+            action.IsComplete = true;
         }
+
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {

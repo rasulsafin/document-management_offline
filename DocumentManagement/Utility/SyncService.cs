@@ -14,17 +14,12 @@ namespace MRS.DocumentManagement.Utility
     public class SyncService : ISyncService
     {
         private static SyncManager syncManager;
-        //private readonly DMContext context;
+        private static bool initialise = false;
         private readonly IMapper mapper;
         private readonly IServiceScopeFactory factoryScope;
-        //private int current;
-        //private int total;
-        //private string message;
-        private static bool initialise = false;
 
-        public SyncService(/*DMContext context,*/ IMapper mapper, IServiceScopeFactory factory)
+        public SyncService(IMapper mapper, IServiceScopeFactory factory)
         {
-            //this.context = context;
             this.mapper = mapper;
             factoryScope = factory;
             if (!initialise)
@@ -35,36 +30,13 @@ namespace MRS.DocumentManagement.Utility
 
         public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update) => syncManager.Update(table, id, type);
 
-        // public void AddChange(ID<ProjectDto> id)
-        // {
-        //    syncManager.Update(id);
-        // }
-
-        // public void AddChange(ID<UserDto> id)
-        // {
-        //    syncManager.Update(id);
-        // }
-
-        // public void AddChange(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
-        // {
-        //    syncManager.Update(id);
-        // }
-
-        // public void AddChange(ID<ItemDto> id, ID<ProjectDto> idProj)
-        // {
-        //    syncManager.Update(id, idProj);
-        // }
-
-        // public void AddChange(ID<ItemDto> id, ID<ObjectiveDto> idObj)
-        // {
-        //    syncManager.Update(id, idObj);
-        // }
         public async void StartSync()
         {
             while (!initialise)
             {
-                Task.Delay(100);
+                await Task.Delay(10);
             }
+
             var cont = factoryScope.CreateScope().ServiceProvider.GetService<DMContext>();
             if (!syncManager.NowSync)
                 await syncManager.StartSync(cont, mapper);
@@ -82,31 +54,5 @@ namespace MRS.DocumentManagement.Utility
             await syncManager.Initialize(accessToken);
             initialise = true;
         }
-
-        // public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj)
-        // {
-        //    syncManager.Delete(id, idObj);
-        // }
-
-        // public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
-        // {
-        //    syncManager.Delete(id, idProj);
-        // }
-
-        // public void Delete(ID<ObjectiveDto> id, ID<ProjectDto> idProj)
-        // {
-        //    syncManager.Delete(id);
-        // }
-
-        // public void Delete(ID<ProjectDto> id)
-        // {
-        //    syncManager.Delete(id);
-        // }
-
-        // public void Delete(ID<UserDto> id)
-        // {
-        //    syncManager.Delete(id);
-        // }
     }
-
 }

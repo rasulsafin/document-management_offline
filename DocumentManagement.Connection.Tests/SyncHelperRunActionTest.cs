@@ -189,6 +189,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(synchro.RunDeleteRemote);
             Assert.IsFalse(synchro.RunDownload);
             Assert.IsFalse(synchro.RunUpload);
+
             // Assert.IsTrue(synchro.RunSpecial);
             AssertHelper.EqualRevisionCollection(expected, local);
         }

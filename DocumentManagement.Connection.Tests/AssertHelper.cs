@@ -111,7 +111,7 @@ namespace DocumentManagement.Connection.Tests
                 if (!(actual is ItemSynchro))
                 {
                     Assert.Fail("Типы полученых синхронизаторов не совподают!");
-                }                
+                }
             }
             if (expected is UserSynchro)
             {

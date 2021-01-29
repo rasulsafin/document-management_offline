@@ -11,7 +11,7 @@ using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    public class ObjectiveSynchro : ISynchroTable
+    public class ObjectiveTypeSynchro : ISynchroTable
     {
         private IDiskManager disk;
         private DMContext context;
@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private Objective local;
         private ObjectiveDto remote;
 
-        public ObjectiveSynchro(IDiskManager disk, DMContext context, IMapper mapper)
+        public ObjectiveTypeSynchro(IDiskManager disk, DMContext context, IMapper mapper)
         {
             this.disk = disk;
             this.context = context;
@@ -31,16 +31,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
             {
-                action.IsComplete = true;
                 context.Objectives.Remove(local);
                 await context.SaveChangesAsync();
             }
         }
 
         public async Task DeleteRemote(SyncAction action)
-        {            
+        {
             await disk.Delete<ObjectiveDto>(action.ID.ToString());
-            action.IsComplete = true;
         }
 
         public async Task Download(SyncAction action)
@@ -202,7 +200,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
             {
-                action.IsComplete = true;
                 remote = mapper.Map<ObjectiveDto>(local);
                 await disk.Push(remote, action.ID.ToString());
             }

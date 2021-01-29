@@ -13,9 +13,8 @@ using MRS.DocumentManagement.Utility;
 
 namespace DocumentManagement.Connection.Tests
 {
-
     [TestClass]
-    public class ProjectSynchroTest
+    public class ProjectSynchroTest : IUserSynchroTests
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -85,8 +84,8 @@ namespace DocumentManagement.Connection.Tests
             delRev.Delete();
             var expected = new List<Revision>()
             {
-                new Revision(1,5),
-                new Revision(2,5),
+                new Revision(1, 5),
+                new Revision(2, 5),
                 delRev,
             };
 
@@ -137,7 +136,7 @@ namespace DocumentManagement.Connection.Tests
             int id = 1;
             SyncAction action = new SyncAction();
             action.ID = id;
-      
+
             // List<ISynchroTable> expected = new List<ISynchroTable>();
             // expected.Add(new ItemSynchro(disk, Fixture.Context, new ID<ProjectDto>(id)));
             List<ISynchroTable> actual = await sychro.GetSubSynchroList(action);
@@ -194,7 +193,7 @@ namespace DocumentManagement.Connection.Tests
 
         [TestMethod]
         public async Task UploadTest()
-        {            
+        {
             int id = 1;
             var project = Fixture.Context.Projects.Find(id);
             ProjectDto expected = mapper.Map<ProjectDto>(project);
@@ -215,7 +214,7 @@ namespace DocumentManagement.Connection.Tests
         public async Task UploadTest_ItemCollect()
         {
             int id = 1;
-            var items = MockData.DEFAULT_ITEMS;            
+            var items = MockData.DEFAULT_ITEMS;
             Fixture.Context.Items.AddRange(items);
             Fixture.Context.SaveChanges();
             var project = Fixture.Context.Projects.Find(id);
@@ -288,12 +287,13 @@ namespace DocumentManagement.Connection.Tests
         public async Task DownloadTest_ItemCollect()
         {
             int id = 2;
-            //ProjectDto expected = new ProjectDto()
-            //{
+
+            // ProjectDto expected = new ProjectDto()
+            // {
             //    ID = (ID<ProjectDto>)id,
             //    Title = "Замок кащея",
             //    Items = new List<ItemDto>(),
-            //};
+            // };
             var project = Fixture.Context.Projects.Find(id);
             ProjectDto expected = mapper.Map<ProjectDto>(project);
             var expItem = new List<ItemDto>();

@@ -14,7 +14,6 @@ namespace DocumentManagement.Connection.Tests
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
-
         private DiskTest disk;
         private static IMapper mapper;
         private static UserSynchro sychro;
@@ -45,24 +44,23 @@ namespace DocumentManagement.Connection.Tests
             sychro = new UserSynchro(disk, Fixture.Context);
         }
 
-        //[TestMethod]
+        // [TestMethod]
         public async Task AnalysisDownloadTestAsync()
         {
             // Проверить заполнение пустой структуры
 
-            //RevisionCollection remote = new RevisionCollection();
-            //remote.GetRevision(TableRevision.Users, 1).Rev = 30;
+            // RevisionCollection remote = new RevisionCollection();
+            // remote.GetRevision(TableRevision.Users, 1).Rev = 30;
 
-            //RevisionCollection local = new RevisionCollection();
-            //local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            // RevisionCollection local = new RevisionCollection();
+            // local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
-            //SyncManager.Analysis();
+            // SyncManager.Analysis();
 
-
-            //List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
-            //actual.Sort((x, y) => x.ID.CompareTo(y.ID));
-            //List<SyncAction> expected = new List<SyncAction>()
-            //{
+            // List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
+            // actual.Sort((x, y) => x.ID.CompareTo(y.ID));
+            // List<SyncAction> expected = new List<SyncAction>()
+            // {
             //    new SyncAction()
             //    {
             //        Synchronizer = nameof(),
@@ -75,9 +73,9 @@ namespace DocumentManagement.Connection.Tests
             //        TypeAction = TypeSyncAction.Upload,
             //        ID = 2,
             //    },
-            //};
+            // };
 
-            //AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
+            // AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
         }
     }
 

@@ -44,11 +44,13 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
                 context.Projects.Remove(local);
+                action.IsComplete = true;
         }
 
         public async Task DeleteRemote(SyncAction action)
         {
             await disk.Delete<ProjectDto>(action.ID.ToString());
+                action.IsComplete = true;
         }
 
         public async Task Download(SyncAction action)
@@ -57,6 +59,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (remote != null)
             {
+                action.IsComplete = true;
                 var exist = local != null;
                 if (!exist)
                     local = mapper.Map<Project>(remote);
@@ -105,6 +108,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
             {
+                action.IsComplete = true;
                 remote = new ProjectDto()
                 {
                     ID = new ID<ProjectDto>(local.ID),

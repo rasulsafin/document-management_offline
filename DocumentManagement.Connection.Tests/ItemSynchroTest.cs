@@ -14,19 +14,17 @@ using MRS.DocumentManagement.Utility;
 
 namespace DocumentManagement.Connection.Tests
 {
-
     [TestClass]
-    public class ItemSynchroTest
+    public class ItemSynchroTest : IUserSynchroTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
+        public readonly int idProj = 1;
+        private static IMapper mapper;
+        private static ItemSynchro sychro;
+        private DiskTest disk;
 
         public RevisionCollection Revisions { get; private set; }
 
-        private DiskTest disk;
-        private static IMapper mapper;
-        private static ItemSynchro sychro;
-
-        public readonly int idProj = 1;
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -49,6 +47,7 @@ namespace DocumentManagement.Connection.Tests
                 context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
                 context.Items.AddRange(MockData.DEFAULT_ITEMS);
                 context.SaveChanges();
+
                 // var project = context.Projects.FirstOrDefault();
                 // var items = context.Items.ToList();
                 // foreach (var item in items)
@@ -85,8 +84,8 @@ namespace DocumentManagement.Connection.Tests
             delRev.Delete();
             var expected = new List<Revision>()
             {
-                new Revision(1,5),
-                new Revision(2,5),
+                new Revision(1, 5),
+                new Revision(2, 5),
                 delRev,
             };
 
@@ -190,9 +189,10 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
-            Assert.IsTrue(disk.RunDeleteFile);
-            Assert.IsFalse(disk.RunPullFile);
-            Assert.IsFalse(disk.RunPushFile);
+
+            // Assert.IsTrue(disk.RunDeleteFile);
+            // Assert.IsFalse(disk.RunPullFile);
+            // Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
         }
 
@@ -211,27 +211,26 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsTrue(disk.RunPush);
-            Assert.IsFalse(disk.RunDeleteFile);
-            Assert.IsFalse(disk.RunPullFile);
-            Assert.IsTrue(disk.RunPushFile);
+
+            // Assert.IsFalse(disk.RunDeleteFile);
+            // Assert.IsFalse(disk.RunPullFile);
+            // Assert.IsTrue(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
             ItemDto actual = disk.Item;
             AssertHelper.EqualDto(expected, actual);
         }
 
         [TestMethod]
-        public async Task CheckDBRevisionTest()
+        public void CheckDBRevisionTest()
         {
             // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
-            //int id = 1;
-            //var item = Fixture.Context.Items.Find(id);
-            //ItemDto expected = mapper.Map<ItemDto>(item);
-            //SyncAction action = new SyncAction();
-            //action.ID = id;
+            // int id = 1;
+            // var item = Fixture.Context.Items.Find(id);
+            // ItemDto expected = mapper.Map<ItemDto>(item);
+            // SyncAction action = new SyncAction();
+            // action.ID = id;
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
-
-
 
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Items, 1);
@@ -241,8 +240,9 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
-            //Assert.AreEqual(id, disk.LastId);
-            //ItemDto actual = disk.Item;
+
+            // Assert.AreEqual(id, disk.LastId);
+            // ItemDto actual = disk.Item;
             AssertHelper.EqualRevisionCollection(expected, actual);
         }
 
@@ -250,6 +250,13 @@ namespace DocumentManagement.Connection.Tests
         public async Task DownloadTestExist()
         {
             int id = 1;
+            await DownloadTest(id);
+        }
+
+        [TestMethod]
+        public async Task DownloadTestNotExist()
+        {
+            int id = 5;
             await DownloadTest(id);
         }
 
@@ -267,13 +274,14 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction();
             action.ID = id;
             await sychro.Download(action);
-            
+
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
-            Assert.IsFalse(disk.RunDeleteFile);
-            Assert.IsTrue(disk.RunPullFile);
-            Assert.IsFalse(disk.RunPushFile);
+
+            // Assert.IsFalse(disk.RunDeleteFile);
+            // Assert.IsTrue(disk.RunPullFile);
+            // Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
 
             var item = Fixture.Context.Items.Find(id);
@@ -281,13 +289,5 @@ namespace DocumentManagement.Connection.Tests
 
             AssertHelper.EqualDto(expected, actual);
         }
-
-        [TestMethod]
-        public async Task DownloadTestNotExist()
-        {
-            int id = 5;
-            await DownloadTest(id);
-        }
-
     }
 }

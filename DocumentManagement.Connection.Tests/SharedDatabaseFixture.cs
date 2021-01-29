@@ -19,7 +19,7 @@ namespace DocumentManagement.Connection.Tests
 
     // public SharedDatabaseFixture(Action<DMContext> seedAction = null)
     //    {
-            
+
     // Context = Seed(seedAction);
     //        // Connection.Open();
     //    }
@@ -71,7 +71,7 @@ namespace DocumentManagement.Connection.Tests
     //    }
 
     // private DbConnection CreateInMemoryDatabase()
-    //    {            
+    //    {
     //        Connection = new SqliteConnection("Data Source = DocumentManagement.db;Filename=:memory:");
     //        //Connection.Open();
 

@@ -13,7 +13,7 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class UserSynchroTests
+    public class UserSynchroTests : IUserSynchroTests
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -85,8 +85,8 @@ namespace DocumentManagement.Connection.Tests
             delRev.Delete();
             var expected = new List<Revision>()
             {
-                new Revision(1,5),
-                new Revision(2,5),
+                new Revision(1, 5),
+                new Revision(2, 5),
                 delRev,
             };
 

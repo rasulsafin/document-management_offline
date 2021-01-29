@@ -15,9 +15,8 @@ using MRS.DocumentManagement.Utility;
 
 namespace DocumentManagement.Connection.Tests
 {
-
     [TestClass]
-    public class ObjectiveSynchroTests
+    public class ObjectiveSynchroTests : IUserSynchroTests
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -58,7 +57,7 @@ namespace DocumentManagement.Connection.Tests
 
                 // context.Items.AddRange(items);
                 context.SaveChanges();
-                
+
                 if (objectives.Count >= 3 && users.Count >= 2 && projects.Count >= 2 && objectiveTypes.Count >= 2)
                 {
                     objectives[0].AuthorID = users[0].ID;
@@ -114,8 +113,8 @@ namespace DocumentManagement.Connection.Tests
             delRev.Delete();
             var expected = new List<Revision>()
             {
-                new Revision(1,5),
-                new Revision(2,5),
+                new Revision(1, 5),
+                new Revision(2, 5),
                 delRev,
             };
 
@@ -144,7 +143,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronization()
+        public void SpecialSynchronizationTest()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -152,7 +151,8 @@ namespace DocumentManagement.Connection.Tests
             actual.Synchronizer = expected.Synchronizer = nameof(ObjectiveSynchro);
             actual.TypeAction = expected.TypeAction = TypeSyncAction.Download;
             expected.SpecialSynchronization = false;
-            //expected.SpecialSynchronization = true;
+
+            // expected.SpecialSynchronization = true;
 
             actual = sychro.SpecialSynchronization(actual);
 
@@ -175,8 +175,6 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPush);
         }
 
-       
-
         [TestMethod]
         public async Task SpecialTest()
         {
@@ -190,7 +188,23 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPush);
         }
 
-        
+        [TestMethod]
+        public async Task DeleteLocalTest()
+        {
+            int id = 1;
+            SyncAction action = new SyncAction();
+            action.ID = id;
+            await sychro.DeleteLocal(action);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            var exist = Fixture.Context.Objectives.Any(x => x.ID == action.ID);
+            exist = exist || Fixture.Context.BimElementObjectives.Any(x => x.ObjectiveID == action.ID);
+            exist = exist || Fixture.Context.ObjectiveItems.Any(x => x.ObjectiveID == action.ID);
+            Assert.IsFalse(exist);
+            //Assert.AreEqual(id, disk.LastId);
+        }
 
         [TestMethod]
         public async Task DeleteRemoteTest()
@@ -207,7 +221,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest_NoCollect()
+        public async Task UploadTest()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -301,8 +315,9 @@ namespace DocumentManagement.Connection.Tests
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
-            //Fixture.Context.DynamicFields.AddRange(MockData.DEFAULT_DYNAMIC_FIELDS);
-            //Fixture.Context.SaveChanges();
+
+            // Fixture.Context.DynamicFields.AddRange(MockData.DEFAULT_DYNAMIC_FIELDS);
+            // Fixture.Context.SaveChanges();
             objective.DynamicFields = new List<DynamicField>();
             foreach (var dynamic in Fixture.Context.DynamicFields)
             {
@@ -342,7 +357,7 @@ namespace DocumentManagement.Connection.Tests
             objective.ProjectID = 1;
             objective.AuthorID = 1;
             objective.ObjectiveTypeID = 1;
-            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);            
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
 
             await DownloadObjectiveTest(expected);
         }
@@ -374,7 +389,8 @@ namespace DocumentManagement.Connection.Tests
             ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
             var expBim = new List<BimElementDto>();
             expected.BimElements = expBim;
-            //int num = 1;
+
+            // int num = 1;
             foreach (var bim in MockData.DEFAULT_BIM_ELEMENTS)
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
@@ -413,7 +429,8 @@ namespace DocumentManagement.Connection.Tests
             ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
             var expBim = new List<BimElementDto>();
             expected.BimElements = expBim;
-            //int num = 1;
+
+            // int num = 1;
             foreach (var bim in MockData.DEFAULT_BIM_ELEMENTS)
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
@@ -445,11 +462,69 @@ namespace DocumentManagement.Connection.Tests
             await DownloadObjectiveTest(expected);
         }
 
+        [TestMethod]
+        public async Task StopedDownloadAction_NoKeyProject_Test()
+        {
+            int id = 5;
+            var objective = MockData.DEFAULT_OBJECTIVES[0];
+            objective.ID = id;
+            objective.ProjectID = 5;
+            objective.AuthorID = 1;
+            objective.ObjectiveTypeID = 1;
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
+            await StopedAction(expected);
+        }
+
+        [TestMethod]
+        public async Task StopedDownloadAction_NoKeyAuthor_Test()
+        {
+            int id = 5;
+            var objective = MockData.DEFAULT_OBJECTIVES[0];
+            objective.ID = id;
+            objective.ProjectID = 1;
+            objective.AuthorID = 5;
+            objective.ObjectiveTypeID = 1;
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
+            await StopedAction(expected);
+        }
+
+        [TestMethod]
+        public async Task StopedDownloadAction_NoKeyObjectiveType_Test()
+        {
+            int id = 5;
+            var objective = MockData.DEFAULT_OBJECTIVES[0];
+            objective.ID = id;
+            objective.ProjectID = 1;
+            objective.AuthorID = 1;
+            objective.ObjectiveTypeID = 5;
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
+            await StopedAction(expected);
+        }
+
+        private async Task StopedAction(ObjectiveDto expected)
+        {
+            disk.Objective = expected;
+
+            SyncAction action = new SyncAction();
+            action.ID = (int)expected.ID;
+
+                await sychro.Download(action);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsTrue(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            Assert.IsFalse(action.IsComplete);
+            Assert.AreEqual(action.ID, disk.LastId);
+
+            ObjectiveDto actual = mapper.Map<ObjectiveDto>(action.Data);
+
+            AssertHelper.EqualDto(expected, actual);
+        }
+
         private async Task DownloadTest(int id)
         {
             var objective = Fixture.Context.Objectives.Find(id);
-            disk.Objective = mapper.Map<ObjectiveDto>(objective);
-            ObjectiveDto expected = disk.Objective;
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
 
             await DownloadObjectiveTest(expected);
         }
@@ -465,6 +540,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(action.IsComplete);
             Assert.AreEqual(action.ID, disk.LastId);
 
             var objective = Fixture.Context.Objectives.Find(action.ID);
@@ -473,28 +549,29 @@ namespace DocumentManagement.Connection.Tests
             AssertHelper.EqualDto(expected, actual);
         }
 
+        
 
-        private ItemDto Convert(Item item)
-        {
-            return new ItemDto()
-            {
-                ID = new ID<ItemDto>(item.ID),
-                ExternalItemId = item.ExternalItemId,
-                ItemType = (ItemTypeDto)item.ItemType,
-                Name = item.Name,
-            };
-        }
+        //private ItemDto Convert(Item item)
+        //{
+        //    return new ItemDto()
+        //    {
+        //        ID = new ID<ItemDto>(item.ID),
+        //        ExternalItemId = item.ExternalItemId,
+        //        ItemType = (ItemTypeDto)item.ItemType,
+        //        Name = item.Name,
+        //    };
+        //}
 
-        private Item Convert(ItemDto item)
-        {
-            return new Item()
-            {
-                ID = (int)item.ID,
-                ItemType = (int)item.ItemType,
-                ExternalItemId = item.ExternalItemId,
-                Name = item.Name,
-            };
-        }
+        //private Item Convert(ItemDto item)
+        //{
+        //    return new Item()
+        //    {
+        //        ID = (int)item.ID,
+        //        ItemType = (int)item.ItemType,
+        //        ExternalItemId = item.ExternalItemId,
+        //        Name = item.Name,
+        //    };
+        //}
 
     }
 }
