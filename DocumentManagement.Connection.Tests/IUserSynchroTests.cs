@@ -4,6 +4,7 @@ namespace DocumentManagement.Connection.Tests
 {
     public interface IUserSynchroTests
     {
+        void CheckDBRevisionTest();
         Task DeleteLocalTest();
         Task DeleteRemoteTest();
         Task DownloadTestExist();

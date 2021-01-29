@@ -16,8 +16,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private IDiskManager disk;
         private DMContext context;
         private IMapper mapper;
-        private Objective local;
-        private ObjectiveDto remote;
+        private ObjectiveType local;
+        private ObjectiveTypeDto remote;
 
         public ObjectiveTypeSynchro(IDiskManager disk, DMContext context, IMapper mapper)
         {
@@ -31,14 +31,16 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
             {
-                context.Objectives.Remove(local);
+                context.ObjectiveTypes.Remove(local);
                 await context.SaveChangesAsync();
             }
+            action.IsComplete = true;
         }
 
         public async Task DeleteRemote(SyncAction action)
         {
-            await disk.Delete<ObjectiveDto>(action.ID.ToString());
+            await disk.Delete<ObjectiveTypeDto>(action.ID.ToString());
+            action.IsComplete = true;
         }
 
         public async Task Download(SyncAction action)
@@ -48,131 +50,23 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (remote != null)
             {
                 action.IsComplete = true;
-                await VerifyPrimaryKey(action);
-                if (!action.IsComplete)
-                    return;
 
                 var exist = local != null;
                 if (!exist)
-                    local = mapper.Map<Objective>(remote);
+                    local = mapper.Map<ObjectiveType>(remote);
                 else
                     local = mapper.Map(remote, local);
 
-                await ItemSync();
-                await BinElementSync();
-                await DynamicFieldSync();
-
                 if (!exist)
-                    context.Objectives.Add(local);
+                    context.ObjectiveTypes.Add(local);
                 await context.SaveChangesAsync();
-
-            }
-        }
-
-        private async Task VerifyPrimaryKey(SyncAction action)
-        {
-            bool projExist = await context.Projects.AnyAsync(x => x.ID == (int)remote.ProjectID);
-            if (!projExist)
-            {
-                action.IsComplete = false;
-                action.Data = remote;
-                return;
-            }
-
-            bool userExist = await context.Users.AnyAsync(x => x.ID == (int)remote.AuthorID);
-            if (!userExist)
-            {
-                action.IsComplete = false;
-                action.Data = remote;
-                return;
-            }
-
-            bool objectiveTypeExist = await context.ObjectiveTypes.AnyAsync(x => x.ID == (int)remote.ObjectiveTypeID);
-            if (!objectiveTypeExist)
-            {
-                action.IsComplete = false;
-                action.Data = remote;
-                return;
-            }
-        }
-
-        private async Task DynamicFieldSync()
-        {
-            foreach (var dynamicDto in remote.DynamicFields)
-            {
-                var dynamic = await context.DynamicFields.FindAsync((int)dynamicDto.ID);
-                var existItem = dynamic != null;
-                dynamic = mapper.Map<DynamicField>(dynamicDto);
-                dynamic.ObjectiveID = local.ID;
-
-                if (!existItem)
-                    context.DynamicFields.Add(dynamic);
-                else
-                    context.DynamicFields.Update(dynamic);
-                await context.SaveChangesAsync();
-            }
-        }
-
-        private async Task BinElementSync()
-        {
-            // Добавим отсутвуюшие BimElement
-            if (local.BimElements == null) local.BimElements = new List<BimElementObjective>();
-            local.BimElements.Clear();
-
-            foreach (var bimDto in remote.BimElements)
-            {
-                var bim = await context.BimElements.FirstOrDefaultAsync(x => x.GlobalID == bimDto.GlobalID);
-                var existBim = bim != null;
-                var item = await context.Items.FindAsync((int)bimDto.ItemID);
-                if (item != null)
-                {
-                    bim = mapper.Map<BimElement>(bimDto);
-                    if (!existBim)
-                    {
-                        context.BimElements.Add(bim);
-                    }
-                    else
-                    {
-                        context.BimElements.Update(bim);
-                    }
-
-                    await context.SaveChangesAsync();
-                    local.BimElements.Add(new BimElementObjective() { ObjectiveID = local.ID, BimElementID = bim.ID });
-                }
-            }
-        }
-
-        private async Task ItemSync()
-        {
-            // Добавим отсутвуюшие item
-            if (local.Items == null) local.Items = new List<ObjectiveItem>();
-            local.Items.Clear();
-
-            foreach (var itemDto in remote.Items)
-            {
-                var item = await context.Items.FindAsync((int)itemDto.ID);
-                var existItem = item != null;
-                if (!existItem)
-                {
-                    item = mapper.Map<Item>(itemDto);
-                    item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Add(item);
-                }
-                else
-                {
-                    item = mapper.Map(itemDto, item);
-                    item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Update(item);
-                }
-
-                await context.SaveChangesAsync();
-                local.Items.Add(new ObjectiveItem() { ObjectiveID = local.ID, ItemID = item.ID });
+                action.IsComplete = true;
             }
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.GetRevisions(TableRevision.Objectives);
+            return revisions.GetRevisions(TableRevision.ObjectiveTypes);
         }
 
         public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
@@ -182,7 +76,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetRevision(TableRevision.Objectives, rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(TableRevision.ObjectiveTypes, rev.ID).Rev = rev.Rev;
         }
 
         public async Task Special(SyncAction action)
@@ -200,39 +94,29 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
             {
-                remote = mapper.Map<ObjectiveDto>(local);
+                remote = mapper.Map<ObjectiveTypeDto>(local);
                 await disk.Push(remote, action.ID.ToString());
             }
-        }
-
-        private DynamicFieldDto Convert(DynamicField field)
-        {
-            return new DynamicFieldDto()
-            {
-                ID = (ID<DynamicFieldDto>)field.ID,
-                Key = field.Key,
-                Type = field.Type,
-                Value = field.Value,
-            };
+            action.IsComplete = true;
         }
 
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
-                local = await context.Objectives.FindAsync(id);
+                local = await context.ObjectiveTypes.FindAsync(id);
         }
 
         private async Task GetRemote(int id)
         {
-            if (remote?.ID != (ID<ObjectiveDto>)id)
-                remote = await disk.Pull<ObjectiveDto>(id.ToString());
+            if (remote?.ID != (ID<ObjectiveTypeDto>)id)
+                remote = await disk.Pull<ObjectiveTypeDto>(id.ToString());
         }
 
         public void CheckDBRevision(RevisionCollection local)
         {
-            var allId = context.Objectives.Select(x => x.ID).ToList();
+            var allId = context.ObjectiveTypes.Select(x => x.ID).ToList();
 
-            var revCollect = local.GetRevisions(TableRevision.Objectives);
+            var revCollect = local.GetRevisions(TableRevision.ObjectiveTypes);
             foreach (var id in allId)
             {
                 if (!revCollect.Any(x => x.ID == id))

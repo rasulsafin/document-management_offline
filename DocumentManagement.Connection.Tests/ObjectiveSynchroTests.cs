@@ -84,7 +84,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public async Task CheckDBRevisionTest()
+        public void CheckDBRevisionTest()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -550,28 +550,5 @@ namespace DocumentManagement.Connection.Tests
         }
 
         
-
-        //private ItemDto Convert(Item item)
-        //{
-        //    return new ItemDto()
-        //    {
-        //        ID = new ID<ItemDto>(item.ID),
-        //        ExternalItemId = item.ExternalItemId,
-        //        ItemType = (ItemTypeDto)item.ItemType,
-        //        Name = item.Name,
-        //    };
-        //}
-
-        //private Item Convert(ItemDto item)
-        //{
-        //    return new Item()
-        //    {
-        //        ID = (int)item.ID,
-        //        ItemType = (int)item.ItemType,
-        //        ExternalItemId = item.ExternalItemId,
-        //        Name = item.Name,
-        //    };
-        //}
-
     }
 }

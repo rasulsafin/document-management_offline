@@ -53,6 +53,7 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.BimElements, opt => opt.Ignore())
                 .ForMember(d => d.Items, o => o.Ignore());
             CreateMap<BimElementDto, BimElement>();
+            CreateMap<ObjectiveTypeDto, ObjectiveType>();
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();

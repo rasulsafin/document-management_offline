@@ -61,5 +61,6 @@ namespace MRS.DocumentManagement.Interface.Services
         Projects,
         Items,
         Objectives,
+        ObjectiveTypes,
     }
 }

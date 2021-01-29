@@ -14,7 +14,7 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualSyncAction(SyncAction expected, SyncAction actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID");
             Assert.AreEqual(expected.Synchronizer, actual.Synchronizer, "Не совпали Synchronizer");
             Assert.AreEqual(expected.TypeAction, actual.TypeAction, "Не совпали TypeAction");
             Assert.AreEqual(expected.SpecialSynchronization, actual.SpecialSynchronization, "Не совпали SubSynchronization");
@@ -56,14 +56,14 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualRevision(Revision expected, Revision actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID");
             Assert.AreEqual(expected.Rev, actual.Rev, "Не совпали Rev");
         }
 
         public static void EqualDto(UserDto expected, UserDto actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта UserDto");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта UserDto");
             Assert.AreEqual(expected.Login, actual.Login, "Не совпали Login у объекта UserDto");
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта UserDto");
             EqualDto(expected.Role, actual.Role);
@@ -73,6 +73,13 @@ namespace DocumentManagement.Connection.Tests
         {
             if (NUllComparer(expected, actual)) return;
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта RoleDto");
+        }
+
+        public static void EqualDto(ObjectiveTypeDto expected, ObjectiveTypeDto actual)
+        {
+            if (NUllComparer(expected, actual)) return;
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта ObjectiveTypeDto");
+            Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта ObjectiveTypeDto");
         }
 
         private static bool NUllComparer(object expected, object actual)
@@ -90,7 +97,7 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualDto(ProjectDto expected, ProjectDto actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта ProjectDto");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта ProjectDto");
             Assert.AreEqual(expected.Title, actual.Title, "Не совпали Title у объекта ProjectDto");
             EqualEnumerable(expected.Items, actual.Items, EqualDto);
         }
@@ -98,7 +105,7 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualDto(ItemDto expected, ItemDto actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта ItemDto");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта ItemDto");
             Assert.AreEqual(expected.ItemType, actual.ItemType, "Не совпали ItemType у объекта ItemDto");
             Assert.AreEqual(expected.ExternalItemId, actual.ExternalItemId, "Не совпали ExternalItemId у объекта ItemDto");
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта ItemDto");
@@ -164,7 +171,7 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualDto(ObjectiveDto expected, ObjectiveDto actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта ObjectiveDto");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта ObjectiveDto");
             Assert.AreEqual(expected.AuthorID, actual.AuthorID, "Не совпали AuthorID у объекта ObjectiveDto");
             Assert.AreEqual(expected.CreationDate, actual.CreationDate, "Не совпали CreationDate у объекта ObjectiveDto");
             Assert.AreEqual(expected.Description, actual.Description, "Не совпали Description у объекта ObjectiveDto");
@@ -183,7 +190,7 @@ namespace DocumentManagement.Connection.Tests
         private static void EqualDto(DynamicFieldDto expected, DynamicFieldDto actual)
         {
             if (NUllComparer(expected, actual)) return;
-            Assert.AreEqual(expected.ID, actual.ID, "Не совпали id у объекта DynamicFieldDto");
+            Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта DynamicFieldDto");
             Assert.AreEqual(expected.Key, actual.Key, "Не совпали Key у объекта DynamicFieldDto");
             Assert.AreEqual(expected.Type, actual.Type, "Не совпали Type у объекта DynamicFieldDto");
             Assert.AreEqual(expected.Value, actual.Value, "Не совпали Value у объекта DynamicFieldDto");

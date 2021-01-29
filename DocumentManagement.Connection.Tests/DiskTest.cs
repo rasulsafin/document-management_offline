@@ -34,7 +34,8 @@ namespace DocumentManagement.Connection.Tests
         public ItemDto Item { get; set; }
 
         public ObjectiveDto Objective { get; internal set; }
-        public ObjectiveTypeDto ObjectiveType { get; internal set; }
+
+        public ObjectiveTypeDto ObjectiveType { get; set; }
 
         public Task<bool> Delete<T>(string id)
         {
@@ -63,6 +64,8 @@ namespace DocumentManagement.Connection.Tests
                     return Task.FromResult(itm);
                 if (Objective is T obj)
                     return Task.FromResult(obj);
+                if (ObjectiveType is T obt)
+                    return Task.FromResult(obt);
             }
 
             return Task.FromResult<T>(default);
@@ -98,6 +101,12 @@ namespace DocumentManagement.Connection.Tests
                     Objective = obj;
                     return Task.FromResult(true);
                 }
+
+                if (@object is ObjectiveTypeDto qbt)
+                {
+                    ObjectiveType = qbt;
+                    return Task.FromResult(true);
+                }
             }
 
             return Task.FromResult(false);
@@ -113,20 +122,14 @@ namespace DocumentManagement.Connection.Tests
 
         public Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
         {
-            RunPullFile= true;
-
-            // if (Item.ExternalItemId == path)
-                return Task.FromResult(true);
-
-            // return Task.FromResult(false);
+            RunPullFile = true;
+            return Task.FromResult(true);
         }
 
         public Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
         {
-            RunPushFile= true;
+            RunPushFile = true;
             return Task.FromResult(true);
         }
-
     }
-
 }
