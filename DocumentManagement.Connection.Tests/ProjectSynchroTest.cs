@@ -57,6 +57,22 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
+        public void CheckDBRevisionTest()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Projects, 1);
+            expected.GetRevision(TableRevision.Projects, 2);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
+
+        [TestMethod]
         public void GetRevisionsTest()
         {
             Revisions.GetRevision(TableRevision.Projects, 1).Rev = 5;

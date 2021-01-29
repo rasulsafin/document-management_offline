@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Database;
@@ -10,19 +12,21 @@ namespace MRS.DocumentManagement.Utility
 {
 
     public class SyncService : ISyncService
-    {        
+    {
         private static SyncManager syncManager;
-        private readonly DMContext context;
+        //private readonly DMContext context;
         private readonly IMapper mapper;
-        private int current;
-        private int total;
-        private string message;
+        private readonly IServiceScopeFactory factoryScope;
+        //private int current;
+        //private int total;
+        //private string message;
         private static bool initialise = false;
 
-        public SyncService(DMContext context, IMapper mapper)
+        public SyncService(/*DMContext context,*/ IMapper mapper, IServiceScopeFactory factory)
         {
-            this.context = context;
+            //this.context = context;
             this.mapper = mapper;
+            factoryScope = factory;
             if (!initialise)
             {
                 Initialisation();
@@ -61,25 +65,14 @@ namespace MRS.DocumentManagement.Utility
             {
                 Task.Delay(100);
             }
-
-                if (!syncManager.NowSync)
-                await syncManager.StartSync(ProgressChenge, context, mapper);
+            var cont = factoryScope.CreateScope().ServiceProvider.GetService<DMContext>();
+            if (!syncManager.NowSync)
+                await syncManager.StartSync(cont, mapper);
         }
 
         public void StopSync() => syncManager.StopSync();
 
-        public (int current, int total, string step) GetSyncProgress() => (current, total, message);
-
-        // public void AddChange(ID<ItemDto> id, ID<ObjectiveDto> idObj, ID<ProjectDto> idProj)
-        // {
-        //    syncManager.Update(id, idObj);
-        // }
-        private void ProgressChenge(int current, int total, string message)
-        {
-            this.current = current;
-            this.total = total;
-            this.message = message;
-        }
+        public ProgressSync GetProgressSync() => syncManager.GetProgressSync();
 
         private static async void Initialisation()
         {

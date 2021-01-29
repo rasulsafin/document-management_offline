@@ -25,6 +25,20 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             this.context = context;
         }
 
+        public void CheckDBRevision(RevisionCollection local)
+        {
+            var allId = context.Projects.Select(x => x.ID).ToList();
+
+            var revCollect = local.GetRevisions(TableRevision.Projects);
+            foreach (var id in allId)
+            {
+                if (!revCollect.Any(x => x.ID == id))
+                {
+                    revCollect.Add(new Revision(id));
+                }
+            }
+        }
+
         public async Task DeleteLocal(SyncAction action)
         {
             await GetLocal(action.ID);

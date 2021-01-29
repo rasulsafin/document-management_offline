@@ -85,6 +85,23 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
+        public async Task CheckDBRevisionTest()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Objectives, 1);
+            expected.GetRevision(TableRevision.Objectives, 2);
+            expected.GetRevision(TableRevision.Objectives, 3);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
+
+        [TestMethod]
         public void GetRevisionsTest()
         {
             Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;

@@ -181,13 +181,18 @@ namespace DocumentManagement.Connection.Tests
         public async Task DeleteRemoteTest()
         {
             int id = 1;
+            var item = Fixture.Context.Items.Find(id);
+            disk.Item = mapper.Map<ItemDto>(item);
             SyncAction action = new SyncAction();
             action.ID = id;
             await sychro.DeleteRemote(action);
 
             Assert.IsTrue(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
+            Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsTrue(disk.RunDeleteFile);
+            Assert.IsFalse(disk.RunPullFile);
+            Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
         }
 
@@ -206,9 +211,39 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsTrue(disk.RunPush);
+            Assert.IsFalse(disk.RunDeleteFile);
+            Assert.IsFalse(disk.RunPullFile);
+            Assert.IsTrue(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
             ItemDto actual = disk.Item;
             AssertHelper.EqualDto(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task CheckDBRevisionTest()
+        {
+            // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
+            //int id = 1;
+            //var item = Fixture.Context.Items.Find(id);
+            //ItemDto expected = mapper.Map<ItemDto>(item);
+            //SyncAction action = new SyncAction();
+            //action.ID = id;
+            RevisionCollection actual = new RevisionCollection();
+            sychro.CheckDBRevision(actual);
+
+
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Items, 1);
+            expected.GetRevision(TableRevision.Items, 2);
+            expected.GetRevision(TableRevision.Items, 3);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            //Assert.AreEqual(id, disk.LastId);
+            //ItemDto actual = disk.Item;
+            AssertHelper.EqualRevisionCollection(expected, actual);
         }
 
         [TestMethod]
@@ -236,6 +271,9 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
+            Assert.IsFalse(disk.RunDeleteFile);
+            Assert.IsTrue(disk.RunPullFile);
+            Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
 
             var item = Fixture.Context.Items.Find(id);

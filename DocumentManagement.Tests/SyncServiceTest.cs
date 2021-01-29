@@ -5,12 +5,6 @@ namespace MRS.DocumentManagement.Tests
 {
     internal class SyncServiceTest : ISyncService
     {
-        
-        public (int current, int total, string step) GetSyncProgress()
-        {
-            return (0, 0, string.Empty);
-        }
-
         public void StartSync()
         {
         }
@@ -21,7 +15,11 @@ namespace MRS.DocumentManagement.Tests
 
         public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
         {
-            
+        }
+
+        public ProgressSync GetProgressSync()
+        {
+            return default;
         }
     }
 }

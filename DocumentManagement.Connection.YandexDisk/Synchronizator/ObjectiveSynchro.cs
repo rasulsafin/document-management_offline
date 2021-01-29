@@ -288,5 +288,19 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (remote?.ID != (ID<ObjectiveDto>)id)
                 remote = await disk.Pull<ObjectiveDto>(id.ToString());
         }
+
+        public void CheckDBRevision(RevisionCollection local)
+        {
+            var allId = context.Objectives.Select(x => x.ID).ToList();
+
+            var revCollect = local.GetRevisions(TableRevision.Objectives);
+            foreach (var id in allId)
+            {
+                if (!revCollect.Any(x => x.ID == id))
+                {
+                    revCollect.Add(new Revision(id));
+                }
+            }
+        }
     }
 }

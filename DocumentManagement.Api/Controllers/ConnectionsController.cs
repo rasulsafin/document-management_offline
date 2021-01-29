@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
@@ -12,8 +12,14 @@ namespace MRS.DocumentManagement.Api.Controllers
     public class ConnectionsController : ControllerBase
     {
         private IConnectionService service;
+        private ISyncService syncService;
 
-        public ConnectionsController(IConnectionService connectionService) => service = connectionService;
+        public ConnectionsController(IConnectionService connectionService, ISyncService syncService)
+        {
+            service = connectionService;
+            this.syncService = syncService;
+
+        }
 
         [HttpGet]
         public async Task<IActionResult> GetAvailableConnections()
@@ -50,6 +56,30 @@ namespace MRS.DocumentManagement.Api.Controllers
         {
             var connection = await service.GetCurrentConnection(new ID<UserDto>(userId));
             return ValidateFoundObject(connection);
+        }
+
+        [HttpHead]
+        [Route("syncStart")]
+        public IActionResult StartSynchronize()
+        {
+            syncService.StartSync();
+            return Accepted();
+        }
+
+        [HttpGet]
+        [Route("progress")]
+        public IActionResult GetProgressSync()
+        {
+            var progress = syncService.GetProgressSync();
+            return ValidateFoundObject(progress);
+        }
+
+        [HttpHead]
+        [Route("syncStop")]
+        public IActionResult StopSynchronize()
+        {
+            syncService.StopSync();
+            return Accepted();
         }
 
         //[HttpGet]

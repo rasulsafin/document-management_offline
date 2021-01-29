@@ -107,6 +107,20 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return remote;
         }
 
+        public void CheckDBRevision(RevisionCollection local)
+        {
+            var allId = context.Users.Select(x => x.ID).ToList();
+
+            var revCollect = local.GetRevisions(TableRevision.Users);
+            foreach (var id in allId)
+            {
+                if (!revCollect.Any(x => x.ID == id))
+                {
+                    revCollect.Add(new Revision(id));
+                }
+            }
+        }
+
         public class UserSync
         {
             public UserSync()

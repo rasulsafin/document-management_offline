@@ -6,7 +6,6 @@ using MRS.DocumentManagement.Interface.Services;
 
 namespace DocumentManagement.Connection.Tests
 {
-
     [TestClass]
     public class SyncHelperAnalysisTest
     {
@@ -19,19 +18,19 @@ namespace DocumentManagement.Connection.Tests
             RevisionCollection local = new RevisionCollection();
             local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
-            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.Download,
                     ID = 1,
                 },
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.Upload,
                     ID = 2,
                 },
@@ -51,21 +50,22 @@ namespace DocumentManagement.Connection.Tests
             local.GetRevision(TableRevision.Users, 1).Rev = 10;
             local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
-            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
 
-            List<SyncAction> expected = new List<SyncAction>(){
-                new SyncAction()
-                {
-                    Synchronizer = nameof(UserSyncro),
-                    TypeAction = TypeSyncAction.None,
-                    ID = 1,
-                },
-                new SyncAction()
-                {
-                    Synchronizer = nameof(UserSyncro),
-                    TypeAction = TypeSyncAction.None,
-                    ID = 2,
-                },
+            List<SyncAction> expected = new List<SyncAction>()
+            {
+                //new SyncAction()
+                //{
+                //    Synchronizer = nameof(UserSyncro),
+                //    TypeAction = TypeSyncAction.None,
+                //    ID = 1,
+                //},
+                //new SyncAction()
+                //{
+                //    Synchronizer = nameof(UserSyncro),
+                //    TypeAction = TypeSyncAction.None,
+                //    ID = 2,
+                //},
             };
 
             AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
@@ -81,19 +81,19 @@ namespace DocumentManagement.Connection.Tests
             RevisionCollection local = new RevisionCollection();
             local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
-            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.Download,
                     ID = 1,
                 },
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.DeleteLocal,
                     ID = 2,
                 },
@@ -113,19 +113,19 @@ namespace DocumentManagement.Connection.Tests
             local.GetRevision(TableRevision.Users, 1).Rev = 100;
             local.GetRevision(TableRevision.Users, 2).Rev = 100;
 
-            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.Upload,
                     ID = 1,
                 },
                 new SyncAction()
                 {
-                    Synchronizer = nameof(UserSyncro),
+                    Synchronizer = nameof(TestSyncro),
                     TypeAction = TypeSyncAction.Upload,
                     ID = 2,
                 },
@@ -170,6 +170,11 @@ namespace DocumentManagement.Connection.Tests
 
         internal class SubSyncSyncro : ISynchroTable
         {
+            public void CheckDBRevision(RevisionCollection local)
+            {
+                throw new System.NotImplementedException();
+            }
+
             Task ISynchroTable.DeleteLocal(SyncAction action)
             {
                 throw new System.NotImplementedException();
@@ -219,8 +224,13 @@ namespace DocumentManagement.Connection.Tests
             }
         }
 
-        internal class UserSyncro : ISynchroTable
+        internal class TestSyncro : ISynchroTable
         {
+            public void CheckDBRevision(RevisionCollection local)
+            {
+                throw new System.NotImplementedException();
+            }
+
             public Task DeleteLocal(SyncAction action)
             {
                 throw new System.NotImplementedException();

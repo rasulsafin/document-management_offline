@@ -211,7 +211,7 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project.GetType(), project.ID);
             if (dbItem == null)
                 return;
-
+            synchronizator.Update(TableRevision.Items, dbItem.ID);
             project.Items.Add(new Database.Models.ProjectItem
             {
                 ProjectID = project.ID,

@@ -239,7 +239,7 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
-
+            synchronizator.Update(TableRevision.Items, dbItem.ID);
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,

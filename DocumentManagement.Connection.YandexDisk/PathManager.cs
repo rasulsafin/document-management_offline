@@ -29,19 +29,17 @@ namespace MRS.DocumentManagement.Connection
         public static string GetTablesDir() => YandexHelper.DirectoryName(APP_DIR, TABLE_DIR);
 
         public static string GetTableDir(string tableName) => YandexHelper.DirectoryName(GetTablesDir(), tableName);
+        
+        public static string GetFile(string dirName, string fileName) => YandexHelper.DirectoryName(GetDir(dirName), fileName);
+
+        public static string GetDir(string dirName) => YandexHelper.DirectoryName(APP_DIR, dirName);
 
         public static string GetRecordFile(string tableName, string id) => YandexHelper.FileName(GetTableDir(tableName), string.Format(REC_FILE, id));
-
-        public static string GetGlobalRecordFile(string tableName, string id) => YandexHelper.FileName(GetTablesDir(), string.Format(REC_FILE, id));
-
-        public static string GetLocalProjectDir(ProjectDto project) => Path.Combine(APP_DIR, project.Title);
 
         public static string GetLocalRevisionFile()
         {
             return REVISION_FILE;
         }
-
-        public static string GetLocalItemFile(ProjectDto project, ItemDto item) => Path.Combine(GetLocalProjectDir(project), item.Name);
 
         #region Remote
         public static string GetRevisionsFile() => YandexHelper.DirectoryName(GetRevisionsDir(), REVISION_FILE);
@@ -88,58 +86,5 @@ namespace MRS.DocumentManagement.Connection
         public static string GetAppDir() => YandexHelper.DirectoryName("/", APP_DIR);
         #endregion
 
-        public static bool TryParseObjectiveId(string str, out ID<ObjectiveDto> id)
-        {
-            string text = str.Replace("objective_", string.Empty).Replace(".json", string.Empty);
-            if (int.TryParse(text, out int num))
-            {
-                id = new ID<ObjectiveDto>(num);
-                return true;
-            }
-
-            id = ID<ObjectiveDto>.InvalidID;
-            return false;
-        }
-
-        public static bool TryParseProjectId(string str, out ID<ProjectDto> id)
-        {
-            string text = str.Replace("project_", string.Empty).Replace(".json", string.Empty);
-            if (int.TryParse(text, out int num))
-            {
-                id = new ID<ProjectDto>(num);
-                return true;
-            }
-
-            id = ID<ProjectDto>.InvalidID;
-            return false;
-        }
-
-        public static bool TryParseItemId(string str, out ID<ItemDto> idItem, out ID<ObjectiveDto> idObjective)
-        {
-            string[] texts = str.Replace("item_", string.Empty).Replace(".json", string.Empty).Split('_');
-            if (texts.Length == 1)
-            {
-                if (int.TryParse(texts[0], out int num))
-                {
-                    idItem = new ID<ItemDto>(num);
-                    idObjective = ID<ObjectiveDto>.InvalidID;
-                    return true;
-                }
-            }
-
-            if (texts.Length == 2)
-            {
-                if (int.TryParse(texts[0], out int numItem) && int.TryParse(texts[1], out int numObjective))
-                {
-                    idItem = new ID<ItemDto>(numItem);
-                    idObjective = new ID<ObjectiveDto>(numObjective);
-                    return true;
-                }
-            }
-
-            idItem = ID<ItemDto>.InvalidID;
-            idObjective = ID<ObjectiveDto>.InvalidID;
-            return false;
-        }
     }
 }

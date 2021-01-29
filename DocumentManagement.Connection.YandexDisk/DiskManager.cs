@@ -26,6 +26,7 @@ namespace MRS.DocumentManagement.Connection
         private List<int> objectives = new List<int>();
         private List<int> items = new List<int>();
         private List<string> tables = new List<string>();
+        private List<string> directories = new List<string>();
         private bool isInit;
 
         public DiskManager(string accessToken)
@@ -76,14 +77,16 @@ namespace MRS.DocumentManagement.Connection
             return default;
         }
 
-        public async Task Delete<T>(string id)
+        public async Task<bool> Delete<T>(string id)
         {            
             if (await CheckTableDir<T>())
             {
                 string tableName = typeof(T).Name;
                 string path = PathManager.GetRecordFile(tableName, id);
-                await controller.DeleteAsync(path);
+                return await controller.DeleteAsync(path);
             }
+
+            return false;
         }
 
         private async Task<bool> CheckTableDir<T>()
@@ -123,5 +126,62 @@ namespace MRS.DocumentManagement.Connection
             isInit = true;
         }
 
+        public async Task<bool> DeleteFile(string path)
+        {
+            return await controller.DeleteAsync(path);
+        }
+
+        public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        {
+            try
+            {
+                if (await CheckDir(remoteDirName))
+                {
+                    string path = PathManager.GetFile(remoteDirName, fileName);
+                    string dir = Path.Combine(localDirName, fileName);
+                    return await controller.DownloadFileAsync(path, dir);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return false;
+        }
+
+
+        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        {
+            try
+            {
+                await CheckDir(remoteDirName);
+                string path = PathManager.GetDir(remoteDirName);
+                string file = Path.Combine(localDirName, fileName);
+                return await controller.LoadFileAsync(path, file);
+            }
+            catch (Exception ex)
+            {
+            }
+
+            return false;
+        }
+
+        private async Task<bool> CheckDir(string dirName)
+        {
+            bool res = directories.Any(x => x == dirName);
+            if (res) return true;
+            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+            foreach (DiskElement element in list)
+            {
+                if (element.IsDirectory)
+                    directories.Add(element.DisplayName);
+                if (element.DisplayName == dirName)
+                    res = true;
+            }
+
+            if (!res)
+                await controller.CreateDirAsync(PathManager.GetAppDir(), dirName);
+            return res;
+        }
     }
 }

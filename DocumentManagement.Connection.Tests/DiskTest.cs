@@ -17,6 +17,12 @@ namespace DocumentManagement.Connection.Tests
 
         public bool RunPush { get; private set; }
 
+        public bool RunPullFile { get; private set; }
+
+        public bool RunPushFile { get; private set; }
+
+        public bool RunDeleteFile { get; internal set; }
+
         public int LastId { get; private set; }
 
         public string NameType { get; private set; }
@@ -29,7 +35,7 @@ namespace DocumentManagement.Connection.Tests
 
         public ObjectiveDto Objective { get; internal set; }
 
-        public Task Delete<T>(string id)
+        public Task<bool> Delete<T>(string id)
         {
             RunDelete = true;
             NameType = typeof(T).Name;
@@ -38,8 +44,9 @@ namespace DocumentManagement.Connection.Tests
                 LastId = num;
             }
 
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
+
 
         public Task<T> Pull<T>(string id)
         {
@@ -60,6 +67,7 @@ namespace DocumentManagement.Connection.Tests
 
             return Task.FromResult<T>(default);
         }
+
 
         public Task<bool> Push<T>(T @object, string id)
         {
@@ -95,6 +103,29 @@ namespace DocumentManagement.Connection.Tests
 
             return Task.FromResult(false);
         }
+
+        public Task<bool> DeleteFile(string path)
+        {
+            RunDeleteFile = true;
+            if (Item.ExternalItemId == path)
+                return Task.FromResult(true);
+            return Task.FromResult(false);
+        }
+
+        public Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        {
+            RunPullFile= true;
+            //if (Item.ExternalItemId == path)
+                return Task.FromResult(true);
+            //return Task.FromResult(false);
+        }
+
+        public Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        {
+            RunPushFile= true;
+            return Task.FromResult(true);
+        }
+
     }
 
 }

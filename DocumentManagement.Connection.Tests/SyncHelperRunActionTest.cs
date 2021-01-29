@@ -241,6 +241,11 @@ namespace DocumentManagement.Connection.Tests
 
             public bool RunSpecial { get; private set; }
 
+            public void CheckDBRevision(RevisionCollection local)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task DeleteLocal(SyncAction action)
             {
                 RunDeleteLocal = true;

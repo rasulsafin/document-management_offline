@@ -70,5 +70,13 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         /// <param name="action">Информация об действии</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task Special(SyncAction action);
+
+        /// <summary>
+        /// Добавить записи которые есть в базе но в отслеживание ещё не попали
+        /// (Функция для копирований баз)
+        /// TODO: Постоянна она не нужна продумать отключение (включать по требованию)
+        /// </summary>
+        /// <param name="local"></param>
+        void CheckDBRevision(RevisionCollection local);
     }
 }

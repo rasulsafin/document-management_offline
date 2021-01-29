@@ -45,10 +45,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 else
                 {
                     action = GetAction(localRev, TypeSyncAction.None, synchro);
+                    action = synchro.SpecialSynchronization(action);
                 }
 
-                action = synchro.SpecialSynchronization(action);
-                result.Add(action);
+                if (action.TypeAction != TypeSyncAction.None)
+                    result.Add(action);
 
                 List<ISynchroTable> subSynchros = await synchro.GetSubSynchroList(action);
                 if (subSynchros != null)

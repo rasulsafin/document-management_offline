@@ -1,4 +1,5 @@
-﻿using System;
+﻿#define TEST
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,20 +12,38 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
+
     public class SyncManager
     {
         private const string REVISIONS = "revisions";
-        private DiskManager disk;
-        private int total;
-        private int current;
+#if TEST
+        internal
+#else
+        private
+#endif
+        DiskManager disk;
+
+#if TEST
+        internal
+#else
+        private
+#endif
+        ProgressSync progress;
+
+#if TEST
+        internal
+#else
+        private
+#endif
+        RevisionCollection localRevisions = new RevisionCollection();
 
         public delegate void ProgressChangeDelegate(int current, int total, string message);
 
         public event ProgressChangeDelegate ProgressChange;
 
-        public RevisionCollection Revisions { get; private set; } = new RevisionCollection();
 
         public bool NeedStopSync { get; private set; }
+
         public bool NowSync { get; set; }
 
         public async Task Initialize(string accessToken)
@@ -36,119 +55,101 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        #region Update Table
+#region Update Table
         public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
         {
             if (type == TypeChange.Update)
-                Revisions.GetRevision(table, id).Incerment();
+                localRevisions.GetRevision(table, id).Incerment();
             else if (type == TypeChange.Delete)
-                Revisions.GetRevision(table, id).Delete();
+                localRevisions.GetRevision(table, id).Delete();
             SaveRevisions();
         }
-
-        // public void Update(int id)
-        // {
-        //    Revisions.GetProject((int)id).Incerment();
-        //    SaveRevisions();
-        // }
-        // public void Update(ID<ProjectDto> id)
-        // {
-        //    Revisions.GetProject((int)id).Incerment();
-        //    SaveRevisions();
-        // }
-        // public void Delete(ID<ProjectDto> id)
-        // {
-        //    Revisions.GetProject((int)id).Delete();
-        //    SaveRevisions();
-        // }
-        // public void Delete(ID<UserDto> id)
-        // {
-        //    Revisions.GetUser((int)id).Delete();
-        //    SaveRevisions();
-        // }
-        // public void Update(ID<ObjectiveDto> id)
-        // {
-        //    Revisions.GetObjective((int)id).Incerment();
-        //    SaveRevisions();
-        // }
-        // public void Delete(ID<ObjectiveDto> id)
-        // {
-        //    Revisions.GetObjective((int)id).Delete();
-        //    SaveRevisions();
-        // }
-        // public void Update(ID<ItemDto> id, ID<ProjectDto> idProj)
-        // {
-        //    Revisions.GetItem((int)id).Incerment();
-        //    SaveRevisions();
-        // }
-        // public void Delete(ID<ItemDto> id, ID<ProjectDto> idProj)
-        // {
-        //    Revisions.GetItem((int)id).Delete();
-        //    SaveRevisions();
-        // }
-        // public void Update(ID<ItemDto> id, ID<ObjectiveDto> idObj)
-        // {
-        //    Revisions.GetItem((int)id).Incerment();
-        //    SaveRevisions();
-        // }
-        // public void Delete(ID<ItemDto> id, ID<ObjectiveDto> idObj)
-        // {
-        //    Revisions.GetItem((int)id).Delete();
-        //    SaveRevisions();
-        // }
-
-        #endregion
+#endregion
 
         public void StopSync()
         {
             NeedStopSync = true;
         }
 
-        public async Task StartSync(ProgressChangeDelegate progressChange, DMContext context, IMapper mapper)
+        public ProgressSync GetProgressSync()
         {
+            return progress;
+        }
+
+        public async Task StartSync(DMContext context, IMapper mapper)
+        {
+            //ProgressChangeDelegate progressChange,
+            progress.current = 0;
+            progress.total = 0;
+            progress.message = "Analysis";
+            progress.error = null;
+
             NowSync = true;
             NeedStopSync = false;
-            RevisionCollection remote = await disk.Pull<RevisionCollection>(REVISIONS);
-            if (remote == null) remote = new RevisionCollection();
-            progressChange.Invoke(0, 0, "Analysis");
-
-            var userSynchro = new UserSynchro(disk, context);
-            var projectSynchro = new ProjectSynchro(disk, context, mapper);
-            var objectiveSynchro = new ObjectiveSynchro(disk, context, mapper);
-            var itemSynchro = new ItemSynchro(disk, context);
-
-            List<SyncAction> syncActions = await SyncHelper.Analysis(Revisions, remote, userSynchro);
-            var actions = await SyncHelper.Analysis(Revisions, remote, projectSynchro);
-            syncActions.AddRange(actions);
-            actions = await SyncHelper.Analysis(Revisions, remote, objectiveSynchro);
-            syncActions.AddRange(actions);
-            actions = await SyncHelper.Analysis(Revisions, remote, itemSynchro);
-            syncActions.AddRange(actions);
-            total = syncActions.Count;
-            current = 0;
-
-            foreach (var action in actions)
+            RevisionCollection remoteRevisions = await disk.Pull<RevisionCollection>(REVISIONS);
+            if (remoteRevisions == null) remoteRevisions = new RevisionCollection();
+            var synchros = new ISynchroTable[]
             {
-                if (NeedStopSync) break;
-                ISynchroTable synchro = null;
-                if (action.Synchronizer == nameof(UserSynchro)) synchro = userSynchro;
-                else if (action.Synchronizer == nameof(ProjectSynchro)) synchro = projectSynchro;
-                else if (action.Synchronizer == nameof(ObjectiveSynchro)) synchro = objectiveSynchro;
-                else if (action.Synchronizer == nameof(ItemSynchro)) synchro = itemSynchro;
-                else throw new NotImplementedException("Синхронизатор не найден");
-                await SyncHelper.RunAction(action, synchro, Revisions, remote);
-                progressChange.Invoke(current++, total, "Sync");
+                new UserSynchro(disk, context),
+                new ProjectSynchro(disk, context, mapper),
+                new ObjectiveSynchro(disk, context, mapper),
+                new ItemSynchro(disk, context),
+            };
+            List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
+            progress.total = syncActions.Count;
+            progress.current = 0;
+
+            try
+            {
+                progress.message = "Sync";
+                foreach (var action in syncActions)
+                {
+                    if (NeedStopSync) break;
+                    await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
+                    progress.current++;
+                }
+            }
+            catch (Exception ex)
+            {
+                progress.error = ex;
             }
 
-            progressChange.Invoke(current, total, "Save");
-            await disk.Push(remote, REVISIONS);
+            progress.message = "Save";
+            await disk.Push(remoteRevisions, REVISIONS);
             SaveRevisions();
             NowSync = false;
         }
 
-        private Task Synchronize(IProgress<(int, int, string)> progress, ISynchroTable synchro, RevisionCollection remoreRevisions)
+        public static async Task FindSyncroRunAction(
+            RevisionCollection local,
+            RevisionCollection remote,
+            SyncAction action,
+            IEnumerable<ISynchroTable> synchros)
         {
-            return Task.CompletedTask;
+            foreach (var synchro in synchros)
+            {
+                if (action.Synchronizer == synchro.GetType().Name)
+                {
+                    await SyncHelper.RunAction(action, synchro, local, remote);
+                    break;
+                }
+            }
+        }
+
+        public static async Task<List<SyncAction>> Analysis(
+            RevisionCollection local,
+            RevisionCollection remote,
+            IEnumerable<ISynchroTable> synchros)
+        {
+            List<SyncAction> syncActions = new List<SyncAction>();
+            foreach (var synchro in synchros)
+            {
+                // TODO: функция обхода всей базы нужна не всегда
+                synchro.CheckDBRevision(local);
+                var actions = await SyncHelper.Analysis(local, remote, synchro);
+                syncActions.AddRange(actions);
+            }
+            return syncActions;
         }
 
         private async Task LoadRevisions()
@@ -157,11 +158,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             try
             {
                 string json = await File.ReadAllTextAsync(fileName);
-                Revisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
+                localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
             }
             catch
             {
-                Revisions = new RevisionCollection();
+                localRevisions = new RevisionCollection();
                 SaveRevisions();
             }
         }
@@ -169,10 +170,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         private void SaveRevisions()
         {
             string fileName = PathManager.GetLocalRevisionFile();
-            string str = JsonConvert.SerializeObject(Revisions, Formatting.Indented);
+            string str = JsonConvert.SerializeObject(localRevisions, Formatting.Indented);
             File.WriteAllText(fileName, str);
         }
     }
 
-    
+
 }
