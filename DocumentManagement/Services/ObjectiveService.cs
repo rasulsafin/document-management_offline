@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,6 +10,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utils.ReportCreator;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -17,6 +19,7 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
+        private readonly ReportHelper reportHelper = new ReportHelper();
 
         public ObjectiveService(DMContext context, IMapper mapper, ItemHelper itemHelper)
         {
@@ -46,10 +49,11 @@ namespace MRS.DocumentManagement.Services
                     context.BimElements.Add(dbBim);
                     await context.SaveChangesAsync();
                 }
+
                 objective.BimElements.Add(new BimElementObjective
                 {
                     ObjectiveID = objective.ID,
-                    BimElementID = dbBim.ID
+                    BimElementID = dbBim.ID,
                 });
             }
 
@@ -74,19 +78,60 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
         {
-            var dbObjective = await context.Objectives
-                .Include(x => x.Project)
-                .Include(x => x.Author)
-                .Include(x => x.ObjectiveType)
-                .Include(x => x.DynamicFields)
-                .Include(x => x.Items)
-                .ThenInclude(x => x.Item)
-                .Include(x => x.BimElements)
-                .ThenInclude(x => x.BimElement)
-                .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
+            var dbObjective = await Get(objectiveID);
             if (dbObjective == null)
                 return null;
+
             return mapper.Map<ObjectiveDto>(dbObjective);
+        }
+
+        public async Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        {
+            int count = 0;
+            DateTime date = DateTime.Now.Date;
+
+            var reportCount = await context.ReportCounts.FindAsync(userID);
+            if (reportCount != null)
+            {
+                if (reportCount.Date == date)
+                    count = reportCount.Count;
+            }
+            else
+            {
+                reportCount = new ReportCount() { UserID = userID, Count = count, Date = date };
+                await context.AddAsync(reportCount);
+            }
+
+            reportCount.Count = ++count;
+            reportCount.Date = date;
+            await context.SaveChangesAsync();
+
+            string reportID = $"{date.ToString("ddMMyyyy")}-{count}";
+
+            List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
+            var objNum = 1;
+            foreach (var objectiveId in objectiveIds)
+            {
+                var objective = await Get(objectiveId);
+                var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
+                objectiveToReport.ID = $"{reportID}/{objNum++}";
+
+                foreach (var item in objectiveToReport.Items)
+                {
+                    var newName = Path.Combine(path, item.Name.TrimStart('\\'));
+                    item.Name = newName;
+                }
+
+                objectives.Add(objectiveToReport);
+            }
+
+            path = Path.Combine(path, $"Отчет {reportID}.docx");
+            var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+
+            ReportCreator reportCreator = new ReportCreator();
+            reportCreator.CreateReport(xmlDoc, path);
+
+            return true;
         }
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
@@ -95,7 +140,7 @@ namespace MRS.DocumentManagement.Services
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.DynamicFields)
                 .Include(x => x.Objectives)
-                .ThenInclude(x=>x.ObjectiveType)
+                .ThenInclude(x => x.ObjectiveType)
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.BimElements)
                 .ThenInclude(x => x.BimElement)
@@ -110,8 +155,9 @@ namespace MRS.DocumentManagement.Services
         public Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ObjectiveTypeDto type)
         {
              throw new NotImplementedException();
-            //IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
-            //return Task.FromResult(list);
+
+            // IEnumerable<DynamicFieldInfoDto> list = Enumerable.Empty<DynamicFieldInfoDto>();
+            // return Task.FromResult(list);
         }
 
         public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
@@ -141,7 +187,7 @@ namespace MRS.DocumentManagement.Services
 
             var objectiveFields = objective.DynamicFields;
             var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
-            var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int) f.ID != x.ID)).ToList();
+            var fieldsToRemove = objectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);
 
             foreach (var field in newFields)
@@ -169,34 +215,35 @@ namespace MRS.DocumentManagement.Services
             var newBimElements = objData.BimElements ?? Enumerable.Empty<BimElementDto>();
             var currentBimLinks = objective.BimElements.ToList();
             var linksToRemove = currentBimLinks
-                .Where(x => !newBimElements.Any(e => 
-                    (int)e.ItemID == x.BimElement.ItemID 
-                    && e.GlobalID == x.BimElement.GlobalID)
-                ).ToList();
+                .Where(x => !newBimElements.Any(e =>
+                    (int)e.ItemID == x.BimElement.ItemID
+                    && e.GlobalID == x.BimElement.GlobalID))
+                .ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
 
-            //rebuild objective's BimElements
+            // Rebuild objective's BimElements
             objective.BimElements.Clear();
             foreach (var bim in newBimElements)
             {
-                //see if objective already had this bim element referenced
+                // See if objective already had this bim element referenced
                 var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
                     objective.BimElements.Add(dbBim);
                 }
-                else 
+                else
                 {
-                    //bim element was not referenced. Does it exist?
+                    // Bim element was not referenced. Does it exist?
                     var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
-                        //bim element does not exist at all - should be created
+                        // Bim element does not exist at all - should be created
                         bimElement = mapper.Map<BimElement>(bim);
                         await context.BimElements.AddAsync(bimElement);
                         await context.SaveChangesAsync();
                     }
-                    //add link between bim element and objective
+
+                    // Add link between bim element and objective
                     dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
                     objective.BimElements.Add(dbBim);
                 }
@@ -230,7 +277,7 @@ namespace MRS.DocumentManagement.Services
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
-                ItemID = dbItem.ID
+                ItemID = dbItem.ID,
             });
         }
 
@@ -245,6 +292,21 @@ namespace MRS.DocumentManagement.Services
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
             return true;
+        }
+
+        private async Task<Objective> Get(ID<ObjectiveDto> objectiveID)
+        {
+            var dbObjective = await context.Objectives
+               .Include(x => x.Project)
+               .Include(x => x.Author)
+               .Include(x => x.ObjectiveType)
+               .Include(x => x.DynamicFields)
+               .Include(x => x.Items)
+               .ThenInclude(x => x.Item)
+               .Include(x => x.BimElements)
+               .ThenInclude(x => x.BimElement)
+               .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
+            return dbObjective;
         }
     }
 }
