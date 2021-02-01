@@ -15,7 +15,7 @@ namespace MRS.Bim.DocumentManagement.Utilities
     {
         private static readonly string APP_PATH = "Brio MRS";
         private static readonly string ISSUE_FILE_NAME = "issues.json";
-        private static readonly string[] IFC_EXTENSIONS = {".ifc", ".ifczip"};
+        private static readonly string[] IFC_EXTENSIONS = {".ifc", ".ifczip", ".ifcxml", ".nwd", ".nwf", ".nwc"};
 
         protected string loggerPath = "CloudBimOnline-Log.txt";
         private readonly ICloudManager manager;

@@ -1,7 +1,7 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MRS.Bim.DocumentManagement.Tdms.Helpers
 {
@@ -20,7 +20,6 @@ namespace MRS.Bim.DocumentManagement.Tdms.Helpers
             float fact = item["Fact"].Value<float>();
 
             return new Volume() { Plan = plan, Fact = fact, Progress = progress };
-
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

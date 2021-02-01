@@ -28,10 +28,12 @@ namespace MRS.Bim.DocumentManagement
             {
                 var isSuccess = true;
                 var (hasProjects, projectsList) = await GetProjects("");
-                if (File.Exists(dbPath))
-                    File.Delete(dbPath);
+
                 if (!hasProjects)
                     return false;
+
+                if (File.Exists(dbPath))
+                    File.Delete(dbPath);
 
                 var (hasEnums, enumList) = await GetEnums();
 
@@ -97,7 +99,7 @@ namespace MRS.Bim.DocumentManagement
                             isSuccess = result is bool ? isSuccess & result : isSuccess;
                             actions.Delete(action.ID);
                         }
-                        catch (Exception e)
+                        catch
                         {
                             isSuccess = false;
                         }

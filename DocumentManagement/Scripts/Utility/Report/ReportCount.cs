@@ -6,7 +6,7 @@
     {
         public string ID
         {
-            get => Get(CreateKeyByMethodName(nameof(ReportCount)),  ref id);
+            get => Get(CreateKeyByMethodName(nameof(ReportCount)), ref id);
             set => Set(CreateKeyByMethodName(nameof(ReportCount)), out id, value);
         }
         
@@ -15,7 +15,6 @@
             get => Get(CreateKeyByMethodName(nameof(ReportCount)), ref count);
             set => Set(CreateKeyByMethodName(nameof(ReportCount)), out count, value);
         }
-
 
         private string id;
         private int? count;

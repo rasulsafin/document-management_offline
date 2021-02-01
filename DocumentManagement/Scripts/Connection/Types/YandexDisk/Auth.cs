@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
         {
             AccessProperty.Token = "";
             AccessProperty.RefreshToken = "";
-            AccessProperty.End = "";
+            AccessProperty.End = null;
         }
 
         public void Cancel()
@@ -38,7 +39,7 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
 
         private async Task CheckAccessAsync(bool mustUpdate = false)
         {
-            await Task.Delay((int) (1000 * timeout));
+            await Task.Delay((int)(1000 * timeout));
             sentTime = DateTime.UtcNow;
             if ((!IsLogged || mustUpdate) && !await WebFeatures.RemoteUrlExistsAsync("https://yandex.ru/"))
                 throw new Exception("Failed to ping the server");
@@ -46,14 +47,16 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
                 await _3leggedAsync(GotIt);
         }
 
-        private bool IsLogged
-            => !string.IsNullOrEmpty(AccessProperty.End) &&
-               DateTime.UtcNow < DateTime.Parse(AccessProperty.End);
+        private bool IsLogged 
+            => !string.IsNullOrWhiteSpace(AccessProperty.Token)
+            && AccessProperty.End.HasValue 
+            && AccessProperty.End.Value != DateTime.MinValue 
+            && DateTime.UtcNow < AccessProperty.End.Value;
 
         private void SaveData(dynamic bearer)
         {
             AccessProperty.Token = bearer.access_token;
-            AccessProperty.End = sentTime.AddSeconds(bearer.expires_in).ToString();
+            AccessProperty.End = sentTime.AddSeconds(bearer.expires_in);
         }
 
         private async Task _3leggedAsync(NewBearerDelegate cb)
@@ -89,7 +92,7 @@ namespace MRS.Bim.DocumentManagement.YandexDisk
                 SetResponse(context, responseString);
                 GetToken(await httpListener.GetContextAsync(), callback);
             }
-            catch (Exception ex)
+            catch
             {
                 callback?.Invoke(null);
             }

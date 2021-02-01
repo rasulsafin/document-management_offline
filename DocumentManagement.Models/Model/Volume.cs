@@ -13,6 +13,7 @@ namespace MRS.Bim.DocumentManagement
         public float Fact { get; set; }
         [JsonProperty]
         public List<(string guid, string constractor, float volume)> Progress { get; set; }
+
     }
 }
 

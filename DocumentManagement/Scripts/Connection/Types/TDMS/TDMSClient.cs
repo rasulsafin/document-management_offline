@@ -39,9 +39,8 @@ namespace MRS.Bim.DocumentManagement.Tdms
                 else
                     process = System.Diagnostics.Process.Start(filePath);
             }
-            catch (Exception e)
-            {
-            }
+            catch
+            { }
 
             instance = this;
             EventBasedNetListener listener = new EventBasedNetListener();
@@ -76,9 +75,8 @@ namespace MRS.Bim.DocumentManagement.Tdms
                         Thread.Sleep(1);
                     }
                 }
-                catch (Exception e)
-                {
-                }
+                catch
+                { }
             });
         }
 
@@ -136,7 +134,7 @@ namespace MRS.Bim.DocumentManagement.Tdms
                     writer.Put(data);
                     peer.Send(writer, DeliveryMethod.ReliableOrdered);
                 }
-                catch (Exception e)
+                catch
                 {
                     result = null;
                     ConnectionHandler.Instance.Disconnect();

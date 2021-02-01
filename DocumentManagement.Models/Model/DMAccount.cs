@@ -5,7 +5,8 @@
         public string Login { get; set; }
         public byte[] ImageSource { get; set; }
 
-        //TODO add permissions
+        //TODO add account image
 
+        //TODO add permissions
     }
 }
