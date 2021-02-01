@@ -103,7 +103,6 @@ namespace DocumentManagement.Connection.Tests
             var synchro = new UserSyncro();
             await SyncHelper.RunAction(action, synchro, local, remote);
 
-            // local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Users, 1).Delete();
             expected.GetRevision(TableRevision.Users, 2).Rev = 10;
@@ -140,7 +139,6 @@ namespace DocumentManagement.Connection.Tests
             var synchro = new UserSyncro();
             await SyncHelper.RunAction(action, synchro, local, remote);
 
-            // local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Users, 1).Delete();
             expected.GetRevision(TableRevision.Users, 2).Rev = 10;
@@ -180,7 +178,6 @@ namespace DocumentManagement.Connection.Tests
                  await SyncHelper.RunAction(action, synchro, local, remote);
              });
 
-            // local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Users, 1).Rev = 10;
             expected.GetRevision(TableRevision.Users, 2).Rev = 10;
@@ -190,7 +187,6 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(synchro.RunDownload);
             Assert.IsFalse(synchro.RunUpload);
 
-            // Assert.IsTrue(synchro.RunSpecial);
             AssertHelper.EqualRevisionCollection(expected, local);
         }
 
@@ -217,7 +213,6 @@ namespace DocumentManagement.Connection.Tests
             var synchro = new UserSyncro();
             await SyncHelper.RunAction(action, synchro, local, remote);
 
-            // local.Users.Sort((x, y) => x.ID.CompareTo(y.ID));
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Users, 1).Rev = 10;
             expected.GetRevision(TableRevision.Users, 2).Rev = 10;

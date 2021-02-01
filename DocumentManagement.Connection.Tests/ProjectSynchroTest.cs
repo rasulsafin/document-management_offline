@@ -137,12 +137,9 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction();
             action.ID = id;
 
-            // List<ISynchroTable> expected = new List<ISynchroTable>();
-            // expected.Add(new ItemSynchro(disk, Fixture.Context, new ID<ProjectDto>(id)));
             List<ISynchroTable> actual = await sychro.GetSubSynchroList(action);
             Assert.IsNull(actual);
 
-            // AssertHelper.EqualList(expected, actual, AssertHelper.EqualISynchro);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
@@ -262,12 +259,6 @@ namespace DocumentManagement.Connection.Tests
         {
             int id = 2;
 
-            // ProjectDto expected = new ProjectDto()
-            // {
-            //    ID = (ID<ProjectDto>)id,
-            //    Title = "Замок кащея",
-            //    Items = new List<ItemDto>(),
-            // };
             var project = Fixture.Context.Projects.Find(id);
             ProjectDto expected = mapper.Map<ProjectDto>(project);
             var expItem = new List<ItemDto>();

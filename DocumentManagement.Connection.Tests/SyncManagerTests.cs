@@ -43,39 +43,5 @@ namespace DocumentManagement.Connection.Tests
             disk = new DiskTest();
             sychro = new UserSynchro(disk, Fixture.Context);
         }
-
-        // [TestMethod]
-        public async Task AnalysisDownloadTestAsync()
-        {
-            // Проверить заполнение пустой структуры
-
-            // RevisionCollection remote = new RevisionCollection();
-            // remote.GetRevision(TableRevision.Users, 1).Rev = 30;
-
-            // RevisionCollection local = new RevisionCollection();
-            // local.GetRevision(TableRevision.Users, 2).Rev = 10;
-
-            // SyncManager.Analysis();
-
-            // List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new UserSyncro());
-            // actual.Sort((x, y) => x.ID.CompareTo(y.ID));
-            // List<SyncAction> expected = new List<SyncAction>()
-            // {
-            //    new SyncAction()
-            //    {
-            //        Synchronizer = nameof(),
-            //        TypeAction = TypeSyncAction.Download,
-            //        ID = 1,
-            //    },
-            //    new SyncAction()
-            //    {
-            //        Synchronizer = nameof(UserSyncro),
-            //        TypeAction = TypeSyncAction.Upload,
-            //        ID = 2,
-            //    },
-            // };
-
-            // AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
-        }
     }
 }

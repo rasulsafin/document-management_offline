@@ -52,21 +52,7 @@ namespace DocumentManagement.Connection.Tests
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
 
-            List<SyncAction> expected = new List<SyncAction>()
-            {
-                // new SyncAction()
-                // {
-                //    Synchronizer = nameof(UserSyncro),
-                //    TypeAction = TypeSyncAction.None,
-                //    ID = 1,
-                // },
-                // new SyncAction()
-                // {
-                //    Synchronizer = nameof(UserSyncro),
-                //    TypeAction = TypeSyncAction.None,
-                //    ID = 2,
-                // },
-            };
+            List<SyncAction> expected = new List<SyncAction>();
 
             AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
         }

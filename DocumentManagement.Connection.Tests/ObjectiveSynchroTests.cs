@@ -47,14 +47,10 @@ namespace DocumentManagement.Connection.Tests
                 var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
                 var objectives = MockData.DEFAULT_OBJECTIVES;
 
-                // var items = MockData.DEFAULT_ITEMS;
-                // var bimElements = MockData.DEFAULT_BIM_ELEMENTS;
-                // var dynamicFields = MockData.DEFAULT_DYNAMIC_FIELDS;
                 context.Users.AddRange(users);
                 context.Projects.AddRange(projects);
                 context.ObjectiveTypes.AddRange(objectiveTypes);
 
-                // context.Items.AddRange(items);
                 context.SaveChanges();
 
                 if (objectives.Count >= 3 && users.Count >= 2 && projects.Count >= 2 && objectiveTypes.Count >= 2)
@@ -313,8 +309,6 @@ namespace DocumentManagement.Connection.Tests
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
 
-            // Fixture.Context.DynamicFields.AddRange(MockData.DEFAULT_DYNAMIC_FIELDS);
-            // Fixture.Context.SaveChanges();
             objective.DynamicFields = new List<DynamicField>();
             foreach (var dynamic in Fixture.Context.DynamicFields)
             {
@@ -387,7 +381,6 @@ namespace DocumentManagement.Connection.Tests
             var expBim = new List<BimElementDto>();
             expected.BimElements = expBim;
 
-            // int num = 1;
             foreach (var bim in MockData.DEFAULT_BIM_ELEMENTS)
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
@@ -427,7 +420,6 @@ namespace DocumentManagement.Connection.Tests
             var expBim = new List<BimElementDto>();
             expected.BimElements = expBim;
 
-            // int num = 1;
             foreach (var bim in MockData.DEFAULT_BIM_ELEMENTS)
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);

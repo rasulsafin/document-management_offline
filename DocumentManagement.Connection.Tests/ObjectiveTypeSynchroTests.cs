@@ -44,7 +44,6 @@ namespace DocumentManagement.Connection.Tests
                 context.SaveChanges();
             });
 
-            // Revisions = new RevisionCollection();
             disk = new DiskTest();
             sychro = new ObjectiveTypeSynchro(disk, Fixture.Context, mapper);
         }

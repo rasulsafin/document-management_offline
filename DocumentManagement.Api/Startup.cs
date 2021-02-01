@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Api
                         ValidateAudience = true,
                         ValidAudience = AuthOptions.AUDIENCE,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                        ValidateIssuerSigningKey = true
+                        ValidateIssuerSigningKey = true,
                     };
                 });
 
@@ -55,7 +55,6 @@ namespace MRS.DocumentManagement.Api
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
-
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
@@ -70,7 +69,7 @@ namespace MRS.DocumentManagement.Api
                 {
                     Version = "v1",
                     Title = "BRIO DM",
-                    Description = "DM API details"
+                    Description = "DM API details",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -97,9 +96,9 @@ namespace MRS.DocumentManagement.Api
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            //else
-            //    app.UseExceptionHandler("/error");
 
+            // else
+            //    app.UseExceptionHandler("/error");
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -107,8 +106,7 @@ namespace MRS.DocumentManagement.Api
                 c.RoutePrefix = string.Empty;
             });
 
-            //app.UseHttpsRedirection();
-
+            // app.UseHttpsRedirection();
             app.UseRouting();
 
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());

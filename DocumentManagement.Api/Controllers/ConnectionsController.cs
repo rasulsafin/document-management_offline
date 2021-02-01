@@ -12,12 +12,8 @@ namespace MRS.DocumentManagement.Api.Controllers
     public class ConnectionsController : ControllerBase
     {
         private IConnectionService service;
-        
 
-        public ConnectionsController(IConnectionService connectionService)
-        {
-            service = connectionService;
-        }
+        public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
         [HttpGet]
         public async Task<IActionResult> GetAvailableConnections()
@@ -79,13 +75,5 @@ namespace MRS.DocumentManagement.Api.Controllers
             service.StopSync();
             return Accepted();
         }
-
-        //[HttpGet]
-        //[Route("variants")]
-        //public async Task<IActionResult> GetEnumVariants(string dynamicFieldKey)
-        //{
-        //    var variants = await service.GetEnumVariants(dynamicFieldKey);
-        //    return Forbid();
-        //}
     }
 }

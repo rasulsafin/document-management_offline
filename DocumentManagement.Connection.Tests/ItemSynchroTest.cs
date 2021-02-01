@@ -47,18 +47,6 @@ namespace DocumentManagement.Connection.Tests
                 context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
                 context.Items.AddRange(MockData.DEFAULT_ITEMS);
                 context.SaveChanges();
-
-                // var project = context.Projects.FirstOrDefault();
-                // var items = context.Items.ToList();
-                // foreach (var item in items)
-                // {
-                //    var link = new ProjectItem();
-                //    link.ItemID = item.ID;
-                //    link.ProjectID = project.ID;
-                //    project.Items.Add(link);
-                // }
-
-                // context.SaveChanges();
             });
 
             Revisions = new RevisionCollection();
@@ -192,16 +180,12 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPush);
             Assert.IsTrue(action.IsComplete);
 
-            // Assert.IsTrue(disk.RunDeleteFile);
-            // Assert.IsFalse(disk.RunPullFile);
-            // Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
         }
 
         [TestMethod]
         public async Task UploadTest()
         {
-            // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
             int id = 1;
             var item = Fixture.Context.Items.Find(id);
             ItemDto expected = mapper.Map<ItemDto>(item);
@@ -215,9 +199,6 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(disk.RunPush);
             Assert.IsTrue(action.IsComplete);
 
-            // Assert.IsFalse(disk.RunDeleteFile);
-            // Assert.IsFalse(disk.RunPullFile);
-            // Assert.IsTrue(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
             ItemDto actual = disk.Item;
             AssertHelper.EqualDto(expected, actual);
@@ -226,12 +207,6 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void CheckDBRevisionTest()
         {
-            // Assert.Fail("Что тут будет происходить пока не доконца понятно!");
-            // int id = 1;
-            // var item = Fixture.Context.Items.Find(id);
-            // ItemDto expected = mapper.Map<ItemDto>(item);
-            // SyncAction action = new SyncAction();
-            // action.ID = id;
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
 
@@ -244,8 +219,6 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
 
-            // Assert.AreEqual(id, disk.LastId);
-            // ItemDto actual = disk.Item;
             AssertHelper.EqualRevisionCollection(expected, actual);
         }
 
@@ -283,9 +256,6 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsFalse(disk.RunPush);
             Assert.IsTrue(action.IsComplete);
 
-            // Assert.IsFalse(disk.RunDeleteFile);
-            // Assert.IsTrue(disk.RunPullFile);
-            // Assert.IsFalse(disk.RunPushFile);
             Assert.AreEqual(id, disk.LastId);
 
             var item = Fixture.Context.Items.Find(id);
