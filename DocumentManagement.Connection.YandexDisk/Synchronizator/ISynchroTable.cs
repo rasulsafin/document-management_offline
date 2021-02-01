@@ -4,79 +4,82 @@ using System.Threading.Tasks;
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     /// <summary>
-    /// Синхронизатор
+    /// The synchronizer is a single entity
     /// </summary>
     public interface ISynchroTable
     {
         /// <summary>
-        /// Получить список ревизий.
+        /// Get a list of revisions.
         /// </summary>
-        /// <param name="revisions">Комплексная переменная из которой нужно извлечь коллекцию.</param>
-        /// <returns> Получить список ревизий </returns>
+        /// <param name="revisions">
+        /// The complex variable from which to extract the collection.
+        /// </param>
+        /// <returns> list of revisions </returns>
         List<Revision> GetRevisions(RevisionCollection revisions);
 
         /// <summary>
-        /// Установить обновленную ревизию.
+        /// Install the updated revision.
         /// </summary>
-        /// <param name="revisions">Комплексная переменная в которую нужно записать коллекцию.</param>
-        /// <param name="rev"> экземпляр ревизии </param>
+        /// <param name="revisions">
+        /// The complex variable that you want to write the new revision to.
+        /// </param>
+        /// <param name="rev"> revision </param>
         void SetRevision(RevisionCollection revisions, Revision rev);
 
         /// <summary>
-        /// Возвращает синхронизатор внутренних коллекция.
+        /// Returns the internal collection synchronizer.
         /// </summary>
-        /// <param name="action">Информация об действии</param>
+        /// <param name="action">Information about the action</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action);
 
         /// <summary>
-        /// Скачать с сервера объект
+        /// Download an object from the server
         /// </summary>
-        /// <param name="action">Информация об действии </param>
+        /// <param name="action">Information about the action</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task Download(SyncAction action);
 
         /// <summary>
-        /// Загрузить на сервер объект
+        /// Upload an object to the server
         /// </summary>
-        /// <param name="action">Информация об действии</param>
+        /// <param name="action">Information about the action</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task Upload(SyncAction action);
 
         /// <summary>
-        /// Удалить объект из локальной коллекции
+        /// Delete an object from the local collection
         /// </summary>
-        /// <param name="action">Информация об действии</param>
+        /// <param name="action">Information about the action</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task DeleteLocal(SyncAction action);
 
         /// <summary>
-        /// Удалить объект из удаленной коллекции
+        /// Delete an object from a remote collection
         /// </summary>
-        /// <param name="action">Информация об действии</param>
+        /// <param name="action">Information about the action</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task DeleteRemote(SyncAction action);
 
         /// <summary>
-        /// Получить информацию об особом виде синхронизации
+        /// Special check about the need for synchronization
         /// </summary>
-        /// <param name="action"></param>
-        /// <returns></returns>
+        /// <param name="action">Information about the action</param>
+        /// <returns>Information about the action.</returns>
         SyncAction SpecialSynchronization(SyncAction action);
 
         /// <summary>
-        /// Провести особый вид синхронизации
+        /// Perform a special type of synchronization
         /// </summary>
-        /// <param name="action">Информация об действии</param>
+        /// <param name="action">Information about the action</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task Special(SyncAction action);
 
         /// <summary>
-        /// Добавить записи которые есть в базе но в отслеживание ещё не попали
-        /// (Функция для копирований баз)
-        /// TODO: Постоянна она не нужна продумать отключение (включать по требованию)
+        /// Add records that are in the database but have not yet been tracked (A function for copying databases)
+        /// TODO: Permanent it is not necessary to think about disabling it(enable it on demand)
         /// </summary>
-        /// <param name="local"></param>
+        /// <param name="local">The complex variable that you want to write the new revision to.</param>
         void CheckDBRevision(RevisionCollection local);
     }
 }
