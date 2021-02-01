@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateFoundObject(connection);
         }
 
-        [HttpHead]
+        [HttpPost]
         [Route("syncStart")]
         public IActionResult StartSynchronize()
         {
@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateFoundObject(progress);
         }
 
-        [HttpHead]
+        [HttpPost]
         [Route("syncStop")]
         public IActionResult StopSynchronize()
         {
