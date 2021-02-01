@@ -14,5 +14,9 @@ namespace MRS.DocumentManagement.Interface.Services
         Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
         Task<IEnumerable<ItemDto>> GetItems(IEnumerable<ID<ItemDto>> itemIds);
         Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds);
+        Task StartSync();
+
+        Task StopSync();
+        Task<ProgressSync> GetProgressSync();
     }
 }

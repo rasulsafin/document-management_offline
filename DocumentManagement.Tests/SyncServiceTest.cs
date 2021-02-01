@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Tests
         {
         }
 
-        public ProgressSync GetProgressSync()
+        public ProgressSync GetProgress()
         {
             return default;
         }

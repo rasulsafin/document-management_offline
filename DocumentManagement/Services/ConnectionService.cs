@@ -15,11 +15,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private ISyncService syncService;
 
-        public ConnectionService(DMContext context, IMapper mapper)
+        public ConnectionService(DMContext context, IMapper mapper, ISyncService syncService)
         {
             this.context = context;
             this.mapper = mapper;
+            this.syncService = syncService;
         }
 
         private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 
@@ -93,6 +95,23 @@ namespace MRS.DocumentManagement.Services
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
         {
             throw new NotImplementedException();
+        }
+
+        public Task StartSync()
+        {
+            syncService.StartSync();
+            return Task.CompletedTask;
+        }
+
+        public Task StopSync()
+        {
+            syncService.StopSync();
+            return Task.CompletedTask;
+        }
+
+        public Task<ProgressSync> GetProgressSync()
+        {
+            return Task.FromResult(syncService.GetProgress());
         }
     }
 }

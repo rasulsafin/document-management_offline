@@ -25,27 +25,24 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         void StopSync();
 
-        ///// <summary>
-        ///// Get information about the synchronization progress
-        ///// </summary>
-        ///// <returns>
-        ///// <para>current - synchronized items at the moment</para>
-        ///// <para>total  - total number of elements found</para>
-        ///// <para>step  - short name of the synchronization stage</para>
-        ///// </returns>
-
         /// <summary>
         /// Get information about the synchronization progress
         /// </summary>
         /// <returns>Object of progress</returns>
-        ProgressSync GetProgressSync();
+        ProgressSync GetProgress();
     }
 
     public struct ProgressSync
     {
+        /// <summary>total  - total number of elements found</summary>
         public int total;
+        /// <summary>message  - short name of the synchronization stage</summary>
         public string message;
+        /// <summary>current - synchronized items at the moment</summary>
         public int current;
+        /// <summary>
+        /// 
+        /// </summary>
         public Exception error;
     }
 

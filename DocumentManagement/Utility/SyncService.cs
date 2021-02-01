@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Utility
 
         public void StopSync() => syncManager.StopSync();
 
-        public ProgressSync GetProgressSync() => syncManager.GetProgressSync();
+        public ProgressSync GetProgress() => syncManager.GetProgressSync();
 
         private static async void Initialisation()
         {

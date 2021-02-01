@@ -12,13 +12,11 @@ namespace MRS.DocumentManagement.Api.Controllers
     public class ConnectionsController : ControllerBase
     {
         private IConnectionService service;
-        private ISyncService syncService;
+        
 
-        public ConnectionsController(IConnectionService connectionService, ISyncService syncService)
+        public ConnectionsController(IConnectionService connectionService)
         {
             service = connectionService;
-            this.syncService = syncService;
-
         }
 
         [HttpGet]
@@ -62,15 +60,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("syncStart")]
         public IActionResult StartSynchronize()
         {
-            syncService.StartSync();
+            service.StartSync();
             return Accepted();
         }
 
         [HttpGet]
         [Route("progress")]
-        public IActionResult GetProgressSync()
+        public async Task<IActionResult> GetProgressSyncAsync()
         {
-            var progress = syncService.GetProgressSync();
+            ProgressSync progress = await service.GetProgressSync();
             return ValidateFoundObject(progress);
         }
 
@@ -78,7 +76,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("syncStop")]
         public IActionResult StopSynchronize()
         {
-            syncService.StopSync();
+            service.StopSync();
             return Accepted();
         }
 

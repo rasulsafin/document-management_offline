@@ -104,6 +104,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
                 try
                 {
+                    
+                    Console.WriteLine("Начата синхронизация");
                     progress.message = "Sync";
                     for (int i = 0; i < COUNT_TRY; i++)
                     {
@@ -116,6 +118,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                                 progress.current++;
                             else
                                 noComplete.Add(action);
+                            Console.WriteLine($"Синхронизировано элементов: {progress.current}");
                         }
 
                         if (noComplete.Count == 0) break;
@@ -138,6 +141,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                         progress.message = "Complete";
                     else
                         progress.message = "Error";
+
+                    Console.WriteLine("Синхронизация завершена!");
                 }
             }
             else
