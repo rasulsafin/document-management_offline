@@ -13,6 +13,8 @@ namespace MRS.DocumentManagement.Interface.Services
 
         Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID);
 
+        Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
+
         //Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ID<ObjectiveDto> objectiveID);
     }
 }
