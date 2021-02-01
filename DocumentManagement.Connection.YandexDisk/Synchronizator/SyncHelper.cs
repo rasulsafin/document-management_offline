@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-
     public class SyncHelper
     {
         public static async Task<List<SyncAction>> Analysis(RevisionCollection local, RevisionCollection remote, ISynchroTable synchro)
@@ -122,7 +115,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             if (action.SpecialSynchronization)
             {
                 var subSynchroList = await synchro.GetSubSynchroList(action);
-                // TODO Выполнить внутренюю синхронизация
+
+                // TODO Выполнить внутренюю синхронизацию
                 await synchro.Special(action);
             }
         }

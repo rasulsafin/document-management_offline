@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Runtime.InteropServices;
-using System.Web;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
@@ -41,6 +39,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 }
             }
         }
+        #endregion
 
         public static HttpWebRequest RequestGetList(string accessToken, string path)
         {
@@ -90,7 +89,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        internal static HttpWebRequest RequestLoadFile(string accessToken, string path)
+        public static HttpWebRequest RequestLoadFile(string accessToken, string path)
         {
             var url = URI_API_YANDEX + path;
             var request = WebRequest.CreateHttp(url);
@@ -102,7 +101,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        internal static HttpWebRequest RequestDelete(string accessToken, string path)
+        public static HttpWebRequest RequestDelete(string accessToken, string path)
         {
             var url = URI_API_YANDEX + path;
             var request = WebRequest.CreateHttp(url);
@@ -113,7 +112,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        internal static HttpWebRequest RequestMove(string accessToken, string originPath, string movePath, bool overwrite = true)
+        public static HttpWebRequest RequestMove(string accessToken, string originPath, string movePath, bool overwrite = true)
         {
             var url = URI_API_YANDEX + originPath;
             var request = WebRequest.CreateHttp(url);
@@ -127,6 +126,5 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 request.Headers["Overwrite"] = "F";
             return request;
         }
-        #endregion
     }
 }

@@ -78,5 +78,4 @@ namespace DocumentManagement.Connection.Tests
             // AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
         }
     }
-
 }

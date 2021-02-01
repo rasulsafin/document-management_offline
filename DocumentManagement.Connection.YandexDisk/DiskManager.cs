@@ -2,29 +2,18 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {
     public class DiskManager : IDiskManager
     {
-        // public static CoolLogger logger = new CoolLogger(typeof(DiskManager).Name);
-
         private string accessToken;
         private IDiskController controller;
-        private bool projectsDirCreate;
-        private bool transactionsDirCreate;
-        private bool usersDirCreate;
-        private List<int> projects = new List<int>();
-        private List<int> objectives = new List<int>();
-        private List<int> items = new List<int>();
         private List<string> tables = new List<string>();
         private List<string> directories = new List<string>();
         private bool isInit;
@@ -43,7 +32,7 @@ namespace MRS.DocumentManagement.Connection
         public async Task<bool> Push<T>(T @object, string id)
         {
             try
-            {                
+            {
                 await CheckTableDir<T>();
                 string tableName = typeof(T).Name;
                 string path = PathManager.GetRecordFile(tableName, id);
@@ -60,7 +49,7 @@ namespace MRS.DocumentManagement.Connection
         public async Task<T> Pull<T>(string id)
         {
             try
-            {                
+            {
                 if (await CheckTableDir<T>())
                 {
                     string tableName = typeof(T).Name;
@@ -78,12 +67,51 @@ namespace MRS.DocumentManagement.Connection
         }
 
         public async Task<bool> Delete<T>(string id)
-        {            
+        {
             if (await CheckTableDir<T>())
             {
                 string tableName = typeof(T).Name;
                 string path = PathManager.GetRecordFile(tableName, id);
                 return await controller.DeleteAsync(path);
+            }
+
+            return false;
+        }
+
+        public async Task<bool> DeleteFile(string path)
+        {
+            return await controller.DeleteAsync(path);
+        }
+
+        public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        {
+            try
+            {
+                if (await CheckDir(remoteDirName))
+                {
+                    string path = PathManager.GetFile(remoteDirName, fileName);
+                    string dir = Path.Combine(localDirName, fileName);
+                    return await controller.DownloadFileAsync(path, dir);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return false;
+        }
+
+        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        {
+            try
+            {
+                await CheckDir(remoteDirName);
+                string path = PathManager.GetDir(remoteDirName);
+                string file = Path.Combine(localDirName, fileName);
+                return await controller.LoadFileAsync(path, file);
+            }
+            catch (Exception ex)
+            {
             }
 
             return false;
@@ -124,46 +152,6 @@ namespace MRS.DocumentManagement.Connection
             }
 
             isInit = true;
-        }
-
-        public async Task<bool> DeleteFile(string path)
-        {
-            return await controller.DeleteAsync(path);
-        }
-
-        public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
-        {
-            try
-            {
-                if (await CheckDir(remoteDirName))
-                {
-                    string path = PathManager.GetFile(remoteDirName, fileName);
-                    string dir = Path.Combine(localDirName, fileName);
-                    return await controller.DownloadFileAsync(path, dir);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-            }
-
-            return false;
-        }
-
-
-        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
-        {
-            try
-            {
-                await CheckDir(remoteDirName);
-                string path = PathManager.GetDir(remoteDirName);
-                string file = Path.Combine(localDirName, fileName);
-                return await controller.LoadFileAsync(path, file);
-            }
-            catch (Exception ex)
-            {
-            }
-
-            return false;
         }
 
         private async Task<bool> CheckDir(string dirName)

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
@@ -19,11 +16,11 @@ namespace DocumentManagement.Connection.Tests
     public class ObjectiveTypeSynchroTests : IUserSynchroTests
     {
         #region Initilise / Cleanup
-        private static SharedDatabaseFixture Fixture { get; set; }
-
-        private DiskTest disk;
         private static IMapper mapper;
         private static ObjectiveTypeSynchro sychro;
+        private DiskTest disk;
+
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -201,7 +198,6 @@ namespace DocumentManagement.Connection.Tests
         {
             int id = 1;
             var expected = mapper.Map<ObjectiveTypeDto>(Fixture.Context.ObjectiveTypes.Find(id));
-            //var expected = mapper.Map<ObjectiveTypeDto>(MockData.DEFAULT_OBJECTIVE_TYPES[0]);
 
             SyncAction action = new SyncAction();
             action.ID = id;
@@ -215,6 +211,22 @@ namespace DocumentManagement.Connection.Tests
             Assert.IsTrue(action.IsComplete);
 
             AssertHelper.EqualDto(expected, actual);
+        }
+
+        [TestMethod]
+        public void CheckDBRevisionTest()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.ObjectiveTypes, 1);
+            expected.GetRevision(TableRevision.ObjectiveTypes, 2);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
         }
 
         private async Task DownloadObjectiveTypeTest(ObjectiveTypeDto expected)
@@ -234,22 +246,6 @@ namespace DocumentManagement.Connection.Tests
             var actual = mapper.Map<ObjectiveTypeDto>(objectiveType);
 
             AssertHelper.EqualDto(expected, actual);
-        }
-
-        [TestMethod]
-        public void CheckDBRevisionTest()
-        {
-            RevisionCollection actual = new RevisionCollection();
-            sychro.CheckDBRevision(actual);
-
-            RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.ObjectiveTypes, 1);
-            expected.GetRevision(TableRevision.ObjectiveTypes, 2);
-
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-            AssertHelper.EqualRevisionCollection(expected, actual);
         }
     }
 }

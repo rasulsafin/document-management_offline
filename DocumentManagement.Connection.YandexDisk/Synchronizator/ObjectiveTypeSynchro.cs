@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -34,6 +33,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 context.ObjectiveTypes.Remove(local);
                 await context.SaveChangesAsync();
             }
+
             action.IsComplete = true;
         }
 
@@ -97,19 +97,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 remote = mapper.Map<ObjectiveTypeDto>(local);
                 await disk.Push(remote, action.ID.ToString());
             }
+
             action.IsComplete = true;
-        }
-
-        private async Task GetLocal(int id)
-        {
-            if (local?.ID != id)
-                local = await context.ObjectiveTypes.FindAsync(id);
-        }
-
-        private async Task GetRemote(int id)
-        {
-            if (remote?.ID != (ID<ObjectiveTypeDto>)id)
-                remote = await disk.Pull<ObjectiveTypeDto>(id.ToString());
         }
 
         public void CheckDBRevision(RevisionCollection local)
@@ -124,6 +113,18 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     revCollect.Add(new Revision(id));
                 }
             }
+        }
+
+        private async Task GetLocal(int id)
+        {
+            if (local?.ID != id)
+                local = await context.ObjectiveTypes.FindAsync(id);
+        }
+
+        private async Task GetRemote(int id)
+        {
+            if (remote?.ID != (ID<ObjectiveTypeDto>)id)
+                remote = await disk.Pull<ObjectiveTypeDto>(id.ToString());
         }
     }
 }

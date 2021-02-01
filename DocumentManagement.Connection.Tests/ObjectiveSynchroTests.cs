@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -18,13 +17,13 @@ namespace DocumentManagement.Connection.Tests
     [TestClass]
     public class ObjectiveSynchroTests : IUserSynchroTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private static IMapper mapper;
+        private static ObjectiveSynchro sychro;
+        private DiskTest disk;
 
         public RevisionCollection Revisions { get; private set; }
 
-        private DiskTest disk;
-        private static IMapper mapper;
-        private static ObjectiveSynchro sychro;
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -70,6 +69,7 @@ namespace DocumentManagement.Connection.Tests
                     objectives[2].ProjectID = projects[1].ID;
                     objectives[2].ObjectiveTypeID = objectiveTypes[1].ID;
                 }
+
                 context.Objectives.AddRange(objectives);
                 context.SaveChanges();
             });
@@ -152,8 +152,6 @@ namespace DocumentManagement.Connection.Tests
             actual.TypeAction = expected.TypeAction = TypeSyncAction.Download;
             expected.SpecialSynchronization = false;
 
-            // expected.SpecialSynchronization = true;
-
             actual = sychro.SpecialSynchronization(actual);
 
             AssertHelper.EqualSyncAction(expected, actual);
@@ -203,7 +201,6 @@ namespace DocumentManagement.Connection.Tests
             exist = exist || Fixture.Context.BimElementObjectives.Any(x => x.ObjectiveID == action.ID);
             exist = exist || Fixture.Context.ObjectiveItems.Any(x => x.ObjectiveID == action.ID);
             Assert.IsFalse(exist);
-            //Assert.AreEqual(id, disk.LastId);
         }
 
         [TestMethod]
@@ -508,7 +505,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction();
             action.ID = (int)expected.ID;
 
-                await sychro.Download(action);
+            await sychro.Download(action);
 
             Assert.IsFalse(disk.RunDelete);
             Assert.IsTrue(disk.RunPull);
@@ -548,7 +545,5 @@ namespace DocumentManagement.Connection.Tests
 
             AssertHelper.EqualDto(expected, actual);
         }
-
-        
     }
 }

@@ -40,7 +40,7 @@ namespace DocumentManagement.Connection.Tests
             EqualRevisions(expected.GetRevisions(TableRevision.Items), actual.GetRevisions(TableRevision.Items));
         }
 
-        private static void EqualRevisions(List<Revision> expected, List<Revision> actual)
+        public static void EqualRevisions(List<Revision> expected, List<Revision> actual)
         {
             if (NUllComparer(expected, actual)) return;
             if (expected == null) expected = new List<Revision>();
@@ -82,7 +82,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта ObjectiveTypeDto");
         }
 
-        private static bool NUllComparer(object expected, object actual)
+        public static bool NUllComparer(object expected, object actual)
         {
             if (expected == null)
             {
@@ -111,7 +111,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(expected.Name, actual.Name, "Не совпали Name у объекта ItemDto");
         }
 
-        internal static void EqualISynchro(ISynchroTable expected, ISynchroTable actual)
+        public static void EqualISynchro(ISynchroTable expected, ISynchroTable actual)
         {
             if (expected is ItemSynchro)
             {
@@ -120,6 +120,7 @@ namespace DocumentManagement.Connection.Tests
                     Assert.Fail("Типы полученых синхронизаторов не совподают!");
                 }
             }
+
             if (expected is UserSynchro)
             {
                 if (!(actual is UserSynchro))
@@ -187,7 +188,7 @@ namespace DocumentManagement.Connection.Tests
             EqualEnumerable(expected.Items, actual.Items, EqualDto);
         }
 
-        private static void EqualDto(DynamicFieldDto expected, DynamicFieldDto actual)
+        public static void EqualDto(DynamicFieldDto expected, DynamicFieldDto actual)
         {
             if (NUllComparer(expected, actual)) return;
             Assert.AreEqual(expected.ID, actual.ID, "Не совпали ID у объекта DynamicFieldDto");
@@ -196,7 +197,7 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(expected.Value, actual.Value, "Не совпали Value у объекта DynamicFieldDto");
         }
 
-        private static void EqualDto(BimElementDto expected, BimElementDto actual)
+        public static void EqualDto(BimElementDto expected, BimElementDto actual)
         {
             if (NUllComparer(expected, actual)) return;
             Assert.AreEqual(expected.GlobalID, actual.GlobalID, "Не совпали GlobalID у объекта BimElementDto");

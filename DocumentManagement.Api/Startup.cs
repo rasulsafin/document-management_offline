@@ -1,5 +1,7 @@
+using System;
+using System.IO;
+using System.Reflection;
 using AutoMapper;
-using MRS.DocumentManagement.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,9 +14,7 @@ using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using System;
-using System.IO;
-using System.Reflection;
+using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Api
 {

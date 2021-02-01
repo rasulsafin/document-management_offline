@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         }
 
         public async Task DeleteRemote(SyncAction action)
-        {            
+        {
             await disk.Delete<ObjectiveDto>(action.ID.ToString());
             action.IsComplete = true;
         }
@@ -67,7 +67,56 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 if (!exist)
                     context.Objectives.Add(local);
                 await context.SaveChangesAsync();
+            }
+        }
 
+        public List<Revision> GetRevisions(RevisionCollection revisions)
+        {
+            return revisions.GetRevisions(TableRevision.Objectives);
+        }
+
+        public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
+        {
+            return Task.FromResult<List<ISynchroTable>>(null);
+        }
+
+        public void SetRevision(RevisionCollection revisions, Revision rev)
+        {
+            revisions.GetRevision(TableRevision.Objectives, rev.ID).Rev = rev.Rev;
+        }
+
+        public async Task Special(SyncAction action)
+        {
+            throw new NotImplementedException();
+        }
+
+        public SyncAction SpecialSynchronization(SyncAction action)
+        {
+            return action;
+        }
+
+        public async Task Upload(SyncAction action)
+        {
+            await GetLocal(action.ID);
+            if (local != null)
+            {
+                action.IsComplete = true;
+                remote = mapper.Map<ObjectiveDto>(local);
+                await disk.Push(remote, action.ID.ToString());
+            }
+        }
+
+        public void CheckDBRevision(RevisionCollection local)
+        {
+            var allId = context.Objectives.Select(x => x.ID).ToList();
+
+            var revCollect = local.GetRevisions(TableRevision.Objectives);
+            foreach (var id in allId)
+            {
+                if (!revCollect.Any(x => x.ID == id))
+                {
+                    revCollect.Add(new Revision(id));
+                }
             }
         }
 
@@ -172,53 +221,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        public List<Revision> GetRevisions(RevisionCollection revisions)
-        {
-            return revisions.GetRevisions(TableRevision.Objectives);
-        }
-
-        public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
-        {
-            return Task.FromResult<List<ISynchroTable>>(null);
-        }
-
-        public void SetRevision(RevisionCollection revisions, Revision rev)
-        {
-            revisions.GetRevision(TableRevision.Objectives, rev.ID).Rev = rev.Rev;
-        }
-
-        public async Task Special(SyncAction action)
-        {
-            throw new NotImplementedException();
-        }
-
-        public SyncAction SpecialSynchronization(SyncAction action)
-        {
-            return action;
-        }
-
-        public async Task Upload(SyncAction action)
-        {
-            await GetLocal(action.ID);
-            if (local != null)
-            {
-                action.IsComplete = true;
-                remote = mapper.Map<ObjectiveDto>(local);
-                await disk.Push(remote, action.ID.ToString());
-            }
-        }
-
-        private DynamicFieldDto Convert(DynamicField field)
-        {
-            return new DynamicFieldDto()
-            {
-                ID = (ID<DynamicFieldDto>)field.ID,
-                Key = field.Key,
-                Type = field.Type,
-                Value = field.Value,
-            };
-        }
-
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
@@ -229,20 +231,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             if (remote?.ID != (ID<ObjectiveDto>)id)
                 remote = await disk.Pull<ObjectiveDto>(id.ToString());
-        }
-
-        public void CheckDBRevision(RevisionCollection local)
-        {
-            var allId = context.Objectives.Select(x => x.ID).ToList();
-
-            var revCollect = local.GetRevisions(TableRevision.Objectives);
-            foreach (var id in allId)
-            {
-                if (!revCollect.Any(x => x.ID == id))
-                {
-                    revCollect.Add(new Revision(id));
-                }
-            }
         }
     }
 }

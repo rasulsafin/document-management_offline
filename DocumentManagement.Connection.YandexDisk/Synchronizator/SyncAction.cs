@@ -21,6 +21,7 @@
         public bool SpecialSynchronization { get; set; }
 
         public object Data { get; set; }
+
         public bool IsComplete { get; internal set; }
     }
 }

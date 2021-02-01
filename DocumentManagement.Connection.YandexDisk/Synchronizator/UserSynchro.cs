@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
@@ -72,7 +70,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             action.IsComplete = true;
         }
 
-
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
             return revisions.GetRevisions(TableRevision.Users);
@@ -91,6 +88,20 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         public SyncAction SpecialSynchronization(SyncAction action)
         {
             return action;
+        }
+
+        public void CheckDBRevision(RevisionCollection local)
+        {
+            var allId = context.Users.Select(x => x.ID).ToList();
+
+            var revCollect = local.GetRevisions(TableRevision.Users);
+            foreach (var id in allId)
+            {
+                if (!revCollect.Any(x => x.ID == id))
+                {
+                    revCollect.Add(new Revision(id));
+                }
+            }
         }
 
         private async Task<User> GetLocal(int id)
@@ -113,24 +124,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return remote;
         }
 
-        public void CheckDBRevision(RevisionCollection local)
-        {
-            var allId = context.Users.Select(x => x.ID).ToList();
-
-            var revCollect = local.GetRevisions(TableRevision.Users);
-            foreach (var id in allId)
-            {
-                if (!revCollect.Any(x => x.ID == id))
-                {
-                    revCollect.Add(new Revision(id));
-                }
-            }
-        }
-
         public class UserSync
         {
             public UserSync()
-            { }
+            {
+            }
 
             public UserSync(User local)
             {

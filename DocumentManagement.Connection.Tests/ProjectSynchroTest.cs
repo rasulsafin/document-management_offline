@@ -16,13 +16,13 @@ namespace DocumentManagement.Connection.Tests
     [TestClass]
     public class ProjectSynchroTest : IUserSynchroTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private static IMapper mapper;
+        private static ProjectSynchro sychro;
+        private DiskTest disk;
 
         public RevisionCollection Revisions { get; private set; }
 
-        private DiskTest disk;
-        private static IMapper mapper;
-        private static ProjectSynchro sychro;
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -250,37 +250,6 @@ namespace DocumentManagement.Connection.Tests
             await DownloadTest(id);
         }
 
-        private async Task DownloadTest(int id)
-        {
-            ProjectDto expected = new ProjectDto()
-            {
-                ID = (ID<ProjectDto>)id,
-                Title = "Замок кащея",
-                Items = new List<ItemDto>(),
-            };
-            await DownloadProjectTest(expected);
-        }
-
-        private async Task DownloadProjectTest(ProjectDto expected)
-        {
-            disk.Project = expected;
-
-            SyncAction action = new SyncAction();
-            action.ID = (int)expected.ID;
-            await sychro.Download(action);
-
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsTrue(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-            Assert.AreEqual(action.ID, disk.LastId);
-            Assert.IsTrue(action.IsComplete);
-
-            var project = Fixture.Context.Projects.Find(action.ID);
-            ProjectDto actual = mapper.Map<ProjectDto>(project);
-
-            AssertHelper.EqualDto(expected, actual);
-        }
-
         [TestMethod]
         public async Task DownloadTestNotExist()
         {
@@ -314,5 +283,35 @@ namespace DocumentManagement.Connection.Tests
             await DownloadProjectTest(expected);
         }
 
+        private async Task DownloadProjectTest(ProjectDto expected)
+        {
+            disk.Project = expected;
+
+            SyncAction action = new SyncAction();
+            action.ID = (int)expected.ID;
+            await sychro.Download(action);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsTrue(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            Assert.AreEqual(action.ID, disk.LastId);
+            Assert.IsTrue(action.IsComplete);
+
+            var project = Fixture.Context.Projects.Find(action.ID);
+            ProjectDto actual = mapper.Map<ProjectDto>(project);
+
+            AssertHelper.EqualDto(expected, actual);
+        }
+
+        private async Task DownloadTest(int id)
+        {
+            ProjectDto expected = new ProjectDto()
+            {
+                ID = (ID<ProjectDto>)id,
+                Title = "Замок кащея",
+                Items = new List<ItemDto>(),
+            };
+            await DownloadProjectTest(expected);
+        }
     }
 }

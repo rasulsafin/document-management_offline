@@ -4,11 +4,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class ProjectRevision : RevisionChildsItem
     {
-        // public static implicit operator Revision(ProjectRevision project)
-        // {
-        //    return (Revision)project;
-        // }
-        public ProjectRevision(int id, ulong rev = 0) : base(id, rev) { }
+        public ProjectRevision(int id, ulong rev = 0)
+            : base(id, rev)
+        {
+        }
 
         public List<RevisionChildsItem> Objectives { get; set; }
 
@@ -31,12 +30,5 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             return objective;
         }
-
-        //public void UpdateItem(int idObj, int id)
-        //{
-        //    RevisionChildsItem objective = FindObjetive(idObj);
-        //    objective.UpdateItem(id);
-        //    Incerment();
-        //}
     }
 }

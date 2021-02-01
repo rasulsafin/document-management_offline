@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -44,13 +43,13 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             await GetLocal(action.ID);
             if (local != null)
                 context.Projects.Remove(local);
-                action.IsComplete = true;
+            action.IsComplete = true;
         }
 
         public async Task DeleteRemote(SyncAction action)
         {
             await disk.Delete<ProjectDto>(action.ID.ToString());
-                action.IsComplete = true;
+            action.IsComplete = true;
         }
 
         public async Task Download(SyncAction action)

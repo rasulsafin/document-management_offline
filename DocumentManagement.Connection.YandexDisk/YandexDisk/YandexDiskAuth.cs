@@ -7,15 +7,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexDiskAuth
     {
-        private static readonly string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
-        private static readonly string CLIENT_Secret = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
-        private static readonly string RETURN_URL = @"http://localhost:8000/oauth/";
-        // internal delegate void NewBearerDelegate(dynamic bearer);
-        // internal Action<object, GenericSdkEventArgs<string>> AuthCompleted;
-        // private HttpListener httpListener;
         public string access_token;
         public string token_type;
         public int expires_in;
+
+        private static readonly string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
+        private static readonly string CLIENT_SECRET = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
+        private static readonly string RETURN_URL = @"http://localhost:8000/oauth/";
 
         /// <summary>
         /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
@@ -32,6 +30,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             var httpListener = new HttpListener();
             httpListener.Prefixes.Add(RETURN_URL);
             httpListener.Start();
+
             // }
 
             // stage 1, 2, 3
@@ -48,6 +47,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 if (context != null)
                 {
                     var responseStage5 = "<html><head><script>function onLoad() { window.location.href = window.location.href.replace('#', '?') }</script></head><body onload=\"onLoad()\">...</body></html>";
+
                     // stage 5
                     SetResponse(context, responseStage5);
                 }
@@ -68,6 +68,7 @@ window.close();
 
                 // === complete ===
                 result = access_token;
+
                 // ===          ===
             }
             catch (Exception sdkEx)

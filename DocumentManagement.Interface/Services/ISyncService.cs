@@ -2,6 +2,21 @@
 
 namespace MRS.DocumentManagement.Interface.Services
 {
+    public enum TypeChange
+    {
+        Update,
+        Delete,
+    }
+
+    public enum TableRevision
+    {
+        Users,
+        Projects,
+        Items,
+        Objectives,
+        ObjectiveTypes,
+    }
+
     /// <summary>
     /// Manages synchronization
     /// </summary>
@@ -36,28 +51,13 @@ namespace MRS.DocumentManagement.Interface.Services
     {
         /// <summary>total  - total number of elements found</summary>
         public int total;
+
         /// <summary>message  - short name of the synchronization stage</summary>
         public string message;
+
         /// <summary>current - synchronized items at the moment</summary>
         public int current;
-        /// <summary>
-        /// 
-        /// </summary>
+
         public Exception error;
-    }
-
-    public enum TypeChange
-    {
-        Update,
-        Delete,
-    }
-
-    public enum TableRevision
-    {
-        Users,
-        Projects,
-        Items,
-        Objectives,
-        ObjectiveTypes,
     }
 }

@@ -2,21 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-
     public class SyncManager
     {
-        private const string REVISIONS = "revisions";
-        private const int COUNT_TRY = 3;
 #if TEST
         internal
 #else
@@ -38,14 +33,45 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 #endif
         RevisionCollection localRevisions = new RevisionCollection();
 
-        public delegate void ProgressChangeDelegate(int current, int total, string message);
-
-        public event ProgressChangeDelegate ProgressChange;
-
+        private const string REVISIONS = "revisions";
+        private const int COUNT_TRY = 3;
 
         public bool NeedStopSync { get; private set; }
 
         public bool NowSync { get; set; }
+
+        public static async Task FindSyncroRunAction(
+            RevisionCollection local,
+            RevisionCollection remote,
+            SyncAction action,
+            IEnumerable<ISynchroTable> synchros)
+        {
+            foreach (var synchro in synchros)
+            {
+                if (action.Synchronizer == synchro.GetType().Name)
+                {
+                    await SyncHelper.RunAction(action, synchro, local, remote);
+                    break;
+                }
+            }
+        }
+
+        public static async Task<List<SyncAction>> Analysis(
+            RevisionCollection local,
+            RevisionCollection remote,
+            IEnumerable<ISynchroTable> synchros)
+        {
+            List<SyncAction> syncActions = new List<SyncAction>();
+            foreach (var synchro in synchros)
+            {
+                // TODO: функция обхода всей базы нужна не всегда
+                synchro.CheckDBRevision(local);
+                var actions = await SyncHelper.Analysis(local, remote, synchro);
+                syncActions.AddRange(actions);
+            }
+
+            return syncActions;
+        }
 
         public async Task Initialize(string accessToken)
         {
@@ -104,7 +130,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
                 try
                 {
-                    
                     Console.WriteLine("Начата синхронизация");
                     progress.message = "Sync";
                     for (int i = 0; i < COUNT_TRY; i++)
@@ -125,7 +150,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
                         syncActions = noComplete;
                     }
-
                 }
                 catch (Exception ex)
                 {
@@ -149,40 +173,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             {
                 progress.message = "Not Need";
             }
-
-        }
-
-        public static async Task FindSyncroRunAction(
-            RevisionCollection local,
-            RevisionCollection remote,
-            SyncAction action,
-            IEnumerable<ISynchroTable> synchros)
-        {
-            foreach (var synchro in synchros)
-            {
-                if (action.Synchronizer == synchro.GetType().Name)
-                {
-                    await SyncHelper.RunAction(action, synchro, local, remote);
-                    break;
-                }
-            }
-        }
-
-        public static async Task<List<SyncAction>> Analysis(
-            RevisionCollection local,
-            RevisionCollection remote,
-            IEnumerable<ISynchroTable> synchros)
-        {
-            List<SyncAction> syncActions = new List<SyncAction>();
-            foreach (var synchro in synchros)
-            {
-                // TODO: функция обхода всей базы нужна не всегда
-                synchro.CheckDBRevision(local);
-                var actions = await SyncHelper.Analysis(local, remote, synchro);
-                syncActions.AddRange(actions);
-            }
-
-            return syncActions;
         }
 
         private async Task LoadRevisions()
@@ -209,6 +199,4 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             File.WriteAllText(fileName, str);
         }
     }
-
-
 }

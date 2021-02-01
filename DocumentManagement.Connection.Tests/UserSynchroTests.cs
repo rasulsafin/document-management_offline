@@ -15,13 +15,13 @@ namespace DocumentManagement.Connection.Tests
     [TestClass]
     public class UserSynchroTests : IUserSynchroTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private static IMapper mapper;
+        private static UserSynchro sychro;
+        private DiskTest disk;
 
         public RevisionCollection Revisions { get; private set; }
 
-        private DiskTest disk;
-        private static IMapper mapper;
-        private static UserSynchro sychro;
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
@@ -251,6 +251,5 @@ namespace DocumentManagement.Connection.Tests
 
             AssertHelper.EqualDto(expected, actual);
         }
-
     }
 }
