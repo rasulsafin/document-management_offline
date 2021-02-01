@@ -338,5 +338,3 @@ MigrationBackup/
 
 # End of https://www.gitignore.io/api/visualstudio
 .idea/
-
-DocumentManagement.Api/Revisions.json
