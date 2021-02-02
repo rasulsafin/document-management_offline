@@ -14,12 +14,19 @@ namespace MRS.DocumentManagement.Utility
             CreateMapToModel();
         }
 
+        private static List<string> DecodeAuthFieldNames(string encoded)
+        {
+            var names = new List<string>();
+            if (!string.IsNullOrEmpty(encoded))
+                names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
+            return names;
+        }
+
         private void CreateMapToDto()
         {
             CreateMap<User, UserDto>();
             CreateMap<Project, ProjectDto>();
             CreateMap<Project, ProjectToListDto>();
-               // .ForMember(d => d.ID, a => a.MapFrom(x => x.ID));
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<Objective, ObjectiveToListDto>();
@@ -40,6 +47,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
         }
+
         private void CreateMapToModel()
         {
             CreateMap<ProjectDto, Project>();
@@ -59,15 +67,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
-            CreateMap<ItemDto, Item>();           
-        }
-
-        private static List<string> DecodeAuthFieldNames(string encoded)
-        {
-            var names = new List<string>();
-            if (!string.IsNullOrEmpty(encoded))
-                names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
-            return names;
+            CreateMap<ItemDto, Item>();
         }
     }
 }

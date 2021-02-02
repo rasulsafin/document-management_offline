@@ -3,11 +3,10 @@
 namespace MRS.DocumentManagement.Database.Models
 {
     public class BimElement
-    { 
+    {
         public int ID { get; set; }
 
-        public int ItemID { get; set; }
-        public Item Item { get; set; }
+        public string ParentName { get; set; }
 
         public string GlobalID { get; set; }
 
