@@ -29,7 +29,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Project, ProjectToListDto>();
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
-            CreateMap<Objective, ObjectiveToListDto>();
+            CreateMap<Objective, ObjectiveToListDto>()
+                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<Objective, ObjectiveDto>()
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
