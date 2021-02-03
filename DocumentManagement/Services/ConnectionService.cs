@@ -1,36 +1,31 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ConnectionService : IConnectionService
     {
+        private static SyncManager syncManager;
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private ISyncService syncService;
+        private readonly IServiceScopeFactory factoryScope;
 
-        public ConnectionService(DMContext context, IMapper mapper, ISyncService syncService)
+        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory factory)
         {
             this.context = context;
             this.mapper = mapper;
-            this.syncService = syncService;
-        }
-
-        private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 
-            => mapper.Map<RemoteConnectionInfoDto>(info);
-
-        private static string EncodeAuthFieldNames(IEnumerable<string> names)
-        {
-            var lnames = names.ToList();
-            return System.Text.Json.JsonSerializer.Serialize(lnames);
+            factoryScope = factory;
+            syncManager ??= SyncManager.Instance;
         }
 
         public async Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections()
@@ -58,28 +53,9 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public async Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        public Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
-            
-            //var currentConnection = await GetCurrentConnection();
-            //if (currentConnection != null)
-            //{
-            //    //TODO: what to do?
-            //}
-
-            //var remote = await context.ConnectionInfos.FindAsync((int)connectionInfo.ID);
-            //if (remote == null)
-            //    throw new ArgumentException($"Remote connection with key {connectionInfo.ID} not found");
-            //var authNames = DecodeAuthFieldNames(remote.AuthFieldNames);
-            
-            
-            //// assign connection ID to user
-            //var currentUserID = (int)userContext.CurrentUser.ID;
-            //var user = await context.Users.FindAsync(currentUserID);
-            //user.ConnectionInfoID = remote.ID;
-            //context.Users.Update(user);
-            //await context.SaveChangesAsync();
         }
 
         public Task<bool> Reconnect(RemoteConnectionToCreateDto connectionInfo)
@@ -97,21 +73,55 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public Task StartSync()
+        public Task<bool> StartSync()
         {
-            syncService.StartSync();
-            return Task.CompletedTask;
+            if (!syncManager.Initilize)
+            {
+                // TODO: В будушем это надо вытаскивать из базы опираясь на пользователя
+                var connection = context.ConnectionInfos.Find(1);
+                if (connection == null)
+                {
+                    connection = new ConnectionInfo();
+                    connection.Name = SyncManager.YANDEX;
+                    context.ConnectionInfos.Add(connection);
+                    context.SaveChanges();
+                }
+
+                syncManager.Initialization(mapper.Map<RemoteConnectionInfoDto>(connection));
+                return Task.FromResult(false);
+            }
+            else
+            {
+                var cont = factoryScope.CreateScope().ServiceProvider.GetService<DMContext>();
+                if (!syncManager.NowSync)
+                    syncManager.StartSync(cont, mapper);
+                return Task.FromResult(true);
+            }
         }
 
         public Task StopSync()
         {
-            syncService.StopSync();
+            syncManager.StopSync();
             return Task.CompletedTask;
         }
 
         public Task<ProgressSync> GetProgressSync()
         {
-            return Task.FromResult(syncService.GetProgress());
+            return Task.FromResult(syncManager.GetProgressSync());
         }
+
+        public Task TokenYandexDisk(string access_token)
+        {
+            var connection = context.ConnectionInfos.First(x => x.Name == SyncManager.YANDEX);
+            var connectionDto = mapper.Map<RemoteConnectionInfoDto>(connection);
+            connectionDto.AuthFieldNames = new List<string>() { access_token };
+            connection = mapper.Map<ConnectionInfo>(connectionDto);
+            context.SaveChanges();
+            syncManager.Initialization(mapper.Map<RemoteConnectionInfoDto>(connection));
+            return Task.CompletedTask;
+        }
+
+        private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info)
+            => mapper.Map<RemoteConnectionInfoDto>(info);
     }
 }

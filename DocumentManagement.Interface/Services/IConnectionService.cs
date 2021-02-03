@@ -26,7 +26,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Start the synchronization process
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task StartSync();
+        Task<bool> StartSync();
 
         /// <summary>
         /// Stop the synchronization process with an intermediate save
@@ -39,5 +39,12 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         Task<ProgressSync> GetProgressSync();
+
+        /// <summary>
+        /// Set Token
+        /// </summary>
+        /// <param name="access_token">string token</param>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        Task TokenYandexDisk(string access_token);
     }
 }

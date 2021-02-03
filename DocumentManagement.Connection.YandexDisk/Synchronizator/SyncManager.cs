@@ -2,9 +2,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using Newtonsoft.Json;
 
@@ -12,12 +15,18 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 {
     public class SyncManager
     {
+        private const string REVISIONS = "revisions";
+        private const int COUNT_TRY = 3;
+        public static readonly string YANDEX = "YANDEX";
+        private static SyncManager instance;
+
+        #region field
 #if TEST
         internal
 #else
         private
 #endif
-        DiskManager disk;
+        IDiskManager disk;
 
 #if TEST
         internal
@@ -33,12 +42,33 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 #endif
         RevisionCollection localRevisions = new RevisionCollection();
 
-        private const string REVISIONS = "revisions";
-        private const int COUNT_TRY = 3;
+        #endregion
+
+        public SyncManager()
+        {
+            LoadRevisions();
+        }
+
+        #region property
+        public static SyncManager Instance { get => instance ??= new SyncManager(); }
 
         public bool NeedStopSync { get; private set; }
 
         public bool NowSync { get; set; }
+
+        public bool Initilize { get; private set; }
+        #endregion
+
+        #region Update Table
+        public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
+        {
+            if (type == TypeChange.Update)
+                localRevisions.GetRevision(table, id).Incerment();
+            else if (type == TypeChange.Delete)
+                localRevisions.GetRevision(table, id).Delete();
+            SaveRevisions();
+        }
+        #endregion
 
         public static async Task FindSyncroRunAction(
             RevisionCollection local,
@@ -72,26 +102,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             return syncActions;
         }
-
-        public async Task Initialize(string accessToken)
-        {
-            if (disk == null)
-            {
-                disk = new DiskManager(accessToken);
-                await LoadRevisions();
-            }
-        }
-
-        #region Update Table
-        public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
-        {
-            if (type == TypeChange.Update)
-                localRevisions.GetRevision(table, id).Incerment();
-            else if (type == TypeChange.Delete)
-                localRevisions.GetRevision(table, id).Delete();
-            SaveRevisions();
-        }
-        #endregion
 
         public void StopSync()
         {
@@ -175,14 +185,31 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        private async Task LoadRevisions()
+        public void Initialization(RemoteConnectionInfoDto connection)
+        {
+            // Selecting a third-party document flow
+            if (connection.ServiceName == YANDEX)
+            {
+                if (connection.AuthFieldNames == null || connection.AuthFieldNames.Count() == 0)
+                {
+                    YandexHelper.OpenBrowser(YandexDiskAuth.OAUTH_URL);
+                }
+                else
+                {
+                    disk = new DiskManager(new YandexDiskController(connection.AuthFieldNames.First()));
+                    Initilize = true;
+                }
+            }
+        }
+
+        private void LoadRevisions()
         {
             string fileName = PathManager.GetLocalRevisionFile();
             FileInfo info = new FileInfo(fileName);
             try
             {
                 Console.WriteLine($"RevisionFile={info.FullName}");
-                string json = await File.ReadAllTextAsync(fileName);
+                string json = File.ReadAllText(fileName);
                 localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
             }
             catch

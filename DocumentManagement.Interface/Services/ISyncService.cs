@@ -30,21 +30,21 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="type">update / delete</param>
         void Update(TableRevision table, int id, TypeChange type = TypeChange.Update);
 
-        /// <summary>
-        /// Start the synchronization process
-        /// </summary>
-        void StartSync();
+        ///// <summary>
+        ///// Start the synchronization process
+        ///// </summary>
+        //bool StartSync();
 
-        /// <summary>
-        /// Астановитесь (Орфография сохранена)
-        /// </summary>
-        void StopSync();
+        ///// <summary>
+        ///// Астановитесь (Орфография сохранена)
+        ///// </summary>
+        //void StopSync();
 
-        /// <summary>
-        /// Get information about the synchronization progress
-        /// </summary>
-        /// <returns>Object of progress</returns>
-        ProgressSync GetProgress();
+        ///// <summary>
+        ///// Get information about the synchronization progress
+        ///// </summary>
+        ///// <returns>Object of progress</returns>
+        //ProgressSync GetProgress();
     }
 
     public struct ProgressSync

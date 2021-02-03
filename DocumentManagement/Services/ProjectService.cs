@@ -53,8 +53,6 @@ namespace MRS.DocumentManagement.Services
             var projectID = new ID<ProjectDto>(project.ID);
             synchronizator.Update(TableRevision.Projects, project.ID);
             return projectID;
-
-            // return (ID<ProjectDto>)project.ID;
         }
 
         public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
