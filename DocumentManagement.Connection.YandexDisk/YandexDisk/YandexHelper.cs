@@ -62,21 +62,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        public static string DirectoryName(string path, string nameDir)
-        {
-            List<string> items = new List<string>(path.Split('/', StringSplitOptions.RemoveEmptyEntries));
-            items.Add(nameDir);
-            string result = string.Join('/', items);
-            return $"/{result}/";
-        }
-
-        public static string FileName(string path, string nameFile)
-        {
-            List<string> items = new List<string>(path.Split('/', StringSplitOptions.RemoveEmptyEntries));
-            items.Add(nameFile);
-            string result = string.Join('/', items);
-            return $"/{result}";
-        }
+        
 
         public static HttpWebRequest RequestDownloadFile(string accessToken, string path)
         {

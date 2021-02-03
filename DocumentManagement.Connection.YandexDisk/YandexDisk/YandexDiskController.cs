@@ -8,10 +8,8 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    /// <summary>Нижний уровень взаимодействия с сервисом YandexDisk.</summary>
     public class YandexDiskController : IDiskController
     {
-        // public static CoolLogger logger = new CoolLogger("controller");
         private string accessToken;
 
         public YandexDiskController(string accessToken)
@@ -22,12 +20,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region PROPFIND
 
         /// <summary>
-        /// Возвращает список элементов.
+        /// Returns a list of items.
         /// </summary>
-        /// <param name="path">Путь к папке</param>
+        /// <param name="path">The path to the folder</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="FileNotFoundException"> Файл отсутвует </exception>
-        /// <exception cref="TimeoutException" > Время ожидание вышло </exception>
+        /// <exception cref="FileNotFoundException"> File Not Found Exception </exception>
+        /// <exception cref="TimeoutException" > Timeout Exception </exception>
         public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
         {
             try
@@ -80,7 +78,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             try
             {
-                string newPath = YandexHelper.DirectoryName(path, nameDir);
+                string newPath = PathManager.DirectoryName(path, nameDir);
                 HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
                 using (WebResponse response = await request.GetResponseAsync())
                 {
@@ -102,16 +100,20 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
         #endregion
         #region Content
-
+        /// <summary>
+        /// Write the content to a file and upload it.
+        /// </summary>
+        /// <param name="path">The path to the file on the disk. </param>
+        /// <param name="content">Content</param>
+        /// <param name="progressChenge"> to transfer the progress </param>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         public async Task<bool> SetContentAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
-                // загрузка
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, path);
                 using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
                 {
-                    // logger.Message($"reader.Length={reader.Length};");
                     request.ContentLength = reader.Length;
                     using (var writer = request.GetRequestStream())
                     {
@@ -130,7 +132,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     }
                 }
 
-                // прием
                 using (WebResponse response = await request.GetResponseAsync())
                 {
                     if (response is HttpWebResponse httpResponse)
@@ -150,13 +151,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         }
 
         /// <summary>
-        /// Скачивает файл и возвращает его содержимое.
+        /// Downloads the file and returns its contents.
         /// </summary>
-        /// <param name="path"> путь к файлу.</param>
-        /// <param name="updateProgress"> прогресс </param>
+        /// <param name="path">The path to the file on the disk. </param>
+        /// <param name="updateProgress"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="DirectoryNotFoundException">Директория не создана, не могу прочитать файл.</exception>
-        /// <exception cref="FileNotFoundException">Файл не существует.</exception>
+        /// <exception cref="DirectoryNotFoundException">Directory Not Found Exception</exception>
+        /// <exception cref="FileNotFoundException">File Not Found Exception</exception>
         public async Task<string> GetContentAsync(string path, Action<ulong, ulong> updateProgress = null)
         {
             try
@@ -200,13 +201,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region Download File
 
         /// <summary>
-        /// Скачивание файла (GET).
+        /// Downloading a file (GET).
         /// </summary>
-        /// <param name="href">путь на диске.</param>
-        /// <param name="currentPath">Файл локальный.  </param>
-        /// <param name="updateProgress"> для передачи прогресса </param>
+        /// <param name="href">The path to the file on the disk. </param>
+        /// <param name="currentPath">The path to the file on the computer.</param>
+        /// <param name="updateProgress"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/get.html/.</remarks>
+        /// <exception cref="DirectoryNotFoundException">Directory Not Found Exception</exception>
+        /// <exception cref="FileNotFoundException">File Not Found Exception</exception>
         public async Task<bool> DownloadFileAsync(string href, string currentPath, Action<ulong, ulong> updateProgress = null)
         {
             try
@@ -250,11 +253,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region Delete file and directory
 
         /// <summary>
-        /// Удаление файла или каталога по указанному пути.
+        /// Deleting a file or directory at the specified path.
         /// </summary>
-        /// <param name="path">путь по которому надо удалить файл или каталок.</param>
-        /// <returns>успех операции.</returns>
-        /// <exception cref="FileNotFoundException" > ошибка </exception>
+        /// <param name="path">the path to delete the file or gurney.</param>
+        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
+        /// <exception cref="FileNotFoundException" >No file needed</exception>
         public async Task<bool> DeleteAsync(string path)
         {
             try
@@ -282,20 +285,19 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region Load File
 
         /// <summary>
-        /// Загрузить файл на сервер.
+        /// Load File
         /// </summary>
-        /// <param name="href">Путь к файлу на диске. </param>
-        /// <param name="fileName">Путь к файлу на компьюткрк.</param>
-        /// <param name="progressChenge"> для передачи прогресса </param>
+        /// <param name="href">The path to the file on the disk. </param>
+        /// <param name="fileName">The path to the file on the computer.</param>
+        /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
+        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
         public async Task<bool> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
-                // загрузка
                 FileInfo fileInfo = new FileInfo(fileName);
-                string diskName = YandexHelper.FileName(href, fileInfo.Name);
+                string diskName = PathManager.FileName(href, fileInfo.Name);
                 HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
                 using (var reader = fileInfo.OpenRead())
                 {
@@ -317,7 +319,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     }
                 }
 
-                // прием
                 using (WebResponse response = await request.GetResponseAsync())
                 {
                     if (response is HttpWebResponse httpResponse)
@@ -339,12 +340,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region COPY TODO
 
         /// <summary>
-        /// Копирование (COPY).
+        /// (COPY).
         /// </summary>
-        /// <param name="originPath"> путь к оригинальному файлу </param>
-        /// <param name="copyPath"> путь в который нужно скопировать </param>
+        /// <param name="originPath"> path to the original file </param>
+        /// <param name="copyPath"> the way in which you need to copy </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
+        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
         public Task<bool> CopyAsync(string originPath, string copyPath)
         {
@@ -361,12 +362,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         #region MOVE TODO
 
         /// <summary>
-        /// Перемещение и переименование (MOVE).
+        /// (MOVE).
         /// </summary>
-        /// <param name="originPath"> путь к оригинальному файлу </param>
-        /// <param name="movePath"> путь в который надо переместить файл(или переименовать) </param>
+        /// <param name="originPath"> path to the original file </param>
+        /// <param name="movePath"> the way in which it is necessary to move the file(or rename) </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">Время ожидания сервера вышло.</exception>
+        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
         /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
         public async Task<bool> MoveAsync(string originPath, string movePath)
         {
@@ -399,7 +400,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 if (web.Status == WebExceptionStatus.Timeout)
                 {
-                    return new TimeoutException("Время ожидания сервера вышло.", web);
+                    return new TimeoutException("The server timeout has expired.", web);
                 }
                 else if (web.Status == WebExceptionStatus.ProtocolError)
                 {
