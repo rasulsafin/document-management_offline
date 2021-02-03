@@ -1,5 +1,5 @@
 ﻿#define TEST // Use to perform tests
-// #define DEVELOPMENT //Use to work with database
+#define DEVELOPMENT //Use to work with database
 #undef DEVELOPMENT
 
 using Microsoft.EntityFrameworkCore;
