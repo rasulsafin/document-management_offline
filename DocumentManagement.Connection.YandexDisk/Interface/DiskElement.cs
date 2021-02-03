@@ -7,44 +7,44 @@ namespace MRS.DocumentManagement.Connection
     public class DiskElement
     {
         private string status;
-        private string creationdate;
-        private string displayname;
-        private string getcontentlength;
-        private string getlastmodified;
-        private DateTime lastmodified;
-        private string resourcetype;
+        private string creationDate;
+        private string displayName;
+        private string contentLength;
+        private string lastModifiedString;
+        private DateTime lastModified;
+        private string resourceType;
         private string href;
-        private string getcontenttype;
-        private string mulca_file_url;
-        private string mulca_digest_url;
-        private string file_url;
-        private string getetag;
+        private string contentType;
+        private string mulcaFileUrl;
+        private string mulcaDigestUrl;
+        private string fileUrl;
+        private string etag;
 
-        public string DisplayName { get => displayname; }
+        public string DisplayName { get => displayName; }
 
-        public DateTime LastModified { get => lastmodified; }
+        public DateTime LastModified { get => lastModified; }
 
-        public string ContentLength { get => getcontentlength; set => getcontentlength = value; }
+        public string ContentLength { get => contentLength; set => contentLength = value; }
 
-        public string ContentType { get => getcontenttype; set => getcontenttype = value; }
+        public string ContentType { get => contentType; set => contentType = value; }
 
         public bool IsDirectory { get; private set; }
 
         public string Status { get => status; }
 
-        public string Creationdate { get => creationdate; set => creationdate = value; }
+        public string CreationDate { get => creationDate; set => creationDate = value; }
 
-        public string Resourcetype { get => resourcetype; set => resourcetype = value; }
+        public string ResourceType { get => resourceType; set => resourceType = value; }
 
         public string Href { get => href; set => href = value; }
 
-        public string Mulca_file_url { get => mulca_file_url; set => mulca_file_url = value; }
+        public string MulcaFileUrl { get => mulcaFileUrl; set => mulcaFileUrl = value; }
 
-        public string Mulca_digest_url { get => mulca_digest_url; set => mulca_digest_url = value; }
+        public string MulcaDigestUrl { get => mulcaDigestUrl; set => mulcaDigestUrl = value; }
 
-        public string File_url { get => file_url; set => file_url = value; }
+        public string FileUrl { get => fileUrl; set => fileUrl = value; }
 
-        public string Getetag { get => getetag; set => getetag = value; }
+        public string Etag { get => etag; set => etag = value; }
 
         #region Create
         internal static List<DiskElement> GetElements(XmlElement root)
@@ -124,16 +124,16 @@ namespace MRS.DocumentManagement.Connection
             {
                 if (node is XmlElement element)
                 {
-                    if (element.Name == "d:creationdate") result.creationdate = GetValueElement(element);
-                    else if (element.Name == "d:displayname") result.displayname = GetValueElement(element);
-                    else if (element.Name == "d:getcontentlength") result.getcontentlength = GetValueElement(element);
+                    if (element.Name == "d:creationdate") result.creationDate = GetValueElement(element);
+                    else if (element.Name == "d:displayname") result.displayName = GetValueElement(element);
+                    else if (element.Name == "d:getcontentlength") result.contentLength = GetValueElement(element);
                     else if (element.Name == "d:getlastmodified") SetLastModified(result, element);
                     else if (element.Name == "d:resourcetype") GetResourcetype(result, element);
-                    else if (element.Name == "d:getcontenttype") result.getcontenttype = GetValueElement(element);
-                    else if (element.Name == "mulca_file_url") result.mulca_file_url = GetValueElement(element);
-                    else if (element.Name == "d:getetag") result.getetag = GetValueElement(element);
-                    else if (element.Name == "file_url") result.file_url = GetValueElement(element);
-                    else if (element.Name == "mulca_digest_url") result.mulca_digest_url = GetValueElement(element);
+                    else if (element.Name == "d:getcontenttype") result.contentType = GetValueElement(element);
+                    else if (element.Name == "mulca_file_url") result.mulcaFileUrl = GetValueElement(element);
+                    else if (element.Name == "d:getetag") result.etag = GetValueElement(element);
+                    else if (element.Name == "file_url") result.fileUrl = GetValueElement(element);
+                    else if (element.Name == "mulca_digest_url") result.mulcaDigestUrl = GetValueElement(element);
                     else
                         Console.WriteLine($"GetProp: Неизвестный тег [{element.Name}]");
                 }
@@ -146,8 +146,8 @@ namespace MRS.DocumentManagement.Connection
 
         private static void SetLastModified(DiskElement result, XmlElement element)
         {
-            result.getlastmodified = GetValueElement(element);
-            result.lastmodified = DateTime.Parse(result.getlastmodified);
+            result.lastModifiedString = GetValueElement(element);
+            result.lastModified = DateTime.Parse(result.lastModifiedString);
         }
 
         private static void GetResourcetype(DiskElement result, XmlElement root)
@@ -162,7 +162,7 @@ namespace MRS.DocumentManagement.Connection
                 }
                 else if (node is XmlText text)
                 {
-                    result.resourcetype = text.Value;
+                    result.resourceType = text.Value;
                 }
                 else
                 {
