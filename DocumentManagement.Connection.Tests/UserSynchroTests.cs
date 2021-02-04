@@ -13,7 +13,7 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class UserSynchroTests : IUserSynchroTests
+    public class UserSynchroTests 
     {
         private static IMapper mapper;
         private static UserSynchro sychro;
@@ -55,7 +55,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void CheckDBRevisionTest()
+        public void CheckDBRevision_UserSynchro_AddingNonIncludedRecordsToRevisionCollection()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -73,7 +73,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisionsTest()
+        public void GetRevisions_UserSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
@@ -97,7 +97,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevisionTest()
+        public void SetRevision_UserSynchro_SettingAnEntryToAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
@@ -114,7 +114,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronizationTest()
+        public void SpecialSynchronization_UserSynchro_NoChanges()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -132,7 +132,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroListTest()
+        public async Task GetSubSynchroList_UserSynchro_Null()
         {
             SyncAction action = new SyncAction();
             action.ID = 1;
@@ -145,7 +145,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task SpecialTest()
+        public async Task Special_UserSynchro_Exeption()
         {
             SyncAction action = new SyncAction();
             await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
@@ -158,7 +158,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocalTest()
+        public async Task DeleteLocal_UserSynchro_DeletingEntryFromLocalCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -175,7 +175,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemoteTest()
+        public async Task DeleteRemote_UserSynchro_DeletingEntryFromRemoteCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -190,7 +190,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest()
+        public async Task Upload_UserSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -212,14 +212,14 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestExist()
+        public async Task Download_UserSynchro_OverwriteExistingEntryToRemoteCollection()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task DownloadTestNotExist()
+        public async Task Download_UserSynchro_AddEntryToRemoteCollection()
         {
             int id = 5;
             await DownloadTest(id);
