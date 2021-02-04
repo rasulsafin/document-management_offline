@@ -3,11 +3,7 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-#pragma warning disable CS0659 // Тип переопределяет Object.Equals(object o), но не переопределяет Object.GetHashCode()
-#pragma warning disable CS0661 // Тип определяет оператор == или оператор !=, но не переопределяет Object.GetHashCode()
     public class Revision : IComparable<Revision>
-#pragma warning restore CS0661 // Тип определяет оператор == или оператор !=, но не переопределяет Object.GetHashCode()
-#pragma warning restore CS0659 // Тип переопределяет Object.Equals(object o), но не переопределяет Object.GetHashCode()
     {
         public Revision(int id, ulong rev = 0)
         {
@@ -72,6 +68,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
 
             return false;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(ID, Rev, IsDelete);
         }
     }
 }
