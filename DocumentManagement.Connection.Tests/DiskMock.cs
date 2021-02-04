@@ -5,9 +5,9 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace DocumentManagement.Connection.Tests
 {
-    public class DiskTest : IDiskManager
+    public class DiskMock : IDiskManager
     {
-        public DiskTest()
+        public DiskMock()
         {
         }
 

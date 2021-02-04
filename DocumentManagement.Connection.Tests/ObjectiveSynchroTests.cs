@@ -15,11 +15,11 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class ObjectiveSynchroTests : IUserSynchroTests
+    public class ObjectiveSynchroTests
     {
         private static IMapper mapper;
         private static ObjectiveSynchro sychro;
-        private DiskTest disk;
+        private DiskMock disk;
 
         public RevisionCollection Revisions { get; private set; }
 
@@ -72,7 +72,7 @@ namespace DocumentManagement.Connection.Tests
 
             Revisions = new RevisionCollection();
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new ObjectiveSynchro(disk, Fixture.Context, mapper);
         }
 
@@ -80,7 +80,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void CheckDBRevisionTest()
+        public void CheckDBRevision_ObjectiveSynchro_AddingNonIncludedRecordsToRevisionCollection()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -97,7 +97,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisionsTest()
+        public void GetRevisions_ObjectiveSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Objectives, 2).Rev = 5;
@@ -121,7 +121,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevisionTest()
+        public void SetRevision_ObjectiveSynchro_SettingAnEntryToAComplexVariable()
         {
             int id = 2;
             Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
@@ -139,7 +139,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronizationTest()
+        public void SpecialSynchronization_ObjectiveSynchro_NoChanges()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -157,7 +157,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroListTest()
+        public async Task GetSubSynchroList_ObjectiveSynchro_Null()
         {
             SyncAction action = new SyncAction();
             action.ID = 1;
@@ -170,7 +170,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task SpecialTest()
+        public async Task Special_ObjectiveSynchro_Exeption()
         {
             SyncAction action = new SyncAction();
             await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
@@ -183,7 +183,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocalTest()
+        public async Task DeleteLocal_ObjectiveSynchro_DeletingEntryFromLocalCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -200,7 +200,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemoteTest()
+        public async Task DeleteRemote_ObjectiveSynchro_DeletingEntryFromRemoteCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -214,7 +214,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest()
+        public async Task Upload_ObjectiveSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -234,7 +234,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest_ItemCollect()
+        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndItemCollect()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -264,7 +264,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest_BimCollect()
+        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndBimCollect()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -304,7 +304,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest_DynamicCollect()
+        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndDynamicCollect()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -333,14 +333,14 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestExist()
+        public async Task Download_ObjectiveSynchro_OverwriteExistingEntryToRemoteCollection()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task DownloadTestNotExist()
+        public async Task Download_ObjectiveSynchro_AddEntryToRemoteCollection()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES.First();
@@ -354,7 +354,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTest_ItemCollect()
+        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndItemCollect()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -373,7 +373,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTest_BimElementCollect_NoFileBim()
+        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndBimElementCollect_NoFileBim()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -408,7 +408,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTest_BimElementCollect_YesFileBim()
+        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndBimElementCollect_YesFileBim()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -432,7 +432,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTest_DynamicCollect()
+        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndDynamicCollect()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -452,7 +452,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task StopedDownloadAction_NoKeyProject_Test()
+        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyProject()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];
@@ -465,7 +465,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task StopedDownloadAction_NoKeyAuthor_Test()
+        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyAuthor()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];
@@ -478,7 +478,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task StopedDownloadAction_NoKeyObjectiveType_Test()
+        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyObjectiveType()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];

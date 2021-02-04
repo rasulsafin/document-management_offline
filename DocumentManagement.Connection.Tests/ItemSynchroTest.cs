@@ -15,12 +15,12 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class ItemSynchroTest : IUserSynchroTests
+    public class ItemSynchroTest
     {
         public readonly int idProj = 1;
         private static IMapper mapper;
         private static ItemSynchro sychro;
-        private DiskTest disk;
+        private DiskMock disk;
 
         public RevisionCollection Revisions { get; private set; }
 
@@ -52,7 +52,7 @@ namespace DocumentManagement.Connection.Tests
             Revisions = new RevisionCollection();
             Revisions.GetRevision(TableRevision.Projects, idProj).Rev = 5;
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new ItemSynchro(disk, Fixture.Context);
         }
 
@@ -60,7 +60,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void GetRevisionsTest()
+        public void GetRevisions_ItemSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
@@ -84,7 +84,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevisionTest()
+        public void SetRevision_ItemSynchro_SettingAnEntryToAComplexVariable()
         {
             int id = 2;
             Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
@@ -102,7 +102,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronizationTest()
+        public void SpecialSynchronization_ItemSynchro_NoChanges()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -120,7 +120,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroListTest()
+        public async Task GetSubSynchroList_ItemSynchro_Null()
         {
             SyncAction action = new SyncAction();
             action.ID = 1;
@@ -133,7 +133,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task SpecialTest()
+        public async Task Special_ItemSynchro_Exeption()
         {
             SyncAction action = new SyncAction();
             await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
@@ -146,7 +146,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocalTest()
+        public async Task DeleteLocal_ItemSynchro_DeletingEntryFromLocalCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -166,7 +166,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemoteTest()
+        public async Task DeleteRemote_ItemSynchro_DeletingEntryFromRemoteCollection()
         {
             int id = 1;
             var item = Fixture.Context.Items.Find(id);
@@ -184,7 +184,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest()
+        public async Task Upload_ItemSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             var item = Fixture.Context.Items.Find(id);
@@ -205,7 +205,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void CheckDBRevisionTest()
+        public void CheckDBRevision_ItemSynchro_AddingNonIncludedRecordsToRevisionCollection()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -223,14 +223,14 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestExist()
+        public async Task Download_ItemSynchro_OverwriteExistingEntryToRemoteCollection()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task DownloadTestNotExist()
+        public async Task Download_ItemSynchro_AddEntryToRemoteCollection()
         {
             int id = 5;
             await DownloadTest(id);

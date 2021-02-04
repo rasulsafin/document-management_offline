@@ -13,11 +13,11 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class UserSynchroTests 
+    public class UserSynchroTests
     {
         private static IMapper mapper;
         private static UserSynchro sychro;
-        private DiskTest disk;
+        private DiskMock disk;
 
         public RevisionCollection Revisions { get; private set; }
 
@@ -47,7 +47,7 @@ namespace DocumentManagement.Connection.Tests
 
             Revisions = new RevisionCollection();
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new UserSynchro(disk, Fixture.Context);
         }
 
