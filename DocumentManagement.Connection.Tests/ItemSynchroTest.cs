@@ -108,7 +108,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction expected = new SyncAction();
             actual.ID = expected.ID = 1;
             actual.Synchronizer = expected.Synchronizer = nameof(ItemSynchro);
-            actual.TypeAction = expected.TypeAction = TypeSyncAction.None;
+            actual.TypeAction = expected.TypeAction = SyncActionType.None;
 
             actual = sychro.SpecialSynchronization(actual);
             expected.SpecialSynchronization = false;

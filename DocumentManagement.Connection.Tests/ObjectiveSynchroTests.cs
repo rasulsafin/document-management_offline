@@ -145,7 +145,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction expected = new SyncAction();
             actual.ID = expected.ID = 1;
             actual.Synchronizer = expected.Synchronizer = nameof(ObjectiveSynchro);
-            actual.TypeAction = expected.TypeAction = TypeSyncAction.Download;
+            actual.TypeAction = expected.TypeAction = SyncActionType.Download;
             expected.SpecialSynchronization = false;
 
             actual = sychro.SpecialSynchronization(actual);

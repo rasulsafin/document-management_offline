@@ -31,8 +31,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <summary>
         /// Stop the synchronization process with an intermediate save
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task StopSync();
+        void StopSync();
 
         /// <summary>
         /// Get information about the current synchronization process

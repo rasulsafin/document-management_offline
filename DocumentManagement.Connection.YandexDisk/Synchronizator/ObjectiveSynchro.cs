@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     local = mapper.Map(remote, local);
 
                 await ItemSync();
-                await BinElementSync();
+                await BimElementSync();
                 await DynamicFieldSync();
 
                 if (!exist)
@@ -164,7 +164,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        private async Task BinElementSync()
+        private async Task BimElementSync()
         {
             // Добавим отсутвуюшие BimElement
             if (local.BimElements == null) local.BimElements = new List<BimElementObjective>();

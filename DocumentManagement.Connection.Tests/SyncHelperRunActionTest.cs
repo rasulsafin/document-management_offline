@@ -25,7 +25,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.Download,
+                TypeAction = SyncActionType.Download,
                 ID = 1,
             };
 
@@ -60,7 +60,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.Upload,
+                TypeAction = SyncActionType.Upload,
                 ID = 1,
             };
 
@@ -96,7 +96,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.DeleteLocal,
+                TypeAction = SyncActionType.DeleteLocal,
                 ID = 1,
             };
 
@@ -132,7 +132,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.DeleteRemote,
+                TypeAction = SyncActionType.DeleteRemote,
                 ID = 1,
             };
 
@@ -168,7 +168,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.Special,
+                TypeAction = SyncActionType.Special,
                 ID = 1,
             };
 
@@ -207,7 +207,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction action = new SyncAction()
             {
                 Synchronizer = nameof(UserSyncro),
-                TypeAction = TypeSyncAction.None,
+                TypeAction = SyncActionType.None,
                 ID = 1,
             };
             var synchro = new UserSyncro();

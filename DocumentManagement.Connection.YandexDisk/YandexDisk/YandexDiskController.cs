@@ -136,9 +136,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 {
                     if (response is HttpWebResponse httpResponse)
                     {
-                        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
-                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
-                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
+                        switch (httpResponse.StatusCode)
+                        {
+                            case HttpStatusCode.Created:
+                                return true;
+                            case HttpStatusCode.InsufficientStorage:
+                                return false;
+                            case HttpStatusCode.Continue:
+                                return false;
+                        }
                     }
                 }
             }

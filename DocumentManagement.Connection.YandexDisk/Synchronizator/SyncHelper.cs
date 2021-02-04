@@ -17,31 +17,31 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 var remoteRev = remoteRevs.Find(r => r.ID == localRev.ID);
                 if (remoteRev == null)
                 {
-                    action = GetAction(localRev, TypeSyncAction.Upload, synchro);
+                    action = GetAction(localRev, SyncActionType.Upload, synchro);
                 }
                 else if (remoteRev.IsDelete && !localRev.IsDelete)
                 {
-                    action = GetAction(localRev, TypeSyncAction.DeleteLocal, synchro);
+                    action = GetAction(localRev, SyncActionType.DeleteLocal, synchro);
                 }
                 else if (!remoteRev.IsDelete && localRev.IsDelete)
                 {
-                    action = GetAction(localRev, TypeSyncAction.DeleteRemote, synchro);
+                    action = GetAction(localRev, SyncActionType.DeleteRemote, synchro);
                 }
                 else if (remoteRev > localRev)
                 {
-                    action = GetAction(localRev, TypeSyncAction.Download, synchro);
+                    action = GetAction(localRev, SyncActionType.Download, synchro);
                 }
                 else if (remoteRev < localRev)
                 {
-                    action = GetAction(localRev, TypeSyncAction.Upload, synchro);
+                    action = GetAction(localRev, SyncActionType.Upload, synchro);
                 }
                 else
                 {
-                    action = GetAction(localRev, TypeSyncAction.None, synchro);
+                    action = GetAction(localRev, SyncActionType.None, synchro);
                     action = synchro.SpecialSynchronization(action);
                 }
 
-                if (action.TypeAction != TypeSyncAction.None)
+                if (action.TypeAction != SyncActionType.None)
                     result.Add(action);
 
                 List<ISynchroTable> subSynchros = await synchro.GetSubSynchroList(action);
@@ -60,12 +60,12 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             foreach (var remoteRev in remoteRevs)
             {
-                result.Add(GetAction(remoteRev, TypeSyncAction.Download, synchro));
+                result.Add(GetAction(remoteRev, SyncActionType.Download, synchro));
             }
 
             return result;
 
-            static SyncAction GetAction(Revision localRev, TypeSyncAction action, ISynchroTable synchro)
+            static SyncAction GetAction(Revision localRev, SyncActionType action, ISynchroTable synchro)
             {
                 return new SyncAction()
                 {
@@ -85,29 +85,29 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             switch (action.TypeAction)
             {
-                case TypeSyncAction.None:
+                case SyncActionType.None:
                     break;
-                case TypeSyncAction.Download:
+                case SyncActionType.Download:
                     Revision remoteRev1 = synchro.GetRevisions(remote).Find(r => r.ID == id);
                     await synchro.Download(action);
                     synchro.SetRevision(local, remoteRev1);
                     break;
-                case TypeSyncAction.Upload:
+                case SyncActionType.Upload:
                     Revision localRev1 = synchro.GetRevisions(local).Find(r => r.ID == id);
                     await synchro.Upload(action);
                     synchro.SetRevision(remote, localRev1);
                     break;
-                case TypeSyncAction.DeleteLocal:
+                case SyncActionType.DeleteLocal:
                     Revision localRev2 = synchro.GetRevisions(local).Find(r => r.ID == id);
                     await synchro.DeleteLocal(action);
                     synchro.SetRevision(remote, localRev2);
                     break;
-                case TypeSyncAction.DeleteRemote:
+                case SyncActionType.DeleteRemote:
                     Revision remoteRev2 = synchro.GetRevisions(remote).Find(r => r.ID == id);
                     await synchro.DeleteRemote(action);
                     synchro.SetRevision(local, remoteRev2);
                     break;
-                case TypeSyncAction.Special:
+                case SyncActionType.Special:
                     action.SpecialSynchronization = true;
                     break;
             }

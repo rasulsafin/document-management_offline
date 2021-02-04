@@ -99,10 +99,9 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public Task StopSync()
+        public void StopSync()
         {
             syncManager.StopSync();
-            return Task.CompletedTask;
         }
 
         public Task<ProgressSync> GetProgressSync()

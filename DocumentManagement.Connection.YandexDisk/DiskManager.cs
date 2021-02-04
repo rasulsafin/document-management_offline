@@ -121,20 +121,21 @@ namespace MRS.DocumentManagement.Connection
         {
             if (!isInit) await Initialize();
             string tableName = typeof(T).Name;
-            bool res = tables.Any(x => x == tableName);
-            if (res) return true;
+            bool result = tables.Any(x => x == tableName);
+            if (result)
+                return true;
             IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
             foreach (DiskElement element in list)
             {
                 if (element.IsDirectory)
                     tables.Add(element.DisplayName);
                 if (element.DisplayName == tableName)
-                    res = true;
+                    result = true;
             }
 
-            if (!res)
+            if (!result)
                 await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
-            return res;
+            return result;
         }
 
         private async Task Initialize()

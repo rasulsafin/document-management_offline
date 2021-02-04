@@ -25,13 +25,13 @@ namespace DocumentManagement.Connection.Tests
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.Download,
+                    TypeAction = SyncActionType.Download,
                     ID = 1,
                 },
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.Upload,
+                    TypeAction = SyncActionType.Upload,
                     ID = 2,
                 },
             };
@@ -74,13 +74,13 @@ namespace DocumentManagement.Connection.Tests
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.Download,
+                    TypeAction = SyncActionType.Download,
                     ID = 1,
                 },
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.DeleteLocal,
+                    TypeAction = SyncActionType.DeleteLocal,
                     ID = 2,
                 },
             };
@@ -106,13 +106,13 @@ namespace DocumentManagement.Connection.Tests
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.Upload,
+                    TypeAction = SyncActionType.Upload,
                     ID = 1,
                 },
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
-                    TypeAction = TypeSyncAction.Upload,
+                    TypeAction = SyncActionType.Upload,
                     ID = 2,
                 },
             };
@@ -138,14 +138,14 @@ namespace DocumentManagement.Connection.Tests
                 new SyncAction()
                 {
                     Synchronizer = nameof(SubSyncSyncro),
-                    TypeAction = TypeSyncAction.Special,
+                    TypeAction = SyncActionType.Special,
                     ID = 1,
                     SpecialSynchronization = true,
                 },
                 new SyncAction()
                 {
                     Synchronizer = nameof(SubSyncSyncro),
-                    TypeAction = TypeSyncAction.Special,
+                    TypeAction = SyncActionType.Special,
                     ID = 2,
                     SpecialSynchronization = true,
                 },
@@ -220,7 +220,7 @@ namespace DocumentManagement.Connection.Tests
             SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
             {
                 action.SpecialSynchronization = true;
-                action.TypeAction = TypeSyncAction.Special;
+                action.TypeAction = SyncActionType.Special;
                 return action;
             }
 
