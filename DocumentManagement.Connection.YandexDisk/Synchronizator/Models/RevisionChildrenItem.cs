@@ -2,9 +2,9 @@
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    public class RevisionChildsItem : Revision
+    public class RevisionChildrenItem : Revision
     {
-        public RevisionChildsItem(int id, ulong rev = 0)
+        public RevisionChildrenItem(int id, ulong rev = 0)
             : base(id, rev)
         {
         }

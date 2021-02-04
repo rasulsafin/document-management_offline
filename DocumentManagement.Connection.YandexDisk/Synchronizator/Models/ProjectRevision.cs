@@ -2,29 +2,29 @@
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
-    public class ProjectRevision : RevisionChildsItem
+    public class ProjectRevision : RevisionChildrenItem
     {
         public ProjectRevision(int id, ulong rev = 0)
             : base(id, rev)
         {
         }
 
-        public List<RevisionChildsItem> Objectives { get; set; }
+        public List<RevisionChildrenItem> Objectives { get; set; }
 
         public void UpdateObjective(int id)
         {
-            RevisionChildsItem objective = FindObjetive(id);
+            RevisionChildrenItem objective = FindObjetive(id);
             objective.Incerment();
             Incerment();
         }
 
-        public RevisionChildsItem FindObjetive(int id)
+        public RevisionChildrenItem FindObjetive(int id)
         {
-            if (Objectives == null) Objectives = new List<RevisionChildsItem>();
-            RevisionChildsItem objective = Objectives.Find(x => x.ID == id);
+            if (Objectives == null) Objectives = new List<RevisionChildrenItem>();
+            RevisionChildrenItem objective = Objectives.Find(x => x.ID == id);
             if (objective == null)
             {
-                objective = new RevisionChildsItem(id);
+                objective = new RevisionChildrenItem(id);
                 Objectives.Add(objective);
             }
 
