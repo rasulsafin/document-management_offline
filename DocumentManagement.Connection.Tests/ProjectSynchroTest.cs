@@ -14,11 +14,11 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class ProjectSynchroTest : IUserSynchroTests
+    public class ProjectSynchroTest
     {
         private static IMapper mapper;
         private static ProjectSynchro sychro;
-        private DiskTest disk;
+        private DiskMock disk;
 
         public RevisionCollection Revisions { get; private set; }
 
@@ -48,7 +48,7 @@ namespace DocumentManagement.Connection.Tests
 
             Revisions = new RevisionCollection();
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new ProjectSynchro(disk, Fixture.Context, mapper);
         }
 
@@ -56,7 +56,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void CheckDBRevisionTest()
+        public void CheckDBRevision_ProjectSynchro_AddingNonIncludedRecordsToRevisionCollection()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -72,7 +72,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisionsTest()
+        public void GetRevisions_ProjectSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Projects, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Projects, 2).Rev = 5;
@@ -96,7 +96,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevisionTest()
+        public void SetRevision_ProjectSynchro_SettingAnEntryToAComplexVariable()
         {
             Revisions.GetRevision(TableRevision.Projects, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Projects, 2).Rev = 5;
@@ -113,7 +113,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronizationTest()
+        public void SpecialSynchronization_ProjectSynchro_NoChanges()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -131,7 +131,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroListTest()
+        public async Task GetSubSynchroList_ProjectSynchro_Null()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -146,7 +146,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task SpecialTest()
+        public async Task Special_ProjectSynchro_Exeption()
         {
             SyncAction action = new SyncAction();
             await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
@@ -159,7 +159,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocalTest()
+        public async Task DeleteLocal_ProjectSynchro_DeletingEntryFromLocalCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -176,7 +176,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemoteTest()
+        public async Task DeleteRemote_ProjectSynchro_DeletingEntryFromRemoteCollection()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -191,7 +191,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest()
+        public async Task Upload_ProjectSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             var project = Fixture.Context.Projects.Find(id);
@@ -211,7 +211,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest_ItemCollect()
+        public async Task Upload_ProjectSynchro_UploadEntryToRemoteCollection_ItemCollect()
         {
             int id = 1;
             var items = MockData.DEFAULT_ITEMS;
@@ -241,21 +241,21 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestExist()
+        public async Task Download_ProjectSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task DownloadTestNotExist()
+        public async Task Download_ProjectSynchro_OverwriteExistingEntryToRemoteCollection()
         {
             int id = 3;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task DownloadTest_ItemCollect()
+        public async Task Download_ProjectSynchro_OverwriteExistingEntryToRemoteCollectionItemCollect()
         {
             int id = 2;
 

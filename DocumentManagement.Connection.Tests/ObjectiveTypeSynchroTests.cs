@@ -13,12 +13,12 @@ using MRS.DocumentManagement.Utility;
 namespace DocumentManagement.Connection.Tests
 {
     [TestClass]
-    public class ObjectiveTypeSynchroTests : IUserSynchroTests
+    public class ObjectiveTypeSynchroTests
     {
         #region Initilise / Cleanup
         private static IMapper mapper;
         private static ObjectiveTypeSynchro sychro;
-        private DiskTest disk;
+        private DiskMock disk;
 
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -44,7 +44,7 @@ namespace DocumentManagement.Connection.Tests
                 context.SaveChanges();
             });
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new ObjectiveTypeSynchro(disk, Fixture.Context, mapper);
         }
 
@@ -53,7 +53,7 @@ namespace DocumentManagement.Connection.Tests
         #endregion
 
         [TestMethod]
-        public async Task DeleteLocalTest()
+        public async Task DeleteLocal_ObjectiveTypeSynchro_()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -69,7 +69,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemoteTest()
+        public async Task DeleteRemote_ObjectiveTypeSynchro_()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -83,7 +83,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestExist()
+        public async Task Download_ObjectiveTypeSynchro_Exist()
         {
             var type = Fixture.Context.ObjectiveTypes.Find(1);
             ObjectiveTypeDto expected = mapper.Map<ObjectiveTypeDto>(type);
@@ -94,7 +94,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DownloadTestNotExist()
+        public async Task Download_ObjectiveTypeSynchro_NotExist()
         {
             ObjectiveTypeDto expected = new ObjectiveTypeDto()
             {
@@ -106,7 +106,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisionsTest()
+        public void GetRevisions_ObjectiveTypeSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
         {
             var revisions = new RevisionCollection();
             revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
@@ -131,20 +131,20 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroListTest()
+        public async Task GetSubSynchroList_ObjectiveTypeSynchro_Null()
         {
             SyncAction action = new SyncAction();
-            await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
-            {
-                await sychro.Special(action);
-            });
+            action.ID = 1;
+            var sub = await sychro.GetSubSynchroList(action);
+            Assert.IsNull(sub);
+
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
         }
 
         [TestMethod]
-        public void SetRevisionTest()
+        public void SetRevision_ObjectiveTypeSynchro_SettingAnEntryToAComplexVariable()
         {
             var revisions = new RevisionCollection();
             revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
@@ -162,7 +162,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronizationTest()
+        public void SpecialSynchronization_ObjectiveTypeSynchro_NoChanges()
         {
             SyncAction actual = new SyncAction();
             SyncAction expected = new SyncAction();
@@ -180,7 +180,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task SpecialTest()
+        public async Task Special_ObjectiveTypeSynchro_Exeption()
         {
             SyncAction action = new SyncAction();
             await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
@@ -193,7 +193,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task UploadTest()
+        public async Task Upload_ObjectiveTypeSynchro_UploadEntryToRemoteCollection()
         {
             int id = 1;
             var expected = mapper.Map<ObjectiveTypeDto>(Fixture.Context.ObjectiveTypes.Find(id));
@@ -213,7 +213,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void CheckDBRevisionTest()
+        public void CheckDBRevision_ObjectiveTypeSynchro_AddingNonIncludedRecordsToRevisionCollection()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);

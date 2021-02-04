@@ -14,7 +14,7 @@ namespace DocumentManagement.Connection.Tests
     {
         private static SharedDatabaseFixture Fixture { get; set; }
 
-        private DiskTest disk;
+        private DiskMock disk;
         private static IMapper mapper;
         private static UserSynchro sychro;
 
@@ -40,7 +40,7 @@ namespace DocumentManagement.Connection.Tests
                 context.SaveChanges();
             });
 
-            disk = new DiskTest();
+            disk = new DiskMock();
             sychro = new UserSynchro(disk, Fixture.Context);
         }
     }
