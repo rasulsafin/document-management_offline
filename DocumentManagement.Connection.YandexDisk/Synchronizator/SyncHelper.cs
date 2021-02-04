@@ -13,34 +13,17 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
             foreach (var localRev in localRevs)
             {
-                SyncAction action = null;
                 var remoteRev = remoteRevs.Find(r => r.ID == localRev.ID);
-                if (remoteRev == null)
-                {
-                    action = GetAction(localRev, SyncActionType.Upload, synchro);
-                }
-                else if (remoteRev.IsDelete && !localRev.IsDelete)
-                {
-                    action = GetAction(localRev, SyncActionType.DeleteLocal, synchro);
-                }
-                else if (!remoteRev.IsDelete && localRev.IsDelete)
-                {
-                    action = GetAction(localRev, SyncActionType.DeleteRemote, synchro);
-                }
-                else if (remoteRev > localRev)
-                {
-                    action = GetAction(localRev, SyncActionType.Download, synchro);
-                }
-                else if (remoteRev < localRev)
-                {
-                    action = GetAction(localRev, SyncActionType.Upload, synchro);
-                }
-                else
-                {
-                    action = GetAction(localRev, SyncActionType.None, synchro);
-                    action = synchro.SpecialSynchronization(action);
-                }
+                SyncActionType actionType = (remoteRev == null) ? SyncActionType.Upload
+                    : (remoteRev.IsDelete && !localRev.IsDelete) ? SyncActionType.DeleteLocal
+                    : (!remoteRev.IsDelete && localRev.IsDelete) ? SyncActionType.DeleteRemote
+                    : (remoteRev > localRev) ? SyncActionType.Download
+                    : (remoteRev < localRev) ? SyncActionType.Upload
+                    : SyncActionType.None;
+                SyncAction action = GetAction(localRev, actionType, synchro);
 
+                if (action.TypeAction == SyncActionType.None)
+                    action = synchro.SpecialSynchronization(action);
                 if (action.TypeAction != SyncActionType.None)
                     result.Add(action);
 
