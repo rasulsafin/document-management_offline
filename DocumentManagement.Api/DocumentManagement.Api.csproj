@@ -7,6 +7,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
     <UserSecretsId>f16ae3b8-e260-4bfc-84ad-2f42d42b7d0f</UserSecretsId>
+    <RootNamespace>MRS.DocumentManagement.Api</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="DocumentManagement.db-shm" />
