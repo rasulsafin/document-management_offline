@@ -81,9 +81,9 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpGet]
         [Route("yandex-disk")]
-        public async Task GetTokenYandexDisk()
+        public async Task AuthenticateToExternalSystem()
         {
-            // https://yandex.ru/dev/oauth/doc/dg/reference/desktop-client.html
+            // information:  https://yandex.ru/dev/oauth/doc/dg/reference/desktop-client.html
             var context = this.HttpContext;
             var response = string.Empty;
             if (context.Request.Query.ContainsKey("access_token"))
