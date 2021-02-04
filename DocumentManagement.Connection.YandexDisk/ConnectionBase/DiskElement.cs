@@ -49,12 +49,12 @@ namespace MRS.DocumentManagement.Connection
                     }
                     else
                     {
-                        Console.WriteLine($"GetElements: Неизвестный тег [{element.Name}]");
+                        throw new XmlException($"GetElements: Неизвестный тег [{element.Name}]");
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"GetElements: Неизвестный тип [{node.GetType().Name}]");
+                    throw new XmlException($"GetElements: Неизвестный тип [{node.GetType().Name}]");
                 }
             }
 
@@ -74,19 +74,19 @@ namespace MRS.DocumentManagement.Connection
                             result.Href = GetValueElement(element);
                             break;
                         case "d:propstat":
-                            GetPropstat(result, element);
+                            GetPropStatus(result, element);
                             break;
                         case "d:response":
                             result = GetElement(element);
                             break;
                         default:
-                            Console.WriteLine($"GetElement: Неизвестный тег [{element.Name}]");
+                            throw new XmlException($"GetElement: Неизвестный тег [{element.Name}]");
                             break;
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"GetElement: Неизвестный тип [{node.GetType().Name}]");
+                    throw new XmlException($"GetElement: Неизвестный тип [{node.GetType().Name}]");
                 }
             }
 
@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Connection
             return Uri.UnescapeDataString(element.InnerText);
         }
 
-        private static void GetPropstat(DiskElement result, XmlElement root)
+        private static void GetPropStatus(DiskElement result, XmlElement root)
         {
             foreach (var node in root.ChildNodes)
             {
@@ -113,13 +113,13 @@ namespace MRS.DocumentManagement.Connection
                             GetProp(result, element);
                             break;
                         default:
-                            Console.WriteLine($"GetPropstat: Неизвестный тег [{element.Name}]");
+                            throw new XmlException($"GetPropStatus: Неизвестный тег [{element.Name}]");
                             break;
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"GetPropstat: Неизвестный тип [{node.GetType().Name}]");
+                    throw new XmlException($"GetPropstat: Неизвестный тип [{node.GetType().Name}]");
                 }
             }
         }
@@ -145,7 +145,7 @@ namespace MRS.DocumentManagement.Connection
                             SetLastModified(result, element);
                             break;
                         case "d:resourcetype":
-                            GetResourcetype(result, element);
+                            GetResourceType(result, element);
                             break;
                         case "d:getcontenttype":
                             result.ContentType = GetValueElement(element);
@@ -163,13 +163,13 @@ namespace MRS.DocumentManagement.Connection
                             result.MulcaDigestUrl = GetValueElement(element);
                             break;
                         default:
-                            Console.WriteLine($"GetProp: Неизвестный тег [{element.Name}]");
+                            throw new XmlException($"GetProp: Неизвестный тег [{element.Name}]");
                             break;
                     }
                 }
                 else
                 {
-                    Console.WriteLine($"GetProp: Неизвестный тип [{node.GetType().Name}]");
+                    throw new XmlException($"GetProp: Неизвестный тип [{node.GetType().Name}]");
                 }
             }
         }
@@ -180,7 +180,7 @@ namespace MRS.DocumentManagement.Connection
             result.LastModified = DateTime.Parse(result.lastModifiedString);
         }
 
-        private static void GetResourcetype(DiskElement result, XmlElement root)
+        private static void GetResourceType(DiskElement result, XmlElement root)
         {
             foreach (var node in root.ChildNodes)
             {
@@ -192,7 +192,7 @@ namespace MRS.DocumentManagement.Connection
                             result.IsDirectory = true;
                             break;
                         default:
-                            Console.WriteLine($"GetResourcetype: Неизвестный тег [{element.Name}]");
+                            throw new XmlException($"GetResourcetype: Неизвестный тег [{element.Name}]");
                             break;
                     }
                 }
@@ -202,7 +202,7 @@ namespace MRS.DocumentManagement.Connection
                 }
                 else
                 {
-                    Console.WriteLine($"GetResourcetype: Неизвестный тип [{node.GetType().Name}]");
+                    throw new XmlException($"GetResourcetype: Неизвестный тип [{node.GetType().Name}]");
                 }
             }
         }
