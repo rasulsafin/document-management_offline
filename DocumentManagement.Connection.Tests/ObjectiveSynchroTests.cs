@@ -80,16 +80,16 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void CheckDBRevision_ObjectiveSynchro_AddingNonIncludedRecordsToRevisionCollection()
+        public void CheckDBRevision_EmptyCollectRevision_AddingNonIncluded()
         {
             RevisionCollection actual = new RevisionCollection();
+
             sychro.CheckDBRevision(actual);
 
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Objectives, 1);
             expected.GetRevision(TableRevision.Objectives, 2);
             expected.GetRevision(TableRevision.Objectives, 3);
-
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
@@ -97,7 +97,27 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisions_ObjectiveSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
+        public void CheckDBRevision_NotEmptyCollectRevision_NoChange()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            actual.GetRevision(TableRevision.Objectives, 1);
+            actual.GetRevision(TableRevision.Objectives, 2);
+            actual.GetRevision(TableRevision.Objectives, 3);
+
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Objectives, 1);
+            expected.GetRevision(TableRevision.Objectives, 2);
+            expected.GetRevision(TableRevision.Objectives, 3);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
+
+        [TestMethod]
+        public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
             Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Objectives, 2).Rev = 5;
@@ -121,7 +141,37 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevision_ObjectiveSynchro_SettingAnEntryToAComplexVariable()
+        public void GetRevisions_Empty_EmptyCollection()
+        {
+            var expected = new List<Revision>();
+
+            var actual = sychro.GetRevisions(Revisions);
+
+            AssertHelper.EqualList(expected, actual, AssertHelper.EqualRevision);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_NotExistRevision_CorrectAdd()
+        {
+            int id = 2;
+            Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Objectives, 3).Delete();
+
+            Revision expected = new Revision(id, 25);
+            sychro.SetRevision(Revisions, expected);
+
+            var actual = Revisions.GetRevision(TableRevision.Objectives, id);
+            AssertHelper.EqualRevision(expected, actual);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_ExistRevision_CorrectRewrite()
         {
             int id = 2;
             Revisions.GetRevision(TableRevision.Objectives, 1).Rev = 5;
@@ -183,7 +233,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocal_ObjectiveSynchro_DeletingEntryFromLocalCollection()
+        public async Task DeleteLocal_NeedDelete_DeletingInDatebase()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -200,7 +250,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemote_ObjectiveSynchro_DeletingEntryFromRemoteCollection()
+        public async Task DeleteRemote_NeedDelete_DeletingMethodCall()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -214,15 +264,16 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ObjectiveSynchro_UploadEntryToRemoteCollection()
+        public async Task Upload_NeedUnloadNotCollection_UnloadMethodCall()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
-            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
             SyncAction action = new SyncAction();
             action.ID = id;
+
             await sychro.Upload(action);
 
+            ObjectiveDto expected = mapper.Map<ObjectiveDto>(objective);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsTrue(disk.RunPush);
@@ -234,7 +285,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndItemCollect()
+        public async Task Upload_NeedUnloadAndItemCollection_UnloadMethodCall()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -264,7 +315,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndBimCollect()
+        public async Task Upload_NeedUnloadAndBimElementCollection_UnloadMethodCall()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -304,7 +355,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ObjectiveSynchro__UploadEntryToRemoteCollectionAndDynamicCollect()
+        public async Task Upload_NeedUnloadAndDynamicFieldCollection_UnloadMethodCall()
         {
             int id = 1;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -333,14 +384,14 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro_OverwriteExistingEntryToRemoteCollection()
+        public async Task Download_ExistRec_Rewrite()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro_AddEntryToRemoteCollection()
+        public async Task Download_NotExistRec_AddRecord()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES.First();
@@ -354,7 +405,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndItemCollect()
+        public async Task Download_ExistRecAndItemCollect_RewriteRecordAddCollect()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -373,7 +424,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndBimElementCollect_NoFileBim()
+        public async Task Download_ExistRecAndNotBimElementCollect_RewriteRecord()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -408,7 +459,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndBimElementCollect_YesFileBim()
+        public async Task Download_ExistRecAndBimElementCollect_RewriteRecordAddCollect()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -432,7 +483,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro__OverwriteExistingEntryToRemoteCollectionAndDynamicCollect()
+        public async Task Download_ExistRecAndDynamicFieldCollect_RewriteRecordAddCollect()
         {
             int id = 2;
             var objective = Fixture.Context.Objectives.Find(id);
@@ -452,7 +503,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyProject()
+        public async Task Download_NotExistProject_NotCompleteAction()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];
@@ -465,7 +516,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyAuthor()
+        public async Task Download_NotExistUser_NotCompleteAction()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];
@@ -478,7 +529,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveSynchro_StopedDownloadAction_NoKeyObjectiveType()
+        public async Task Download_NotExistObjectiveType_NotCompleteAction()
         {
             int id = 5;
             var objective = MockData.DEFAULT_OBJECTIVES[0];

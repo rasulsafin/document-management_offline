@@ -53,7 +53,7 @@ namespace DocumentManagement.Connection.Tests
         #endregion
 
         [TestMethod]
-        public async Task DeleteLocal_ObjectiveTypeSynchro_()
+        public async Task DeleteLocal_NeedDelete_DeletingInDatebase()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -69,7 +69,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemote_ObjectiveTypeSynchro_()
+        public async Task DeleteRemote_NeedDelete_DeletingMethodCall()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -83,7 +83,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveTypeSynchro_Exist()
+        public async Task Download_ExistRec_Rewrite()
         {
             var type = Fixture.Context.ObjectiveTypes.Find(1);
             ObjectiveTypeDto expected = mapper.Map<ObjectiveTypeDto>(type);
@@ -94,7 +94,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ObjectiveTypeSynchro_NotExist()
+        public async Task Download_NotExistRec_AddRecord()
         {
             ObjectiveTypeDto expected = new ObjectiveTypeDto()
             {
@@ -106,7 +106,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisions_ObjectiveTypeSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
+        public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
             var revisions = new RevisionCollection();
             revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
@@ -131,6 +131,19 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
+        public void GetRevisions_Empty_EmptyCollection()
+        {
+            var revisions = new RevisionCollection();
+            var actual = sychro.GetRevisions(revisions);
+
+            var expected = new List<Revision>();
+            AssertHelper.EqualList(expected, actual, AssertHelper.EqualRevision);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
         public async Task GetSubSynchroList_ObjectiveTypeSynchro_Null()
         {
             SyncAction action = new SyncAction();
@@ -144,11 +157,28 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevision_ObjectiveTypeSynchro_SettingAnEntryToAComplexVariable()
+        public void SetRevision_ExistRevision_CorrectRewrite()
         {
             var revisions = new RevisionCollection();
             revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
             revisions.GetRevision(TableRevision.ObjectiveTypes, 2).Rev = 5;
+            revisions.GetRevision(TableRevision.ObjectiveTypes, 3).Delete();
+
+            Revision expected = new Revision(2, 25);
+            sychro.SetRevision(revisions, expected);
+
+            var actual = revisions.GetRevision(TableRevision.ObjectiveTypes, 2);
+            AssertHelper.EqualRevision(expected, actual);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_NotExistRevision_CorrectAdd()
+        {
+            var revisions = new RevisionCollection();
+            revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
             revisions.GetRevision(TableRevision.ObjectiveTypes, 3).Delete();
 
             Revision expected = new Revision(2, 25);
@@ -193,7 +223,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ObjectiveTypeSynchro_UploadEntryToRemoteCollection()
+        public async Task Upload_NeedUnload_UploadMethodCall()
         {
             int id = 1;
             var expected = mapper.Map<ObjectiveTypeDto>(Fixture.Context.ObjectiveTypes.Find(id));
@@ -213,15 +243,33 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void CheckDBRevision_ObjectiveTypeSynchro_AddingNonIncludedRecordsToRevisionCollection()
+        public void CheckDBRevision_EmptyCollectRevision_AddingNonIncluded()
         {
             RevisionCollection actual = new RevisionCollection();
+
             sychro.CheckDBRevision(actual);
 
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.ObjectiveTypes, 1);
             expected.GetRevision(TableRevision.ObjectiveTypes, 2);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
 
+        [TestMethod]
+        public void CheckDBRevision_NotEmptyCollectRevision_NoChange()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            actual.GetRevision(TableRevision.ObjectiveTypes, 1);
+            actual.GetRevision(TableRevision.ObjectiveTypes, 2);
+
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.ObjectiveTypes, 1);
+            expected.GetRevision(TableRevision.ObjectiveTypes, 2);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);

@@ -60,14 +60,24 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void GetRevisions_ItemSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
+        public void GetRevisions_Empty_EmptyCollection()
+        {
+            var expected = new List<Revision>();
+
+            var actual = sychro.GetRevisions(Revisions);
+
+            AssertHelper.EqualList(expected, actual, AssertHelper.EqualRevision);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
             Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
             Revisions.GetRevision(TableRevision.Items, 3).Delete();
-
-            var actual = sychro.GetRevisions(Revisions);
-
             var delRev = new Revision(3);
             delRev.Delete();
             var expected = new List<Revision>()
@@ -77,6 +87,8 @@ namespace DocumentManagement.Connection.Tests
                 delRev,
             };
 
+            var actual = sychro.GetRevisions(Revisions);
+
             AssertHelper.EqualList(expected, actual, AssertHelper.EqualRevision);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -84,14 +96,31 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevision_ItemSynchro_SettingAnEntryToAComplexVariable()
+        public void SetRevision_NotExistRevision_CorrectAdd()
+        {
+            int id = 2;
+            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(TableRevision.Items, 3).Delete();
+            Revision expected = new Revision(id, 25);
+
+            sychro.SetRevision(Revisions, expected);
+
+            var actual = Revisions.GetRevision(TableRevision.Items, id);
+            AssertHelper.EqualRevision(expected, actual);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_ExistRevision_CorrectRewrite()
         {
             int id = 2;
             Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
             Revisions.GetRevision(TableRevision.Items, 3).Delete();
-
             Revision expected = new Revision(id, 25);
+
             sychro.SetRevision(Revisions, expected);
 
             var actual = Revisions.GetRevision(TableRevision.Items, id);
@@ -146,7 +175,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocal_ItemSynchro_DeletingEntryFromLocalCollection()
+        public async Task DeleteLocal_NeedDelete_DeletingInDatebase()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -166,7 +195,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemote_ItemSynchro_DeletingEntryFromRemoteCollection()
+        public async Task DeleteRemote_NeedDelete_DeletingMethodCall()
         {
             int id = 1;
             var item = Fixture.Context.Items.Find(id);
@@ -184,7 +213,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_ItemSynchro_UploadEntryToRemoteCollection()
+        public async Task Upload_NeedUnload_UploadMethodCall()
         {
             int id = 1;
             var item = Fixture.Context.Items.Find(id);
@@ -205,15 +234,15 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void CheckDBRevision_ItemSynchro_AddingNonIncludedRecordsToRevisionCollection()
+        public void CheckDBRevision_EmptyRevisionCollection_AddingNonIncludedRecords()
         {
             RevisionCollection actual = new RevisionCollection();
-            sychro.CheckDBRevision(actual);
-
             RevisionCollection expected = new RevisionCollection();
             expected.GetRevision(TableRevision.Items, 1);
             expected.GetRevision(TableRevision.Items, 2);
             expected.GetRevision(TableRevision.Items, 3);
+
+            sychro.CheckDBRevision(actual);
 
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -223,14 +252,34 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Download_ItemSynchro_OverwriteExistingEntryToRemoteCollection()
+        public void CheckDBRevision_NotEmptyRevisionCollection_AddingNonIncludedRecords()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            actual.GetRevision(TableRevision.Items, 1);
+            actual.GetRevision(TableRevision.Items, 2);
+            actual.GetRevision(TableRevision.Items, 3);
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Items, 1);
+            expected.GetRevision(TableRevision.Items, 2);
+            expected.GetRevision(TableRevision.Items, 3);
+
+            sychro.CheckDBRevision(actual);
+
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
+
+        [TestMethod]
+        public async Task Download_ExistRec_Rewrite()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task Download_ItemSynchro_AddEntryToRemoteCollection()
+        public async Task Download_NotExistRec_AddRecord()
         {
             int id = 5;
             await DownloadTest(id);

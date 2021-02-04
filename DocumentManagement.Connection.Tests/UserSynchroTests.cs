@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -55,7 +54,7 @@ namespace DocumentManagement.Connection.Tests
         public void Cleanup() => Fixture.Dispose();
 
         [TestMethod]
-        public void CheckDBRevision_UserSynchro_AddingNonIncludedRecordsToRevisionCollection()
+        public void CheckDBRevision_EmptyRevisionCollection_AddingNonIncludedRecords()
         {
             RevisionCollection actual = new RevisionCollection();
             sychro.CheckDBRevision(actual);
@@ -65,7 +64,6 @@ namespace DocumentManagement.Connection.Tests
             expected.GetRevision(TableRevision.Users, 2);
             expected.GetRevision(TableRevision.Users, 3);
             expected.GetRevision(TableRevision.Users, 4);
-
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
@@ -73,7 +71,29 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void GetRevisions_UserSynchro_RemovingACollectionOfRevisionsFromAComplexVariable()
+        public void CheckDBRevision_NotEmptyRevisionCollection_AddingNonIncludedRecords()
+        {
+            RevisionCollection actual = new RevisionCollection();
+            actual.GetRevision(TableRevision.Users, 1);
+            actual.GetRevision(TableRevision.Users, 2);
+            actual.GetRevision(TableRevision.Users, 3);
+            actual.GetRevision(TableRevision.Users, 4);
+
+            sychro.CheckDBRevision(actual);
+
+            RevisionCollection expected = new RevisionCollection();
+            expected.GetRevision(TableRevision.Users, 1);
+            expected.GetRevision(TableRevision.Users, 2);
+            expected.GetRevision(TableRevision.Users, 3);
+            expected.GetRevision(TableRevision.Users, 4);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+            AssertHelper.EqualRevisionCollection(expected, actual);
+        }
+
+        [TestMethod]
+        public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
             Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
@@ -97,10 +117,41 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SetRevision_UserSynchro_SettingAnEntryToAComplexVariable()
+        public void GetRevisions_Empty_EmptyCollection()
+        {
+            var actual = sychro.GetRevisions(Revisions);
+
+            var delRev = new Revision(3);
+            delRev.Delete();
+            var expected = new List<Revision>();
+
+            AssertHelper.EqualList(expected, actual, AssertHelper.EqualRevision);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_ExistRevision_CorrectRewrite()
         {
             Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Users, 2).Rev = 5;
+            Revisions.GetRevision(TableRevision.Users, 3).Delete();
+
+            Revision expected = new Revision(2, 25);
+            sychro.SetRevision(Revisions, expected);
+
+            var actual = Revisions.GetRevision(TableRevision.Users, 2);
+            AssertHelper.EqualRevision(expected, actual);
+            Assert.IsFalse(disk.RunDelete);
+            Assert.IsFalse(disk.RunPull);
+            Assert.IsFalse(disk.RunPush);
+        }
+
+        [TestMethod]
+        public void SetRevision_NotExistRevision_CorrectAdd()
+        {
+            Revisions.GetRevision(TableRevision.Users, 1).Rev = 5;
             Revisions.GetRevision(TableRevision.Users, 3).Delete();
 
             Revision expected = new Revision(2, 25);
@@ -158,7 +209,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteLocal_UserSynchro_DeletingEntryFromLocalCollection()
+        public async Task DeleteLocal_NeedDelete_DeletingInDatebase()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -175,7 +226,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task DeleteRemote_UserSynchro_DeletingEntryFromRemoteCollection()
+        public async Task DeleteRemote_NeedDelete_DeletingMethodCall()
         {
             int id = 1;
             SyncAction action = new SyncAction();
@@ -190,11 +241,12 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Upload_UserSynchro_UploadEntryToRemoteCollection()
+        public async Task Upload_NeedUnload_UploadMethodCall()
         {
             int id = 1;
             SyncAction action = new SyncAction();
             action.ID = id;
+
             await sychro.Upload(action);
 
             Assert.IsFalse(disk.RunDelete);
@@ -203,23 +255,21 @@ namespace DocumentManagement.Connection.Tests
             Assert.AreEqual(id, disk.LastId);
 
             var user = Fixture.Context.Users.Find(id);
-
             UserDto expected = mapper.Map<UserDto>(user);
             UserDto actual = disk.User.ToDto();
-
             AssertHelper.EqualDto(expected, actual);
             Assert.IsTrue(action.IsComplete);
         }
 
         [TestMethod]
-        public async Task Download_UserSynchro_OverwriteExistingEntryToRemoteCollection()
+        public async Task Download_ExistRec_Rewrite()
         {
             int id = 1;
             await DownloadTest(id);
         }
 
         [TestMethod]
-        public async Task Download_UserSynchro_AddEntryToRemoteCollection()
+        public async Task Download_NotExistRec_AddRecord()
         {
             int id = 5;
             await DownloadTest(id);

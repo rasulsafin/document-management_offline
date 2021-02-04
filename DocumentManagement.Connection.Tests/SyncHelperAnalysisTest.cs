@@ -10,15 +10,17 @@ namespace DocumentManagement.Connection.Tests
     public class SyncHelperAnalysisTest
     {
         [TestMethod]
-        public async Task AnalysisDownloadTestAsync()
+        public async Task Analysis_NeedDownload_AddActionDownload()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 30;
+            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
             local.GetRevision(TableRevision.Users, 2).Rev = 10;
 
             List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
+
             actual.Sort((x, y) => x.ID.CompareTo(y.ID));
             List<SyncAction> expected = new List<SyncAction>()
             {
@@ -28,6 +30,26 @@ namespace DocumentManagement.Connection.Tests
                     TypeAction = SyncActionType.Download,
                     ID = 1,
                 },
+            };
+
+            AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
+        }
+
+        [TestMethod]
+        public async Task Analysis_NeedUpload_AddActionUpload()
+        {
+            RevisionCollection remote = new RevisionCollection();
+            remote.GetRevision(TableRevision.Users, 1).Rev = 10;
+
+            RevisionCollection local = new RevisionCollection();
+            local.GetRevision(TableRevision.Users, 1).Rev = 10;
+            local.GetRevision(TableRevision.Users, 2).Rev = 30;
+
+            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new TestSyncro());
+
+            actual.Sort((x, y) => x.ID.CompareTo(y.ID));
+            List<SyncAction> expected = new List<SyncAction>()
+            {
                 new SyncAction()
                 {
                     Synchronizer = nameof(TestSyncro),
@@ -40,7 +62,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task AnalysisNoneActionTestAsync()
+        public async Task Analysis_NotChenge_NoneAction()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 10;
@@ -58,7 +80,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task AnalysisDeleteTestAsync()
+        public async Task Analysis_NeedDownloadMore_AddActionDownloadMore()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 30;
@@ -89,7 +111,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task AnalysisUploadTestAsync()
+        public async Task Analysis_NeedUploadMore_AddActionUploadMore()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 30;
@@ -121,7 +143,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task AnalysisSubSyncTestAsync()
+        public async Task Analysis_NeedSubSync_AddActionSubSync()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 1;
@@ -155,7 +177,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task AnalysisNoChengeCollectAsync()
+        public async Task Analysis_NoChenge_NoChangeCollect()
         {
             RevisionCollection remote = new RevisionCollection();
             remote.GetRevision(TableRevision.Users, 1).Rev = 1;

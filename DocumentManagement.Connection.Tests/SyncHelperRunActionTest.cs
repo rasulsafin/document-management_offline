@@ -11,7 +11,7 @@ namespace DocumentManagement.Connection.Tests
     public class SyncHelperRunActionTest
     {
         [TestMethod]
-        public async Task RunDownloadTestAsync()
+        public async Task RunAction_NeedDownload_CallDownloadMethod()
         {
             // N | Rem  |  loc
             // 1 |  30  |    0
@@ -45,7 +45,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task RunUploadTestAsync()
+        public async Task RunAction_NeedUpload_CallUploadMethod()
         {
             // N | Rem  |  loc
             // 1 |   0  |   30
@@ -80,7 +80,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task RunDeleteLocalTestAsync()
+        public async Task RunAction_NeedDeleteLocal_CallDeleteLocalMethod()
         {
             // N | Rem  |  loc
             // 1 |  10  |  del
@@ -116,7 +116,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task RunDeleteRemoteTestAsync()
+        public async Task RunAction_NeedDeleteRemote_CallDeleteRemoteMethod()
         {
             // N | Rem  |  loc
             // 1 | del  |  10
@@ -152,7 +152,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task RunSpecialTestAsync()
+        public async Task RunAction_NeedSpecial_CallSpecialMethod()
         {
             // N | Rem  |  loc
             // 1 |  10  |  10  spec
@@ -191,7 +191,7 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task NoneRunTestAsync()
+        public async Task RunAction_NoneAction_NotCall()
         {
             // N | Rem  |  loc
             // 1 |  10  |  10
