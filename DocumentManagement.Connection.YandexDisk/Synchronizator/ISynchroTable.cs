@@ -27,13 +27,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         void SetRevision(RevisionCollection revisions, Revision rev);
 
         /// <summary>
-        /// Returns the internal collection synchronizer.
-        /// </summary>
-        /// <param name="action">Information about the action</param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action);
-
-        /// <summary>
         /// Download an object from the server
         /// </summary>
         /// <param name="action">Information about the action</param>
@@ -60,20 +53,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         /// <param name="action">Information about the action</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task DeleteRemote(SyncAction action);
-
-        /// <summary>
-        /// Special check about the need for synchronization
-        /// </summary>
-        /// <param name="action">Information about the action</param>
-        /// <returns>Information about the action.</returns>
-        SyncAction SpecialSynchronization(SyncAction action);
-
-        /// <summary>
-        /// Perform a special type of synchronization
-        /// </summary>
-        /// <param name="action">Information about the action</param>
-        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task Special(SyncAction action);
 
         /// <summary>
         /// Add records that are in the database but have not yet been tracked (A function for copying databases)

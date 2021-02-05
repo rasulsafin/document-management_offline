@@ -143,40 +143,6 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task Analysis_NeedSubSync_AddActionSubSync()
-        {
-            RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Rev = 1;
-            remote.GetRevision(TableRevision.Users, 2).Rev = 1;
-
-            RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Rev = 1;
-            local.GetRevision(TableRevision.Users, 2).Rev = 1;
-
-            List<SyncAction> actual = await SyncHelper.Analysis(local, remote, new SubSyncSyncro());
-            actual.Sort((x, y) => x.ID.CompareTo(y.ID));
-            List<SyncAction> expected = new List<SyncAction>()
-            {
-                new SyncAction()
-                {
-                    Synchronizer = nameof(SubSyncSyncro),
-                    TypeAction = SyncActionType.Special,
-                    ID = 1,
-                    SpecialSynchronization = true,
-                },
-                new SyncAction()
-                {
-                    Synchronizer = nameof(SubSyncSyncro),
-                    TypeAction = SyncActionType.Special,
-                    ID = 2,
-                    SpecialSynchronization = true,
-                },
-            };
-
-            AssertHelper.EqualList<SyncAction>(expected, actual, AssertHelper.EqualSyncAction);
-        }
-
-        [TestMethod]
         public async Task Analysis_NoChenge_NoChangeCollect()
         {
             RevisionCollection remote = new RevisionCollection();
@@ -224,26 +190,9 @@ namespace DocumentManagement.Connection.Tests
                 return revisions.GetRevisions(TableRevision.Users);
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
-            {
-                return Task.FromResult<List<ISynchroTable>>(null);
-            }
-
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
             {
                 throw new System.NotImplementedException();
-            }
-
-            Task ISynchroTable.Special(SyncAction action)
-            {
-                throw new System.NotImplementedException();
-            }
-
-            SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
-            {
-                action.SpecialSynchronization = true;
-                action.TypeAction = SyncActionType.Special;
-                return action;
             }
 
             Task ISynchroTable.Upload(SyncAction action)
@@ -289,20 +238,11 @@ namespace DocumentManagement.Connection.Tests
                 return revisions.GetRevisions(TableRevision.Users);
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
-            {
-                return Task.FromResult<List<ISynchroTable>>(null);
-            }
-
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
             {
                 throw new System.NotImplementedException();
             }
 
-            SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
-            {
-                return action;
-            }
         }
     }
 }

@@ -58,10 +58,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             }
         }
 
-        public Task Special(SyncAction action)
-        {
-            throw new NotImplementedException();
-        }
+        
 
         public async Task Upload(SyncAction action)
         {
@@ -75,19 +72,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return revisions.GetRevisions(TableRevision.Users);
         }
 
-        public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
-        {
-            return Task.FromResult<List<ISynchroTable>>(null);
-        }
-
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             revisions.GetRevision(TableRevision.Users, rev.ID).Rev = rev.Rev;
-        }
-
-        public SyncAction SpecialSynchronization(SyncAction action)
-        {
-            return action;
         }
 
         public void CheckDBRevision(RevisionCollection local)

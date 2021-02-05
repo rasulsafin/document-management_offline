@@ -152,45 +152,6 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task RunAction_NeedSpecial_CallSpecialMethod()
-        {
-            // N | Rem  |  loc
-            // 1 |  10  |  10  spec
-            // 2 |  10  |  10
-            RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Rev = 10;
-            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
-
-            RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Rev = 10;
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
-
-            SyncAction action = new SyncAction()
-            {
-                Synchronizer = nameof(UserSyncro),
-                TypeAction = SyncActionType.Special,
-                ID = 1,
-            };
-
-            var synchro = new UserSyncro();
-            await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
-             {
-                 await SyncHelper.RunAction(action, synchro, local, remote);
-             });
-
-            RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Rev = 10;
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
-
-            Assert.IsFalse(synchro.RunDeleteLocal);
-            Assert.IsFalse(synchro.RunDeleteRemote);
-            Assert.IsFalse(synchro.RunDownload);
-            Assert.IsFalse(synchro.RunUpload);
-
-            AssertHelper.EqualRevisionCollection(expected, local);
-        }
-
-        [TestMethod]
         public async Task RunAction_NoneAction_NotCall()
         {
             // N | Rem  |  loc
@@ -277,19 +238,9 @@ namespace DocumentManagement.Connection.Tests
                 return revisions.GetRevisions(TableRevision.Users);
             }
 
-            Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
-            {
-                throw new System.NotImplementedException();
-            }
-
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
             {
                 revisions.GetRevision(TableRevision.Users, rev.ID).Rev = rev.Rev;
-            }
-
-            SyncAction ISynchroTable.SpecialSynchronization(SyncAction action)
-            {
-                return action;
             }
         }
     }

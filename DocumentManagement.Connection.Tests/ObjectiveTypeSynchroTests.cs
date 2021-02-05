@@ -144,19 +144,6 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public async Task GetSubSynchroList_ObjectiveTypeSynchro_Null()
-        {
-            SyncAction action = new SyncAction();
-            action.ID = 1;
-            var sub = await sychro.GetSubSynchroList(action);
-            Assert.IsNull(sub);
-
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
         public void SetRevision_ExistRevision_CorrectRewrite()
         {
             var revisions = new RevisionCollection();
@@ -186,37 +173,6 @@ namespace DocumentManagement.Connection.Tests
 
             var actual = revisions.GetRevision(TableRevision.ObjectiveTypes, 2);
             AssertHelper.EqualRevision(expected, actual);
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
-        public void SpecialSynchronization_ObjectiveTypeSynchro_NoChanges()
-        {
-            SyncAction actual = new SyncAction();
-            SyncAction expected = new SyncAction();
-            actual.ID = expected.ID = 1;
-            actual.Synchronizer = expected.Synchronizer = nameof(ObjectiveTypeSynchro);
-            actual.TypeAction = expected.TypeAction = SyncActionType.None;
-
-            actual = sychro.SpecialSynchronization(actual);
-            expected.SpecialSynchronization = false;
-
-            AssertHelper.EqualSyncAction(expected, actual);
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
-        public async Task Special_ObjectiveTypeSynchro_Exeption()
-        {
-            SyncAction action = new SyncAction();
-            await Assert.ThrowsExceptionAsync<NotImplementedException>(async () =>
-            {
-                await sychro.Special(action);
-            });
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);

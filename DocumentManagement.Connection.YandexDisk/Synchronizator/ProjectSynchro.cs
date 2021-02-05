@@ -78,28 +78,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return revisions.GetRevisions(TableRevision.Projects).Select(pr => (Revision)pr).ToList();
         }
 
-        public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
-        {
-            return Task.FromResult<List<ISynchroTable>>(null);
-
-            // List<ISynchroTable> synchros = new List<ISynchroTable>();
-            // synchros.Add(new ItemSynchro(disk, context));
-            // return Task.FromResult(synchros);
-        }
-
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             revisions.GetRevision(TableRevision.Projects, rev.ID).Rev = rev.Rev;
-        }
-
-        public Task Special(SyncAction action)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public SyncAction SpecialSynchronization(SyncAction action)
-        {
-            return action;
         }
 
         public async Task Upload(SyncAction action)

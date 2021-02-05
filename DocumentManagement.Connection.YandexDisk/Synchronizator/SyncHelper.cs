@@ -22,20 +22,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                     : SyncActionType.None;
                 SyncAction action = GetAction(localRev, actionType, synchro);
 
-                if (action.TypeAction == SyncActionType.None)
-                    action = synchro.SpecialSynchronization(action);
                 if (action.TypeAction != SyncActionType.None)
                     result.Add(action);
-
-                List<ISynchroTable> subSynchros = await synchro.GetSubSynchroList(action);
-                if (subSynchros != null)
-                {
-                    foreach (var subSynchro in subSynchros)
-                    {
-                        List<SyncAction> subActions = await Analysis(local, remote, subSynchro);
-                        result.AddRange(subActions);
-                    }
-                }
 
                 if (remoteRev != null)
                     remoteRevs.Remove(remoteRev);
@@ -93,14 +81,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 case SyncActionType.Special:
                     action.SpecialSynchronization = true;
                     break;
-            }
-
-            if (action.SpecialSynchronization)
-            {
-                var subSynchroList = await synchro.GetSubSynchroList(action);
-
-                // TODO Выполнить внутренюю синхронизацию
-                await synchro.Special(action);
             }
         }
     }

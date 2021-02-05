@@ -165,50 +165,6 @@ namespace DocumentManagement.Connection.Tests
         }
 
         [TestMethod]
-        public void SpecialSynchronization_UserSynchro_NoChanges()
-        {
-            SyncAction actual = new SyncAction();
-            SyncAction expected = new SyncAction();
-            actual.ID = expected.ID = 1;
-            actual.Synchronizer = expected.Synchronizer = nameof(UserSynchro);
-            actual.TypeAction = expected.TypeAction = SyncActionType.None;
-
-            actual = sychro.SpecialSynchronization(actual);
-            expected.SpecialSynchronization = false;
-
-            AssertHelper.EqualSyncAction(expected, actual);
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
-        public async Task GetSubSynchroList_UserSynchro_Null()
-        {
-            SyncAction action = new SyncAction();
-            action.ID = 1;
-            var sub = await sychro.GetSubSynchroList(action);
-            Assert.IsNull(sub);
-
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
-        public async Task Special_UserSynchro_Exeption()
-        {
-            SyncAction action = new SyncAction();
-            await Assert.ThrowsExceptionAsync<NotImplementedException>(() =>
-            {
-                return sychro.Special(action);
-            });
-            Assert.IsFalse(disk.RunDelete);
-            Assert.IsFalse(disk.RunPull);
-            Assert.IsFalse(disk.RunPush);
-        }
-
-        [TestMethod]
         public async Task DeleteLocal_NeedDelete_DeletingInDatebase()
         {
             int id = 1;

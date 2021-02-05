@@ -82,24 +82,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             return revisions.GetRevisions(TableRevision.Items);
         }
 
-        public Task<List<ISynchroTable>> GetSubSynchroList(SyncAction action)
-        {
-            return Task.FromResult<List<ISynchroTable>>(null);
-        }
-
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
             revisions.GetRevision(TableRevision.Items, rev.ID).Rev = rev.Rev;
-        }
-
-        public Task Special(SyncAction action)
-        {
-            throw new System.NotImplementedException();
-        }
-
-        public SyncAction SpecialSynchronization(SyncAction action)
-        {
-            return action;
         }
 
         public async Task Upload(SyncAction action)
