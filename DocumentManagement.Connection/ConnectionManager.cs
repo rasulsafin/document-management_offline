@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection
+namespace MRS.DocumentManagement.Connection
 {
     public class ConnectionManager
     {

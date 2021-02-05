@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using Castle.DynamicProxy.Generators;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -107,6 +106,17 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         private static readonly ObjectiveType OBJECTIVE_TYPE_ONE = new ObjectiveType { Name = "FirstOT" };
         private static readonly ObjectiveType OBJECTIVE_TYPE_TWO = new ObjectiveType { Name = "SecondOT" };
+        #endregion
+
+        #region CONNECTION_TYPES
+        public static List<ConnectionType> DEFAULT_CONNECTION_TYPES => new List<ConnectionType>
+        {
+            new ConnectionType { Name = CONNECTION_TYPE_ONE.Name },
+            new ConnectionType { Name = CONNECTION_TYPE_TWO.Name },
+        };
+
+        private static readonly ConnectionType CONNECTION_TYPE_ONE = new ConnectionType { Name = "FirstConnectionType" };
+        private static readonly ConnectionType CONNECTION_TYPE_TWO = new ConnectionType { Name = "SecondConnectionType" };
         #endregion
 
         #region PROJECTS

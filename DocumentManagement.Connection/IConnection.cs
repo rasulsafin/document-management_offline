@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace DocumentManagement.Connection
+namespace MRS.DocumentManagement.Connection
 {
     /// <summary>
     /// Interface for any type of connection.
@@ -37,7 +37,7 @@ namespace DocumentManagement.Connection
         /// </summary>
         /// <returns>Progress.</returns>
         ///
-        // TODO uncomment after yandex PR will be merged
+        // TODO uncomment after yandex PR with syncronization functionality will be merged
         Task/*<ProgressSync>*/ GetProgressSyncronization();
     }
 }

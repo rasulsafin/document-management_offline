@@ -17,7 +17,7 @@ namespace DocumentManagement.Api.Controllers
         public ConnectionTypesController(IConnectionTypeService connectionTypeService) => service = connectionTypeService;
 
         [HttpPost]
-        public async Task<IActionResult> AddAsync([FromBody] string typeName)
+        public async Task<IActionResult> Add([FromBody] string typeName)
         {
             try
             {

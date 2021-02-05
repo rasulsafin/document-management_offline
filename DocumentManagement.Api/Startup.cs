@@ -15,6 +15,7 @@ using MRS.DocumentManagement.Services;
 using System;
 using System.IO;
 using System.Reflection;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -79,6 +80,7 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
+            services.AddScoped<ConnectionManager>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
