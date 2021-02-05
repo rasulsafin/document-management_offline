@@ -8,7 +8,7 @@ using AutoMapper;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
@@ -115,10 +115,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public async Task StartSync(DMContext context, IMapper mapper)
         {
-            progress.current = 0;
-            progress.total = 0;
-            progress.message = "Analysis";
-            progress.error = null;
+            progress.Current= 0;
+            progress.Total = 0;
+            progress.Message = "Analysis";
+            progress.Error = null;
 
             NowSync = true;
             NeedStopSync = false;
@@ -135,13 +135,13 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
             if (syncActions.Count > 0)
             {
-                progress.total = syncActions.Count;
-                progress.current = 0;
+                progress.Total = syncActions.Count;
+                progress.Current = 0;
 
                 try
                 {
                     Console.WriteLine("Начата синхронизация");
-                    progress.message = "Sync";
+                    progress.Message = "Sync";
                     for (int i = 0; i < COUNT_TRY; i++)
                     {
                         List<SyncAction> noComplete = new List<SyncAction>();
@@ -150,10 +150,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                             if (NeedStopSync) break;
                             await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
                             if (action.IsComplete)
-                                progress.current++;
+                                progress.Current++;
                             else
                                 noComplete.Add(action);
-                            Console.WriteLine($"Синхронизировано элементов: {progress.current}");
+                            Console.WriteLine($"Синхронизировано элементов: {progress.Current}");
                         }
 
                         if (noComplete.Count == 0) break;
@@ -163,25 +163,25 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
                 }
                 catch (Exception ex)
                 {
-                    progress.error = ex;
+                    progress.Error = ex;
                 }
                 finally
                 {
-                    progress.message = "Save";
+                    progress.Message = "Save";
                     await disk.Push(remoteRevisions, REVISIONS);
                     SaveRevisions();
                     NowSync = false;
-                    if (progress.error == null)
-                        progress.message = "Complete";
+                    if (progress.Error == null)
+                        progress.Message = "Complete";
                     else
-                        progress.message = "Error";
+                        progress.Message = "Error";
 
                     Console.WriteLine("Синхронизация завершена!");
                 }
             }
             else
             {
-                progress.message = "Not Need";
+                progress.Message = "Not Need";
             }
         }
 

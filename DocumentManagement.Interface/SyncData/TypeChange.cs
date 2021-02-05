@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Interface.Services
+﻿namespace MRS.DocumentManagement.Interface.SyncData
 {
     public enum TypeChange
     {

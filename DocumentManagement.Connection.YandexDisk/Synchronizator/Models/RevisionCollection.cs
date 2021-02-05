@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {

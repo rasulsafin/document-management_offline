@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
 {

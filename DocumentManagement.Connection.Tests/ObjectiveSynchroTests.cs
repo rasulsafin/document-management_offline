@@ -8,7 +8,7 @@ using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 
@@ -322,10 +322,10 @@ namespace DocumentManagement.Connection.Tests
             Fixture.Context.Items.AddRange(MockData.DEFAULT_ITEMS);
             Fixture.Context.SaveChanges();
 
-            var itemID = Fixture.Context.Items.Where(x => x.ItemType == (int)ItemTypeDto.Bim).FirstOrDefault().ID;
+            var itemName = Fixture.Context.Items.Where(x => x.ItemType == (int)ItemTypeDto.Bim).FirstOrDefault().Name;
             foreach (var bimElem in MockData.DEFAULT_BIM_ELEMENTS)
             {
-                bimElem.ItemID = itemID;
+                bimElem.ParentName = itemName;
                 Fixture.Context.BimElements.Add(bimElem);
             }
 
@@ -436,7 +436,7 @@ namespace DocumentManagement.Connection.Tests
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
 
-                bimDto.ItemID = (ID<ItemDto>)3;
+                bimDto.ParentName = "Имя Файла которого пока нет";
                 expBim.Add(bimDto);
             }
 
@@ -454,7 +454,6 @@ namespace DocumentManagement.Connection.Tests
             objective = Fixture.Context.Objectives.Find(action.ID);
             ObjectiveDto actual = mapper.Map<ObjectiveDto>(objective);
 
-            expected.BimElements = Enumerable.Empty<BimElementDto>();
             AssertHelper.EqualDto(expected, actual);
         }
 
@@ -475,7 +474,7 @@ namespace DocumentManagement.Connection.Tests
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
 
-                bimDto.ItemID = (ID<ItemDto>)item.ID;
+                bimDto.ParentName = item.Name;
                 expBim.Add(bimDto);
             }
 

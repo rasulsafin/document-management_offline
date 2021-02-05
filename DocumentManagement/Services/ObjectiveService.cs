@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utils.ReportCreator;
 

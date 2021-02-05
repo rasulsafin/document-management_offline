@@ -1,9 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 

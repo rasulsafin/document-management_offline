@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.Synchronizator
 {
@@ -174,22 +174,19 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
             {
                 var bim = await context.BimElements.FirstOrDefaultAsync(x => x.GlobalID == bimDto.GlobalID);
                 var existBim = bim != null;
-                var item = await context.Items.FindAsync((int)bimDto.ItemID);
-                if (item != null)
-                {
-                    bim = mapper.Map<BimElement>(bimDto);
-                    if (!existBim)
-                    {
-                        context.BimElements.Add(bim);
-                    }
-                    else
-                    {
-                        context.BimElements.Update(bim);
-                    }
 
-                    await context.SaveChangesAsync();
-                    local.BimElements.Add(new BimElementObjective() { ObjectiveID = local.ID, BimElementID = bim.ID });
+                bim = mapper.Map<BimElement>(bimDto);
+                if (!existBim)
+                {
+                    context.BimElements.Add(bim);
                 }
+                else
+                {
+                    context.BimElements.Update(bim);
+                }
+
+                await context.SaveChangesAsync();
+                local.BimElements.Add(new BimElementObjective() { ObjectiveID = local.ID, BimElementID = bim.ID });
             }
         }
 

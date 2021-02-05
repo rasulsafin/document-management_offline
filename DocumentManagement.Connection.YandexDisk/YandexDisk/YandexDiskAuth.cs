@@ -1,9 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MRS.DocumentManagement.Connection.YandexDisk
+﻿namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexDiskAuth
     {

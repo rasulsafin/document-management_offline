@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+﻿using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Tests
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Interface.Services
+namespace MRS.DocumentManagement.Interface.SyncData
 {
     public struct ProgressSync
     {

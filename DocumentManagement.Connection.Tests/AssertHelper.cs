@@ -5,7 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace DocumentManagement.Connection.Tests
 {
@@ -201,7 +201,8 @@ namespace DocumentManagement.Connection.Tests
         {
             if (NullComparer(expected, actual)) return;
             Assert.AreEqual(expected.GlobalID, actual.GlobalID, "Не совпали GlobalID у объекта BimElementDto");
-            Assert.AreEqual(expected.ItemID, actual.ItemID, "Не совпали ItemID у объекта BimElementDto");
+            Assert.AreEqual(expected.ParentName, actual.ParentName, "Не совпали ParentName у объекта BimElementDto");
+            Assert.AreEqual(expected.ElementName, actual.ElementName, "Не совпали ElementName у объекта BimElementDto");
         }
     }
 }

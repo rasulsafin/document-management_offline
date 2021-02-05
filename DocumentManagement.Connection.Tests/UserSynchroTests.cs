@@ -5,7 +5,7 @@ using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
 

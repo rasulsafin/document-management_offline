@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Synchronizator;
-using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace DocumentManagement.Connection.Tests
 {
@@ -221,7 +221,7 @@ namespace DocumentManagement.Connection.Tests
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
-                return revisions.GetRevisions(MRS.DocumentManagement.Interface.Services.TableRevision.Users);
+                return revisions.GetRevisions(TableRevision.Users);
             }
 
             Task<List<ISynchroTable>> ISynchroTable.GetSubSynchroList(SyncAction action)
