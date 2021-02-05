@@ -14,7 +14,7 @@ namespace Forge.Models
         [DataMember(Name = "attributes")]
         public TAttributes Attributes { get; set; }
 
-        [DataMember(Name = "relationships")]
+        [DataMember(Name = "relationships", EmitDefaultValue = false)]
         public TRelationships Relationships { get; set; }
     }
 }

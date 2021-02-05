@@ -61,6 +61,60 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на https://developer.api.autodesk.com.
+        /// </summary>
+        internal static string ForgeUrl {
+            get {
+                return ResourceManager.GetString("ForgeUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}.
+        /// </summary>
+        internal static string GetIssuesMethod {
+            get {
+                return ResourceManager.GetString("GetIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/ng-issue-types.
+        /// </summary>
+        internal static string GetNGIssueTypesMethod {
+            get {
+                return ResourceManager.GetString("GetNGIssueTypesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}.
+        /// </summary>
+        internal static string PatchIssuesMethod {
+            get {
+                return ResourceManager.GetString("PatchIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/attachments.
+        /// </summary>
+        internal static string PostIssuesAttachmentsMethod {
+            get {
+                return ResourceManager.GetString("PostIssuesAttachmentsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues.
+        /// </summary>
+        internal static string PostIssuesMethod {
+            get {
+                return ResourceManager.GetString("PostIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &lt;!DOCTYPE html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
         ///    &lt;body&gt;You can now close this window!&lt;/body&gt;

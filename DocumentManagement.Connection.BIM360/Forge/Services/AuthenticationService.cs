@@ -10,7 +10,7 @@ using DocumentManagement.Connection.BIM360.Properties;
 using Forge.Models.Authentication;
 using Newtonsoft.Json;
 
-namespace Forge
+namespace Forge.Services
 {
     public class AuthenticationService : IDisposable
     {
@@ -186,10 +186,10 @@ namespace Forge
             status = ConnectionStatus.Connected;
         }
 
-        private string Authorize(string appProperyClientId, string appProperyCallBackUrl)
-            => $"https://developer.api.autodesk.com/authentication/v1/refreshtoken?response_type=code&client_id={appProperyClientId}&redirect_uri={appProperyCallBackUrl}&scope={SCOPE}";
+        private string Authorize(string appPropertyClientId, string appPropertyCallBackUrl)
+            => $"https://developer.api.autodesk.com/authentication/v1/refreshtoken?response_type=code&client_id={appPropertyClientId}&redirect_uri={appPropertyCallBackUrl}&scope={SCOPE}";
 
-        private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string? code, string appProperyCallBackUrl)
+        private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string code, string appProperyCallBackUrl)
         {
             var request = new HttpRequestMessage(HttpMethod.Post, "https://developer.api.autodesk.com/authentication/v1/gettoken")
             {

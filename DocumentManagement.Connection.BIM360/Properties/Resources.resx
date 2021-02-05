@@ -117,8 +117,27 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ForgeUrl" xml:space="preserve">
+    <value>https://developer.api.autodesk.com</value>
+    <comment>URL of Autodesk Forge methods</comment>
+  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="SuccessfulAuthentication" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SuccessfulAuthentication.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1251</value>
+  </data>
+  <data name="GetIssuesMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}</value>
+  </data>
+  <data name="GetNGIssueTypesMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/ng-issue-types</value>
+  </data>
+  <data name="PatchIssuesMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/quality-issues/{1}</value>
+  </data>
+  <data name="PostIssuesAttachmentsMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/attachments</value>
+  </data>
+  <data name="PostIssuesMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/quality-issues</value>
   </data>
 </root>

@@ -1,3 +1,5 @@
+using Forge.Services;
+
 namespace CloudApis.Utils
 {
     public class ApiProperties
@@ -12,7 +14,7 @@ namespace CloudApis.Utils
             switch (type)
             {
                 case CloudTypes.Bim360:
-                    auth = Forge.AuthenticationService.Instance;
+                    auth = AuthenticationService.Instance;
                     break;
                 default:
                     return;
