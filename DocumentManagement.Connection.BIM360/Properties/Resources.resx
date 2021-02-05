@@ -140,4 +140,7 @@
   <data name="PostIssuesMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/quality-issues</value>
   </data>
+  <data name="GetHubsMethod" xml:space="preserve">
+    <value>/project/v1/hubs</value>
+  </data>
 </root>
