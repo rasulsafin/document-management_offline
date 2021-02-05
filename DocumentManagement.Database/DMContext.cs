@@ -1,51 +1,73 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿#define TEST // Use to perform tests
+#define DEVELOPMENT //Use to work with database
+#undef DEVELOPMENT
+
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {
+        #region Models
         public DbSet<User> Users { get; set; }
+
         public DbSet<Project> Projects { get; set; }
+
         public DbSet<Item> Items { get; set; }
+
         public DbSet<Objective> Objectives { get; set; }
+
         public DbSet<ObjectiveType> ObjectiveTypes { get; set; }
+
         public DbSet<DynamicField> DynamicFields { get; set; }
+
         public DbSet<BimElement> BimElements { get; set; }
+
         public DbSet<ConnectionInfo> ConnectionInfos { get; set; }
+
         public DbSet<EnumDm> EnumDms { get; set; }
+
         public DbSet<EnumDmValue> EnumDmValues { get; set; }
-		public DbSet<Role> Roles { get; set; }
+
+        public DbSet<Role> Roles { get; set; }
+
         public DbSet<ReportCount> ReportCounts { get; set; }
+        #endregion
 
+        #region Bridges
         public DbSet<ProjectItem> ProjectItems { get; set; }
+
         public DbSet<ObjectiveItem> ObjectiveItems { get; set; }
+
         public DbSet<UserProject> UserProjects { get; set; }
+
         public DbSet<UserEnumDmValue> UserEnumDmValues { get; set; }
-		public DbSet<BimElementObjective> BimElementObjectives { get; set; }
-		public DbSet<UserRole> UserRoles { get; set; }
 
-		
+        public DbSet<BimElementObjective> BimElementObjectives { get; set; }
 
-        public DMContext() 
-        {			
+        public DbSet<UserRole> UserRoles { get; set; }
+        #endregion
+
+        public DMContext()
+        {
         }
 
-        public DMContext(DbContextOptions<DMContext> opt) : base(opt)
+        public DMContext(DbContextOptions<DMContext> opt)
+            : base(opt)
         {
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-			// To Update current DB during developing use this line instead of next
-			//optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
-			optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
+#if DEVELOPMENT
+            optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
+#endif
 
-			//if(!optionsBuilder.IsConfigured)
-			//{
-			//    optionsBuilder.UseNpgsql("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
-			//}
-		}
+#if TEST
+            optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
+#endif
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -53,12 +75,13 @@ namespace MRS.DocumentManagement.Database
 				.HasOne(x => x.ConnectionInfo)
 				.WithMany(x => x.Users)
 				.OnDelete(DeleteBehavior.SetNull);
+
 			// Users should have unique logins
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Login)
 				.IsUnique(true);
 
-            modelBuilder.Entity<ReportCount>()
+			modelBuilder.Entity<ReportCount>()
                 .HasKey(x => x.UserID);
 
 			// Roles have unique names
@@ -137,9 +160,7 @@ namespace MRS.DocumentManagement.Database
 				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<BimElement>()
-				.HasOne(x => x.Item)
-				.WithMany(x => x.BimElements)
-				.OnDelete(DeleteBehavior.Cascade);
+                .HasKey(x => x.ID);
 
 			modelBuilder.Entity<BimElementObjective>()
 				.HasKey(x => new { x.BimElementID, x.ObjectiveID });
@@ -171,7 +192,7 @@ namespace MRS.DocumentManagement.Database
 			modelBuilder.Entity<UserEnumDmValue>()
 				.HasOne(x => x.EnumDmValue)
 				.WithMany(x => x.Users)
-				.OnDelete(DeleteBehavior.Cascade);	
+				.OnDelete(DeleteBehavior.Cascade);
 		}
 	}
 }
