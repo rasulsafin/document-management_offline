@@ -280,8 +280,8 @@ namespace MRS.DocumentManagement.Tests.Utility
             new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
         };
 
-        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}" };
-        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}" };
+        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House" };
+        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House" };
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO

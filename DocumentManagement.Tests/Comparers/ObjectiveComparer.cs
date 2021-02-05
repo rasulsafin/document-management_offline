@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Tests
         public ObjectiveComparer(bool ignoreIDs = false) : base(ignoreIDs)
         {
             userComparer = new UserComparer(false);
-            bimComparer = new DelegateComparer<BimElementDto>((x, y) => x.ItemID == y.ItemID && x.GlobalID == y.GlobalID);
+            bimComparer = new DelegateComparer<BimElementDto>((x, y) => x.ParentName == y.ParentName && x.GlobalID == y.GlobalID);
             fieldComparer = new DelegateComparer<DynamicFieldDto>((x, y) => x.Key == y.Key && x.Type == y.Type && x.Value == y.Value);
         }
 

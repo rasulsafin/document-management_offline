@@ -3,14 +3,16 @@ using System;
 using MRS.DocumentManagement.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    partial class DMContextModelSnapshot : ModelSnapshot
+    [Migration("20210201064717_UpdateBimElement")]
+    partial class UpdateBimElement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,9 +23,6 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ElementName")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("GlobalID")
                         .HasColumnType("TEXT");

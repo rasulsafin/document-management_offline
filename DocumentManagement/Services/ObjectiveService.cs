@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Services
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
             {
                 var dbBim = await context.BimElements
-                    .Where(x => x.ItemID == (int)bim.ItemID)
+                    .Where(x => x.ParentName == bim.ParentName)
                     .Where(x => x.GlobalID == bim.GlobalID)
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
@@ -226,7 +226,7 @@ namespace MRS.DocumentManagement.Services
             var currentBimLinks = objective.BimElements.ToList();
             var linksToRemove = currentBimLinks
                 .Where(x => !newBimElements.Any(e =>
-                    (int)e.ItemID == x.BimElement.ItemID
+                    e.ParentName == x.BimElement.ParentName
                     && e.GlobalID == x.BimElement.GlobalID))
                 .ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
@@ -236,7 +236,7 @@ namespace MRS.DocumentManagement.Services
             foreach (var bim in newBimElements)
             {
                 // See if objective already had this bim element referenced
-                var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
+                var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ParentName == bim.ParentName && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
                     objective.BimElements.Add(dbBim);
@@ -244,7 +244,7 @@ namespace MRS.DocumentManagement.Services
                 else
                 {
                     // Bim element was not referenced. Does it exist?
-                    var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
+                    var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ParentName == bim.ParentName && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
                         // Bim element does not exist at all - should be created
