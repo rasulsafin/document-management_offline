@@ -14,15 +14,23 @@ namespace MRS.DocumentManagement.Utility
             CreateMapToModel();
         }
 
+        private static List<string> DecodeAuthFieldNames(string encoded)
+        {
+            var names = new List<string>();
+            if (!string.IsNullOrEmpty(encoded))
+                names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
+            return names;
+        }
+
         private void CreateMapToDto()
         {
             CreateMap<User, UserDto>();
             CreateMap<Project, ProjectDto>();
             CreateMap<Project, ProjectToListDto>();
-               // .ForMember(d => d.ID, a => a.MapFrom(x => x.ID));
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
-            CreateMap<Objective, ObjectiveToListDto>();
+            CreateMap<Objective, ObjectiveToListDto>()
+                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<Objective, ObjectiveDto>()
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
@@ -41,6 +49,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<BimElement, BimElementDto>();
             CreateMap<ConnectionType, ConnectionTypeDto>();
         }
+
         private void CreateMapToModel()
         {
             CreateMap<ProjectDto, Project>();
@@ -62,14 +71,6 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<UserToCreateDto, User>();
             CreateMap<ConnectionTypeDto, ConnectionType>();
             CreateMap<ItemDto, Item>();           
-        }
-
-        private static List<string> DecodeAuthFieldNames(string encoded)
-        {
-            var names = new List<string>();
-            if (!string.IsNullOrEmpty(encoded))
-                names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
-            return names;
         }
     }
 }

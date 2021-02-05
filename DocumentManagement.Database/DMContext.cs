@@ -1,19 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿#define TEST // Use to perform tests
+#define DEVELOPMENT //Use to work with database
+#undef DEVELOPMENT
+
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {
-        public DMContext()
-        {
-        }
-
-        public DMContext(DbContextOptions<DMContext> opt)
-            : base(opt)
-        {
-        }
-
+        #region Models
         public DbSet<User> Users { get; set; }
 
         public DbSet<Project> Projects { get; set; }
@@ -39,7 +35,9 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ReportCount> ReportCounts { get; set; }
 
         public DbSet<ConnectionType> ConnectionTypes { get; set; }
+        #endregion
 
+        #region Bridges
         public DbSet<ProjectItem> ProjectItems { get; set; }
 
         public DbSet<ObjectiveItem> ObjectiveItems { get; set; }
@@ -51,12 +49,26 @@ namespace MRS.DocumentManagement.Database
         public DbSet<BimElementObjective> BimElementObjectives { get; set; }
 
         public DbSet<UserRole> UserRoles { get; set; }
+        #endregion
+
+        public DMContext()
+        {
+        }
+
+        public DMContext(DbContextOptions<DMContext> opt)
+            : base(opt)
+        {
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            // To Update current DB during developing use this line instead of next
-            // optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
+#if DEVELOPMENT
+            optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
+#endif
+
+#if TEST
             optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
+#endif
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,129 +83,127 @@ namespace MRS.DocumentManagement.Database
                 .HasIndex(x => x.Login)
                 .IsUnique(true);
 
-            modelBuilder.Entity<ReportCount>()
+			modelBuilder.Entity<ReportCount>()
                 .HasKey(x => x.UserID);
 
-            // Roles have unique names
-            modelBuilder.Entity<Role>()
-                .HasIndex(x => x.Name)
-                .IsUnique(true);
+			// Roles have unique names
+			modelBuilder.Entity<Role>()
+				.HasIndex(x => x.Name)
+				.IsUnique(true);
 
-            modelBuilder.Entity<ObjectiveType>()
-                .HasIndex(x => x.Name)
-                .IsUnique(true);
+			modelBuilder.Entity<ObjectiveType>()
+				.HasIndex(x => x.Name)
+				.IsUnique(true);
 
             modelBuilder.Entity<ConnectionType>()
                  .HasIndex(x => x.Name)
                  .IsUnique();
 
             modelBuilder.Entity<UserRole>()
-                .HasKey(x => new { x.UserID, x.RoleID });
-            modelBuilder.Entity<UserRole>()
-                .HasOne(x => x.User)
-                .WithMany(x => x.Roles)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<UserRole>()
-                .HasOne(x => x.Role)
-                .WithMany(x => x.Users)
-                .OnDelete(DeleteBehavior.Cascade);
+				.HasKey(x => new { x.UserID, x.RoleID });
+			modelBuilder.Entity<UserRole>()
+				.HasOne(x => x.User)
+				.WithMany(x => x.Roles)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<UserRole>()
+				.HasOne(x => x.Role)
+				.WithMany(x => x.Users)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserProject>()
-                .HasKey(x => new { x.ProjectID, x.UserID });
-            modelBuilder.Entity<UserProject>()
-                .HasOne(x => x.User)
-                .WithMany(x => x.Projects)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<UserProject>()
-                .HasOne(x => x.Project)
-                .WithMany(x => x.Users)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<UserProject>()
+				.HasKey(x => new { x.ProjectID, x.UserID });
+			modelBuilder.Entity<UserProject>()
+				.HasOne(x => x.User)
+				.WithMany(x => x.Projects)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<UserProject>()
+				.HasOne(x => x.Project)
+				.WithMany(x => x.Users)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectItem>()
-                .HasKey(x => new { x.ItemID, x.ProjectID });
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Item)
-                .WithMany(x => x.Projects)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Project)
-                .WithMany(x => x.Items)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ProjectItem>()
+				.HasKey(x => new { x.ItemID, x.ProjectID });
+			modelBuilder.Entity<ProjectItem>()
+				.HasOne(x => x.Item)
+				.WithMany(x => x.Projects)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ProjectItem>()
+				.HasOne(x => x.Project)
+				.WithMany(x => x.Items)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ObjectiveItem>()
-                .HasKey(x => new { x.ObjectiveID, x.ItemID });
-            modelBuilder.Entity<ObjectiveItem>()
-                .HasOne(x => x.Item)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ObjectiveItem>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.Items)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ObjectiveItem>()
+				.HasKey(x => new { x.ObjectiveID, x.ItemID });
+			modelBuilder.Entity<ObjectiveItem>()
+				.HasOne(x => x.Item)
+				.WithMany(x => x.Objectives)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<ObjectiveItem>()
+				.HasOne(x => x.Objective)
+				.WithMany(x => x.Items)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Objective>()
-                .HasOne(x => x.Project)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Objective>()
-                .HasOne(x => x.Author)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.SetNull);
-            modelBuilder.Entity<Objective>()
-                .HasOne(x => x.ParentObjective)
-                .WithMany(x => x.ChildrenObjectives)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Objective>()
-                .HasOne(x => x.ObjectiveType)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<Objective>()
+				.HasOne(x => x.Project)
+				.WithMany(x => x.Objectives)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Objective>()
+				.HasOne(x => x.Author)
+				.WithMany(x => x.Objectives)
+				.OnDelete(DeleteBehavior.SetNull);
+			modelBuilder.Entity<Objective>()
+				.HasOne(x => x.ParentObjective)
+				.WithMany(x => x.ChildrenObjectives)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Objective>()
+				.HasOne(x => x.ObjectiveType)
+				.WithMany(x => x.Objectives)
+				.OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<DynamicField>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.DynamicFields)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<DynamicField>()
+				.HasOne(x => x.Objective)
+				.WithMany(x => x.DynamicFields)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<BimElement>()
-                .HasOne(x => x.Item)
-                .WithMany(x => x.BimElements)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<BimElement>()
+                .HasKey(x => x.ID);
 
-            modelBuilder.Entity<BimElementObjective>()
-                .HasKey(x => new { x.BimElementID, x.ObjectiveID });
-            modelBuilder.Entity<BimElementObjective>()
-                .HasOne(x => x.BimElement)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<BimElementObjective>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.BimElements)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<BimElementObjective>()
+				.HasKey(x => new { x.BimElementID, x.ObjectiveID });
+			modelBuilder.Entity<BimElementObjective>()
+				.HasOne(x => x.BimElement)
+				.WithMany(x => x.Objectives)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<BimElementObjective>()
+				.HasOne(x => x.Objective)
+				.WithMany(x => x.BimElements)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ConnectionInfo>()
-                 .HasOne(x => x.ConnectionType)
-                 .WithMany(x => x.ConnectionInfos)
-                 .OnDelete(DeleteBehavior.Restrict);
+			modelBuilder.Entity<ConnectionInfo>()
+				 .HasOne(x => x.ConnectionType)
+				 .WithMany(x => x.ConnectionInfos)
+				 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<EnumDm>()
-                .HasOne(x => x.ConnectionInfo)
-                .WithMany(x => x.EnumDms)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<EnumDm>()
+				.HasOne(x => x.ConnectionInfo)
+				.WithMany(x => x.EnumDms)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<EnumDmValue>()
-                .HasOne(x => x.EnumDm)
-                .WithMany(x => x.EnumDmValues)
-                .OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<EnumDmValue>()
+				.HasOne(x => x.EnumDm)
+				.WithMany(x => x.EnumDmValues)
+				.OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserEnumDmValue>()
-                .HasKey(x => new { x.EnumDmValueID, x.UserID });
-            modelBuilder.Entity<UserEnumDmValue>()
-                .HasOne(x => x.User)
-                .WithMany(x => x.EnumDmValues)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<UserEnumDmValue>()
-                .HasOne(x => x.EnumDmValue)
-                .WithMany(x => x.Users)
-                .OnDelete(DeleteBehavior.Cascade);
-        }
-    }
+			modelBuilder.Entity<UserEnumDmValue>()
+				.HasKey(x => new { x.EnumDmValueID, x.UserID });
+			modelBuilder.Entity<UserEnumDmValue>()
+				.HasOne(x => x.User)
+				.WithMany(x => x.EnumDmValues)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<UserEnumDmValue>()
+				.HasOne(x => x.EnumDmValue)
+				.WithMany(x => x.Users)
+				.OnDelete(DeleteBehavior.Cascade);
+		}
+	}
 }

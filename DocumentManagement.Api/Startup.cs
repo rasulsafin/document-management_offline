@@ -70,7 +70,7 @@ namespace MRS.DocumentManagement.Api
                 {
                     Version = "v1",
                     Title = "BRIO DM",
-                    Description = "DM API details"
+                    Description = "DM API details",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
