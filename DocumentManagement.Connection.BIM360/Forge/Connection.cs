@@ -12,7 +12,6 @@ namespace DocumentManagement.Connection.BIM360.Forge
 {
     public class Connection : IDisposable
     {
-        private const string CONTENT_TYPE_HEADER = "Content-Type";
         private const string MEDIA_TYPE_JSON = "text/json";
 
         private static readonly double TIMEOUT = 10;

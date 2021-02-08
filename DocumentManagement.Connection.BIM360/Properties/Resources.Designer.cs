@@ -124,6 +124,24 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/contents?filter[type]={2}.
+        /// </summary>
+        internal static string GetProjectsFoldersContentsMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsFoldersContentsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/:project_id/folders/:folder_id/search?.
+        /// </summary>
+        internal static string GetProjectsFoldersSearchMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsFoldersSearchMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}/hub.
         /// </summary>
         internal static string GetProjectsHubMethod {

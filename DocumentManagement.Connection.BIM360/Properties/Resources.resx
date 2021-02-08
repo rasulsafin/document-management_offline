@@ -127,18 +127,23 @@
   </data>
   <data name="GetIssuesMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}</value>
+    <comment>Retrieves information about all the BIM 360 issues in a project, including details about their associated comments and attachments</comment>
   </data>
   <data name="GetNGIssueTypesMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/ng-issue-types</value>
+    <comment>Retrieves a list of supported issue types (e.g., quality and safety) and issue subtypes (e.g., work to complete and pre-punch list) that you can allocate to an issue</comment>
   </data>
   <data name="PatchIssuesMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/quality-issues/{1}</value>
+    <comment>Updates a BIM 360 issue</comment>
   </data>
   <data name="PostIssuesAttachmentsMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/attachments</value>
+    <comment>Adds a BIM 360 Document Management file to a BIM 360 issue</comment>
   </data>
   <data name="PostIssuesMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/quality-issues</value>
+    <comment>Adds a BIM 360 issue to a project</comment>
   </data>
   <data name="GetHubsMethod" xml:space="preserve">
     <value>/project/v1/hubs</value>
@@ -150,9 +155,11 @@
   </data>
   <data name="PutBucketsObjectsMethod" xml:space="preserve">
     <value>/oss/v2/buckets/{0}/objects/{1}</value>
+    <comment>Upload an object. If the specified object name already exists in the bucket, the uploaded content will overwrite the existing content for the bucket name/object name combination.</comment>
   </data>
   <data name="PutBucketsObjectsResumableMethod" xml:space="preserve">
     <value>/oss/v2/buckets/{0}/objects/{1}/resumable</value>
+    <comment>This endpoint allows resumable uploads for large files in chunks.</comment>
   </data>
   <data name="GetProjectsOfHubMethod" xml:space="preserve">
     <value>/project/v1/hubs/{0}/projects</value>
@@ -173,5 +180,13 @@
   <data name="GetTopFoldersMethod" xml:space="preserve">
     <value>/project/v1/hubs/{0}/projects/{1}/topFolders</value>
     <comment>Returns the details of the highest level folders the user has access to for a given project</comment>
+  </data>
+  <data name="GetProjectsFoldersContentsMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/folders/{1}/contents?filter[type]={2}</value>
+    <comment>Returns a collection of items and folders within a folder</comment>
+  </data>
+  <data name="GetProjectsFoldersSearchMethod" xml:space="preserve">
+    <value>/data/v1/projects/:project_id/folders/:folder_id/search?</value>
+    <comment>Filters the data of a folder and recursively in the subfolders of any project accessible to you, using the filter query string parameter</comment>
   </data>
 </root>
