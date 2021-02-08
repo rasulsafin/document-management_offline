@@ -47,6 +47,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
+            CreateMap<ConnectionType, ConnectionTypeDto>();
         }
 
         private void CreateMapToModel()
@@ -68,7 +69,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
-            CreateMap<ItemDto, Item>();
+            CreateMap<ConnectionTypeDto, ConnectionType>();
+            CreateMap<ItemDto, Item>();           
         }
     }
 }
