@@ -1,13 +1,10 @@
-﻿using DocumentManagement.Connection.BIM360.Properties;
-using Forge.Models.DataManagement;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
+using DocumentManagement.Connection.BIM360.Forge;
+using DocumentManagement.Connection.BIM360.Properties;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace Forge.Services
 {
     public class HubService
     {
@@ -25,6 +22,14 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             var data = response[DATA_PROPERTY]?.ToObject<List<Hub>>();
 
             return data ?? new List<Hub>();
+        }
+
+        public async Task<Hub> GetHubInfo(string hubId)
+        {
+            var response = await connection.GetResponse(HttpMethod.Get, Resources.GetHubsInfoByIdMethod, hubId);
+            var data = response[DATA_PROPERTY]?.ToObject<Hub>();
+
+            return data;
         }
     }
 }

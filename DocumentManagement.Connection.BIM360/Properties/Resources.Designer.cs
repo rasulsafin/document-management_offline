@@ -70,6 +70,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}.
+        /// </summary>
+        internal static string GetHubsInfoByIdMethod {
+            get {
+                return ResourceManager.GetString("GetHubsInfoByIdMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs.
         /// </summary>
         internal static string GetHubsMethod {

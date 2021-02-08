@@ -142,5 +142,10 @@
   </data>
   <data name="GetHubsMethod" xml:space="preserve">
     <value>/project/v1/hubs</value>
+    <comment>Returns a collection of accessible hubs for the user</comment>
+  </data>
+  <data name="GetHubsInfoByIdMethod" xml:space="preserve">
+    <value>/project/v1/hubs/{0}</value>
+    <comment>Returns data on a specific hub_id</comment>
   </data>
 </root>
