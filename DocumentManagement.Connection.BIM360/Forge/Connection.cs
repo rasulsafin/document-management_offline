@@ -70,6 +70,7 @@ namespace DocumentManagement.Connection.BIM360.Forge
 
         private async Task<JObject> SendAsync(HttpRequestMessage request)
         {
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TOKEN);
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();
