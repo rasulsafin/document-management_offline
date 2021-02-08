@@ -6,11 +6,13 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F5838427-97CC-44DA-8075-49A8C7480065} = {F5838427-97CC-44DA-8075-49A8C7480065}
+		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA} = {C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.IntegrationTests", "DocumentManagement.Tests\DocumentManagement.IntegrationTests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
+		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA} = {C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Api", "DocumentManagement.Api\DocumentManagement.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
@@ -26,7 +28,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection", "DocumentManagement.Connection\DocumentManagement.Connection.csproj", "{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection", "DocumentManagement.Connection\DocumentManagement.Connection.csproj", "{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

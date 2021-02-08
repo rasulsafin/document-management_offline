@@ -286,8 +286,8 @@ namespace MRS.DocumentManagement.Tests.Utility
         #region BIM_ELEMENTS
         public static List<BimElement> DEFAULT_BIM_ELEMENTS => new List<BimElement>
         {
-            new BimElement { GlobalID = BIM_ELEMENT_ONE.GlobalID },
-            new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
+            BIM_ELEMENT_ONE,
+            BIM_ELEMENT_TWO,
         };
 
         private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House" };

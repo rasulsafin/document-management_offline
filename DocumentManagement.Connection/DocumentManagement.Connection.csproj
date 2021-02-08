@@ -5,4 +5,8 @@
     <RootNamespace>MRS.DocumentManagement.Connection</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+  </ItemGroup>
+
 </Project>
