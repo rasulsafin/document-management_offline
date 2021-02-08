@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using System;
@@ -8,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -15,11 +15,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ConnectionManager connectionManager;
 
-        public ConnectionService(DMContext context, IMapper mapper)
+        public ConnectionService(DMContext context, IMapper mapper, ConnectionManager connectionManager)
         {
             this.context = context;
             this.mapper = mapper;
+            this.connectionManager = connectionManager;
         }
 
         private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 

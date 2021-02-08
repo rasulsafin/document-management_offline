@@ -15,6 +15,7 @@ using MRS.DocumentManagement.Services;
 using System;
 using System.IO;
 using System.Reflection;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -69,7 +70,7 @@ namespace MRS.DocumentManagement.Api
                 {
                     Version = "v1",
                     Title = "BRIO DM",
-                    Description = "DM API details"
+                    Description = "DM API details",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -79,6 +80,7 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
+            services.AddScoped<ConnectionManager>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
@@ -86,6 +88,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
             services.AddSingleton<CryptographyHelper>();
         }

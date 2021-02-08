@@ -3,14 +3,16 @@ using System;
 using MRS.DocumentManagement.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    partial class DMContextModelSnapshot : ModelSnapshot
+    [Migration("20210202131738_AddNameToBimElement")]
+    partial class AddNameToBimElement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,34 +62,12 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<string>("AuthFieldNames")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ConnectionTypeID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("ConnectionTypeID");
 
                     b.ToTable("ConnectionInfos");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionType", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("ConnectionTypes");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
@@ -341,8 +321,7 @@ namespace DocumentManagement.Database.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ConnectionInfoID")
-                        .IsUnique();
+                    b.HasIndex("ConnectionInfoID");
 
                     b.HasIndex("Login")
                         .IsUnique();
@@ -412,17 +391,6 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("BimElement");
 
                     b.Navigation("Objective");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfo", b =>
-                {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
-                        .WithMany("ConnectionInfos")
-                        .HasForeignKey("ConnectionTypeID")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ConnectionType");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
@@ -532,8 +500,8 @@ namespace DocumentManagement.Database.Migrations
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.User", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
-                        .WithOne("User")
-                        .HasForeignKey("MRS.DocumentManagement.Database.Models.User", "ConnectionInfoID")
+                        .WithMany("Users")
+                        .HasForeignKey("ConnectionInfoID")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ConnectionInfo");
@@ -605,12 +573,7 @@ namespace DocumentManagement.Database.Migrations
                 {
                     b.Navigation("EnumDms");
 
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionType", b =>
-                {
-                    b.Navigation("ConnectionInfos");
+                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDm", b =>
