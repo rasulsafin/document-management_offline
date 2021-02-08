@@ -6,7 +6,7 @@ using Autodesk.Forge;
 using Autodesk.Forge.Client;
 using Autodesk.Forge.Model;
 
-namespace Forge
+namespace Forge.Legacy
 {
     public class File : CloudItem<,>
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Forge
+namespace Forge.Legacy
 {
     public static class Extensions
     {

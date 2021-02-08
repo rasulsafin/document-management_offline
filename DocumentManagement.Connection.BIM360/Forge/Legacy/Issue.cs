@@ -5,7 +5,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 
-namespace Forge
+namespace Forge.Legacy
 {
     public class Issue: CloudItem<,>
     {

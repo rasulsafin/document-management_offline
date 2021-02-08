@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using RestSharp;
 
-namespace Forge
+namespace Forge.Legacy
 {
     [DataContract]
     public class JsonData<T> where T : class

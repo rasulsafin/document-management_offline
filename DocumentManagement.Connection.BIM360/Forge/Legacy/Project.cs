@@ -1,4 +1,4 @@
-﻿namespace Forge
+﻿namespace Forge.Legacy
 {
     public class Project : CloudItem<,>
     {

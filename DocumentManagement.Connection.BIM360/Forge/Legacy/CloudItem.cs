@@ -1,7 +1,7 @@
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Forge
+namespace Forge.Legacy
 {
     [DataContract]
     public class CloudItem<T, T2>

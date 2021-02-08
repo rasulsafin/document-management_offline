@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
+using Forge.Models.DataManagement;
 using static Forge.Constants;
 
 namespace Forge.Services

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Forge
+namespace Forge.Legacy
 {
     public class Storage
     {

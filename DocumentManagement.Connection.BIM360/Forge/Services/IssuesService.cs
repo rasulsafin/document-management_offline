@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
 using Forge.Models;
+using Forge.Models.Bim360;
 using static Forge.Constants;
 
 namespace Forge.Services
@@ -64,10 +65,10 @@ namespace Forge.Services
         {
             var response = await connection.SendRequestWithSerializedData(
                     HttpMethod.Patch,
-                    Resources.PostIssuesMethod,
+                    Resources.PatchIssuesMethod,
                     issue,
                     containerID,
-                    issue.id);
+                    issue.ID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
     }
