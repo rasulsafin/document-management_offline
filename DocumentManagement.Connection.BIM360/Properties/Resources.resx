@@ -148,4 +148,10 @@
     <value>/project/v1/hubs/{0}</value>
     <comment>Returns data on a specific hub_id</comment>
   </data>
+  <data name="PutBucketsObjectsMethod" xml:space="preserve">
+    <value>/oss/v2/buckets/{0}/objects/{1}</value>
+  </data>
+  <data name="PutBucketsObjectsResumableMethod" xml:space="preserve">
+    <value>/oss/v2/buckets/{0}/objects/{1}/resumable</value>
+  </data>
 </root>

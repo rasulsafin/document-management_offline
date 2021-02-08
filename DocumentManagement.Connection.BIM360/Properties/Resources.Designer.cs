@@ -133,6 +133,24 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}.
+        /// </summary>
+        internal static string PutBucketsObjectsMethod {
+            get {
+                return ResourceManager.GetString("PutBucketsObjectsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}/resumable.
+        /// </summary>
+        internal static string PutBucketsObjectsResumableMethod {
+            get {
+                return ResourceManager.GetString("PutBucketsObjectsResumableMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &lt;!DOCTYPE html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
         ///    &lt;body&gt;You can now close this window!&lt;/body&gt;
