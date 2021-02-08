@@ -3,12 +3,12 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
+using static Forge.Constants;
 
 namespace Forge.Services
 {
     public class HubService
     {
-        private static readonly string DATA_PROPERTY = "data";
         private readonly Connection connection;
 
         public HubService(Connection connection)

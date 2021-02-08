@@ -4,15 +4,13 @@ using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
 using Forge.Models;
+using static Forge.Constants;
 
 namespace Forge.Services
 {
     public class IssuesService
     {
         private static readonly int ITEMS_ON_PAGE = 100;
-        private static readonly string DATA_PROPERTY = "data";
-        private static readonly string META_PROPERTY = "meta";
-        private static readonly string RESULTS_PROPERTY = "results";
 
         private readonly Connection connection;
 
