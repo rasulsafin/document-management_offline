@@ -186,7 +186,11 @@
     <comment>Returns a collection of items and folders within a folder</comment>
   </data>
   <data name="GetProjectsFoldersSearchMethod" xml:space="preserve">
-    <value>/data/v1/projects/:project_id/folders/:folder_id/search?</value>
+    <value>/data/v1/projects/{0}/folders/{1}/search?</value>
     <comment>Filters the data of a folder and recursively in the subfolders of any project accessible to you, using the filter query string parameter</comment>
+  </data>
+  <data name="PostProjectsItemsMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/items</value>
+    <comment>Creates versions of uploaded files (items) and makes copies of existing files</comment>
   </data>
 </root>

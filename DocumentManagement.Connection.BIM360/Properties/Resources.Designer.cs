@@ -133,7 +133,7 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /data/v1/projects/:project_id/folders/:folder_id/search?.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/search?.
         /// </summary>
         internal static string GetProjectsFoldersSearchMethod {
             get {
@@ -192,6 +192,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         internal static string PostIssuesMethod {
             get {
                 return ResourceManager.GetString("PostIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/items.
+        /// </summary>
+        internal static string PostProjectsItemsMethod {
+            get {
+                return ResourceManager.GetString("PostProjectsItemsMethod", resourceCulture);
             }
         }
         
