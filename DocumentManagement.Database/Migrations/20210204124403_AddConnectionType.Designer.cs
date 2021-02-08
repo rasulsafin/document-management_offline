@@ -3,14 +3,16 @@ using System;
 using MRS.DocumentManagement.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    partial class DMContextModelSnapshot : ModelSnapshot
+    [Migration("20210204124403_AddConnectionType")]
+    partial class AddConnectionType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,16 +24,15 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ElementName")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("GlobalID")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ParentName")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ItemID")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ItemID");
 
                     b.ToTable("BimElements");
                 });
@@ -395,6 +396,17 @@ namespace DocumentManagement.Database.Migrations
                     b.ToTable("UserRoles");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.BimElement", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
+                        .WithMany("BimElements")
+                        .HasForeignKey("ItemID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.BimElementObjective", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.BimElement", "BimElement")
@@ -625,6 +637,8 @@ namespace DocumentManagement.Database.Migrations
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Item", b =>
                 {
+                    b.Navigation("BimElements");
+
                     b.Navigation("Objectives");
 
                     b.Navigation("Projects");

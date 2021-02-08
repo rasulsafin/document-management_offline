@@ -15,6 +15,7 @@ using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -76,6 +77,7 @@ namespace MRS.DocumentManagement.Api
 
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ItemHelper>();
+            services.AddScoped<ConnectionManager>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
@@ -83,6 +85,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
             services.AddSingleton<CryptographyHelper>();
         }

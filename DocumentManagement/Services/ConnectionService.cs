@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Interface.SyncData;
+using MRS.DocumentManagement.Connection;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -20,13 +21,15 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly IServiceScopeFactory factoryScope;
+        private readonly ConnectionManager connectionManager;
 
-        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory factory)
+        public ConnectionService(DMContext context, IMapper mapper, ConnectionManager connectionManager)
         {
             this.context = context;
             this.mapper = mapper;
             factoryScope = factory;
             syncManager ??= SyncManager.Instance;
+            this.connectionManager = connectionManager;
         }
 
         public async Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections()

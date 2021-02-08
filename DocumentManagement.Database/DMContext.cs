@@ -33,6 +33,8 @@ namespace MRS.DocumentManagement.Database
         public DbSet<Role> Roles { get; set; }
 
         public DbSet<ReportCount> ReportCounts { get; set; }
+
+        public DbSet<ConnectionType> ConnectionTypes { get; set; }
         #endregion
 
         #region Bridges
@@ -71,15 +73,15 @@ namespace MRS.DocumentManagement.Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-			modelBuilder.Entity<User>()
-				.HasOne(x => x.ConnectionInfo)
-				.WithMany(x => x.Users)
-				.OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<User>()
+                .HasOne(x => x.ConnectionInfo)
+                .WithOne(x => x.User)
+                .OnDelete(DeleteBehavior.SetNull);
 
-			// Users should have unique logins
-			modelBuilder.Entity<User>()
-				.HasIndex(x => x.Login)
-				.IsUnique(true);
+            // Users should have unique logins
+            modelBuilder.Entity<User>()
+                .HasIndex(x => x.Login)
+                .IsUnique(true);
 
 			modelBuilder.Entity<ReportCount>()
                 .HasKey(x => x.UserID);
@@ -93,7 +95,11 @@ namespace MRS.DocumentManagement.Database
 				.HasIndex(x => x.Name)
 				.IsUnique(true);
 
-			modelBuilder.Entity<UserRole>()
+            modelBuilder.Entity<ConnectionType>()
+                 .HasIndex(x => x.Name)
+                 .IsUnique();
+
+            modelBuilder.Entity<UserRole>()
 				.HasKey(x => new { x.UserID, x.RoleID });
 			modelBuilder.Entity<UserRole>()
 				.HasOne(x => x.User)
@@ -172,6 +178,11 @@ namespace MRS.DocumentManagement.Database
 				.HasOne(x => x.Objective)
 				.WithMany(x => x.BimElements)
 				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<ConnectionInfo>()
+				 .HasOne(x => x.ConnectionType)
+				 .WithMany(x => x.ConnectionInfos)
+				 .OnDelete(DeleteBehavior.Restrict);
 
 			modelBuilder.Entity<EnumDm>()
 				.HasOne(x => x.ConnectionInfo)

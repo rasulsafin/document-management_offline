@@ -13,6 +13,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
+      <ProjectReference Include="..\DocumentManagement.Connection\DocumentManagement.Connection.csproj" />
       <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
       <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
       <ProjectReference Include="..\DocumentManagement.Utils\DocumentManagement.Utils.csproj" />

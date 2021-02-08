@@ -108,6 +108,17 @@ namespace MRS.DocumentManagement.Tests.Utility
         private static readonly ObjectiveType OBJECTIVE_TYPE_TWO = new ObjectiveType { Name = "SecondOT" };
         #endregion
 
+        #region CONNECTION_TYPES
+        public static List<ConnectionType> DEFAULT_CONNECTION_TYPES => new List<ConnectionType>
+        {
+            new ConnectionType { Name = CONNECTION_TYPE_ONE.Name },
+            new ConnectionType { Name = CONNECTION_TYPE_TWO.Name },
+        };
+
+        private static readonly ConnectionType CONNECTION_TYPE_ONE = new ConnectionType { Name = "FirstConnectionType" };
+        private static readonly ConnectionType CONNECTION_TYPE_TWO = new ConnectionType { Name = "SecondConnectionType" };
+        #endregion
+
         #region PROJECTS
         public static List<Project> DEFAULT_PROJECTS => new List<Project>
         {
@@ -275,8 +286,8 @@ namespace MRS.DocumentManagement.Tests.Utility
         #region BIM_ELEMENTS
         public static List<BimElement> DEFAULT_BIM_ELEMENTS => new List<BimElement>
         {
-            new BimElement { GlobalID = BIM_ELEMENT_ONE.GlobalID },
-            new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
+            BIM_ELEMENT_ONE,
+            BIM_ELEMENT_TWO,
         };
 
         private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House" };
