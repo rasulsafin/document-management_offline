@@ -7,16 +7,16 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class UserSynchro : ISynchroTable
     {
-        private IDiskManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private User local;
         private UserSync remote;
 
-        public UserSynchro(IDiskManager disk, DMContext context)
+        public UserSynchro(ICloudManager disk, DMContext context)
         {
             this.disk = disk;
             this.context = context;
@@ -69,19 +69,19 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.GetRevisions(TableRevision.Users);
+            return revisions.GetRevisions(NameTypeRevision.Users);
         }
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetRevision(TableRevision.Users, rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(NameTypeRevision.Users, rev.ID).Rev = rev.Rev;
         }
 
         public void CheckDBRevision(RevisionCollection local)
         {
             var allId = context.Users.Select(x => x.ID).ToList();
 
-            var revCollect = local.GetRevisions(TableRevision.Users);
+            var revCollect = local.GetRevisions(NameTypeRevision.Users);
             foreach (var id in allId)
             {
                 if (!revCollect.Any(x => x.ID == id))

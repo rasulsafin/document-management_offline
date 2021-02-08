@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using MRS.DocumentManagement.Tests.Utility;
@@ -109,9 +109,9 @@ namespace DocumentManagement.Connection.Tests
         public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
             var revisions = new RevisionCollection();
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 2).Rev = 5;
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 3).Delete();
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 1).Rev = 5;
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 2).Rev = 5;
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 3).Delete();
 
             var actual = sychro.GetRevisions(revisions);
 
@@ -147,14 +147,14 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevision_ExistRevision_CorrectRewrite()
         {
             var revisions = new RevisionCollection();
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 2).Rev = 5;
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 3).Delete();
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 1).Rev = 5;
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 2).Rev = 5;
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 3).Delete();
 
             Revision expected = new Revision(2, 25);
             sychro.SetRevision(revisions, expected);
 
-            var actual = revisions.GetRevision(TableRevision.ObjectiveTypes, 2);
+            var actual = revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 2);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -165,13 +165,13 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevision_NotExistRevision_CorrectAdd()
         {
             var revisions = new RevisionCollection();
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 1).Rev = 5;
-            revisions.GetRevision(TableRevision.ObjectiveTypes, 3).Delete();
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 1).Rev = 5;
+            revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 3).Delete();
 
             Revision expected = new Revision(2, 25);
             sychro.SetRevision(revisions, expected);
 
-            var actual = revisions.GetRevision(TableRevision.ObjectiveTypes, 2);
+            var actual = revisions.GetRevision(NameTypeRevision.ObjectiveTypes, 2);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -206,8 +206,8 @@ namespace DocumentManagement.Connection.Tests
             sychro.CheckDBRevision(actual);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.ObjectiveTypes, 1);
-            expected.GetRevision(TableRevision.ObjectiveTypes, 2);
+            expected.GetRevision(NameTypeRevision.ObjectiveTypes, 1);
+            expected.GetRevision(NameTypeRevision.ObjectiveTypes, 2);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);
@@ -218,14 +218,14 @@ namespace DocumentManagement.Connection.Tests
         public void CheckDBRevision_NotEmptyCollectRevision_NoChange()
         {
             RevisionCollection actual = new RevisionCollection();
-            actual.GetRevision(TableRevision.ObjectiveTypes, 1);
-            actual.GetRevision(TableRevision.ObjectiveTypes, 2);
+            actual.GetRevision(NameTypeRevision.ObjectiveTypes, 1);
+            actual.GetRevision(NameTypeRevision.ObjectiveTypes, 2);
 
             sychro.CheckDBRevision(actual);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.ObjectiveTypes, 1);
-            expected.GetRevision(TableRevision.ObjectiveTypes, 2);
+            expected.GetRevision(NameTypeRevision.ObjectiveTypes, 1);
+            expected.GetRevision(NameTypeRevision.ObjectiveTypes, 2);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
             Assert.IsFalse(disk.RunPush);

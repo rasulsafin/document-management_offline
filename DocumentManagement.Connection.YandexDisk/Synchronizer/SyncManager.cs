@@ -11,7 +11,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class SyncManager
     {
@@ -26,7 +26,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 #else
         private
 #endif
-        IDiskManager disk;
+        ICloudManager disk;
 
 #if TEST
         internal
@@ -60,10 +60,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         #endregion
 
         #region Update Table
-        public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
+        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update)
         {
             if (type == TypeChange.Update)
-                localRevisions.GetRevision(table, id).Incerment();
+                localRevisions.GetRevision(table, id).Increment();
             else if (type == TypeChange.Delete)
                 localRevisions.GetRevision(table, id).Delete();
             SaveRevisions();

@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.SyncData
 {
-    public enum TableRevision
+    public enum NameTypeRevision
     {
         Users,
         Projects,

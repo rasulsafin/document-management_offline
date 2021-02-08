@@ -1,11 +1,11 @@
 ﻿using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace DocumentManagement.Connection.Tests
 {
-    public class DiskMock : IDiskManager
+    public class DiskMock : ICloudManager
     {
         public DiskMock()
         {

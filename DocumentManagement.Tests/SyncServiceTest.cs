@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Tests
         {
         }
 
-        public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update)
+        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update)
         {
         }
 

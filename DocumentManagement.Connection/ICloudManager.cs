@@ -2,7 +2,7 @@
 
 namespace MRS.DocumentManagement.Connection
 {
-    public interface IDiskManager
+    public interface ICloudManager
     {
         /// <summary>
         /// Скачать объект с сервера из соответвующей таблицы. Если объекта нет вернётся null;

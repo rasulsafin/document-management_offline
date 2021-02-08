@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Services
                     };
             context.Update(projectToDb);
             await context.SaveChangesAsync();
-            synchronizator.Update(TableRevision.Projects, projectToDb.ID);
+            synchronizator.Update(NameTypeRevision.Projects, projectToDb.ID);
             var res = mapper.Map<ProjectToListDto>(projectToDb);
 
             return res;
@@ -128,7 +128,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Projects.Remove(project);
             await context.SaveChangesAsync();
-            synchronizator.Update(TableRevision.Projects, (int)projectID, TypeChange.Delete);
+            synchronizator.Update(NameTypeRevision.Projects, (int)projectID, TypeChange.Delete);
             return true;
         }
 
@@ -176,7 +176,7 @@ namespace MRS.DocumentManagement.Services
 
             context.Projects.Update(projectFromDb);
             await context.SaveChangesAsync();
-            synchronizator.Update(TableRevision.Projects, projectFromDb.ID);
+            synchronizator.Update(NameTypeRevision.Projects, projectFromDb.ID);
             return true;
         }
 
@@ -191,7 +191,7 @@ namespace MRS.DocumentManagement.Services
                 ProjectID = project.ID,
                 ItemID = dbItem.ID
             });
-            synchronizator.Update(TableRevision.Projects, project.ID);
+            synchronizator.Update(NameTypeRevision.Projects, project.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int projectID)
@@ -204,7 +204,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ProjectItems.Remove(link);
             await context.SaveChangesAsync();
-            synchronizator.Update(TableRevision.Projects, projectID);
+            synchronizator.Update(NameTypeRevision.Projects, projectID);
             return true;
         }
     }

@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using MRS.DocumentManagement.Connection.Synchronizer;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.Synchronizator
+namespace MRS.DocumentManagement.Connection
 {
     /// <summary>
     /// The synchronizer is a single entity

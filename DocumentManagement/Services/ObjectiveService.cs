@@ -79,9 +79,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             await context.SaveChangesAsync();
-
-            var objectiveID = new ID<ObjectiveDto>(objective.ID);
-            synchronizator.Update(TableRevision.Objectives, objective.ID);
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return mapper.Map<ObjectiveToListDto>(objective);
         }
 
@@ -176,8 +174,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Objectives.Remove(objective);
             await context.SaveChangesAsync();
-            var projectID = new ID<ProjectDto>(objective.ProjectID);
-            synchronizator.Update(TableRevision.Objectives, objective.ID, TypeChange.Delete);
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID, TypeChange.Delete);
             return true;
         }
 
@@ -276,9 +273,7 @@ namespace MRS.DocumentManagement.Services
 
             context.Update(objective);
             await context.SaveChangesAsync();
-
-            var projectID = new ID<ProjectDto>(objective.ProjectID);
-            synchronizator.Update(TableRevision.Objectives, objective.ID);
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return true;
         }
 
@@ -287,15 +282,14 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
-            synchronizator.Update(TableRevision.Items, dbItem.ID);
+            synchronizator.Update(NameTypeRevision.Items, dbItem.ID);
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
                 ItemID = dbItem.ID,
             });
 
-            var objectiveID = new ID<ObjectiveDto>(objective.ID);
-            synchronizator.Update(TableRevision.Objectives, objective.ID);
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
@@ -308,11 +302,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
-
-            ID<ProjectDto> projectID = new ID<ProjectDto>(link.Objective.ProjectID);
-            var _objectiveID = new ID<ObjectiveDto>(objectiveID);
-            var _itemID = new ID<ItemDto>(itemID);
-            synchronizator.Update(TableRevision.Objectives, objectiveID);
+            synchronizator.Update(NameTypeRevision.Objectives, objectiveID);
 
             return true;
         }

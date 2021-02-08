@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.SyncData;
 
 namespace DocumentManagement.Connection.Tests
@@ -17,10 +17,10 @@ namespace DocumentManagement.Connection.Tests
             // 1 |  30  |    0
             // 2 |  10  |   10
             RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Rev = 30;
+            remote.GetRevision(NameTypeRevision.Users, 1).Rev = 30;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             SyncAction action = new SyncAction()
             {
@@ -33,8 +33,8 @@ namespace DocumentManagement.Connection.Tests
             await SyncHelper.RunAction(action, synchro, local, remote);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Rev = 30;
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 1).Rev = 30;
+            expected.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             Assert.IsFalse(synchro.RunDeleteLocal);
             Assert.IsFalse(synchro.RunDeleteRemote);
@@ -51,11 +51,11 @@ namespace DocumentManagement.Connection.Tests
             // 1 |   0  |   30
             // 2 |  10  |   10
             RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Rev = 30;
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 1).Rev = 30;
+            local.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             SyncAction action = new SyncAction()
             {
@@ -68,8 +68,8 @@ namespace DocumentManagement.Connection.Tests
             await SyncHelper.RunAction(action, synchro, local, remote);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Rev = 30;
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 1).Rev = 30;
+            expected.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             Assert.IsFalse(synchro.RunDeleteLocal);
             Assert.IsFalse(synchro.RunDeleteRemote);
@@ -86,12 +86,12 @@ namespace DocumentManagement.Connection.Tests
             // 1 |  10  |  del
             // 2 |  10  |  10
             RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Rev = 10;
-            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 1).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Delete();
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 1).Delete();
+            local.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             SyncAction action = new SyncAction()
             {
@@ -104,8 +104,8 @@ namespace DocumentManagement.Connection.Tests
             await SyncHelper.RunAction(action, synchro, local, remote);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Delete();
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 1).Delete();
+            expected.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             Assert.IsTrue(synchro.RunDeleteLocal);
             Assert.IsFalse(synchro.RunDeleteRemote);
@@ -122,12 +122,12 @@ namespace DocumentManagement.Connection.Tests
             // 1 | del  |  10
             // 2 |  10  |  10
             RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Delete();
-            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 1).Delete();
+            remote.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Rev = 10;
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 1).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             SyncAction action = new SyncAction()
             {
@@ -140,8 +140,8 @@ namespace DocumentManagement.Connection.Tests
             await SyncHelper.RunAction(action, synchro, local, remote);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Delete();
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 1).Delete();
+            expected.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             Assert.IsFalse(synchro.RunDeleteLocal);
             Assert.IsTrue(synchro.RunDeleteRemote);
@@ -158,12 +158,12 @@ namespace DocumentManagement.Connection.Tests
             // 1 |  10  |  10
             // 2 |  10  |  10
             RevisionCollection remote = new RevisionCollection();
-            remote.GetRevision(TableRevision.Users, 1).Rev = 10;
-            remote.GetRevision(TableRevision.Users, 2).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 1).Rev = 10;
+            remote.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             RevisionCollection local = new RevisionCollection();
-            local.GetRevision(TableRevision.Users, 1).Rev = 10;
-            local.GetRevision(TableRevision.Users, 2).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 1).Rev = 10;
+            local.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             SyncAction action = new SyncAction()
             {
@@ -175,8 +175,8 @@ namespace DocumentManagement.Connection.Tests
             await SyncHelper.RunAction(action, synchro, local, remote);
 
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Users, 1).Rev = 10;
-            expected.GetRevision(TableRevision.Users, 2).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 1).Rev = 10;
+            expected.GetRevision(NameTypeRevision.Users, 2).Rev = 10;
 
             Assert.IsFalse(synchro.RunDeleteLocal);
             Assert.IsFalse(synchro.RunDeleteRemote);
@@ -235,12 +235,12 @@ namespace DocumentManagement.Connection.Tests
 
             List<Revision> ISynchroTable.GetRevisions(RevisionCollection revisions)
             {
-                return revisions.GetRevisions(TableRevision.Users);
+                return revisions.GetRevisions(NameTypeRevision.Users);
             }
 
             void ISynchroTable.SetRevision(RevisionCollection revisions, Revision rev)
             {
-                revisions.GetRevision(TableRevision.Users, rev.ID).Rev = rev.Rev;
+                revisions.GetRevision(NameTypeRevision.Users, rev.ID).Rev = rev.Rev;
             }
         }
     }

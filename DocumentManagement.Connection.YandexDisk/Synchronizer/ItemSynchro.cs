@@ -6,16 +6,16 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class ItemSynchro : ISynchroTable
     {
-        private IDiskManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private Item local;
         private ItemDto remote;
 
-        public ItemSynchro(IDiskManager disk, DMContext context)
+        public ItemSynchro(ICloudManager disk, DMContext context)
         {
             this.disk = disk;
             this.context = context;
@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
         {
             var allId = context.Items.Select(x => x.ID).ToList();
 
-            var revCollect = local.GetRevisions(TableRevision.Items);
+            var revCollect = local.GetRevisions(NameTypeRevision.Items);
             foreach (var id in allId)
             {
                 if (!revCollect.Any(x => x.ID == id))
@@ -79,12 +79,12 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
         {
-            return revisions.GetRevisions(TableRevision.Items);
+            return revisions.GetRevisions(NameTypeRevision.Items);
         }
 
         public void SetRevision(RevisionCollection revisions, Revision rev)
         {
-            revisions.GetRevision(TableRevision.Items, rev.ID).Rev = rev.Rev;
+            revisions.GetRevision(NameTypeRevision.Items, rev.ID).Rev = rev.Rev;
         }
 
         public async Task Upload(SyncAction action)

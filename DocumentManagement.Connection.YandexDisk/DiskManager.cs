@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class DiskManager : IDiskManager
+    public class DiskManager : ICloudManager
     {
         private string accessToken;
         private IDiskController controller;

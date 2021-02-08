@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.Synchronizator
+﻿namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class SyncAction
     {

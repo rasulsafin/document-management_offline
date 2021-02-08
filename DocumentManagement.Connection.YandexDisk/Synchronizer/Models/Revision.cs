@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Synchronizator
+namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class Revision : IComparable<Revision>
     {
@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizator
 
         public static bool operator !=(Revision left, Revision right) => !(left == right);
 
-        public void Incerment()
+        public void Increment()
         {
             if (!IsDelete)
                 Rev++;

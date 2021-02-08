@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Connection\DocumentManagement.Connection.csproj" />
     <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
   </ItemGroup>

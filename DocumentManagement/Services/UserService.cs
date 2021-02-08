@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
 
                 var userID = new ID<UserDto>(user.ID);
-                synchronizator.Update(TableRevision.Users, user.ID);
+                synchronizator.Update(NameTypeRevision.Users, user.ID);
                 return userID;
             }
             catch (DbUpdateException ex)
@@ -82,7 +82,8 @@ namespace MRS.DocumentManagement.Services
                 context.Roles.RemoveRange(orphanRoles);
                 await context.SaveChangesAsync();
             }
-            synchronizator.Update(TableRevision.Users, user.ID, TypeChange.Delete);
+
+            synchronizator.Update(NameTypeRevision.Users, user.ID, TypeChange.Delete);
             return true;
         }
 
@@ -124,7 +125,7 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
-                synchronizator.Update(TableRevision.Users, storedUser.ID);
+                synchronizator.Update(NameTypeRevision.Users, storedUser.ID);
                 return true;
             }
             catch

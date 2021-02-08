@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Connection.Synchronizator;
+﻿using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Interface.SyncData;
 
@@ -13,6 +13,6 @@ namespace MRS.DocumentManagement.Utility
             syncManager ??= SyncManager.Instance;
         }
 
-        public void Update(TableRevision table, int id, TypeChange type = TypeChange.Update) => syncManager.Update(table, id, type);
+        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update) => syncManager.Update(table, id, type);
     }
 }

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
@@ -50,7 +50,7 @@ namespace DocumentManagement.Connection.Tests
             });
 
             Revisions = new RevisionCollection();
-            Revisions.GetRevision(TableRevision.Projects, idProj).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Projects, idProj).Rev = 5;
 
             disk = new DiskMock();
             sychro = new ItemSynchro(disk, Fixture.Context);
@@ -75,9 +75,9 @@ namespace DocumentManagement.Connection.Tests
         [TestMethod]
         public void GetRevisions_NotEmpty_NotEmptyCollection()
         {
-            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
-            Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
-            Revisions.GetRevision(TableRevision.Items, 3).Delete();
+            Revisions.GetRevision(NameTypeRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Items, 2).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Items, 3).Delete();
             var delRev = new Revision(3);
             delRev.Delete();
             var expected = new List<Revision>()
@@ -99,13 +99,13 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevision_NotExistRevision_CorrectAdd()
         {
             int id = 2;
-            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
-            Revisions.GetRevision(TableRevision.Items, 3).Delete();
+            Revisions.GetRevision(NameTypeRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Items, 3).Delete();
             Revision expected = new Revision(id, 25);
 
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetRevision(TableRevision.Items, id);
+            var actual = Revisions.GetRevision(NameTypeRevision.Items, id);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -116,14 +116,14 @@ namespace DocumentManagement.Connection.Tests
         public void SetRevision_ExistRevision_CorrectRewrite()
         {
             int id = 2;
-            Revisions.GetRevision(TableRevision.Items, 1).Rev = 5;
-            Revisions.GetRevision(TableRevision.Items, 2).Rev = 5;
-            Revisions.GetRevision(TableRevision.Items, 3).Delete();
+            Revisions.GetRevision(NameTypeRevision.Items, 1).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Items, 2).Rev = 5;
+            Revisions.GetRevision(NameTypeRevision.Items, 3).Delete();
             Revision expected = new Revision(id, 25);
 
             sychro.SetRevision(Revisions, expected);
 
-            var actual = Revisions.GetRevision(TableRevision.Items, id);
+            var actual = Revisions.GetRevision(NameTypeRevision.Items, id);
             AssertHelper.EqualRevision(expected, actual);
             Assert.IsFalse(disk.RunDelete);
             Assert.IsFalse(disk.RunPull);
@@ -194,9 +194,9 @@ namespace DocumentManagement.Connection.Tests
         {
             RevisionCollection actual = new RevisionCollection();
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Items, 1);
-            expected.GetRevision(TableRevision.Items, 2);
-            expected.GetRevision(TableRevision.Items, 3);
+            expected.GetRevision(NameTypeRevision.Items, 1);
+            expected.GetRevision(NameTypeRevision.Items, 2);
+            expected.GetRevision(NameTypeRevision.Items, 3);
 
             sychro.CheckDBRevision(actual);
 
@@ -211,13 +211,13 @@ namespace DocumentManagement.Connection.Tests
         public void CheckDBRevision_NotEmptyRevisionCollection_AddingNonIncludedRecords()
         {
             RevisionCollection actual = new RevisionCollection();
-            actual.GetRevision(TableRevision.Items, 1);
-            actual.GetRevision(TableRevision.Items, 2);
-            actual.GetRevision(TableRevision.Items, 3);
+            actual.GetRevision(NameTypeRevision.Items, 1);
+            actual.GetRevision(NameTypeRevision.Items, 2);
+            actual.GetRevision(NameTypeRevision.Items, 3);
             RevisionCollection expected = new RevisionCollection();
-            expected.GetRevision(TableRevision.Items, 1);
-            expected.GetRevision(TableRevision.Items, 2);
-            expected.GetRevision(TableRevision.Items, 3);
+            expected.GetRevision(NameTypeRevision.Items, 1);
+            expected.GetRevision(NameTypeRevision.Items, 2);
+            expected.GetRevision(NameTypeRevision.Items, 3);
 
             sychro.CheckDBRevision(actual);
 

@@ -7,6 +7,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -14,11 +15,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ISyncService syncService;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper)
+        public ObjectiveTypeService(DMContext context, IMapper mapper, ISyncService syncService )
         {
             this.context = context;
             this.mapper = mapper;
+            this.syncService = syncService;
         }
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
@@ -31,6 +34,7 @@ namespace MRS.DocumentManagement.Services
                 };
                 context.ObjectiveTypes.Add(objType);
                 await context.SaveChangesAsync();
+                syncService.Update(NameTypeRevision.ObjectiveTypes, objType.ID);
                 return (ID<ObjectiveTypeDto>)objType.ID;
             }
             catch (DbUpdateException ex)
@@ -66,6 +70,7 @@ namespace MRS.DocumentManagement.Services
                 if (type == null)
                     return false;
                 context.ObjectiveTypes.Remove(type);
+                syncService.Update(NameTypeRevision.ObjectiveTypes, type.ID, TypeChange.Delete);
                 await context.SaveChangesAsync();
                 return true;
             }

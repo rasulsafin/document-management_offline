@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Synchronizator;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
@@ -34,10 +34,10 @@ namespace DocumentManagement.Connection.Tests
         public static void EqualRevisionCollection(RevisionCollection expected, RevisionCollection actual)
         {
             if (NullComparer(expected, actual)) return;
-            EqualRevisions(expected.GetRevisions(TableRevision.Users), actual.GetRevisions(TableRevision.Users));
-            EqualRevisions(expected.GetRevisions(TableRevision.Projects), actual.GetRevisions(TableRevision.Projects));
-            EqualRevisions(expected.GetRevisions(TableRevision.Objectives), actual.GetRevisions(TableRevision.Objectives));
-            EqualRevisions(expected.GetRevisions(TableRevision.Items), actual.GetRevisions(TableRevision.Items));
+            EqualRevisions(expected.GetRevisions(NameTypeRevision.Users), actual.GetRevisions(NameTypeRevision.Users));
+            EqualRevisions(expected.GetRevisions(NameTypeRevision.Projects), actual.GetRevisions(NameTypeRevision.Projects));
+            EqualRevisions(expected.GetRevisions(NameTypeRevision.Objectives), actual.GetRevisions(NameTypeRevision.Objectives));
+            EqualRevisions(expected.GetRevisions(NameTypeRevision.Items), actual.GetRevisions(NameTypeRevision.Items));
         }
 
         public static void EqualRevisions(List<Revision> expected, List<Revision> actual)

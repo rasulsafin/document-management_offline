@@ -13,6 +13,6 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="table">table</param>
         /// <param name="id">id element</param>
         /// <param name="type">update / delete</param>
-        void Update(TableRevision table, int id, TypeChange type = TypeChange.Update);
+        void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update);
     }
 }
