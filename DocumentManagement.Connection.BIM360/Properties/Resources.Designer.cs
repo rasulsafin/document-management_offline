@@ -106,6 +106,51 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}.
+        /// </summary>
+        internal static string GetProjectOfHubMethod {
+            get {
+                return ResourceManager.GetString("GetProjectOfHubMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /projects/{0}/downloads/{1}.
+        /// </summary>
+        internal static string GetProjectsDownloadInfoMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsDownloadInfoMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}/hub.
+        /// </summary>
+        internal static string GetProjectsHubMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsHubMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects.
+        /// </summary>
+        internal static string GetProjectsOfHubMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsOfHubMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}/topFolders.
+        /// </summary>
+        internal static string GetTopFoldersMethod {
+            get {
+                return ResourceManager.GetString("GetTopFoldersMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}.
         /// </summary>
         internal static string PatchIssuesMethod {

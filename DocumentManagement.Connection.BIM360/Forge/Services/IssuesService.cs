@@ -11,8 +11,6 @@ namespace Forge.Services
 {
     public class IssuesService
     {
-        private static readonly int ITEMS_ON_PAGE = 100;
-
         private readonly Connection connection;
 
         public IssuesService(Connection connection)

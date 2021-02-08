@@ -25,7 +25,7 @@ namespace Forge.Services
             return data ?? new List<Hub>();
         }
 
-        public async Task<Hub> GetHubInfo(string hubId)
+        public async Task<Hub> GetHubInfoAsync(string hubId)
         {
             var response = await connection.GetResponse(HttpMethod.Get, Resources.GetHubsInfoByIdMethod, hubId);
             var data = response[DATA_PROPERTY]?.ToObject<Hub>();

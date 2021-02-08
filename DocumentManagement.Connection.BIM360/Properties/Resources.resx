@@ -154,4 +154,24 @@
   <data name="PutBucketsObjectsResumableMethod" xml:space="preserve">
     <value>/oss/v2/buckets/{0}/objects/{1}/resumable</value>
   </data>
+  <data name="GetProjectsOfHubMethod" xml:space="preserve">
+    <value>/project/v1/hubs/{0}/projects</value>
+    <comment>Returns a collection of projects for a given hub_id</comment>
+  </data>
+  <data name="GetProjectOfHubMethod" xml:space="preserve">
+    <value>/project/v1/hubs/{0}/projects/{1}</value>
+    <comment>Returns a project for a given project_id</comment>
+  </data>
+  <data name="GetProjectsDownloadInfoMethod" xml:space="preserve">
+    <value>/projects/{0}/downloads/{1}</value>
+    <comment>Returns the details for a specific download</comment>
+  </data>
+  <data name="GetProjectsHubMethod" xml:space="preserve">
+    <value>/project/v1/hubs/{0}/projects/{1}/hub</value>
+    <comment>Returns the hub for a given project_id</comment>
+  </data>
+  <data name="GetTopFoldersMethod" xml:space="preserve">
+    <value>/project/v1/hubs/{0}/projects/{1}/topFolders</value>
+    <comment>Returns the details of the highest level folders the user has access to for a given project</comment>
+  </data>
 </root>
