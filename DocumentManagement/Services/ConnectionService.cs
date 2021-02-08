@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Services
         private readonly IServiceScopeFactory factoryScope;
         private readonly ConnectionManager connectionManager;
 
-        public ConnectionService(DMContext context, IMapper mapper, ConnectionManager connectionManager)
+        public ConnectionService(DMContext context, IMapper mapper, ConnectionManager connectionManager, IServiceScopeFactory factory)
         {
             this.context = context;
             this.mapper = mapper;
