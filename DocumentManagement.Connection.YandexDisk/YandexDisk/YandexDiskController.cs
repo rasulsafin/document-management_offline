@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDiskController : IDiskController
+    public class YandexDiskController : ICloudController
     {
         private string accessToken;
 
@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 }
 
                 response.Close();
-                List<DiskElement> items = DiskElement.GetElements(xml.DocumentElement);
+                List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
                 return items;
             }
             catch (Exception ex)
@@ -63,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 }
 
                 response.Close();
-                DiskElement item = DiskElement.GetElement(xml.DocumentElement);
+                YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
                 return item;
             }
             catch (Exception ex)

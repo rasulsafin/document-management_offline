@@ -6,11 +6,11 @@ namespace MRS.DocumentManagement.Utility
 {
     public class SyncService : ISyncService
     {
-        private static SyncManager syncManager;
+        private SyncManager syncManager;
 
-        public SyncService()
+        public SyncService(SyncManager syncManager)
         {
-            syncManager ??= SyncManager.Instance;
+            this.syncManager = syncManager;
         }
 
         public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update) => syncManager.Update(table, id, type);

@@ -5,26 +5,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.YandexDisk;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class DiskManager : ICloudManager
+    public class CloudManager : ICloudManager
     {
         private string accessToken;
-        private IDiskController controller;
+        private ICloudController controller;
         private List<string> tables = new List<string>();
         private List<string> directories = new List<string>();
         private bool isInit;
 
-        public DiskManager(string accessToken)
-        {
-            this.accessToken = accessToken;
-            controller = new YandexDiskController(accessToken);
-        }
-
-        public DiskManager(IDiskController controller)
+        public CloudManager(ICloudController controller)
         {
             this.controller = controller;
         }

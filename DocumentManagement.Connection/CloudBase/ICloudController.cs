@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public interface IDiskController
+    public interface ICloudController
     {
         /// <summary>
         ///

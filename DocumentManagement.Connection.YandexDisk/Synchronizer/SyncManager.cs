@@ -2,12 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using Newtonsoft.Json;
 
@@ -18,7 +17,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
         private const string REVISIONS = "revisions";
         private const int COUNT_TRY = 3;
         public static readonly string YANDEX = "YANDEX";
-        private static SyncManager instance;
+
+
+        private readonly IServiceScopeFactory factoryScope;
+        private readonly IMapper mapper;
 
         #region field
 #if TEST
@@ -44,14 +46,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         #endregion
 
-        public SyncManager()
+        public SyncManager(IMapper mapper, IServiceScopeFactory factory)
         {
+            factoryScope = factory;
+            this.mapper = mapper;
             LoadRevisions();
         }
 
         #region property
-        public static SyncManager Instance { get => instance ??= new SyncManager(); }
-
         public bool NeedStopSync { get; private set; }
 
         public bool NowSync { get; set; }
@@ -69,6 +71,12 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             SaveRevisions();
         }
         #endregion
+
+        public void Initialization(string token)
+        {
+            disk = new CloudManager(new YandexDiskController(token));
+            Initilize = true;
+        }
 
         public static async Task FindSyncroRunAction(
             RevisionCollection local,
@@ -113,9 +121,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             return progress;
         }
 
-        public async Task StartSync(DMContext context, IMapper mapper)
+        public async Task StartSync()
         {
-            progress.Current= 0;
+            DMContext context = factoryScope.CreateScope().ServiceProvider.GetService<DMContext>();
+
+            progress.Current = 0;
             progress.Total = 0;
             progress.Message = "Analysis";
             progress.Error = null;
@@ -140,7 +150,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
                 try
                 {
-                    Console.WriteLine("Начата синхронизация");
                     progress.Message = "Sync";
                     for (int i = 0; i < COUNT_TRY; i++)
                     {
@@ -153,7 +162,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
                                 progress.Current++;
                             else
                                 noComplete.Add(action);
-                            Console.WriteLine($"Синхронизировано элементов: {progress.Current}");
                         }
 
                         if (noComplete.Count == 0) break;
@@ -175,30 +183,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
                         progress.Message = "Complete";
                     else
                         progress.Message = "Error";
-
-                    Console.WriteLine("Синхронизация завершена!");
                 }
             }
             else
             {
                 progress.Message = "Not Need";
-            }
-        }
-
-        public void Initialization(RemoteConnectionInfoDto connection)
-        {
-            // Selecting a third-party document flow
-            if (connection.ServiceName == YANDEX)
-            {
-                if (connection.AuthFieldNames == null || connection.AuthFieldNames.Count() == 0)
-                {
-                    YandexHelper.OpenBrowser(YandexDiskAuth.OAUTH_URL);
-                }
-                else
-                {
-                    disk = new DiskManager(new YandexDiskController(connection.AuthFieldNames.First()));
-                    Initilize = true;
-                }
             }
         }
 
@@ -208,7 +197,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             FileInfo info = new FileInfo(fileName);
             try
             {
-                Console.WriteLine($"RevisionFile={info.FullName}");
                 string json = File.ReadAllText(fileName);
                 localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
             }
