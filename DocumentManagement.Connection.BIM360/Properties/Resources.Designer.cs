@@ -61,6 +61,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на https://autodesk.com/.
+        /// </summary>
+        internal static string AutodeskUrl {
+            get {
+                return ResourceManager.GetString("AutodeskUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на https://developer.api.autodesk.com.
         /// </summary>
         internal static string ForgeUrl {
@@ -178,6 +187,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на authentication/v1/gettoken.
+        /// </summary>
+        internal static string PostGetTokenMethod {
+            get {
+                return ResourceManager.GetString("PostGetTokenMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/attachments.
         /// </summary>
         internal static string PostIssuesAttachmentsMethod {
@@ -219,6 +237,24 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         internal static string PostProjectsVersionMethod {
             get {
                 return ResourceManager.GetString("PostProjectsVersionMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /authentication/v1/refreshtoken.
+        /// </summary>
+        internal static string PostRefreshTokenMethod {
+            get {
+                return ResourceManager.GetString("PostRefreshTokenMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /authentication/v1/refreshtoken?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}.
+        /// </summary>
+        internal static string PostRegreshTokenFilteredMethod {
+            get {
+                return ResourceManager.GetString("PostRegreshTokenFilteredMethod", resourceCulture);
             }
         }
         

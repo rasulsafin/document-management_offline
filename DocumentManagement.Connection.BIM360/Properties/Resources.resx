@@ -201,4 +201,20 @@
     <value>/data/v1/projects/{0}/versions</value>
     <comment>Creates new versions of a file (item)</comment>
   </data>
+  <data name="AutodeskUrl" xml:space="preserve">
+    <value>https://autodesk.com/</value>
+    <comment>URL of Autodesk site</comment>
+  </data>
+  <data name="PostGetTokenMethod" xml:space="preserve">
+    <value>authentication/v1/gettoken</value>
+    <comment>Exchange an authorization code extracted from a GET authorize callback for a three-legged access token</comment>
+  </data>
+  <data name="PostRefreshTokenMethod" xml:space="preserve">
+    <value>/authentication/v1/refreshtoken</value>
+    <comment>Acquire a new access token by using the refresh token provided by the POST gettoken endpoint</comment>
+  </data>
+  <data name="PostRegreshTokenFilteredMethod" xml:space="preserve">
+    <value>/authentication/v1/refreshtoken?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}</value>
+    <comment>Acquire filtered new access token by using the refresh token provided by the POST gettoken endpoint</comment>
+  </data>
 </root>

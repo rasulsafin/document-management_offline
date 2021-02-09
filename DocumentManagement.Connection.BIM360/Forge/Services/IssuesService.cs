@@ -11,9 +11,9 @@ namespace Forge.Services
 {
     public class IssuesService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public IssuesService(Connection connection)
+        public IssuesService(ForgeConnection connection)
             => this.connection = connection;
 
         public async Task<List<Issue>> GetIssuesAsync(string containerID)

@@ -10,9 +10,9 @@ namespace Forge.Services
 {
     public class ItemsService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public ItemsService(Connection connection)
+        public ItemsService(ForgeConnection connection)
             => this.connection = connection;
 
         public async Task<(Item, Version)> PostItemAsync(string projectId, Item item, Version version)

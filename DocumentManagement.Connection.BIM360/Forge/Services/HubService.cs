@@ -10,9 +10,9 @@ namespace Forge.Services
 {
     public class HubService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public HubService(Connection connection)
+        public HubService(ForgeConnection connection)
         {
             this.connection = connection;
         }

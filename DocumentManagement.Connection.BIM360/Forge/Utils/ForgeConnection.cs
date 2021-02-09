@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DocumentManagement.Connection.BIM360.Forge
 {
-    public class Connection : IDisposable
+    public class ForgeConnection : IDisposable
     {
         private const string MEDIA_TYPE_JSON = "text/json";
 
@@ -18,7 +18,7 @@ namespace DocumentManagement.Connection.BIM360.Forge
 
         private readonly HttpClient client;
 
-        public Connection()
+        public ForgeConnection()
             => client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
 
         public void Dispose()

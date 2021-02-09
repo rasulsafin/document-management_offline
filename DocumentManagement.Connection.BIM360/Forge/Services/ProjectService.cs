@@ -10,9 +10,9 @@ namespace Forge.Services
 {
     public class ProjectService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public ProjectService(Connection connection)
+        public ProjectService(ForgeConnection connection)
             => this.connection = connection;
 
         public async Task<List<Project>> GetProjectsAsync(string hubId)

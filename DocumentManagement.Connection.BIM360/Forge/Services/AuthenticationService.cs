@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using CloudApis.Utils;
+using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
 using Forge.Models.Authentication;
-using Newtonsoft.Json;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
+using static Forge.Constants;
 
 namespace Forge.Services
 {
@@ -19,16 +22,16 @@ namespace Forge.Services
         private static readonly double TIMEOUT = 10;
         private static readonly string SCOPE = "data:read%20data:write%20data:create";
 
-        private static HttpClient client;
-
         private HttpListener httpListener;
         private DateTime sentTime;
         private IntPtr currentProcess;
+        private ForgeConnection connection;
 
-        private AuthenticationService()
-        {
-            client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
-        }
+        // Is created as scoped as this service
+        private RemoteConnectionInfoDto connectionInfoDto;
+
+        private AuthenticationService(ForgeConnection connection)
+            => this.connection = connection;
 
         internal delegate void NewBearerDelegate(Token bearer);
 
@@ -40,27 +43,108 @@ namespace Forge.Services
             Error,
         }
 
-        public AccessProperty AccessProperty { get; set; }
+        private string AccessToken
+        {
+            get
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var tokenIndex = FindAuthIndex(authNamesList, TOKEN_AUTH_NAME);
+                return GetAuthOrDefault(authValuesSource, tokenIndex);
+            }
 
-        public AppProperty AppProperty { get; set; }
+            set
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var tokenIndex = FindAuthIndex(authNamesList, TOKEN_AUTH_NAME);
+                var updatedValues = authValuesSource.ToList();
+                updatedValues[tokenIndex] = value;
+                connectionInfoDto.AuthFieldValues = updatedValues;
+            }
+        }
 
-        public bool IsLogged => !string.IsNullOrEmpty(AccessProperty.End) && DateTime.UtcNow < DateTime.Parse(AccessProperty.End);
+        private string AccessRefreshToken
+        {
+            get
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var refreshTokenIndex = FindAuthIndex(authNamesList, REFRESH_TOKEN_AUTH_NAME);
+                return GetAuthOrDefault(authValuesSource, refreshTokenIndex);
+            }
+
+            set
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var refreshTokenIndex = FindAuthIndex(authNamesList, REFRESH_TOKEN_AUTH_NAME);
+                var updatedValues = authValuesSource.ToList();
+                updatedValues[refreshTokenIndex] = value;
+                connectionInfoDto.AuthFieldValues = updatedValues;
+            }
+        }
+
+        private string AccessEnd
+        {
+            get
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var endIndex = FindAuthIndex(authNamesList, END_AUTH_NAME);
+                return GetAuthOrDefault(authValuesSource, endIndex);
+            }
+
+            set
+            {
+                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
+                var authValuesSource = connectionInfoDto.AuthFieldValues;
+                var endIndex = FindAuthIndex(authNamesList, END_AUTH_NAME);
+                var updatedValues = authValuesSource.ToList();
+                updatedValues[endIndex] = value;
+                connectionInfoDto.AuthFieldValues = updatedValues;
+            }
+        }
+
+        private string AppClientId
+        {
+            get => connectionInfoDto.ConnectionType.AppProperty[CLIENT_ID_NAME];
+            set => connectionInfoDto.ConnectionType.AppProperty[CLIENT_ID_NAME] = value;
+        }
+
+        private string AppClientSecret
+        {
+            get => connectionInfoDto.ConnectionType.AppProperty[CLIENT_SECRET_NAME];
+            set => connectionInfoDto.ConnectionType.AppProperty[CLIENT_SECRET_NAME] = value;
+        }
+
+        private string AppCallBackUrl
+        {
+            get => connectionInfoDto.ConnectionType.AppProperty[CALLBACK_URL_NAME];
+            set => connectionInfoDto.ConnectionType.AppProperty[CALLBACK_URL_NAME] = value;
+        }
+
+        private bool IsLogged
+            => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
 
         public async Task CheckAccessAsync(bool mustUpdate = false)
         {
             sentTime = DateTime.UtcNow;
             if (!IsLogged || mustUpdate)
             {
-                if (string.IsNullOrEmpty(AccessProperty.Token))
+                if (string.IsNullOrEmpty(AccessToken))
                     await ThreeLeggedAsync();
                 else
                     await RefreshConnectionAsync();
             }
         }
 
-        public async Task SignInAsync()
+        public async Task<CommandResult> SignInAsync(RemoteConnectionInfoDto connectionInfo)
         {
-           await CheckAccessAsync(true);
+            connectionInfoDto = connectionInfo;
+            await CheckAccessAsync(true);
+            var result = new CommandResult { IsSuccessful = status == ConnectionStatus.Connected };
+            return result;
         }
 
         public void Cancel()
@@ -69,21 +153,14 @@ namespace Forge.Services
             httpListener = null;
         }
 
-        public void ClearUserInfo()
-        {
-            AccessProperty.Token = string.Empty;
-            AccessProperty.RefreshToken = string.Empty;
-            AccessProperty.End = string.Empty;
-        }
-
         public async Task RefreshConnectionAsync()
         {
             try
             {
                 status = ConnectionStatus.Connecting;
-                var bearer = await RefreshTokenAsyncWithHttpInfo(AppProperty.clientId,
-                        AppProperty.clientSecret,
-                        AccessProperty.RefreshToken);
+                var bearer = await RefreshTokenAsyncWithHttpInfo(AppClientId,
+                        AppClientSecret,
+                        AccessRefreshToken);
                 SaveData(bearer);
             }
             catch
@@ -93,14 +170,15 @@ namespace Forge.Services
 
         public void Dispose()
         {
-            client.Dispose();
+            connection.Dispose();
+            ((IDisposable)httpListener).Dispose();
         }
 
         internal async Task ThreeLeggedAsync()
         {
             try
             {
-                if (!await WebFeatures.RemoteUrlExistsAsync("https://autodesk.com/"))
+                if (!await WebFeatures.RemoteUrlExistsAsync(Resources.AutodeskUrl))
                     throw new Exception("Failed to ping the server");
                 Task<HttpListenerContext> getting = null;
                 if (httpListener == null || !httpListener.IsListening)
@@ -108,18 +186,18 @@ namespace Forge.Services
                     if (!HttpListener.IsSupported)
                         return;
                     httpListener = new HttpListener();
-                    httpListener.Prefixes.Add(AppProperty.callBackUrl.Replace("localhost", "+") + "/");
+                    httpListener.Prefixes.Add(AppCallBackUrl.Replace("localhost", "+") + "/");
                     httpListener.Start();
                     getting = httpListener.GetContextAsync();
                 }
 
-                var oauthUrl = Authorize(AppProperty.clientId, AppProperty.callBackUrl);
+                var oauthUrl = Authorize(AppClientId, AppCallBackUrl);
                 Process.Start(oauthUrl);
                 if (getting != null)
                     await getting;
                 await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 status = ConnectionStatus.Error;
                 throw;
@@ -142,7 +220,7 @@ namespace Forge.Services
 
                 if (!string.IsNullOrEmpty(code))
                 {
-                    var bearer = await GetTokenAsyncWithHttpInfo(AppProperty.clientId, AppProperty.clientSecret, code, AppProperty.callBackUrl);
+                    var bearer = await GetTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, code, AppCallBackUrl);
                     callback?.Invoke(bearer);
                 }
                 else
@@ -160,52 +238,52 @@ namespace Forge.Services
             }
         }
 
+        private int FindAuthIndex(List<string> source, string authName)
+            => source.FindIndex(a => a.Equals(authName, StringComparison.InvariantCultureIgnoreCase));
+
+        private string GetAuthOrDefault(IEnumerable<string> source, int index)
+            => index != -1 ? source.ElementAtOrDefault(index) : string.Empty;
+
         private async Task<Token> RefreshTokenAsyncWithHttpInfo(string appProperyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://developer.api.autodesk.com/authentication/v1/refreshtoken")
+            var content = new[]
             {
-                Content = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("client_id", appProperyClientId),
-                    new KeyValuePair<string, string>("client_secret", appPropertyClientSecret),
-                    new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                    new KeyValuePair<string, string>("refresh_token", accessPropertyRefreshToken),
-                }),
+                new KeyValuePair<string, string>("client_id", appProperyClientId),
+                new KeyValuePair<string, string>("client_secret", appPropertyClientSecret),
+                new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                new KeyValuePair<string, string>("refresh_token", accessPropertyRefreshToken),
             };
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var data = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<Token>(data);
+
+            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post, Resources.PostRefreshTokenMethod, content);
+
+            return response.ToObject<Token>();
         }
 
         private void SaveData(Token bearer)
         {
-            AccessProperty.Token = bearer.AccessToken;
-            AccessProperty.RefreshToken = bearer.RefreshToken;
-            AccessProperty.End = sentTime.AddSeconds(bearer.ExpiresIn).ToString();
+            AccessToken = bearer.AccessToken;
+            AccessRefreshToken = bearer.RefreshToken;
+            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn).ToString();
             status = ConnectionStatus.Connected;
         }
 
         private string Authorize(string appPropertyClientId, string appPropertyCallBackUrl)
-            => $"https://developer.api.autodesk.com/authentication/v1/refreshtoken?response_type=code&client_id={appPropertyClientId}&redirect_uri={appPropertyCallBackUrl}&scope={SCOPE}";
+            => string.Format($"{Resources.ForgeUrl}{Resources.PostRegreshTokenFilteredMethod}", appPropertyClientId, appPropertyCallBackUrl, SCOPE);
 
         private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string code, string appProperyCallBackUrl)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "https://developer.api.autodesk.com/authentication/v1/gettoken")
+            var content = new[]
             {
-                Content = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("client_id", appProperyClientId),
-                    new KeyValuePair<string, string>("client_secret", appProperyClientSecret),
-                    new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                    new KeyValuePair<string, string>("code", code),
-                    new KeyValuePair<string, string>("redirect_uri", appProperyCallBackUrl),
-                }),
+                new KeyValuePair<string, string>("client_id", appProperyClientId),
+                new KeyValuePair<string, string>("client_secret", appProperyClientSecret),
+                new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                new KeyValuePair<string, string>("code", code),
+                new KeyValuePair<string, string>("redirect_uri", appProperyCallBackUrl),
             };
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-            var data = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<Token>(data);
+
+            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post, Resources.PostGetTokenMethod, content);
+
+            return response.ToObject<Token>();
         }
 
         private void GotIt(Token bearer)

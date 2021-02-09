@@ -14,9 +14,9 @@ namespace Forge.Services
 {
     public class FoldersService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public FoldersService(Connection connection)
+        public FoldersService(ForgeConnection connection)
             => this.connection = connection;
 
         public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)

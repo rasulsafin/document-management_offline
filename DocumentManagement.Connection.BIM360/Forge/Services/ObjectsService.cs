@@ -12,9 +12,9 @@ namespace Forge.Services
 {
     public class ObjectsService
     {
-        private readonly Connection connection;
+        private readonly ForgeConnection connection;
 
-        public ObjectsService(Connection connection)
+        public ObjectsService(ForgeConnection connection)
             => this.connection = connection;
 
         /// <summary>
