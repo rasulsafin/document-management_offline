@@ -60,24 +60,8 @@ namespace Forge.Services
             return data;
         }
 
-        public async Task<string> CreateStorageAsync(string projectId, string fileName, string folderId, bool isFolder)
+        public async Task<string> CreateStorageAsync(string projectId, StorageObject obj)
         {
-            var obj = new StorageObject
-            {
-                Type = "objects",
-                Attributes = new StorageObject.StorageObjectAttributes { Name = fileName },
-                Relationships = new StorageObject.StorageObjectRelationshops
-                {
-                    Target = new
-                    {
-                        data = new
-                        {
-                            type = isFolder ? FOLDER_TYPE : ITEM_TYPE,
-                            id = folderId,
-                        },
-                    },
-                },
-            };
             var response = await connection
                 .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectStorageMethod, obj, projectId);
 
