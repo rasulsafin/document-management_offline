@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        public async Task<IActionResult> LinkRemoteConnection(ConnectionInfoToCreateDto connectionInfo)
         {
             var linked = await service.LinkRemoteConnection(connectionInfo);
             return Forbid();
@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Reconnect(RemoteConnectionToCreateDto connectionInfo)
+        public async Task<IActionResult> Reconnect(ConnectionInfoToCreateDto connectionInfo)
         {
             var reconnected = await service.Reconnect(connectionInfo);
             return Forbid();

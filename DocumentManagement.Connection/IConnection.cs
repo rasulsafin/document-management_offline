@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
@@ -12,7 +13,7 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <param name="param">Dynamic params.</param>
         /// <returns>Result success and additional result data.</returns>
-        Task<(bool, string)> Connect(dynamic param);
+        Task<ConnectionStatusDto> Connect(dynamic param);
 
         /// <summary>
         /// Checks if the saved authorization data is correct.

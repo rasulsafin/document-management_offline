@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
-            services.AddScoped<ConnectionManager>();
+            services.AddScoped<ConnectionCreator>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();

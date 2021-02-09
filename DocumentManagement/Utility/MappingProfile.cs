@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
-            CreateMap<ConnectionInfo, RemoteConnectionInfoDto>()
+            CreateMap<ConnectionInfo, ConnectionInfoDto>()
                 .ForMember(d => d.ServiceName, o => o.MapFrom(x => x.Name))
                 .ForMember(d => d.AuthFieldNames, o => o.MapFrom(x => DecodeAuthFieldNames(x.AuthFieldNames)));
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
