@@ -1,13 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizer;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -15,22 +18,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ConnectionManager connectionManager;
+        private readonly IConnection connection;
 
-        public ConnectionService(DMContext context, IMapper mapper, ConnectionManager connectionManager)
+        public ConnectionService(DMContext context, IMapper mapper, IConnection connection)
         {
             this.context = context;
             this.mapper = mapper;
-            this.connectionManager = connectionManager;
-        }
-
-        private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 
-            => mapper.Map<RemoteConnectionInfoDto>(info);
-
-        private static string EncodeAuthFieldNames(IEnumerable<string> names)
-        {
-            var lnames = names.ToList();
-            return System.Text.Json.JsonSerializer.Serialize(lnames);
+            this.connection = connection;
         }
 
         public async Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections()
@@ -58,28 +52,9 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public async Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        public Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
         {
             throw new NotImplementedException();
-            
-            //var currentConnection = await GetCurrentConnection();
-            //if (currentConnection != null)
-            //{
-            //    //TODO: what to do?
-            //}
-
-            //var remote = await context.ConnectionInfos.FindAsync((int)connectionInfo.ID);
-            //if (remote == null)
-            //    throw new ArgumentException($"Remote connection with key {connectionInfo.ID} not found");
-            //var authNames = DecodeAuthFieldNames(remote.AuthFieldNames);
-            
-            
-            //// assign connection ID to user
-            //var currentUserID = (int)userContext.CurrentUser.ID;
-            //var user = await context.Users.FindAsync(currentUserID);
-            //user.ConnectionInfoID = remote.ID;
-            //context.Users.Update(user);
-            //await context.SaveChangesAsync();
         }
 
         public Task<bool> Reconnect(RemoteConnectionToCreateDto connectionInfo)
@@ -96,5 +71,25 @@ namespace MRS.DocumentManagement.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<bool> StartSync()
+        {
+            if (! await connection.IsAuthDataCorrect())
+                await connection.Connect(null);
+            return await connection.StartSyncronization();
+        }
+
+        public async Task StopSync()
+        {
+            await connection.StopSyncronization();
+        }
+
+        public async Task<ProgressSync> GetProgressSync()
+        {
+            return await connection.GetProgressSyncronization();
+        }
+
+        private RemoteConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info)
+            => mapper.Map<RemoteConnectionInfoDto>(info);
     }
 }

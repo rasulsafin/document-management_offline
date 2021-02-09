@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Interface
 {

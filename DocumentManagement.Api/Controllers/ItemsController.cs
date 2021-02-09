@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Interface;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers

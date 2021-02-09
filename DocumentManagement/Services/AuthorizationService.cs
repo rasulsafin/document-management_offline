@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
@@ -5,10 +9,6 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -30,7 +30,6 @@ namespace MRS.DocumentManagement.Services
             var user = await context.Users.FindAsync((int)userID);
             if (user == null)
                 throw new ArgumentException($"User with key {userID} not found");
-            //return false;
             try
             {
                 if (await IsInRole(userID, role))

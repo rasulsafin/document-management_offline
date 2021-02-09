@@ -6,6 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
   </ItemGroup>
 

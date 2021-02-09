@@ -15,29 +15,29 @@ namespace MRS.DocumentManagement.Tests.Utility
                 Login = PAULI_USER.Login,
                 Name = PAULI_USER.Name,
                 PasswordHash = PAULI_USER.PasswordHash,
-                PasswordSalt = PAULI_USER.PasswordSalt
+                PasswordSalt = PAULI_USER.PasswordSalt,
             },
             new User
             {
                 Login = SCHREDINGER_USER.Login,
                 Name = SCHREDINGER_USER.Name,
                 PasswordHash = SCHREDINGER_USER.PasswordHash,
-                PasswordSalt = SCHREDINGER_USER.PasswordSalt
+                PasswordSalt = SCHREDINGER_USER.PasswordSalt,
             },
             new User
             {
                 Login = HEISENBERG_USER.Login,
                 Name = HEISENBERG_USER.Name,
                 PasswordHash = HEISENBERG_USER.PasswordHash,
-                PasswordSalt = HEISENBERG_USER.PasswordSalt
+                PasswordSalt = HEISENBERG_USER.PasswordSalt,
             },
             new User
             {
                 Login = BOHR_USER.Login,
                 Name = BOHR_USER.Name,
                 PasswordHash = BOHR_USER.PasswordHash,
-                PasswordSalt = BOHR_USER.PasswordSalt
-            }
+                PasswordSalt = BOHR_USER.PasswordSalt,
+            },
         };
 
         private static readonly User BOHR_USER = new User
@@ -45,28 +45,28 @@ namespace MRS.DocumentManagement.Tests.Utility
             Login = "NBohr",
             Name = "Nils Bohr",
             PasswordHash = new byte[10],
-            PasswordSalt = new byte[5]
+            PasswordSalt = new byte[5],
         };
         private static readonly User HEISENBERG_USER = new User
         {
             Login = "IAmTheDangerous",
             Name = "Werner Heisenberg",
             PasswordHash = new byte[10],
-            PasswordSalt = new byte[5]
+            PasswordSalt = new byte[5],
         };
         private static readonly User SCHREDINGER_USER = new User
         {
             Login = "loveDogs1932",
             Name = "Ervin Schredinger",
             PasswordHash = new byte[10],
-            PasswordSalt = new byte[5]
+            PasswordSalt = new byte[5],
         };
         private static readonly User PAULI_USER = new User
         {
             Login = "principlesHater",
             Name = "Wolfgang Pauli",
             PasswordHash = new byte[10],
-            PasswordSalt = new byte[5]
+            PasswordSalt = new byte[5],
         };
 
         public static User AdminUser => new User()
@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Login = "vpupkin",
             Name = "Vasily Pupkin",
             PasswordHash = new byte[] { 1, 2, 3, 4 },
-            PasswordSalt = new byte[] { 5, 6, 7, 8 }
+            PasswordSalt = new byte[] { 5, 6, 7, 8 },
         };
 
         public static User OperatorUser => new User()
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Login = "itaranov",
             Name = "Ivan Taranov",
             PasswordHash = new byte[] { 4, 8, 15, 16 },
-            PasswordSalt = new byte[] { 23, 42, 6, 6 }
+            PasswordSalt = new byte[] { 23, 42, 6, 6 },
         };
         #endregion
 
@@ -90,7 +90,7 @@ namespace MRS.DocumentManagement.Tests.Utility
         public static List<Role> DEFAULT_ROLES => new List<Role>
         {
             new Role { Name = ADMIN_ROLE.Name },
-            new Role { Name = USER_ROLE.Name }
+            new Role { Name = USER_ROLE.Name },
         };
 
         private static readonly Role ADMIN_ROLE = new Role { Name = "admin" };
@@ -101,7 +101,7 @@ namespace MRS.DocumentManagement.Tests.Utility
         public static List<ObjectiveType> DEFAULT_OBJECTIVE_TYPES => new List<ObjectiveType>
         {
             new ObjectiveType { Name = OBJECTIVE_TYPE_ONE.Name },
-            new ObjectiveType { Name = OBJECTIVE_TYPE_TWO.Name }
+            new ObjectiveType { Name = OBJECTIVE_TYPE_TWO.Name },
         };
 
         private static readonly ObjectiveType OBJECTIVE_TYPE_ONE = new ObjectiveType { Name = "FirstOT" };
@@ -123,7 +123,7 @@ namespace MRS.DocumentManagement.Tests.Utility
         public static List<Project> DEFAULT_PROJECTS => new List<Project>
         {
             new Project { Title = GLADILOV_STREET.Title },
-            new Project { Title = FSK.Title }
+            new Project { Title = FSK.Title },
         };
 
         private static readonly Project GLADILOV_STREET = new Project { Title = "Gladilov str. 38a" };
@@ -139,7 +139,7 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE.DueDate,
                 Title = FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE.Title,
                 Description = FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE.Description,
-                Status = FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE.Status
+                Status = FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE.Status,
             },
             new ObjectiveToCreateDto
             {
@@ -147,7 +147,7 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.DueDate,
                 Title = FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Title,
                 Description = FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Description,
-                Status = FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Status
+                Status = FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Status,
             },
             new ObjectiveToCreateDto
             {
@@ -155,8 +155,8 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.DueDate,
                 Title = SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Title,
                 Description = SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Description,
-                Status = SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Status
-            }
+                Status = SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE.Status,
+            },
         };
 
         private static readonly ObjectiveToCreateDto FIRST_TYPE_OPEN_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
@@ -165,7 +165,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "First type OPEN issue",
             Description = "everything wrong! redo!!!",
-            Status = ObjectiveStatus.Open
+            Status = ObjectiveStatus.Open,
         };
         private static readonly ObjectiveToCreateDto FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
@@ -173,7 +173,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "First type OPEN issue",
             Description = "ASAP: everything wrong! redo!!!",
-            Status = ObjectiveStatus.InProgress
+            Status = ObjectiveStatus.InProgress,
         };
         private static readonly ObjectiveToCreateDto SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
@@ -181,7 +181,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "Second type OPEN issue",
             Description = "ASAP: everything wrong! redo!!!",
-            Status = ObjectiveStatus.InProgress
+            Status = ObjectiveStatus.InProgress,
         };
         #endregion
 
@@ -194,7 +194,7 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = FIRST_TYPE_OPEN_OBJECTIVE.DueDate,
                 Title = FIRST_TYPE_OPEN_OBJECTIVE.Title,
                 Description = FIRST_TYPE_OPEN_OBJECTIVE.Description,
-                Status = FIRST_TYPE_OPEN_OBJECTIVE.Status
+                Status = FIRST_TYPE_OPEN_OBJECTIVE.Status,
             },
             new Objective
             {
@@ -202,7 +202,7 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = FIRST_TYPE_INPROGRESS_OBJECTIVE.DueDate,
                 Title = FIRST_TYPE_INPROGRESS_OBJECTIVE.Title,
                 Description = FIRST_TYPE_INPROGRESS_OBJECTIVE.Description,
-                Status = FIRST_TYPE_INPROGRESS_OBJECTIVE.Status
+                Status = FIRST_TYPE_INPROGRESS_OBJECTIVE.Status,
             },
             new Objective
             {
@@ -210,8 +210,8 @@ namespace MRS.DocumentManagement.Tests.Utility
                 DueDate = SECOND_TYPE_INPROGRESS_OBJECTIVE.DueDate,
                 Title = SECOND_TYPE_INPROGRESS_OBJECTIVE.Title,
                 Description = SECOND_TYPE_INPROGRESS_OBJECTIVE.Description,
-                Status = SECOND_TYPE_INPROGRESS_OBJECTIVE.Status
-            }
+                Status = SECOND_TYPE_INPROGRESS_OBJECTIVE.Status,
+            },
         };
 
         private static readonly Objective FIRST_TYPE_OPEN_OBJECTIVE = new Objective
@@ -220,7 +220,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "First type OPEN issue",
             Description = "everything wrong! redo!!!",
-            Status = (int)ObjectiveStatus.Open
+            Status = (int)ObjectiveStatus.Open,
         };
         private static readonly Objective FIRST_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
@@ -228,7 +228,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "First type OPEN issue",
             Description = "ASAP: everything wrong! redo!!!",
-            Status = (int)ObjectiveStatus.InProgress
+            Status = (int)ObjectiveStatus.InProgress,
         };
         private static readonly Objective SECOND_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
@@ -236,7 +236,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             DueDate = DateTime.MaxValue,
             Title = "Second type OPEN issue",
             Description = "ASAP: everything wrong! redo!!!",
-            Status = (int)ObjectiveStatus.InProgress
+            Status = (int)ObjectiveStatus.InProgress,
         };
         #endregion
 
@@ -247,39 +247,39 @@ namespace MRS.DocumentManagement.Tests.Utility
             {
                 ExternalItemId = FILE_ITEM.ExternalItemId,
                 ItemType = FILE_ITEM.ItemType,
-                Name = FILE_ITEM.Name
+                Name = FILE_ITEM.Name,
             },
             new Item
             {
                 ExternalItemId = BIM_ITEM.ExternalItemId,
                 ItemType = BIM_ITEM.ItemType,
-                Name = BIM_ITEM.Name
+                Name = BIM_ITEM.Name,
             },
             new Item
             {
                 ExternalItemId = MEDIA_ITEM.ExternalItemId,
                 ItemType = MEDIA_ITEM.ItemType,
-                Name = MEDIA_ITEM.Name
-            }
+                Name = MEDIA_ITEM.Name,
+            },
         };
 
         private static readonly Item FILE_ITEM = new Item
         {
             ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
-            Name = "File element"
+            Name = "File element",
         };
         private static readonly Item BIM_ITEM = new Item
         {
             ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
-            Name = "Bim element"
+            Name = "Bim element",
         };
         private static readonly Item MEDIA_ITEM = new Item
         {
             ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
-            Name = "Media element"
+            Name = "Media element",
         };
         #endregion
 
@@ -304,7 +304,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             new DynamicFieldToCreateDto(
                 DYNAMIC_FIELD_TO_CREATE_DATE.Key,
                 DYNAMIC_FIELD_TO_CREATE_DATE.Type,
-                DYNAMIC_FIELD_TO_CREATE_DATE.Value)
+                DYNAMIC_FIELD_TO_CREATE_DATE.Value),
         };
 
         private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
@@ -320,14 +320,14 @@ namespace MRS.DocumentManagement.Tests.Utility
             {
                 Key = DYNAMIC_FIELD_DROPDOWN.Key,
                 Type = DYNAMIC_FIELD_DROPDOWN.Type,
-                Value = DYNAMIC_FIELD_DROPDOWN.Value
+                Value = DYNAMIC_FIELD_DROPDOWN.Value,
             },
             new DynamicField
             {
                 Key = DYNAMIC_FIELD_DATE.Key,
                 Type = DYNAMIC_FIELD_DATE.Type,
-                Value = DYNAMIC_FIELD_DATE.Value
-            }
+                Value = DYNAMIC_FIELD_DATE.Value,
+            },
         };
 
         private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =

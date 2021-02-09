@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Database.Models;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Tests
 {
