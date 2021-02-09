@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace MRS.DocumentManagement.Interface.Dtos
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
     public class RoleDto
     {

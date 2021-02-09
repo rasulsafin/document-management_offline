@@ -39,6 +39,6 @@ namespace MRS.DocumentManagement.Connection
         /// <returns>Progress.</returns>
         ///
         // TODO uncomment after yandex PR with syncronization functionality will be merged
-        Task/*<ProgressSync>*/ GetProgressSyncronization();
+        Task<ProgressSync> GetProgressSyncronization();
     }
 }

@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Diagnostics.CodeAnalysis;
 using MRS.DocumentManagement.Interface.Dtos;
-using System.Diagnostics.CodeAnalysis;
 
 namespace MRS.DocumentManagement.Tests
 {

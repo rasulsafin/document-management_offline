@@ -26,7 +26,8 @@ namespace MRS.DocumentManagement.Utility
         private void CreateMapToDto()
         {
             CreateMap<User, UserDto>();
-            CreateMap<Project, ProjectDto>();
+            CreateMap<Project, ProjectDto>()
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)));
             CreateMap<Project, ProjectToListDto>();
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
@@ -43,7 +44,6 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<ConnectionInfo, ConnectionInfoDto>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Decode<List<string>>(s.AuthFieldValues)));
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
-            CreateMap<Project, ProjectDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
@@ -54,7 +54,8 @@ namespace MRS.DocumentManagement.Utility
 
         private void CreateMapToModel()
         {
-            CreateMap<ProjectDto, Project>();
+            CreateMap<ProjectDto, Project>()
+                .ForMember(d => d.Items, o => o.Ignore());
             CreateMap<ProjectToCreateDto, Project>()
                 .ForMember(d => d.Items, opt => opt.Ignore());
             CreateMap<ID<ObjectiveDto>?, int?>()
@@ -68,6 +69,7 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.BimElements, opt => opt.Ignore())
                 .ForMember(d => d.Items, o => o.Ignore());
             CreateMap<BimElementDto, BimElement>();
+            CreateMap<ObjectiveTypeDto, ObjectiveType>();
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();

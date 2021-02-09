@@ -1,13 +1,14 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -41,8 +42,8 @@ namespace MRS.DocumentManagement.Tests
                 context.ObjectiveTypes.AddRange(types);
                 context.SaveChanges();
             });
-
-            service = new ObjectiveTypeService(Fixture.Context, mapper);
+            var syncService = new Mock<SyncService>();
+            service = new ObjectiveTypeService(Fixture.Context, mapper, syncService.Object);
         }
 
         [TestCleanup]
