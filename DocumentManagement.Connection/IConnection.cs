@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection
         /// Stops syncronization between local and remote DMs.
         /// </summary>
         /// <returns>Result of syncronizing stop process.</returns>
-        Task StopSyncronization();
+        Task<bool> StopSyncronization();
 
         /// <summary>
         /// Gets current syncronization progress.

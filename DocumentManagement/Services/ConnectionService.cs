@@ -4,6 +4,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -22,25 +23,29 @@ namespace MRS.DocumentManagement.Services
             this.connectionFactory = connectionFactory;
         }
 
-        public async Task<bool> Add(ConnectionInfoToCreateDto connectionInfo)
+        public async Task<bool> Add(ConnectionInfoToCreateDto data)
         {
-            throw new System.NotImplementedException();
+            // TODO: Add connection info to db and link it to user and connection type?
+            var connectionInfo = mapper.Map<ConnectionInfo>(data);
+            context.ConnectionInfos.Add(connectionInfo);
+            await context.SaveChangesAsync();
+
+            return true;
         }
 
         // TODO: Get Enums and ObjectiveTypes after connection?
         public async Task<ConnectionStatusDto> Connect(ID<UserDto> userID)
         {
-            var user = await context.Users.FindAsync((int)userID);
-            var connectionInfo = await context.ConnectionInfos.FindAsync(user.ConnectionInfoID);
-            var type = mapper.Map<ConnectionTypeDto>(connectionInfo.ConnectionType);
+            var connectionInfo = await GetConnectionInfo((int)userID);
+            var connection = GetConnection(connectionInfo);
 
-            var connection = connectionFactory.GetConnection(type);
             return await connection.Connect(connectionInfo.AuthFieldValues);
         }
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)
         {
-            throw new System.NotImplementedException();
+            var connectionInfoFromDb = await GetConnectionInfo((int)userID);
+            return mapper.Map<ConnectionInfoDto>(connectionInfoFromDb);
         }
 
         public async Task<ConnectionStatusDto> GetRemoteConnectionStatus()
@@ -50,12 +55,26 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> StartSyncronization(ID<UserDto> userID)
         {
-            throw new System.NotImplementedException();
+            var connection = GetConnection(await GetConnectionInfo((int)userID));
+            return await connection.StartSyncronization();
         }
 
         public async Task<bool> StopSyncronization(ID<UserDto> userID)
         {
-            throw new System.NotImplementedException();
+            var connection = GetConnection(await GetConnectionInfo((int)userID));
+            return await connection.StopSyncronization();
+        }
+
+        private async Task<ConnectionInfo> GetConnectionInfo(int userID)
+        {
+            var user = await context.Users.FindAsync(userID);
+            return await context.ConnectionInfos.FindAsync(user.ConnectionInfoID);
+        }
+
+        private IConnection GetConnection(ConnectionInfo connectionInfo)
+        {
+            var type = mapper.Map<ConnectionTypeDto>(connectionInfo.ConnectionType);
+            return connectionFactory.GetConnection(type);
         }
 
         //private ConnectionInfoDto MapConnectionFromDb(Database.Models.ConnectionInfo info) 
@@ -99,14 +118,13 @@ namespace MRS.DocumentManagement.Services
         //    //var currentConnection = await GetCurrentConnection();
         //    //if (currentConnection != null)
         //    //{
-        //    //    //TODO: what to do?
+        //    //   
         //    //}
 
         //    //var remote = await context.ConnectionInfos.FindAsync((int)connectionInfo.ID);
         //    //if (remote == null)
         //    //    throw new ArgumentException($"Remote connection with key {connectionInfo.ID} not found");
         //    //var authNames = DecodeAuthFieldNames(remote.AuthFieldNames);
-
 
         //    //// assign connection ID to user
         //    //var currentUserID = (int)userContext.CurrentUser.ID;

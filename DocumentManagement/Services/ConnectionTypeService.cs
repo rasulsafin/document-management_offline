@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -54,6 +55,15 @@ namespace MRS.DocumentManagement.Services
             return dbList.Select(t => mapper.Map<ConnectionTypeDto>(dbList)).ToList();
         }
 
+        public Task<bool> RegisterAll()
+        {
+            // TODO: Find all connection types (as libs?) and add them to db.
+            var typeOne = new ConnectionTypeDto();
+            typeOne.Name = "tdms";
+            typeOne.AuthFieldNames = new List<string>() {"login", "pass", "server", "db" };
+            typeOne.AppProperty = new Dictionary<string, string>();
+        }
+
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)
         {
             try
@@ -71,5 +81,6 @@ namespace MRS.DocumentManagement.Services
                 throw new InvalidDataException($"Can't remove connection type with key {id}", ex.InnerException);
             }
         }
+
     }
 }

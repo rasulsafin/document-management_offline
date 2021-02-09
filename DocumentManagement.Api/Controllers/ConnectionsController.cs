@@ -1,9 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Interface;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Threading.Tasks;
-using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -15,49 +13,46 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
-        [HttpGet]
-        public async Task<IActionResult> GetAvailableConnections()
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ConnectionInfoToCreateDto connectionInfo)
         {
-            var availableConnections = await service.GetAvailableConnections();
-            return ValidateCollection(availableConnections);
+            var result = await service.Add(connectionInfo);
+            return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> LinkRemoteConnection(ConnectionInfoToCreateDto connectionInfo)
+        [HttpGet]
+        [Route("connect/{userID}")]
+        public async Task<IActionResult> Connect([FromRoute] int userID)
         {
-            var linked = await service.LinkRemoteConnection(connectionInfo);
-            return Forbid();
+            throw new System.NotImplementedException();
+        }
+
+        [HttpGet]
+        [Route("{userID}")]
+        public async Task<IActionResult> Get([FromRoute] int userID)
+        {
+            throw new System.NotImplementedException();
         }
 
         [HttpGet]
         [Route("status")]
         public async Task<IActionResult> GetRemoteConnectionStatus()
         {
-            var status = await service.GetRemoteConnectionStatus();
-            return Forbid();
+            throw new System.NotImplementedException();
         }
 
-        [HttpPut]
-        public async Task<IActionResult> Reconnect(ConnectionInfoToCreateDto connectionInfo)
+        [HttpPost]
+        [Route("startsyncronization/{userID}")]
+        public async Task<IActionResult> StartSyncronization([FromRoute] int userID)
         {
-            var reconnected = await service.Reconnect(connectionInfo);
-            return Forbid();
+            throw new System.NotImplementedException();
         }
 
-        [HttpGet]
-        [Route("current")]
-        public async Task<IActionResult> GetCurrentConnection(int userId)
+        [HttpPost]
+        [Route("stopsyncronization/{userID}")]
+        public async Task<IActionResult> StopSyncronization([FromRoute] int userID)
         {
-            var connection = await service.GetCurrentConnection(new ID<UserDto>(userId));
-            return ValidateFoundObject(connection);
+            throw new System.NotImplementedException();
         }
-
-        //[HttpGet]
-        //[Route("variants")]
-        //public async Task<IActionResult> GetEnumVariants(string dynamicFieldKey)
-        //{
-        //    var variants = await service.GetEnumVariants(dynamicFieldKey);
-        //    return Forbid();
-        //}
     }
 }
