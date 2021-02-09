@@ -338,14 +338,12 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
         {
-            Name = "TDMS",
-            AuthFieldNames = "TDMS field 1; TDMS field 2",
+            AuthFieldValues = "TDMS field 1; TDMS field 2",
         };
 
         public static ConnectionInfo BimConnectionInfo => new ConnectionInfo()
         {
-            Name = "BIM360",
-            AuthFieldNames = "Bim field 1; Bim field 2",
+            AuthFieldValues = "Bim field 1; Bim field 2",
         };
 
         public static IEnumerable<EnumDm> CreateEnumDms(string prefix, int connectionID, int count = 3)

@@ -8,7 +8,9 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
 
-        public ICollection<string> AuthFieldNames { get; set; }
+        public string AppProperty { get; set; }
+
+        public string AuthFieldNames { get; set; }
 
         public ICollection<ConnectionInfo> ConnectionInfos { get; set; }
     }

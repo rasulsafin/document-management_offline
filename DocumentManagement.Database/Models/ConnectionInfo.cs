@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Database.Models
         /// <summary>
         /// TODO: Security??
         /// </summary>
-        public ICollection<string> AuthFieldValues { get; set; }
+        public string AuthFieldValues { get; set; }
 
         public User User { get; set; }
 

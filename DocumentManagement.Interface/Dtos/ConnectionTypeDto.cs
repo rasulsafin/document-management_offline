@@ -8,6 +8,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string Name { get; set; }
 
+        public IDictionary<string, string> AppProperty { get; set; }
+
         public IEnumerable<string> AuthFieldNames { get; set; }
 
     }
