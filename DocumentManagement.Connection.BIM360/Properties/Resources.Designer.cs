@@ -205,6 +205,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /projects/{0}/storage.
+        /// </summary>
+        internal static string PostProjectStorage {
+            get {
+                return ResourceManager.GetString("PostProjectStorage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}.
         /// </summary>
         internal static string PutBucketsObjectsMethod {
