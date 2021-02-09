@@ -36,21 +36,24 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>Status of the connection.</returns>
         Task<ConnectionStatusDto> GetRemoteConnectionStatus();
 
-        /// <summary>
-        /// Starts syncronization between database and remote connetion.
-        /// </summary>
-        /// <param name="userID">User's ID.</param>
-        /// <returns>True if syncronization started.</returns>
-        Task<bool> StartSyncronization(ID<UserDto> userID);
-
-        /// <summary>
-        /// Stops syncronization between database and remote connetion.
-        /// </summary>
-        /// <param name="userID">User's ID.</param>
-        /// <returns>True if syncronization successfully stopped.</returns>
-        Task<bool> StopSyncronization(ID<UserDto> userID);
-
         #region TODO
+
+        // TODO: Make Progress using IProgress and do it in one method
+        ///// <summary>
+        ///// Starts syncronization between database and remote connetion.
+        ///// </summary>
+        ///// <param name="userID">User's ID.</param>
+        ///// <returns>True if syncronization started.</returns>
+        //Task<bool> StartSyncronization(ID<UserDto> userID);
+
+        ///// <summary>
+        ///// Stops syncronization between database and remote connetion.
+        ///// </summary>
+        ///// <param name="userID">User's ID.</param>
+        ///// <returns>True if syncronization successfully stopped.</returns>
+        //Task<bool> StopSyncronization(ID<UserDto> userID);
+
+
 
         // In case user can have several connections?
         // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);

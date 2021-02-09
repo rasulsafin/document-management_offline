@@ -38,8 +38,9 @@ namespace MRS.DocumentManagement.Services
         {
             var connectionInfo = await GetConnectionInfo((int)userID);
             var connection = GetConnection(connectionInfo);
+            var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
 
-            return await connection.Connect(connectionInfo.AuthFieldValues);
+            return await connection.Connect(connectionInfoDto);
         }
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)

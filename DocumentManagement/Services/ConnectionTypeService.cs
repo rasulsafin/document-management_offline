@@ -55,13 +55,32 @@ namespace MRS.DocumentManagement.Services
             return dbList.Select(t => mapper.Map<ConnectionTypeDto>(dbList)).ToList();
         }
 
-        public Task<bool> RegisterAll()
+        public async Task<bool> RegisterAll()
         {
             // TODO: Find all connection types (as libs?) and add them to db.
+            // Type One.
             var typeOne = new ConnectionTypeDto();
             typeOne.Name = "tdms";
-            typeOne.AuthFieldNames = new List<string>() {"login", "pass", "server", "db" };
+            typeOne.AuthFieldNames = new List<string>() { "login", "pass", "server", "db" };
             typeOne.AppProperty = new Dictionary<string, string>();
+            var typeOneDb = mapper.Map<ConnectionType>(typeOne);
+            await context.ConnectionTypes.AddAsync(typeOneDb);
+
+            // Type Two.
+            var typeTwo = new ConnectionTypeDto();
+            typeTwo.Name = "yandexdisk";
+            typeTwo.AuthFieldNames = new List<string>() {};
+            typeTwo.AppProperty = new Dictionary<string, string>();
+            typeTwo.AppProperty.Add("CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051");
+            typeTwo.AppProperty.Add("CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c");
+            typeTwo.AppProperty.Add("RETURN_URL", @"http://localhost:8000/oauth/");
+            var typeTwoDb = mapper.Map<ConnectionType>(typeTwo);
+            await context.ConnectionTypes.AddAsync(typeTwoDb);
+
+            // Save.
+            await context.SaveChangesAsync();
+
+            return true;
         }
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)

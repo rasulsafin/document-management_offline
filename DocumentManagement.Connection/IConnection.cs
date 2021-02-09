@@ -11,9 +11,9 @@ namespace MRS.DocumentManagement.Connection
         /// <summary>
         /// Connect to remote DM.
         /// </summary>
-        /// <param name="param">Dynamic params.</param>
+        /// <param name="info">Information abot the connection.</param>
         /// <returns>Result success and additional result data.</returns>
-        Task<ConnectionStatusDto> Connect(dynamic param);
+        Task<ConnectionStatusDto> Connect(ConnectionInfoDto info);
 
         /// <summary>
         /// Checks if the saved authorization data is correct.
@@ -21,24 +21,23 @@ namespace MRS.DocumentManagement.Connection
         /// <returns>Result of check.</returns>
         Task<bool> IsAuthDataCorrect();
 
-        /// <summary>
-        /// Starts syncronization between local and remote DMs.
-        /// </summary>
-        /// <returns>Result of syncronizing start process.</returns>
-        Task<bool> StartSyncronization();
+        // TODO: Syncronization
+        ///// <summary>
+        ///// Starts syncronization between local and remote DMs.
+        ///// </summary>
+        ///// <returns>Result of syncronizing start process.</returns>
+        // Task<bool> StartSyncronization();
 
-        /// <summary>
-        /// Stops syncronization between local and remote DMs.
-        /// </summary>
-        /// <returns>Result of syncronizing stop process.</returns>
-        Task<bool> StopSyncronization();
+        ///// <summary>
+        ///// Stops syncronization between local and remote DMs.
+        ///// </summary>
+        ///// <returns>Result of syncronizing stop process.</returns>
+        // Task<bool> StopSyncronization();
 
         /// <summary>
         /// Gets current syncronization progress.
         /// </summary>
         /// <returns>Progress.</returns>
-        ///
-        // TODO uncomment after yandex PR with syncronization functionality will be merged
-        Task<ProgressSync> GetProgressSyncronization();
+        // Task<ProgressSync> GetProgressSyncronization();
     }
 }
