@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Forge.Models
+namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
     [DataContract]
     public class Object<TAttributes, TRelationships>

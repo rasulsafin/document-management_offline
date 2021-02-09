@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Forge.Models
+namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
     public class Attachment : Object<Attachment.AttachmentAttributes, Attachment.AttachmentRelationships>
     {

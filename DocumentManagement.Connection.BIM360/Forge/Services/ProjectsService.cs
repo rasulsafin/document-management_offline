@@ -1,18 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge;
+using DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
 using DocumentManagement.Connection.BIM360.Properties;
-using Forge.Models.DataManagement;
-using static Forge.Constants;
+using static DocumentManagement.Connection.BIM360.Forge.Constants;
 
-namespace Forge.Services
+namespace DocumentManagement.Connection.BIM360.Forge.Services
 {
-    public class ProjectService
+    public class ProjectsService
     {
         private readonly ForgeConnection connection;
 
-        public ProjectService(ForgeConnection connection)
+        public ProjectsService(ForgeConnection connection)
             => this.connection = connection;
 
         public async Task<List<Project>> GetProjectsAsync(string hubId)

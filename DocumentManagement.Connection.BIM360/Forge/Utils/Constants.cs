@@ -1,4 +1,4 @@
-﻿namespace Forge
+﻿namespace DocumentManagement.Connection.BIM360.Forge
 {
     internal static class Constants
     {

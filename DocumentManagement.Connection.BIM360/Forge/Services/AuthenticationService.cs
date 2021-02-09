@@ -5,15 +5,14 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge;
+using DocumentManagement.Connection.BIM360.Forge.Models.Authentication;
 using DocumentManagement.Connection.BIM360.Properties;
-using Forge.Models.Authentication;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using static Forge.Constants;
+using static DocumentManagement.Connection.BIM360.Forge.Constants;
 
-namespace Forge.Services
+namespace DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class AuthenticationService : IDisposable
     {
@@ -22,16 +21,16 @@ namespace Forge.Services
         private static readonly double TIMEOUT = 10;
         private static readonly string SCOPE = "data:read%20data:write%20data:create";
 
+        private HttpClient client;
         private HttpListener httpListener;
         private DateTime sentTime;
         private IntPtr currentProcess;
-        private ForgeConnection connection;
 
         // Is created as scoped as this service
         private RemoteConnectionInfoDto connectionInfoDto;
 
-        private AuthenticationService(ForgeConnection connection)
-            => this.connection = connection;
+        private AuthenticationService()
+            => client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
 
         internal delegate void NewBearerDelegate(Token bearer);
 
@@ -124,7 +123,7 @@ namespace Forge.Services
             set => connectionInfoDto.ConnectionType.AppProperty[CALLBACK_URL_NAME] = value;
         }
 
-        private bool IsLogged
+        public bool IsLogged
             => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
 
         public async Task CheckAccessAsync(bool mustUpdate = false)
@@ -139,11 +138,14 @@ namespace Forge.Services
             }
         }
 
-        public async Task<CommandResult> SignInAsync(RemoteConnectionInfoDto connectionInfo)
+        public async Task<ConnectionStatusDto> SignInAsync(RemoteConnectionInfoDto connectionInfo)
         {
             connectionInfoDto = connectionInfo;
             await CheckAccessAsync(true);
-            var result = new CommandResult { IsSuccessful = status == ConnectionStatus.Connected };
+
+            // TODO Add filling connection status depending on 'status' field
+            var result = new ConnectionStatusDto();
+
             return result;
         }
 
@@ -170,7 +172,7 @@ namespace Forge.Services
 
         public void Dispose()
         {
-            connection.Dispose();
+            client.Dispose();
             ((IDisposable)httpListener).Dispose();
         }
 
@@ -246,17 +248,20 @@ namespace Forge.Services
 
         private async Task<Token> RefreshTokenAsyncWithHttpInfo(string appProperyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
         {
-            var content = new[]
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{Resources.ForgeUrl}{Resources.PostRefreshTokenMethod}")
             {
-                new KeyValuePair<string, string>("client_id", appProperyClientId),
-                new KeyValuePair<string, string>("client_secret", appPropertyClientSecret),
-                new KeyValuePair<string, string>("grant_type", "refresh_token"),
-                new KeyValuePair<string, string>("refresh_token", accessPropertyRefreshToken),
+                Content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("client_id", appProperyClientId),
+                    new KeyValuePair<string, string>("client_secret", appPropertyClientSecret),
+                    new KeyValuePair<string, string>("grant_type", "refresh_token"),
+                    new KeyValuePair<string, string>("refresh_token", accessPropertyRefreshToken),
+                }),
             };
-
-            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post, Resources.PostRefreshTokenMethod, content);
-
-            return response.ToObject<Token>();
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Token>(data);
         }
 
         private void SaveData(Token bearer)
@@ -272,18 +277,21 @@ namespace Forge.Services
 
         private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string code, string appProperyCallBackUrl)
         {
-            var content = new[]
+            var request = new HttpRequestMessage(HttpMethod.Post, $"{Resources.ForgeUrl}{Resources.PostGetTokenMethod}")
             {
-                new KeyValuePair<string, string>("client_id", appProperyClientId),
-                new KeyValuePair<string, string>("client_secret", appProperyClientSecret),
-                new KeyValuePair<string, string>("grant_type", "authorization_code"),
-                new KeyValuePair<string, string>("code", code),
-                new KeyValuePair<string, string>("redirect_uri", appProperyCallBackUrl),
+                Content = new FormUrlEncodedContent(new[]
+                {
+                    new KeyValuePair<string, string>("client_id", appProperyClientId),
+                    new KeyValuePair<string, string>("client_secret", appProperyClientSecret),
+                    new KeyValuePair<string, string>("grant_type", "authorization_code"),
+                    new KeyValuePair<string, string>("code", code),
+                    new KeyValuePair<string, string>("redirect_uri", appProperyCallBackUrl),
+                }),
             };
-
-            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post, Resources.PostGetTokenMethod, content);
-
-            return response.ToObject<Token>();
+            var response = await client.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+            var data = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<Token>(data);
         }
 
         private void GotIt(Token bearer)

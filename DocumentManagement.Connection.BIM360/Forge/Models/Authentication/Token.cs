@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Forge.Models.Authentication
+namespace DocumentManagement.Connection.BIM360.Forge.Models.Authentication
 {
     public class Token
     {

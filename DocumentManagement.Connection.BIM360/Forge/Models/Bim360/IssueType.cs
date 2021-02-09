@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Forge.Models.Bim360
+namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
     public class IssueType
     {

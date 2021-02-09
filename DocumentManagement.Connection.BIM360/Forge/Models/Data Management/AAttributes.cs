@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Forge.Models.DataManagement
+namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
     public abstract class AAttributes
     {

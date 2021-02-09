@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Forge.Services;
+using DocumentManagement.Connection.BIM360.Forge.Services;
 using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace DocumentManagement.Connection.BIM360.Forge
@@ -11,7 +10,7 @@ namespace DocumentManagement.Connection.BIM360.Forge
     {
         private AuthenticationService authService;
 
-        public async Task<CommandResult> Connect(dynamic param)
+        public async Task<ConnectionStatusDto> Connect(dynamic param)
         {
             return await authService.SignInAsync((RemoteConnectionInfoDto)param);
         }

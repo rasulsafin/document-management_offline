@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Forge.Models.DataManagement
+namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
     public class Folder : Object<Folder.FolderAttributes, Folder.FolderRelationships>
     {

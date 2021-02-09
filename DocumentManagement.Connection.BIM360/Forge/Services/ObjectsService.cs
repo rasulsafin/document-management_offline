@@ -4,11 +4,10 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge;
 using DocumentManagement.Connection.BIM360.Properties;
 using Newtonsoft.Json.Linq;
 
-namespace Forge.Services
+namespace DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class ObjectsService
     {
