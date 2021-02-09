@@ -1,5 +1,7 @@
+using System;
+using System.IO;
+using System.Reflection;
 using AutoMapper;
-using MRS.DocumentManagement.Utility;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,23 +14,19 @@ using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using System;
-using System.IO;
-using System.Reflection;
+using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizer;
+using MRS.DocumentManagement.Connection.YandexDisk;
 
 namespace MRS.DocumentManagement.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
@@ -45,7 +43,7 @@ namespace MRS.DocumentManagement.Api
                         ValidateAudience = true,
                         ValidAudience = AuthOptions.AUDIENCE,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                        ValidateIssuerSigningKey = true
+                        ValidateIssuerSigningKey = true,
                     };
                 });
 
@@ -79,6 +77,7 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
+            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ItemHelper>();
             services.AddScoped<ConnectionManager>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
@@ -89,33 +88,25 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
+            services.AddScoped<IConnection, YandexConnection>();
 
             services.AddSingleton<CryptographyHelper>();
+            services.AddSingleton<SyncManager>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            //else
-            //    app.UseExceptionHandler("/error");
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = string.Empty;
             });
-
-            //app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

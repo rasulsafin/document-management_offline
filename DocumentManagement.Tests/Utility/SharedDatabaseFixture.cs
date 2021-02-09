@@ -1,8 +1,8 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System;
+using System.Data.Common;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using System;
-using System.Data.Common;
 
 namespace MRS.DocumentManagement.Tests.Utility
 {

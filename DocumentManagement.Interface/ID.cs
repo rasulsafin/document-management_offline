@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
 using System;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement
 {
@@ -8,15 +8,20 @@ namespace MRS.DocumentManagement
         [JsonProperty]
         private readonly int id;
 
-        public static ID<T> InvalidID => new ID<T>(-1);
-
         public ID(int id) => this.id = id;
 
+        public static ID<T> InvalidID => new ID<T>(-1);
+
+        [JsonIgnore]
+        public bool IsValid => id > 0;
+
         public static explicit operator int(ID<T> ident) => ident.id;
+
         public static explicit operator ID<T>(int id) => new ID<T>(id);
 
         public static bool operator !=(ID<T> lhs, ID<T> rhs) => !lhs.Equals(rhs);
-        public static bool operator ==(ID<T> lhs, ID<T> rhs)=> lhs.Equals(rhs);
+
+        public static bool operator ==(ID<T> lhs, ID<T> rhs) => lhs.Equals(rhs);
 
         public bool Equals(ID<T> other) => this.id == other.id;
 
@@ -30,8 +35,5 @@ namespace MRS.DocumentManagement
         public override int GetHashCode() => id.GetHashCode();
 
         public override string ToString() => $"{id}";
-
-        [JsonIgnore]
-        public bool IsValid => id > 0;
     }
 }

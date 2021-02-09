@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection
 {
@@ -37,8 +38,6 @@ namespace MRS.DocumentManagement.Connection
         /// Gets current syncronization progress.
         /// </summary>
         /// <returns>Progress.</returns>
-        ///
-        // TODO uncomment after yandex PR with syncronization functionality will be merged
-        Task/*<ProgressSync>*/ GetProgressSyncronization();
+        Task<ProgressSync> GetProgressSyncronization();
     }
 }

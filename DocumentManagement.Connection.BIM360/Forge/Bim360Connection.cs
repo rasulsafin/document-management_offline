@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge.Services;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.SyncData;
 
 namespace DocumentManagement.Connection.BIM360.Forge
 {
@@ -15,7 +16,7 @@ namespace DocumentManagement.Connection.BIM360.Forge
             return await authService.SignInAsync((RemoteConnectionInfoDto)param);
         }
 
-        public async Task GetProgressSyncronization()
+        public async Task<ProgressSync> GetProgressSyncronization()
         {
             throw new NotImplementedException();
         }

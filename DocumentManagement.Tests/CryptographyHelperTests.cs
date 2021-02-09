@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Utility;
-using System;
 
 namespace MRS.DocumentManagement.Tests
 {
