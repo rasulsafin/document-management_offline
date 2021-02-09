@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models.Authentication
 {
+    [DataContract]
     public class Token
     {
         [DataMember(Name = "token_type")]

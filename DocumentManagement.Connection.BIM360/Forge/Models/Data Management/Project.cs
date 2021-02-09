@@ -2,14 +2,17 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
+    [DataContract]
     public class Project : Object<Project.ProjectAttributes, Project.ProjectRelationships>
     {
+        [DataContract]
         public class ProjectAttributes : AAttributes
         {
             [DataMember(Name = "name")]
             public string Name { get; set; }
         }
 
+        [DataContract]
         public class ProjectRelationships
         {
             [DataMember(Name = "hub")]

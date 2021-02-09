@@ -79,6 +79,15 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /authentication/v1/authorize?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}.
+        /// </summary>
+        internal static string GetAuthorizeMethod {
+            get {
+                return ResourceManager.GetString("GetAuthorizeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}.
         /// </summary>
         internal static string GetHubsInfoByIdMethod {
@@ -187,7 +196,7 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на authentication/v1/gettoken.
+        ///   Ищет локализованную строку, похожую на /authentication/v1/gettoken.
         /// </summary>
         internal static string PostGetTokenMethod {
             get {
@@ -246,15 +255,6 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         internal static string PostRefreshTokenMethod {
             get {
                 return ResourceManager.GetString("PostRefreshTokenMethod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на /authentication/v1/refreshtoken?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}.
-        /// </summary>
-        internal static string PostRegreshTokenFilteredMethod {
-            get {
-                return ResourceManager.GetString("PostRegreshTokenFilteredMethod", resourceCulture);
             }
         }
         

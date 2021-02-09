@@ -3,8 +3,10 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
+    [DataContract]
     public class Folder : Object<Folder.FolderAttributes, Folder.FolderRelationships>
     {
+        [DataContract]
         public class FolderAttributes : AAttributes
         {
             [DataMember(Name = "name")]
@@ -38,6 +40,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
             public int ObjectCount { get; set; }
         }
 
+        [DataContract]
         public class FolderRelationships
         {
             [DataMember(Name = "links")]

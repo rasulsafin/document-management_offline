@@ -2,8 +2,10 @@
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
+    [DataContract]
     public class Attachment : Object<Attachment.AttachmentAttributes, Attachment.AttachmentRelationships>
     {
+        [DataContract]
         public class AttachmentAttributes
         {
             [DataMember(Name = "urn")]
@@ -16,6 +18,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Models
             public string IssueId { get; set; }
         }
 
+        [DataContract]
         public class AttachmentRelationships
         {
             [DataMember(Name = "activity_batches")]

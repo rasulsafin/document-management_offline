@@ -2,6 +2,7 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
+    [DataContract]
     public class Page
     {
         [DataMember(Name = "offset")]

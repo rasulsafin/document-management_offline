@@ -3,6 +3,7 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
+    [DataContract]
     public class IssueSubtype
     {
         [DataMember(Name = "id")]

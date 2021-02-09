@@ -21,6 +21,8 @@ namespace DocumentManagement.Connection.BIM360.Forge
         public ForgeConnection()
             => client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
 
+        public string Token { get; set; }
+
         public void Dispose()
         {
             client.Dispose();
@@ -70,7 +72,7 @@ namespace DocumentManagement.Connection.BIM360.Forge
 
         private async Task<JObject> SendAsync(HttpRequestMessage request)
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", TOKEN);
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync();

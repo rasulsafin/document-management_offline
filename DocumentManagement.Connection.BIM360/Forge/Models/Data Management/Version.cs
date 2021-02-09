@@ -3,8 +3,10 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
+    [DataContract]
     public class Version : Object<Version.VersionAttributes, Version.VersionRelationships>
     {
+        [DataContract]
         public class VersionAttributes : AAttributes
         {
             [DataMember(Name = "createTime")]
@@ -47,6 +49,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
             public string ReservedUserName { get; set; }
         }
 
+        [DataContract]
         public class VersionRelationships
         {
             [DataMember(Name = "links")]

@@ -3,8 +3,10 @@ using System.Runtime.Serialization;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Models
 {
+    [DataContract]
     public class Issue : Object<Issue.IssueAttributes, Issue.IssueRelationships>
     {
+        [DataContract]
         public class IssueAttributes
         {
             [DataMember(Name = "created_at")]
@@ -146,6 +148,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Models
             public object AttachmentsAttributes { get; set; }
         }
 
+        [DataContract]
         public class IssueRelationships
         {
             [DataMember(Name = "container")]

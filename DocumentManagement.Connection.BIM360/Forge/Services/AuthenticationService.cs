@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading.Tasks;
 using DocumentManagement.Connection.BIM360.Forge.Models.Authentication;
 using DocumentManagement.Connection.BIM360.Properties;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using static DocumentManagement.Connection.BIM360.Forge.Constants;
 
 namespace DocumentManagement.Connection.BIM360.Forge.Services
@@ -188,13 +188,13 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
                     if (!HttpListener.IsSupported)
                         return;
                     httpListener = new HttpListener();
-                    httpListener.Prefixes.Add(AppCallBackUrl.Replace("localhost", "+") + "/");
+                    httpListener.Prefixes.Add(AppCallBackUrl/*.Replace("localhost", "+") + "/"*/);
                     httpListener.Start();
                     getting = httpListener.GetContextAsync();
                 }
 
                 var oauthUrl = Authorize(AppClientId, AppCallBackUrl);
-                Process.Start(oauthUrl);
+                Process.Start(new ProcessStartInfo(oauthUrl) { UseShellExecute = true });
                 if (getting != null)
                     await getting;
                 await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
@@ -246,14 +246,14 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         private string GetAuthOrDefault(IEnumerable<string> source, int index)
             => index != -1 ? source.ElementAtOrDefault(index) : string.Empty;
 
-        private async Task<Token> RefreshTokenAsyncWithHttpInfo(string appProperyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
+        private async Task<Token> RefreshTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
         {
             var url = new StringBuilder(Resources.ForgeUrl).Append(Resources.PostRefreshTokenMethod).ToString();
             var request = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Content = new FormUrlEncodedContent(new[]
                 {
-                    new KeyValuePair<string, string>("client_id", appProperyClientId),
+                    new KeyValuePair<string, string>("client_id", appPropertyClientId),
                     new KeyValuePair<string, string>("client_secret", appPropertyClientSecret),
                     new KeyValuePair<string, string>("grant_type", "refresh_token"),
                     new KeyValuePair<string, string>("refresh_token", accessPropertyRefreshToken),
@@ -262,7 +262,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var data = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<Token>(data);
+            return JsonConvert.DeserializeObject<Token>(data);
         }
 
         private void SaveData(Token bearer)
@@ -274,7 +274,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         }
 
         private string Authorize(string appPropertyClientId, string appPropertyCallBackUrl)
-            => string.Format($"{Resources.ForgeUrl}{Resources.PostRegreshTokenFilteredMethod}", appPropertyClientId, appPropertyCallBackUrl, SCOPE);
+            => string.Format($"{Resources.ForgeUrl}{Resources.GetAuthorizeMethod}", appPropertyClientId, appPropertyCallBackUrl.Replace("/", "%2F"), SCOPE);
 
         private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string code, string appProperyCallBackUrl)
         {
@@ -293,7 +293,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var data = await response.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<Token>(data);
+            return JsonConvert.DeserializeObject<Token>(data);
         }
 
         private void GotIt(Token bearer)
