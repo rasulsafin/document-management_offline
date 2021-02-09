@@ -170,7 +170,7 @@
     <comment>Returns a project for a given project_id</comment>
   </data>
   <data name="GetProjectsDownloadInfoMethod" xml:space="preserve">
-    <value>/projects/{0}/downloads/{1}</value>
+    <value>/data/v1/projects/{0}/downloads/{1}</value>
     <comment>Returns the details for a specific download</comment>
   </data>
   <data name="GetProjectsHubMethod" xml:space="preserve">
@@ -194,7 +194,7 @@
     <comment>Creates versions of uploaded files (items) and makes copies of existing files</comment>
   </data>
   <data name="PostProjectStorage" xml:space="preserve">
-    <value>/projects/{0}/storage</value>
+    <value>data/v1/projects/{0}/storage</value>
     <comment>Creates a storage location in the OSS where data can be uploaded to</comment>
   </data>
 </root>

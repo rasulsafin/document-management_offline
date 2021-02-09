@@ -115,7 +115,7 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /projects/{0}/downloads/{1}.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/downloads/{1}.
         /// </summary>
         internal static string GetProjectsDownloadInfoMethod {
             get {
@@ -205,7 +205,7 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /projects/{0}/storage.
+        ///   Ищет локализованную строку, похожую на data/v1/projects/{0}/storage.
         /// </summary>
         internal static string PostProjectStorage {
             get {
