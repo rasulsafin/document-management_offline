@@ -248,7 +248,8 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
 
         private async Task<Token> RefreshTokenAsyncWithHttpInfo(string appProperyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{Resources.ForgeUrl}{Resources.PostRefreshTokenMethod}")
+            var url = new StringBuilder(Resources.ForgeUrl).Append(Resources.PostRefreshTokenMethod).ToString();
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Content = new FormUrlEncodedContent(new[]
                 {
@@ -277,7 +278,8 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
 
         private async Task<Token> GetTokenAsyncWithHttpInfo(string appProperyClientId, string appProperyClientSecret, string code, string appProperyCallBackUrl)
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, $"{Resources.ForgeUrl}{Resources.PostGetTokenMethod}")
+            var url = new StringBuilder(Resources.ForgeUrl).Append(Resources.PostGetTokenMethod).ToString();
+            var request = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Content = new FormUrlEncodedContent(new[]
                 {
