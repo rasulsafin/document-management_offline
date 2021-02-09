@@ -207,9 +207,18 @@ namespace DocumentManagement.Connection.BIM360.Properties {
         /// <summary>
         ///   Ищет локализованную строку, похожую на data/v1/projects/{0}/storage.
         /// </summary>
-        internal static string PostProjectStorage {
+        internal static string PostProjectStorageMethod {
             get {
-                return ResourceManager.GetString("PostProjectStorage", resourceCulture);
+                return ResourceManager.GetString("PostProjectStorageMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/versions.
+        /// </summary>
+        internal static string PostProjectsVersionMethod {
+            get {
+                return ResourceManager.GetString("PostProjectsVersionMethod", resourceCulture);
             }
         }
         

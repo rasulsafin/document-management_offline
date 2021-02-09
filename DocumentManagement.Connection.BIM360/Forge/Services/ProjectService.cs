@@ -42,7 +42,7 @@ namespace Forge.Services
             return data;
         }
 
-        public async Task<List<Folder>> GetTopFolders(string hubId, string projectId)
+        public async Task<List<Folder>> GetTopFoldersAsync(string hubId, string projectId)
         {
             var response = await connection
                 .GetResponse(HttpMethod.Get, Resources.GetTopFoldersMethod, hubId, projectId);
@@ -51,7 +51,7 @@ namespace Forge.Services
             return data;
         }
 
-        public async Task<Download> GetDownloadInfo(string projectId, string downloadId)
+        public async Task<Download> GetDownloadInfoAsync(string projectId, string downloadId)
         {
             var response = await connection
                 .GetResponse(HttpMethod.Get, Resources.GetProjectsDownloadInfoMethod, projectId, downloadId);
@@ -60,7 +60,7 @@ namespace Forge.Services
             return data;
         }
 
-        public async Task<string> CreateStorage(string projectId, string fileName, string folderId, bool isFolder)
+        public async Task<string> CreateStorageAsync(string projectId, string fileName, string folderId, bool isFolder)
         {
             var obj = new StorageObject
             {
@@ -79,7 +79,7 @@ namespace Forge.Services
                 },
             };
             var response = await connection
-                .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectStorage, obj, projectId);
+                .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectStorageMethod, obj, projectId);
 
             return response[DATA_PROPERTY]?.ToObject<StorageObject>().ID;
         }

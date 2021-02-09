@@ -193,8 +193,12 @@
     <value>/data/v1/projects/{0}/items</value>
     <comment>Creates versions of uploaded files (items) and makes copies of existing files</comment>
   </data>
-  <data name="PostProjectStorage" xml:space="preserve">
+  <data name="PostProjectStorageMethod" xml:space="preserve">
     <value>data/v1/projects/{0}/storage</value>
     <comment>Creates a storage location in the OSS where data can be uploaded to</comment>
+  </data>
+  <data name="PostProjectsVersionMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/versions</value>
+    <comment>Creates new versions of a file (item)</comment>
   </data>
 </root>

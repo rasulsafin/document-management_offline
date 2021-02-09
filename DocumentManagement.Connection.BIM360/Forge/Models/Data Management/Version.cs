@@ -31,6 +31,9 @@ namespace Forge.Models.DataManagement
             [DataMember(Name = "lastModifiedUserName")]
             public string LastModifiedUserName { get; set; }
 
+            [DataMember(Name = "name")]
+            public string Name { get; set; }
+
             [DataMember(Name = "reserved")]
             public bool Reserved { get; set; }
 
