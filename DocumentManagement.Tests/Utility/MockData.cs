@@ -286,12 +286,12 @@ namespace MRS.DocumentManagement.Tests.Utility
         #region BIM_ELEMENTS
         public static List<BimElement> DEFAULT_BIM_ELEMENTS => new List<BimElement>
         {
-            BIM_ELEMENT_ONE,
-            BIM_ELEMENT_TWO,
+            new BimElement { GlobalID = BIM_ELEMENT_ONE.GlobalID },
+            new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
         };
 
-        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House" };
-        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House" };
+        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House1" };
+        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House2" };
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO
