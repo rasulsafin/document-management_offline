@@ -1,45 +1,64 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
+    /// <summary>
+    /// Service to manage RemoteConnections (e.g. YandexDisk, TDMS, BIM360).
+    /// </summary>
     public interface IConnectionService
     {
-        Task<IEnumerable<RemoteConnectionInfoDto>> GetAvailableConnections();
-
-        Task<bool> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo);
-
-        Task<ConnectionStatusDto> GetRemoteConnectionStatus();
-
-        Task<bool> Reconnect(RemoteConnectionToCreateDto connectionInfo);
-
-        Task<RemoteConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
-
-        Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
-
-        Task<IEnumerable<ItemDto>> GetItems(IEnumerable<ID<ItemDto>> itemIds);
-
-        Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds);
+        /// <summary>
+        /// Adds new ConnectionInfo and links it to User.
+        /// </summary>
+        /// <param name="connectionInfo">ConnectionInfo to create.</param>
+        /// <returns>True if ConnectionInfo was succesfuly created.</returns>
+        Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto connectionInfo);
 
         /// <summary>
-        /// Start the synchronization process
+        /// Gets ConnectionInfo for the specific user.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task<bool> StartSync();
+        /// <param name="userID">User's ID.</param>
+        /// <returns>ConnectionInfoDto.</returns>
+        Task<ConnectionInfoDto> Get(ID<UserDto> userID);
 
         /// <summary>
-        /// Stop the synchronization process with an intermediate save
+        /// Connects user to Remote connection(e.g. YandexDisk, TDMS, BIM360), using user's ConnectionInfo.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task StopSync();
+        /// <param name="userID">User's ID.</param>
+        /// <returns>Status of the connection.</returns>
+        Task<ConnectionStatusDto> Connect(ID<UserDto> userID);
 
         /// <summary>
-        /// Get information about the current synchronization process
+        /// Gets current stutus of user's connetion.
         /// </summary>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        Task<ProgressSync> GetProgressSync();
+        /// <param name="userID">User's ID.</param>
+        /// <returns>Status of the connection.</returns>
+        Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID);
 
+        #region TODO
+
+        // TODO: Syncronization!
+        // Task<bool> StartSyncronization(ID<UserDto> userID);
+        // Task<bool> StopSyncronization(ID<UserDto> userID);
+        // Task<?> GetProgressSyncronization(ConnectionInfoDto info);
+        //
+        // OR
+        //
+        // Task<bool> Sync(System.IProgress<SyncData.ProgressSync> prog, System.Threading.CancellationToken token);
+
+        // TODO: In case user can have several connections?
+        // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
+
+        // TODO: If we need different method than connect?
+        // Task<bool> Reconnect(ConnectionInfoToCreateDto connectionInfo);
+
+        // TODO: Enum and ObjectiveType support?
+        // Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
+
+        // TODO: Change current user connection.
+        // Task<bool> Update(ConnectionInfoDto connectionInfo);
+        #endregion
     }
 }

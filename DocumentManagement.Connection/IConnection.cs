@@ -1,5 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.SyncData;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
@@ -11,9 +11,9 @@ namespace MRS.DocumentManagement.Connection
         /// <summary>
         /// Connect to remote DM.
         /// </summary>
-        /// <param name="param">Dynamic params.</param>
+        /// <param name="info">Information abot the connection.</param>
         /// <returns>Result success and additional result data.</returns>
-        Task<(bool, string)> Connect(dynamic param);
+        Task<ConnectionStatusDto> Connect(ConnectionInfoDto info);
 
         /// <summary>
         /// Checks if the saved authorization data is correct.
@@ -22,23 +22,28 @@ namespace MRS.DocumentManagement.Connection
         Task<bool> IsAuthDataCorrect();
 
         /// <summary>
-        /// Starts syncronization between local and remote DMs.
+        /// Current status of the connection.
         /// </summary>
-        /// <returns>Result of syncronizing start process.</returns>
-        Task<bool> StartSyncronization();
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<ConnectionStatusDto> GetStatus();
 
-        /// <summary>
-        /// Stops syncronization between local and remote DMs.
-        /// </summary>
-        /// <returns>Result of syncronizing stop process.</returns>
-        Task StopSyncronization();
+        // TODO: Syncronization!
+        ///// <summary>
+        ///// Starts syncronization between local and remote DMs.
+        ///// </summary>
+        ///// <returns>Result of syncronizing start process.</returns>
+        // Task<bool> StartSyncronization();
+
+        ///// <summary>
+        ///// Stops syncronization between local and remote DMs.
+        ///// </summary>
+        ///// <returns>Result of syncronizing stop process.</returns>
+        // Task<bool> StopSyncronization();
 
         /// <summary>
         /// Gets current syncronization progress.
         /// </summary>
         /// <returns>Progress.</returns>
-        ///
-        // TODO uncomment after yandex PR with syncronization functionality will be merged
-        Task<ProgressSync> GetProgressSyncronization();
+        // Task<ProgressSync> GetProgressSyncronization();
     }
 }

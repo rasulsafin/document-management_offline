@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement.Api.Validators
 
         internal static IActionResult ValidateCollection<T>(IEnumerable<T> collection)
         {
-            return new OkObjectResult(collection);            
+            return new OkObjectResult(collection);
         }
 
         internal static IActionResult ValidateFoundObject<T>(T foundObject)

@@ -1,9 +1,7 @@
-﻿using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Interface.SyncData;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
@@ -16,68 +14,37 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
-        [HttpGet]
-        public async Task<IActionResult> GetAvailableConnections()
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ConnectionInfoToCreateDto connectionInfo)
         {
-            var availableConnections = await service.GetAvailableConnections();
-            return ValidateCollection(availableConnections);
+            var connectionInfoId = await service.Add(connectionInfo);
+            return ValidateId(connectionInfoId);
+        }
+
+        [HttpGet]
+        [Route("connect/{userID}")]
+        public async Task<IActionResult> Connect([FromRoute] int userID)
+        {
+            var result = await service.Connect(new ID<UserDto>(userID));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{userID}")]
+        public async Task<IActionResult> Get([FromRoute] int userID)
+        {
+            var connectionInfoDto = await service.Get(new ID<UserDto>(userID));
+            return ValidateFoundObject(connectionInfoDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        [Route("status/{userID}")]
+        public async Task<IActionResult> GetRemoteConnectionStatus([FromRoute] int userID)
         {
-            var linked = await service.LinkRemoteConnection(connectionInfo);
-            return Forbid();
+            var status = await service.GetRemoteConnectionStatus(new ID<UserDto>(userID));
+            return Ok(status);
         }
 
-        [HttpGet]
-        [Route("status")]
-        public async Task<IActionResult> GetRemoteConnectionStatus()
-        {
-            var status = await service.GetRemoteConnectionStatus();
-            return Forbid();
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> Reconnect(RemoteConnectionToCreateDto connectionInfo)
-        {
-            var reconnected = await service.Reconnect(connectionInfo);
-            return Forbid();
-        }
-
-        [HttpGet]
-        [Route("current")]
-        public async Task<IActionResult> GetCurrentConnection(int userId)
-        {
-            var connection = await service.GetCurrentConnection(new ID<UserDto>(userId));
-            return ValidateFoundObject(connection);
-        }
-
-        [HttpPost]
-        [Route("syncStart")]
-        public async Task<IActionResult> StartSynchronizeAsync()
-        {
-            bool res = await service.StartSync();
-
-            // TODO: Отправить пользователью результат
-            return Accepted(res);
-        }
-
-        [HttpGet]
-        [Route("progress")]
-        public async Task<IActionResult> GetProgressSyncAsync()
-        {
-            ProgressSync progress = await service.GetProgressSync();
-            return ValidateFoundObject(progress);
-        }
-
-        [HttpPost]
-        [Route("syncStop")]
-        public IActionResult StopSynchronize()
-        {
-            service.StopSync();
-            return Accepted();
-        }
-        
+        // TODO: Syncronization!
     }
 }

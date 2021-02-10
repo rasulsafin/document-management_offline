@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -14,31 +15,20 @@ namespace MRS.DocumentManagement.Utility
             CreateMapToModel();
         }
 
-        private static string CodeAuthFieldNames(IEnumerable<string> authFieldNames)
+        private static T Deserialize<T>(string encoded)
         {
-            try
-            {
-                return System.Text.Json.JsonSerializer.Serialize(authFieldNames);
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            if (string.IsNullOrEmpty(encoded))
+                return default;
+
+            return JsonSerializer.Deserialize<T>(encoded);
         }
 
-        private static List<string> DecodeAuthFieldNames(string encoded)
+        private static string Serialize<T>(T obj)
         {
-            var names = new List<string>();
-            try
-            {
-                if (!string.IsNullOrEmpty(encoded))
-                    names = System.Text.Json.JsonSerializer.Deserialize<List<string>>(encoded);
-            }
-            catch
-            {
-            }
+            if (obj == null)
+                return string.Empty;
 
-            return names;
+            return JsonSerializer.Serialize(obj);
         }
 
         private void CreateMapToDto()
@@ -59,14 +49,15 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
-            CreateMap<ConnectionInfo, RemoteConnectionInfoDto>()
-                .ForMember(d => d.ServiceName, o => o.MapFrom(x => x.Name))
-                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(x => DecodeAuthFieldNames(x.AuthFieldNames)));
+            CreateMap<ConnectionInfo, ConnectionInfoDto>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AuthFieldValues)));
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
-            CreateMap<ConnectionType, ConnectionTypeDto>();
+            CreateMap<ConnectionType, ConnectionTypeDto>()
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Deserialize<List<string>>(s.AuthFieldNames)))
+                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AppProperty)));
         }
 
         private void CreateMapToModel()
@@ -90,8 +81,14 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldToCreateDto, DynamicField>();
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
-            CreateMap<ConnectionTypeDto, ConnectionType>();
-            CreateMap<ItemDto, Item>();           
+            CreateMap<ConnectionTypeDto, ConnectionType>()
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Serialize(s.AuthFieldNames)))
+                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Serialize(s.AppProperty)));
+            CreateMap<ItemDto, Item>();
+            CreateMap<ConnectionInfoDto, ConnectionInfo>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthFieldValues)));
+            CreateMap<ConnectionInfoToCreateDto, ConnectionInfo>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthData)));
         }
     }
 }
