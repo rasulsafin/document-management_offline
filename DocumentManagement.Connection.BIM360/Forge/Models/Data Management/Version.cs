@@ -6,7 +6,11 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
     [DataContract]
     public class Version : Object<Version.VersionAttributes, Version.VersionRelationships>
     {
-        public override string Type => Constants.VERSION_TYPE;
+        public override string Type
+        {
+            get => Constants.VERSION_TYPE;
+            set { }
+        }
 
         [DataContract]
         public class VersionAttributes : AAttributes

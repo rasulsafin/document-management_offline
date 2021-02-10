@@ -6,7 +6,11 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
     [DataContract]
     public class Folder : Object<Folder.FolderAttributes, Folder.FolderRelationships>
     {
-        public override string Type => Constants.FOLDER_TYPE;
+        public override string Type
+        {
+            get => Constants.FOLDER_TYPE;
+            set { }
+        }
 
         [DataContract]
         public class FolderAttributes : AAttributes

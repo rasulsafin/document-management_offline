@@ -17,6 +17,8 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         private static readonly double TIMEOUT = 10;
 
         private readonly HttpClient client;
+        private readonly JsonSerializerSettings jsonSerializerSettings =
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
 
         public ForgeConnection()
             => client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
@@ -36,7 +38,10 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         /// <param name="command">Route of Forge method with format items if needed.</param>
         /// <param name="arguments">Inserting objects to command line.</param>
         /// <returns>Deserialized response from Forge.</returns>
-        public async Task<JObject> GetResponseAuthorizedAsync(HttpMethod methodType, string command, params object[] arguments)
+        public async Task<JObject> GetResponseAuthorizedAsync(
+                HttpMethod methodType,
+                string command,
+                params object[] arguments)
             => await SendSerializedDataAuthorizedAsync(methodType, command, (object)null, arguments);
 
         /// <summary>
@@ -48,15 +53,20 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         /// <param name="arguments">Inserting objects to command line.</param>
         /// <typeparam name="T">Type of sending data. Must be DataContract.</typeparam>
         /// <returns>Deserialized response from Forge.</returns>
-        public async Task<JObject> SendSerializedDataAuthorizedAsync<T>(HttpMethod methodType, string command, T data, params object[] arguments)
+        public async Task<JObject> SendSerializedDataAuthorizedAsync<T>(
+                HttpMethod methodType,
+                string command,
+                T data,
+                params object[] arguments)
         {
             using var request = CreateRequest(methodType, command, arguments);
 
             if (data != null)
             {
                 var jsonData = new { data };
-                request.Content =
-                        new StringContent(JsonConvert.SerializeObject(jsonData), Encoding.Default, MEDIA_TYPE_JSON);
+                request.Content = new StringContent(JsonConvert.SerializeObject(jsonData, jsonSerializerSettings),
+                        Encoding.Default,
+                        MEDIA_TYPE_JSON);
             }
 
             return await SendAsync(request);
@@ -71,7 +81,12 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         /// <param name="rangeHeaderValue">Header of ranges if needed.</param>
         /// <param name="arguments">Inserting objects to command line.</param>
         /// <returns>Deserialized response from Forge.</returns>
-        public async Task<JObject> SendStreamAuthorizedAsync(HttpMethod methodType, string command, Stream data, RangeHeaderValue rangeHeaderValue, params object[] arguments)
+        public async Task<JObject> SendStreamAuthorizedAsync(
+                HttpMethod methodType,
+                string command,
+                Stream data,
+                RangeHeaderValue rangeHeaderValue,
+                params object[] arguments)
         {
             // TODO: check is it working or not?
             using var request = CreateRequest(methodType, command, arguments);
@@ -95,7 +110,12 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         /// <param name="isAuthorized">Is need the add authentication header.</param>
         /// <param name="arguments">Inserting objects to command line.</param>
         /// <returns>Deserialized the response from Forge.</returns>
-        public async Task<JObject> SendRequestAsync(HttpMethod methodType, string command, HttpContent content, bool isAuthorized, params object[] arguments)
+        public async Task<JObject> SendRequestAsync(
+                HttpMethod methodType,
+                string command,
+                HttpContent content,
+                bool isAuthorized,
+                params object[] arguments)
         {
             using var request = CreateRequest(methodType, command, arguments);
             if (content != null)

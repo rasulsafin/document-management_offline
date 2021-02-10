@@ -6,7 +6,11 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
     [DataContract]
     public class Item : Object<Item.ItemAttributes, Item.ItemRelationships>
     {
-        public override string Type => Constants.ITEM_TYPE;
+        public override string Type
+        {
+            get => Constants.ITEM_TYPE;
+            set { }
+        }
 
         [DataContract]
         public class ItemAttributes : AAttributes

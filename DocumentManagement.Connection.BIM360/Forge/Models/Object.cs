@@ -5,16 +5,16 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models
     [DataContract]
     public class Object<TAttributes, TRelationships>
     {
-        [DataMember(Name = "id", EmitDefaultValue = false)]
+        [DataMember(Name = "id")]
         public string ID { get; set; }
 
-        [DataMember(Name = "type", EmitDefaultValue = false)]
+        [DataMember(Name = "type")]
         public virtual string Type { get; set; }
 
         [DataMember(Name = "attributes")]
         public TAttributes Attributes { get; set; }
 
-        [DataMember(Name = "relationships", EmitDefaultValue = false)]
+        [DataMember(Name = "relationships")]
         public TRelationships Relationships { get; set; }
     }
 }

@@ -6,7 +6,11 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
     [DataContract]
     public class StorageObject : Object<StorageObject.StorageObjectAttributes, StorageObject.StorageObjectRelationships>
     {
-        public override string Type => Constants.OBJECT_TYPE;
+        public override string Type
+        {
+            get => Constants.OBJECT_TYPE;
+            set { }
+        }
 
         public (string bucketKey, string hashedName) ParseStorageId()
         {
