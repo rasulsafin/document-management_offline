@@ -44,16 +44,16 @@ namespace MRS.DocumentManagement.Interface.Services
         ///// </summary>
         ///// <param name="userID">User's ID.</param>
         ///// <returns>True if syncronization started.</returns>
-        //Task<bool> StartSyncronization(ID<UserDto> userID);
+        // Task<bool> StartSyncronization(ID<UserDto> userID);
+
+        // Task<bool> Sync(System.IProgress<SyncData.ProgressSync> prog, System.Threading.CancellationToken token);
 
         ///// <summary>
         ///// Stops syncronization between database and remote connetion.
         ///// </summary>
         ///// <param name="userID">User's ID.</param>
         ///// <returns>True if syncronization successfully stopped.</returns>
-        //Task<bool> StopSyncronization(ID<UserDto> userID);
-
-
+        // Task<bool> StopSyncronization(ID<UserDto> userID);
 
         // In case user can have several connections?
         // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);

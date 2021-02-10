@@ -8,6 +8,6 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ID<UserDto> UserID { get; set;  }
 
-        public IReadOnlyCollection<string> AuthData { get; set;  }
+        public IReadOnlyDictionary<string, string> AuthData { get; set;  }
     }
 }

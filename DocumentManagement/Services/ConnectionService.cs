@@ -28,6 +28,10 @@ namespace MRS.DocumentManagement.Services
             // TODO: Add connection info to db and link it to user and connection type?
             var connectionInfo = mapper.Map<ConnectionInfo>(data);
             context.ConnectionInfos.Add(connectionInfo);
+
+            var user = await context.Users.FindAsync((int)data.UserID);
+            user.ConnectionInfo = connectionInfo;
+
             await context.SaveChangesAsync();
 
             return true;
@@ -54,21 +58,25 @@ namespace MRS.DocumentManagement.Services
             throw new System.NotImplementedException();
         }
 
-        public async Task<bool> StartSyncronization(ID<UserDto> userID)
-        {
-            var connection = GetConnection(await GetConnectionInfo((int)userID));
-            return await connection.StartSyncronization();
-        }
+        //public async Task<bool> StartSyncronization(ID<UserDto> userID)
+        //{
+        //    var connection = GetConnection(await GetConnectionInfo((int)userID));
+        //    return await connection.StartSyncronization();
+        //}
 
-        public async Task<bool> StopSyncronization(ID<UserDto> userID)
-        {
-            var connection = GetConnection(await GetConnectionInfo((int)userID));
-            return await connection.StopSyncronization();
-        }
+        //public async Task<bool> StopSyncronization(ID<UserDto> userID)
+        //{
+        //    var connection = GetConnection(await GetConnectionInfo((int)userID));
+        //    return await connection.StopSyncronization();
+        //}
 
         private async Task<ConnectionInfo> GetConnectionInfo(int userID)
         {
-            var user = await context.Users.FindAsync(userID);
+            var user = await context.Users
+                .Include(x => x.ConnectionInfo)
+                .ThenInclude(x => x.ConnectionType)
+                .Where(x => x.ID == userID)
+                .FirstOrDefaultAsync();
             return await context.ConnectionInfos.FindAsync(user.ConnectionInfoID);
         }
 

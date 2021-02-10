@@ -67,5 +67,13 @@ namespace DocumentManagement.Api.Controllers
                 return BadRequest(e);
             }
         }
+
+        [HttpGet]
+        [Route("register")]
+        public async Task<IActionResult> Register()
+        {
+            var result = await service.RegisterAll();
+            return Ok(result);
+        }
     }
 }

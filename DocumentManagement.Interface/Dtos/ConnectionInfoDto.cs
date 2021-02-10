@@ -8,6 +8,6 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ConnectionTypeDto ConnectionType { get; set; }
 
-        public IEnumerable<string> AuthFieldValues { get; set; }
+        public IDictionary<string, string> AuthFieldValues { get; set; }
     }
 }

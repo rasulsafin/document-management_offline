@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Services
         public async Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes()
         {
             var dbList = await context.ConnectionTypes.ToListAsync();
-            return dbList.Select(t => mapper.Map<ConnectionTypeDto>(dbList)).ToList();
+            return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
         }
 
         public async Task<bool> RegisterAll()
@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Services
             // Type One.
             var typeOne = new ConnectionTypeDto();
             typeOne.Name = "tdms";
-            typeOne.AuthFieldNames = new List<string>() { "login", "pass", "server", "db" };
+            typeOne.AuthFieldNames = new List<string>() { "login", "password", "server", "db" };
             typeOne.AppProperty = new Dictionary<string, string>();
             var typeOneDb = mapper.Map<ConnectionType>(typeOne);
             await context.ConnectionTypes.AddAsync(typeOneDb);

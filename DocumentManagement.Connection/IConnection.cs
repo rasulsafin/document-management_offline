@@ -21,6 +21,12 @@ namespace MRS.DocumentManagement.Connection
         /// <returns>Result of check.</returns>
         Task<bool> IsAuthDataCorrect();
 
+        /// <summary>
+        /// Current status of the connection.
+        /// </summary>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<ConnectionStatusDto> GetStatus();
+
         // TODO: Syncronization
         ///// <summary>
         ///// Starts syncronization between local and remote DMs.

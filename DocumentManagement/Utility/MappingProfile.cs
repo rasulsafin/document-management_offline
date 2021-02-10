@@ -15,12 +15,20 @@ namespace MRS.DocumentManagement.Utility
             CreateMapToModel();
         }
 
-        private static T Decode<T>(string encoded)
+        private static T Deserialize<T>(string encoded)
         {
             if (string.IsNullOrEmpty(encoded))
                 return default;
 
             return JsonSerializer.Deserialize<T>(encoded);
+        }
+
+        private static string Serialize<T>(T obj)
+        {
+            if (obj == null)
+                return string.Empty;
+
+            return JsonSerializer.Serialize(obj);
         }
 
         private void CreateMapToDto()
@@ -42,14 +50,14 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<ConnectionInfo, ConnectionInfoDto>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Decode<List<string>>(s.AuthFieldValues)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AuthFieldValues)));
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
             CreateMap<ConnectionType, ConnectionTypeDto>()
-                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Decode<List<string>>(s.AuthFieldNames)))
-                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Decode<Dictionary<string, string>>(s.AppProperty)));
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Deserialize<List<string>>(s.AuthFieldNames)))
+                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AppProperty)));
         }
 
         private void CreateMapToModel()
@@ -74,11 +82,13 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
             CreateMap<ConnectionTypeDto, ConnectionType>()
-                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => JsonSerializer.Serialize(s.AuthFieldNames, null)))
-                .ForMember(d => d.AppProperty, o => o.MapFrom(s => JsonSerializer.Serialize(s.AppProperty, null)));
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Serialize(s.AuthFieldNames)))
+                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Serialize(s.AppProperty)));
             CreateMap<ItemDto, Item>();
             CreateMap<ConnectionInfoDto, ConnectionInfo>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => JsonSerializer.Serialize(s.AuthFieldValues, null)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthFieldValues)));
+            CreateMap<ConnectionInfoToCreateDto, ConnectionInfo>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthData)));
         }
     }
 }
