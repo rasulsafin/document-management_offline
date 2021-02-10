@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper.Internal;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Models.Authentication;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Services;
 using MRS.DocumentManagement.Connection.BIM360.Properties;
@@ -39,38 +40,38 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
 
         private string AccessToken
         {
-            get => connectionInfoDto.AuthFieldValues[TOKEN_AUTH_NAME];
-            set => connectionInfoDto.AuthFieldValues[TOKEN_AUTH_NAME] = value;
+            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(TOKEN_AUTH_NAME);
+            set => SetAuthValue(connectionInfoDto, TOKEN_AUTH_NAME, value);
         }
 
         private string AccessRefreshToken
         {
-            get => connectionInfoDto.AuthFieldValues[REFRESH_TOKEN_AUTH_NAME];
-            set => connectionInfoDto.AuthFieldValues[REFRESH_TOKEN_AUTH_NAME] = value;
+            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(REFRESH_TOKEN_AUTH_NAME);
+            set => SetAuthValue(connectionInfoDto, REFRESH_TOKEN_AUTH_NAME, value);
         }
 
         private string AccessEnd
         {
-            get => connectionInfoDto.AuthFieldValues[END_AUTH_NAME];
-            set => connectionInfoDto.AuthFieldValues[END_AUTH_NAME] = value;
+            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(END_AUTH_NAME);
+            set => SetAuthValue(connectionInfoDto, END_AUTH_NAME, value);
         }
 
         private string AppClientId
         {
-            get => connectionInfoDto.ConnectionType.AppProperty[CLIENT_ID_NAME];
-            set => connectionInfoDto.ConnectionType.AppProperty[CLIENT_ID_NAME] = value;
+            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CLIENT_ID_NAME);
+            set => SetAppProperty(connectionInfoDto, CLIENT_ID_NAME, value);
         }
 
         private string AppClientSecret
         {
-            get => connectionInfoDto.ConnectionType.AppProperty[CLIENT_SECRET_NAME];
-            set => connectionInfoDto.ConnectionType.AppProperty[CLIENT_SECRET_NAME] = value;
+            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CLIENT_SECRET_NAME);
+            set => SetAppProperty(connectionInfoDto, CLIENT_SECRET_NAME, value);
         }
 
         private string AppCallBackUrl
         {
-            get => connectionInfoDto.ConnectionType.AppProperty[CALLBACK_URL_NAME];
-            set => connectionInfoDto.ConnectionType.AppProperty[CALLBACK_URL_NAME] = value;
+            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CALLBACK_URL_NAME);
+            set => SetAppProperty(connectionInfoDto, CALLBACK_URL_NAME, value);
         }
 
         public bool IsLogged
@@ -94,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
             await CheckAccessAsync(true);
 
             // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto();
+            var result = new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK };
 
             return result;
         }
@@ -203,6 +204,33 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
             }
 
             SaveData(bearer);
+        }
+
+        private void SetAuthValue(ConnectionInfoDto info, string key, string value)
+        {
+            if (info.AuthFieldValues == null)
+                info.AuthFieldValues = new Dictionary<string, string>();
+
+            SetDictionaryValue(info.AuthFieldValues, key, value);
+        }
+
+        private void SetAppProperty(ConnectionInfoDto info, string key, string value)
+        {
+            if (info.ConnectionType.AppProperty == null)
+                info.ConnectionType.AppProperty = new Dictionary<string, string>();
+
+            SetDictionaryValue(info.ConnectionType.AppProperty, key, value);
+        }
+
+        private void SetDictionaryValue(IDictionary<string, string> dictionary, string key, string value)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                dictionary[key] = value;
+                return;
+            }
+
+            dictionary.Add(key, value);
         }
     }
 }

@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Services;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.BIM360.Tests
@@ -18,43 +19,47 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
     {
         private static readonly string TEST_FILE_PATH = "AdditionalData//TestIcon.png";
 
-        private AuthenticationService authService;
-        private HubsService hubsService;
-        private ProjectsService projectsService;
-        private RemoteConnectionInfoDto connectionInfo;
-        private ObjectsService objectsService;
-        private ItemsService itemsService;
-        private Authenticator authenticator;
-        private ForgeConnection connection;
-
-        private string[] authData;
+        private static AuthenticationService authService;
+        private static HubsService hubsService;
+        private static ProjectsService projectsService;
+        private static ConnectionInfoDto connectionInfo;
+        private static ObjectsService objectsService;
+        private static ItemsService itemsService;
+        private static Authenticator authenticator;
+        private static ForgeConnection connection;
 
         [ClassInitialize]
-        public void Initialize(AuthenticationService authService,
-            HubsService hubsService,
-            ProjectsService projectsService,
-            ObjectsService objectsService,
-            ItemsService itemsService,
-            Authenticator authenticator,
-            ForgeConnection connection)
+        public static void Initialize(TestContext _)
         {
-            authData = File.ReadAllLines("AdditionalData//AuthData.json");
-            this.authService = authService;
-            this.hubsService = hubsService;
-            this.connection = connection;
-            this.projectsService = projectsService;
-            this.objectsService = objectsService;
-            this.itemsService = itemsService;
-            this.authenticator = authenticator;
-            var authDataDictionary = new Dictionary<string, string>();
-            foreach (var data in authData)
+            connection = new ForgeConnection();
+            authService = new AuthenticationService(connection);
+            authenticator = new Authenticator(authService);
+            hubsService = new HubsService(connection);
+            projectsService = new ProjectsService(connection);
+            objectsService = new ObjectsService(connection);
+            itemsService = new ItemsService(connection);
+
+            connectionInfo = new ConnectionInfoDto
             {
-                var parsedLine = data.Split(':', System.StringSplitOptions.TrimEntries);
-
-                authDataDictionary.Add(parsedLine[0].Trim('\"'), parsedLine[1]);
-            }
-
-            connectionInfo = new RemoteConnectionInfoDto { AuthFieldValues = authDataDictionary };
+                ID = new ID<ConnectionInfoDto>(2),
+                ConnectionType = new ConnectionTypeDto
+                {
+                    AppProperty = new Dictionary<string, string>
+                    {
+                        { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
+                        { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
+                        { "RETURN_URL", "http://localhost:8000/oauth/" },
+                    },
+                    AuthFieldNames = new List<string>
+                    {
+                        "token",
+                        "refreshtoken",
+                        "end",
+                    },
+                    ID = new ID<ConnectionTypeDto>(2),
+                    Name = "BIM360",
+                },
+            };
         }
 
         /// <summary>
@@ -68,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
                 Assert.Fail();
 
-            connection.Token = connectionInfo.AuthFieldValues["Token"];
+            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
             // STEP 1. Find hub with projects
             var hub = (await hubsService.GetHubsAsync()).FirstOrDefault(h => h.Relationships.Projects.Count > 0);

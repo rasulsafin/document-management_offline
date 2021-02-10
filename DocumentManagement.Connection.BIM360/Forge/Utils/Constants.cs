@@ -9,6 +9,10 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
 
         public static readonly string AUTODESK_FILE_TYPE = "items:autodesk.core:File";
 
+        public static readonly string TOKEN_AUTH_NAME = "token";
+        public static readonly string REFRESH_TOKEN_AUTH_NAME = "refreshtoken";
+        public static readonly string END_AUTH_NAME = "end";
+
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
         internal static readonly string RESULTS_PROPERTY = "results";
@@ -16,13 +20,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
 
         internal static readonly int ITEMS_ON_PAGE = 100;
         internal static readonly string JSON_API_VERSION = "1.0";
-
-        internal static readonly string TOKEN_AUTH_NAME = "Token";
-        internal static readonly string REFRESH_TOKEN_AUTH_NAME = "RefreshToken";
-        internal static readonly string END_AUTH_NAME = "End";
-        internal static readonly string CALLBACK_URL_NAME = "callBackUrl";
-        internal static readonly string CLIENT_ID_NAME = "clientId";
-        internal static readonly string CLIENT_SECRET_NAME = "clientSecret";
+        internal static readonly string CALLBACK_URL_NAME = "RETURN_URL";
+        internal static readonly string CLIENT_ID_NAME = "CLIENT_ID";
+        internal static readonly string CLIENT_SECRET_NAME = "CLIENT_SECRET";
 
         internal static readonly string AUTH_REQUEST_BODY_CLIENT_ID_FIELD = "client_id";
         internal static readonly string AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD = "client_secret";

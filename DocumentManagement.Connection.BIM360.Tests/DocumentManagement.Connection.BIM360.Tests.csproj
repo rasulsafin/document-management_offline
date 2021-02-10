@@ -21,4 +21,10 @@
     <ProjectReference Include="..\DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="AdditionalData\TestIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
