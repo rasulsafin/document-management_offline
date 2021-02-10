@@ -1,11 +1,13 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Version : Object<Version.VersionAttributes, Version.VersionRelationships>
     {
+        public override string Type => Constants.VERSION_TYPE;
+
         [DataContract]
         public class VersionAttributes : AAttributes
         {

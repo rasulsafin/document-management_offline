@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Models
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models
 {
     [DataContract]
     public class Issue : Object<Issue.IssueAttributes, Issue.IssueRelationships>

@@ -4,11 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Properties;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DocumentManagement.Connection.BIM360.Forge
+namespace MRS.DocumentManagement.Connection.BIM360.Forge
 {
     public class ForgeConnection : IDisposable
     {

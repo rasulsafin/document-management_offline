@@ -4,10 +4,10 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Properties;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
 using Newtonsoft.Json.Linq;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class ObjectsService
     {
@@ -22,13 +22,13 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         /// <param name="bucketKey">URL-encoded bucket to upload object into.</param>
         /// <param name="file">URL-encoded object name being uploaded.</param>
         /// <returns>Task of this action.</returns>
-        public async Task PutObjectAsync(string bucketKey, FileInfo file)
+        public async Task PutObjectAsync(string bucketKey, string objectName, string fileFullName)
             => await connection.SendRequestWithStream(HttpMethod.Patch,
                     Resources.PutBucketsObjectsMethod,
-                    System.IO.File.OpenRead(file.FullName),
+                    File.OpenRead(fileFullName),
                     null,
                     bucketKey,
-                    file.Name);
+                    objectName);
 
         /// <summary>
         /// Recommend to objects larger than 100 MB.
@@ -36,7 +36,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         /// <param name="bucketKey">URL-encoded bucket to upload object into.</param>
         /// <param name="file">URL-encoded object name being uploaded.</param>
         /// <returns>Task of this action.</returns>
-        public async Task PutObjectResumableAsync(string bucketKey, FileInfo file, long chunkSize)
+        public async Task PutObjectResumableAsync(string bucketKey, string objectName, FileInfo file, long chunkSize)
         {
             // TODO: check is it working or not?
             var length = file.Length;
@@ -46,10 +46,10 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             {
                 tasks.Add(connection.SendRequestWithStream(HttpMethod.Patch,
                         Resources.PutBucketsObjectsResumableMethod,
-                        System.IO.File.OpenRead(file.FullName),
+                        File.OpenRead(file.FullName),
                         new RangeHeaderValue(i, Math.Max(i + chunkSize, length - 1)),
                         bucketKey,
-                        file.Name));
+                        objectName));
             }
 
             foreach (var task in tasks)

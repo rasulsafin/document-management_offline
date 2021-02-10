@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge.Services;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Services;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 
-namespace DocumentManagement.Connection.BIM360.Forge
+namespace MRS.DocumentManagement.Connection.BIM360.Forge
 {
     public class Bim360Connection : IConnection
     {

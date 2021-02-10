@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
-using DocumentManagement.Connection.BIM360.Properties;
-using static DocumentManagement.Connection.BIM360.Forge.Constants;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
+using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class ProjectsService
     {
@@ -59,12 +60,12 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             return data;
         }
 
-        public async Task<string> CreateStorageAsync(string projectId, StorageObject obj)
+        public async Task<StorageObject> CreateStorageAsync(string projectId, StorageObject obj)
         {
             var response = await connection
                 .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectStorageMethod, obj, projectId);
 
-            return response[DATA_PROPERTY]?.ToObject<StorageObject>().ID;
+            return response[DATA_PROPERTY]?.ToObject<StorageObject>();
         }
     }
 }

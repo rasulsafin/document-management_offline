@@ -4,12 +4,12 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
-using DocumentManagement.Connection.BIM360.Properties;
-using static DocumentManagement.Connection.BIM360.Forge.Constants;
-using Version = DocumentManagement.Connection.BIM360.Forge.Models.DataManagement.Version;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
+using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
+using Version = MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement.Version;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class FoldersService
     {

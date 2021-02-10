@@ -1,11 +1,11 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge.Models;
-using DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
-using DocumentManagement.Connection.BIM360.Properties;
-using static DocumentManagement.Connection.BIM360.Forge.Constants;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Models;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
+using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class ItemsService
     {
@@ -14,7 +14,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public ItemsService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<(Item, Version)> PostItemAsync(string projectId, Item item, Version version)
+        public async Task<(Item item, Version version)> PostItemAsync(string projectId, Item item, Version version)
         {
             var response = await connection.SendRequestWithSerializedData(HttpMethod.Post,
                     Resources.PostProjectsItemsMethod,

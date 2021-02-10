@@ -1,11 +1,13 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Item : Object<Item.ItemAttributes, Item.ItemRelationships>
     {
+        public override string Type => Constants.ITEM_TYPE;
+
         [DataContract]
         public class ItemAttributes : AAttributes
         {

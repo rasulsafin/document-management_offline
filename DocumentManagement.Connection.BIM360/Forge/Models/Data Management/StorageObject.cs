@@ -1,10 +1,21 @@
-﻿using System.Runtime.Serialization;
+﻿using System.Linq;
+using System.Runtime.Serialization;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement
 {
     [DataContract]
     public class StorageObject : Object<StorageObject.StorageObjectAttributes, StorageObject.StorageObjectRelationships>
     {
+        public override string Type => Constants.OBJECT_TYPE;
+
+        public (string bucketKey, string hashedName) ParseStorageId()
+        {
+            var bucketKey = ID.Split(':').Last().Split('/').First();
+            var hashedName = ID.Split('/').Last();
+
+            return (bucketKey, hashedName);
+        }
+
         [DataContract]
         public class StorageObjectAttributes
         {

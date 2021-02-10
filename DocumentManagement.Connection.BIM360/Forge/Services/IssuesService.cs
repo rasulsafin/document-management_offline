@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
-using DocumentManagement.Connection.BIM360.Forge.Models;
-using DocumentManagement.Connection.BIM360.Properties;
-using static DocumentManagement.Connection.BIM360.Forge.Constants;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Models;
+using MRS.DocumentManagement.Connection.BIM360.Properties;
+using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class IssuesService
     {

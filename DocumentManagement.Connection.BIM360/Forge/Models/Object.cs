@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace DocumentManagement.Connection.BIM360.Forge.Models
+namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models
 {
     [DataContract]
     public class Object<TAttributes, TRelationships>
@@ -9,7 +9,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Models
         public string ID { get; set; }
 
         [DataMember(Name = "type", EmitDefaultValue = false)]
-        public string Type { get; set; }
+        public virtual string Type { get; set; }
 
         [DataMember(Name = "attributes")]
         public TAttributes Attributes { get; set; }
