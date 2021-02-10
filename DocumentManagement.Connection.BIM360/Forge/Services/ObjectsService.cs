@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
         /// <param name="file">URL-encoded object name being uploaded.</param>
         /// <returns>Task of this action.</returns>
         public async Task PutObjectAsync(string bucketKey, string objectName, string fileFullName)
-            => await connection.SendRequestWithStream(HttpMethod.Patch,
+            => await connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
                     Resources.PutBucketsObjectsMethod,
                     File.OpenRead(fileFullName),
                     null,
@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 
             for (long i = 0; i < length; i += chunkSize)
             {
-                tasks.Add(connection.SendRequestWithStream(HttpMethod.Patch,
+                tasks.Add(connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
                         Resources.PutBucketsObjectsResumableMethod,
                         File.OpenRead(file.FullName),
                         new RangeHeaderValue(i, Math.Max(i + chunkSize, length - 1)),

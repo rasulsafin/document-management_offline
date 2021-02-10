@@ -7,6 +7,7 @@ using MRS.DocumentManagement.Connection.BIM360.Forge;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Models;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.BIM360.Forge.Services;
+using MRS.DocumentManagement.Connection.BIM360.Forge.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
 
@@ -21,9 +22,10 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
         private HubsService hubsService;
         private ProjectsService projectsService;
         private RemoteConnectionInfoDto connectionInfo;
-        private ForgeConnection connection;
         private ObjectsService objectsService;
         private ItemsService itemsService;
+        private Authenticator authenticator;
+        private ForgeConnection connection;
 
         private string[] authData;
 
@@ -33,6 +35,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
             ProjectsService projectsService,
             ObjectsService objectsService,
             ItemsService itemsService,
+            Authenticator authenticator,
             ForgeConnection connection)
         {
             authData = File.ReadAllLines("AdditionalData//AuthData.json");
@@ -42,6 +45,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
             this.projectsService = projectsService;
             this.objectsService = objectsService;
             this.itemsService = itemsService;
+            this.authenticator = authenticator;
             var authDataDictionary = new Dictionary<string, string>();
             foreach (var data in authData)
             {
@@ -60,7 +64,10 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests
         public async Task Can_upload_item()
         {
             // Authorize
-            await authService.SignInAsync(connectionInfo);
+            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+                Assert.Fail();
+
             connection.Token = connectionInfo.AuthFieldValues["Token"];
 
             // STEP 1. Find hub with projects

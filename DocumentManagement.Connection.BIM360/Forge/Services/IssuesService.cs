@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
             for (int i = 0; !all; i++)
             {
                 var response = await connection
-                        .GetResponse(HttpMethod.Get, Resources.GetIssuesMethod, containerID, ITEMS_ON_PAGE, i);
+                        .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetIssuesMethod, containerID, ITEMS_ON_PAGE, i);
                 var data = response[DATA_PROPERTY]?.ToObject<List<Issue>>();
                 if (data != null)
                     result.AddRange(data);
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
         {
-            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post,
+            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post,
                     Resources.PostIssuesAttachmentsMethod,
                     attachment,
                     containerID);
@@ -44,20 +44,20 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 
         public async Task<List<IssueType>> GetIssueTypesAsync(string containerID)
         {
-            var response = await connection.GetResponse(HttpMethod.Get, Resources.GetNGIssueTypesMethod, containerID);
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetNGIssueTypesMethod, containerID);
             return response[RESULTS_PROPERTY]?.ToObject<List<IssueType>>();
         }
 
         public async Task<Issue> PostIssueAsync(string containerID, Issue issue)
         {
             var response = await
-                    connection.SendRequestWithSerializedData(HttpMethod.Post, Resources.PostIssuesMethod, issue, containerID);
+                    connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostIssuesMethod, issue, containerID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
         public async Task<Issue> PatchIssueAsync(string containerID, Issue issue)
         {
-            var response = await connection.SendRequestWithSerializedData(
+            var response = await connection.SendSerializedDataAuthorizedAsync(
                     HttpMethod.Patch,
                     Resources.PatchIssuesMethod,
                     issue,
