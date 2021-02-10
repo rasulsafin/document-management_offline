@@ -77,9 +77,9 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ItemHelper>();
-            services.AddScoped<ConnectionCreator>();
+
+            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
@@ -88,10 +88,10 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
-            services.AddScoped<IConnection, YandexConnection>();
 
             services.AddSingleton<CryptographyHelper>();
             services.AddSingleton<SyncManager>();
+            services.AddSingleton<ConnectionCreator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
