@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="connectionInfo">ConnectionInfo to create.</param>
         /// <returns>True if ConnectionInfo was succesfuly created.</returns>
-        Task<bool> Add(ConnectionInfoToCreateDto connectionInfo);
+        Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto connectionInfo);
 
         /// <summary>
         /// Gets ConnectionInfo for the specific user.
@@ -33,37 +33,32 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <summary>
         /// Gets current stutus of user's connetion.
         /// </summary>
+        /// <param name="userID">User's ID.</param>
         /// <returns>Status of the connection.</returns>
-        Task<ConnectionStatusDto> GetRemoteConnectionStatus();
+        Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID);
 
         #region TODO
 
-        // TODO: Make Progress using IProgress and do it in one method
-        ///// <summary>
-        ///// Starts syncronization between database and remote connetion.
-        ///// </summary>
-        ///// <param name="userID">User's ID.</param>
-        ///// <returns>True if syncronization started.</returns>
+        // TODO: Syncronization!
         // Task<bool> StartSyncronization(ID<UserDto> userID);
-
+        // Task<bool> StopSyncronization(ID<UserDto> userID);
+        // Task<?> GetProgressSyncronization(ConnectionInfoDto info);
+        //
+        // OR
+        //
         // Task<bool> Sync(System.IProgress<SyncData.ProgressSync> prog, System.Threading.CancellationToken token);
 
-        ///// <summary>
-        ///// Stops syncronization between database and remote connetion.
-        ///// </summary>
-        ///// <param name="userID">User's ID.</param>
-        ///// <returns>True if syncronization successfully stopped.</returns>
-        // Task<bool> StopSyncronization(ID<UserDto> userID);
-
-        // In case user can have several connections?
+        // TODO: In case user can have several connections?
         // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
 
-        // If we need different method than connect?
+        // TODO: If we need different method than connect?
         // Task<bool> Reconnect(ConnectionInfoToCreateDto connectionInfo);
 
+        // TODO: Enum and ObjectiveType support?
         // Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
 
-        // Task<?> GetProgressSyncronization(ConnectionInfoDto info);
+        // TODO: Change current user connection.
+        // Task<bool> Update(ConnectionInfoDto connectionInfo);
         #endregion
     }
 }

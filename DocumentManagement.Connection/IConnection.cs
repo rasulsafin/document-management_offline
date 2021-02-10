@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<ConnectionStatusDto> GetStatus();
 
-        // TODO: Syncronization
+        // TODO: Syncronization!
         ///// <summary>
         ///// Starts syncronization between local and remote DMs.
         ///// </summary>

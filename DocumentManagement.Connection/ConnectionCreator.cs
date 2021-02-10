@@ -1,9 +1,9 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
     /// <summary>
-    /// TODO: Factory for connections. Make it static or?..
+    /// TODO: Factory for connections when connections are present. Make it static or?..
     /// </summary>
     public class ConnectionCreator
     {

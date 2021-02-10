@@ -73,7 +73,7 @@ namespace DocumentManagement.Api.Controllers
         public async Task<IActionResult> Register()
         {
             var result = await service.RegisterAll();
-            return Ok(result);
+            return result ? Ok(result) : BadRequest(result);
         }
     }
 }

@@ -55,9 +55,11 @@ namespace MRS.DocumentManagement.Services
             return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
         }
 
+        // TODO: Find all connection types (as libs?) and add them to db.
+        // Maybe ask ConnectionCreator about it?
+        // Hardcode for now.
         public async Task<bool> RegisterAll()
         {
-            // TODO: Find all connection types (as libs?) and add them to db.
             // Type One.
             var typeOne = new ConnectionTypeDto();
             typeOne.Name = "tdms";
@@ -69,7 +71,7 @@ namespace MRS.DocumentManagement.Services
             // Type Two.
             var typeTwo = new ConnectionTypeDto();
             typeTwo.Name = "yandexdisk";
-            typeTwo.AuthFieldNames = new List<string>() {};
+            typeTwo.AuthFieldNames = new List<string>() { };
             typeTwo.AppProperty = new Dictionary<string, string>();
             typeTwo.AppProperty.Add("CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051");
             typeTwo.AppProperty.Add("CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c");
@@ -78,9 +80,9 @@ namespace MRS.DocumentManagement.Services
             await context.ConnectionTypes.AddAsync(typeTwoDb);
 
             // Save.
-            await context.SaveChangesAsync();
+            var result = await context.SaveChangesAsync();
 
-            return true;
+            return result == 2;
         }
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)
@@ -100,6 +102,5 @@ namespace MRS.DocumentManagement.Services
                 throw new InvalidDataException($"Can't remove connection type with key {id}", ex.InnerException);
             }
         }
-
     }
 }
