@@ -42,7 +42,13 @@ namespace MRS.DocumentManagement.Services
             var connection = GetConnection(connectionInfo);
             var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
 
-            return await connection.Connect(connectionInfoDto);
+            var status = await connection.Connect(connectionInfoDto);
+
+            // Save changes to ConnectionInfo
+            connectionInfo = mapper.Map<ConnectionInfo>(connectionInfoDto);
+            await context.SaveChangesAsync();
+
+            return status;
         }
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)
