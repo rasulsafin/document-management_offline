@@ -5,6 +5,6 @@
         NotLinked,
         OK,
         NeedReconnect,
-        Error
+        Error,
     }
 }

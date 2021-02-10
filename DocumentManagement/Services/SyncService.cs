@@ -8,11 +8,15 @@ namespace MRS.DocumentManagement.Utility
     {
         private SyncManager syncManager;
 
+        public SyncService()
+        {
+        }
+
         public SyncService(SyncManager syncManager)
         {
             this.syncManager = syncManager;
         }
 
-        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update) => syncManager.Update(table, id, type);
+        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update) => syncManager?.Update(table, id, type);
     }
 }

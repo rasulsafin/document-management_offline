@@ -38,10 +38,17 @@ namespace MRS.DocumentManagement.Interface.Services
         Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes();
 
         /// <summary>
-        /// Removes the connection type
+        /// Removes the connection type.
         /// </summary>
         /// <param name="id">ID of the type to remove.</param>
         /// <returns>Removing result.</returns>
         Task<bool> Remove(ID<ConnectionTypeDto> id);
+
+        /// <summary>
+        /// Register all existing Connection Types.
+        /// </summary>
+        /// <returns>Result of registration.</returns>
+        Task<bool> RegisterAll();
+
     }
 }
