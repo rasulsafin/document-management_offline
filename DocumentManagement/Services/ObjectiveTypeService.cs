@@ -26,11 +26,11 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
-            try 
+            try
             {
                 var objType = new Database.Models.ObjectiveType
                 {
-                    Name = typeName
+                    Name = typeName,
                 };
                 context.ObjectiveTypes.Add(objType);
                 await context.SaveChangesAsync();

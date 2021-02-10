@@ -1,9 +1,7 @@
-﻿using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Interface.SyncData;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
@@ -16,106 +14,37 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
-        [HttpGet]
-        public async Task<IActionResult> GetAvailableConnections()
+        [HttpPost]
+        public async Task<IActionResult> Add([FromBody] ConnectionInfoToCreateDto connectionInfo)
         {
-            var availableConnections = await service.GetAvailableConnections();
-            return ValidateCollection(availableConnections);
+            var connectionInfoId = await service.Add(connectionInfo);
+            return ValidateId(connectionInfoId);
+        }
+
+        [HttpGet]
+        [Route("connect/{userID}")]
+        public async Task<IActionResult> Connect([FromRoute] int userID)
+        {
+            var result = await service.Connect(new ID<UserDto>(userID));
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("{userID}")]
+        public async Task<IActionResult> Get([FromRoute] int userID)
+        {
+            var connectionInfoDto = await service.Get(new ID<UserDto>(userID));
+            return ValidateFoundObject(connectionInfoDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        [Route("status/{userID}")]
+        public async Task<IActionResult> GetRemoteConnectionStatus([FromRoute] int userID)
         {
-            var linked = await service.LinkRemoteConnection(connectionInfo);
-            return Forbid();
+            var status = await service.GetRemoteConnectionStatus(new ID<UserDto>(userID));
+            return Ok(status);
         }
 
-        [HttpGet]
-        [Route("status")]
-        public async Task<IActionResult> GetRemoteConnectionStatus()
-        {
-            var status = await service.GetRemoteConnectionStatus();
-            return Forbid();
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> Reconnect(RemoteConnectionToCreateDto connectionInfo)
-        {
-            var reconnected = await service.Reconnect(connectionInfo);
-            return Forbid();
-        }
-
-        [HttpGet]
-        [Route("current")]
-        public async Task<IActionResult> GetCurrentConnection(int userId)
-        {
-            var connection = await service.GetCurrentConnection(new ID<UserDto>(userId));
-            return ValidateFoundObject(connection);
-        }
-
-        [HttpHead]
-        [Route("syncStart")]
-        public async Task<IActionResult> StartSynchronizeAsync()
-        {
-            bool res = await service.StartSync();
-
-            // TODO: Отправить пользователью результат
-            return Accepted();
-        }
-
-        [HttpGet]
-        [Route("progress")]
-        public async Task<IActionResult> GetProgressSyncAsync()
-        {
-            ProgressSync progress = await service.GetProgressSync();
-            return ValidateFoundObject(progress);
-        }
-
-        [HttpPost]
-        [Route("syncStop")]
-        public IActionResult StopSynchronize()
-        {
-            service.StopSync();
-            return Accepted();
-        }
-
-        [HttpGet]
-        [Route("yandex-disk")]
-        public async Task AuthenticateToExternalSystem()
-        {
-            // information:  https://yandex.ru/dev/oauth/doc/dg/reference/desktop-client.html
-            var context = this.HttpContext;
-            var response = string.Empty;
-            if (context.Request.Query.ContainsKey("access_token"))
-            {
-                var access_token = context.Request.Query["access_token"];
-
-                await service.TokenYandexDisk(access_token);
-                await service.StartSync();
-                response = @"<!doctype html>
-<html>
-<head>
-<title>Авторизация</title>
-<script>function onLoad()
-{window.close();}</script>
-</head>
-<body onload=""onLoad()"">You can now close this window!</body></html>";
-            }
-            else
-            {
-                response = @"<!doctype html>
-<html><head>
-<title>Авторизация</title>
-<script>
-function onLoad() 
-{ window.location.href = window.location.href.replace('#', '?')}
-</script></head>
-<body onload=""onLoad()"">...</body></html>";
-            }
-
-            context.Response.ContentType = "text/html";
-            await HttpContext.Response.Body.WriteAsync(Encoding.UTF8.GetBytes(response));
-            return;
-        }
+        // TODO: Syncronization!
     }
 }

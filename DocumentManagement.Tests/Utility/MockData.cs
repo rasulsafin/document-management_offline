@@ -286,12 +286,12 @@ namespace MRS.DocumentManagement.Tests.Utility
         #region BIM_ELEMENTS
         public static List<BimElement> DEFAULT_BIM_ELEMENTS => new List<BimElement>
         {
-            BIM_ELEMENT_ONE,
-            BIM_ELEMENT_TWO,
+            new BimElement { GlobalID = BIM_ELEMENT_ONE.GlobalID },
+            new BimElement { GlobalID = BIM_ELEMENT_TWO.GlobalID },
         };
 
-        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House" };
-        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House" };
+        private static readonly BimElement BIM_ELEMENT_ONE = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Wall", ParentName = "House1" };
+        private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House2" };
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO
@@ -338,14 +338,12 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
         {
-            Name = "TDMS",
-            AuthFieldNames = "TDMS field 1; TDMS field 2",
+            AuthFieldValues = "TDMS field 1; TDMS field 2",
         };
 
         public static ConnectionInfo BimConnectionInfo => new ConnectionInfo()
         {
-            Name = "BIM360",
-            AuthFieldNames = "Bim field 1; Bim field 2",
+            AuthFieldValues = "Bim field 1; Bim field 2",
         };
 
         public static IEnumerable<EnumDm> CreateEnumDms(string prefix, int connectionID, int count = 3)

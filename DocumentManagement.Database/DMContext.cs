@@ -26,6 +26,9 @@ namespace MRS.DocumentManagement.Database
 
         public DbSet<ConnectionInfo> ConnectionInfos { get; set; }
 
+        /// <summary>
+        /// TODO: Enums.
+        /// </summary>
         public DbSet<EnumDm> EnumDms { get; set; }
 
         public DbSet<EnumDmValue> EnumDmValues { get; set; }
