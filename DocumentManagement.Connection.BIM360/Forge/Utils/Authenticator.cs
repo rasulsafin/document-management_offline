@@ -22,9 +22,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
         private DateTime sentTime;
 
         // Is created as scoped as this service
-        private RemoteConnectionInfoDto connectionInfoDto;
+        private ConnectionInfoDto connectionInfoDto;
 
-        private Authenticator(AuthenticationService service)
+        public Authenticator(AuthenticationService service)
             => this.service = service;
 
         internal delegate void NewBearerDelegate(Token bearer);
@@ -39,65 +39,20 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
 
         private string AccessToken
         {
-            get
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var tokenIndex = FindAuthIndex(authNamesList, TOKEN_AUTH_NAME);
-                return GetAuthOrDefault(authValuesSource, tokenIndex);
-            }
-
-            set
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var tokenIndex = FindAuthIndex(authNamesList, TOKEN_AUTH_NAME);
-                var updatedValues = authValuesSource.ToList();
-                updatedValues[tokenIndex] = value;
-                connectionInfoDto.AuthFieldValues = updatedValues;
-            }
+            get => connectionInfoDto.AuthFieldValues[TOKEN_AUTH_NAME];
+            set => connectionInfoDto.AuthFieldValues[TOKEN_AUTH_NAME] = value;
         }
 
         private string AccessRefreshToken
         {
-            get
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var refreshTokenIndex = FindAuthIndex(authNamesList, REFRESH_TOKEN_AUTH_NAME);
-                return GetAuthOrDefault(authValuesSource, refreshTokenIndex);
-            }
-
-            set
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var refreshTokenIndex = FindAuthIndex(authNamesList, REFRESH_TOKEN_AUTH_NAME);
-                var updatedValues = authValuesSource.ToList();
-                updatedValues[refreshTokenIndex] = value;
-                connectionInfoDto.AuthFieldValues = updatedValues;
-            }
+            get => connectionInfoDto.AuthFieldValues[REFRESH_TOKEN_AUTH_NAME];
+            set => connectionInfoDto.AuthFieldValues[REFRESH_TOKEN_AUTH_NAME] = value;
         }
 
         private string AccessEnd
         {
-            get
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var endIndex = FindAuthIndex(authNamesList, END_AUTH_NAME);
-                return GetAuthOrDefault(authValuesSource, endIndex);
-            }
-
-            set
-            {
-                var authNamesList = connectionInfoDto.ConnectionType.AuthFieldNames.ToList();
-                var authValuesSource = connectionInfoDto.AuthFieldValues;
-                var endIndex = FindAuthIndex(authNamesList, END_AUTH_NAME);
-                var updatedValues = authValuesSource.ToList();
-                updatedValues[endIndex] = value;
-                connectionInfoDto.AuthFieldValues = updatedValues;
-            }
+            get => connectionInfoDto.AuthFieldValues[END_AUTH_NAME];
+            set => connectionInfoDto.AuthFieldValues[END_AUTH_NAME] = value;
         }
 
         private string AppClientId
@@ -133,7 +88,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
             }
         }
 
-        public async Task<ConnectionStatusDto> SignInAsync(RemoteConnectionInfoDto connectionInfo)
+        public async Task<ConnectionStatusDto> SignInAsync(ConnectionInfoDto connectionInfo)
         {
             connectionInfoDto = connectionInfo;
             await CheckAccessAsync(true);
@@ -227,9 +182,6 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
                 httpListener.Stop();
             }
         }
-
-        private int FindAuthIndex(List<string> source, string authName)
-            => source.FindIndex(a => a.Equals(authName, StringComparison.InvariantCultureIgnoreCase));
 
         private string GetAuthOrDefault(IEnumerable<string> source, int index)
             => index != -1 ? source.ElementAtOrDefault(index) : string.Empty;
