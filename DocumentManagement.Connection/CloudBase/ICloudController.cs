@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="path"></param>
         /// <param name="nameDir"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> CreateDirAsync(string path, string nameDir);
+        Task<DiskElement> CreateDirAsync(string path, string nameDir);
 
         /// <summary>
         ///

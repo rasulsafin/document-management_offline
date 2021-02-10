@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         #endregion
         #region Create Directory
-        public async Task<bool> CreateDirAsync(string path, string nameDir)
+        public async Task<DiskElement> CreateDirAsync(string path, string nameDir)
         {
             try
             {
@@ -86,11 +86,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     {
                         if (http.StatusCode == HttpStatusCode.Created)
                         {
-                            return true;
+                            return new YandexDiskElement() { };
                         }
                     }
 
-                    return false;
+                    return null;
                 }
             }
             catch (Exception ex)

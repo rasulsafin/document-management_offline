@@ -115,8 +115,8 @@ namespace GoogleConsoleTest
                 string parent = comList[2].StartsWith('-') ? string.Empty : comList[2];
                 var res = await controller.CreateDirAsync(parent, name);
 
-                if (res)
-                    Console.WriteLine($"Успех!");
+                if (res == null)
+                    Console.WriteLine($"Успех! id = {res.Href}");
                 else
                     Console.WriteLine($"Провал!");
 

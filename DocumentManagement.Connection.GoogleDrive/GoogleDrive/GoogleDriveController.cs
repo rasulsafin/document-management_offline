@@ -145,7 +145,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         #endregion
         #region Create Directory
-        public async Task<bool> CreateDirAsync(string idParent, string nameDir)
+        public async Task<DiskElement> CreateDirAsync(string idParent, string nameDir)
         {
 
             var fileDrive = new Google.Apis.Drive.v3.Data.File
@@ -159,8 +159,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             var request = service.Files.Create(fileDrive);
             var result = await request.ExecuteAsync();
             if (result != null)
-                return true;
-            return false;
+                return new GoogleDriveElement(result);
+            return null;
 
         }
         #endregion
