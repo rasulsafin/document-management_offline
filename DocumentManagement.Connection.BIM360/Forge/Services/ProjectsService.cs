@@ -17,7 +17,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<List<Project>> GetProjectsAsync(string hubId)
         {
             var response = await connection
-                .GetResponse(HttpMethod.Get, Resources.GetProjectsOfHubMethod, hubId);
+                .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetProjectsOfHubMethod, hubId);
             var data = response[DATA_PROPERTY].ToObject<List<Project>>();
 
             return data;
@@ -26,7 +26,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<Project> GetProjectAsync(string hubId, string projectId)
         {
             var response = await connection
-                .GetResponse(HttpMethod.Get, Resources.GetProjectOfHubMethod, hubId, projectId);
+                .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetProjectOfHubMethod, hubId, projectId);
             var data = response[DATA_PROPERTY].ToObject<Project>();
 
             return data;
@@ -35,7 +35,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<Hub> GetHubAsync(string hubId, string projectId)
         {
             var response = await connection
-                .GetResponse(HttpMethod.Get, Resources.GetProjectsHubMethod, hubId, projectId);
+                .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetProjectsHubMethod, hubId, projectId);
             var data = response[DATA_PROPERTY].ToObject<Hub>();
 
             return data;
@@ -44,7 +44,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<List<Folder>> GetTopFoldersAsync(string hubId, string projectId)
         {
             var response = await connection
-                .GetResponse(HttpMethod.Get, Resources.GetTopFoldersMethod, hubId, projectId);
+                .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetTopFoldersMethod, hubId, projectId);
             var data = response[DATA_PROPERTY].ToObject<List<Folder>>();
 
             return data;
@@ -53,7 +53,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<Download> GetDownloadInfoAsync(string projectId, string downloadId)
         {
             var response = await connection
-                .GetResponse(HttpMethod.Get, Resources.GetProjectsDownloadInfoMethod, projectId, downloadId);
+                .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetProjectsDownloadInfoMethod, projectId, downloadId);
             var data = response[DATA_PROPERTY].ToObject<Download>();
 
             return data;
@@ -62,7 +62,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<string> CreateStorageAsync(string projectId, StorageObject obj)
         {
             var response = await connection
-                .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectStorageMethod, obj, projectId);
+                .SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostProjectStorageMethod, obj, projectId);
 
             return response[DATA_PROPERTY]?.ToObject<StorageObject>().ID;
         }

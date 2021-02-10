@@ -1,4 +1,4 @@
-﻿namespace DocumentManagement.Connection.BIM360.Forge
+namespace DocumentManagement.Connection.BIM360.Forge
 {
     internal static class Constants
     {
@@ -19,5 +19,15 @@
         internal static readonly string CALLBACK_URL_NAME = "callBackUrl";
         internal static readonly string CLIENT_ID_NAME = "clientId";
         internal static readonly string CLIENT_SECRET_NAME = "clientSecret";
+
+        internal static readonly string AUTH_REQUEST_BODY_CLIENT_ID_FIELD = "client_id";
+        internal static readonly string AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD = "client_secret";
+        internal static readonly string AUTH_REQUEST_BODY_GRANT_TYPE_FIELD = "grant_type";
+        internal static readonly string AUTH_REQUEST_BODY_CODE_FIELD = "code";
+        internal static readonly string AUTH_REQUEST_BODY_REDIRECT_URI_FIELD = "redirect_uri";
+        internal static readonly string AUTH_REQUEST_BODY_REFRESH_TOKEN_FIELD = "refresh_token";
+
+        internal static readonly string AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE = "authorization_code";
+        internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
     }
 }

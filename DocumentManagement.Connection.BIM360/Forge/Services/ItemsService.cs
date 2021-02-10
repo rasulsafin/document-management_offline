@@ -16,7 +16,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
 
         public async Task<(Item, Version)> PostItemAsync(string projectId, Item item, Version version)
         {
-            var response = await connection.SendRequestWithSerializedData(HttpMethod.Post,
+            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post,
                     Resources.PostProjectsItemsMethod,
                     new
                     {
@@ -32,7 +32,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
         public async Task<(Item, Version)> PostVersionAsync(string projectId, Version version)
         {
             var response = await connection
-                .SendRequestWithSerializedData(HttpMethod.Post, Resources.PostProjectsVersionMethod, version, projectId);
+                .SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostProjectsVersionMethod, version, projectId);
             var resultVersion = response[DATA_PROPERTY]?.ToObject<Version>();
             var item = response[INCLUDED_PROPERTY]?.ToObject<Item>();
 

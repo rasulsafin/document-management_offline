@@ -20,7 +20,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
 
         public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)
         {
-            var response = await connection.GetResponse(HttpMethod.Get,
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get,
                     Resources.GetProjectsFoldersContentsMethod,
                     projectId,
                     folderId,
@@ -31,7 +31,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
 
         public async Task<List<Item>> GetItemsAsync(string projectId, string folderId)
         {
-            var response = await connection.GetResponse(HttpMethod.Get,
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get,
                     Resources.GetProjectsFoldersContentsMethod,
                     projectId,
                     folderId,
@@ -45,7 +45,7 @@ namespace DocumentManagement.Connection.BIM360.Forge.Services
             var stringBuilder = new StringBuilder(Resources.GetProjectsFoldersSearchMethod);
             foreach (var filter in filters)
                 stringBuilder.AppendFormat("filter[{0}]={1}&", filter.filteringField, filter.filteringValue);
-            var response = await connection.GetResponse(HttpMethod.Get,
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get,
                     stringBuilder.ToString(),
                     projectId,
                     folderId);
