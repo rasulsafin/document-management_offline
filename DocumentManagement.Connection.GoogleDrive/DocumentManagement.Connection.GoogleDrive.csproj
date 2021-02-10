@@ -2,15 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Connection</RootNamespace>
+    <RootNamespace>MRS.DocumentManagement.Connection.YandexDisk</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.1.1" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.50.0.2223" />
+    <PackageReference Include="System.Linq" Version="4.3.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Connection\DocumentManagement.Connection.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
   </ItemGroup>
 

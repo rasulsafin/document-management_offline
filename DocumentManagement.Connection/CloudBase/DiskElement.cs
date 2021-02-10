@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement.Connection
 
         public DateTime LastModified { get; protected set; }
 
-        public string ContentLength { get; protected set; }
+        public ulong ContentLength { get; protected set; }
 
         public string ContentType { get; protected set; }
 
@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Connection
 
         public string Status { get; protected set; }
 
-        public string CreationDate { get; protected set; }
+        public DateTime CreationDate { get; protected set; }
 
         public string ResourceType { get; protected set; }
 

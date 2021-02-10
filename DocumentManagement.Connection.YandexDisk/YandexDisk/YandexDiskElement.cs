@@ -7,6 +7,7 @@ namespace MRS.DocumentManagement.Connection
     public class YandexDiskElement : DiskElement
     {
         private string lastModifiedString;
+        private string contentLengthString;
 
         public string MulcaFileUrl { get; private set; }
 
@@ -113,16 +114,16 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:creationdate":
-                            result.CreationDate = GetValueElement(element);
+                            result.CreationDate = GetDataElement(element);
                             break;
                         case "d:displayname":
                             result.DisplayName = GetValueElement(element);
                             break;
                         case "d:getcontentlength":
-                            result.ContentLength = GetValueElement(element);
+                            result.ContentLength = GetUlongElement(element);
                             break;
                         case "d:getlastmodified":
-                            SetLastModified(result, element);
+                            result.LastModified = GetDataElement(element);
                             break;
                         case "d:resourcetype":
                             GetResourceType(result, element);
@@ -154,10 +155,26 @@ namespace MRS.DocumentManagement.Connection
             }
         }
 
-        private static void SetLastModified(YandexDiskElement result, XmlElement element)
+        private static ulong GetUlongElement(XmlElement element)
         {
-            result.lastModifiedString = GetValueElement(element);
-            result.LastModified = DateTime.Parse(result.lastModifiedString);
+            var str = GetValueElement(element);
+            if (ulong.TryParse(str, out ulong num))
+            {
+                return num;
+            }
+
+            return ulong.MinValue;
+        }
+
+        private static DateTime GetDataElement(XmlElement element)
+        {
+            var str = GetValueElement(element);
+            if (DateTime.TryParse(str, out DateTime date))
+            {
+                return date;
+            }
+
+            return DateTime.MinValue;
         }
 
         private static void GetResourceType(YandexDiskElement result, XmlElement root)

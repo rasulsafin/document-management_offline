@@ -53,14 +53,14 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateFoundObject(connection);
         }
 
-        [HttpHead]
+        [HttpPost]
         [Route("syncStart")]
         public async Task<IActionResult> StartSynchronizeAsync()
         {
             bool res = await service.StartSync();
 
             // TODO: Отправить пользователью результат
-            return Accepted();
+            return Accepted(res);
         }
 
         [HttpGet]
@@ -78,5 +78,6 @@ namespace MRS.DocumentManagement.Api.Controllers
             service.StopSync();
             return Accepted();
         }
+        
     }
 }

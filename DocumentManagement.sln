@@ -37,6 +37,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connecti
 		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive", "DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogleConsoleTest", "GoogleConsoleTest\GoogleConsoleTest.csproj", "{46A3D59C-E210-4BD4-8528-1636C2149BDB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +83,14 @@ Global
 		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Release|Any CPU.Build.0 = Release|Any CPU
+		{46A3D59C-E210-4BD4-8528-1636C2149BDB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{46A3D59C-E210-4BD4-8528-1636C2149BDB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{46A3D59C-E210-4BD4-8528-1636C2149BDB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{46A3D59C-E210-4BD4-8528-1636C2149BDB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
