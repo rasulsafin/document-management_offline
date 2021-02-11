@@ -6,6 +6,9 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests.Utility
 {
+    /// <summary>
+    /// TODO: Test enums.
+    /// </summary>
     public static class MockData
     {
         #region USERS
@@ -346,16 +349,16 @@ namespace MRS.DocumentManagement.Tests.Utility
             AuthFieldValues = "Bim field 1; Bim field 2",
         };
 
-        public static IEnumerable<EnumDm> CreateEnumDms(string prefix, int connectionID, int count = 3)
+        public static IEnumerable<EnumerationType> CreateEnumDms(string prefix, int count = 3)
         {
             for (int i = 0; i < count; i++)
-                yield return new EnumDm() { Name = $"{prefix} EnumDm {i + 1}", ConnectionInfoID = connectionID };
+                yield return new EnumerationType() { Name = $"{prefix} EnumDm {i + 1}" };
         }
 
-        public static IEnumerable<EnumDmValue> CreateEnumDmValues(int enumDmID, string prefix, int count = 3)
+        public static IEnumerable<EnumerationValue> CreateEnumDmValues(int enumDmID, string prefix, int count = 3)
         {
             for (int i = 0; i < count; i++)
-                yield return new EnumDmValue() { Value = $"{prefix} Value {i + 1}", EnumDmID = enumDmID };
+                yield return new EnumerationValue() { Value = $"{prefix} Value {i + 1}", EnumerationTypeID = enumDmID };
         }
     }
 }

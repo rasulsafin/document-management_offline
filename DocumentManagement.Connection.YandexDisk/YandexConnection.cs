@@ -29,6 +29,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             throw new NotImplementedException();
         }
 
+        public Task<ConnectionInfoDto> FillInfo(ConnectionInfoDto info)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ProgressSync> GetProgressSyncronization()
         {
             return Task.FromResult(syncManager.GetProgressSync());
