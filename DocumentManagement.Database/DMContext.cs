@@ -1,4 +1,4 @@
-﻿#define TEST // Use to perform tests
+#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
 #undef DEVELOPMENT
 
@@ -97,6 +97,10 @@ namespace MRS.DocumentManagement.Database
 			modelBuilder.Entity<ObjectiveType>()
 				.HasIndex(x => x.Name)
 				.IsUnique(true);
+            modelBuilder.Entity<ObjectiveType>()
+                .HasOne(x => x.ConnectionType)
+                .WithMany(x => x.ObjectiveTypes)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ConnectionType>()
                  .HasIndex(x => x.Name)

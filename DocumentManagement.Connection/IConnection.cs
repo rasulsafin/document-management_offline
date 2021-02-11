@@ -8,8 +8,9 @@ namespace MRS.DocumentManagement.Connection
     /// </summary>
     public interface IConnection
     {
+        /// TODO: Make abstract class where Connect calls for FillInfo?
         /// <summary>
-        /// Connect to remote DM.
+        /// Connect to remote DM. Probably should call for FillInfo before returning.
         /// </summary>
         /// <param name="info">Information abot the connection.</param>
         /// <returns>Result success and additional result data.</returns>
@@ -26,6 +27,14 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<ConnectionStatusDto> GetStatus();
+
+        /// <summary>
+        /// Method fills all the relevant fields in ConnectionInfo
+        /// e.g. AuthFieldValues and EnumerationTypes in order to link them to User.
+        /// </summary>
+        /// <param name="info">ConnectionInfoDto to fill in.</param>
+        /// <returns>Filed ConnectionInfoDto.</returns>
+        Task<ConnectionInfoDto> FillInfo(ConnectionInfoDto info);
 
         // TODO: Syncronization!
         ///// <summary>

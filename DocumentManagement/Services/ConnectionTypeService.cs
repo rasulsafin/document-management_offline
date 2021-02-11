@@ -65,8 +65,21 @@ namespace MRS.DocumentManagement.Services
             typeOne.Name = "tdms";
             typeOne.AuthFieldNames = new List<string>() { "login", "password", "server", "db" };
             typeOne.AppProperty = new Dictionary<string, string>();
+            typeOne.ObjectiveTypes = new List<ObjectiveTypeDto>()
+            {
+                new ObjectiveTypeDto() { Name = "Tdms_Нарушение" },
+                new ObjectiveTypeDto() { Name = "Tdms_Работа" },
+            };
+
             var typeOneDb = mapper.Map<ConnectionType>(typeOne);
             await context.ConnectionTypes.AddAsync(typeOneDb);
+
+            foreach (var objTypeDto in typeOne.ObjectiveTypes)
+            {
+                var objectiveType = mapper.Map<ObjectiveType>(objTypeDto);
+                objectiveType.ConnectionTypeID = typeOneDb.ID;
+                context.ObjectiveTypes.Add(objectiveType);
+            }
 
             // Type Two.
             var typeTwo = new ConnectionTypeDto();
@@ -76,13 +89,24 @@ namespace MRS.DocumentManagement.Services
             typeTwo.AppProperty.Add("CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051");
             typeTwo.AppProperty.Add("CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c");
             typeTwo.AppProperty.Add("RETURN_URL", @"http://localhost:8000/oauth/");
+            typeTwo.ObjectiveTypes = new List<ObjectiveTypeDto>()
+            {
+                new ObjectiveTypeDto() { Name = "YandexDisk_Issue" },
+            };
             var typeTwoDb = mapper.Map<ConnectionType>(typeTwo);
             await context.ConnectionTypes.AddAsync(typeTwoDb);
+
+            foreach (var objTypeDto in typeTwo.ObjectiveTypes)
+            {
+                var objectiveType = mapper.Map<ObjectiveType>(objTypeDto);
+                objectiveType.ConnectionTypeID = typeTwoDb.ID;
+                context.ObjectiveTypes.Add(objectiveType);
+            }
 
             // Save.
             var result = await context.SaveChangesAsync();
 
-            return result == 2;
+            return result > 0;
         }
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)

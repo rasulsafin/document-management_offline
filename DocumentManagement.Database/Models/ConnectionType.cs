@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 
 namespace MRS.DocumentManagement.Database.Models
 {
@@ -13,5 +13,7 @@ namespace MRS.DocumentManagement.Database.Models
         public string AuthFieldNames { get; set; }
 
         public ICollection<ConnectionInfo> ConnectionInfos { get; set; }
+
+        public ICollection<ObjectiveType> ObjectiveTypes { get; set; }
     }
 }

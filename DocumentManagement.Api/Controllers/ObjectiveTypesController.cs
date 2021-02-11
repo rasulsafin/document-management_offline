@@ -47,9 +47,10 @@ namespace DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllObjectiveTypes()
+        [Route("list/{id}")]
+        public async Task<IActionResult> GetAllObjectiveTypes([FromRoute] int connectionTypeId)
         {
-            var allTypes = await service.GetAllObjectiveTypes();
+            var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));
             return ValidateCollection(allTypes);
         }
 
