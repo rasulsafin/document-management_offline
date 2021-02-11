@@ -71,6 +71,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<FileInfo> GetAsync(string bucketKey, string objectName, string pathToDownload)
         {
+            var directory = Path.GetDirectoryName(pathToDownload);
+            if (!string.IsNullOrEmpty(directory))
+                Directory.CreateDirectory(directory);
             await using var output = File.OpenWrite(pathToDownload);
             await using var stream = await connection.GetResponseStreamAuthorizedAsync(
                     HttpMethod.Get,

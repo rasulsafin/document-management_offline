@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -197,14 +197,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             // Authorize
             var authorizationResult = await authenticator.SignInAsync(connectionInfo);
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
-                Assert.Fail();
+                Assert.Fail("Authorization failed");
 
-            connection.Token = connectionInfo.AuthFieldValues["Token"];
+            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
             // STEP 1. Find hub with projects
-            var hub = (await hubsService.GetHubsAsync()).FirstOrDefault(h => h.Relationships.Projects.Count > 0);
+            var hub = (await hubsService.GetHubsAsync()).FirstOrDefault();
             if (hub == default)
-                Assert.Fail();
+                Assert.Fail("Hubs are empty");
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
@@ -212,17 +212,37 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (project == default)
                 Assert.Fail();
 
+            // STEP 3. Find the Folder ID
+            var topFolders = await projectsService.GetTopFoldersAsync(hub.ID, project.ID);
+            if (topFolders == default)
+                Assert.Fail("Top folders in project are empty");
+
             // Step 3: Find the resource item in a project folder.
             var root = ((JToken)project.Relationships.RootFolder.data).ToObject<Folder>();
 
             if (root == null)
                 Assert.Fail();
 
-            var files = await foldersService.SearchAsync(project.ID,
-                    root.ID,
-                    new[] { (typeof(Item).GetDataMemberName(nameof(Item.Type)), ITEM_TYPE) });
+            List<(Version version, Item item)> files = null;
+
+            foreach (var folder in topFolders)
+            {
+                files = await foldersService.SearchAsync(project.ID,
+                        folder.ID,
+                        Array.Empty<(string filteringField, string filteringValue)>());
+
+                        // new[] { (typeof(Item).GetDataMemberName(nameof(Item.Type)), ITEM_TYPE) });
+                if (files != null && files.Count > 0)
+                    break;
+            }
+
+            if (files == null || files.Count == 0)
+                Assert.Fail();
 
             var file = files[random.Next(files.Count)];
+
+            if (root == null)
+                Assert.Fail();
 
             // Step 6: Download the item.
             var storage = ((JToken)file.version.Relationships.Storage.data).ToObject<StorageObject>();
@@ -231,12 +251,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Assert.Fail();
 
             (var bucketKey, var hashedName) = storage.ParseStorageId();
-            var directory = Path.GetTempPath();
-            var fileInfo = await objectsService.GetAsync(bucketKey, hashedName, directory);
+            var fileInfo = await objectsService.GetAsync(bucketKey, hashedName, file.item.Attributes.DisplayName);
 
             if (!fileInfo.Exists)
                 Assert.Fail();
         }
-    }
     }
 }

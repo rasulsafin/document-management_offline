@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
+using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -52,7 +53,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             var versions = response[DATA_PROPERTY]?.ToObject<Version[]>();
             var items = response[INCLUDED_PROPERTY]?.ToObject<Item[]>() ?? Array.Empty<Item>();
 
-            return versions?.Select(v => (v, items.FirstOrDefault(i => i.ID == v.Relationships.Item.data.id))).ToList();
+            return versions?.Select(v => (v, items.FirstOrDefault(i =>
+            {
+                var item = ((JToken)v.Relationships.Item.data).ToObject<Item>();
+                return item != null && i.ID == item.ID;
+            }))).ToList();
         }
     }
 }
