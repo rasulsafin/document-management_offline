@@ -62,10 +62,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return false;
         }
 
-        public Task StopSyncronization()
+        public Task<bool> StopSyncronization()
         {
             syncManager.StopSync();
-            return Task.CompletedTask;
+            return Task.FromResult(true);
         }
     }
 }

@@ -28,17 +28,17 @@ namespace MRS.DocumentManagement.Connection
         Task<ConnectionStatusDto> GetStatus();
 
         // TODO: Syncronization!
-        ///// <summary>
-        ///// Starts syncronization between local and remote DMs.
-        ///// </summary>
-        ///// <returns>Result of syncronizing start process.</returns>
-        // Task<bool> StartSyncronization();
+        /// <summary>
+        /// Starts syncronization between local and remote DMs.
+        /// </summary>
+        /// <returns>Result of syncronizing start process.</returns>
+        Task<bool> StartSyncronization();
 
-        ///// <summary>
-        ///// Stops syncronization between local and remote DMs.
-        ///// </summary>
-        ///// <returns>Result of syncronizing stop process.</returns>
-        // Task<bool> StopSyncronization();
+        /// <summary>
+        /// Stops syncronization between local and remote DMs.
+        /// </summary>
+        /// <returns>Result of syncronizing stop process.</returns>
+        Task<bool> StopSyncronization();
 
         /// <summary>
         /// Gets current syncronization progress.

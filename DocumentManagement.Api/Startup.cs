@@ -17,7 +17,7 @@ using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Connection.GoogleDrive;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -88,7 +88,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
-            services.AddScoped<IConnection, YandexConnection>();
+            services.AddScoped<IConnection, GoogleConnection>();
 
             services.AddSingleton<CryptographyHelper>();
             services.AddSingleton<SyncManager>();
