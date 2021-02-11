@@ -88,7 +88,6 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
-            services.AddScoped<IConnection, GoogleConnection>();
 
             services.AddSingleton<CryptographyHelper>();
             services.AddSingleton<SyncManager>();

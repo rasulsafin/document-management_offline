@@ -12,12 +12,10 @@ namespace MRS.DocumentManagement.Api.Controllers
     public class ConnectionsController : ControllerBase
     {
         private IConnectionService service;
-        private IConnection connection;
 
-        public ConnectionsController(IConnectionService connectionService, IConnection connection)
+        public ConnectionsController(IConnectionService connectionService)
         {
             service = connectionService;
-            this.connection = connection;
         }
 
         [HttpPost]
@@ -52,23 +50,5 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         // TODO: Syncronization!
-
-        [HttpPost]
-        [Route("syncronization")]
-        public async Task<IActionResult> StartSyncronization()
-        {
-            var needConnect = await connection.IsAuthDataCorrect();
-            if (!needConnect)
-            {
-                await connection.Connect(new ConnectionInfoDto()
-                {
-                    ConnectionType = new ConnectionTypeDto() { },
-                    ID = new ID<ConnectionInfoDto>(2),
-                });
-            }
-
-            await connection.StartSyncronization();
-            return Ok();
-        }
     }
 }
