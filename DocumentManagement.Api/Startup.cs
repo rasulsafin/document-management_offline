@@ -12,12 +12,11 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Connection.GoogleDrive;
 
 namespace MRS.DocumentManagement.Api
 {
