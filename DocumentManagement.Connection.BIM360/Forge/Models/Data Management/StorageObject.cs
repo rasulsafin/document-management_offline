@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         }
 
         [DataContract]
-        public class StorageObjectAttributes
+        public class StorageObjectAttributes : AAttributes
         {
             [DataMember(Name = "name")]
             public string Name { get; set; }

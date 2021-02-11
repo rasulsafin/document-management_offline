@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class LoadTests
     {
-        private static readonly string TEST_FILE_PATH = "AdditionalData//TestIcon.png";
+        private static readonly string TEST_FILE_PATH = "My Test Folder/TestIcon.png";
 
         private static AuthenticationService authService;
         private static HubsService hubsService;
@@ -29,6 +29,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static ConnectionInfoDto connectionInfo;
         private static ObjectsService objectsService;
         private static ItemsService itemsService;
+        private static FoldersService foldersService;
         private static Authenticator authenticator;
         private static ForgeConnection connection;
         private static FoldersService foldersService;
@@ -71,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         /// <summary>
-        /// Test based on https://forge.autodesk.com/en/docs/data/v2/tutorials/upload-file/ step-by-step tutorial
+        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial
         /// </summary>
         [TestMethod]
         public async Task Can_upload_item()
@@ -79,44 +80,60 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             // Authorize
             var authorizationResult = await authenticator.SignInAsync(connectionInfo);
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
-                Assert.Fail();
+                Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
             // STEP 1. Find hub with projects
-            var hub = (await hubsService.GetHubsAsync()).FirstOrDefault(h => h.Relationships.Projects.Count > 0);
+            var hub = (await hubsService.GetHubsAsync()).FirstOrDefault();
             if (hub == default)
-                Assert.Fail();
+                Assert.Fail("Hubs are empty");
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
             var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault();
             if (project == default)
-                Assert.Fail();
+                Assert.Fail("Projects in hubs are empty");
 
-            // STEP 3. Create storage
-            // Choose folder
-            var folder = (await projectsService.GetTopFoldersAsync(hub.ID, project.ID)).LastOrDefault();
+            // STEP 3. Find the Folder ID
+            var topFolder = (await projectsService.GetTopFoldersAsync(hub.ID, project.ID)).LastOrDefault();
+            if (topFolder == default)
+                Assert.Fail("Top folders in project are empty");
 
+            // STEP 4. Find the nested Folder ID
+            var folder = (await foldersService.GetFoldersAsync(project.ID, topFolder.ID)).FirstOrDefault();
+            if (folder == default)
+                Assert.Fail("Top folder is empty");
+
+            // STEP 5. Create a Storage Object
             var objectToUpload = new StorageObject
             {
-                Attributes = new StorageObject.StorageObjectAttributes { Name = TEST_FILE_PATH },
+                Attributes = new StorageObject.StorageObjectAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                },
                 Relationships = new StorageObject.StorageObjectRelationships
                 {
                     Target = new
                     {
-                        data = folder,
+                        data = new
+                        {
+                            type = FOLDER_TYPE,
+                            id = folder.ID,
+                        },
                     },
                 },
             };
 
             var storage = await projectsService.CreateStorageAsync(project.ID, objectToUpload);
             if (storage == default)
-                Assert.Fail();
+                Assert.Fail("Storage creating failed");
 
-            // STEP 4. Upload file to storage
+            await Task.Delay(10000);
+
+            // STEP 6. Upload file to storage
             if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
-                Assert.Fail();
+                Assert.Fail("Storage ID has incorrect format");
 
             var parsedId = storage.ParseStorageId();
             var bucketKey = parsedId.bucketKey;
@@ -124,7 +141,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
-            // STEP 5. Create first version
+            // STEP 7. Create first version
             var item = new Item
             {
                 Attributes = new Item.ItemAttributes
@@ -157,7 +174,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var addedItem = await itemsService.PostItemAsync(project.ID, item, version);
 
             if (addedItem.item == null || addedItem.version == null)
-                Assert.Fail();
+                Assert.Fail("Adding item failed");
+        }
+
+        [TestMethod]
+        public async Task Can_get_buckets()
+        {
+            // Authorize
+            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+                Assert.Fail("Authorization failed");
+
+            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
+
+            var result = await objectsService.GetBucketDetails("wip.dm.prod");
+            //var result = await objectsService.GetBuckets();
         }
 
         [TestMethod]

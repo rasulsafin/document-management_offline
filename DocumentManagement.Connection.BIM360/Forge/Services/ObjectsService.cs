@@ -80,5 +80,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             await stream.CopyToAsync(output);
             return new FileInfo(pathToDownload);
         }
+
+        public async Task<JObject> GetBuckets()
+        {
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketsMethod);
+            return response;
+        }
+
+        public async Task<JObject> GetBucketDetails(string bucketKey)
+        {
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketDetailsMethod, bucketKey);
+            return response;
+        }
     }
 }

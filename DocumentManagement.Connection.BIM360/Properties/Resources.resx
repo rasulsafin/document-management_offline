@@ -194,7 +194,7 @@
     <comment>Creates versions of uploaded files (items) and makes copies of existing files</comment>
   </data>
   <data name="PostProjectStorageMethod" xml:space="preserve">
-    <value>data/v1/projects/{0}/storage</value>
+    <value>/data/v1/projects/{0}/storage</value>
     <comment>Creates a storage location in the OSS where data can be uploaded to</comment>
   </data>
   <data name="PostProjectsVersionMethod" xml:space="preserve">
@@ -216,6 +216,14 @@
   <data name="GetAuthorizeMethod" xml:space="preserve">
     <value>/authentication/v1/authorize?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}</value>
     <comment>This is the browser URL to redirect an end user to in order to acquire the user’s consent for your app to access the specified resources</comment>
+  </data>
+  <data name="GetBucketDetailsMethod" xml:space="preserve">
+    <value>/oss/v2/buckets/{0}/details</value>
+    <comment>Return bucket details in JSON format if the caller is the owner of the bucket</comment>
+  </data>
+  <data name="GetBucketsMethod" xml:space="preserve">
+    <value>/oss/v2/buckets?region=us</value>
+    <comment>Returns the buckets owned by the application</comment>
   </data>
   <data name="GetBucketsObjectMethod" xml:space="preserve">
     <value>/oss/v2/buckets/{0}/objects/{1}</value>

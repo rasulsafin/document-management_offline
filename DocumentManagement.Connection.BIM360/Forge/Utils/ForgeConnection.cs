@@ -13,6 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
     public class ForgeConnection : IDisposable
     {
         private const string MEDIA_TYPE_JSON = "text/json";
+        private const string CONTENT_TYPE = "application/vnd.api+json";
 
         private static readonly double TIMEOUT = 10;
 
@@ -74,9 +75,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             if (data != null)
             {
                 var jsonData = new { data };
-                request.Content = new StringContent(JsonConvert.SerializeObject(jsonData, jsonSerializerSettings),
+                var serializedData = JsonConvert.SerializeObject(jsonData, jsonSerializerSettings);
+                request.Content = new StringContent(serializedData,
                         Encoding.Default,
                         MEDIA_TYPE_JSON);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(CONTENT_TYPE);
             }
 
             return await GetResponseAsync(request);
