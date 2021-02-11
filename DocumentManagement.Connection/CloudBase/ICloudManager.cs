@@ -24,18 +24,17 @@ namespace MRS.DocumentManagement.Connection
         /// <summary>
         /// Удалить файл
         /// </summary>
-        /// <param name="path">Путь от папки приложения 'BRIO MRS' разделены '/'</param>
+        /// <param name="href">уникальный путь к файлу</param>
         /// <returns></returns>
-        Task<bool> DeleteFile(string path);
+        Task<bool> DeleteFile(string href);
 
         /// <summary>
         /// Получить файл
         /// </summary>
-        /// <param name="remoteDirName">Название подпапки в папке приложения 'BRIO MRS' </param>
-        /// <param name="localDirName">Локальный путь (папка должна быть создана)</param>
+        /// <param name="href">уникальный путь к файлу</param>
         /// <param name="fileName">имя файла</param>
         /// <returns></returns>
-        Task<bool> PullFile(string remoteDirName, string localDirName, string fileName);
+        Task<bool> PullFile(string href, string fileName);
 
         /// <summary>
         /// Отправить файл
@@ -44,7 +43,7 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="localDirName">Локальный путь (папка должна быть создана)</param>
         /// <param name="fileName">имя файла</param>
         /// <returns></returns>
-        Task<bool> PushFile(string remoteDirName, string localDirName, string fileName);
+        Task<string> PushFile(string remoteDirName, string localDirName, string fileName);
 
         /// <summary>
         /// Удалить объект из папки

@@ -298,7 +298,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<bool> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<DiskElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
@@ -329,9 +329,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 {
                     if (response is HttpWebResponse httpResponse)
                     {
-                        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
-                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
-                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
+                        if (httpResponse.StatusCode == HttpStatusCode.Created) return new YandexDiskElement();
+                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return null;
+                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return null;
                     }
                 }
             }
@@ -340,7 +340,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 throw WebExceptionHandler(ex);
             }
 
-            return false;
+            return null;
         }
         #endregion
         #region COPY TODO

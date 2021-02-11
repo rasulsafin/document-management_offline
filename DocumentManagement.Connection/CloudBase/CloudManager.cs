@@ -76,38 +76,41 @@ namespace MRS.DocumentManagement.Connection
             return await controller.DeleteAsync(path);
         }
 
-        public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        // public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<bool> PullFile(string href, string fileName)
         {
-            try
-            {
-                if (await CheckDir(remoteDirName))
-                {
-                    string path = PathManager.GetFile(remoteDirName, fileName);
-                    string dir = Path.Combine(localDirName, fileName);
-                    return await controller.DownloadFileAsync(path, dir);
-                }
-            }
-            catch (FileNotFoundException)
-            {
-            }
+            return await controller.DownloadFileAsync(href, fileName);
 
-            return false;
+            // try
+            // {
+            //    if (await CheckDir(remoteDirName))
+            //    {
+            //        string path = PathManager.GetFile(remoteDirName, fileName);
+            //        string dir = Path.Combine(localDirName, fileName);
+            //        return await controller.DownloadFileAsync(path, dir);
+            //    }
+            // }
+            // catch (FileNotFoundException)
+            // {
+            // }
+            // return false;
         }
 
-        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
         {
             try
             {
                 await CheckDir(remoteDirName);
                 string path = PathManager.GetDir(remoteDirName);
                 string file = Path.Combine(localDirName, fileName);
-                return await controller.LoadFileAsync(path, file);
+                var element = await controller.LoadFileAsync(path, file);
+                return element.Href;
             }
             catch (Exception ex)
             {
             }
 
-            return false;
+            return string.Empty;
         }
 
         private async Task<bool> CheckTableDir<T>()

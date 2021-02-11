@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
-    internal class GoogleDriveManager : ICloudManager
+    public class GoogleDriveManager : ICloudManager
     {
         public static readonly string APP_DIR = "BRIO MRS";
         public static readonly string TABLE_DIR = "Tables";
@@ -32,8 +32,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 var tableHref = await GetTableHref<T>();
+                string name = string.Format(REC_FILE, id);
                 string json = JsonConvert.SerializeObject(@object);
-                return await controller.SetContentAsync(json, tableHref, id);
+                return await controller.SetContentAsync(json, tableHref, name);
             }
             catch (Exception ex)
             {
@@ -47,7 +48,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 var tableHref = await GetTableHref<T>();
-                string json = await controller.GetContentAsync(tableHref, id);
+                string name = string.Format(REC_FILE, id);
+                string json = await controller.GetContentAsync(tableHref, name);
                 T @object = JsonConvert.DeserializeObject<T>(json);
                 return @object;
             }
@@ -61,8 +63,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public async Task<bool> Delete<T>(string id)
         {
             var tableHref = await GetTableHref<T>();
+            string name = string.Format(REC_FILE, id);
             var list = await controller.GetListAsync(tableHref);
-            var record = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == id);
+            var record = list.FirstOrDefault(x=>x.DisplayName == name);
             if (record != null)
             {
                 return await controller.DeleteAsync(record.Href);
@@ -71,32 +74,28 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return false;
         }
 
-        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
         {
             string dirHref = await GetDirHref(remoteDirName);
             var res = await controller.LoadFileAsync(dirHref, Path.Combine(localDirName, fileName));
-            return res;
+            return res.Href;
         }
 
-
-        public Task<bool> DeleteFile(string path)
+        public async Task<bool> DeleteFile(string href)
         {
-            throw new System.NotImplementedException();
+            return await controller.DeleteAsync(href);
         }
 
-
-        public Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<bool> PullFile(string href, string fileName)
         {
-            throw new System.NotImplementedException();
+            return await controller.DownloadFileAsync(href, fileName);
         }
-
-
 
         private async Task<string> GetDirHref(string dirName)
         {
             await CheckDirApp();
             var res = directories.ContainsKey(dirName);
-            if (res)
+            if (!res)
             {
                 directories.Clear();
                 var list = await controller.GetListAsync(DirAppHref);
@@ -123,7 +122,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             await CheckDirApp();
             string tableName = typeof(T).Name;
             var res = tables.ContainsKey(tableName);
-            if (res)
+            if (!res)
             {
                 tables.Clear();
                 var list = await controller.GetListAsync(DirTableHref);

@@ -250,7 +250,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         /// <param name="currentPath">The path to the file on the computer.</param>
         /// <param name="updateProgress"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/get.html/.</remarks>
         /// <exception cref="DirectoryNotFoundException">Directory Not Found Exception</exception>
         /// <exception cref="FileNotFoundException">File Not Found Exception</exception>
         public async Task<bool> DownloadFileAsync(string href, string currentPath, Action<ulong, ulong> updateProgress = null)
@@ -288,7 +287,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<bool> LoadFileAsync(string idParent, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<DiskElement> LoadFileAsync(string idParent, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             var info = await GetInfoAsync(idParent);
             IUploadProgress result = null;
@@ -319,9 +318,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                         result = await request.UploadAsync();
                     }
                 }
+
+                return new GoogleDriveElement(fileDrive);
             }
 
-            return result.Exception == null;
+            return null;
         }
         #endregion
         #region COPY TODO

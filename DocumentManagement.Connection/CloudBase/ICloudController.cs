@@ -67,7 +67,7 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="fileName"></param>
         /// <param name="progressChenge"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null);
+        Task<DiskElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null);
 
         /// <summary>
         ///
