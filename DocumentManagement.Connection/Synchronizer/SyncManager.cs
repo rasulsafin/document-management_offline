@@ -15,6 +15,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
     {
         private const string REVISIONS = "revisions";
         private const int COUNT_TRY = 3;
+        public static readonly string YANDEX = "YANDEX";
 
 
         private readonly IServiceScopeFactory factoryScope;
@@ -70,9 +71,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
         }
         #endregion
 
-        public void Initialization(ICloudManager disk)
+        public void Initialization(ICloudManager manager)
         {
-            this.disk = disk;
+            disk = manager;
             Initilize = true;
         }
 

@@ -120,15 +120,15 @@ namespace DocumentManagement.Connection.Tests
             return Task.FromResult(false);
         }
 
-        public Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
-        {
-            RunPullFile = true;
-            return Task.FromResult(true);
-        }
-
-        public Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        public Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
         {
             RunPushFile = true;
+            return Task.FromResult(string.Empty);
+        }
+
+        public Task<bool> PullFile(string href, string fileName)
+        {
+            RunPullFile = true;
             return Task.FromResult(true);
         }
     }

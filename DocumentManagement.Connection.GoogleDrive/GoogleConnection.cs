@@ -6,30 +6,35 @@ using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
-
     public class GoogleConnection : IConnection
     {
-        SyncManager syncManager;
-        ICloudManager manager;
+        private SyncManager syncManager;
+        private ICloudManager manager;
 
         public GoogleConnection(SyncManager syncManager)
         {
             this.syncManager = syncManager;
         }
 
-
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
-            GoogleDriveController driveController = new GoogleDriveController();
-            await driveController.InitializationAsync();
-            manager = new GoogleDriveManager(driveController);
+            try
+            {
+                GoogleDriveController driveController = new GoogleDriveController();
+                await driveController.InitializationAsync();
+                manager = new GoogleDriveManager(driveController);
+                syncManager.Initialization(manager);
 
-            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, };
-        }
-
-        public Task<ProgressSync> GetProgressSyncronization()
-        {
-            return Task.FromResult(syncManager.GetProgressSync());
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, };
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionStatusDto()
+                {
+                    Status = RemoteConnectionStatusDto.Error,
+                    Message = ex.Message,
+                };
+            }
         }
 
         public Task<ConnectionStatusDto> GetStatus()
@@ -44,6 +49,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<bool> StartSyncronization()
         {
+            // TODO: Пользователь поменял подключение, в этом случае изменния вступят в силу 
+            // только после перезагрузки приловжения
             if (syncManager.Initilize)
             {
                 await syncManager.StartSync();

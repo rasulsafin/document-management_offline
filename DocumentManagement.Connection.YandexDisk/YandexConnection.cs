@@ -8,25 +8,32 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexConnection : IConnection
     {
-        SyncManager syncManager;
+        private SyncManager syncManager;
 
         public YandexConnection(SyncManager syncManager)
         {
             this.syncManager = syncManager;
         }
 
-        public async Task<(bool, string)> Connect(dynamic param)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
-            YandexDiskAuth auth = new YandexDiskAuth();
-            var token = await auth.GetYandexDiskToken();
-            syncManager.Initialization(token);
+            try
+            {
+                YandexDiskAuth auth = new YandexDiskAuth();
+                var token = await auth.GetYandexDiskToken();
 
-            return (true, token);
-        }
+                syncManager.Initialization(new YandexManager(new YandexDiskController(token)));
 
-        public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
-        {
-            throw new NotImplementedException();
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK };
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionStatusDto()
+                {
+                    Status = RemoteConnectionStatusDto.Error,
+                    Message = ex.Message,
+                };
+            }
         }
 
         public Task<ProgressSync> GetProgressSyncronization()
