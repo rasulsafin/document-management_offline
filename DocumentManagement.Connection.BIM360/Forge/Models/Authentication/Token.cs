@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.BIM360.Forge.Models.Authentication
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication
 {
     [DataContract]
     public class Token

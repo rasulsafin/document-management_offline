@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Connection.BIM360.Forge
+namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public static class Constants
     {
@@ -17,6 +17,8 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
         internal static readonly string META_PROPERTY = "meta";
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";
+
+        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]={1}&";
 
         internal static readonly int ITEMS_ON_PAGE = 100;
         internal static readonly string JSON_API_VERSION = "1.0";

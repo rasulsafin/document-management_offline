@@ -4,10 +4,11 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.BIM360.Properties;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Data_Management;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 {
     public class ObjectsService
     {
@@ -22,21 +23,25 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
         /// <param name="bucketKey">URL-encoded bucket to upload object into.</param>
         /// <param name="file">URL-encoded object name being uploaded.</param>
         /// <returns>Task of this action.</returns>
-        public async Task PutObjectAsync(string bucketKey, string objectName, string fileFullName)
-            => await connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
+        public async Task<UploadResult> PutObjectAsync(string bucketKey, string objectName, string fileFullName)
+        {
+            var response = await connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
                     Resources.PutBucketsObjectsMethod,
                     File.OpenRead(fileFullName),
                     null,
                     bucketKey,
                     objectName);
+            return response.ToObject<UploadResult>();
+        }
 
         /// <summary>
         /// Recommend to objects larger than 100 MB.
         /// </summary>
         /// <param name="bucketKey">URL-encoded bucket to upload object into.</param>
         /// <param name="file">URL-encoded object name being uploaded.</param>
+        /// <param name="chunkSize">Count of bytes, that must be upload by one request.</param>
         /// <returns>Task of this action.</returns>
-        public async Task PutObjectResumableAsync(string bucketKey, string objectName, FileInfo file, long chunkSize)
+        public async Task<UploadResult> PutObjectResumableAsync(string bucketKey, string objectName, FileInfo file, long chunkSize)
         {
             // TODO: check is it working or not?
             var length = file.Length;
@@ -52,8 +57,28 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
                         objectName));
             }
 
+            UploadResult result = null;
+
             foreach (var task in tasks)
-                await task;
+            {
+                var response = await task;
+                if (response.HasValues)
+                    result = response.ToObject<UploadResult>();
+            }
+
+            return result;
+        }
+
+        public async Task<FileInfo> GetAsync(string bucketKey, string objectName, string pathToDownload)
+        {
+            await using var output = File.OpenWrite(pathToDownload);
+            await using var stream = await connection.GetResponseStreamAuthorizedAsync(
+                    HttpMethod.Get,
+                    Resources.GetBucketsObjectMethod,
+                    bucketKey,
+                    objectName);
+            await stream.CopyToAsync(output);
+            return new FileInfo(pathToDownload);
         }
     }
 }

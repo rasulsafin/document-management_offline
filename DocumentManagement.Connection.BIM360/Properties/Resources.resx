@@ -217,4 +217,8 @@
     <value>/authentication/v1/authorize?response_type=code&amp;client_id={0}&amp;redirect_uri={1}&amp;scope={2}</value>
     <comment>This is the browser URL to redirect an end user to in order to acquire the user’s consent for your app to access the specified resources</comment>
   </data>
+  <data name="GetBucketsObjectMethod" xml:space="preserve">
+    <value>/oss/v2/buckets/{0}/objects/{1}</value>
+    <comment>Download an object</comment>
+  </data>
 </root>

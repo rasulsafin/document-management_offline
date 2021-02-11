@@ -6,13 +6,13 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper.Internal;
-using MRS.DocumentManagement.Connection.BIM360.Forge.Models.Authentication;
-using MRS.DocumentManagement.Connection.BIM360.Forge.Services;
-using MRS.DocumentManagement.Connection.BIM360.Properties;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.BIM360.Forge.Utils
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     public class Authenticator
     {

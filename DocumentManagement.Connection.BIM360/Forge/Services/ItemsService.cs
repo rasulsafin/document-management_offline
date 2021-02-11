@@ -1,11 +1,11 @@
 using System.Net.Http;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.BIM360.Forge.Models;
-using MRS.DocumentManagement.Connection.BIM360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.BIM360.Properties;
-using static MRS.DocumentManagement.Connection.BIM360.Forge.Constants;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 {
     public class ItemsService
     {

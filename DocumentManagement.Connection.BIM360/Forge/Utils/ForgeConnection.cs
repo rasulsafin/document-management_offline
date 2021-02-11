@@ -4,11 +4,11 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.BIM360.Properties;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.BIM360.Forge
+namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public class ForgeConnection : IDisposable
     {
@@ -44,6 +44,16 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
                 params object[] arguments)
             => await SendSerializedDataAuthorizedAsync(methodType, command, (object)null, arguments);
 
+        public async Task<Stream> GetResponseStreamAuthorizedAsync(
+                HttpMethod methodType,
+                string command,
+                params object[] arguments)
+        {
+            using var request = CreateRequest(methodType, command, arguments);
+            var response = await SendAsync(request, completionOption: HttpCompletionOption.ResponseHeadersRead);
+            return await response.Content.ReadAsStreamAsync();
+        }
+
         /// <summary>
         /// Send the authorized request with a JSON content to Forge server.
         /// </summary>
@@ -69,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
                         MEDIA_TYPE_JSON);
             }
 
-            return await SendAsync(request);
+            return await GetResponseAsync(request);
         }
 
         /// <summary>
@@ -98,7 +108,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
                 request.Content = new StreamContent(data);
             }
 
-            return await SendAsync(request);
+            return await GetResponseAsync(request);
         }
 
         /// <summary>
@@ -120,7 +130,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
             using var request = CreateRequest(methodType, command, arguments);
             if (content != null)
                 request.Content = content;
-            return await SendAsync(request, isAuthorized);
+            return await GetResponseAsync(request, isAuthorized);
         }
 
         private HttpRequestMessage CreateRequest(HttpMethod methodType, string command, object[] arguments)
@@ -131,15 +141,24 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge
             return request;
         }
 
-        private async Task<JObject> SendAsync(HttpRequestMessage request, bool isAuthorized = true)
+        private async Task<JObject> GetResponseAsync(HttpRequestMessage request, bool isAuthorized = true)
         {
-            if (isAuthorized)
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-            var response = await client.SendAsync(request);
-            response.EnsureSuccessStatusCode();
+            var response = await SendAsync(request, isAuthorized);
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);
             return jObject;
+        }
+
+        private async Task<HttpResponseMessage> SendAsync(
+                HttpRequestMessage request,
+                bool isAuthorized = true,
+                HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+        {
+            if (isAuthorized)
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+            var response = await client.SendAsync(request, completionOption);
+            response.EnsureSuccessStatusCode();
+            return response;
         }
     }
 }

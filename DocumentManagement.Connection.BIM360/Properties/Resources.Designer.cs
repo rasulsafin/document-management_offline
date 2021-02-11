@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MRS.DocumentManagement.Connection.BIM360.Properties {
+namespace MRS.DocumentManagement.Connection.Bim360.Properties {
     using System;
     
     
@@ -84,6 +84,15 @@ namespace MRS.DocumentManagement.Connection.BIM360.Properties {
         internal static string GetAuthorizeMethod {
             get {
                 return ResourceManager.GetString("GetAuthorizeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}.
+        /// </summary>
+        internal static string GetBucketsObjectMethod {
+            get {
+                return ResourceManager.GetString("GetBucketsObjectMethod", resourceCulture);
             }
         }
         
