@@ -55,5 +55,17 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
             foreach (var task in tasks)
                 await task;
         }
+
+        public async Task<JObject> GetBuckets()
+        {
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketsMethod);
+            return response;
+        }
+
+        public async Task<JObject> GetBucketDetails(string bucketKey)
+        {
+            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketDetailsMethod, bucketKey);
+            return response;
+        }
     }
 }

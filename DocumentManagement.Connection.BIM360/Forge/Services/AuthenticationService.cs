@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Forge.Services
 {
     public class AuthenticationService
     {
-        private static readonly string SCOPE = "data:read%20data:write%20data:create";
+        private static readonly string SCOPE = "data:read%20data:write%20data:create%20bucket:read%20bucket:update";
 
         private readonly ForgeConnection connection;
 

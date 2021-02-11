@@ -88,6 +88,24 @@ namespace MRS.DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/details.
+        /// </summary>
+        internal static string GetBucketDetailsMethod {
+            get {
+                return ResourceManager.GetString("GetBucketDetailsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets?region=us.
+        /// </summary>
+        internal static string GetBucketsMethod {
+            get {
+                return ResourceManager.GetString("GetBucketsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}.
         /// </summary>
         internal static string GetHubsInfoByIdMethod {
@@ -232,7 +250,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на data/v1/projects/{0}/storage.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/storage.
         /// </summary>
         internal static string PostProjectStorageMethod {
             get {
