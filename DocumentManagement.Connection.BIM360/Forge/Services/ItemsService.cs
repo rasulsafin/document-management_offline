@@ -20,7 +20,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     Resources.PostProjectsItemsMethod,
                     new
                     {
-                        jsonapi = JsonApi.Default,
                         data = item,
                         included = new[] { version },
                     },

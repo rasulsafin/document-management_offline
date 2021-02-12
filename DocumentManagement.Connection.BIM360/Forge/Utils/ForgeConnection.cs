@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -74,7 +75,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
             if (data != null)
             {
-                var jsonData = new { data };
+                var jsonData = new
+                {
+                    jsonapi = JsonApi.Default,
+                    data,
+                };
                 var serializedData = JsonConvert.SerializeObject(jsonData, jsonSerializerSettings);
                 request.Content = new StringContent(serializedData,
                         Encoding.Default,
