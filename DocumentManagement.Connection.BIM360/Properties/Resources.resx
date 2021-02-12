@@ -222,11 +222,19 @@
     <comment>Return bucket details in JSON format if the caller is the owner of the bucket</comment>
   </data>
   <data name="GetBucketsMethod" xml:space="preserve">
-    <value>/oss/v2/buckets?region=us</value>
+    <value>/oss/v2/buckets</value>
     <comment>Returns the buckets owned by the application</comment>
   </data>
   <data name="GetBucketsObjectMethod" xml:space="preserve">
     <value>/oss/v2/buckets/{0}/objects/{1}</value>
     <comment>Download an object</comment>
+  </data>
+  <data name="PostBucketsMethod" xml:space="preserve">
+    <value>/oss/v2/buckets</value>
+    <comment>Creates a bucket</comment>
+  </data>
+  <data name="GetCheckFolderPermissionsMethod" xml:space="preserve">
+    <value>/bim360/docs/v1/projects/{0}/folders/{1}/permissions</value>
+    <comment>Retrieves information about the permissions assigned to users, roles and companies for a BIM 360 Document Management folder, including details about the name and the status</comment>
   </data>
 </root>

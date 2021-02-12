@@ -22,6 +22,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="My Test Folder\123.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="My Test Folder\124.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="My Test Folder\TestIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

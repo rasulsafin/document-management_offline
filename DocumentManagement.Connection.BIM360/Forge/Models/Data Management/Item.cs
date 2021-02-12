@@ -13,10 +13,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         }
 
         [DataContract]
-        public class ItemAttributes : AAttributes
+        public class ItemAttributes
         {
             [DataMember(Name = "createTime")]
-            public DateTime CreateTime { get; set; }
+            public DateTime? CreateTime { get; set; }
 
             [DataMember(Name = "createUserId")]
             public string CreateUserId { get; set; }
@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public string DisplayName { get; set; }
 
             [DataMember(Name = "lastModifiedTime")]
-            public DateTime LastModifiedTime { get; set; }
+            public DateTime? LastModifiedTime { get; set; }
 
             [DataMember(Name = "lastModifiedUserId")]
             public string LastModifiedUserId { get; set; }
@@ -43,7 +43,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public string Name { get; set; }
 
             [DataMember(Name = "versionNumber")]
-            public int VersionNumber { get; set; }
+            public int? VersionNumber { get; set; }
+
+            [DataMember(Name = "extension")]
+            public dynamic Extension { get; set; }
         }
 
         [DataContract]

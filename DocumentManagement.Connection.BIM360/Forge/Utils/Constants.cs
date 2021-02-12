@@ -7,7 +7,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string VERSION_TYPE = "versions";
         public static readonly string OBJECT_TYPE = "objects";
 
-        public static readonly string AUTODESK_FILE_TYPE = "items:autodesk.core:File";
+        public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.core:File";
+        public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.core:File";
 
         public static readonly string TOKEN_AUTH_NAME = "token";
         public static readonly string REFRESH_TOKEN_AUTH_NAME = "refreshtoken";

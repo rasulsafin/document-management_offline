@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         /// <returns>Task of this action.</returns>
         public async Task<UploadResult> PutObjectAsync(string bucketKey, string objectName, string fileFullName)
         {
-            var response = await connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
+            var response = await connection.SendStreamAuthorizedAsync(HttpMethod.Put,
                     Resources.PutBucketsObjectsMethod,
                     File.OpenRead(fileFullName),
                     null,
@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
             for (long i = 0; i < length; i += chunkSize)
             {
-                tasks.Add(connection.SendStreamAuthorizedAsync(HttpMethod.Patch,
+                tasks.Add(connection.SendStreamAuthorizedAsync(HttpMethod.Put,
                         Resources.PutBucketsObjectsResumableMethod,
                         File.OpenRead(file.FullName),
                         new RangeHeaderValue(i, Math.Max(i + chunkSize, length - 1)),
@@ -93,6 +93,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<JObject> GetBucketDetails(string bucketKey)
         {
             var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketDetailsMethod, bucketKey);
+            return response;
+        }
+
+        public async Task<JObject> PostBucket(string bucketKeyToAdd)
+        {
+            var bucket = new
+            {
+                bucketKey = bucketKeyToAdd,
+                //authId = appKey,
+                access = "full",
+                policyKey = "transient",
+            };
+            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostBucketsMethod, bucket);
             return response;
         }
     }

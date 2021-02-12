@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
@@ -21,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class LoadTests
     {
-        private static readonly string TEST_FILE_PATH = "My Test Folder/TestIcon.png";
+        private static readonly string TEST_FILE_PATH = "My Test Folder/124.txt";
 
         private static AuthenticationService authService;
         private static HubsService hubsService;
@@ -32,7 +31,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static FoldersService foldersService;
         private static Authenticator authenticator;
         private static ForgeConnection connection;
-        private static FoldersService foldersService;
 
         private readonly Random random = new Random();
 
@@ -129,8 +127,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (storage == default)
                 Assert.Fail("Storage creating failed");
 
-            await Task.Delay(10000);
-
             // STEP 6. Upload file to storage
             if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
                 Assert.Fail("Storage ID has incorrect format");
@@ -142,31 +138,60 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-            var item = new Item
-            {
-                Attributes = new Item.ItemAttributes
-                {
-                    DisplayName = TEST_FILE_PATH,
-                    Extension = new Extension { Type = AUTODESK_FILE_TYPE },
-                },
-                Relationships = new Item.ItemRelationships
-                {
-                    Parent = folder,
-                },
-            };
 
             var version = new Forge.Models.DataManagement.Version
             {
+                ID = "1",
                 Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH,
-                    Extension = new Extension { Type = AUTODESK_FILE_TYPE },
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_VERSION_FILE_TYPE,
+                        version = "1.0",
+                    },
                 },
                 Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Storage = new
                     {
-                        data = storage,
+                        data = new
+                        {
+                            type = OBJECT_TYPE,
+                            id = storage.ID,
+                        },
+                    },
+                },
+            };
+
+            var item = new Item
+            {
+                Attributes = new Item.ItemAttributes
+                {
+                    DisplayName = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_ITEM_FILE_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Item.ItemRelationships
+                {
+                    Tip = new
+                    {
+                        data = new
+                        {
+                            type = VERSION_TYPE,
+                            id = "1",
+                        },
+                    },
+                    Parent = new
+                    {
+                        data = new
+                        {
+                            type = FOLDER_TYPE,
+                            id = folder.ID,
+                        },
                     },
                 },
             };
@@ -175,20 +200,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             if (addedItem.item == null || addedItem.version == null)
                 Assert.Fail("Adding item failed");
-        }
-
-        [TestMethod]
-        public async Task Can_get_buckets()
-        {
-            // Authorize
-            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
-            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
-                Assert.Fail("Authorization failed");
-
-            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
-
-            var result = await objectsService.GetBucketDetails("wip.dm.prod");
-            //var result = await objectsService.GetBuckets();
         }
 
         [TestMethod]

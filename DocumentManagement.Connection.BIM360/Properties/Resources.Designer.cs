@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MRS.DocumentManagement.Connection.BIM360.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MRS.DocumentManagement.Connection.Bim360.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -97,7 +97,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /oss/v2/buckets?region=us.
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets.
         /// </summary>
         internal static string GetBucketsMethod {
             get {
@@ -111,6 +111,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string GetBucketsObjectMethod {
             get {
                 return ResourceManager.GetString("GetBucketsObjectMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /bim360/docs/v1/projects/{0}/folders/{1}/permissions.
+        /// </summary>
+        internal static string GetCheckFolderPermissionsMethod {
+            get {
+                return ResourceManager.GetString("GetCheckFolderPermissionsMethod", resourceCulture);
             }
         }
         
@@ -219,6 +228,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string PatchIssuesMethod {
             get {
                 return ResourceManager.GetString("PatchIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets.
+        /// </summary>
+        internal static string PostBucketsMethod {
+            get {
+                return ResourceManager.GetString("PostBucketsMethod", resourceCulture);
             }
         }
         

@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <RootNamespace>MRS.DocumentManagement.Connection.BIM360</RootNamespace>
+        <RootNamespace>MRS.DocumentManagement.Connection.Bim360</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

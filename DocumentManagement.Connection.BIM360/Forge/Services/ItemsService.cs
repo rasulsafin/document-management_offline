@@ -16,13 +16,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<(Item item, Version version)> PostItemAsync(string projectId, Item item, Version version)
         {
-            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post,
+            var response = await connection.SendSerializedDataAndIncludedAuthorizedAsync(HttpMethod.Post,
                     Resources.PostProjectsItemsMethod,
-                    new
-                    {
-                        data = item,
-                        included = new[] { version },
-                    },
+                    item,
+                    new[] { version },
                     projectId);
 
             return (response[DATA_PROPERTY]?.ToObject<Item>(), response[INCLUDED_PROPERTY]?.First?.ToObject<Version>());

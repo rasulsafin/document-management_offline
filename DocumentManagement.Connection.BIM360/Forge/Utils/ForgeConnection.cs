@@ -63,6 +63,42 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         /// <param name="command">Route of Forge method with format items if needed.</param>
         /// <param name="data">Sending serializing data that be annotated by "data" in JSON.</param>
         /// <param name="arguments">Inserting objects to command line.</param>
+        /// <typeparam name="TData">Type of sending data. Must be DataContract.</typeparam>
+        /// <returns>Deserialized response from Forge.</returns>
+        public async Task<JObject> SendSerializedDataAndIncludedAuthorizedAsync<TData, TIncluded>(
+                HttpMethod methodType,
+                string command,
+                TData data,
+                TIncluded included,
+                params object[] arguments)
+        {
+            using var request = CreateRequest(methodType, command, arguments);
+
+            if (data != null)
+            {
+                var jsonData = new
+                {
+                    jsonapi = JsonApi.Default,
+                    data,
+                    included,
+                };
+                var serializedData = JsonConvert.SerializeObject(jsonData, jsonSerializerSettings);
+                request.Content = new StringContent(serializedData,
+                        Encoding.Default,
+                        MEDIA_TYPE_JSON);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(CONTENT_TYPE);
+            }
+
+            return await GetResponseAsync(request);
+        }
+
+        /// <summary>
+        /// Send the authorized request with a JSON content to Forge server.
+        /// </summary>
+        /// <param name="methodType">Type of standard HTTP methods(GET, POST etc.).</param>
+        /// <param name="command">Route of Forge method with format items if needed.</param>
+        /// <param name="data">Sending serializing data that be annotated by "data" in JSON.</param>
+        /// <param name="arguments">Inserting objects to command line.</param>
         /// <typeparam name="T">Type of sending data. Must be DataContract.</typeparam>
         /// <returns>Deserialized response from Forge.</returns>
         public async Task<JObject> SendSerializedDataAuthorizedAsync<T>(
