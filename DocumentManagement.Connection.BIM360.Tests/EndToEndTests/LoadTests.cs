@@ -77,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         public async Task Can_upload_and_delete_item()
         {
             // Authorize
-            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
                 Assert.Fail("Authorization failed");
 
@@ -200,7 +200,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         public async Task CanDownloadRandomItem()
         {
             // Authorize
-            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
                 Assert.Fail("Authorization failed");
 
@@ -249,7 +249,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         public async Task Can_update_version_for_already_upload_item_and_delete_item()
         {
             // Authorize
-            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
             if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
                 Assert.Fail("Authorization failed");
 

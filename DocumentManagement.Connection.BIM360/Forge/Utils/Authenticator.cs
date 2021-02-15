@@ -89,7 +89,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             }
         }
 
-        public async Task<ConnectionStatusDto> SignInAsync(ConnectionInfoDto connectionInfo)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoDto updatedInfo)> SignInAsync(ConnectionInfoDto connectionInfo)
         {
             connectionInfoDto = connectionInfo;
             await CheckAccessAsync(true);
@@ -97,7 +97,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             // TODO Add filling connection status depending on 'status' field
             var result = new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK };
 
-            return result;
+            return (result, connectionInfo);
         }
 
         public void Cancel()
