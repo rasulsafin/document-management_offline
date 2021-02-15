@@ -13,10 +13,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     {
         private IConnectionService service;
 
-        public ConnectionsController(IConnectionService connectionService)
-        {
-            service = connectionService;
-        }
+        public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ConnectionInfoToCreateDto connectionInfo)

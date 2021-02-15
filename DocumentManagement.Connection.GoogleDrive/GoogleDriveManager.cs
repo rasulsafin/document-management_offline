@@ -1,9 +1,9 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
@@ -99,7 +99,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             {
                 directories.Clear();
                 var list = await controller.GetListAsync(DirAppHref);
-                foreach (DiskElement element in list)
+                foreach (CloudElement element in list)
                 {
                     if (element.IsDirectory)
                         directories.Add(element.DisplayName, element.Href);
@@ -126,7 +126,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             {
                 tables.Clear();
                 var list = await controller.GetListAsync(DirTableHref);
-                foreach (DiskElement element in list)
+                foreach (CloudElement element in list)
                 {
                     if (element.IsDirectory)
                         tables.Add(element.DisplayName, element.Href);
@@ -147,11 +147,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         private async Task CheckDirApp()
         {
             if (!string.IsNullOrWhiteSpace(DirAppHref)) return;
-            IEnumerable<DiskElement> list = await controller.GetListAsync();
+            IEnumerable<CloudElement> list = await controller.GetListAsync();
             var dirApp = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == APP_DIR);
             if (dirApp == null)
             {
-                dirApp = await controller.CreateDirAsync("", APP_DIR);
+                dirApp = await controller.CreateDirAsync(string.Empty, APP_DIR);
             }
 
             DirAppHref = dirApp.Href;

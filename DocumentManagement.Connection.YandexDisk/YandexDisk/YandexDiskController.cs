@@ -26,7 +26,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="FileNotFoundException"> File Not Found Exception </exception>
         /// <exception cref="TimeoutException" > Timeout Exception </exception>
-        public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
+        public async Task<IEnumerable<CloudElement>> GetListAsync(string path = "/")
         {
             try
             {
@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
         }
 
-        public async Task<DiskElement> GetInfoAsync(string path = "/")
+        public async Task<CloudElement> GetInfoAsync(string path = "/")
         {
             try
             {
@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         #endregion
         #region Create Directory
-        public async Task<DiskElement> CreateDirAsync(string path, string nameDir)
+        public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
         {
             try
             {
@@ -298,7 +298,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<DiskElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
@@ -341,62 +341,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
 
             return null;
-        }
-        #endregion
-        #region COPY TODO
-
-        /// <summary>
-        /// (COPY).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="copyPath"> the way in which you need to copy </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public Task<bool> CopyAsync(string originPath, string copyPath)
-        {
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
-        }
-        #endregion
-        #region MOVE TODO
-
-        /// <summary>
-        /// (MOVE).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="movePath"> the way in which it is necessary to move the file(or rename) </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public async Task<bool> MoveAsync(string originPath, string movePath)
-        {
-            try
-            {
-                HttpWebRequest request = YandexHelper.RequestMove(accessToken, originPath, movePath);
-                using (WebResponse response = await request.GetResponseAsync())
-                {
-                    if (response is HttpWebResponse http)
-                    {
-                        if (http.StatusCode == HttpStatusCode.Created)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
         }
         #endregion
 
