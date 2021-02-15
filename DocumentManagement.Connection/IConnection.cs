@@ -45,6 +45,5 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <returns>Progress.</returns>
         // Task<ProgressSync> GetProgressSyncronization();
-
     }
 }
