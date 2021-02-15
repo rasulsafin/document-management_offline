@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2;
+using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
@@ -15,12 +16,10 @@ using Google.Apis.Util.Store;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
-    public class GoogleDriveController 
+    public class GoogleDriveController : IDisposable
     {
         // https://developers.google.com/drive/api/v3/search-files?hl=ru
-
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
-        private static readonly string REQUEST_All_FIELDS = "nextPageToken, files(*)";
         private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
         private CancellationTokenSource cancellationTokenSource;
         private UserCredential credential;
@@ -39,15 +38,15 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 ClientId = GoogleDriveAuth.CLIENT_ID,
                 ClientSecret = GoogleDriveAuth.CLIENT_SECRET,
             };
+
             // TODO: Найти место для этой помойки
             FileDataStore dataStore = new FileDataStore("token.json", true);
             credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    clientSecrets,
-                    GoogleDriveAuth.SCOPES,
-                    "user",
-                    cancellationTokenSource.Token,
-                    dataStore
-                    );
+                    clientSecrets: clientSecrets,
+                    scopes: GoogleDriveAuth.SCOPES,
+                    user: "user",
+                    taskCancellationToken: cancellationTokenSource.Token,
+                    dataStore: dataStore);
 
             service = new DriveService(new BaseClientService.Initializer
             {
@@ -138,7 +137,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 if (file != null)
                     return new GoogleDriveElement(file);
             }
-            catch { }
+            catch
+            {
+            }
 
             return null;
         }
@@ -147,7 +148,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         #region Create Directory
         public async Task<CloudElement> CreateDirAsync(string idParent, string nameDir)
         {
-
             var fileDrive = new Google.Apis.Drive.v3.Data.File
             {
                 Name = nameDir,
@@ -161,17 +161,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             if (result != null)
                 return new GoogleDriveElement(result);
             return null;
-
         }
+
         #endregion
         #region Content
-        /// <summary>
-        /// Write the content to a file and upload it.
-        /// </summary>
-        /// <param name="path">The path to the file on the disk. </param>
-        /// <param name="content">Content</param>
-        /// <param name="progressChenge"> to transfer the progress </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         public async Task<bool> SetContentAsync(string content, string idParent, string name)
         {
             var info = await GetInfoAsync(idParent);
@@ -189,10 +182,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
                 {
-                    if (infos.Any(x => x.DisplayName == name))
+                    var element = infos.First(x => x.DisplayName == name);
+                    if (element != null)
                     {
-                        var href = infos.First().Href;
-                        var request = service.Files.Update(fileDrive, href, stream, contentType);
+                        var request = service.Files.Update(fileDrive, element.Href, stream, contentType);
                         result = await request.UploadAsync();
                     }
                     else
@@ -207,32 +200,26 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return result.Exception == null;
         }
 
-        /// <summary>
-        /// Downloads the file and returns its contents.
-        /// </summary>
-        /// <param name="path">The path to the file on the disk. </param>
-        /// <param name="updateProgress"> to transfer the progress </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="DirectoryNotFoundException">Directory Not Found Exception</exception>
-        /// <exception cref="FileNotFoundException">File Not Found Exception</exception>
         public async Task<string> GetContentAsync(string idParent, string name)
         {
             var info = await GetInfoAsync(idParent);
-            IUploadProgress result = null;
+            IDownloadProgress result = null;
 
             if (info.IsDirectory)
             {
                 var infos = await GetListAsync(idParent);
-                if (infos.Any(x => x.DisplayName == name))
+                var element = infos.First(x => x.DisplayName == name);
+                if (element != null)
                 {
                     using (var stream = new MemoryStream())
                     {
-                        var href = infos.First().Href;
+                        var href = element.Href;
                         var request = service.Files.Get(href);
-                        await request.DownloadAsync(stream);
+                        result = await request.DownloadAsync(stream);
                         var buffer = stream.ToArray();
                         var content = Encoding.UTF8.GetString(buffer, 0, buffer.Length);
-                        return content;
+                        if (result.Status == DownloadStatus.Completed)
+                            return content;
                     }
                 }
             }
@@ -242,15 +229,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         #endregion
         #region Download File
 
-        /// <summary>
-        /// Downloading a file (GET).
-        /// </summary>
-        /// <param name="href">The path to the file on the disk. </param>
-        /// <param name="currentPath">The path to the file on the computer.</param>
-        /// <param name="updateProgress"> to transfer the progress </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="DirectoryNotFoundException">Directory Not Found Exception</exception>
-        /// <exception cref="FileNotFoundException">File Not Found Exception</exception>
         public async Task<bool> DownloadFileAsync(string href, string currentPath, Action<ulong, ulong> updateProgress = null)
         {
             using (var stream = System.IO.File.Create(currentPath))
@@ -263,12 +241,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         #endregion
         #region Delete file and directory
 
-        /// <summary>
-        /// Deleting a file or directory at the specified path.
-        /// </summary>
-        /// <param name="path">the path to delete the file or gurney.</param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="FileNotFoundException" >No file needed</exception>
         public async Task<bool> DeleteAsync(string href)
         {
             var request = service.Files.Delete(href);
@@ -278,14 +250,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         #endregion
         #region Load File
 
-        /// <summary>
-        /// Load File
-        /// </summary>
-        /// <param name="href">The path to the file on the disk. </param>
-        /// <param name="fileName">The path to the file on the computer.</param>
-        /// <param name="progressChenge"> to transfer the progress </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
         public async Task<CloudElement> LoadFileAsync(string idParent, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             var info = await GetInfoAsync(idParent);
@@ -324,7 +288,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return null;
         }
 
-        
+        public void Dispose()
+        {
+            ((IDisposable)cancellationTokenSource).Dispose();
+            ((IDisposable)service).Dispose();
+        }
         #endregion
     }
 }

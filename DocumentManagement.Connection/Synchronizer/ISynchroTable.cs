@@ -1,5 +1,4 @@
-﻿using MRS.DocumentManagement.Connection.Synchronizer;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Synchronizer
