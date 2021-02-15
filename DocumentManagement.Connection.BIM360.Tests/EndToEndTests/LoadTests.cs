@@ -4,9 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -33,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private readonly Random random = new Random();
 
         [ClassInitialize]
-        public static void Initialize(TestContext _)
+        public static void Initialize(TestContext unused)
         {
             connection = new ForgeConnection();
             authService = new AuthenticationService(connection);
@@ -69,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         /// <summary>
-        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial
+        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
         /// </summary>
         [TestMethod]
         public async Task Can_upload_and_delete_item()
@@ -88,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
-            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault();
+            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == TEST_PROJECT_NAME);
             if (project == default)
                 Assert.Fail("Projects in hubs are empty");
 
@@ -181,18 +183,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Attributes = new Version.VersionAttributes
                 {
                     Name = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
-                    {
-                        type = AUTODESK_VERSION_DELETED_TYPE,
-                        version = "1.0",
-                    },
+                    Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
                 {
-                    Item = new
-                    {
-                        data = new Item { ID = addedItem.item.ID },
-                    },
+                    Item = addedItem.item.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -248,7 +243,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         /// <summary>
-        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial
+        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
         /// </summary>
         [TestMethod]
         public async Task Can_update_version_for_already_upload_item_and_delete_item()
@@ -267,7 +262,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
-            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault();
+            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == TEST_PROJECT_NAME);
             if (project == default)
                 Assert.Fail("Projects in hubs are empty");
 
@@ -316,28 +311,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-            var version = new Forge.Models.DataManagement.Version
+            var version = new Version
             {
-                ID = "1",
-                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
+                Attributes = new Version.VersionAttributes
                 {
                     Name = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
+                    Extension = new Extension
                     {
-                        type = AUTODESK_VERSION_FILE_TYPE,
-                        version = "1.0",
+                        Type = AUTODESK_VERSION_FILE_TYPE,
                     },
                 },
-                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
+                Relationships = new Version.VersionRelationships
                 {
-                    Storage = new
-                    {
-                        data = new
-                        {
-                            type = OBJECT_TYPE,
-                            id = firstStorage.ID,
-                        },
-                    },
+                    Storage = firstStorage.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -346,30 +332,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Attributes = new Item.ItemAttributes
                 {
                     DisplayName = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
+                    Extension = new Extension
                     {
-                        type = AUTODESK_ITEM_FILE_TYPE,
-                        version = "1.0",
+                        Type = AUTODESK_ITEM_FILE_TYPE,
                     },
                 },
                 Relationships = new Item.ItemRelationships
                 {
-                    Tip = new
-                    {
-                        data = new
-                        {
-                            type = VERSION_TYPE,
-                            id = "1",
-                        },
-                    },
-                    Parent = new
-                    {
-                        data = new
-                        {
-                            type = FOLDER_TYPE,
-                            id = folder.ID,
-                        },
-                    },
+                    Tip = version.ToInfo().ToDataContainer(),
+                    Parent = folder.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -400,22 +371,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Attributes = new Version.VersionAttributes
                 {
                     Name = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
-                    {
-                        type = AUTODESK_VERSION_FILE_TYPE,
-                        version = "1.0",
-                    },
+                    Extension = new Extension { Type = AUTODESK_VERSION_FILE_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
                 {
-                    Item = new
-                    {
-                        data = new Item { ID = addedItem.item.ID },
-                    },
-                    Storage = new
-                    {
-                        data = new StorageObject { ID = secondStorage.ID },
-                    },
+                    Item = addedItem.item.ToInfo().ToDataContainer(),
+                    Storage = secondStorage.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -429,18 +390,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Attributes = new Version.VersionAttributes
                 {
                     Name = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
-                    {
-                        type = AUTODESK_VERSION_DELETED_TYPE,
-                        version = "1.0",
-                    },
+                    Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
                 {
-                    Item = new
-                    {
-                        data = new Item { ID = addedItem.item.ID },
-                    },
+                    Item = addedItem.item.ToInfo().ToDataContainer(),
                 },
             };
 
