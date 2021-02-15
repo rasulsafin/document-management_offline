@@ -45,6 +45,14 @@ namespace MRS.DocumentManagement.Api.Controllers
             return Ok(status);
         }
 
-        // TODO: Syncronization!
+        [HttpGet]
+        [Route("enumerationValues")]
+        public async Task<IActionResult> GetEnumerationVariants([FromQuery] int userID, [FromQuery]int enumerationTypeID)
+        {
+            var result = await service.GetEnumerationVariants(new ID<UserDto>(userID), new ID<EnumerationTypeDto>(enumerationTypeID));
+            return ValidateFoundObject(result);
+        }
+
+            // TODO: Syncronization!
     }
 }

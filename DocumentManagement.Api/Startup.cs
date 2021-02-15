@@ -91,7 +91,6 @@ namespace MRS.DocumentManagement.Api
 
             services.AddSingleton<CryptographyHelper>();
             services.AddSingleton<SyncManager>();
-            services.AddSingleton<ConnectionCreator>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

@@ -37,6 +37,14 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>Status of the connection.</returns>
         Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID);
 
+        /// <summary>
+        /// Gets available to user enumeration values of enum type.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="enumerationTypeID">Enumeration Type's ID.</param>
+        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID);
+
         #region TODO
 
         // TODO: Syncronization!
@@ -54,10 +62,7 @@ namespace MRS.DocumentManagement.Interface.Services
         // TODO: If we need different method than connect?
         // Task<bool> Reconnect(ConnectionInfoToCreateDto connectionInfo);
 
-        // TODO: Enum and ObjectiveType support?
-        // Task<IEnumerable<EnumVariantDto>> GetEnumVariants(string dynamicFieldKey);
-
-        // TODO: Change current user connection.
+        // TODO: Update connectionInfo from user's request?
         // Task<bool> Update(ConnectionInfoDto connectionInfo);
         #endregion
     }

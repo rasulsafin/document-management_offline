@@ -10,6 +10,8 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
 
+        public ConnectionType ConnectionType { get; set; }
+
         public ICollection<ConnectionInfoEnumerationType> ConnectionInfos { get; set; }
 
         public ICollection<EnumerationValue> EnumerationValues { get; set; }

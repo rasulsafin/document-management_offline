@@ -50,7 +50,8 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<ConnectionInfo, ConnectionInfoDto>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AuthFieldValues)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AuthFieldValues)))
+                .ForMember(d => d.EnumerationTypes, o => o.Ignore());
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
@@ -58,6 +59,9 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<ConnectionType, ConnectionTypeDto>()
                 .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Deserialize<List<string>>(s.AuthFieldNames)))
                 .ForMember(d => d.AppProperty, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AppProperty)));
+            CreateMap<EnumerationType, EnumerationTypeDto>()
+                .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
+            CreateMap<EnumerationValue, EnumerationValueDto>();
         }
 
         private void CreateMapToModel()
@@ -83,12 +87,17 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<UserToCreateDto, User>();
             CreateMap<ConnectionTypeDto, ConnectionType>()
                 .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Serialize(s.AuthFieldNames)))
-                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Serialize(s.AppProperty)));
+                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Serialize(s.AppProperty)))
+                .ForMember(d => d.EnumerationTypes, opt => opt.Ignore());
             CreateMap<ItemDto, Item>();
             CreateMap<ConnectionInfoDto, ConnectionInfo>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthFieldValues)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthFieldValues)))
+                .ForMember(d => d.EnumerationTypes, opt => opt.Ignore());
             CreateMap<ConnectionInfoToCreateDto, ConnectionInfo>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthData)));
+            CreateMap<EnumerationTypeDto, EnumerationType>()
+                .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
+            CreateMap<EnumerationValueDto, EnumerationValue>();
         }
     }
 }

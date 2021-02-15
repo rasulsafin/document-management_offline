@@ -13,5 +13,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public IEnumerable<string> AuthFieldNames { get; set; }
 
         public ICollection<ObjectiveTypeDto> ObjectiveTypes { get; set; }
+
+        public ICollection<EnumerationTypeDto> EnumerationTypes { get; set; }
     }
 }

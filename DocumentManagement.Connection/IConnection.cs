@@ -8,9 +8,8 @@ namespace MRS.DocumentManagement.Connection
     /// </summary>
     public interface IConnection
     {
-        /// TODO: Make abstract class where Connect calls for FillInfo?
         /// <summary>
-        /// Connect to remote DM. Probably should call for FillInfo before returning.
+        /// Connect to remote DM.
         /// </summary>
         /// <param name="info">Information abot the connection.</param>
         /// <returns>Result success and additional result data.</returns>
@@ -34,19 +33,27 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <param name="info">ConnectionInfoDto to fill in.</param>
         /// <returns>Filed ConnectionInfoDto.</returns>
-        Task<ConnectionInfoDto> FillInfo(ConnectionInfoDto info);
+        Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info);
+
+        /// <summary>
+        /// Get the information about the current Connection.
+        /// </summary>
+        /// <returns>Filed ConnectionTypeDto.</returns>
+        ConnectionTypeDto GetConnectionType();
+
+        #region TODO
 
         // TODO: Syncronization!
-        ///// <summary>
-        ///// Starts syncronization between local and remote DMs.
-        ///// </summary>
-        ///// <returns>Result of syncronizing start process.</returns>
+        /// <summary>
+        /// Starts syncronization between local and remote DMs.
+        /// </summary>
+        /// <returns>Result of syncronizing start process.</returns>
         // Task<bool> StartSyncronization();
 
-        ///// <summary>
-        ///// Stops syncronization between local and remote DMs.
-        ///// </summary>
-        ///// <returns>Result of syncronizing stop process.</returns>
+        /// <summary>
+        /// Stops syncronization between local and remote DMs.
+        /// </summary>
+        /// <returns>Result of syncronizing stop process.</returns>
         // Task<bool> StopSyncronization();
 
         /// <summary>
@@ -54,5 +61,7 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <returns>Progress.</returns>
         // Task<ProgressSync> GetProgressSyncronization();
+
+        #endregion
     }
 }

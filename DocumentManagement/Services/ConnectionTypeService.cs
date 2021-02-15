@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
@@ -55,58 +56,53 @@ namespace MRS.DocumentManagement.Services
             return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
         }
 
-        // TODO: Find all connection types (as libs?) and add them to db.
-        // Maybe ask ConnectionCreator about it?
-        // Hardcode for now.
         public async Task<bool> RegisterAll()
         {
-            // Type One.
-            var typeOne = new ConnectionTypeDto();
-            typeOne.Name = "tdms";
-            typeOne.AuthFieldNames = new List<string>() { "login", "password", "server", "db" };
-            typeOne.AppProperty = new Dictionary<string, string>();
-            typeOne.ObjectiveTypes = new List<ObjectiveTypeDto>()
-            {
-                new ObjectiveTypeDto() { Name = "Tdms_Нарушение" },
-                new ObjectiveTypeDto() { Name = "Tdms_Работа" },
-            };
+            var listOfTypes = ConnectionCreator.GetAllConnectionTypes();
 
-            var typeOneDb = mapper.Map<ConnectionType>(typeOne);
-            await context.ConnectionTypes.AddAsync(typeOneDb);
-
-            foreach (var objTypeDto in typeOne.ObjectiveTypes)
+            try
             {
-                var objectiveType = mapper.Map<ObjectiveType>(objTypeDto);
-                objectiveType.ConnectionTypeID = typeOneDb.ID;
-                context.ObjectiveTypes.Add(objectiveType);
+                foreach (var type in listOfTypes)
+                {
+                    var typeDb = mapper.Map<ConnectionType>(type);
+                    var typeFromDb = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == type.Name);
+
+                    // TODO: Update if exists?
+                    if (typeFromDb == default)
+                        await context.ConnectionTypes.AddAsync(typeDb);
+
+                    await context.SaveChangesAsync();
+
+                    if (type.EnumerationTypes == null)
+                        continue;
+
+                    foreach (var enumTypeDto in type.EnumerationTypes)
+                    {
+                        var enumType = await context.EnumerationTypes.FirstOrDefaultAsync(x => x.ExternalId == enumTypeDto.ExternalId);
+                        enumType.ConnectionType = typeDb;
+                        await context.SaveChangesAsync();
+
+                        if (enumTypeDto.EnumerationValues == null)
+                            enumTypeDto.EnumerationValues = new List<EnumerationValueDto>();
+
+                        foreach (var enumValueDto in enumTypeDto.EnumerationValues)
+                        {
+                            var enumValue = mapper.Map<EnumerationValue>(enumValueDto);
+                            enumValue.EnumerationTypeID = enumType.ID;
+
+                            // TODO: Add or Update.
+                            context.EnumerationValues.Add(enumValue);
+                        }
+                    }
+                }
+
+                await context.SaveChangesAsync();
+                return true;
             }
-
-            // Type Two.
-            var typeTwo = new ConnectionTypeDto();
-            typeTwo.Name = "yandexdisk";
-            typeTwo.AuthFieldNames = new List<string>() { };
-            typeTwo.AppProperty = new Dictionary<string, string>();
-            typeTwo.AppProperty.Add("CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051");
-            typeTwo.AppProperty.Add("CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c");
-            typeTwo.AppProperty.Add("RETURN_URL", @"http://localhost:8000/oauth/");
-            typeTwo.ObjectiveTypes = new List<ObjectiveTypeDto>()
+            catch (DbUpdateException ex)
             {
-                new ObjectiveTypeDto() { Name = "YandexDisk_Issue" },
-            };
-            var typeTwoDb = mapper.Map<ConnectionType>(typeTwo);
-            await context.ConnectionTypes.AddAsync(typeTwoDb);
-
-            foreach (var objTypeDto in typeTwo.ObjectiveTypes)
-            {
-                var objectiveType = mapper.Map<ObjectiveType>(objTypeDto);
-                objectiveType.ConnectionTypeID = typeTwoDb.ID;
-                context.ObjectiveTypes.Add(objectiveType);
+                throw new InvalidDataException($"Something went wrong with presented ConnectionTypes", ex.InnerException);
             }
-
-            // Save.
-            var result = await context.SaveChangesAsync();
-
-            return result > 0;
         }
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)
