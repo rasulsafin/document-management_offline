@@ -29,4 +29,10 @@
     <ProjectReference Include="..\DocumentManagement\DocumentManagement.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="DocumentManagement.db">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
