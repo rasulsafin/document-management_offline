@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         #region PROPFIND
 
-        public async Task<IEnumerable<DiskElement>> GetListAsync(string id = "")
+        public async Task<IEnumerable<CloudElement>> GetListAsync(string id = "")
         {
             var result = new List<Google.Apis.Drive.v3.Data.File>();
             var nextPageToken = string.Empty;
@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return elements;
         }
 
-        public async Task<IEnumerable<DiskElement>> GetListAsync(string parentId, string partOfName)
+        public async Task<IEnumerable<CloudElement>> GetListAsync(string parentId, string partOfName)
         {
             var result = new List<Google.Apis.Drive.v3.Data.File>();
             var nextPageToken = string.Empty;
@@ -128,7 +128,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return elements;
         }
 
-        public async Task<DiskElement> GetInfoAsync(string id)
+        public async Task<CloudElement> GetInfoAsync(string id)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         #endregion
         #region Create Directory
-        public async Task<DiskElement> CreateDirAsync(string idParent, string nameDir)
+        public async Task<CloudElement> CreateDirAsync(string idParent, string nameDir)
         {
 
             var fileDrive = new Google.Apis.Drive.v3.Data.File
@@ -287,7 +287,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<DiskElement> LoadFileAsync(string idParent, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<CloudElement> LoadFileAsync(string idParent, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             var info = await GetInfoAsync(idParent);
             IUploadProgress result = null;
@@ -325,47 +325,5 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return null;
         }
         #endregion
-        #region COPY TODO
-
-        /// <summary>
-        /// (COPY).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="copyPath"> the way in which you need to copy </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public Task<bool> CopyAsync(string originPath, string copyPath)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-        #region MOVE TODO
-
-        /// <summary>
-        /// (MOVE).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="movePath"> the way in which it is necessary to move the file(or rename) </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public async Task<bool> MoveAsync(string originPath, string movePath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> SetContentAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> GetContentAsync(string path, Action<ulong, ulong> updateProgress = null)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-
-
     }
 }

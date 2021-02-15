@@ -2,9 +2,8 @@
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class DiskElement
+    public class CloudElement
     {
-
         public string DisplayName { get; protected set; }
 
         public DateTime LastModified { get; protected set; }

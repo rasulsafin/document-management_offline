@@ -81,13 +81,6 @@ namespace MRS.DocumentManagement.Connection
             try
             {
                 return await controller.DownloadFileAsync(href, fileName);
-
-                //if (await CheckDir(remoteDirName))
-                //{
-                //string path = PathManager.GetFile(remoteDirName, fileName);
-                //string dir = Path.Combine(localDirName, fileName);
-                //return await controller.DownloadFileAsync(path, dir);
-                //}
             }
             catch (FileNotFoundException)
             {
@@ -110,7 +103,7 @@ namespace MRS.DocumentManagement.Connection
             {
             }
 
-            return string.Empty; ;
+            return string.Empty;
         }
 
         private async Task<bool> CheckTableDir<T>()
@@ -120,8 +113,8 @@ namespace MRS.DocumentManagement.Connection
             bool result = tables.Any(x => x == tableName);
             if (result)
                 return true;
-            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
-            foreach (DiskElement element in list)
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
+            foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                     tables.Add(element.DisplayName);
@@ -136,7 +129,7 @@ namespace MRS.DocumentManagement.Connection
 
         private async Task Initialize()
         {
-            IEnumerable<DiskElement> list = await controller.GetListAsync();
+            IEnumerable<CloudElement> list = await controller.GetListAsync();
             if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APP_DIR))
             {
                 await controller.CreateDirAsync("/", PathManager.APP_DIR);
@@ -155,8 +148,8 @@ namespace MRS.DocumentManagement.Connection
         {
             bool res = directories.Any(x => x == dirName);
             if (res) return true;
-            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
-            foreach (DiskElement element in list)
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+            foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                     directories.Add(element.DisplayName);
@@ -168,7 +161,5 @@ namespace MRS.DocumentManagement.Connection
                 await controller.CreateDirAsync(PathManager.GetAppDir(), dirName);
             return res;
         }
-
-
     }
 }

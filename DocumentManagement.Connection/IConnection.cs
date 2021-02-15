@@ -32,18 +32,18 @@ namespace MRS.DocumentManagement.Connection
         ///// Starts syncronization between local and remote DMs.
         ///// </summary>
         ///// <returns>Result of syncronizing start process.</returns>
-        //Task<bool> StartSyncronization();
+        // Task<bool> StartSyncronization();
 
         ///// <summary>
         ///// Stops syncronization between local and remote DMs.
         ///// </summary>
         ///// <returns>Result of syncronizing stop process.</returns>
-        //Task<bool> StopSyncronization();
+        // Task<bool> StopSyncronization();
 
-        ///// <summary>
-        ///// Gets current syncronization progress.
-        ///// </summary>
-        ///// <returns>Progress.</returns>
+        /// <summary>
+        /// Gets current syncronization progress.
+        /// </summary>
+        /// <returns>Progress.</returns>
         // Task<ProgressSync> GetProgressSyncronization();
     }
 }

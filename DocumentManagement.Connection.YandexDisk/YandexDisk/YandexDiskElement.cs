@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class YandexDiskElement : DiskElement
+    public class YandexDiskElement : CloudElement
     {
         private string lastModifiedString;
         private string contentLengthString;
@@ -114,7 +114,7 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:creationdate":
-                            result.CreationDate = GetDataElement(element);
+                            result.CreationDate = GetDateElement(element);
                             break;
                         case "d:displayname":
                             result.DisplayName = GetValueElement(element);
@@ -123,7 +123,7 @@ namespace MRS.DocumentManagement.Connection
                             result.ContentLength = GetUlongElement(element);
                             break;
                         case "d:getlastmodified":
-                            result.LastModified = GetDataElement(element);
+                            result.LastModified = GetDateElement(element);
                             break;
                         case "d:resourcetype":
                             GetResourceType(result, element);
@@ -166,7 +166,7 @@ namespace MRS.DocumentManagement.Connection
             return ulong.MinValue;
         }
 
-        private static DateTime GetDataElement(XmlElement element)
+        private static DateTime GetDateElement(XmlElement element)
         {
             var str = GetValueElement(element);
             if (DateTime.TryParse(str, out DateTime date))

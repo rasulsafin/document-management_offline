@@ -6,13 +6,6 @@ namespace MRS.DocumentManagement.Connection
 {
     public interface ICloudController
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="originPath"></param>
-        /// <param name="copyPath"></param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> CopyAsync(string originPath, string copyPath);
 
         /// <summary>
         ///
@@ -20,7 +13,7 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="path"></param>
         /// <param name="nameDir"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<DiskElement> CreateDirAsync(string path, string nameDir);
+        Task<CloudElement> CreateDirAsync(string path, string nameDir);
 
         /// <summary>
         ///
@@ -51,14 +44,14 @@ namespace MRS.DocumentManagement.Connection
         /// </summary>
         /// <param name="path"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<IEnumerable<DiskElement>> GetListAsync(string path = "/");
+        Task<IEnumerable<CloudElement>> GetListAsync(string path = "/");
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="path"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<DiskElement> GetInfoAsync(string path = "/");
+        Task<CloudElement> GetInfoAsync(string path = "/");
 
         /// <summary>
         ///
@@ -67,15 +60,7 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="fileName"></param>
         /// <param name="progressChenge"></param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<DiskElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null);
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="originPath"></param>
-        /// <param name="movePath"></param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> MoveAsync(string originPath, string movePath);
+        Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null);
 
         /// <summary>
         ///
