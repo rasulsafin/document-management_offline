@@ -8,7 +8,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -18,6 +17,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     public class LoadTests
     {
         private static readonly string TEST_FILE_PATH = "My Test Folder/123.txt";
+        private static readonly string TEST_PROJECT_NAME = "Sample Project";
 
         private static AuthenticationService authService;
         private static HubsService hubsService;
@@ -137,28 +137,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-            var version = new Forge.Models.DataManagement.Version
+            var version = new Version
             {
-                ID = "1",
-                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
+                Attributes = new Version.VersionAttributes
                 {
                     Name = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
+                    Extension = new Extension
                     {
-                        type = AUTODESK_VERSION_FILE_TYPE,
-                        version = "1.0",
+                        Type = AUTODESK_VERSION_FILE_TYPE,
                     },
                 },
-                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
+                Relationships = new Version.VersionRelationships
                 {
-                    Storage = new
-                    {
-                        data = new
-                        {
-                            type = OBJECT_TYPE,
-                            id = storage.ID,
-                        },
-                    },
+                    Storage = storage.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -167,30 +158,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Attributes = new Item.ItemAttributes
                 {
                     DisplayName = TEST_FILE_PATH.Split('/').Last(),
-                    Extension = new
+                    Extension = new Extension
                     {
-                        type = AUTODESK_ITEM_FILE_TYPE,
-                        version = "1.0",
+                        Type = AUTODESK_ITEM_FILE_TYPE,
                     },
                 },
                 Relationships = new Item.ItemRelationships
                 {
-                    Tip = new
-                    {
-                        data = new
-                        {
-                            type = VERSION_TYPE,
-                            id = "1",
-                        },
-                    },
-                    Parent = new
-                    {
-                        data = new
-                        {
-                            type = FOLDER_TYPE,
-                            id = folder.ID,
-                        },
-                    },
+                    Tip = version.ToInfo().ToDataContainer(),
+                    Parent = folder.ToInfo().ToDataContainer(),
                 },
             };
 
@@ -240,55 +216,35 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (hub == default)
                 Assert.Fail("Hubs are empty");
 
-            // STEP 2. Choose first project
-            // TODO decide which project should be used for end-to-end tests
-            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault();
+            // STEP 2. Choose project
+            var project = (await projectsService.GetProjectsAsync(hub.ID))
+                    .FirstOrDefault(x => x.Attributes.Name == TEST_PROJECT_NAME);
             if (project == default)
-                Assert.Fail();
+                Assert.Fail("Testing project doesn't exist");
 
-            // STEP 3. Find the Folder ID
-            var topFolders = await projectsService.GetTopFoldersAsync(hub.ID, project.ID);
-            if (topFolders == default)
-                Assert.Fail("Top folders in project are empty");
-
-            // Step 3: Find the resource item in a project folder.
-            var root = ((JToken)project.Relationships.RootFolder.data).ToObject<Folder>();
-
+            // Step 3: Find the resource item in a project.
+            var root = project.Relationships.RootFolder.Data;
             if (root == null)
-                Assert.Fail();
-
-            List<(Version version, Item item)> files = null;
-
-            foreach (var folder in topFolders)
-            {
-                files = await foldersService.SearchAsync(project.ID,
-                        folder.ID,
-                        Array.Empty<(string filteringField, string filteringValue)>());
-
-                        // new[] { (typeof(Item).GetDataMemberName(nameof(Item.Type)), ITEM_TYPE) });
-                if (files != null && files.Count > 0)
-                    break;
-            }
-
+                Assert.Fail("Can't take root folder");
+            var files = await foldersService.SearchAsync(project.ID,
+                    root.ID,
+                    Array.Empty<(string filteringField, string filteringValue)>());
             if (files == null || files.Count == 0)
-                Assert.Fail();
-
+                Assert.Fail("Files are empty");
             var file = files[random.Next(files.Count)];
 
-            if (root == null)
-                Assert.Fail();
-
-            // Step 6: Download the item.
-            var storage = ((JToken)file.version.Relationships.Storage.data).ToObject<StorageObject>();
-
+            // Step 4: Download the item.
+            var storage = file.version.Relationships.Storage?.Data
+                    .ToObject<StorageObject,
+                            StorageObject.StorageObjectAttributes,
+                            StorageObject.StorageObjectRelationships>();
             if (storage == null)
-                Assert.Fail();
-
-            (var bucketKey, var hashedName) = storage.ParseStorageId();
+                Assert.Fail("Can't take storage of file");
+            var (bucketKey, hashedName) = storage.ParseStorageId();
             var fileInfo = await objectsService.GetAsync(bucketKey, hashedName, file.item.Attributes.DisplayName);
-
             if (!fileInfo.Exists)
-                Assert.Fail();
+                Assert.Fail("File doesn't exist");
+            fileInfo.Delete();
         }
 
         /// <summary>

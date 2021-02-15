@@ -6,7 +6,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
     public class Object<TAttributes, TRelationships>
     {
         [DataMember(Name = "id")]
-        public string ID { get; set; }
+        public virtual string ID { get; set; }
 
         [DataMember(Name = "type")]
         public virtual string Type { get; set; }
@@ -16,5 +16,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 
         [DataMember(Name = "relationships")]
         public TRelationships Relationships { get; set; }
+
     }
 }
