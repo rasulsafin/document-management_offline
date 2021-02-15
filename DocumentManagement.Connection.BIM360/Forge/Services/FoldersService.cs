@@ -6,7 +6,6 @@ using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
-using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -41,23 +40,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<List<Item>>();
         }
 
-        public async Task<List<(Version version, Item item)>> SearchAsync(string projectId, string folderId, (string filteringField, string filteringValue)[] filters)
+        public async Task<List<(Version version, Item item)>> SearchAsync(
+                string projectId,
+                string folderId,
+                IEnumerable<(string filteringField, string filteringValue)> filters)
         {
             var stringBuilder = new StringBuilder(Resources.GetProjectsFoldersSearchMethod);
             foreach ((string field, string filterValue) in filters)
                 stringBuilder.AppendFormat(FILTER_QUERY_PARAMETER, field, filterValue);
+            if (stringBuilder.Length > 0)
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+
             var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get,
                     stringBuilder.ToString(),
                     projectId,
                     folderId);
+
             var versions = response[DATA_PROPERTY]?.ToObject<Version[]>();
             var items = response[INCLUDED_PROPERTY]?.ToObject<Item[]>() ?? Array.Empty<Item>();
 
-            return versions?.Select(v => (v, items.FirstOrDefault(i =>
-            {
-                var item = ((JToken)v.Relationships.Item.data).ToObject<Item>();
-                return item != null && i.ID == item.ID;
-            }))).ToList();
+            return versions?
+                    .Select(v => (v, items.FirstOrDefault(i => i.ID == v.Relationships.Item?.Data.ID)))
+                    .ToList();
         }
     }
 }

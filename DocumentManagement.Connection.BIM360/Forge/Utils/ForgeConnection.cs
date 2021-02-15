@@ -187,7 +187,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         private async Task<JObject> GetResponseAsync(HttpRequestMessage request, bool isAuthorized = true)
         {
-            var response = await SendAsync(request, isAuthorized);
+            using var response = await SendAsync(request, isAuthorized);
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);
             return jObject;

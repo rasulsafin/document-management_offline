@@ -12,8 +12,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             set { }
         }
 
+        public override string ID { get; set; } = Constants.DEFAULT_VERSION_ID;
+
         [DataContract]
-        public class VersionAttributes
+        public class VersionAttributes : AAttributes
         {
             [DataMember(Name = "createTime")]
             public DateTime? CreateTime { get; set; }
@@ -53,9 +55,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 
             [DataMember(Name = "reservedUserName")]
             public string ReservedUserName { get; set; }
-
-            [DataMember(Name = "extension")]
-            public dynamic Extension { get; set; }
         }
 
         [DataContract]
@@ -71,13 +70,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public dynamic DownloadFormats { get; set; }
 
             [DataMember(Name = "item")]
-            public dynamic Item { get; set; }
+            public DataContainer<ObjectInfo> Item { get; set; }
 
             [DataMember(Name = "refs")]
             public dynamic Refs { get; set; }
 
             [DataMember(Name = "storage")]
-            public dynamic Storage { get; set; }
+            public DataContainer<ObjectInfo> Storage { get; set; }
 
             [DataMember(Name = "thumbnails")]
             public dynamic Thumbnails { get; set; }

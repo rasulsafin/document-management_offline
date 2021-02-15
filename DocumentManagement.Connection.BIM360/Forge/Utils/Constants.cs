@@ -7,6 +7,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string VERSION_TYPE = "versions";
         public static readonly string OBJECT_TYPE = "objects";
 
+        public static readonly string DEFAULT_VERSION_ID = "1";
+        public static readonly string DEFAULT_EXTENSION_VERSION = "1.0";
+
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";
 

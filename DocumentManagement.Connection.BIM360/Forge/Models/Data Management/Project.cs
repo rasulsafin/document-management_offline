@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public dynamic Hub { get; set; }
 
             [DataMember(Name = "rootFolder")]
-            public dynamic RootFolder { get; set; }
+            public DataContainer<ObjectInfo> RootFolder { get; set; }
 
             [DataMember(Name = "topFolders")]
             public dynamic TopFolders { get; set; }

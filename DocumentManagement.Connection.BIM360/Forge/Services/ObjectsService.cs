@@ -69,19 +69,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             return result;
         }
 
-        public async Task<FileInfo> GetAsync(string bucketKey, string objectName, string pathToDownload)
+        public async Task<FileInfo> GetAsync(string bucketKey, string objectName, string fullFileName)
         {
-            var directory = Path.GetDirectoryName(pathToDownload);
+            var directory = Path.GetDirectoryName(fullFileName);
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
-            await using var output = File.OpenWrite(pathToDownload);
+            await using var output = File.OpenWrite(fullFileName);
             await using var stream = await connection.GetResponseStreamAuthorizedAsync(
                     HttpMethod.Get,
                     Resources.GetBucketsObjectMethod,
                     bucketKey,
                     objectName);
             await stream.CopyToAsync(output);
-            return new FileInfo(pathToDownload);
+            return new FileInfo(fullFileName);
         }
 
         public async Task<JObject> GetBuckets()

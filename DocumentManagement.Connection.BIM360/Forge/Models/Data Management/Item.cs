@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         }
 
         [DataContract]
-        public class ItemAttributes
+        public class ItemAttributes : AAttributes
         {
             [DataMember(Name = "createTime")]
             public DateTime? CreateTime { get; set; }
@@ -44,9 +44,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 
             [DataMember(Name = "versionNumber")]
             public int? VersionNumber { get; set; }
-
-            [DataMember(Name = "extension")]
-            public dynamic Extension { get; set; }
         }
 
         [DataContract]
@@ -56,13 +53,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public dynamic Links { get; set; }
 
             [DataMember(Name = "parent")]
-            public dynamic Parent { get; set; }
+            public DataContainer<ObjectInfo> Parent { get; set; }
 
             [DataMember(Name = "refs")]
             public dynamic Refs { get; set; }
 
             [DataMember(Name = "tip")]
-            public dynamic Tip { get; set; }
+            public DataContainer<ObjectInfo> Tip { get; set; }
 
             [DataMember(Name = "versions")]
             public dynamic Versions { get; set; }
