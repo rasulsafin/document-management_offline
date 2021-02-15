@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDiskController : ICloudController
+    public class YandexDiskController
     {
         private string accessToken;
 

@@ -15,7 +15,7 @@ using Google.Apis.Util.Store;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
-    public class GoogleDriveController : ICloudController
+    public class GoogleDriveController 
     {
         // https://developers.google.com/drive/api/v3/search-files?hl=ru
 
@@ -239,7 +239,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
             return string.Empty;
         }
-
         #endregion
         #region Download File
 
@@ -324,6 +323,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
             return null;
         }
+
+        
         #endregion
     }
 }
