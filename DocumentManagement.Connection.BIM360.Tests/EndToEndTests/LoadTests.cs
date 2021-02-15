@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class LoadTests
     {
-        private static readonly string TEST_FILE_PATH = "My Test Folder/124.txt";
+        private static readonly string TEST_FILE_PATH = "My Test Folder/123.txt";
 
         private static AuthenticationService authService;
         private static HubsService hubsService;
@@ -138,7 +138,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-
             var version = new Forge.Models.DataManagement.Version
             {
                 ID = "1",
