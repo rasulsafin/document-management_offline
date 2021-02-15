@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
@@ -29,6 +26,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static ObjectsService objectsService;
         private static ItemsService itemsService;
         private static FoldersService foldersService;
+        private static VersionsService versionsService;
         private static Authenticator authenticator;
         private static ForgeConnection connection;
 
@@ -45,6 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             objectsService = new ObjectsService(connection);
             itemsService = new ItemsService(connection);
             foldersService = new FoldersService(connection);
+            versionsService = new VersionsService(connection);
 
             connectionInfo = new ConnectionInfoDto
             {
@@ -73,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial
         /// </summary>
         [TestMethod]
-        public async Task Can_upload_item()
+        public async Task Can_upload_and_delete_item()
         {
             // Authorize
             var authorizationResult = await authenticator.SignInAsync(connectionInfo);
@@ -199,6 +198,31 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             if (addedItem.item == null || addedItem.version == null)
                 Assert.Fail("Adding item failed");
+
+            // Delete uploaded item by marking version as "deleted"
+            var deletedVersion = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_VERSION_DELETED_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Item = new
+                    {
+                        data = new Item { ID = addedItem.item.ID },
+                    },
+                },
+            };
+
+            var deleteResult = await versionsService.PostVersionAsync(project.ID, deletedVersion);
+            if (deleteResult.item == null || deleteResult.version == null)
+                Assert.Fail("Deleting item failed");
         }
 
         [TestMethod]
@@ -265,6 +289,208 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             if (!fileInfo.Exists)
                 Assert.Fail();
+        }
+
+        /// <summary>
+        /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial
+        /// </summary>
+        [TestMethod]
+        public async Task Can_update_version_for_already_upload_item_and_delete_item()
+        {
+            // Authorize
+            var authorizationResult = await authenticator.SignInAsync(connectionInfo);
+            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+                Assert.Fail("Authorization failed");
+
+            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
+
+            // STEP 1. Find hub with projects
+            var hub = (await hubsService.GetHubsAsync()).FirstOrDefault();
+            if (hub == default)
+                Assert.Fail("Hubs are empty");
+
+            // STEP 2. Choose first project
+            // TODO decide which project should be used for end-to-end tests
+            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault();
+            if (project == default)
+                Assert.Fail("Projects in hubs are empty");
+
+            // STEP 3. Find the Folder ID
+            var topFolder = (await projectsService.GetTopFoldersAsync(hub.ID, project.ID)).LastOrDefault();
+            if (topFolder == default)
+                Assert.Fail("Top folders in project are empty");
+
+            // STEP 4. Find the nested Folder ID
+            var folder = (await foldersService.GetFoldersAsync(project.ID, topFolder.ID)).FirstOrDefault();
+            if (folder == default)
+                Assert.Fail("Top folder is empty");
+
+            // STEP 5. Create a Storage Object
+            var objectToUpload = new StorageObject
+            {
+                Attributes = new StorageObject.StorageObjectAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                },
+                Relationships = new StorageObject.StorageObjectRelationships
+                {
+                    Target = new
+                    {
+                        data = new
+                        {
+                            type = FOLDER_TYPE,
+                            id = folder.ID,
+                        },
+                    },
+                },
+            };
+
+            var firstStorage = await projectsService.CreateStorageAsync(project.ID, objectToUpload);
+            if (firstStorage == default)
+                Assert.Fail("Storage creating failed");
+
+            // STEP 6. Upload file to storage
+            if (!firstStorage.ID.Contains(':') || !firstStorage.ID.Contains('/'))
+                Assert.Fail("Storage ID has incorrect format");
+
+            var parsedId = firstStorage.ParseStorageId();
+            var bucketKey = parsedId.bucketKey;
+            var hashedName = parsedId.hashedName;
+
+            await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
+
+            // STEP 7. Create first version
+            var version = new Forge.Models.DataManagement.Version
+            {
+                ID = "1",
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_VERSION_FILE_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
+                {
+                    Storage = new
+                    {
+                        data = new
+                        {
+                            type = OBJECT_TYPE,
+                            id = firstStorage.ID,
+                        },
+                    },
+                },
+            };
+
+            var item = new Item
+            {
+                Attributes = new Item.ItemAttributes
+                {
+                    DisplayName = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_ITEM_FILE_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Item.ItemRelationships
+                {
+                    Tip = new
+                    {
+                        data = new
+                        {
+                            type = VERSION_TYPE,
+                            id = "1",
+                        },
+                    },
+                    Parent = new
+                    {
+                        data = new
+                        {
+                            type = FOLDER_TYPE,
+                            id = folder.ID,
+                        },
+                    },
+                },
+            };
+
+            var addedItem = await itemsService.PostItemAsync(project.ID, item, version);
+
+            if (addedItem.item == null || addedItem.version == null)
+                Assert.Fail("Adding item failed");
+
+            // To update version for uploaded item there is need to repeat step 5 and 6 and then call updating version.
+            // REPEAT STEP 5: Creating new storage for the same item
+            var secondStorage = await projectsService.CreateStorageAsync(project.ID, objectToUpload);
+            if (secondStorage == default)
+                Assert.Fail("Storage creating failed");
+
+            // REPEAT STEP 6: Upload the item
+            if (!secondStorage.ID.Contains(':') || !secondStorage.ID.Contains('/'))
+                Assert.Fail("Storage ID has incorrect format");
+
+            var secondStorageParsedId = secondStorage.ParseStorageId();
+            var secondStorageBucketKey = secondStorageParsedId.bucketKey;
+            var secondStorageHashedName = secondStorageParsedId.hashedName;
+
+            await objectsService.PutObjectAsync(secondStorageBucketKey, secondStorageHashedName, TEST_FILE_PATH);
+
+            // STEP 8: Update version
+            var updatedVersion = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_VERSION_FILE_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Item = new
+                    {
+                        data = new Item { ID = addedItem.item.ID },
+                    },
+                    Storage = new
+                    {
+                        data = new StorageObject { ID = secondStorage.ID },
+                    },
+                },
+            };
+
+            var updateResult = await versionsService.PostVersionAsync(project.ID, updatedVersion);
+            if (updateResult.item == null || updateResult.version == null)
+                Assert.Fail("Updating item failed");
+
+            // Delete uploaded item by marking version as "deleted"
+            var deletedVersion = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Extension = new
+                    {
+                        type = AUTODESK_VERSION_DELETED_TYPE,
+                        version = "1.0",
+                    },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Item = new
+                    {
+                        data = new Item { ID = addedItem.item.ID },
+                    },
+                },
+            };
+
+            var deleteResult = await versionsService.PostVersionAsync(project.ID, deletedVersion);
+            if (deleteResult.item == null || deleteResult.version == null)
+                Assert.Fail("Deleting item failed");
         }
     }
 }

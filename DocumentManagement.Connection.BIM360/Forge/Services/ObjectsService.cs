@@ -4,7 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Data_Management;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using Newtonsoft.Json.Linq;
 
@@ -83,6 +83,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             await stream.CopyToAsync(output);
             return new FileInfo(pathToDownload);
         }
+
+        public async Task DeleteAsync(string bucketKey, string objectKey)
+            => await connection.GetResponseAuthorizedAsync(HttpMethod.Delete, Resources.DeleteBucketsObjectMethod, bucketKey, objectKey);
 
         public async Task<JObject> GetBuckets()
         {

@@ -70,6 +70,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}.
+        /// </summary>
+        internal static string DeleteBucketsObjectMethod {
+            get {
+                return ResourceManager.GetString("DeleteBucketsObjectMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на https://developer.api.autodesk.com.
         /// </summary>
         internal static string ForgeUrl {

@@ -237,4 +237,8 @@
     <value>/bim360/docs/v1/projects/{0}/folders/{1}/permissions</value>
     <comment>Retrieves information about the permissions assigned to users, roles and companies for a BIM 360 Document Management folder, including details about the name and the status</comment>
   </data>
+  <data name="DeleteBucketsObjectMethod" xml:space="preserve">
+    <value>/oss/v2/buckets/{0}/objects/{1}</value>
+    <comment>Deletes an object from the bucket</comment>
+  </data>
 </root>
