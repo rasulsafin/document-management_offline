@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         public string ObjectKey { get; set; }
 
         [DataMember(Name = "size")]
-        public int Size { get; set; }
+        public int? Size { get; set; }
 
         [DataMember(Name = "contentType")]
         public string ContentType { get; set; }

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -32,7 +33,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 new KeyValuePair<string, string>(AUTH_REQUEST_BODY_REDIRECT_URI_FIELD, appPropertyCallBackUrl),
             });
 
-            var data = await connection.SendRequestAsync(HttpMethod.Post, Resources.PostGetTokenMethod, content, false);
+            var data = await connection.SendAsync(
+                    ForgeSettings.UnauthorizedPost(content),
+                    Resources.PostGetTokenMethod);
             return data.ToObject<Token>();
         }
 
@@ -49,11 +52,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                         accessPropertyRefreshToken),
             });
 
-            var data = await connection.SendRequestAsync(
-                    HttpMethod.Post,
-                    Resources.PostRefreshTokenMethod,
-                    content,
-                    false);
+            var data = await connection.SendAsync(
+                    ForgeSettings.UnauthorizedPost(content),
+                    Resources.PostRefreshTokenMethod);
             return data.ToObject<Token>();
         }
     }

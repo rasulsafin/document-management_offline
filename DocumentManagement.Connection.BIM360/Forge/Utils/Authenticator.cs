@@ -191,7 +191,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             AccessToken = bearer.AccessToken;
             AccessRefreshToken = bearer.RefreshToken;
-            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn).ToString();
+            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn ?? 0).ToString();
             status = ConnectionStatus.Connected;
         }
 

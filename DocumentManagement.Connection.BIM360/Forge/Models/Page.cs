@@ -6,10 +6,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
     public class Page
     {
         [DataMember(Name = "offset")]
-        public int Offset { get; set; }
+        public int? Offset { get; set; }
 
         [DataMember(Name = "limit")]
-        public int Limit { get; set; }
+        public int? Limit { get; set; }
     }
-
 }

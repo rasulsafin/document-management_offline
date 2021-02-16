@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public string Name { get; set; }
 
             [DataMember(Name = "createTime")]
-            public DateTime CreateTime { get; set; }
+            public DateTime? CreateTime { get; set; }
 
             [DataMember(Name = "createUserId")]
             public string CreateUserId { get; set; }
@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public bool Hidden { get; set; }
 
             [DataMember(Name = "lastModifiedTime")]
-            public DateTime LastModifiedTime { get; set; }
+            public DateTime? LastModifiedTime { get; set; }
 
             [DataMember(Name = "lastModifiedUserId")]
             public string LastModifiedUserId { get; set; }
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public string LastModifiedUserName { get; set; }
 
             [DataMember(Name = "objectCount")]
-            public int ObjectCount { get; set; }
+            public int? ObjectCount { get; set; }
         }
 
         [DataContract]

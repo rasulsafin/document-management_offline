@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication
         public string Type { get; set; }
 
         [DataMember(Name = "expires_in")]
-        public int ExpiresIn { get; set; }
+        public int? ExpiresIn { get; set; }
 
         [DataMember(Name = "access_token")]
         public string AccessToken { get; set; }

@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using Newtonsoft.Json.Linq;
 
@@ -25,10 +26,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         /// <returns>Task of this action.</returns>
         public async Task<UploadResult> PutObjectAsync(string bucketKey, string objectName, string fileFullName)
         {
-            var response = await connection.SendStreamAuthorizedAsync(HttpMethod.Put,
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPut(File.OpenRead(fileFullName)),
                     Resources.PutBucketsObjectsMethod,
-                    File.OpenRead(fileFullName),
-                    null,
                     bucketKey,
                     objectName);
             return response.ToObject<UploadResult>();
@@ -49,10 +49,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
             for (long i = 0; i < length; i += chunkSize)
             {
-                tasks.Add(connection.SendStreamAuthorizedAsync(HttpMethod.Put,
+                tasks.Add(connection.SendAsync(
+                        ForgeSettings.AuthorizedPut(
+                                File.OpenRead(file.FullName),
+                                new RangeHeaderValue(i, Math.Max(i + chunkSize, length - 1))),
                         Resources.PutBucketsObjectsResumableMethod,
-                        File.OpenRead(file.FullName),
-                        new RangeHeaderValue(i, Math.Max(i + chunkSize, length - 1)),
                         bucketKey,
                         objectName));
             }
@@ -85,30 +86,29 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task DeleteAsync(string bucketKey, string objectKey)
-            => await connection.GetResponseAuthorizedAsync(HttpMethod.Delete, Resources.DeleteBucketsObjectMethod, bucketKey, objectKey);
+            => await connection.SendAsync(
+                    ForgeSettings.AuthorizedDelete(),
+                    Resources.DeleteBucketsObjectMethod,
+                    bucketKey,
+                    objectKey);
 
         public async Task<JObject> GetBuckets()
-        {
-            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketsMethod);
-            return response;
-        }
+            => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketsMethod);
 
         public async Task<JObject> GetBucketDetails(string bucketKey)
-        {
-            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetBucketDetailsMethod, bucketKey);
-            return response;
-        }
+            => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketDetailsMethod, bucketKey);
 
         public async Task<JObject> PostBucket(string bucketKeyToAdd)
         {
             var bucket = new
             {
                 bucketKey = bucketKeyToAdd,
-                //authId = appKey,
                 access = "full",
                 policyKey = "transient",
             };
-            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostBucketsMethod, bucket);
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPostWithoutKeyData(bucket),
+                    Resources.PostBucketsMethod);
             return response;
         }
     }

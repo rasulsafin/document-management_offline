@@ -151,6 +151,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}.
+        /// </summary>
+        internal static string GetIssueMethod {
+            get {
+                return ResourceManager.GetString("GetIssueMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}.
         /// </summary>
         internal static string GetIssuesMethod {

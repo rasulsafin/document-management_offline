@@ -16,10 +16,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public string Title { get; set; }
 
         [DataMember(Name = "createdAt")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime? CreatedAt { get; set; }
 
         [DataMember(Name = "updatedAt")]
-        public DateTime UpdatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         [DataMember(Name = "deletedAt")]
         public object DeletedAt { get; set; }
@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public bool IsActive { get; set; }
 
         [DataMember(Name = "orderIndex")]
-        public int OrderIndex { get; set; }
+        public int? OrderIndex { get; set; }
 
         [DataMember(Name = "isReadOnly")]
         public bool IsReadOnly { get; set; }

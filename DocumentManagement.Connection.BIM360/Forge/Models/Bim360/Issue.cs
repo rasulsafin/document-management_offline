@@ -10,13 +10,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public class IssueAttributes
         {
             [DataMember(Name = "created_at")]
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
 
             [DataMember(Name = "synced_at")]
-            public DateTime SyncedAt { get; set; }
+            public DateTime? SyncedAt { get; set; }
 
             [DataMember(Name = "updated_at")]
-            public DateTime UpdatedAt { get; set; }
+            public DateTime? UpdatedAt { get; set; }
 
             [DataMember(Name = "close_version")]
             public object CloseVersion { get; set; }
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string CreatedBy { get; set; }
 
             [DataMember(Name = "starting_version")]
-            public int StartingVersion { get; set; }
+            public int? StartingVersion { get; set; }
 
             [DataMember(Name = "title")]
             public string Title { get; set; }
@@ -61,10 +61,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object CollectionUrn { get; set; }
 
             [DataMember(Name = "due_date")]
-            public DateTime DueDate { get; set; }
+            public DateTime? DueDate { get; set; }
 
             [DataMember(Name = "identifier")]
-            public int Identifier { get; set; }
+            public int? Identifier { get; set; }
 
             [DataMember(Name = "status")]
             public string Status { get; set; }
@@ -115,10 +115,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string[] PermittedAttributes { get; set; }
 
             [DataMember(Name = "comment_count")]
-            public int CommentCount { get; set; }
+            public int? CommentCount { get; set; }
 
             [DataMember(Name = "attachment_count")]
-            public int AttachmentCount { get; set; }
+            public int? AttachmentCount { get; set; }
 
             [DataMember(Name = "permitted_actions")]
             public string[] PermittedActions { get; set; }

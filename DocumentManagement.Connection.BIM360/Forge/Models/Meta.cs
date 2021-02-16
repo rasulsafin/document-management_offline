@@ -9,6 +9,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public Page Page { get; set; }
 
         [DataMember(Name = "record_count")]
-        public int RecordCount { get; set; }
+        public int? RecordCount { get; set; }
     }
 }

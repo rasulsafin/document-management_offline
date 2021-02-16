@@ -23,6 +23,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 
             [DataMember(Name = "topFolders")]
             public dynamic TopFolders { get; set; }
+
+            [DataMember(Name = "issues")]
+            public DataContainer<ObjectInfo> IssuesContainer { get; set; }
         }
     }
 }

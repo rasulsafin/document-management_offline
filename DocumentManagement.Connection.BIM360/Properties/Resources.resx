@@ -241,4 +241,8 @@
     <value>/oss/v2/buckets/{0}/objects/{1}</value>
     <comment>Deletes an object from the bucket</comment>
   </data>
+  <data name="GetIssueMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/quality-issues/{1}</value>
+    <comment>Retrieves detailed information about a single BIM 360 issue</comment>
+  </data>
 </root>

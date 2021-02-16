@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -21,8 +21,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
             for (int i = 0; !all; i++)
             {
-                var response = await connection
-                        .GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetIssuesMethod, containerID, ITEMS_ON_PAGE, i);
+                var response = await connection.SendAsync(
+                        ForgeSettings.AuthorizedGet(),
+                        Resources.GetIssuesMethod,
+                        containerID,
+                        ITEMS_ON_PAGE,
+                        i);
                 var data = response[DATA_PROPERTY]?.ToObject<List<Issue>>();
                 if (data != null)
                     result.AddRange(data);
@@ -35,34 +39,56 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
         {
-            var response = await connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post,
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPost(attachment),
                     Resources.PostIssuesAttachmentsMethod,
-                    attachment,
                     containerID);
             return response[DATA_PROPERTY]?.ToObject<Attachment>();
         }
 
         public async Task<List<IssueType>> GetIssueTypesAsync(string containerID)
         {
-            var response = await connection.GetResponseAuthorizedAsync(HttpMethod.Get, Resources.GetNGIssueTypesMethod, containerID);
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedGet(),
+                    Resources.GetNGIssueTypesMethod,
+                    containerID);
             return response[RESULTS_PROPERTY]?.ToObject<List<IssueType>>();
         }
 
         public async Task<Issue> PostIssueAsync(string containerID, Issue issue)
         {
-            var response = await
-                    connection.SendSerializedDataAuthorizedAsync(HttpMethod.Post, Resources.PostIssuesMethod, issue, containerID);
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPost(issue),
+                    Resources.PostIssuesMethod,
+                    containerID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
         public async Task<Issue> PatchIssueAsync(string containerID, Issue issue)
         {
-            var response = await connection.SendSerializedDataAuthorizedAsync(
-                    HttpMethod.Patch,
-                    Resources.PatchIssuesMethod,
-                    issue,
+            try
+            {
+               // var content = new StringContent();
+                var response = await connection.SendAsync(
+                        ForgeSettings.AuthorizedPatch(issue),
+                        Resources.PatchIssuesMethod,
+                        containerID,
+                        issue.ID);
+                return response[DATA_PROPERTY]?.ToObject<Issue>();
+
+            }
+            finally
+            {
+            }
+        }
+
+        public async Task<Issue> GetIssueAsync(string containerID, string issueID)
+        {
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedGet(),
+                    Resources.GetIssueMethod,
                     containerID,
-                    issue.ID);
+                    issueID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
     }
