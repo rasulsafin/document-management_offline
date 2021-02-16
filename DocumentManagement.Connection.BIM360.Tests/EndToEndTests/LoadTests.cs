@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
         /// </summary>
         [TestMethod]
-        public async Task Can_upload_and_delete_item()
+        public async Task UploadAndDeleteFile_Bim360IsWorkingForgeConnected_Success()
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
@@ -197,7 +197,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanDownloadRandomItem()
+        public async Task DownloadRandomItem_Bim360IsWorkingForgeConnected_Success()
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
@@ -246,7 +246,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
         /// </summary>
         [TestMethod]
-        public async Task Can_update_version_for_already_upload_item_and_delete_item()
+        public async Task UploadFileUpdateVersionDeleteFile_Bim360IsWorkingForgeConnected_Success()
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;

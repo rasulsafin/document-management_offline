@@ -14,7 +14,7 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
-    public class Authenticator
+    public class Authenticator : IDisposable
     {
         public ConnectionStatus status;
 
@@ -37,6 +37,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             Connected,
             Error,
         }
+
+        public bool IsLogged
+            => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
 
         private string AccessToken
         {
@@ -74,8 +77,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             set => SetAppProperty(connectionInfoDto, CALLBACK_URL_NAME, value);
         }
 
-        public bool IsLogged
-            => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
+        public void Dispose()
+        {
+            httpListener.Close();
+            GC.SuppressFinalize(this);
+        }
 
         public async Task CheckAccessAsync(bool mustUpdate = false)
         {
@@ -95,7 +101,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             await CheckAccessAsync(true);
 
             // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK };
+            var result = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
 
             return (result, connectionInfo);
         }
@@ -138,9 +144,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
                 var oAuthUri = service.GetAuthorizationUri(AppClientId, AppCallBackUrl);
                 Process.Start(new ProcessStartInfo(oAuthUri) { UseShellExecute = true });
+
                 if (getting != null)
+                {
                     await getting;
-                await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
+                    await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
+                }
             }
             catch (Exception)
             {
@@ -208,17 +217,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         private void SetAuthValue(ConnectionInfoDto info, string key, string value)
         {
-            if (info.AuthFieldValues == null)
-                info.AuthFieldValues = new Dictionary<string, string>();
-
+            info.AuthFieldValues ??= new Dictionary<string, string>();
             SetDictionaryValue(info.AuthFieldValues, key, value);
         }
 
         private void SetAppProperty(ConnectionInfoDto info, string key, string value)
         {
-            if (info.ConnectionType.AppProperty == null)
-                info.ConnectionType.AppProperty = new Dictionary<string, string>();
-
+            info.ConnectionType.AppProperty ??= new Dictionary<string, string>();
             SetDictionaryValue(info.ConnectionType.AppProperty, key, value);
         }
 

@@ -1,31 +1,34 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 
-public static class WebFeatures
+namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public static async Task<bool> RemoteUrlExistsAsync(string url)
+    public static class WebFeatures
     {
-        try
+        public static async Task<bool> RemoteUrlExistsAsync(string url)
         {
-            // Creating the HttpWebRequest
-            var request = WebRequest.Create(url);
+            try
+            {
+                // Creating the HttpWebRequest
+                var request = WebRequest.Create(url);
 
-            // Setting the Request method HEAD, you can also use GET too.
-            request.Method = "HEAD";
+                // Setting the Request method HEAD, you can also use GET too.
+                request.Method = "HEAD";
 
-            // Getting the Web Response.
-            var response = (HttpWebResponse)await request.GetResponseAsync();
+                // Getting the Web Response.
+                var response = (HttpWebResponse)await request.GetResponseAsync();
 
-            var urlExist = response.StatusCode == HttpStatusCode.OK;
+                var urlExist = response.StatusCode == HttpStatusCode.OK;
 
-            // Returns TRUE if the Status code == 200
-            response.Close();
-            return urlExist;
-        }
-        catch
-        {
-            // Any exception will returns false.
-            return false;
+                // Returns TRUE if the Status code == 200
+                response.Close();
+                return urlExist;
+            }
+            catch
+            {
+                // Any exception will returns false.
+                return false;
+            }
         }
     }
 }

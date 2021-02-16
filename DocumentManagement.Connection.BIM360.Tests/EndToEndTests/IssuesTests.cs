@@ -15,20 +15,19 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
 namespace MRS.DocumentManagement.Connection.Bim360.Tests
 {
     [TestClass]
-    public class IssuesTest
+    public class IssuesTests
     {
-        private static readonly string TEST_FILE_PATH = "My Test Folder/123.txt";
         private static readonly string TEST_PROJECT_NAME = "Sample Project";
         private static readonly string TEST_ISSUE_ID = "da04f18d-b8e8-407b-983e-385f1a0520ea";
+        private static readonly Random RANDOM = new Random();
 
         private static Project project;
         private static IssuesService issuesService;
         private static string issuesContainer;
-        private static Random random = new Random();
         private static ForgeConnection connection;
 
         [ClassInitialize]
-        public static void Initialize(TestContext _)
+        public static void Initialize(TestContext unused)
         {
             connection = new ForgeConnection();
             var authService = new AuthenticationService(connection);
@@ -85,7 +84,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanGetIssues()
+        public async Task GetIssues_HaveAccessToIssueContainer_ReturnsIssuesList()
         {
             var issues = await issuesService.GetIssuesAsync(issuesContainer);
 
@@ -94,7 +93,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanPatchIssue()
+        public async Task PatchTestingIssue_HaveAccessToTestingIssue_PatchedPropertyChanged()
         {
             var issues = await issuesService.GetIssuesAsync(issuesContainer);
 
@@ -119,7 +118,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanGetIssueTypes()
+        public async Task GetIssuesTypes_HaveAccessToIssueContainer_ReturnsTypesList()
         {
             var types = await issuesService.GetIssueTypesAsync(issuesContainer);
 
@@ -128,7 +127,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanGetIssue()
+        public async Task GetIssuesSubtypes_HaveAccessToIssueContainer_SubtypesNotEmpty()
         {
             var types = await issuesService.GetIssueTypesAsync(issuesContainer);
 
@@ -139,7 +138,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanPostIssue()
+        public async Task PostIssue_HaveAccessToIssueContainer_Success()
         {
             var types = await issuesService.GetIssueTypesAsync(issuesContainer);
 
@@ -166,7 +165,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanPostIssueAttachment()
+        public async Task PostIssueAndAttachmentRandomFile_HaveFileAtBim360AndAccessToIssueContainer_Success()
         {
             var foldersService = new FoldersService(connection);
 
@@ -181,7 +180,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             Assert.IsNotNull(files);
             Assert.IsFalse(files.Count == 0, "Files are empty");
 
-            var file = files[random.Next(files.Count)];
+            var file = files[RANDOM.Next(files.Count)];
 
             var types = await issuesService.GetIssueTypesAsync(issuesContainer);
 
@@ -222,7 +221,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task CanGetAttachments()
+        public async Task GetAttachments_HaveAccessToTestingIssue_ReturnsAttachmentsList()
         {
             var attachments = await issuesService.GetAttachmentsAsync(issuesContainer, TEST_ISSUE_ID);
             Assert.IsNotNull(attachments);

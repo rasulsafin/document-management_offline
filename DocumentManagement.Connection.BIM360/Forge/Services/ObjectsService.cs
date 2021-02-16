@@ -22,7 +22,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         /// Recommend to objects smaller than 100 MB.
         /// </summary>
         /// <param name="bucketKey">URL-encoded bucket to upload object into.</param>
-        /// <param name="file">URL-encoded object name being uploaded.</param>
+        /// <param name="objectName">URL-encoded object name being uploaded.</param>
+        /// <param name="fileFullName">File path on this device.</param>
         /// <returns>Task of this action.</returns>
         public async Task<UploadResult> PutObjectAsync(string bucketKey, string objectName, string fileFullName)
         {

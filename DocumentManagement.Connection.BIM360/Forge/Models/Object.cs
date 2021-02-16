@@ -16,6 +16,5 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 
         [DataMember(Name = "relationships")]
         public TRelationships Relationships { get; set; }
-
     }
 }
