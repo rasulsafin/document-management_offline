@@ -53,7 +53,8 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateCollection(items);
         }
 
-        [HttpDelete]
+        [HttpPost]
+        [Route("delete")]
         public async Task<IActionResult> DeleteItems([FromBody] IEnumerable<ID<ItemDto>> data)
         {
             var result = await service.DeleteItems(data);

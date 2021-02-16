@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
             var connection = GetConnection(connectionInfo);
 
-            return await connection.GetStatus();
+            return await connection.GetStatus(mapper.Map<ConnectionInfoDto>(connectionInfo));
         }
 
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)

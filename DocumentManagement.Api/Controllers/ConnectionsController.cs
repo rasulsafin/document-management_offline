@@ -37,7 +37,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateFoundObject(connectionInfoDto);
         }
 
-        [HttpPost]
+        [HttpGet]
         [Route("status/{userID}")]
         public async Task<IActionResult> GetRemoteConnectionStatus([FromRoute] int userID)
         {

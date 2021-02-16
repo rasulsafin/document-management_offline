@@ -47,7 +47,7 @@ namespace DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        [Route("list/{id}")]
+        [Route("list/{connectionTypeId}")]
         public async Task<IActionResult> GetAllObjectiveTypes([FromRoute] int connectionTypeId)
         {
             var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));

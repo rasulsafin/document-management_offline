@@ -42,12 +42,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return Task.FromResult(syncManager.GetProgressSync());
         }
 
-        public Task<ConnectionStatusDto> GetStatus()
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
             throw new NotImplementedException();
         }
 
-        public Task<bool> IsAuthDataCorrect()
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
         {
             return Task.FromResult(syncManager.Initilize);
         }
