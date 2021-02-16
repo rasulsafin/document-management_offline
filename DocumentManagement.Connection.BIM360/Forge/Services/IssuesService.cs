@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
+using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
@@ -15,27 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             => this.connection = connection;
 
         public async Task<List<Issue>> GetIssuesAsync(string containerID)
-        {
-            var result = new List<Issue>();
-            var all = false;
-
-            for (int i = 0; !all; i++)
-            {
-                var response = await connection.SendAsync(
-                        ForgeSettings.AuthorizedGet(),
-                        Resources.GetIssuesMethod,
-                        containerID,
-                        ITEMS_ON_PAGE,
-                        i);
-                var data = response[DATA_PROPERTY]?.ToObject<List<Issue>>();
-                if (data != null)
-                    result.AddRange(data);
-                var meta = response[META_PROPERTY]?.ToObject<Meta>();
-                all = meta == null || meta.Page.Limit * ((meta.Page.Offset / ITEMS_ON_PAGE) + 1) >= meta.RecordCount;
-            }
-
-            return result;
-        }
+            => await GetItemsByPages<Issue>(Resources.GetIssuesMethod, containerID);
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
         {
@@ -57,6 +41,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<Issue> PostIssueAsync(string containerID, Issue issue)
         {
+            // TODO: check required fields from user.
+            if (string.IsNullOrEmpty(issue.Attributes.Title))
+                throw new Exception($"{nameof(Issue.IssueAttributes.Title)} is empty");
+            if (string.IsNullOrEmpty(issue.Attributes.NgIssueTypeID))
+                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueTypeID)} is empty");
+            if (string.IsNullOrEmpty(issue.Attributes.NgIssueSubtypeID))
+                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueSubtypeID)} is empty");
+
             var response = await connection.SendAsync(
                     ForgeSettings.AuthorizedPost(issue),
                     Resources.PostIssuesMethod,
@@ -66,20 +58,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<Issue> PatchIssueAsync(string containerID, Issue issue)
         {
-            try
-            {
-               // var content = new StringContent();
-                var response = await connection.SendAsync(
-                        ForgeSettings.AuthorizedPatch(issue),
-                        Resources.PatchIssuesMethod,
-                        containerID,
-                        issue.ID);
-                return response[DATA_PROPERTY]?.ToObject<Issue>();
-
-            }
-            finally
-            {
-            }
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPatch(issue.GetPatchableIssue()),
+                    Resources.PatchIssuesMethod,
+                    containerID,
+                    issue.ID);
+            return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
         public async Task<Issue> GetIssueAsync(string containerID, string issueID)
@@ -90,6 +74,39 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     containerID,
                     issueID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
+        }
+
+        public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
+            => await GetItemsByPages<Attachment>(Resources.GetIssuesAttachmentMethod, containerID, issueID);
+
+        public Task<object> GetMeAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        private async Task<List<T>> GetItemsByPages<T>(string command, params object[] arguments)
+        {
+            var result = new List<T>();
+            var all = false;
+            var length = arguments.Length;
+            Array.Resize(ref arguments, length + 2);
+            arguments[length++] = ITEMS_ON_PAGE;
+
+            for (int i = 0; !all; i++)
+            {
+                arguments[length] = i;
+                var response = await connection.SendAsync(
+                        ForgeSettings.AuthorizedGet(),
+                        command,
+                        arguments);
+                var data = response[DATA_PROPERTY]?.ToObject<List<T>>();
+                if (data != null)
+                    result.AddRange(data);
+                var meta = response[META_PROPERTY]?.ToObject<Meta>();
+                all = meta == null || meta.Page.Limit * ((meta.Page.Offset / ITEMS_ON_PAGE) + 1) >= meta.RecordCount;
+            }
+
+            return result;
         }
     }
 }

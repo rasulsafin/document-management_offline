@@ -8,6 +8,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ITEM_TYPE = "items";
         public static readonly string VERSION_TYPE = "versions";
         public static readonly string OBJECT_TYPE = "objects";
+        public static readonly string ISSUE_TYPE = "quality_issues";
+        public static readonly string ATTACHMENT_TYPE = "attachments";
+        public static readonly string ATTACHMENT_URN_TYPE = "dm";
 
         public static readonly string DEFAULT_VERSION_ID = "1";
         public static readonly string DEFAULT_EXTENSION_VERSION = "1.0";

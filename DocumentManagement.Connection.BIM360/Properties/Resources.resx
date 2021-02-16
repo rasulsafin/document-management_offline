@@ -130,7 +130,7 @@
     <comment>Retrieves information about all the BIM 360 issues in a project, including details about their associated comments and attachments</comment>
   </data>
   <data name="GetNGIssueTypesMethod" xml:space="preserve">
-    <value>/issues/v1/containers/{0}/ng-issue-types</value>
+    <value>/issues/v1/containers/{0}/ng-issue-types?include=subtypes</value>
     <comment>Retrieves a list of supported issue types (e.g., quality and safety) and issue subtypes (e.g., work to complete and pre-punch list) that you can allocate to an issue</comment>
   </data>
   <data name="PatchIssuesMethod" xml:space="preserve">
@@ -244,5 +244,9 @@
   <data name="GetIssueMethod" xml:space="preserve">
     <value>/issues/v1/containers/{0}/quality-issues/{1}</value>
     <comment>Retrieves detailed information about a single BIM 360 issue</comment>
+  </data>
+  <data name="GetIssuesAttachmentMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/quality-issues/{1}/attachments?&amp;page[limit]={2}&amp;page[offset]={3}</value>
+    <comment>Retrieves information about all the attachments associated with a specific BIM 360 issue in a project</comment>
   </data>
 </root>

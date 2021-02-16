@@ -6,7 +6,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
     public class RequestData
     {
         [DataMember(Name = "jsonapi")]
-        public JsonApi JsonApi { get; set; }
+        public JsonApi? JsonApi { get; set; }
 
         [DataMember(Name = "data")]
         public object Data { get; set; }

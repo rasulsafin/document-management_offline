@@ -160,6 +160,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/attachments?&amp;page[limit]={2}&amp;page[offset]={3}.
+        /// </summary>
+        internal static string GetIssuesAttachmentMethod {
+            get {
+                return ResourceManager.GetString("GetIssuesAttachmentMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}.
         /// </summary>
         internal static string GetIssuesMethod {
@@ -169,7 +178,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/ng-issue-types.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/ng-issue-types?include=subtypes.
         /// </summary>
         internal static string GetNGIssueTypesMethod {
             get {

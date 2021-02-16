@@ -6,6 +6,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
     [DataContract]
     public class Issue : Object<Issue.IssueAttributes, Issue.IssueRelationships>
     {
+        public override string Type
+        {
+            get => Constants.ISSUE_TYPE;
+            set { }
+        }
+
         [DataContract]
         public class IssueAttributes
         {
