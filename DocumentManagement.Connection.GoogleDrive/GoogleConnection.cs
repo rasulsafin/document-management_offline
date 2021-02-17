@@ -9,7 +9,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     public class GoogleConnection : IConnection
     {
         private SyncManager syncManager;
-        private ICloudManager manager;
 
         public GoogleConnection(SyncManager syncManager)
         {
@@ -21,8 +20,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 GoogleDriveController driveController = new GoogleDriveController();
-                await driveController.InitializationAsync();
-                manager = new GoogleDriveManager(driveController);
+                await driveController.InitializationAsync(info);
+                var manager = new GoogleDriveManager(driveController);
                 syncManager.Initialization(manager);
 
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, };

@@ -18,6 +18,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
     public class GoogleDriveController : IDisposable
     {
+        public static readonly string[] SCOPES = { DriveService.Scope.Drive };
         // https://developers.google.com/drive/api/v3/search-files?hl=ru
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
         private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
@@ -29,21 +30,24 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
         }
 
-        public async Task InitializationAsync()
+        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoDto info)
         {
             cancellationTokenSource = new CancellationTokenSource();
 
             ClientSecrets clientSecrets = new ClientSecrets
             {
-                ClientId = GoogleDriveAuth.CLIENT_ID,
-                ClientSecret = GoogleDriveAuth.CLIENT_SECRET,
+                ClientId = Properties.Resources.ClientID,
+                ClientSecret = Properties.Resources.ClientSecret,
             };
 
             // TODO: Найти место для этой помойки
-            FileDataStore dataStore = new FileDataStore("token.json", true);
+
+            // FileDataStore dataStore = new FileDataStore("token.json", true);
+            DataStore dataStore = new DataStore(info);
+
             credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     clientSecrets: clientSecrets,
-                    scopes: GoogleDriveAuth.SCOPES,
+                    scopes: SCOPES,
                     user: "user",
                     taskCancellationToken: cancellationTokenSource.Token,
                     dataStore: dataStore);
@@ -51,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             service = new DriveService(new BaseClientService.Initializer
             {
                 HttpClientInitializer = credential,
-                ApplicationName = GoogleDriveAuth.APPLICATION_NAME,
+                ApplicationName = Properties.Resources.ApplicationName,
             });
         }
 
