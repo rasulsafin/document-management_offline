@@ -40,19 +40,28 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionTypeDto> Find(ID<ConnectionTypeDto> id)
         {
-            var dbConnectionType = await context.ConnectionTypes.FindAsync((int)id);
+            var dbConnectionType = await context.ConnectionTypes
+                .Include(x => x.AppProperties)
+                .Include(x => x.AuthFieldNames)
+                .FirstOrDefaultAsync(x => x.ID == (int)id);
             return dbConnectionType == null ? null : mapper.Map<ConnectionTypeDto>(dbConnectionType);
         }
 
         public async Task<ConnectionTypeDto> Find(string name)
         {
-            var dbConnectionType = await context.ConnectionTypes.FirstOrDefaultAsync(t => t.Name == name);
+            var dbConnectionType = await context.ConnectionTypes
+                .Include(x => x.AppProperties)
+                .Include(x => x.AuthFieldNames)
+                .FirstOrDefaultAsync(t => t.Name == name);
             return dbConnectionType == null ? null : mapper.Map<ConnectionTypeDto>(dbConnectionType);
         }
 
         public async Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes()
         {
-            var dbList = await context.ConnectionTypes.ToListAsync();
+            var dbList = await context.ConnectionTypes
+                .Include(x => x.AppProperties)
+                .Include(x => x.AuthFieldNames)
+                .ToListAsync();
             return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
         }
 
@@ -62,24 +71,48 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
-                foreach (var type in listOfTypes)
+                foreach (var typeDto in listOfTypes)
                 {
-                    var typeDb = mapper.Map<ConnectionType>(type);
-                    var typeFromDb = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == type.Name);
+                    var type = mapper.Map<ConnectionType>(typeDto);
+                    var typeFromDb = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == typeDto.Name);
 
                     // TODO: Update if exists?
-                    if (typeFromDb == default)
-                        await context.ConnectionTypes.AddAsync(typeDb);
-
-                    await context.SaveChangesAsync();
-
-                    if (type.EnumerationTypes == null)
+                    if (typeFromDb != null)
                         continue;
 
-                    foreach (var enumTypeDto in type.EnumerationTypes)
+                    await context.ConnectionTypes.AddAsync(type);
+                    await context.SaveChangesAsync();
+
+                    foreach (var property in type.AppProperties)
                     {
-                        var enumType = await context.EnumerationTypes.FirstOrDefaultAsync(x => x.ExternalId == enumTypeDto.ExternalId);
-                        enumType.ConnectionType = typeDb;
+                        property.ConnectionType = type;
+
+                        var propFromDb = await context.AppProperties.FirstOrDefaultAsync(x => x.Key == property.Key && x.ConnectionTypeID == type.ID);
+
+                        // TODO: Update if exists?
+                        if (propFromDb != null)
+                            continue;
+
+                        await context.AppProperties.AddAsync(property);
+                        await context.SaveChangesAsync();
+                    }
+
+                    // TODO: Update if exists?
+                    if (typeDto.EnumerationTypes == null)
+                        continue;
+
+                    foreach (var enumTypeDto in typeDto.EnumerationTypes)
+                    {
+                        var enumType = mapper.Map<EnumerationType>(enumTypeDto);
+                        var enumTypeFromDb = await context.EnumerationTypes.FirstOrDefaultAsync(x => x.ExternalId == enumTypeDto.ExternalId);
+
+                        // TODO: Update if exists?
+                        if (enumTypeFromDb != null)
+                            continue;
+
+                        await context.EnumerationTypes.AddAsync(enumType);
+
+                        enumType.ConnectionType = type;
                         await context.SaveChangesAsync();
 
                         if (enumTypeDto.EnumerationValues == null)
@@ -90,7 +123,7 @@ namespace MRS.DocumentManagement.Services
                             var enumValue = mapper.Map<EnumerationValue>(enumValueDto);
                             enumValue.EnumerationTypeID = enumType.ID;
 
-                            // TODO: Add or Update.
+                            // TODO: Update if exists?
                             context.EnumerationValues.Add(enumValue);
                         }
                     }

@@ -44,6 +44,12 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ReportCount> ReportCounts { get; set; }
 
         public DbSet<ConnectionType> ConnectionTypes { get; set; }
+
+        public DbSet<AppProperty> AppProperties { get; set; }
+
+        public DbSet<AuthFieldName> AuthFieldNames{ get; set; }
+
+        public DbSet<AuthFieldValue> AuthFieldValues { get; set; }
         #endregion
 
         #region Bridges
@@ -214,6 +220,21 @@ namespace MRS.DocumentManagement.Database
             modelBuilder.Entity<EnumerationValue>()
                 .HasOne(x => x.EnumerationType)
                 .WithMany(x => x.EnumerationValues)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionType>()
+                .HasMany(x => x.AppProperties)
+                .WithOne(x => x.ConnectionType)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionType>()
+                .HasMany(x => x.AuthFieldNames)
+                .WithOne(x => x.ConnectionType)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionInfo>()
+                .HasMany(x => x.AuthFieldValues)
+                .WithOne(x => x.ConnectionInfo)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

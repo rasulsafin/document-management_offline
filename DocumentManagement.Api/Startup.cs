@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -12,12 +11,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Connection.YandexDisk;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -47,13 +44,12 @@ namespace MRS.DocumentManagement.Api
                     };
                 });
 
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            // Mapping
+            services.AddTransient<ConnectionTypeAppPropertiesResolver>();
+            services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
+            services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
+            services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {

@@ -18,18 +18,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             this.syncManager = syncManager;
         }
 
-        public async Task<(bool, string)> Connect(dynamic param)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
             YandexDiskAuth auth = new YandexDiskAuth();
             var token = await auth.GetYandexDiskToken();
             syncManager.Initialization(token);
 
-            return (true, token);
-        }
+            info.AuthFieldValues.Add("Token", token);
 
-        public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
-        {
-            throw new NotImplementedException();
+            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Ok" };
         }
 
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
@@ -76,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 Name = "yandexdisk",
                 AuthFieldNames = new List<string>() { },
-                AppProperty = new Dictionary<string, string>
+                AppProperties = new Dictionary<string, string>
                 {
                     { "CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051" },
                     { "CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c" },

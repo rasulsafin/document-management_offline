@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -37,28 +36,33 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionStatusDto> Connect(ID<UserDto> userID)
         {
+            // Get connection info from user
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
             var connection = GetConnection(connectionInfo);
             var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
 
+            // Connect to Remote
             var status = await connection.Connect(connectionInfoDto);
 
+            // Update connection info
             connectionInfoDto = await connection.UpdateConnectionInfo(connectionInfoDto);
             connectionInfo = mapper.Map(connectionInfoDto, connectionInfo);
             context.Update(connectionInfo);
 
+            // Update types stored in connection info
             var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
-            var typesToRemove = currentEnumerationTypes
+            var typesToRemove = currentEnumerationTypes?
                 .Where(x => !newTypes.Any(t =>
                     t.ExternalId == x.EnumerationType.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
+            // Update values stored in connection info
             var newValues = connectionInfoDto.EnumerationTypes
                 .SelectMany(x => x.EnumerationValues).ToList() ?? Enumerable.Empty<EnumerationValueDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
-            var valuesToRemove = currentEnumerationValues
+            var valuesToRemove = currentEnumerationValues?
                 .Where(x => !newValues.Any(t =>
                     t.ExternalId == x.EnumerationValue.ExternalId))
                 .ToList();
@@ -107,18 +111,20 @@ namespace MRS.DocumentManagement.Services
         private async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
             var user = await context.Users
-                .Where(x => x.ID == userID)
                 .Include(x => x.ConnectionInfo)
-                .ThenInclude(x => x.ConnectionType)
-                .ThenInclude(x => x.EnumerationTypes)
-                .ThenInclude(x => x.EnumerationValues)
-                .FirstOrDefaultAsync();
+                .FirstOrDefaultAsync(x => x.ID == userID);
 
             var info = await context.ConnectionInfos
-                .Where(x => x.ID == user.ConnectionInfoID)
+                .Include(x => x.ConnectionType)
+                    .ThenInclude(x => x.AppProperties)
+                .Include(x => x.ConnectionType)
+                    .ThenInclude(x => x.AuthFieldNames)
                 .Include(x => x.EnumerationTypes)
+                    .ThenInclude(x => x.EnumerationType)
                 .Include(x => x.EnumerationValues)
-                .FirstOrDefaultAsync();
+                    .ThenInclude(x => x.EnumerationValue)
+                .Include(x => x.AuthFieldValues)
+                .FirstOrDefaultAsync(x => x.ID == user.ConnectionInfoID);
 
             return info;
         }
