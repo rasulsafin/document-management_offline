@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Services;
+using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -12,13 +13,15 @@ namespace MRS.DocumentManagement.Connection.LementPro
     {
         private readonly NetConnector connector;
         private readonly AuthenticationService authenticationService;
+        private readonly HttpRequestUtility requestUtility;
 
         private ConnectionInfoDto updatedInfo;
 
         public LementProConnection()
         {
             connector = new NetConnector();
-            authenticationService = new AuthenticationService(connector);
+            requestUtility = new HttpRequestUtility(connector);
+            authenticationService = new AuthenticationService(requestUtility);
         }
 
         public void Dispose()

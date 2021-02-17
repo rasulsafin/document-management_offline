@@ -70,6 +70,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/Category/GetMenuCategories.do.
+        /// </summary>
+        internal static string MethodGetMenuCategories {
+            get {
+                return ResourceManager.GetString("MethodGetMenuCategories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /Bim.
         /// </summary>
         internal static string UrlCategoryBim {

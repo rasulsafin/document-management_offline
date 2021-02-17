@@ -16,10 +16,5 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
 
         [DataMember(Name = "returnUrl")]
         public string ReturnUrl { get; set; }
-
-        public string ToJson()
-        {
-            return JsonConvert.SerializeObject(this, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-        }
     }
 }

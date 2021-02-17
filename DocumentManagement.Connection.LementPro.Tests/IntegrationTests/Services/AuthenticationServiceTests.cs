@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Services;
+using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests
@@ -14,7 +15,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests
 
         [ClassInitialize]
         public static void Init(TestContext unused)
-            => service = new AuthenticationService(new NetConnector());
+            => service = new AuthenticationService(new HttpRequestUtility(new NetConnector()));
 
         [ClassCleanup]
         public static void ClassCleanup()

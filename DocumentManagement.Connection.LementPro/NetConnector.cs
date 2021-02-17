@@ -8,10 +8,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 {
     public class NetConnector : IDisposable
     {
-        private const string CONTENT_TYPE = "application/json; charset=UTF-8";
-
         private static readonly double TIMEOUT = 10;
-        private static readonly string AUTHENTICATION_SCHEME = "auth";
 
         private readonly HttpClient client;
 
@@ -25,22 +22,22 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 HttpMethod methodType,
                 string uri,
                 object[] arguments = null,
-                string token = null)
+                (string scheme, string token) authData = default)
         {
             var argumentsArray = arguments ?? Array.Empty<object>();
             var formattedUri = string.Format(uri, argumentsArray);
             var request = new HttpRequestMessage(methodType, formattedUri);
-            if (token != null)
-                request.Headers.Authorization = new AuthenticationHeaderValue(AUTHENTICATION_SCHEME, token);
+            if (authData != default)
+                request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
 
             return request;
         }
 
         public async Task<JObject> GetResponseAsync(
                 HttpRequestMessage request,
-                string token)
+                (string scheme, string token) authData = default)
         {
-            using var response = await SendRequestAsync(request, token);
+            using var response = await SendRequestAsync(request, authData);
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);
             return jObject;
@@ -48,11 +45,11 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public async Task<HttpResponseMessage> SendRequestAsync(
                 HttpRequestMessage request,
-                string token = null,
+                (string scheme, string token) authData = default,
                 HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            if (token != null)
-                request.Headers.Authorization = new AuthenticationHeaderValue(AUTHENTICATION_SCHEME, token);
+            if (authData != default)
+                request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
             var response = await client.SendAsync(request, completionOption);
             response.EnsureSuccessStatusCode();
             return response;

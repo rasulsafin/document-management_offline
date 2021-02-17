@@ -13,6 +13,7 @@
 
         public const string STANDARD_CONTENT_TYPE = "application/json";
         public const string STANDARD_ACCEPT_LANGUAGE = "ru-RU";
+        public const string STANDARD_AUTHENTICATION_SCHEME = "auth";
 
         public const string RESPONSE_COOKIES_AUTH_NAME = "auth";
         public const string RESPONSE_COOKIES_EXPIRES_NAME = "expires";

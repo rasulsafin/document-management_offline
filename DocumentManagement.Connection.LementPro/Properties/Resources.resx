@@ -121,6 +121,10 @@
     <value>/Services/Authentication/Login.do</value>
     <comment>Method to log in</comment>
   </data>
+  <data name="MethodGetMenuCategories" xml:space="preserve">
+    <value>/Services/Category/GetMenuCategories.do</value>
+    <comment>Method to get all menu categories</comment>
+  </data>
   <data name="UrlCategoryBim" xml:space="preserve">
     <value>/Bim</value>
     <comment>BIM category URL</comment>
