@@ -341,12 +341,12 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
         {
-            AuthFieldValues = "TDMS field 1; TDMS field 2",
+            AuthFieldValues = new List<AuthFieldValue>() { new AuthFieldValue() { Key = "Key1", Value = "TDMS Value1" } },
         };
 
         public static ConnectionInfo BimConnectionInfo => new ConnectionInfo()
         {
-            AuthFieldValues = "Bim field 1; Bim field 2",
+            AuthFieldValues = new List<AuthFieldValue>() { new AuthFieldValue() { Key = "Key2", Value = "Bim Value2" } },
         };
 
         public static IEnumerable<EnumerationType> CreateEnumDms(string prefix, int count = 3)

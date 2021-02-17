@@ -8,9 +8,9 @@ namespace MRS.DocumentManagement.Utility
 {
     public class CryptographyHelper
     {
-        private readonly string key = "f6QpGIoDMtFQqRM=";
+        private static readonly string KEY = "f6QpGIoDMtFQqRM=";
 
-        public bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        public virtual bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
         {
             if (string.IsNullOrWhiteSpace(password) || passwordHash.Length == 0 || passwordSalt.Length == 0)
                 return false;
@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Utility
             return passwordHash.SequenceEqual(computedHash);
         }
 
-        public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public virtual void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             if (string.IsNullOrWhiteSpace(password))
                 throw new ArgumentException("Password must not be empty", nameof(password));
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Utility
             if (string.IsNullOrEmpty(plainText))
                 return string.Empty;
 
-            var key = Encoding.UTF8.GetBytes(this.key);
+            var key = Encoding.UTF8.GetBytes(KEY);
 
             using (var aesAlg = Aes.Create())
             {
@@ -76,7 +76,7 @@ namespace MRS.DocumentManagement.Utility
 
             Buffer.BlockCopy(fullCipher, 0, iv, 0, iv.Length);
             Buffer.BlockCopy(fullCipher, iv.Length, cipher, 0, fullCipher.Length - iv.Length);
-            var key = Encoding.UTF8.GetBytes(this.key);
+            var key = Encoding.UTF8.GetBytes(KEY);
 
             using (var aesAlg = Aes.Create())
             {
