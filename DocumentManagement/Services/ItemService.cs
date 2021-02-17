@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -18,6 +19,18 @@ namespace MRS.DocumentManagement.Services
         {
             this.context = context;
             this.mapper = mapper;
+        }
+
+        public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            // TODO: Delete Items from Remote Connection
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<ItemDto>> DownloadItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            // TODO: Download Items from Remote Connection to Local storage
+            throw new NotImplementedException();
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)

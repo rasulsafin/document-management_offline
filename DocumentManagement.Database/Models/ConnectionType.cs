@@ -8,10 +8,14 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
 
-        public string AppProperty { get; set; }
+        public IEnumerable<AppProperty> AppProperties { get; set; }
 
-        public string AuthFieldNames { get; set; }
+        public IEnumerable<AuthFieldName> AuthFieldNames { get; set; }
 
         public ICollection<ConnectionInfo> ConnectionInfos { get; set; }
+
+        public ICollection<ObjectiveType> ObjectiveTypes { get; set; }
+
+        public ICollection<EnumerationType> EnumerationTypes { get; set; }
     }
 }

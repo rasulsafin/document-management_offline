@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
+﻿using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -13,22 +11,6 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateMapToDto();
             CreateMapToModel();
-        }
-
-        private static T Deserialize<T>(string encoded)
-        {
-            if (string.IsNullOrEmpty(encoded))
-                return default;
-
-            return JsonSerializer.Deserialize<T>(encoded);
-        }
-
-        private static string Serialize<T>(T obj)
-        {
-            if (obj == null)
-                return string.Empty;
-
-            return JsonSerializer.Serialize(obj);
         }
 
         private void CreateMapToDto()
@@ -50,14 +32,18 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<ConnectionInfo, ConnectionInfoDto>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AuthFieldValues)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>())
+                .ForMember(d => d.EnumerationTypes, o => o.Ignore());
             CreateMap<ObjectiveType, ObjectiveTypeDto>();
             CreateMap<User, UserDto>();
             CreateMap<DynamicField, DynamicFieldDto>();
             CreateMap<BimElement, BimElementDto>();
             CreateMap<ConnectionType, ConnectionTypeDto>()
-                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Deserialize<List<string>>(s.AuthFieldNames)))
-                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Deserialize<Dictionary<string, string>>(s.AppProperty)));
+               .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(x => x.Name)))
+               .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeAppPropertiesResolver>());
+            CreateMap<EnumerationType, EnumerationTypeDto>()
+                .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
+            CreateMap<EnumerationValue, EnumerationValueDto>();
         }
 
         private void CreateMapToModel()
@@ -82,13 +68,18 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldDto, DynamicField>();
             CreateMap<UserToCreateDto, User>();
             CreateMap<ConnectionTypeDto, ConnectionType>()
-                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => Serialize(s.AuthFieldNames)))
-                .ForMember(d => d.AppProperty, o => o.MapFrom(s => Serialize(s.AppProperty)));
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(name => new AuthFieldName() { Name = name })))
+                .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeDtoAppPropertiesResolver>())
+                .ForMember(d => d.EnumerationTypes, opt => opt.Ignore());
             CreateMap<ItemDto, Item>();
             CreateMap<ConnectionInfoDto, ConnectionInfo>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthFieldValues)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoDtoAuthFieldValuesResolver>())
+                .ForMember(d => d.EnumerationTypes, opt => opt.Ignore());
             CreateMap<ConnectionInfoToCreateDto, ConnectionInfo>()
-                .ForMember(d => d.AuthFieldValues, o => o.MapFrom(s => Serialize(s.AuthData)));
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoDtoAuthFieldValuesResolver>());
+            CreateMap<EnumerationTypeDto, EnumerationType>()
+                .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
+            CreateMap<EnumerationValueDto, EnumerationValue>();
         }
     }
 }
