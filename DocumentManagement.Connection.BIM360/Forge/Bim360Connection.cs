@@ -30,6 +30,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             return authorizationResult.authStatus;
         }
 
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        {
+            throw new NotImplementedException();
+        }
+
         public Task<ConnectionStatusDto> GetStatus()
         {
             throw new NotImplementedException();
@@ -67,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                     "refreshtoken",
                     "end",
                 },
-                AppProperty = new Dictionary<string, string>
+                AppProperties = new Dictionary<string, string>
                 {
                     { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
                     { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },

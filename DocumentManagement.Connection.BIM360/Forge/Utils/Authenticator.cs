@@ -64,19 +64,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         private string AppClientId
         {
-            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CLIENT_ID_NAME);
+            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CLIENT_ID_NAME);
             set => SetAppProperty(connectionInfoDto, CLIENT_ID_NAME, value);
         }
 
         private string AppClientSecret
         {
-            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CLIENT_SECRET_NAME);
+            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CLIENT_SECRET_NAME);
             set => SetAppProperty(connectionInfoDto, CLIENT_SECRET_NAME, value);
         }
 
         private string AppCallBackUrl
         {
-            get => connectionInfoDto.ConnectionType.AppProperty.GetOrDefault(CALLBACK_URL_NAME);
+            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CALLBACK_URL_NAME);
             set => SetAppProperty(connectionInfoDto, CALLBACK_URL_NAME, value);
         }
 
@@ -226,8 +226,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         private void SetAppProperty(ConnectionInfoDto info, string key, string value)
         {
-            info.ConnectionType.AppProperty ??= new Dictionary<string, string>();
-            SetDictionaryValue(info.ConnectionType.AppProperty, key, value);
+            info.ConnectionType.AppProperties ??= new Dictionary<string, string>();
+            SetDictionaryValue(info.ConnectionType.AppProperties, key, value);
         }
 
         private void SetDictionaryValue(IDictionary<string, string> dictionary, string key, string value)

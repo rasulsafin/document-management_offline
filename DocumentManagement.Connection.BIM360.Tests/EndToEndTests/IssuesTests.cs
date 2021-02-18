@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 ID = new ID<ConnectionInfoDto>(2),
                 ConnectionType = new ConnectionTypeDto
                 {
-                    AppProperty = new Dictionary<string, string>
+                    AppProperties = new Dictionary<string, string>
                     {
                         { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
                         { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
