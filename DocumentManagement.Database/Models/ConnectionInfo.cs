@@ -10,21 +10,12 @@ namespace MRS.DocumentManagement.Database.Models
 
         public ConnectionType ConnectionType { get; set; }
 
-        /// <summary>
-        /// TODO: Security??
-        /// </summary>
-        public string AuthFieldValues { get; set; }
-
         public User User { get; set; }
 
-        /// <summary>
-        /// TODO: Enums.
-        /// </summary>
-        public ICollection<EnumDm> EnumDms { get; set; }
+        public ICollection<AuthFieldValue> AuthFieldValues { get; set; }
 
-        /// <summary>
-        /// TODO: ObjectiveTypes.
-        /// </summary>
-        // public ICollection<ObjectiveType> ObjectiveTypes { get; set; }
+        public ICollection<ConnectionInfoEnumerationType> EnumerationTypes { get; set; }
+
+        public ICollection<ConnectionInfoEnumerationValue> EnumerationValues { get; set; }
     }
 }

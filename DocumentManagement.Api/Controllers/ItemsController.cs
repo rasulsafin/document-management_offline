@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -43,6 +44,21 @@ namespace MRS.DocumentManagement.Api.Controllers
         {
             var items = await service.GetItems(new ID<ObjectiveDto>(objectiveID));
             return ValidateCollection(items);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DowmloadItems([FromBody] IEnumerable<ID<ItemDto>> data)
+        {
+            var items = await service.DownloadItems(data);
+            return ValidateCollection(items);
+        }
+
+        [HttpPost]
+        [Route("delete")]
+        public async Task<IActionResult> DeleteItems([FromBody] IEnumerable<ID<ItemDto>> data)
+        {
+            var result = await service.DeleteItems(data);
+            return result ? Ok(result) : BadRequest(result);
         }
     }
 }

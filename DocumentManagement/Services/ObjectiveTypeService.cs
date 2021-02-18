@@ -56,16 +56,16 @@ namespace MRS.DocumentManagement.Services
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
-        public async Task<IEnumerable<ObjectiveTypeDto>> GetAllObjectiveTypes()
+        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
-            var db = await context.ObjectiveTypes.ToListAsync();
+            var db = await context.ObjectiveTypes.Where(x => x.ConnectionTypeID == null || x.ConnectionTypeID == (int)id).ToListAsync();
             return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
         {
-            try 
-            { 
+            try
+            {
                 var type = await context.ObjectiveTypes.FindAsync((int)id);
                 if (type == null)
                     return false;
