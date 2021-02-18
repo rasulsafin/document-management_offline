@@ -16,7 +16,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     public class Authenticator : IDisposable
     {
-        public ConnectionStatus status;
+        private const string RESPONSE_HTML_TYPE = "text/html";
+        private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
 
         private readonly AuthenticationService service;
         private HttpListener httpListener;
@@ -37,6 +38,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             Connected,
             Error,
         }
+
+        public ConnectionStatus Status { get; private set; }
 
         public bool IsLogged
             => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
@@ -116,7 +119,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             try
             {
-                status = ConnectionStatus.Connecting;
+                Status = ConnectionStatus.Connecting;
                 var bearer = await service.RefreshTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, AccessRefreshToken);
                 SaveData(bearer);
             }
@@ -153,7 +156,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             }
             catch (Exception)
             {
-                status = ConnectionStatus.Error;
+                Status = ConnectionStatus.Error;
                 throw;
             }
         }
@@ -162,11 +165,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             try
             {
-                var code = context.Request.QueryString["code"];
-                var responseString = (string)Resources.ResourceManager.GetObject("SuccessfulAuthentication");
+                var code = context.Request.QueryString[CODE_QUERY_KEY];
+                var responseString = (string)Resources.ResourceManager.GetObject(SUCCESSFUL_AUTHENTICATION_PAGE);
                 var buffer = Encoding.UTF8.GetBytes(responseString ?? string.Empty);
                 var response = context.Response;
-                response.ContentType = "text/html";
+                response.ContentType = RESPONSE_HTML_TYPE;
                 response.ContentLength64 = buffer.Length;
                 response.StatusCode = 200;
                 await response.OutputStream.WriteAsync(buffer.AsMemory());
@@ -201,14 +204,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             AccessToken = bearer.AccessToken;
             AccessRefreshToken = bearer.RefreshToken;
             AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn ?? 0).ToString();
-            status = ConnectionStatus.Connected;
+            Status = ConnectionStatus.Connected;
         }
 
         private void GotIt(Token bearer)
         {
             if (bearer == null)
             {
-                status = ConnectionStatus.Error;
+                Status = ConnectionStatus.Error;
                 throw new Exception("Sorry, Authentication failed");
             }
 

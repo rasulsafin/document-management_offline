@@ -22,13 +22,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="My Test Folder\123.txt">
+    <None Update="Resources\TestIcon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="My Test Folder\124.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="My Test Folder\TestIcon.png">
+    <None Update="Resources\IntegrationTestFile.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

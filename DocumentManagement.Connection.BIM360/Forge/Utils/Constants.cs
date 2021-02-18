@@ -2,8 +2,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public static class Constants
     {
-        public static readonly string AUTHORIZATION_SCHEME = "Bearer";
-
         public static readonly string FOLDER_TYPE = "folders";
         public static readonly string ITEM_TYPE = "items";
         public static readonly string VERSION_TYPE = "versions";
@@ -12,9 +10,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ATTACHMENT_TYPE = "attachments";
         public static readonly string ATTACHMENT_URN_TYPE = "dm";
 
-        public static readonly string DEFAULT_VERSION_ID = "1";
-        public static readonly string DEFAULT_EXTENSION_VERSION = "1.0";
-
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_DELETED_TYPE = "versions:autodesk.core:Deleted";
@@ -22,6 +17,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string TOKEN_AUTH_NAME = "token";
         public static readonly string REFRESH_TOKEN_AUTH_NAME = "refreshtoken";
         public static readonly string END_AUTH_NAME = "end";
+
+        internal static readonly string AUTHORIZATION_SCHEME = "Bearer";
+        internal static readonly string DEFAULT_VERSION_ID = "1";
+
+        internal static readonly string DEFAULT_EXTENSION_VERSION = "1.0";
 
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
@@ -35,6 +35,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string CALLBACK_URL_NAME = "RETURN_URL";
         internal static readonly string CLIENT_ID_NAME = "CLIENT_ID";
         internal static readonly string CLIENT_SECRET_NAME = "CLIENT_SECRET";
+
+        internal static readonly string CODE_QUERY_KEY = "code";
 
         internal static readonly string AUTH_REQUEST_BODY_CLIENT_ID_FIELD = "client_id";
         internal static readonly string AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD = "client_secret";

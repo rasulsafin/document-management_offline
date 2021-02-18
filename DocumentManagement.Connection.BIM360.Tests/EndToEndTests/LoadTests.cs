@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class LoadTests
     {
-        private static readonly string TEST_FILE_PATH = "My Test Folder/123.txt";
+        private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
         private static readonly string TEST_PROJECT_NAME = "Sample Project";
 
         private static AuthenticationService authService;
@@ -33,6 +34,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static ForgeConnection connection;
 
         private readonly Random random = new Random();
+        private readonly string testFileName = Path.GetFileName(TEST_FILE_PATH);
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
@@ -104,12 +106,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (folder == default)
                 Assert.Fail("Top folder is empty");
 
-            // STEP 5. Create a Storage Object
+            // STEP 5. Create a Storage Object.
             var objectToUpload = new StorageObject
             {
                 Attributes = new StorageObject.StorageObjectAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                 },
                 Relationships = new StorageObject.StorageObjectRelationships
                 {
@@ -143,7 +145,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                     Extension = new Extension
                     {
                         Type = AUTODESK_VERSION_FILE_TYPE,
@@ -159,7 +161,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Item.ItemAttributes
                 {
-                    DisplayName = TEST_FILE_PATH.Split('/').Last(),
+                    DisplayName = testFileName,
                     Extension = new Extension
                     {
                         Type = AUTODESK_ITEM_FILE_TYPE,
@@ -182,7 +184,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
@@ -281,7 +283,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new StorageObject.StorageObjectAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                 },
                 Relationships = new StorageObject.StorageObjectRelationships
                 {
@@ -315,7 +317,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                     Extension = new Extension
                     {
                         Type = AUTODESK_VERSION_FILE_TYPE,
@@ -331,7 +333,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Item.ItemAttributes
                 {
-                    DisplayName = TEST_FILE_PATH.Split('/').Last(),
+                    DisplayName = testFileName,
                     Extension = new Extension
                     {
                         Type = AUTODESK_ITEM_FILE_TYPE,
@@ -370,7 +372,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_FILE_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
@@ -389,7 +391,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = TEST_FILE_PATH.Split('/').Last(),
+                    Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
