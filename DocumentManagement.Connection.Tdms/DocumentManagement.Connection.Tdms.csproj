@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>MRS.DocumentManagement.Connection.Tdms</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <COMReference Include="TDMS.dll">
+      <VersionMinor>0</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>50bd3023-f3e5-4bb5-88e1-3cb09989fb34</Guid>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>false</Isolated>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Connection\DocumentManagement.Connection.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Tdms.Core">
+      <HintPath>lib\Tdms.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
