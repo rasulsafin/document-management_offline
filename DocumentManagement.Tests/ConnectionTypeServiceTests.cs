@@ -2,7 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -23,11 +25,14 @@ namespace MRS.DocumentManagement.Tests
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
         {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            mapper = mapperConfig.CreateMapper();
+            IServiceCollection services = new ServiceCollection();
+
+            var mock = new Mock<CryptographyHelper>();
+            services.AddTransient<CryptographyHelper>(sp => mock.Object);
+
+            services.AddAutoMapper(typeof(MappingProfile));
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
         }
 
         [TestInitialize]

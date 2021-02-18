@@ -1,21 +1,47 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
-    /// <summary>
-    /// TODO: Factory for connections when connections are present. Make it static or?..
-    /// </summary>
-    public class ConnectionCreator
+    public static class ConnectionCreator
     {
-        public IConnection GetConnection(ConnectionTypeDto type)
+        private static Dictionary<string, Type> connections;
+
+        public static IConnection GetConnection(ConnectionTypeDto connectionTypeDto)
         {
-            return type.Name switch
+            if (connections == null)
+                GetAllConnectionTypes();
+
+            if (!connections.TryGetValue(connectionTypeDto.Name, out Type type))
+                return null;
+
+            return Activator.CreateInstance(type) as IConnection;
+        }
+
+        public static List<ConnectionTypeDto> GetAllConnectionTypes()
+        {
+            connections = new Dictionary<string, Type>();
+
+            var list = new List<ConnectionTypeDto>();
+            var listOfTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(x => x.GetTypes())
+                .Where(x => typeof(IConnection).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
+
+            foreach (Type type in listOfTypes)
             {
-                //"tdms" => new TdmsConnection(),
-                //"bim360" => new Bim360Connection(),
-                //"yandexdisk" => new YandexDiskConnection(),
-                { } => null,
-            };
+                object connection = Activator.CreateInstance(type);
+                MethodInfo method = type.GetMethod("GetConnectionType");
+                object result = method.Invoke(connection, null);
+                ConnectionTypeDto t = result as ConnectionTypeDto;
+                list.Add(t);
+                connections.Add(t.Name, type);
+            }
+
+            return list;
         }
     }
 }

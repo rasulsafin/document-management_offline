@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -46,13 +45,12 @@ namespace MRS.DocumentManagement.Api
                     };
                 });
 
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            // Mapping
+            services.AddTransient<ConnectionTypeAppPropertiesResolver>();
+            services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
+            services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
+            services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
@@ -76,9 +74,9 @@ namespace MRS.DocumentManagement.Api
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<ItemHelper>();
-            services.AddScoped<ConnectionCreator>();
+
+            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
