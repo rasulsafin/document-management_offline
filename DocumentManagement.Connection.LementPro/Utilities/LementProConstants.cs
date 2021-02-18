@@ -2,6 +2,8 @@
 {
     public static class LementProConstants
     {
+        public const string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";
+
         public const string AUTH_NAME_LOGIN = "login";
         public const string AUTH_NAME_PASSWORD = "password";
         // TODO: move common constants to common project
@@ -15,6 +17,11 @@
         public const string STANDARD_ACCEPT_LANGUAGE = "ru-RU";
         public const string STANDARD_AUTHENTICATION_SCHEME = "auth";
 
+        public const string OBJECT_TYPE_TASKS = "Tasks";
+        public const string OBJECT_TYPE_SINGLE_TASK = "Task";
+
+        public const string RESPONSE_OBJECT_NAME = "object";
+        public const string RESPONSE_COLLECTION_ITEMS_NAME = "items";
         public const string RESPONSE_COOKIES_AUTH_NAME = "auth";
         public const string RESPONSE_COOKIES_EXPIRES_NAME = "expires";
         public const char RESPONSE_COOKIE_VALUES_SEPARATOR = ';';

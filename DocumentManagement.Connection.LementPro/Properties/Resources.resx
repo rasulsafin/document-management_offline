@@ -121,9 +121,29 @@
     <value>/Services/Authentication/Login.do</value>
     <comment>Method to log in</comment>
   </data>
+  <data name="MethodCreateObject" xml:space="preserve">
+    <value>/Services/ObjectBase/Create.do</value>
+    <comment>Method to create an object</comment>
+  </data>
+  <data name="MethodGetCategoryFolders" xml:space="preserve">
+    <value>/Services/Folders/{0}Folder/GetTree.do</value>
+    <comment>Method to get all folders of the category</comment>
+  </data>
   <data name="MethodGetMenuCategories" xml:space="preserve">
     <value>/Services/Category/GetMenuCategories.do</value>
     <comment>Method to get all menu categories</comment>
+  </data>
+  <data name="MethodGetObject" xml:space="preserve">
+    <value>/Services/ObjectBase/Get.do</value>
+    <comment>Method to get object info</comment>
+  </data>
+  <data name="MethodGetObjectsList" xml:space="preserve">
+    <value>/Services/{0}/GetList.do</value>
+    <comment>Method to get list of objects from folder</comment>
+  </data>
+  <data name="MethodGetTypes" xml:space="preserve">
+    <value>/Services/ObjectTypes/ObjectType/GetTree.do</value>
+    <comment>Method to get all possible types</comment>
   </data>
   <data name="UrlCategoryBim" xml:space="preserve">
     <value>/Bim</value>

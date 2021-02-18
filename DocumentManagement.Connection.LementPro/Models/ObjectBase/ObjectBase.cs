@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Models.ObjectBase
+namespace MRS.DocumentManagement.Connection.LementPro.Models
 {
     [DataContract]
     public class ObjectBase
@@ -58,5 +58,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models.ObjectBase
 
         [DataMember(Name = "lastComment")]
         public dynamic LastComment { get; set; }
+
+        [DataMember(Name = "hasExpiredCheckpoints")]
+        public bool? HasExpiredCheckpoints { get; set; }
     }
 }

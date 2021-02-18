@@ -16,7 +16,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         private ConnectionInfoDto connectionInfoDto;
 
         public AuthenticationService(HttpRequestUtility requestUtility)
-            => this.requestUtility = requestUtility;
+        {
+            this.requestUtility = requestUtility;
+            this.requestUtility.AuthenticationService = this;
+        }
 
         internal string AccessToken
         {
@@ -58,13 +61,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             return (successStatus, connectionInfoDto);
         }
 
-        public async Task<string> EnsureAccessValidAsync()
+        public async Task EnsureAccessValidAsync()
         {
             if (IsAuthorisationAccessValid())
-                return AccessToken;
+                return;
 
             await SignInAsync(connectionInfoDto);
-            return AccessToken;
         }
 
         protected bool IsAuthorisationAccessValid()

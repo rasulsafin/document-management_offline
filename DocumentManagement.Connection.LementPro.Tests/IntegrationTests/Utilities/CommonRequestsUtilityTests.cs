@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -37,11 +38,36 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         }
 
         [TestMethod]
-        public async Task MyTestMethod()
+        public async Task GetMenuCategories_WithCorrectCredentials_ReturnsTask()
         {
-            var result = await subject.Object.GetMenuCategoriesAsync(token);
+            var result = await subject.Object.GetMenuCategoriesAsync();
 
             Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        public async Task GetFoldersTree_ExistingCategoryWithCorrectCredentials_ReturnsFoldersTree()
+        {
+            var categoryObject = "Task";
+            var categoryId = 40164;
+
+            var result = await subject.Object.GetFoldersTreeAsync(categoryObject, categoryId);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        public async Task GetListTask_ExistingFolderWithCorrectCredentials_ReturnsTasksList()
+        {
+            var objectType = "Task";
+            string folderKey = "{\"id\":127472,\"subKeys\":[]}";
+
+            var result = await subject.Object.GetObjectsListFromFolderAsync(objectType, folderKey);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
         }
     }
 }

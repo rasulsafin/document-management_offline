@@ -3,7 +3,7 @@
 namespace MRS.DocumentManagement.Connection.LementPro.Models
 {
     [DataContract]
-    public class Category
+    public class BimRef
     {
         [DataMember(Name = "id")]
         public int? ID { get; set; }
@@ -11,10 +11,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "text")]
         public string Text { get; set; }
 
-        [DataMember(Name = "sortOrder")]
-        public int? SortOrder { get; set; }
+        [DataMember(Name = "urlPart")]
+        public string RrlPart { get; set; }
 
-        [DataMember(Name = "url")]
-        public string Url { get; set; }
+        [DataMember(Name = "categoryId")]
+        public string CategoryId { get; set; }
+
+        [DataMember(Name = "isClosed")]
+        public bool? IsClosed { get; set; }
     }
 }

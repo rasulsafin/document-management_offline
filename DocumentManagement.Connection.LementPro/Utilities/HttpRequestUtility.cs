@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
+using MRS.DocumentManagement.Connection.LementPro.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -14,10 +15,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 {
     public class HttpRequestUtility : IDisposable
     {
+        private readonly JsonSerializerSettings jsonSerializerSettings =
+                new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+
         private NetConnector connector;
 
         public HttpRequestUtility(NetConnector connector)
             => this.connector = connector;
+
+        internal AuthenticationService AuthenticationService { get; set; }
 
         public void Dispose()
             => connector.Dispose();
@@ -38,23 +44,35 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return (token, expires);
         }
 
-        protected internal async Task<JToken> GetResponseAsync<TData>(string url, string token = null, TData data = default, HttpMethod requestType = null)
+        protected internal async Task<JToken> GetResponseAsync<TData>(string url, TData data = default, HttpMethod requestType = null)
         {
-            var response = await GetHttpResponseAsync(url, token, data, requestType);
+            await AuthenticationService?.EnsureAccessValidAsync();
+            var response = await GetHttpResponseAsync(url, data, requestType);
             var content = await response.Content.ReadAsStringAsync();
             return JToken.Parse(content);
         }
 
-        protected async Task<HttpResponseMessage> GetHttpResponseAsync<TData>(string url, string token = null, TData data = default, HttpMethod requestType = null)
+        protected internal async Task<JToken> GetResponseWithoutDataAsync(string url, HttpMethod requestType = null)
+        {
+            await AuthenticationService?.EnsureAccessValidAsync();
+            var response = await GetHttpResponseAsync(url, data: (object)null, requestType);
+            var content = await response.Content.ReadAsStringAsync();
+            return JToken.Parse(content);
+        }
+
+        protected async Task<HttpResponseMessage> GetHttpResponseAsync<TData>(string url, TData data = default, HttpMethod requestType = null)
         {
             requestType ??= HttpMethod.Post;
             var fullUrl = $"{Resources.UrlServer}{url}";
 
-            var request = connector.CreateRequest(requestType, fullUrl, authData: (STANDARD_AUTHENTICATION_SCHEME, token));
+            var request = connector.CreateRequest(
+                requestType,
+                fullUrl,
+                authData: (STANDARD_AUTHENTICATION_SCHEME, AuthenticationService.AccessToken));
 
             if (data != null)
             {
-                var serializedData = JsonConvert.SerializeObject(data);
+                var serializedData = JsonConvert.SerializeObject(data, jsonSerializerSettings);
                 request.Content = new StringContent(serializedData, Encoding.UTF8, STANDARD_CONTENT_TYPE);
             }
 

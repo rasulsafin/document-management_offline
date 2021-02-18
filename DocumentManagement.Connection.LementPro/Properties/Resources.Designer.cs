@@ -70,11 +70,56 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Create.do.
+        /// </summary>
+        internal static string MethodCreateObject {
+            get {
+                return ResourceManager.GetString("MethodCreateObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/Folders/{0}Folder/GetTree.do.
+        /// </summary>
+        internal static string MethodGetCategoryFolders {
+            get {
+                return ResourceManager.GetString("MethodGetCategoryFolders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/Category/GetMenuCategories.do.
         /// </summary>
         internal static string MethodGetMenuCategories {
             get {
                 return ResourceManager.GetString("MethodGetMenuCategories", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Get.do.
+        /// </summary>
+        internal static string MethodGetObject {
+            get {
+                return ResourceManager.GetString("MethodGetObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/{0}/GetList.do.
+        /// </summary>
+        internal static string MethodGetObjectsList {
+            get {
+                return ResourceManager.GetString("MethodGetObjectsList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectTypes/ObjectType/GetTree.do.
+        /// </summary>
+        internal static string MethodGetTypes {
+            get {
+                return ResourceManager.GetString("MethodGetTypes", resourceCulture);
             }
         }
         
