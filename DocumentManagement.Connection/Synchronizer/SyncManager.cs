@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using Newtonsoft.Json;
 
@@ -15,9 +16,6 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
     {
         private const string REVISIONS = "revisions";
         private const int COUNT_TRY = 3;
-        public static readonly string YANDEX = "YANDEX";
-
-
         private readonly IServiceScopeFactory factoryScope;
         private readonly IMapper mapper;
 
@@ -91,6 +89,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
                     break;
                 }
             }
+        }
+
+        public ICloudManager GetManager()
+        {
+            return disk;
         }
 
         public static async Task<List<SyncAction>> Analysis(

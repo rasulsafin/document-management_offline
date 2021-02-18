@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
@@ -26,6 +27,36 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public string DirAppHref { get; private set; }
 
         public string DirTableHref { get; private set; }
+
+        public async Task<ConnectionStatusDto> GetStatusAsync()
+        {
+            try
+            {
+                var list = await controller.GetListAsync(DirAppHref);
+                if (list != null)
+                {
+                    return new ConnectionStatusDto()
+                    {
+                        Status = RemoteConnectionStatusDto.OK,
+                        Message = "Good",
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionStatusDto()
+                {
+                    Status = RemoteConnectionStatusDto.Error,
+                    Message = ex.Message,
+                };
+            }
+
+            return new ConnectionStatusDto()
+            {
+                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Message = "Not connect",
+            };
+        }
 
         public async Task<bool> Push<T>(T @object, string id)
         {
@@ -65,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             var tableHref = await GetTableHref<T>();
             string name = string.Format(REC_FILE, id);
             var list = await controller.GetListAsync(tableHref);
-            var record = list.FirstOrDefault(x=>x.DisplayName == name);
+            var record = list.FirstOrDefault(x => x.DisplayName == name);
             if (record != null)
             {
                 return await controller.DeleteAsync(record.Href);

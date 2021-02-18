@@ -13,16 +13,22 @@ using Google.Apis.Drive.v3.Data;
 using Google.Apis.Services;
 using Google.Apis.Upload;
 using Google.Apis.Util.Store;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
     public class GoogleDriveController : IDisposable
     {
-        public static readonly string[] SCOPES = { DriveService.Scope.Drive };
         // https://developers.google.com/drive/api/v3/search-files?hl=ru
+        public static readonly string CLIENT_ID = "CLIENT_ID";
+        public static readonly string CLIENT_SECRET = "CLIENT_SECRET";
+        public static readonly string APPLICATION_NAME = "APPLICATION_NAME";
+
+        public static readonly string[] SCOPES = { DriveService.Scope.Drive };
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
         private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
-        private CancellationTokenSource cancellationTokenSource;
+
+
         private UserCredential credential;
         private DriveService service;
 
@@ -32,17 +38,14 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task InitializationAsync(Interface.Dtos.ConnectionInfoDto info)
         {
-            cancellationTokenSource = new CancellationTokenSource();
+            var cancellationTokenSource = new CancellationTokenSource();
 
             ClientSecrets clientSecrets = new ClientSecrets
             {
-                ClientId = Properties.Resources.ClientID,
-                ClientSecret = Properties.Resources.ClientSecret,
+                ClientId = info.ConnectionType.AppProperties[CLIENT_ID],
+                ClientSecret = info.ConnectionType.AppProperties[CLIENT_SECRET],
             };
 
-            // TODO: Найти место для этой помойки
-
-            // FileDataStore dataStore = new FileDataStore("token.json", true);
             DataStore dataStore = new DataStore(info);
 
             credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
@@ -294,7 +297,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public void Dispose()
         {
-            ((IDisposable)cancellationTokenSource).Dispose();
             ((IDisposable)service).Dispose();
         }
         #endregion

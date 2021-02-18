@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
@@ -88,6 +89,23 @@ namespace MRS.DocumentManagement.Connection
             }
 
             return false;
+        }
+
+        public async Task<ConnectionStatusDto> GetStatusAsync()
+        {
+            if (controller == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "Controller null" };
+            try
+            {
+                var list = await controller.GetListAsync(PathManager.GetAppDir());
+                if (list != null)
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good" };
+            }
+            catch (TimeoutException)
+            {
+            }
+
+            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "No network" };
         }
 
         public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)

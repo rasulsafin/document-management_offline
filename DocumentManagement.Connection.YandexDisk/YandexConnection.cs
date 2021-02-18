@@ -9,6 +9,8 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexConnection : IConnection
     {
+        private const string AUTH_FIELD_KEY_TOKEN = "token";
+        private const string NAME_CONNECTION = "Yandex Disk";
         private SyncManager syncManager;
 
         public YandexConnection() { }
@@ -22,12 +24,24 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             try
             {
-                YandexDiskAuth auth = new YandexDiskAuth();
-                var token = await auth.GetYandexDiskToken();
+                if (await IsAuthDataCorrect(info))
+                {
 
-                syncManager.Initialization(new YandexManager(new YandexDiskController(token)));
+                    YandexDiskAuth auth = new YandexDiskAuth();
+                    if (!info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
+                    {
+                        var tokenNew = await auth.GetYandexDiskToken(info);
+                        info.AuthFieldValues.Add(AUTH_FIELD_KEY_TOKEN, tokenNew);
+                    }
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK };
+                    var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
+
+                    syncManager.Initialization(new YandexManager(new YandexDiskController(token)));
+
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                }
+
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Data app not correct", };
             }
             catch (Exception ex)
             {
@@ -37,9 +51,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     Message = ex.Message,
                 };
             }
+        }
+
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
         {
-            throw new NotImplementedException();
+            info.ConnectionType = GetConnectionType();
+            return Task.FromResult(info);
         }
 
         public Task<ProgressSync> GetProgressSyncronization()
@@ -47,14 +64,34 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return Task.FromResult(syncManager.GetProgressSync());
         }
 
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
-            throw new NotImplementedException();
+            var manager = syncManager.GetManager() as YandexManager;
+            if (manager != null)
+            {
+                return await manager.GetStatusAsync();
+            }
+
+            return new ConnectionStatusDto()
+            {
+                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Message = "Manager null",
+            };
         }
 
         public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
         {
-            return Task.FromResult(syncManager.Initilize);
+            var connect = info.ConnectionType;
+            if (connect.Name == NAME_CONNECTION)
+            {
+                if (connect.AppProperties.ContainsKey(YandexDiskAuth.KEY_CLIENT_ID) &&
+                    connect.AppProperties.ContainsKey(YandexDiskAuth.KEY_RETURN_URL))
+                {
+                    return Task.FromResult(true);
+                }
+            }
+
+            return Task.FromResult(false);
         }
 
         public async Task<bool> StartSyncronization()
@@ -79,13 +116,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             var type = new ConnectionTypeDto
             {
-                Name = "yandexdisk",
-                AuthFieldNames = new List<string>() { },
+                Name = NAME_CONNECTION,
+                AuthFieldNames = new List<string>() { "token" },
                 AppProperties = new Dictionary<string, string>
                 {
-                    { "CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051" },
-                    { "CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
-                    { "RETURN_URL", @"http://localhost:8000/oauth/" },
+                    { YandexDiskAuth.KEY_CLIENT_ID, "b1a5acbc911b4b31bc68673169f57051" },
+                    { YandexDiskAuth.KEY_CLIENT_SECRET, "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
+                    { YandexDiskAuth.KEY_RETURN_URL, @"http://localhost:8000/oauth/" },
                 },
                 ObjectiveTypes = new List<ObjectiveTypeDto>()
                 {
@@ -95,5 +132,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
             return type;
         }
+
     }
 }

@@ -131,5 +131,10 @@ namespace DocumentManagement.Connection.Tests
             RunPullFile = true;
             return Task.FromResult(true);
         }
+
+        public Task<ConnectionStatusDto> GetStatusAsync()
+        {
+             throw new System.NotImplementedException();
+        }
     }
 }

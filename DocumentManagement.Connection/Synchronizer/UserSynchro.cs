@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task DeleteRemote(SyncAction action)
         {
-            await disk.Delete<UserDto>(action.ID.ToString());
+            await disk.Delete<UserSync>(action.ID.ToString());
             action.IsComplete = true;
         }
 
@@ -41,29 +41,42 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             local = await GetLocal(action.ID);
             action.IsComplete = true;
 
-            if (local != null)
+            if (remote != null)
             {
-                remote.Update(local);
+                if (local != null)
+                {
+                    remote.Update(local);
+                }
+                else
+                {
+                    local = new User()
+                    {
+                        ID = remote.ID,
+                        Login = remote.Login,
+                        Name = remote.Name,
+                    };
+                    context.Users.Add(local);
+                }
             }
             else
             {
-                local = new User()
-                {
-                    ID = remote.ID,
-                    Login = remote.Login,
-                    Name = remote.Name,
-                };
-                context.Users.Add(local);
+                action.IsComplete = false;
             }
         }
 
-        
-
         public async Task Upload(SyncAction action)
         {
-            remote = new UserSync(await GetLocal(action.ID));
-            await disk.Push(remote, action.ID.ToString());
-            action.IsComplete = true;
+            var user = await GetLocal(action.ID);
+            if (user != null)
+            {
+                remote = new UserSync();
+                await disk.Push(remote, action.ID.ToString());
+                action.IsComplete = true;
+            }
+            else
+            {
+                action.IsComplete = false;
+            }
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)

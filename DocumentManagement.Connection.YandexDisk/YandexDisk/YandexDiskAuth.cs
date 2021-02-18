@@ -7,29 +7,34 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 {
     public class YandexDiskAuth
     {
+        public static readonly string KEY_CLIENT_ID = "CLIENT_ID";
+        public static readonly string KEY_CLIENT_SECRET = "CLIENT_SECRET";
+        public static readonly string KEY_RETURN_URL = "RETURN_URL";
+        public static readonly string KEY_AUTH_URL = "AUTH_URL";
+
         public string access_token;
         public string token_type;
         public int expires_in;
 
-        private static readonly string CLIENT_ID = "b1a5acbc911b4b31bc68673169f57051";
-        private static readonly string CLIENT_SECRET = "b4890ed3aa4e4a4e9e207467cd4a0f2c";
-        private static readonly string RETURN_URL = @"http://localhost:8000/oauth/";
 
         /// <summary>
         /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        public async Task<string> GetYandexDiskToken()
+        public async Task<string> GetYandexDiskToken(Interface.Dtos.ConnectionInfoDto info)
         {
+            var connect = info.ConnectionType;
+            var clientId = connect.AppProperties[KEY_CLIENT_ID];
+            var returnUri = connect.AppProperties[KEY_RETURN_URL];
+
             if (!HttpListener.IsSupported)
                 throw new Exception("The listener is not supported.");
             var httpListener = new HttpListener();
-            httpListener.Prefixes.Add(RETURN_URL);
+            httpListener.Prefixes.Add(returnUri);
             httpListener.Start();
 
             // stage 1, 2, 3
-            // var oauthUrl = $"https://oauth.yandex.ru/authorize?response_type=token&client_id={CLIENT_ID}";
-            var oauthUrl = $"https://oauth.yandex.ru/authorize?response_type=token&client_id={CLIENT_ID}";
+            var oauthUrl = $"https://oauth.yandex.ru/authorize?response_type=token&client_id={clientId}";
 
             YandexHelper.OpenBrowser(oauthUrl);
             string result = string.Empty;
