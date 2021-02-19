@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper.Internal;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -46,37 +45,75 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         private string AccessToken
         {
-            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(TOKEN_AUTH_NAME);
+            get
+            {
+                if (connectionInfoDto.AuthFieldValues.TryGetValue(TOKEN_AUTH_NAME, out var value))
+                    return value;
+
+                return default;
+            }
+
             set => SetAuthValue(connectionInfoDto, TOKEN_AUTH_NAME, value);
         }
 
         private string AccessRefreshToken
         {
-            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(REFRESH_TOKEN_AUTH_NAME);
+            get
+            {
+                if (connectionInfoDto.AuthFieldValues.TryGetValue(REFRESH_TOKEN_AUTH_NAME, out var value))
+                    return value;
+
+                return default;
+            }
+
             set => SetAuthValue(connectionInfoDto, REFRESH_TOKEN_AUTH_NAME, value);
         }
 
         private string AccessEnd
         {
-            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(END_AUTH_NAME);
+            get
+            {
+                if (connectionInfoDto.AuthFieldValues.TryGetValue(END_AUTH_NAME, out var value))
+                    return value;
+                return default;
+            }
+
             set => SetAuthValue(connectionInfoDto, END_AUTH_NAME, value);
         }
 
         private string AppClientId
         {
-            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CLIENT_ID_NAME);
+            get
+            {
+                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CLIENT_ID_NAME, out var value))
+                    return value;
+                return default;
+            }
+
             set => SetAppProperty(connectionInfoDto, CLIENT_ID_NAME, value);
         }
 
         private string AppClientSecret
         {
-            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CLIENT_SECRET_NAME);
+            get
+            {
+                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CLIENT_SECRET_NAME, out var value))
+                    return value;
+                return default;
+            }
+
             set => SetAppProperty(connectionInfoDto, CLIENT_SECRET_NAME, value);
         }
 
         private string AppCallBackUrl
         {
-            get => connectionInfoDto.ConnectionType.AppProperties.GetOrDefault(CALLBACK_URL_NAME);
+            get
+            {
+                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CALLBACK_URL_NAME, out var value))
+                    return value;
+                return default;
+            }
+
             set => SetAppProperty(connectionInfoDto, CALLBACK_URL_NAME, value);
         }
 
