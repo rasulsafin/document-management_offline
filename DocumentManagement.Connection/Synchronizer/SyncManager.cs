@@ -21,11 +21,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         #region field
 #if TEST
-        internal
+      //  internal
 #else
-        private
+      //  private
 #endif
-        ICloudManager disk;
+        //ICloudManager disk;
 
 #if TEST
         internal
@@ -71,7 +71,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public void Initialization(ICloudManager manager)
         {
+<<<<<<< HEAD:DocumentManagement.Connection/Synchronizer/SyncManager.cs
             disk = manager;
+=======
+           // disk = new CloudManager(new YandexDiskController(token));
+>>>>>>> development:DocumentManagement.Connection.YandexDisk/Synchronizer/SyncManager.cs
             Initilize = true;
         }
 
@@ -134,86 +138,86 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
             NowSync = true;
             NeedStopSync = false;
-            RevisionCollection remoteRevisions = await disk.Pull<RevisionCollection>(REVISIONS);
-            if (remoteRevisions == null) remoteRevisions = new RevisionCollection();
+           // RevisionCollection remoteRevisions = await disk.Pull<RevisionCollection>(REVISIONS);
+           // if (remoteRevisions == null) remoteRevisions = new RevisionCollection();
             var synchros = new ISynchroTable[]
             {
-                new UserSynchro(disk, context),
-                new ProjectSynchro(disk, context, mapper),
-                new ObjectiveTypeSynchro(disk, context, mapper),
-                new ObjectiveSynchro(disk, context, mapper),
-                new ItemSynchro(disk, context),
+               // new UserSynchro(disk, context),
+               // new ProjectSynchro(disk, context, mapper),
+               // new ObjectiveTypeSynchro(disk, context, mapper),
+               // new ObjectiveSynchro(disk, context, mapper),
+                // new ItemSynchro(disk, context),
             };
-            List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
-            if (syncActions.Count > 0)
-            {
-                progress.Total = syncActions.Count;
-                progress.Current = 0;
+           // List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
+            //if (syncActions.Count > 0)
+            //{
+            //    progress.Total = syncActions.Count;
+            //    progress.Current = 0;
 
-                try
-                {
-                    progress.Message = "Sync";
-                    for (int i = 0; i < COUNT_TRY; i++)
-                    {
-                        List<SyncAction> noComplete = new List<SyncAction>();
-                        foreach (var action in syncActions)
-                        {
-                            if (NeedStopSync) break;
-                            await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
-                            if (action.IsComplete)
-                                progress.Current++;
-                            else
-                                noComplete.Add(action);
-                        }
+            //    try
+            //    {
+            //        progress.Message = "Sync";
+            //        for (int i = 0; i < COUNT_TRY; i++)
+            //        {
+            //            List<SyncAction> noComplete = new List<SyncAction>();
+            //            foreach (var action in syncActions)
+            //            {
+            //                if (NeedStopSync) break;
+            //               // await FindSyncroRunAction(localRevisions, remoteRevisions, action, synchros);
+            //                if (action.IsComplete)
+            //                    progress.Current++;
+            //                else
+            //                    noComplete.Add(action);
+            //            }
 
-                        if (noComplete.Count == 0) break;
+            //            if (noComplete.Count == 0) break;
 
-                        syncActions = noComplete;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    progress.Error = ex;
-                }
-                finally
-                {
-                    progress.Message = "Save";
-                    await disk.Push(remoteRevisions, REVISIONS);
-                    SaveRevisions();
-                    NowSync = false;
-                    if (progress.Error == null)
-                        progress.Message = "Complete";
-                    else
-                        progress.Message = "Error";
-                }
-            }
-            else
-            {
-                progress.Message = "Not Need";
-            }
+            //            syncActions = noComplete;
+            //        }
+            //    }
+            //    catch (Exception ex)
+            //    {
+            //        progress.Error = ex;
+            //    }
+            //    finally
+            //    {
+            //        progress.Message = "Save";
+            //        await disk.Push(remoteRevisions, REVISIONS);
+            //        SaveRevisions();
+            //        NowSync = false;
+            //        if (progress.Error == null)
+            //            progress.Message = "Complete";
+            //        else
+            //            progress.Message = "Error";
+            //    }
+            //}
+            //else
+            //{
+            //    progress.Message = "Not Need";
+            //}
         }
 
         private void LoadRevisions()
         {
-            string fileName = PathManager.GetLocalRevisionFile();
-            FileInfo info = new FileInfo(fileName);
-            try
-            {
-                string json = File.ReadAllText(fileName);
-                localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
-            }
-            catch
-            {
-                localRevisions = new RevisionCollection();
-                SaveRevisions();
-            }
+           // string fileName = PathManager.GetLocalRevisionFile();
+            //FileInfo info = new FileInfo(fileName);
+            //try
+            //{
+            //    string json = File.ReadAllText(fileName);
+            //    localRevisions = JsonConvert.DeserializeObject<RevisionCollection>(json);
+            //}
+            //catch
+            //{
+            //    localRevisions = new RevisionCollection();
+            //    SaveRevisions();
+            //}
         }
 
         private void SaveRevisions()
         {
-            string fileName = PathManager.GetLocalRevisionFile();
-            string str = JsonConvert.SerializeObject(localRevisions, Formatting.Indented);
-            File.WriteAllText(fileName, str);
+            // string fileName = PathManager.GetLocalRevisionFile();
+            //string str = JsonConvert.SerializeObject(localRevisions, Formatting.Indented);
+            //File.WriteAllText(fileName, str);
         }
     }
 }

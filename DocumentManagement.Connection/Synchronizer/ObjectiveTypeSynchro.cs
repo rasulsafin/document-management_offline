@@ -11,15 +11,15 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class ObjectiveTypeSynchro : ISynchroTable
     {
-        private ICloudManager disk;
+        //private ICloudManager disk;
         private DMContext context;
         private IMapper mapper;
         private ObjectiveType local;
         private ObjectiveTypeDto remote;
 
-        public ObjectiveTypeSynchro(ICloudManager disk, DMContext context, IMapper mapper)
+        public ObjectiveTypeSynchro(/*ICloudManager disk,*/ DMContext context, IMapper mapper)
         {
-            this.disk = disk;
+            //this.disk = disk;
             this.context = context;
             this.mapper = mapper;
         }
@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task DeleteRemote(SyncAction action)
         {
-            await disk.Delete<ObjectiveTypeDto>(action.ID.ToString());
+           // await disk.Delete<ObjectiveTypeDto>(action.ID.ToString());
             action.IsComplete = true;
         }
 
@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             if (local != null)
             {
                 remote = mapper.Map<ObjectiveTypeDto>(local);
-                await disk.Push(remote, action.ID.ToString());
+               // await disk.Push(remote, action.ID.ToString());
             }
 
             action.IsComplete = true;
@@ -107,8 +107,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private async Task GetRemote(int id)
         {
-            if (remote?.ID != (ID<ObjectiveTypeDto>)id)
-                remote = await disk.Pull<ObjectiveTypeDto>(id.ToString());
+           // if (remote?.ID != (ID<ObjectiveTypeDto>)id)
+               // remote = await disk.Pull<ObjectiveTypeDto>(id.ToString());
         }
     }
 }

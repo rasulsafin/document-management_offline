@@ -10,14 +10,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class UserSynchro : ISynchroTable
     {
-        private ICloudManager disk;
+       // private ICloudManager disk;
         private DMContext context;
         private User local;
         private UserSync remote;
 
-        public UserSynchro(ICloudManager disk, DMContext context)
+        public UserSynchro(/*ICloudManager disk,*/ DMContext context)
         {
-            this.disk = disk;
+           // this.disk = disk;
             this.context = context;
         }
 
@@ -31,7 +31,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task DeleteRemote(SyncAction action)
         {
+<<<<<<< HEAD:DocumentManagement.Connection/Synchronizer/UserSynchro.cs
             await disk.Delete<UserSync>(action.ID.ToString());
+=======
+           // await disk.Delete<UserDto>(action.ID.ToString());
+>>>>>>> development:DocumentManagement.Connection.YandexDisk/Synchronizer/UserSynchro.cs
             action.IsComplete = true;
         }
 
@@ -66,6 +70,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task Upload(SyncAction action)
         {
+<<<<<<< HEAD:DocumentManagement.Connection/Synchronizer/UserSynchro.cs
             var user = await GetLocal(action.ID);
             if (user != null)
             {
@@ -77,6 +82,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             {
                 action.IsComplete = false;
             }
+=======
+            remote = new UserSync(await GetLocal(action.ID));
+           // await disk.Push(remote, action.ID.ToString());
+            action.IsComplete = true;
+>>>>>>> development:DocumentManagement.Connection.YandexDisk/Synchronizer/UserSynchro.cs
         }
 
         public List<Revision> GetRevisions(RevisionCollection revisions)
@@ -115,10 +125,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private async Task<UserSync> GetRemote(int id)
         {
-            if (remote?.ID != id)
-            {
-                remote = await disk.Pull<UserSync>(id.ToString());
-            }
+           // if (remote?.ID != id)
+           // {
+               // remote = await disk.Pull<UserSync>(id.ToString());
+          //  }
 
             return remote;
         }
