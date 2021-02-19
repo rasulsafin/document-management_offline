@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection
+namespace MRS.DocumentManagement.Interface
 {
     /// <summary>
     /// Interface for any type of connection.

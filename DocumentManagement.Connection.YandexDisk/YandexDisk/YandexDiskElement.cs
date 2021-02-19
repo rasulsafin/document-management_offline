@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class YandexDiskElement : DiskElement
+    public class YandexDiskElement //: DiskElement
     {
         private string lastModifiedString;
 
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:href":
-                            result.Href = GetValueElement(element);
+                           // result.Href = GetValueElement(element);
                             break;
                         case "d:propstat":
                             GetPropStatus(result, element);
@@ -87,7 +87,7 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:status":
-                            result.Status = GetValueElement(element);
+                           // result.Status = GetValueElement(element);
                             break;
                         case "d:prop":
                             GetProp(result, element);
@@ -113,13 +113,13 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:creationdate":
-                            result.CreationDate = GetValueElement(element);
+                          //  result.CreationDate = GetValueElement(element);
                             break;
                         case "d:displayname":
-                            result.DisplayName = GetValueElement(element);
+                           // result.DisplayName = GetValueElement(element);
                             break;
                         case "d:getcontentlength":
-                            result.ContentLength = GetValueElement(element);
+                           // result.ContentLength = GetValueElement(element);
                             break;
                         case "d:getlastmodified":
                             SetLastModified(result, element);
@@ -128,7 +128,7 @@ namespace MRS.DocumentManagement.Connection
                             GetResourceType(result, element);
                             break;
                         case "d:getcontenttype":
-                            result.ContentType = GetValueElement(element);
+                           // result.ContentType = GetValueElement(element);
                             break;
                         case "mulca_file_url":
                             result.MulcaFileUrl = GetValueElement(element);
@@ -137,7 +137,7 @@ namespace MRS.DocumentManagement.Connection
                             result.ETag = GetValueElement(element);
                             break;
                         case "file_url":
-                            result.FileUrl = GetValueElement(element);
+                           // result.FileUrl = GetValueElement(element);
                             break;
                         case "mulca_digest_url":
                             result.MulcaDigestUrl = GetValueElement(element);
@@ -157,7 +157,7 @@ namespace MRS.DocumentManagement.Connection
         private static void SetLastModified(YandexDiskElement result, XmlElement element)
         {
             result.lastModifiedString = GetValueElement(element);
-            result.LastModified = DateTime.Parse(result.lastModifiedString);
+           // result.LastModified = DateTime.Parse(result.lastModifiedString);
         }
 
         private static void GetResourceType(YandexDiskElement result, XmlElement root)
@@ -169,7 +169,7 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:collection":
-                            result.IsDirectory = true;
+                           // result.IsDirectory = true;
                             break;
                         default:
                             throw new XmlException($"GetResourcetype: Неизвестный тег [{element.Name}]");
@@ -178,7 +178,7 @@ namespace MRS.DocumentManagement.Connection
                 }
                 else if (node is XmlText text)
                 {
-                    result.ResourceType = text.Value;
+                    //result.ResourceType = text.Value;
                 }
                 else
                 {

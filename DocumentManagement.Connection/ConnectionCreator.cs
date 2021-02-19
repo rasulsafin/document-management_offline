@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
@@ -27,9 +27,9 @@ namespace MRS.DocumentManagement.Connection
             connections = new Dictionary<string, Type>();
 
             var list = new List<ConnectionTypeDto>();
-            var listOfTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .SelectMany(x => x.GetTypes())
-                .Where(x => typeof(IConnection).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
+            var listOfTypes = System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
+                        .SelectMany(x => Assembly.Load(AssemblyName.GetAssemblyName(x)).GetTypes())
+                        .Where(x => typeof(IConnection).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
             foreach (Type type in listOfTypes)
             {
