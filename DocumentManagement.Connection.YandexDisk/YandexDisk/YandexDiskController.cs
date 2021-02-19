@@ -39,15 +39,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                         xml.Load(xmlReader);
                 }
 
-        ////        response.Close();
-        ////        List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
-        ////        return items;
-        ////    }
-        ////    catch (Exception ex)
-        ////    {
-        ////        throw WebExceptionHandler(ex);
-        ////    }
-        ////}
+                response.Close();
+                List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
+                return items;
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+            }
+        }
 
         public async Task<CloudElement> GetInfoAsync(string path = "/")
         {
@@ -62,15 +62,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                         xml.Load(xmlReader);
                 }
 
-        //        response.Close();
-        //        YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
-        //        return item;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw WebExceptionHandler(ex);
-        //    }
-        //}
+                response.Close();
+                YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
+                return item;
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+            }
+        }
 
         #endregion
         #region Create Directory
@@ -303,27 +303,27 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             try
             {
                 FileInfo fileInfo = new FileInfo(fileName);
-                //string diskName = PathManager.FileName(href, fileInfo.Name);
-               // HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
-                //using (var reader = fileInfo.OpenRead())
-                //{
-                //    request.ContentLength = reader.Length;
-                //    using (var writer = request.GetRequestStream())
-                //    {
-                //        const int BUFFER_LENGTH = 4096;
-                //        var total = (ulong)reader.Length;
-                //        ulong current = 0;
-                //        var buffer = new byte[BUFFER_LENGTH];
-                //        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                //        while (count > 0)
-                //        {
-                //            writer.Write(buffer, 0, count);
-                //            current += (ulong)count;
-                //            progressChenge?.Invoke(current, total);
-                //            count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                //        }
-                //    }
-                //}
+                string diskName = PathManager.FileName(href, fileInfo.Name);
+                HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
+                using (var reader = fileInfo.OpenRead())
+                {
+                    request.ContentLength = reader.Length;
+                    using (var writer = request.GetRequestStream())
+                    {
+                        const int BUFFER_LENGTH = 4096;
+                        var total = (ulong)reader.Length;
+                        ulong current = 0;
+                        var buffer = new byte[BUFFER_LENGTH];
+                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        while (count > 0)
+                        {
+                            writer.Write(buffer, 0, count);
+                            current += (ulong)count;
+                            progressChenge?.Invoke(current, total);
+                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        }
+                    }
+                }
 
                 using (WebResponse response = await request.GetResponseAsync())
                 {

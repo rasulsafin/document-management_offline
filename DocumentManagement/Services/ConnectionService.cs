@@ -49,6 +49,7 @@ namespace MRS.DocumentManagement.Services
             connectionInfoDto = await connection.UpdateConnectionInfo(connectionInfoDto);
             connectionInfo = mapper.Map(connectionInfoDto, connectionInfo);
             context.Update(connectionInfo);
+            await context.SaveChangesAsync();
 
             // Update types stored in connection info
             var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
@@ -60,8 +61,8 @@ namespace MRS.DocumentManagement.Services
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
-            var newValues = connectionInfoDto.EnumerationTypes
-                .SelectMany(x => x.EnumerationValues).ToList() ?? Enumerable.Empty<EnumerationValueDto>();
+            var newValues = connectionInfoDto.EnumerationTypes?
+                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
                 .Where(x => !newValues.Any(t =>

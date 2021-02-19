@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
@@ -12,14 +10,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     {
         private const string AUTH_FIELD_KEY_TOKEN = "token";
         private const string NAME_CONNECTION = "Yandex Disk";
-        private SyncManager syncManager;
+        private YandexManager manager;
 
         public YandexConnection() { }
-
-        public YandexConnection(SyncManager syncManager)
-        {
-            this.syncManager = syncManager;
-        }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
@@ -36,8 +29,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     }
 
                     var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
-
-                    syncManager.Initialization(new YandexManager(new YandexDiskController(token)));
+                    manager = new YandexManager(new YandexDiskController(token));
 
                     return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
                 }
@@ -56,18 +48,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
         {
-            info.ConnectionType = GetConnectionType();
             return Task.FromResult(info);
-        }
-
-        public Task<ProgressSync> GetProgressSyncronization()
-        {
-            return Task.FromResult(syncManager.GetProgressSync());
         }
 
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
-            var manager = syncManager.GetManager() as YandexManager;
             if (manager != null)
             {
                 return await manager.GetStatusAsync();
@@ -93,23 +78,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             }
 
             return Task.FromResult(false);
-        }
-
-        public async Task<bool> StartSyncronization()
-        {
-            if (syncManager.Initilize)
-            {
-                await syncManager.StartSync();
-                return true;
-            }
-
-            return false;
-        }
-
-        public Task<bool> StopSyncronization()
-        {
-            syncManager.StopSync();
-            return Task.FromResult(true);
         }
 
         // TODO: Make a proper method.

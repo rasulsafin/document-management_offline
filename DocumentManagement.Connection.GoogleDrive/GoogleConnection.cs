@@ -1,22 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Synchronizer;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
     public class GoogleConnection : IConnection
     {
         private const string NAME_CONNECT = "Google Drive";
-        private SyncManager syncManager;
+        // private SyncManager syncManager;
         private ConnectionInfoDto connectionInfo;
+        private GoogleDriveManager manager;
 
-        public GoogleConnection(SyncManager syncManager)
+        public GoogleConnection()
         {
-            this.syncManager = syncManager;
         }
+
+        //public GoogleConnection(SyncManager syncManager)
+        //{
+        //    this.syncManager = syncManager;
+        //}
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
@@ -25,8 +29,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 connectionInfo = info;
                 GoogleDriveController driveController = new GoogleDriveController();
                 await driveController.InitializationAsync(connectionInfo);
-                var manager = new GoogleDriveManager(driveController);
-                syncManager.Initialization(manager);
+                manager = new GoogleDriveManager(driveController);
+                //syncManager.Initialization(manager);
 
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, };
             }
@@ -62,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
-            GoogleDriveManager manager = syncManager.GetManager() as GoogleDriveManager;
+            //GoogleDriveManager manager = syncManager.GetManager() as GoogleDriveManager;
             if (manager != null)
             {
                 return await manager.GetStatusAsync();
