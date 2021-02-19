@@ -136,33 +136,22 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         public async Task UpdateTaskAsync_CreatedNewTask_ReturnsTrue()
         {
             var id = 402015;
+            var userId = 44212;
             var existingTask = await service.GetTaskAsync(id);
 
-            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
             var updatedTaskValue = new TaskValueToUpdate
             {
-                BimRef = 402297,
-                Controllers = string.Empty,
-                CreationDate = existingTask.Values.CreationDate,
-                Description = $"Описание новой задачи {Guid.NewGuid()}",
-                DocumentResolutionFiles = new List<object>(),
-                Executors = string.Empty,
-                Favorites = string.Empty,
-                Type = 40179,
-                IsResolution = false,
-                Name = $"НовИмя Задача от {DateTime.Now}",
-                Project = 402014,
-                IsExpired = false,
-                I60099 = 44212,
-                LastModifiedDate = DateTime.Now.ToString(dateFormat),
+                BimRef = existingTask.Values.BimRef.ID,
+                Type = existingTask.Values.Type.ID,
+                Name = $"Нов22Имя Задача от {DateTime.Now}",
+                Project = existingTask.Values.Project.ID,
+                I60099 = userId,
+                StartDate = "2020-05-10T12:55:37.000Z",
             };
             var taskToUpdate = new TaskToUpdate
             {
-                CanAutoEditParents = false,
                 ID = id,
                 Values = updatedTaskValue,
-                AddedFileIds = new List<string>(),
-                RemovedFileIds = new List<string>(),
             };
 
             var result = await service.UpdateTaskAsync(taskToUpdate);

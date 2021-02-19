@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests
+namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
 {
     [TestClass]
     public class AuthenticationServiceTests

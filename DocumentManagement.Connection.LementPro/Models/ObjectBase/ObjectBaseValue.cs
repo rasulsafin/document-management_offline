@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         /// During creating this field should contain user id (web form uses logged in user id).
         /// </summary>
         [DataMember(Name = "i60099")]
-        public string I60099 { get; set; }
+        public dynamic I60099 { get; set; }
 
         [DataMember(Name = "linkedDocuments")]
         public dynamic LinkedDocuments { get; set; }

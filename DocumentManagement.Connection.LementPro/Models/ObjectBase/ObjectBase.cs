@@ -8,6 +8,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "id")]
         public int? ID { get; set; }
 
+        [DataMember(Name = "uniqueId")]
+        public string UniqueId { get; set; }
+
         [DataMember(Name = "objectUrl")]
         public string ObjectUrl { get; set; }
 
