@@ -1,6 +1,6 @@
 ﻿#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
-#undef DEVELOPMENT // Disable one
+#undef TEST // Disable one
 
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
@@ -231,6 +231,11 @@ namespace MRS.DocumentManagement.Database
                 .HasMany(x => x.AuthFieldNames)
                 .WithOne(x => x.ConnectionType)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionType>()
+               .HasMany(x => x.ObjectiveTypes)
+               .WithOne(x => x.ConnectionType)
+               .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ConnectionInfo>()
                 .HasMany(x => x.AuthFieldValues)
