@@ -535,7 +535,7 @@ namespace DocumentManagement.Database.Migrations
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
                         .WithMany("ConnectionInfos")
                         .HasForeignKey("ConnectionTypeID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ConnectionType");
@@ -594,7 +594,8 @@ namespace DocumentManagement.Database.Migrations
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
                         .WithMany("EnumerationTypes")
-                        .HasForeignKey("ConnectionTypeID");
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ConnectionType");
                 });
