@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    [Migration("20210219093347_FixDeletionOfConnectionType")]
+    [Migration("20210219114151_FixDeletionOfConnectionType")]
     partial class FixDeletionOfConnectionType
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -537,7 +537,7 @@ namespace DocumentManagement.Database.Migrations
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
                         .WithMany("ConnectionInfos")
                         .HasForeignKey("ConnectionTypeID")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ConnectionType");
@@ -596,7 +596,8 @@ namespace DocumentManagement.Database.Migrations
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
                         .WithMany("EnumerationTypes")
-                        .HasForeignKey("ConnectionTypeID");
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("ConnectionType");
                 });
