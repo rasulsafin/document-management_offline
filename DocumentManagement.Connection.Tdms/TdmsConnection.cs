@@ -15,16 +15,17 @@ namespace MRS.DocumentManagement.Connection.Tdms
         public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
             tdms = new TDMSApplication();
-            var login = info.AuthFieldValues[Auth.LOGIN];
-            var password = info.AuthFieldValues[Auth.PASSWORD];
-            var server = info.AuthFieldValues[Auth.SERVER];
-            var db = info.AuthFieldValues[Auth.DATABASE];
 
             if (tdms.IsLoggedIn)
                 tdms.Quit();
 
             try
             {
+                var login = info.AuthFieldValues[Auth.LOGIN];
+                var password = info.AuthFieldValues[Auth.PASSWORD];
+                var server = info.AuthFieldValues[Auth.SERVER];
+                var db = info.AuthFieldValues[Auth.DATABASE];
+
                 tdms.Login(login, password, db, server);
             }
             catch (Exception e)
@@ -102,27 +103,36 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         private ICollection<EnumerationTypeDto> GetEnumerationTypes()
         {
-            var tdmsType = tdms.ObjectDefs[ObjectTypeID.COMPANY];
-            var enumerationType = new EnumerationTypeDto()
+            var list = new List<EnumerationTypeDto>();
+            try
             {
-                ExternalId = tdmsType.SysName,
-                Name = tdmsType.Description,
-                EnumerationValues = new List<EnumerationValueDto>(),
-            };
-
-            var queryCom = tdms.CreateQuery();
-            queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.COMPANY);
-
-            foreach (TDMSObject contractor in queryCom.Objects)
-            {
-                enumerationType.EnumerationValues.Add(new EnumerationValueDto()
+                var tdmsType = tdms.ObjectDefs[ObjectTypeID.COMPANY];
+                var enumerationType = new EnumerationTypeDto()
                 {
-                    ExternalId = contractor.GUID,
-                    Value = contractor.Description,
-                });
+                    ExternalId = tdmsType.SysName,
+                    Name = tdmsType.Description,
+                    EnumerationValues = new List<EnumerationValueDto>(),
+                };
+
+                var queryCom = tdms.CreateQuery();
+                queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.COMPANY);
+
+                foreach (TDMSObject contractor in queryCom.Objects)
+                {
+                    enumerationType.EnumerationValues.Add(new EnumerationValueDto()
+                    {
+                        ExternalId = contractor.GUID,
+                        Value = contractor.Description,
+                    });
+                }
+
+                list.Add(enumerationType);
+            }
+            catch
+            {
             }
 
-            return new List<EnumerationTypeDto>() { enumerationType };
+            return list;
         }
     }
 }
