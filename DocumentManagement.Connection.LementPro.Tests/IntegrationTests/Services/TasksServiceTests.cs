@@ -71,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         }
 
         [TestMethod]
-        public async Task CreateTask_NewTaskWithCorrectFields_ReturnsTrue()
+        public async Task CreateTaskAsync_NewTaskWithCorrectFields_ReturnsTrue()
         {
             //var defaultType = (await service.GetTasksTypesAsync()).First();
             var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
@@ -97,7 +97,78 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             var result = await service.CreateTask(newTask);
 
+            Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
+        }
+
+        [TestMethod]
+        public async Task DeleteTaskAsync_CreatedNewTask_ReturnsTrue()
+        {
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var newTaskValue = new ObjectBaseValueToCreate
+            {
+                Type = 40179,
+                IsResolution = false,
+                Name = $"Задача от {DateTime.Now}",
+                Description = $"Описание новой задачи {Guid.NewGuid()}",
+                Project = "402014",
+                IsExpired = false,
+                I60099 = "44212",
+                StartDate = DateTime.Now.ToString(dateFormat),
+                BimRef = "402297",
+            };
+            var newTask = new ObjectBaseToCreate
+            {
+                CanAutoEditParents = false,
+                Values = newTaskValue,
+                FileIds = new List<string>(),
+            };
+            var created = await service.CreateTask(newTask);
+
+            // Wait for creating (2 sec is enough usually)
+            await Task.Delay(3000);
+
+            var result = await service.DeleteTaskAsync(created.ID.Value);
+
             Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task UpdateTaskAsync_CreatedNewTask_ReturnsTrue()
+        {
+            var id = 402015;
+            var existingTask = await service.GetTaskAsync(id);
+
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var updatedTaskValue = new TaskValueToUpdate
+            {
+                BimRef = 402297,
+                Controllers = string.Empty,
+                CreationDate = existingTask.Values.CreationDate,
+                Description = $"Описание новой задачи {Guid.NewGuid()}",
+                DocumentResolutionFiles = new List<object>(),
+                Executors = string.Empty,
+                Favorites = string.Empty,
+                Type = 40179,
+                IsResolution = false,
+                Name = $"НовИмя Задача от {DateTime.Now}",
+                Project = 402014,
+                IsExpired = false,
+                I60099 = 44212,
+                LastModifiedDate = DateTime.Now.ToString(dateFormat),
+            };
+            var taskToUpdate = new TaskToUpdate
+            {
+                CanAutoEditParents = false,
+                ID = id,
+                Values = updatedTaskValue,
+                AddedFileIds = new List<string>(),
+                RemovedFileIds = new List<string>(),
+            };
+
+            var result = await service.UpdateTaskAsync(taskToUpdate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(id, result.ID);
         }
     }
 }

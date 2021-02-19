@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
 
         /// <summary>
         /// ??? Response contains the field.
-        /// During creating this field should contain user id (web form uses logged in user id)
+        /// During creating this field should contain user id (web form uses logged in user id).
         /// </summary>
         [DataMember(Name = "i60099")]
         public string I60099 { get; set; }

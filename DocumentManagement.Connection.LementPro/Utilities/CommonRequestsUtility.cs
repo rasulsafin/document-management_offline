@@ -104,11 +104,11 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return response[RESPONSE_OBJECT_NAME].ToObject<ObjectBase>();
         }
 
-        protected internal async Task<bool> CreateObjectAsync(ObjectBaseToCreate objectToCreate)
+        protected internal async Task<ObjectBaseCreateResult> CreateObjectAsync(ObjectBaseToCreate objectToCreate)
         {
             var response = await RequestUtility.GetResponseAsync(Resources.MethodCreateObject, objectToCreate);
             var createResult = response.ToObject<ObjectBaseCreateResult>();
-            return createResult.IsSuccess.GetValueOrDefault();
+            return createResult;
         }
 
         protected internal async Task<List<LementProType>> GetTypesAsync()
@@ -118,6 +118,22 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
             // Types tree has one root with all types included in Items
             return typesTree.FirstOrDefault().Items;
+        }
+
+        protected internal async Task<bool> DeleteObjectAsync(int objectId)
+        {
+            var data = new { id = objectId };
+
+            try
+            {
+                await RequestUtility.GetResponseAsync(Resources.MethodArchiveObject, data);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

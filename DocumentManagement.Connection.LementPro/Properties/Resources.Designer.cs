@@ -70,6 +70,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Archive.do.
+        /// </summary>
+        internal static string MethodArchiveObject {
+            get {
+                return ResourceManager.GetString("MethodArchiveObject", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Create.do.
         /// </summary>
         internal static string MethodCreateObject {
@@ -120,6 +129,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         internal static string MethodGetTypes {
             get {
                 return ResourceManager.GetString("MethodGetTypes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/Task/Edit.do.
+        /// </summary>
+        internal static string MethodTaskUpdate {
+            get {
+                return ResourceManager.GetString("MethodTaskUpdate", resourceCulture);
             }
         }
         

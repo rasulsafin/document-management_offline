@@ -4,6 +4,8 @@
     {
         public const string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";
 
+        public const int STATE_ARCHIVED = 2;
+
         public const string AUTH_NAME_LOGIN = "login";
         public const string AUTH_NAME_PASSWORD = "password";
         // TODO: move common constants to common project

@@ -121,6 +121,10 @@
     <value>/Services/Authentication/Login.do</value>
     <comment>Method to log in</comment>
   </data>
+  <data name="MethodArchiveObject" xml:space="preserve">
+    <value>/Services/ObjectBase/Archive.do</value>
+    <comment>Method to archive (close) an object</comment>
+  </data>
   <data name="MethodCreateObject" xml:space="preserve">
     <value>/Services/ObjectBase/Create.do</value>
     <comment>Method to create an object</comment>
@@ -144,6 +148,10 @@
   <data name="MethodGetTypes" xml:space="preserve">
     <value>/Services/ObjectTypes/ObjectType/GetTree.do</value>
     <comment>Method to get all possible types</comment>
+  </data>
+  <data name="MethodTaskUpdate" xml:space="preserve">
+    <value>/Services/Task/Edit.do</value>
+    <comment>Method to edit (update) a task</comment>
   </data>
   <data name="UrlCategoryBim" xml:space="preserve">
     <value>/Bim</value>
