@@ -71,11 +71,13 @@ namespace MRS.DocumentManagement.Services
 
             foreach (var enumType in newTypes)
             {
-                await LinkEnumerationTypes(enumType, connectionInfo);
-
-                foreach (var enumVal in newValues)
+                var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
+                if (linkedType != null)
                 {
-                    await LinkEnumerationValues(enumVal, connectionInfo);
+                    foreach (var enumVal in newValues)
+                    {
+                        await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
+                    }
                 }
             }
 
@@ -136,24 +138,26 @@ namespace MRS.DocumentManagement.Services
             return ConnectionCreator.GetConnection(type);
         }
 
-        private async Task LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
+        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
         {
             var enumTypeDb = await CheckEnumerationTypeToLink(enumType, (int)connectionInfo.ID);
-            if (enumTypeDb == null)
-                return;
-
-            connectionInfo.EnumerationTypes.Add(new ConnectionInfoEnumerationType
+            if (enumTypeDb != null)
             {
-                ConnectionInfoID = connectionInfo.ID,
-                EnumerationTypeID = enumTypeDb.ID,
-            });
+                connectionInfo.EnumerationTypes.Add(new ConnectionInfoEnumerationType
+                {
+                    ConnectionInfoID = connectionInfo.ID,
+                    EnumerationTypeID = enumTypeDb.ID,
+                });
 
-            await context.SaveChangesAsync();
+                await context.SaveChangesAsync();
+            }
+
+            return enumTypeDb;
         }
 
-        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, ConnectionInfo connectionInfo)
+        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
         {
-            var enumValueDb = await CheckEnumerationValueToLink(enumVal, (int)connectionInfo.ID);
+            var enumValueDb = await CheckEnumerationValueToLink(enumVal, type, (int)connectionInfo.ID);
             if (enumValueDb == null)
                 return;
 
@@ -174,6 +178,9 @@ namespace MRS.DocumentManagement.Services
             if (enumTypeDb == null)
             {
                 enumTypeDb = mapper.Map<EnumerationType>(enumTypeDto);
+                var connectionType = context.ConnectionInfos.Include(x => x.ConnectionType).FirstOrDefault(x => x.ID == connectionInfoID).ConnectionType;
+                enumTypeDb.ConnectionType = connectionType;
+
                 context.EnumerationTypes.Add(enumTypeDb);
                 await context.SaveChangesAsync();
                 return enumTypeDb;
@@ -188,7 +195,7 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, int connectionInfoID)
+        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, EnumerationType type, int connectionInfoID)
         {
             var enumValueDb = await context.EnumerationValues
                     .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalId);
@@ -196,6 +203,7 @@ namespace MRS.DocumentManagement.Services
             if (enumValueDb == null)
             {
                 enumValueDb = mapper.Map<EnumerationValue>(enumValueDto);
+                enumValueDb.EnumerationType = type;
                 context.EnumerationValues.Add(enumValueDb);
                 await context.SaveChangesAsync();
                 return enumValueDb;
