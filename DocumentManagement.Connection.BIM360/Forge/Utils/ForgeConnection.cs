@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
+using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

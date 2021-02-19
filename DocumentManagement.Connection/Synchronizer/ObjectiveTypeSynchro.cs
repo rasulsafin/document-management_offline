@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -11,15 +12,15 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class ObjectiveTypeSynchro : ISynchroTable
     {
-        //private ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private IMapper mapper;
         private ObjectiveType local;
         private ObjectiveTypeDto remote;
 
-        public ObjectiveTypeSynchro(/*ICloudManager disk,*/ DMContext context, IMapper mapper)
+        public ObjectiveTypeSynchro(ICloudManager disk, DMContext context, IMapper mapper)
         {
-            //this.disk = disk;
+            this.disk = disk;
             this.context = context;
             this.mapper = mapper;
         }

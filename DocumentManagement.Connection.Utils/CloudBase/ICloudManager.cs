@@ -1,7 +1,6 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection
+namespace MRS.DocumentManagement.Connection.Utils
 {
     public interface ICloudManager
     {
@@ -53,6 +52,5 @@ namespace MRS.DocumentManagement.Connection
         /// <param name="id">id объекта</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task<bool> Delete<T>(string id);
-        Task<ConnectionStatusDto> GetStatusAsync();
     }
 }

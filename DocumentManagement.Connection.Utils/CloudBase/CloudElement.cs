@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection
+namespace MRS.DocumentManagement.Connection.Utils
 {
     public class CloudElement
     {

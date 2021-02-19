@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Connection.Synchronizer;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace DocumentManagement.Connection.Tests

@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
   </ItemGroup>
 

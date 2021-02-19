@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -10,14 +11,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class UserSynchro : ISynchroTable
     {
-        private YandexDisk.ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private User local;
         private UserSync remote;
 
-        public UserSynchro(/*ICloudManager disk,*/ DMContext context)
+        public UserSynchro(ICloudManager disk, DMContext context)
         {
-            // this.disk = disk;
+            this.disk = disk;
             this.context = context;
         }
 
