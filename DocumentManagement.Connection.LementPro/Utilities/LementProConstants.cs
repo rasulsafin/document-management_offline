@@ -8,7 +8,6 @@
 
         public const string AUTH_NAME_LOGIN = "login";
         public const string AUTH_NAME_PASSWORD = "password";
-        // TODO: move common constants to common project
         public const string AUTH_NAME_TOKEN = "token";
         public const string AUTH_NAME_END = "end";
 

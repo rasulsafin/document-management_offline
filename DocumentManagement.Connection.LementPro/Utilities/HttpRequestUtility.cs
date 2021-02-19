@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
 using MRS.DocumentManagement.Connection.LementPro.Services;
+using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -18,9 +19,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         private readonly JsonSerializerSettings jsonSerializerSettings =
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
 
-        private NetConnector connector;
+        private HttpConnection connector;
 
-        public HttpRequestUtility(NetConnector connector)
+        public HttpRequestUtility(HttpConnection connector)
             => this.connector = connector;
 
         internal AuthenticationService AuthenticationService { get; set; }

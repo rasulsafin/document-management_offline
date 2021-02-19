@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
+using MRS.DocumentManagement.Connection.Utils;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.SyncData;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -11,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 {
     public class LementProConnection : IConnection, IDisposable
     {
-        private readonly NetConnector connector;
+        private readonly HttpConnection connector;
         private readonly AuthenticationService authenticationService;
         private readonly HttpRequestUtility requestUtility;
 
@@ -19,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public LementProConnection()
         {
-            connector = new NetConnector();
+            connector = new HttpConnection();
             requestUtility = new HttpRequestUtility(connector);
             authenticationService = new AuthenticationService(requestUtility);
         }
@@ -76,13 +78,22 @@ namespace MRS.DocumentManagement.Connection.LementPro
                     AUTH_NAME_LOGIN,
                     AUTH_NAME_PASSWORD,
                     AUTH_NAME_TOKEN,
-                    // TODO: Check does success login response returns also token expiration date
-                    //"end",
+                    AUTH_NAME_END,
                 },
-                AppProperty = new Dictionary<string, string>(),
+                AppProperties = new Dictionary<string, string>(),
             };
 
             return type;
+        }
+
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        {
+            throw new NotImplementedException();
         }
     }
 }

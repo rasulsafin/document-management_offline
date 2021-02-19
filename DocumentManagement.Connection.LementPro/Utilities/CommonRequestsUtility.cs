@@ -34,6 +34,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected internal async Task<List<Folder>> GetFoldersTreeAsync(string categoryObject, int categoryId)
         {
+            // Works only with native categories as Project or Task. Custom types should use different url.
             var url = string.Format(Resources.MethodGetCategoryFolders, categoryObject);
 
             var data = new

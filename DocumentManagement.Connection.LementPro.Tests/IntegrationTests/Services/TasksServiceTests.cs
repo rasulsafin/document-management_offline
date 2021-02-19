@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
@@ -19,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         [ClassInitialize]
         public static async Task Init(TestContext unused)
         {
-            var requestUtility = new HttpRequestUtility(new NetConnector());
+            var requestUtility = new HttpRequestUtility(new HttpConnection());
             var authService = new AuthenticationService(requestUtility);
             var commonRequests = new CommonRequestsUtility(requestUtility);
             service = new TasksService(authService, requestUtility, commonRequests);
@@ -73,7 +74,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         [TestMethod]
         public async Task CreateTaskAsync_NewTaskWithCorrectFields_ReturnsTrue()
         {
-            //var defaultType = (await service.GetTasksTypesAsync()).First();
             var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
             var newTaskValue = new ObjectBaseValueToCreate
             {

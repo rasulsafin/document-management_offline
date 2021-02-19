@@ -131,7 +131,7 @@
   </data>
   <data name="MethodGetCategoryFolders" xml:space="preserve">
     <value>/Services/Folders/{0}Folder/GetTree.do</value>
-    <comment>Method to get all folders of the category</comment>
+    <comment>Method to get all folders of the native category</comment>
   </data>
   <data name="MethodGetMenuCategories" xml:space="preserve">
     <value>/Services/Category/GetMenuCategories.do</value>

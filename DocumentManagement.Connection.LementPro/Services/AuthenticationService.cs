@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AutoMapper.Internal;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -23,13 +22,26 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
         internal string AccessToken
         {
-            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(AUTH_NAME_TOKEN);
+            get
+            {
+                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(AUTH_NAME_TOKEN, out var value))
+                    return value;
+
+                return default;
+            }
+
             set => SetAuthValue(connectionInfoDto, AUTH_NAME_TOKEN, value);
         }
 
         internal string AccessEnd
         {
-            get => connectionInfoDto.AuthFieldValues?.GetOrDefault(AUTH_NAME_END);
+            get
+            {
+                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(AUTH_NAME_END, out var value))
+                    return value;
+                return default;
+            }
+
             set => SetAuthValue(connectionInfoDto, AUTH_NAME_END, value);
         }
 
@@ -82,8 +94,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             return true;
         }
-
-        // TODO Move common with BIM360 methods in common project
 
         protected void SetAuthValue(ConnectionInfoDto info, string key, string value)
         {

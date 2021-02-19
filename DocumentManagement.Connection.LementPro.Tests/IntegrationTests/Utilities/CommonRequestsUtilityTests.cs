@@ -5,6 +5,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Utilities
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         [ClassInitialize]
         public static async Task Initialize(TestContext unused)
         {
-            var requestsUtility = new HttpRequestUtility(new NetConnector());
+            var requestsUtility = new HttpRequestUtility(new HttpConnection());
             var service = new AuthenticationService(requestsUtility);
 
             var connectionInfo = new ConnectionInfoDto
