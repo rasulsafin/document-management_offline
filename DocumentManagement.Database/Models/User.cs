@@ -29,8 +29,6 @@ namespace MRS.DocumentManagement.Database.Models
 
         public ICollection<UserProject> Projects { get; set; }
 
-        public ICollection<UserEnumDmValue> EnumDmValues { get; set; }
-
         public ICollection<UserRole> Roles { get; set; }
     }
 }

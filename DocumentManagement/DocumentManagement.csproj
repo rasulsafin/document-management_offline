@@ -8,11 +8,9 @@
     <ItemGroup>
       <PackageReference Include="AutoMapper" Version="10.1.1" />
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-      <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection\DocumentManagement.Connection.csproj" />
       <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
       <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
