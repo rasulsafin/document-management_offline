@@ -10,14 +10,14 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 {
     public class ItemSynchro : ISynchroTable
     {
-        private ICloudManager disk;
+        //private ICloudManager disk;
         private DMContext context;
         private Item local;
         private ItemDto remote;
 
-        public ItemSynchro(ICloudManager disk, DMContext context)
+        public ItemSynchro(/*ICloudManager disk,*/ DMContext context)
         {
-            this.disk = disk;
+            //this.disk = disk;
             this.context = context;
         }
 
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             if (remote != null)
             {
                 action.IsComplete = true;
-                await disk.Delete<ItemDto>(action.ID.ToString());
+                //await disk.Delete<ItemDto>(action.ID.ToString());
             }
         }
 
@@ -93,7 +93,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             if (local != null)
             {
                 remote = Convert(local);
-                await disk.Push(remote, action.ID.ToString());
+                //await disk.Push(remote, action.ID.ToString());
                 action.IsComplete = true;
             }
         }
@@ -128,8 +128,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private async Task GetRemote(int id)
         {
-            if (remote?.ID != new ID<ItemDto>(id))
-                remote = await disk.Pull<ItemDto>(id.ToString());
+           // if (remote?.ID != new ID<ItemDto>(id))
+                //remote = await disk.Pull<ItemDto>(id.ToString());
         }
     }
 }

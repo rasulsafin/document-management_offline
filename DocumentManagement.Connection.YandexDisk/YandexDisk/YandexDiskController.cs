@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDiskController : ICloudController
+    public class YandexDiskController //: ICloudController
     {
         private string accessToken;
 
@@ -26,51 +26,51 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="FileNotFoundException"> File Not Found Exception </exception>
         /// <exception cref="TimeoutException" > Timeout Exception </exception>
-        public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
-        {
-            try
-            {
-                HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
-                WebResponse response = await request.GetResponseAsync();
-                XmlDocument xml = new XmlDocument();
-                using (Stream stream = response.GetResponseStream())
-                {
-                    using (XmlReader xmlReader = XmlReader.Create(stream))
-                        xml.Load(xmlReader);
-                }
+        ////public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
+        ////{
+        ////    try
+        ////    {
+        ////        HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
+        ////        WebResponse response = await request.GetResponseAsync();
+        ////        XmlDocument xml = new XmlDocument();
+        ////        using (Stream stream = response.GetResponseStream())
+        ////        {
+        ////            using (XmlReader xmlReader = XmlReader.Create(stream))
+        ////                xml.Load(xmlReader);
+        ////        }
 
-                response.Close();
-                List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
-                return items;
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
-        }
+        ////        response.Close();
+        ////        List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
+        ////        return items;
+        ////    }
+        ////    catch (Exception ex)
+        ////    {
+        ////        throw WebExceptionHandler(ex);
+        ////    }
+        ////}
 
-        public async Task<DiskElement> GetInfoAsync(string path = "/")
-        {
-            try
-            {
-                HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
-                WebResponse response = await request.GetResponseAsync();
-                XmlDocument xml = new XmlDocument();
-                using (Stream stream = response.GetResponseStream())
-                {
-                    using (XmlReader xmlReader = XmlReader.Create(stream))
-                        xml.Load(xmlReader);
-                }
+        //public async Task<DiskElement> GetInfoAsync(string path = "/")
+        //{
+        //    try
+        //    {
+        //        HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
+        //        WebResponse response = await request.GetResponseAsync();
+        //        XmlDocument xml = new XmlDocument();
+        //        using (Stream stream = response.GetResponseStream())
+        //        {
+        //            using (XmlReader xmlReader = XmlReader.Create(stream))
+        //                xml.Load(xmlReader);
+        //        }
 
-                response.Close();
-                YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
-                return item;
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
-        }
+        //        response.Close();
+        //        YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
+        //        return item;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        throw WebExceptionHandler(ex);
+        //    }
+        //}
 
         #endregion
         #region Create Directory
@@ -78,20 +78,20 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             try
             {
-                string newPath = PathManager.DirectoryName(path, nameDir);
-                HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
-                using (WebResponse response = await request.GetResponseAsync())
-                {
-                    if (response is HttpWebResponse http)
-                    {
-                        if (http.StatusCode == HttpStatusCode.Created)
-                        {
-                            return true;
-                        }
-                    }
+               // string newPath = PathManager.DirectoryName(path, nameDir);
+                //HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
+                //using (WebResponse response = await request.GetResponseAsync())
+                //{
+                //    if (response is HttpWebResponse http)
+                //    {
+                //        if (http.StatusCode == HttpStatusCode.Created)
+                //        {
+                //            return true;
+                //        }
+                //    }
 
                     return false;
-                }
+                //}
             }
             catch (Exception ex)
             {
@@ -303,37 +303,37 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             try
             {
                 FileInfo fileInfo = new FileInfo(fileName);
-                string diskName = PathManager.FileName(href, fileInfo.Name);
-                HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
-                using (var reader = fileInfo.OpenRead())
-                {
-                    request.ContentLength = reader.Length;
-                    using (var writer = request.GetRequestStream())
-                    {
-                        const int BUFFER_LENGTH = 4096;
-                        var total = (ulong)reader.Length;
-                        ulong current = 0;
-                        var buffer = new byte[BUFFER_LENGTH];
-                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        while (count > 0)
-                        {
-                            writer.Write(buffer, 0, count);
-                            current += (ulong)count;
-                            progressChenge?.Invoke(current, total);
-                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        }
-                    }
-                }
+                //string diskName = PathManager.FileName(href, fileInfo.Name);
+               // HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
+                //using (var reader = fileInfo.OpenRead())
+                //{
+                //    request.ContentLength = reader.Length;
+                //    using (var writer = request.GetRequestStream())
+                //    {
+                //        const int BUFFER_LENGTH = 4096;
+                //        var total = (ulong)reader.Length;
+                //        ulong current = 0;
+                //        var buffer = new byte[BUFFER_LENGTH];
+                //        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                //        while (count > 0)
+                //        {
+                //            writer.Write(buffer, 0, count);
+                //            current += (ulong)count;
+                //            progressChenge?.Invoke(current, total);
+                //            count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                //        }
+                //    }
+                //}
 
-                using (WebResponse response = await request.GetResponseAsync())
-                {
-                    if (response is HttpWebResponse httpResponse)
-                    {
-                        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
-                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
-                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
-                    }
-                }
+                //using (WebResponse response = await request.GetResponseAsync())
+                //{
+                //    if (response is HttpWebResponse httpResponse)
+                //    {
+                //        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
+                //        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
+                //        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
+                //    }
+                //}
             }
             catch (Exception ex)
             {
