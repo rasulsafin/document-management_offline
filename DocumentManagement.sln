@@ -44,7 +44,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.Tdms", "DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj", "{6B2CB931-05A8-436C-A577-0B214C6371AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA} = {C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}
 	EndProjectSection
 EndProject
 Global

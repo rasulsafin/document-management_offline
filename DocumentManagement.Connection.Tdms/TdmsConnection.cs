@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Tdms.Helpers;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
@@ -26,12 +27,12 @@ namespace MRS.DocumentManagement.Connection.Tdms
             {
                 tdms.Login(login, password, db, server);
             }
-            catch
+            catch (Exception e)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
                     Status = RemoteConnectionStatusDto.Error,
-                    Message = "Error",
+                    Message = e.Message,
                 });
             }
 
@@ -41,6 +42,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
         {
             info.EnumerationTypes = GetEnumerationTypes();
+            info.ConnectionType.ObjectiveTypes = GetObjectiveTypes();
 
             return Task.FromResult(info);
         }
@@ -84,8 +86,6 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 Name = "tdms",
                 AuthFieldNames = new List<string>() { Auth.LOGIN, Auth.PASSWORD, Auth.SERVER, Auth.DATABASE },
                 AppProperties = new Dictionary<string, string>(),
-                ObjectiveTypes = GetObjectiveTypes(),
-                EnumerationTypes = GetEnumerationTypes(),
             };
 
             return type;
