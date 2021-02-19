@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection
+namespace MRS.DocumentManagement.Interface
 {
     /// <summary>
     /// Interface for any type of connection.
