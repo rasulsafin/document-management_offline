@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -11,14 +10,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public class HttpConnection : IDisposable
     {
-        protected static readonly double TIMEOUT = 10;
-
         protected readonly HttpClient client;
         protected readonly JsonSerializerSettings jsonSerializerSettings =
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
 
         public HttpConnection()
-            => client = new HttpClient { Timeout = TimeSpan.FromSeconds(TIMEOUT) };
+            => client = new HttpClient { Timeout = TimeSpan.FromSeconds(Timeout) };
+
+        protected double Timeout { get; set; } = 10;
 
         public void Dispose()
         {

@@ -17,13 +17,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         private const string MEDIA_TYPE_JSON = "text/json";
         private const string CONTENT_TYPE = "application/vnd.api+json";
 
+        public ForgeConnection()
+            : base()
+            => Timeout = 15;
+
         public string Token { get; set; }
 
         public async Task<Stream> GetResponseStreamAuthorizedAsync(
                 HttpMethod methodType,
                 string command,
                 params object[] arguments)
-            => await GetResponseStreamAuthorizedAsync(methodType, command, (Constants.AUTHORIZATION_SCHEME, Token), arguments);
+            => await GetResponseStreamAuthorizedAsync(methodType, command, authData: (Constants.AUTHORIZATION_SCHEME, Token), arguments);
 
         public async Task<JObject> SendAsync(
                 ForgeSettings settings,

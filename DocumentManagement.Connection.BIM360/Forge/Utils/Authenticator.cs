@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             get
             {
-                if (connectionInfoDto.AuthFieldValues.TryGetValue(TOKEN_AUTH_NAME, out var value))
+                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(TOKEN_AUTH_NAME, out var value))
                     return value;
 
                 return default;
@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             get
             {
-                if (connectionInfoDto.AuthFieldValues.TryGetValue(REFRESH_TOKEN_AUTH_NAME, out var value))
+                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(REFRESH_TOKEN_AUTH_NAME, out var value))
                     return value;
 
                 return default;
@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             get
             {
-                if (connectionInfoDto.AuthFieldValues.TryGetValue(END_AUTH_NAME, out var value))
+                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(END_AUTH_NAME, out var value))
                     return value;
                 return default;
             }
