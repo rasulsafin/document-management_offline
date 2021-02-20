@@ -1,24 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class UserSynchro : ISynchroTable
     {
-       // private ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private User local;
         private UserSync remote;
 
-        public UserSynchro(/*ICloudManager disk,*/ DMContext context)
+        public UserSynchro(ICloudManager disk, DMContext context)
         {
-           // this.disk = disk;
+            this.disk = disk;
             this.context = context;
         }
 
@@ -32,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task DeleteRemote(SyncAction action)
         {
-           // await disk.Delete<UserDto>(action.ID.ToString());
+            await disk.Delete<UserSync>(action.ID.ToString());
             action.IsComplete = true;
         }
 
@@ -42,28 +41,44 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             local = await GetLocal(action.ID);
             action.IsComplete = true;
 
-            if (local != null)
+            if (remote != null)
             {
-                remote.Update(local);
+                if (local != null)
+                {
+                    remote.Update(local);
+                }
+                else
+                {
+                    local = new User()
+                    {
+                        ID = remote.ID,
+                        Login = remote.Login,
+                        Name = remote.Name,
+                    };
+                    context.Users.Add(local);
+                }
             }
             else
             {
-                local = new User()
-                {
-                    ID = remote.ID,
-                    Login = remote.Login,
-                    Name = remote.Name,
-                };
-                context.Users.Add(local);
+                action.IsComplete = false;
             }
         }
 
-        
-
         public async Task Upload(SyncAction action)
         {
+            var user = await GetLocal(action.ID);
+            if (user != null)
+            {
+                remote = new UserSync();
+                await disk.Push(remote, action.ID.ToString());
+                action.IsComplete = true;
+            }
+            else
+            {
+                action.IsComplete = false;
+            }
             remote = new UserSync(await GetLocal(action.ID));
-           // await disk.Push(remote, action.ID.ToString());
+            await disk.Push(remote, action.ID.ToString());
             action.IsComplete = true;
         }
 
@@ -103,10 +118,10 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private async Task<UserSync> GetRemote(int id)
         {
-           // if (remote?.ID != id)
-           // {
-               // remote = await disk.Pull<UserSync>(id.ToString());
-          //  }
+            // if (remote?.ID != id)
+            // {
+            // remote = await disk.Pull<UserSync>(id.ToString());
+            //  }
 
             return remote;
         }

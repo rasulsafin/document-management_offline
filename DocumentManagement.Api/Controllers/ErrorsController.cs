@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-namespace DocumentManagement.Api.Controllers
+﻿namespace DocumentManagement.Api.Controllers
 {
     //[ApiExplorerSettings(IgnoreApi = true)]
     //public class ErrorsController : ControllerBase

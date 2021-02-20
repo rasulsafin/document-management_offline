@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Interface.SyncData
+﻿namespace MRS.DocumentManagement.Synchronizer
 {
     public enum NameTypeRevision
     {

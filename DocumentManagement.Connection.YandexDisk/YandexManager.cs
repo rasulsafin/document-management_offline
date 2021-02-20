@@ -5,19 +5,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public class CloudManager : ICloudManager
+    public class YandexManager : ICloudManager
     {
         private string accessToken;
-        private ICloudController controller;
+        private YandexDiskController controller;
         private List<string> tables = new List<string>();
         private List<string> directories = new List<string>();
         private bool isInit;
 
-        public CloudManager(ICloudController controller)
+        public YandexManager(YandexDiskController controller)
         {
             this.controller = controller;
         }
@@ -76,16 +79,11 @@ namespace MRS.DocumentManagement.Connection
             return await controller.DeleteAsync(path);
         }
 
-        public async Task<bool> PullFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<bool> PullFile(string href, string fileName)
         {
             try
             {
-                if (await CheckDir(remoteDirName))
-                {
-                    string path = PathManager.GetFile(remoteDirName, fileName);
-                    string dir = Path.Combine(localDirName, fileName);
-                    return await controller.DownloadFileAsync(path, dir);
-                }
+                return await controller.DownloadFileAsync(href, fileName);
             }
             catch (FileNotFoundException)
             {
@@ -94,20 +92,38 @@ namespace MRS.DocumentManagement.Connection
             return false;
         }
 
-        public async Task<bool> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<ConnectionStatusDto> GetStatusAsync()
+        {
+            if (controller == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "Controller null" };
+            try
+            {
+                var list = await controller.GetListAsync(PathManager.GetAppDir());
+                if (list != null)
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good" };
+            }
+            catch (TimeoutException)
+            {
+            }
+
+            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "No network" };
+        }
+
+        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
         {
             try
             {
                 await CheckDir(remoteDirName);
                 string path = PathManager.GetDir(remoteDirName);
                 string file = Path.Combine(localDirName, fileName);
-                return await controller.LoadFileAsync(path, file);
+                await controller.LoadFileAsync(path, file);
+                return path;
             }
             catch (Exception ex)
             {
             }
 
-            return false;
+            return string.Empty;
         }
 
         private async Task<bool> CheckTableDir<T>()
@@ -117,8 +133,8 @@ namespace MRS.DocumentManagement.Connection
             bool result = tables.Any(x => x == tableName);
             if (result)
                 return true;
-            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
-            foreach (DiskElement element in list)
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
+            foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                     tables.Add(element.DisplayName);
@@ -133,7 +149,7 @@ namespace MRS.DocumentManagement.Connection
 
         private async Task Initialize()
         {
-            IEnumerable<DiskElement> list = await controller.GetListAsync();
+            IEnumerable<CloudElement> list = await controller.GetListAsync();
             if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APP_DIR))
             {
                 await controller.CreateDirAsync("/", PathManager.APP_DIR);
@@ -152,8 +168,8 @@ namespace MRS.DocumentManagement.Connection
         {
             bool res = directories.Any(x => x == dirName);
             if (res) return true;
-            IEnumerable<DiskElement> list = await controller.GetListAsync(PathManager.GetAppDir());
-            foreach (DiskElement element in list)
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+            foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                     directories.Add(element.DisplayName);

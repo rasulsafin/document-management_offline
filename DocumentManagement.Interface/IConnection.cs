@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Interface
 {

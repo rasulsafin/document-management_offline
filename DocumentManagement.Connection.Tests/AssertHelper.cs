@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
+using MRS.DocumentManagement.Synchronizer;
 
 namespace DocumentManagement.Connection.Tests
 {

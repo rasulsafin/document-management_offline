@@ -1,23 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class ItemSynchro : ISynchroTable
     {
-        //private ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private Item local;
         private ItemDto remote;
 
-        public ItemSynchro(/*ICloudManager disk,*/ DMContext context)
+        public ItemSynchro(ICloudManager disk, DMContext context)
         {
-            //this.disk = disk;
+            this.disk = disk;
             this.context = context;
         }
 

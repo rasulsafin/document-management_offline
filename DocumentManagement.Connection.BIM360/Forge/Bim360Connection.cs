@@ -5,7 +5,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
@@ -48,21 +47,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public async Task<bool> IsAuthDataCorrect()
             => authenticator.IsLogged;
-
-        public async Task<ProgressSync> GetProgressSyncronization()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> StartSyncronization()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task StopSyncronization()
-        {
-            throw new NotImplementedException();
-        }
 
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
             => Task.FromResult(updatedInfo);

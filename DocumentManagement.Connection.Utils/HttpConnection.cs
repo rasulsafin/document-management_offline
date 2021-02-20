@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge
+namespace MRS.DocumentManagement.Connection.Utils
 {
     public class HttpConnection : IDisposable
     {

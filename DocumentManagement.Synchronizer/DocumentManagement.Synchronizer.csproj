@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Connection.YandexDisk</RootNamespace>
+    <RootNamespace>MRS.DocumentManagement.Synchronizer</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

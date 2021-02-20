@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Interface.SyncData;
+using MRS.DocumentManagement.Synchronizer;
 
 namespace DocumentManagement.Connection.Tests
 {

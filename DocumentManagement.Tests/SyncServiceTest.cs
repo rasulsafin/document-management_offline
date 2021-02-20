@@ -1,5 +1,5 @@
 ﻿using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Interface.SyncData;
+using MRS.DocumentManagement.Synchronizer;
 
 namespace MRS.DocumentManagement.Tests
 {
