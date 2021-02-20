@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "v1",
+                    Version = "0.8.0",
                     Title = "BRIO DM",
                     Description = "DM API details",
                 });
