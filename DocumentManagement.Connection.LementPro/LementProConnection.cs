@@ -40,16 +40,6 @@ namespace MRS.DocumentManagement.Connection.LementPro
             return authorizationResult.authStatus;
         }
 
-        public async Task<ConnectionStatusDto> GetStatus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> IsAuthDataCorrect()
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ProgressSync> GetProgressSyncronization()
         {
             throw new NotImplementedException();
@@ -86,11 +76,13 @@ namespace MRS.DocumentManagement.Connection.LementPro
             return type;
         }
 
+        // Do we need this?
         public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
         {
             throw new NotImplementedException();
         }
 
+        // Do we need this?
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
             throw new NotImplementedException();

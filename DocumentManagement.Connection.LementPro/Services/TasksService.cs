@@ -32,16 +32,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         }
 
         public async Task<IEnumerable<ObjectBase>> GetAllTasksAsync()
-        {
-            var tasks = await commonRequests.RetriveObjectsListAsync(OBJECT_TYPE_SINGLE_TASK);
-            return tasks;
-        }
+            => await commonRequests.RetriveObjectsListAsync(OBJECT_TYPE_SINGLE_TASK);
 
         public async Task<ObjectBase> GetTaskAsync(int taskId)
-        {
-            var task = await commonRequests.GetObjectAsync(taskId);
-            return task;
-        }
+            => await commonRequests.GetObjectAsync(taskId);
 
         public async Task<List<LementProType>> GetTasksTypesAsync()
             => await commonRequests.GetObjectsTypes(OBJECT_TYPE_SINGLE_TASK);

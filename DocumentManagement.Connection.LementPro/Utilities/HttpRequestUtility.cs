@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -14,6 +13,10 @@ using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 {
+    /// <summary>
+    /// Work with HttpConnection common for different IConnections.
+    /// Handles work with http requests and responses to local services work with json only.
+    /// </summary>
     public class HttpRequestUtility : IDisposable
     {
         private readonly JsonSerializerSettings jsonSerializerSettings =
@@ -29,6 +32,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         public void Dispose()
             => connector.Dispose();
 
+        /// <summary>
+        /// Connects to LementPro system and returns auth data.
+        /// </summary>
+        /// <param name="login">Login to connect.</param>
+        /// <param name="password">Users password.</param>
+        /// <returns>Tuple containing token and date when it expires.</returns>
         protected internal async Task<(string token, string expires)> Connect(string login, string password)
         {
             var authData = new AuthorizationData

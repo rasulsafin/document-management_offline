@@ -8,6 +8,9 @@ using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 {
+    /// <summary>
+    /// Utility with request common for services for common models as such as ObjectBase, Catetogry etc.
+    /// </summary>
     public class CommonRequestsUtility : IDisposable
     {
         // ctor used for tests.
@@ -22,9 +25,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         protected virtual HttpRequestUtility RequestUtility { get; set; }
 
         public void Dispose()
-        {
-            RequestUtility?.Dispose();
-        }
+            => RequestUtility?.Dispose();
 
         protected internal async Task<List<Category>> GetMenuCategoriesAsync()
         {

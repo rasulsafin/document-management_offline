@@ -1,5 +1,8 @@
 ﻿namespace MRS.DocumentManagement.Connection.LementPro
 {
+    /// <summary>
+    /// Contains constants to use in LementProConnection.
+    /// </summary>
     public static class LementProConstants
     {
         public const string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";

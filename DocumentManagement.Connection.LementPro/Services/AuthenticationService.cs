@@ -22,26 +22,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
         internal string AccessToken
         {
-            get
-            {
-                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(AUTH_NAME_TOKEN, out var value))
-                    return value;
-
-                return default;
-            }
-
+            get => GetValueOrDefault(connectionInfoDto.AuthFieldValues, AUTH_NAME_TOKEN);
             set => SetAuthValue(connectionInfoDto, AUTH_NAME_TOKEN, value);
         }
 
         internal string AccessEnd
         {
-            get
-            {
-                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(AUTH_NAME_END, out var value))
-                    return value;
-                return default;
-            }
-
+            get => GetValueOrDefault(connectionInfoDto.AuthFieldValues, AUTH_NAME_END);
             set => SetAuthValue(connectionInfoDto, AUTH_NAME_END, value);
         }
 
@@ -110,6 +97,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             }
 
             dictionary.Add(key, value);
+        }
+
+        protected string GetValueOrDefault(IDictionary<string, string> source, string key)
+        {
+            if (source != null && source.TryGetValue(key, out var value))
+                return value;
+
+            return default;
         }
     }
 }
