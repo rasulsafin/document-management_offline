@@ -1,7 +1,8 @@
-﻿#define TEST // Use to perform tests
+#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
 #undef TEST // Disable one
 
+using System;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
 
@@ -47,7 +48,7 @@ namespace MRS.DocumentManagement.Database
 
         public DbSet<AppProperty> AppProperties { get; set; }
 
-        public DbSet<AuthFieldName> AuthFieldNames{ get; set; }
+        public DbSet<AuthFieldName> AuthFieldNames { get; set; }
 
         public DbSet<AuthFieldValue> AuthFieldValues { get; set; }
         #endregion
@@ -66,6 +67,7 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ConnectionInfoEnumerationType> ConnectionInfoEnumerationTypes { get; set; }
 
         public DbSet<ConnectionInfoEnumerationValue> ConnectionInfoEnumerationValues { get; set; }
+
         #endregion
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -241,6 +243,36 @@ namespace MRS.DocumentManagement.Database
                 .HasMany(x => x.AuthFieldValues)
                 .WithOne(x => x.ConnectionInfo)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Project>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Objective>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Item>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<DynamicField>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Project>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+            modelBuilder.Entity<Objective>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+            modelBuilder.Entity<Item>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
+            modelBuilder.Entity<DynamicField>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DateTime.UtcNow);
         }
     }
 }

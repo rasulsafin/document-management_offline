@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -38,10 +39,10 @@ namespace MRS.DocumentManagement.Services
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
         {
             var objective = mapper.Map<Objective>(data);
-            context.Objectives.Add(objective);
+            await context.Objectives.AddAsync(objective);
             await context.SaveChangesAsync();
 
-            objective.ObjectiveType = context.ObjectiveTypes.Find(objective.ObjectiveTypeID);
+            objective.ObjectiveType = await context.ObjectiveTypes.FindAsync(objective.ObjectiveTypeID);
 
             objective.BimElements = new List<BimElementObjective>();
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
@@ -75,7 +76,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dynamicField = mapper.Map<DynamicField>(field);
                 dynamicField.ObjectiveID = objective.ID;
-                context.DynamicFields.Add(dynamicField);
+                await context.DynamicFields.AddAsync(dynamicField);
             }
 
             await context.SaveChangesAsync();
@@ -143,7 +144,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
         {
-            var dbProject = await context.Projects
+            var dbProject = await context.Projects.Unsynchronized()
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.DynamicFields)
                 .Include(x => x.Objectives)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
@@ -81,13 +82,13 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Find_ExistingItem_ReturnsItem()
         {
-            var existingItem = Context.Items.First();
+            var existingItem = Context.Items.Unsynchronized().First();
             var dtoId = new ID<ItemDto>(existingItem.ID);
 
             var result = await service.Find(dtoId);
 
             Assert.AreEqual(dtoId, result.ID);
-            Assert.AreEqual(existingItem.ExternalItemId, result.ExternalItemId);
+            Assert.AreEqual(existingItem.ExternalID, result.ExternalID);
             Assert.AreEqual(existingItem.Name, result.Name);
             Assert.AreEqual(existingItem.ItemType, (int)result.ItemType);
         }
@@ -105,7 +106,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetProjectItems_ExistingProjectWithItems_ReturnsEnumerableWithItems()
         {
-            var existingProject = Context.Projects.First(p => p.Items.Any());
+            var existingProject = Context.Projects.Unsynchronized().First(p => p.Items.Any());
             var projectItems = existingProject.Items.Select(pi => pi.Item);
 
             var result = await service.GetItems(new ID<ProjectDto>(existingProject.ID));
@@ -113,7 +114,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(projectItems.Count(), result.Count());
             projectItems.ToList().ForEach(i =>
             {
-                Assert.IsTrue(result.Any(ri => ri.ExternalItemId == i.ExternalItemId
+                Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
                                                && (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
                                                && ri.Name == i.Name));
@@ -123,7 +124,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetProjectItems_ExistingProjectWithoutItems_ReturnsEmptyEnumerable()
         {
-            var existingProject = Context.Projects.First(p => !p.Items.Any());
+            var existingProject = Context.Projects.Unsynchronized().First(p => !p.Items.Any());
 
             var result = await service.GetItems(new ID<ProjectDto>(existingProject.ID));
 
@@ -141,7 +142,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetObjectiveItems_ExistingObjectiveWithItems_ReturnsEnumerableWithItems()
         {
-            var existingObjective = Context.Objectives.First(o => o.Items.Any());
+            var existingObjective = Context.Objectives.Unsynchronized().First(o => o.Items.Any());
             var objectiveItems = existingObjective.Items.Select(oi => oi.Item);
 
             var result = await service.GetItems(new ID<ObjectiveDto>(existingObjective.ID));
@@ -149,7 +150,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(objectiveItems.Count(), result.Count());
             objectiveItems.ToList().ForEach(i =>
             {
-                Assert.IsTrue(result.Any(ri => ri.ExternalItemId == i.ExternalItemId
+                Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
                                                && (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
                                                && ri.Name == i.Name));
@@ -159,7 +160,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetObjectiveItems_ExistingObjectiveWithoutItems_ReturnsEmptyEnumerable()
         {
-            var existingObjective = Context.Objectives.First(o => !o.Items.Any());
+            var existingObjective = Context.Objectives.Unsynchronized().First(o => !o.Items.Any());
 
             var result = await service.GetItems(new ID<ObjectiveDto>(existingObjective.ID));
 
@@ -177,7 +178,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Update_ExistingItem_ReturnsTrue()
         {
-            var existingItem = Context.Items.First();
+            var existingItem = Context.Items.Unsynchronized().First();
             var guid = Guid.NewGuid();
             var newItemType = existingItem.ItemType != 1 ? 1 : 2;
             var newExternalItemId = $"newExternalItemId{guid}";
@@ -186,15 +187,15 @@ namespace MRS.DocumentManagement.Tests
             {
                 ID = new ID<ItemDto>(existingItem.ID),
                 ItemType = (ItemTypeDto)newItemType,
-                ExternalItemId = newExternalItemId,
+                ExternalID = newExternalItemId,
                 Name = newName
             };
 
             var result = await service.Update(item);
 
-            var updatedItem = Context.Items.First(i => i.ID == existingItem.ID);
+            var updatedItem = Context.Items.Unsynchronized().First(i => i.ID == existingItem.ID);
             Assert.IsTrue(result);
-            Assert.IsTrue(updatedItem.ExternalItemId == newExternalItemId);
+            Assert.IsTrue(updatedItem.ExternalID == newExternalItemId);
             Assert.IsTrue(updatedItem.ItemType == newItemType);
             Assert.IsTrue(updatedItem.Name == newName);
         }

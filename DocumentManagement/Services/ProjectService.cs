@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -50,8 +51,8 @@ namespace MRS.DocumentManagement.Services
                         new UserProject
                         {
                             UserID = ownerID,
-                            ProjectID = projectToDb.ID
-                        }
+                            ProjectID = projectToDb.ID,
+                        },
                     };
             context.Update(projectToDb);
             await context.SaveChangesAsync();
@@ -71,7 +72,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetAllProjects()
         {
-            var dbProjects = await context.Projects.ToListAsync();
+            var dbProjects = await context.Projects.Unsynchronized().ToListAsync();
             return dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
         }
 

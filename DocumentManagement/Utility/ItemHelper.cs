@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Utility
             if (dbItem == null)
             {
                 dbItem = mapper.Map<Item>(item);
-                context.Items.Add(dbItem);
+                await context.Items.AddAsync(dbItem);
                 await context.SaveChangesAsync();
                 return dbItem;
             }

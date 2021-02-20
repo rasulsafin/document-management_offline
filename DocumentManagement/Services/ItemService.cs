@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -65,7 +65,7 @@ namespace MRS.DocumentManagement.Services
 
             dbItem.ItemType = (int)item.ItemType;
             dbItem.Name = item.Name;
-            dbItem.ExternalItemId = item.ExternalItemId;
+            dbItem.ExternalID = item.ExternalID;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
             return true;

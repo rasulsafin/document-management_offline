@@ -248,19 +248,19 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             new Item
             {
-                ExternalItemId = FILE_ITEM.ExternalItemId,
+                ExternalID = FILE_ITEM.ExternalID,
                 ItemType = FILE_ITEM.ItemType,
                 Name = FILE_ITEM.Name,
             },
             new Item
             {
-                ExternalItemId = BIM_ITEM.ExternalItemId,
+                ExternalID = BIM_ITEM.ExternalID,
                 ItemType = BIM_ITEM.ItemType,
                 Name = BIM_ITEM.Name,
             },
             new Item
             {
-                ExternalItemId = MEDIA_ITEM.ExternalItemId,
+                ExternalID = MEDIA_ITEM.ExternalID,
                 ItemType = MEDIA_ITEM.ItemType,
                 Name = MEDIA_ITEM.Name,
             },
@@ -268,19 +268,19 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         private static readonly Item FILE_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
             Name = "File element",
         };
         private static readonly Item BIM_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
             Name = "Bim element",
         };
         private static readonly Item MEDIA_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
             Name = "Media element",
         };
