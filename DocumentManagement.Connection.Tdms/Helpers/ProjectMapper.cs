@@ -16,7 +16,6 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             {
                 Title = tdmsObject.Description,
                 Items = GetItems(tdmsObject),
-                ExternalID = tdmsObject.GUID,
             };
 
             return projectDto;

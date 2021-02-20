@@ -10,14 +10,24 @@ namespace MRS.DocumentManagement.Connection.Tdms
 {
     public class TdmsConnection : IConnection
     {
-        private static TDMSApplication tdms;
+        internal static TDMSApplication tdms;
 
         public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
             tdms = new TDMSApplication();
 
             if (tdms.IsLoggedIn)
-                tdms.Quit();
+            {
+                if (tdms.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
+                {
+                    return GetStatus(info);
+                }
+                else
+                {
+                    tdms.Quit();
+                    tdms = new TDMSApplication();
+                }
+            }
 
             try
             {
@@ -77,7 +87,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
         {
-            return Task.FromResult(true);
+            throw new NotImplementedException();
         }
 
         public ConnectionTypeDto GetConnectionType()
