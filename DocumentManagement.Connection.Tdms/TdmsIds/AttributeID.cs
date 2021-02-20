@@ -24,5 +24,7 @@
         public static readonly string NUMBER = "ATTR_NUMBER";
         public static readonly string NORM_DOC = "ATTR_NORMDOC";
         public static readonly string WORK_NAME = "ATTR_WORK_NAME";
+        public static readonly string OBJECT_NAME = "ATTR_OBJECT_NAME";
+        public static readonly string NAME = "ATTR_NAME";
     }
 }

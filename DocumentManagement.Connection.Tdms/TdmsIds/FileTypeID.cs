@@ -10,5 +10,6 @@
         public static readonly string WORD = "FILE_WORD";
         public static readonly string TEXT = "FILE_TXT";
         public static readonly string VIDEO = "FILE_VIDEO";
+        public static readonly string CAD = "FILE_DRAWING";
     }
 }
