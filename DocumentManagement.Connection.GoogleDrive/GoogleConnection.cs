@@ -30,9 +30,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 GoogleDriveController driveController = new GoogleDriveController();
                 await driveController.InitializationAsync(connectionInfo);
                 manager = new GoogleDriveManager(driveController);
-                //syncManager.Initialization(manager);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
             }
             catch (Exception ex)
             {
@@ -108,7 +107,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
         {
             info.AuthFieldValues = connectionInfo.AuthFieldValues;
-            info.ConnectionType = GetConnectionType();
             return Task.FromResult(info);
         }
     }

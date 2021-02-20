@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -28,6 +29,8 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = mapper.Map<ConnectionInfo>(data);
             context.ConnectionInfos.Add(connectionInfo);
             var user = await context.Users.FindAsync((int)data.UserID);
+            if (user == null)
+                return ID<ConnectionInfoDto>.InvalidID;
             user.ConnectionInfo = connectionInfo;
 
             await context.SaveChangesAsync();
@@ -37,8 +40,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionStatusDto> Connect(ID<UserDto> userID)
         {
+            User user = await FindUserFromDb((int)userID);
+            if (user == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Пользователь отсутвует в базе!", };
+
             // Get connection info from user
-            var connectionInfo = await GetConnectionInfoFromDb((int)userID);
+            var connectionInfo = await GetConnectionInfoFromDb(user);
+            if (connectionInfo == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
+
             var connection = GetConnection(connectionInfo);
             var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
 
@@ -112,12 +122,22 @@ namespace MRS.DocumentManagement.Services
             return list;
         }
 
+        #region private method
         private async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
-            var user = await context.Users
-                .Include(x => x.ConnectionInfo)
-                .FirstOrDefaultAsync(x => x.ID == userID);
+            User user = await FindUserFromDb(userID);
+            return await GetConnectionInfoFromDb(user);
+        }
 
+        private async Task<User> FindUserFromDb(int userID)
+        {
+            return await context.Users
+                            .Include(x => x.ConnectionInfo)
+                            .FirstOrDefaultAsync(x => x.ID == userID);
+        }
+
+        private async Task<ConnectionInfo> GetConnectionInfoFromDb(User user)
+        {
             var info = await context.ConnectionInfos
                 .Include(x => x.ConnectionType)
                     .ThenInclude(x => x.AppProperties)
@@ -217,6 +237,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             return enumValueDb;
-        }
+        } 
+        #endregion
     }
 }
