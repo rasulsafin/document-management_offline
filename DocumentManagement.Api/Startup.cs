@@ -14,6 +14,7 @@ using MRS.DocumentManagement.Api.Validators;
 //using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
+using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Api
@@ -62,7 +63,7 @@ namespace MRS.DocumentManagement.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "v1",
+                    Version = "0.8.0",
                     Title = "BRIO DM",
                     Description = "DM API details",
                 });
@@ -86,7 +87,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
             services.AddSingleton<CryptographyHelper>();
-           // services.AddSingleton<SyncManager>();
+            services.AddSingleton<SyncManager>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

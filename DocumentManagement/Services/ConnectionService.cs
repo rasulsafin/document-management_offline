@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -28,6 +29,8 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = mapper.Map<ConnectionInfo>(data);
             context.ConnectionInfos.Add(connectionInfo);
             var user = await context.Users.FindAsync((int)data.UserID);
+            if (user == null)
+                return ID<ConnectionInfoDto>.InvalidID;
             user.ConnectionInfo = connectionInfo;
 
             await context.SaveChangesAsync();
@@ -37,8 +40,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionStatusDto> Connect(ID<UserDto> userID)
         {
+            User user = await FindUserFromDb((int)userID);
+            if (user == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Пользователь отсутвует в базе!", };
+
             // Get connection info from user
-            var connectionInfo = await GetConnectionInfoFromDb((int)userID);
+            var connectionInfo = await GetConnectionInfoFromDb(user);
+            if (connectionInfo == null)
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
+
             var connection = GetConnection(connectionInfo);
             var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
 
@@ -49,6 +59,7 @@ namespace MRS.DocumentManagement.Services
             connectionInfoDto = await connection.UpdateConnectionInfo(connectionInfoDto);
             connectionInfo = mapper.Map(connectionInfoDto, connectionInfo);
             context.Update(connectionInfo);
+            await context.SaveChangesAsync();
 
             // Update types stored in connection info
             var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
@@ -60,8 +71,8 @@ namespace MRS.DocumentManagement.Services
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
-            var newValues = connectionInfoDto.EnumerationTypes
-                .SelectMany(x => x.EnumerationValues).ToList() ?? Enumerable.Empty<EnumerationValueDto>();
+            var newValues = connectionInfoDto.EnumerationTypes?
+                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
                 .Where(x => !newValues.Any(t =>
@@ -71,11 +82,13 @@ namespace MRS.DocumentManagement.Services
 
             foreach (var enumType in newTypes)
             {
-                await LinkEnumerationTypes(enumType, connectionInfo);
-
-                foreach (var enumVal in newValues)
+                var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
+                if (linkedType != null)
                 {
-                    await LinkEnumerationValues(enumVal, connectionInfo);
+                    foreach (var enumVal in newValues)
+                    {
+                        await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
+                    }
                 }
             }
 
@@ -109,12 +122,22 @@ namespace MRS.DocumentManagement.Services
             return list;
         }
 
+        #region private method
         private async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
-            var user = await context.Users
-                .Include(x => x.ConnectionInfo)
-                .FirstOrDefaultAsync(x => x.ID == userID);
+            User user = await FindUserFromDb(userID);
+            return await GetConnectionInfoFromDb(user);
+        }
 
+        private async Task<User> FindUserFromDb(int userID)
+        {
+            return await context.Users
+                            .Include(x => x.ConnectionInfo)
+                            .FirstOrDefaultAsync(x => x.ID == userID);
+        }
+
+        private async Task<ConnectionInfo> GetConnectionInfoFromDb(User user)
+        {
             var info = await context.ConnectionInfos
                 .Include(x => x.ConnectionType)
                     .ThenInclude(x => x.AppProperties)
@@ -136,24 +159,26 @@ namespace MRS.DocumentManagement.Services
             return ConnectionCreator.GetConnection(type);
         }
 
-        private async Task LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
+        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
         {
             var enumTypeDb = await CheckEnumerationTypeToLink(enumType, (int)connectionInfo.ID);
-            if (enumTypeDb == null)
-                return;
-
-            connectionInfo.EnumerationTypes.Add(new ConnectionInfoEnumerationType
+            if (enumTypeDb != null)
             {
-                ConnectionInfoID = connectionInfo.ID,
-                EnumerationTypeID = enumTypeDb.ID,
-            });
+                connectionInfo.EnumerationTypes.Add(new ConnectionInfoEnumerationType
+                {
+                    ConnectionInfoID = connectionInfo.ID,
+                    EnumerationTypeID = enumTypeDb.ID,
+                });
 
-            await context.SaveChangesAsync();
+                await context.SaveChangesAsync();
+            }
+
+            return enumTypeDb;
         }
 
-        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, ConnectionInfo connectionInfo)
+        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
         {
-            var enumValueDb = await CheckEnumerationValueToLink(enumVal, (int)connectionInfo.ID);
+            var enumValueDb = await CheckEnumerationValueToLink(enumVal, type, (int)connectionInfo.ID);
             if (enumValueDb == null)
                 return;
 
@@ -174,6 +199,9 @@ namespace MRS.DocumentManagement.Services
             if (enumTypeDb == null)
             {
                 enumTypeDb = mapper.Map<EnumerationType>(enumTypeDto);
+                var connectionType = context.ConnectionInfos.Include(x => x.ConnectionType).FirstOrDefault(x => x.ID == connectionInfoID).ConnectionType;
+                enumTypeDb.ConnectionType = connectionType;
+
                 context.EnumerationTypes.Add(enumTypeDb);
                 await context.SaveChangesAsync();
                 return enumTypeDb;
@@ -188,7 +216,7 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, int connectionInfoID)
+        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, EnumerationType type, int connectionInfoID)
         {
             var enumValueDb = await context.EnumerationValues
                     .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalId);
@@ -196,6 +224,7 @@ namespace MRS.DocumentManagement.Services
             if (enumValueDb == null)
             {
                 enumValueDb = mapper.Map<EnumerationValue>(enumValueDto);
+                enumValueDb.EnumerationType = type;
                 context.EnumerationValues.Add(enumValueDb);
                 await context.SaveChangesAsync();
                 return enumValueDb;
@@ -208,6 +237,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             return enumValueDb;
-        }
+        } 
+        #endregion
     }
 }

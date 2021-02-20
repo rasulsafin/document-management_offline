@@ -104,8 +104,8 @@ namespace MRS.DocumentManagement.Database
                 .HasIndex(x => x.Name)
                 .IsUnique(true);
             modelBuilder.Entity<ObjectiveType>()
-                .HasOne(x => x.ConnectionType)
-                .WithMany(x => x.ObjectiveTypes)
+                .HasMany(x => x.Objectives)
+                .WithOne(x => x.ObjectiveType)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ConnectionType>()
@@ -168,10 +168,6 @@ namespace MRS.DocumentManagement.Database
                 .HasOne(x => x.ParentObjective)
                 .WithMany(x => x.ChildrenObjectives)
                 .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<Objective>()
-                .HasOne(x => x.ObjectiveType)
-                .WithMany(x => x.Objectives)
-                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DynamicField>()
                 .HasOne(x => x.Objective)
@@ -191,11 +187,6 @@ namespace MRS.DocumentManagement.Database
                 .HasOne(x => x.Objective)
                 .WithMany(x => x.BimElements)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ConnectionInfo>()
-                 .HasOne(x => x.ConnectionType)
-                 .WithMany(x => x.ConnectionInfos)
-                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<ConnectionInfoEnumerationType>()
               .HasKey(x => new { x.ConnectionInfoID, x.EnumerationTypeID });
@@ -238,6 +229,16 @@ namespace MRS.DocumentManagement.Database
                .HasMany(x => x.ObjectiveTypes)
                .WithOne(x => x.ConnectionType)
                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionType>()
+                .HasMany(x => x.EnumerationTypes)
+                .WithOne(x => x.ConnectionType)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ConnectionType>()
+              .HasMany(x => x.ConnectionInfos)
+              .WithOne(x => x.ConnectionType)
+              .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ConnectionInfo>()
                 .HasMany(x => x.AuthFieldValues)

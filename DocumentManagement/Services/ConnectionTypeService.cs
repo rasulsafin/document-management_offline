@@ -96,37 +96,6 @@ namespace MRS.DocumentManagement.Services
                         await context.AppProperties.AddAsync(property);
                         await context.SaveChangesAsync();
                     }
-
-                    // TODO: Update if exists?
-                    if (typeDto.EnumerationTypes == null)
-                        continue;
-
-                    foreach (var enumTypeDto in typeDto.EnumerationTypes)
-                    {
-                        var enumType = mapper.Map<EnumerationType>(enumTypeDto);
-                        var enumTypeFromDb = await context.EnumerationTypes.FirstOrDefaultAsync(x => x.ExternalId == enumTypeDto.ExternalId);
-
-                        // TODO: Update if exists?
-                        if (enumTypeFromDb != null)
-                            continue;
-
-                        await context.EnumerationTypes.AddAsync(enumType);
-
-                        enumType.ConnectionType = type;
-                        await context.SaveChangesAsync();
-
-                        if (enumTypeDto.EnumerationValues == null)
-                            enumTypeDto.EnumerationValues = new List<EnumerationValueDto>();
-
-                        foreach (var enumValueDto in enumTypeDto.EnumerationValues)
-                        {
-                            var enumValue = mapper.Map<EnumerationValue>(enumValueDto);
-                            enumValue.EnumerationTypeID = enumType.ID;
-
-                            // TODO: Update if exists?
-                            context.EnumerationValues.Add(enumValue);
-                        }
-                    }
                 }
 
                 await context.SaveChangesAsync();
