@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var requestUtility = new HttpRequestUtility(new HttpConnection());
             var authService = new AuthenticationService(requestUtility);
             var commonRequests = new CommonRequestsUtility(requestUtility);
-            service = new TasksService(authService, requestUtility, commonRequests);
+            service = new TasksService(requestUtility, commonRequests);
 
             var login = "diismagilov";
             var password = "DYZDFMwZ";
