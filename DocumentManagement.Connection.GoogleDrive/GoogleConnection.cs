@@ -9,7 +9,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     public class GoogleConnection : IConnection
     {
         private const string NAME_CONNECT = "Google Drive";
-        // private SyncManager syncManager;
         private ConnectionInfoDto connectionInfo;
         private GoogleDriveManager manager;
 
@@ -17,18 +16,12 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
         }
 
-        //public GoogleConnection(SyncManager syncManager)
-        //{
-        //    this.syncManager = syncManager;
-        //}
-
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
             try
             {
-                connectionInfo = info;
                 GoogleDriveController driveController = new GoogleDriveController();
-                await driveController.InitializationAsync(connectionInfo);
+                await driveController.InitializationAsync(info);
                 manager = new GoogleDriveManager(driveController);
 
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
@@ -65,17 +58,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
-            //GoogleDriveManager manager = syncManager.GetManager() as GoogleDriveManager;
-            if (manager != null)
-            {
-                return await manager.GetStatusAsync();
-            }
-
-            return new ConnectionStatusDto()
-            {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
-                Message = "Manager null",
-            };
+            return await Connect(info);
         }
 
         public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
@@ -92,16 +75,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             }
 
             return Task.FromResult(false);
-        }
-
-        public Task<bool> StartSyncronization()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> StopSyncronization()
-        {
-            throw new NotImplementedException();
         }
 
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)

@@ -80,7 +80,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return Task.FromResult(false);
         }
 
-        // TODO: Make a proper method.
         public ConnectionTypeDto GetConnectionType()
         {
             var type = new ConnectionTypeDto
