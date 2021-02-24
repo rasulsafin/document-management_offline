@@ -4,6 +4,6 @@
     {
         File,
         Bim,
-        Media
+        Media,
     }
 }
