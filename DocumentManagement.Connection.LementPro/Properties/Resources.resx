@@ -117,41 +117,57 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AuthenticationLoginMethod" xml:space="preserve">
+  <data name="MethodAuthenticationLogin" xml:space="preserve">
     <value>/Services/Authentication/Login.do</value>
     <comment>Method to log in</comment>
   </data>
-  <data name="MethodArchiveObject" xml:space="preserve">
-    <value>/Services/ObjectBase/Archive.do</value>
-    <comment>Method to archive (close) an object</comment>
+  <data name="MethodBimChildrenByAttribute" xml:space="preserve">
+    <value>/Services/Bim/GetChildObjectsByAttribute.do</value>
+    <comment>Method to get childern for BIM file by attribute</comment>
   </data>
-  <data name="MethodCreateObject" xml:space="preserve">
-    <value>/Services/ObjectBase/Create.do</value>
-    <comment>Method to create an object</comment>
+  <data name="MethodBimGetListViewObjectAttributes" xml:space="preserve">
+    <value>/Services/Bim/GetListViewObjectAttributes.do</value>
+    <comment>Method to get BIM's attributes</comment>
   </data>
-  <data name="MethodGetCategoryFolders" xml:space="preserve">
-    <value>/Services/Folders/{0}Folder/GetTree.do</value>
-    <comment>Method to get all folders of the native category</comment>
-  </data>
-  <data name="MethodGetMenuCategories" xml:space="preserve">
+  <data name="MethodCategoriesGetMenuList" xml:space="preserve">
     <value>/Services/Category/GetMenuCategories.do</value>
     <comment>Method to get all menu categories</comment>
   </data>
-  <data name="MethodGetObject" xml:space="preserve">
-    <value>/Services/ObjectBase/Get.do</value>
-    <comment>Method to get object info</comment>
+  <data name="MethodFileDownload" xml:space="preserve">
+    <value>/Services/Files/DocumentFile/GetFile.do</value>
+    <comment>Method to download the file</comment>
+  </data>
+  <data name="MethodFolderGetListForCategory" xml:space="preserve">
+    <value>/Services/Folders/{0}Folder/GetTree.do</value>
+    <comment>Method to get all folders of the native category</comment>
   </data>
   <data name="MethodGetObjectsList" xml:space="preserve">
     <value>/Services/{0}/GetList.do</value>
     <comment>Method to get list of objects from folder</comment>
   </data>
-  <data name="MethodGetTypes" xml:space="preserve">
-    <value>/Services/ObjectTypes/ObjectType/GetTree.do</value>
-    <comment>Method to get all possible types</comment>
+  <data name="MethodObjectArchive" xml:space="preserve">
+    <value>/Services/ObjectBase/Archive.do</value>
+    <comment>Method to archive (close) an object</comment>
+  </data>
+  <data name="MethodObjectCreate" xml:space="preserve">
+    <value>/Services/ObjectBase/Create.do</value>
+    <comment>Method to create an object</comment>
+  </data>
+  <data name="MethodObjectGet" xml:space="preserve">
+    <value>/Services/ObjectBase/Get.do</value>
+    <comment>Method to get object info</comment>
   </data>
   <data name="MethodTaskUpdate" xml:space="preserve">
     <value>/Services/Task/Edit.do</value>
     <comment>Method to edit (update) a task</comment>
+  </data>
+  <data name="MethodTypesGetAttributesDefinition" xml:space="preserve">
+    <value>/Services/ObjectTypes/ObjectTypeAttributeDef/GetList.do</value>
+    <comment>Method to get all type's attributes definitions</comment>
+  </data>
+  <data name="MethodTypesGetTree" xml:space="preserve">
+    <value>/Services/ObjectTypes/ObjectType/GetTree.do</value>
+    <comment>Method to get all possible types</comment>
   </data>
   <data name="UrlCategoryBim" xml:space="preserve">
     <value>/Bim</value>

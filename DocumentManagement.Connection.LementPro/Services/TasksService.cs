@@ -28,13 +28,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         }
 
         public async Task<IEnumerable<ObjectBase>> GetAllTasksAsync()
-            => await commonRequests.RetriveObjectsListAsync(OBJECT_TYPE_SINGLE_TASK);
+            => await commonRequests.RetriveObjectsListAsync(OBJECTTYPE_SINGLE_TASK);
 
         public async Task<ObjectBase> GetTaskAsync(int taskId)
             => await commonRequests.GetObjectAsync(taskId);
 
         public async Task<List<LementProType>> GetTasksTypesAsync()
-            => await commonRequests.GetObjectsTypes(OBJECT_TYPE_SINGLE_TASK);
+            => await commonRequests.GetObjectsTypes(OBJECTTYPE_SINGLE_TASK);
 
         public async Task<ObjectBaseCreateResult> CreateTask(ObjectBaseToCreate objectToCreate)
             => await commonRequests.CreateObjectAsync(objectToCreate);

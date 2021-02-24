@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using File = System.IO.File;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 {
@@ -29,14 +33,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected internal async Task<List<Category>> GetMenuCategoriesAsync()
         {
-            var response = await RequestUtility.GetResponseWithoutDataAsync(Resources.MethodGetMenuCategories);
+            var response = await RequestUtility.GetResponseWithoutDataAsync(Resources.MethodCategoriesGetMenuList);
             return response.ToObject<List<Category>>();
         }
 
         protected internal async Task<List<Folder>> GetFoldersTreeAsync(string categoryObject, int categoryId)
         {
             // Works only with native categories as Project or Task. Custom types should use different url.
-            var url = string.Format(Resources.MethodGetCategoryFolders, categoryObject);
+            var url = string.Format(Resources.MethodFolderGetListForCategory, categoryObject);
 
             var data = new
             {
@@ -100,7 +104,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 rememberme = true,
             };
 
-            var response = await RequestUtility.GetResponseAsync(Resources.MethodGetObject, data);
+            var response = await RequestUtility.GetResponseAsync(Resources.MethodObjectGet, data);
 
             // Response contains some metadata and object
             return response[RESPONSE_OBJECT_NAME].ToObject<ObjectBase>();
@@ -108,14 +112,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected internal async Task<ObjectBaseCreateResult> CreateObjectAsync(ObjectBaseToCreate objectToCreate)
         {
-            var response = await RequestUtility.GetResponseAsync(Resources.MethodCreateObject, objectToCreate);
+            var response = await RequestUtility.GetResponseAsync(Resources.MethodObjectCreate, objectToCreate);
             var createResult = response.ToObject<ObjectBaseCreateResult>();
             return createResult;
         }
 
         protected internal async Task<List<LementProType>> GetTypesAsync()
         {
-            var response = await RequestUtility.GetResponseWithoutDataAsync(Resources.MethodGetTypes);
+            var response = await RequestUtility.GetResponseWithoutDataAsync(Resources.MethodTypesGetTree);
             var typesTree = response.ToObject<List<LementProType>>();
 
             // Types tree has one root with all types included in Items
@@ -128,7 +132,44 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
             try
             {
-                await RequestUtility.GetResponseAsync(Resources.MethodArchiveObject, data);
+                await RequestUtility.GetResponseAsync(Resources.MethodObjectArchive, data);
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        protected internal async Task<List<TypeAttribute>> GetTypesAttributesDefinitionAsync(string typeId)
+        {
+            var data = new
+            {
+                typeId = typeId,
+                includeInherited = false,
+            };
+
+            var response = await RequestUtility.GetResponseAsync(Resources.MethodTypesGetAttributesDefinition, data);
+            return response.ToObject<List<TypeAttribute>>();
+        }
+
+        protected internal int GetFolderKeysId(string source)
+        {
+            var folderKey = JToken.Parse(source).ToObject<FolderKey>();
+            return folderKey.ID.Value;
+        }
+
+        // TODO: MB move this method (and future upload method) to separate FileService?
+        protected internal async Task<bool> DownloadFileAsync(string fileId, string filePath)
+        {
+            var data = new { fileId = fileId };
+            var url = Resources.MethodFileDownload;
+            await using var output = File.OpenWrite(filePath);
+            try
+            {
+                await using var fileStream = await RequestUtility.GetResponseStreamAsync(url, data);
+                await fileStream.CopyToAsync(output);
             }
             catch
             {

@@ -5,6 +5,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
     [DataContract]
     public class Folder
     {
+        // FolderKey class is not used because data presented as string in the field
         [DataMember(Name = "folderKey")]
         public string FolderKey { get; set; }
 

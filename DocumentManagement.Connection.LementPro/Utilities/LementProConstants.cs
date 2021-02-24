@@ -21,8 +21,10 @@
         public const string STANDARD_ACCEPT_LANGUAGE = "ru-RU";
         public const string STANDARD_AUTHENTICATION_SCHEME = "auth";
 
-        public const string OBJECT_TYPE_TASKS = "Tasks";
-        public const string OBJECT_TYPE_SINGLE_TASK = "Task";
+        public const string OBJECTTYPE_BIM = "Bim";
+        public const string OBJECTTYPE_BIM_ATTRIBUTE_VERSION = "modelVersions";
+        public const string OBJECTTYPE_TASKS = "Tasks";
+        public const string OBJECTTYPE_SINGLE_TASK = "Task";
 
         public const string RESPONSE_OBJECT_NAME = "object";
         public const string RESPONSE_COLLECTION_ITEMS_NAME = "items";

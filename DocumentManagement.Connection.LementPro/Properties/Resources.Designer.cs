@@ -63,54 +63,54 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/Authentication/Login.do.
         /// </summary>
-        internal static string AuthenticationLoginMethod {
+        internal static string MethodAuthenticationLogin {
             get {
-                return ResourceManager.GetString("AuthenticationLoginMethod", resourceCulture);
+                return ResourceManager.GetString("MethodAuthenticationLogin", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Archive.do.
+        ///   Ищет локализованную строку, похожую на /Services/Bim/GetChildObjectsByAttribute.do.
         /// </summary>
-        internal static string MethodArchiveObject {
+        internal static string MethodBimChildrenByAttribute {
             get {
-                return ResourceManager.GetString("MethodArchiveObject", resourceCulture);
+                return ResourceManager.GetString("MethodBimChildrenByAttribute", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Create.do.
+        ///   Ищет локализованную строку, похожую на /Services/Bim/GetListViewObjectAttributes.do.
         /// </summary>
-        internal static string MethodCreateObject {
+        internal static string MethodBimGetListViewObjectAttributes {
             get {
-                return ResourceManager.GetString("MethodCreateObject", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на /Services/Folders/{0}Folder/GetTree.do.
-        /// </summary>
-        internal static string MethodGetCategoryFolders {
-            get {
-                return ResourceManager.GetString("MethodGetCategoryFolders", resourceCulture);
+                return ResourceManager.GetString("MethodBimGetListViewObjectAttributes", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/Category/GetMenuCategories.do.
         /// </summary>
-        internal static string MethodGetMenuCategories {
+        internal static string MethodCategoriesGetMenuList {
             get {
-                return ResourceManager.GetString("MethodGetMenuCategories", resourceCulture);
+                return ResourceManager.GetString("MethodCategoriesGetMenuList", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Get.do.
+        ///   Ищет локализованную строку, похожую на /Services/Files/DocumentFile/GetFile.do.
         /// </summary>
-        internal static string MethodGetObject {
+        internal static string MethodFileDownload {
             get {
-                return ResourceManager.GetString("MethodGetObject", resourceCulture);
+                return ResourceManager.GetString("MethodFileDownload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/Folders/{0}Folder/GetTree.do.
+        /// </summary>
+        internal static string MethodFolderGetListForCategory {
+            get {
+                return ResourceManager.GetString("MethodFolderGetListForCategory", resourceCulture);
             }
         }
         
@@ -124,11 +124,29 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /Services/ObjectTypes/ObjectType/GetTree.do.
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Archive.do.
         /// </summary>
-        internal static string MethodGetTypes {
+        internal static string MethodObjectArchive {
             get {
-                return ResourceManager.GetString("MethodGetTypes", resourceCulture);
+                return ResourceManager.GetString("MethodObjectArchive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Create.do.
+        /// </summary>
+        internal static string MethodObjectCreate {
+            get {
+                return ResourceManager.GetString("MethodObjectCreate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Get.do.
+        /// </summary>
+        internal static string MethodObjectGet {
+            get {
+                return ResourceManager.GetString("MethodObjectGet", resourceCulture);
             }
         }
         
@@ -138,6 +156,24 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         internal static string MethodTaskUpdate {
             get {
                 return ResourceManager.GetString("MethodTaskUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectTypes/ObjectTypeAttributeDef/GetList.do.
+        /// </summary>
+        internal static string MethodTypesGetAttributesDefinition {
+            get {
+                return ResourceManager.GetString("MethodTypesGetAttributesDefinition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectTypes/ObjectType/GetTree.do.
+        /// </summary>
+        internal static string MethodTypesGetTree {
+            get {
+                return ResourceManager.GetString("MethodTypesGetTree", resourceCulture);
             }
         }
         

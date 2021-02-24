@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -47,7 +48,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 RememberMe = true,
             };
 
-            var response = await GetHttpResponseAsync(Resources.AuthenticationLoginMethod, data: authData);
+            var response = await GetHttpResponseAsync(Resources.MethodAuthenticationLogin, data: authData);
             var token = ParseCookieFromResponse(response, RESPONSE_COOKIES_AUTH_NAME);
             var expires = ParseCookieFromResponse(response, RESPONSE_COOKIES_EXPIRES_NAME);
 
@@ -70,15 +71,20 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return JToken.Parse(content);
         }
 
-        protected async Task<HttpResponseMessage> GetHttpResponseAsync<TData>(string url, TData data = default, HttpMethod requestType = null)
+        protected internal async Task<Stream> GetResponseStreamAsync<TData>(
+            string url,
+            TData data = default)
         {
-            requestType ??= HttpMethod.Post;
-            var fullUrl = $"{Resources.UrlServer}{url}";
+            var response = await GetHttpResponseAsync(url, data, completionOption: HttpCompletionOption.ResponseHeadersRead);
+            return await response.Content.ReadAsStreamAsync();
+        }
 
-            var request = connector.CreateRequest(
-                requestType,
-                fullUrl,
-                authData: (STANDARD_AUTHENTICATION_SCHEME, AuthenticationService.AccessToken));
+        protected async Task<HttpResponseMessage> GetHttpResponseAsync<TData>(string url,
+            TData data = default,
+            HttpMethod requestType = null,
+            HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+        {
+            var request = InitializeRequest(url, requestType);
 
             if (data != null)
             {
@@ -88,7 +94,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
             request.Headers.Add(CONTENT_ACCEPT_LANGUAGE, STANDARD_ACCEPT_LANGUAGE);
 
-            var response = await connector.SendRequestAsync(request);
+            var response = await connector.SendRequestAsync(request, completionOption: completionOption);
             return response;
         }
 
@@ -111,6 +117,19 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             }
 
             return default;
+        }
+
+        protected HttpRequestMessage InitializeRequest(string url, HttpMethod requestType = null)
+        {
+            requestType ??= HttpMethod.Post;
+            var fullUrl = $"{Resources.UrlServer}{url}";
+
+            var request = connector.CreateRequest(
+                requestType,
+                fullUrl,
+                authData: (STANDARD_AUTHENTICATION_SCHEME, AuthenticationService.AccessToken));
+
+            return request;
         }
     }
 }

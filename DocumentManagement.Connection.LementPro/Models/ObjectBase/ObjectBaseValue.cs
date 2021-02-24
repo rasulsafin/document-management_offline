@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         public dynamic CompletedSubTasks { get; set; }
 
         [DataMember(Name = "files")]
-        public dynamic Files { get; set; }
+        public List<File> Files { get; set; }
 
         [DataMember(Name = "documentResolutionFiles")]
         public dynamic DocumentResolutionFiles { get; set; }
@@ -108,5 +108,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
 
         [DataMember(Name = "executors")]
         public List<UserShortInfo> Executors { get; set; }
+
+        [DataMember(Name = "bimVersionNum")]
+        public int? BimVersionNum { get; set; }
     }
 }

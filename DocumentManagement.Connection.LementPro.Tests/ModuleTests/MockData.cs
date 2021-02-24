@@ -2813,5 +2813,72 @@
                   }
                 ]";
 
+        /// <summary>
+        /// Json success response for '/Services/Bim/GetListViewObjectAttributes.do'.
+        /// </summary>
+        internal string BIM_GETATTRIBUTES_SUCCESS_RESPONSE
+            = @"[{
+                    ""id"":""59218_402297"",
+                    ""attributeId"":""59218"",
+                    ""parentId"":""402297"",
+                    ""name"":""Версии"",
+                    ""showNameInListView"":false,
+                    ""hasChildren"":true,
+                    ""isObject"":false,
+                    ""isAttribute"":true}]";
+
+        /// <summary>
+        /// Json success response for 'Services/ObjectTypes/ObjectTypeAttributeDef/GetList.do'.
+        /// Sample for Bim.
+        /// </summary>
+        internal string TYPE_GETATTRIBUTESDEFINITIONS_SUCCESS_RESPONSE
+            = @"[
+                  {
+                    ""isRequired"": true,
+                    ""sortWeight"": 100.0,
+                    ""field"": ""files"",
+                    ""objectTypeId"": 40163,
+                    ""attrId"": 59163,
+                    ""childId"": null,
+                    ""name"": ""Файлы"",
+                    ""relationMultiplicity"": 1,
+                    ""description"": """",
+                    ""dataType"": 18,
+                    ""listOfValues"": null,
+                    ""units"": """",
+                    ""dontShowIfNull"": false
+                  },
+                  {
+                    ""isRequired"": true,
+                    ""sortWeight"": 100.0,
+                    ""field"": ""name"",
+                    ""objectTypeId"": 40163,
+                    ""attrId"": 59156,
+                    ""childId"": null,
+                    ""name"": ""Название"",
+                    ""relationMultiplicity"": 1,
+                    ""description"": """",
+                    ""dataType"": 5,
+                    ""listOfValues"": null,
+                    ""units"": """",
+                    ""dontShowIfNull"": false
+                  },
+                  {
+                    ""isRequired"": false,
+                    ""sortWeight"": 1500.0,
+                    ""field"": ""modelVersions"",
+                    ""objectTypeId"": 40163,
+                    ""attrId"": 59218,
+                    ""childId"": 59217,
+                    ""name"": ""Версии"",
+                    ""relationMultiplicity"": 0,
+                    ""description"": """",
+                    ""dataType"": 16,
+                    ""listOfValues"": null,
+                    ""units"": """",
+                    ""dontShowIfNull"": false
+                  }
+                ]";
+
     }
 }

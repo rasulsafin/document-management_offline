@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
@@ -63,12 +64,22 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         public async Task GetListTask_ExistingFolderWithCorrectCredentials_ReturnsTasksList()
         {
             var objectType = "Task";
-            string folderKey = "{\"id\":127472,\"subKeys\":[]}";
+            var folderKey =  "{\"id\":127472,\"subKeys\":[]}";
 
             var result = await subject.Object.GetObjectsListFromFolderAsync(objectType, folderKey);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        public async Task GetTypesAttributesDefinitionAsync_BimAttributesWithCorrectCredentials_ReturnsBimAttributesSubtypes()
+        {
+            string typeId = "40163";
+
+            var result = await subject.Object.GetTypesAttributesDefinitionAsync(typeId);
+
+            Assert.IsNotNull(result);
         }
     }
 }
