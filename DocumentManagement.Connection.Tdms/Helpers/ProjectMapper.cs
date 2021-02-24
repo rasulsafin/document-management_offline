@@ -6,23 +6,25 @@ using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms.Helpers
 {
-    internal class ProjectMapper : IModelMapper<ProjectDto, TDMSObject>
+    internal class ProjectMapper : IModelMapper<ProjectExternalDto, TDMSObject>
     {
         private readonly ItemMapper mapper = new ItemMapper();
 
-        public ProjectDto ToDto(TDMSObject tdmsObject)
+        public ProjectExternalDto ToDto(TDMSObject tdmsObject)
         {
-            var projectDto = new ProjectDto()
+            var projectDto = new ProjectExternalDto()
             {
                 Title = tdmsObject.Description,
                 Items = GetItems(tdmsObject),
+                ExternalID = tdmsObject.GUID,
             };
 
             return projectDto;
         }
 
-        public TDMSObject ToModel(ProjectDto objectDto, TDMSObject model)
+        public TDMSObject ToModel(ProjectExternalDto objectDto, TDMSObject model)
         {
+            ///TODO: Swap MAIN_OBJECT to OBJECT_OBJECT?
             model.Attributes[AttributeID.NAME].Value = objectDto.Title;
             model.Attributes[AttributeID.START_DATE].Value = DateTime.Now;
             model.Attributes[AttributeID.DUE_DATE].Value = DateTime.Now;
@@ -31,6 +33,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             model.Update();
             modelsChild.Update();
 
+            ///TODO: OBJECT_OBJECT?
             modelsChild.Attributes[AttributeID.OBJECT_NAME].Value = objectDto.Title;
             modelsChild.Update();
 
@@ -38,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             return model;
         }
 
-        private IEnumerable<ItemDto> GetItems(TDMSObject tdmsObject) => tdmsObject.Files.Cast<TDMSFile>().Select(x => mapper.ToDto(x));
+        private IEnumerable<ItemExternalDto> GetItems(TDMSObject tdmsObject) => tdmsObject.Files.Cast<TDMSFile>().Select(x => mapper.ToDto(x));
 
     }
 }

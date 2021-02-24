@@ -5,7 +5,7 @@ using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms.Helpers
 {
-    internal class ItemMapper : IModelMapper<ItemDto, TDMSFile>
+    internal class ItemMapper : IModelMapper<ItemExternalDto, TDMSFile>
     {
         private static readonly IReadOnlyDictionary<string, ItemTypeDto> FILE_TYPES = new Dictionary<string, ItemTypeDto>
         {
@@ -15,9 +15,9 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             { FileTypeID.VIDEO, ItemTypeDto.Media },
         };
 
-        public ItemDto ToDto(TDMSFile tdmsObject)
+        public ItemExternalDto ToDto(TDMSFile tdmsObject)
         {
-            var itemDto = new ItemDto()
+            var itemDto = new ItemExternalDto()
             {
                 Name = tdmsObject.FileName,
                 ExternalItemId = tdmsObject.Handle,
@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             return itemDto;
         }
 
-        public TDMSFile ToModel(ItemDto objectDto, TDMSFile model)
+        public TDMSFile ToModel(ItemExternalDto objectDto, TDMSFile model)
         {
             throw new NotImplementedException();
         }
