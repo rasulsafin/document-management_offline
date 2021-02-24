@@ -102,6 +102,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return type;
         }
 
+        public void Quit()
+        {
+            tdms.Quit();
+        }
+
         private ICollection<ObjectiveTypeDto> GetObjectiveTypes()
         {
             return new List<ObjectiveTypeDto>()

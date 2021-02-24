@@ -8,24 +8,10 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
     {
         private static ProjectService projectService;
 
-        private static ProjectDto project;
-        private static ProjectDto projectToDelete;
-
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
             projectService = new ProjectService();
-            project = new ProjectDto()
-            {
-                ID = new ID<ProjectDto>(1),
-                Title = "TestProject",
-            };
-
-            projectToDelete = new ProjectDto()
-            {
-                ID = new ID<ProjectDto>(2),
-                Title = "TestProject2",
-            };
         }
 
         [TestMethod]
@@ -37,25 +23,11 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
         }
 
         [TestMethod]
-        public void AddProject_NonExistingProject_ReturnsProjectDto()
-        {
-        }
-
-        [TestMethod]
-        public void UpdateProject_ExistingProject_ReturnsProjectDto()
-        {
-
-        }
-
-        [TestMethod]
-        public void RemoveProject_ExistingProject_ReturnsTrue()
-        {
-        }
-
-        [TestMethod]
         public void GetListOfProject_ReturnsListOfProjectDto()
         {
-
+            var list = projectService.GetListOfProjects();
+            Assert.IsNotNull(list);
+            Assert.IsTrue(list.Count > 0);
         }
     }
 }

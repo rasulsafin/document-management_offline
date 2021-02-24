@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
     {
         private readonly ProjectMapper mapper = new ProjectMapper();
 
-        public ProjectDto Get(string id)
+        public ProjectExternalDto Get(string id)
         {
             try
             {
@@ -23,72 +23,45 @@ namespace MRS.DocumentManagement.Connection.Tdms
             }
         }
 
-        public ProjectDto Add(ProjectDto projectDto)
+        public ProjectExternalDto Add(ProjectExternalDto projectDto)
         {
+            throw new InvalidOperationException();
+        }
+
+        public ProjectDto Update(ProjectDto projectDto)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public bool Remove(ProjectExternalDto projectDto)
+        {
+            throw new InvalidOperationException();
+        }
+
+        public ICollection<ProjectExternalDto> GetListOfProjects()
+        {
+            List<ProjectExternalDto> projects = new List<ProjectExternalDto>();
             try
             {
-                TDMSObject parent = TdmsConnection.tdms.Root;
+                var queryCom = TdmsConnection.tdms.CreateQuery();
+                queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.OBJECT);
 
-                TDMSObject project = parent.Objects.Create(ObjectTypeID.MAINOBJECT);
-                parent.Update();
+                foreach (TDMSObject obj in queryCom.Objects)
+                {
+                    projects.Add(new ProjectExternalDto()
+                    {
+                        ExternalID = obj.GUID,
+                        Title = obj.Description,
+                        // Items = 
+                    });
+                }
 
-                var projectToCreate = mapper.ToModel(projectDto, project);
-
-                project.Update();
-                parent.Update();
-
-                return mapper.ToDto(project);
+                return projects;
             }
             catch
             {
                 return null;
             }
-        }
-
-        public ProjectDto Update(ProjectDto projectDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool Remove(ProjectDto projectDto)
-        {
-            throw new NotImplementedException();
-        }
-
-        public IEnumerable<ProjectDto> GetListOfProjects(string id)
-        {
-            throw new NotImplementedException();
-
-            //List<Project> projects = new List<Project>();
-            //try
-            //{
-            //    var queryCom = tdms.CreateQuery();
-            //    queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.Object);
-
-            //    ProgressBar.Progress.AddLayer(queryCom.Objects.Count);
-
-            //    foreach (TDMSObject obj in queryCom.Objects)
-            //    {
-            //        token.ThrowIfCancellationRequested();
-
-            //        projects.Add(new Project()
-            //        {
-            //            ID = obj.GUID,
-            //            Name = obj.Description
-            //        });
-
-            //        ProgressBar.Progress++;
-            //    }
-
-            //    return projects.ToArray();
-            //}
-            //catch (Exception e)
-            //{
-            //    // ProgressBar.Progress.Cancel();
-            //    //ProgressBar.Progress.Clear();
-            //    Logger.WriteLog(e.Message + " : " + e.StackTrace, LoggingLevel.Error);
-            //    return null;
-            //}
         }
     }
 }
