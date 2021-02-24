@@ -1,53 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Tdms;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.Tdms.Test
+namespace MRS.DocumentManagement.Connection.Tdms.Tests
 {
     [TestClass]
     public class ProjectsTest
     {
-        private static TdmsConnection connection;
         private static ProjectService projectService;
 
         private static ProjectDto project;
+        private static ProjectDto projectToDelete;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
-            connection = new TdmsConnection();
             projectService = new ProjectService();
-
-            var connectionInfo = new ConnectionInfoDto
-            {
-                ID = new ID<ConnectionInfoDto>(1),
-                ConnectionType = connection.GetConnectionType(),
-                AuthFieldValues = new Dictionary<string, string>()
-                {
-                    {Auth.LOGIN, "gureva" },
-                    {Auth.PASSWORD, "123"},
-                    {Auth.DATABASE, "kosmos" },
-                    {Auth.SERVER, @"192.168.100.6\sqlkosmos" },
-                },
-            };
-
-
             project = new ProjectDto()
             {
                 ID = new ID<ProjectDto>(1),
                 Title = "TestProject",
             };
 
-            // Authorize
-            var signInTask = connection.Connect(connectionInfo);
-            signInTask.Wait();
-            if (signInTask.Result.Status != RemoteConnectionStatusDto.OK)
+            projectToDelete = new ProjectDto()
             {
-                Assert.Fail("Authorization failed");
-            }
+                ID = new ID<ProjectDto>(2),
+                Title = "TestProject2",
+            };
         }
 
         [TestMethod]
@@ -61,8 +39,6 @@ namespace DocumentManagement.Connection.Tdms.Test
         [TestMethod]
         public void AddProject_NonExistingProject_ReturnsProjectDto()
         {
-            var res = projectService.Add(project);
-            Assert.IsNotNull(res);
         }
 
         [TestMethod]
@@ -74,7 +50,6 @@ namespace DocumentManagement.Connection.Tdms.Test
         [TestMethod]
         public void RemoveProject_ExistingProject_ReturnsTrue()
         {
-
         }
 
         [TestMethod]
