@@ -19,4 +19,10 @@
     <ProjectReference Include="..\DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\IntegrationTestFile.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
