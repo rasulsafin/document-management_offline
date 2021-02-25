@@ -10,6 +10,11 @@ namespace MRS.DocumentManagement.Database
         where T : ISynchronizable<T>
     {
         /// <summary>
+        /// The ID of the model.
+        /// </summary>
+        int ID { get; set; }
+
+        /// <summary>
         /// The ID of the model in a external system.
         /// </summary>
         string ExternalID { get; set; }

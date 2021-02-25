@@ -5,10 +5,11 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class ObjectiveSynchro : ISynchroTable
     {
@@ -31,7 +32,7 @@ namespace MRS.DocumentManagement.Synchronizer
             if (local != null)
             {
                 action.IsComplete = true;
-                context.Objectives.Remove(local);
+                context.Objectives.Unsynchronized().Remove(local);
                 await context.SaveChangesAsync();
             }
         }
@@ -92,7 +93,7 @@ namespace MRS.DocumentManagement.Synchronizer
 
         public void CheckDBRevision(RevisionCollection local)
         {
-            var allId = context.Objectives.Select(x => x.ID).ToList();
+            var allId = context.Objectives.Unsynchronized().Select(x => x.ID).ToList();
 
             var revCollect = local.GetRevisions(NameTypeRevision.Objectives);
             foreach (var id in allId)
@@ -106,7 +107,7 @@ namespace MRS.DocumentManagement.Synchronizer
 
         private async Task VerifyPrimaryKey(SyncAction action)
         {
-            bool projExist = await context.Projects.AnyAsync(x => x.ID == (int)remote.ProjectID);
+            bool projExist = await context.Projects.Unsynchronized().AnyAsync(x => x.ID == (int)remote.ProjectID);
             if (!projExist)
             {
                 action.IsComplete = false;
@@ -135,15 +136,15 @@ namespace MRS.DocumentManagement.Synchronizer
         {
             foreach (var dynamicDto in remote.DynamicFields)
             {
-                var dynamic = await context.DynamicFields.FindAsync((int)dynamicDto.ID);
+                var dynamic = await context.DynamicFields.Unsynchronized().FindAsync((int)dynamicDto.ID);
                 var existItem = dynamic != null;
                 dynamic = mapper.Map<DynamicField>(dynamicDto);
                 dynamic.ObjectiveID = local.ID;
 
                 if (!existItem)
-                    context.DynamicFields.Add(dynamic);
+                    context.DynamicFields.Unsynchronized().Add(dynamic);
                 else
-                    context.DynamicFields.Update(dynamic);
+                    context.DynamicFields.Unsynchronized().Update(dynamic);
                 await context.SaveChangesAsync();
             }
         }
@@ -182,19 +183,19 @@ namespace MRS.DocumentManagement.Synchronizer
 
             foreach (var itemDto in remote.Items)
             {
-                var item = await context.Items.FindAsync((int)itemDto.ID);
+                var item = await context.Items.Unsynchronized().FindAsync((int)itemDto.ID);
                 var existItem = item != null;
                 if (!existItem)
                 {
                     item = mapper.Map<Item>(itemDto);
                     item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Add(item);
+                    context.Items.Unsynchronized().Add(item);
                 }
                 else
                 {
                     item = mapper.Map(itemDto, item);
                     item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Update(item);
+                    context.Items.Unsynchronized().Update(item);
                 }
 
                 await context.SaveChangesAsync();
@@ -205,7 +206,7 @@ namespace MRS.DocumentManagement.Synchronizer
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
-                local = await context.Objectives.FindAsync(id);
+                local = await context.Objectives.Unsynchronized().FindAsync(id);
         }
 
         private async Task GetRemote(int id)

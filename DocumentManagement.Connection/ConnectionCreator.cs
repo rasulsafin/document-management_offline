@@ -16,7 +16,8 @@ namespace MRS.DocumentManagement.Connection
             if (connections == null)
                 GetAllConnectionTypes();
 
-            if (!connections.TryGetValue(connectionTypeDto.Name, out Type type))
+            Type type = null;
+            if (!(connections?.TryGetValue(connectionTypeDto.Name, out type) ?? false))
                 return null;
 
             return Activator.CreateInstance(type) as IConnection;
@@ -33,12 +34,15 @@ namespace MRS.DocumentManagement.Connection
 
             foreach (Type type in listOfTypes)
             {
-                object connection = Activator.CreateInstance(type);
-                MethodInfo method = type.GetMethod("GetConnectionType");
-                object result = method.Invoke(connection, null);
-                ConnectionTypeDto t = result as ConnectionTypeDto;
-                list.Add(t);
-                connections.Add(t.Name, type);
+                var connection = Activator.CreateInstance(type);
+                var method = type.GetMethod(nameof(IConnection.GetConnectionType));
+                var result = (ConnectionTypeDto)method?.Invoke(connection, null);
+
+                if (result == null)
+                    continue;
+
+                list.Add(result);
+                connections.Add(result.Name, type);
             }
 
             return list;

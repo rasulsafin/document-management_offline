@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
@@ -11,5 +10,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public string Title { get; set; }
 
         public IEnumerable<ItemExternalDto> Items { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
     }
 }

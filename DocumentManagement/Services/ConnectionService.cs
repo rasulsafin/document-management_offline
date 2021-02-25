@@ -65,8 +65,7 @@ namespace MRS.DocumentManagement.Services
             var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
             var typesToRemove = currentEnumerationTypes?
-                .Where(x => !newTypes.Any(t =>
-                    t.ExternalId == x.EnumerationType.ExternalId))
+                .Where(x => newTypes.All(t => t.ExternalId != x.EnumerationType.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace MRS.DocumentManagement.Database.Models
 {
     public class Item : ISynchronizable<Item>
-    { 
+    {
         public int ID { get; set; }
 
         public string Name { get; set; }

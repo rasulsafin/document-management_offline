@@ -6,7 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class SyncManager
     {

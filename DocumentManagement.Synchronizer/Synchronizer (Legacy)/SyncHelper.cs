@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class SyncHelper
     {

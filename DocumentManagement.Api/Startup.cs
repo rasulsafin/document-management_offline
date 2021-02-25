@@ -14,7 +14,7 @@ using MRS.DocumentManagement.Api.Validators;
 //using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Synchronizer;
+using MRS.DocumentManagement.Synchronizer.Legacy;
 using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Api

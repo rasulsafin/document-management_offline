@@ -31,5 +31,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public ICollection<DynamicFieldExternalDto> DynamicFields { get; set; }
 
         public ICollection<BimElementExternalDto> BimElements { get; set; }
+
+        public DateTime UpdatedAt { get; set; }
     }
 }

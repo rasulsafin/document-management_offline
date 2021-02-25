@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public struct ProgressSync
     {

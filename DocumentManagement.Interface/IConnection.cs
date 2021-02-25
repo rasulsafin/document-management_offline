@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Interface
@@ -14,13 +15,6 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="info">Information about the connection.</param>
         /// <returns>Result success and additional result data.</returns>
         Task<ConnectionStatusDto> Connect(ConnectionInfoDto info);
-
-        /// <summary>
-        /// Checks if the saved authorization data is correct.
-        /// </summary>
-        /// <param name="info">Information about the connection.</param>
-        /// <returns>Result of check.</returns>
-        Task<bool> IsAuthDataCorrect(ConnectionInfoDto info);
 
         /// <summary>
         /// Current status of the connection.
@@ -43,27 +37,10 @@ namespace MRS.DocumentManagement.Interface
         /// <returns>Filed ConnectionTypeDto.</returns>
         ConnectionTypeDto GetConnectionType();
 
-        #region TODO
-
-        // TODO: Syncronization!
         /// <summary>
-        /// Starts syncronization between local and remote DMs.
+        /// Get the context for working with this connection.
         /// </summary>
-        /// <returns>Result of syncronizing start process.</returns>
-        // Task<bool> StartSyncronization();
-
-        /// <summary>
-        /// Stops syncronization between local and remote DMs.
-        /// </summary>
-        /// <returns>Result of syncronizing stop process.</returns>
-        // Task<bool> StopSyncronization();
-
-        /// <summary>
-        /// Gets current syncronization progress.
-        /// </summary>
-        /// <returns>Progress.</returns>
-        // Task<ProgressSync> GetProgressSyncronization();
-
-        #endregion
+        /// <returns>All data.</returns>
+        ConnectionContext GetContext();
     }
 }

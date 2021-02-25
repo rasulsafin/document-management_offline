@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class Revision : IComparable<Revision>
     {

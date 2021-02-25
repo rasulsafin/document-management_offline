@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class RevisionCollection
     {

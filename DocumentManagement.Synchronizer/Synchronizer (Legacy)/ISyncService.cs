@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Synchronizer
+﻿namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     /// <summary>
     /// Manages synchronization

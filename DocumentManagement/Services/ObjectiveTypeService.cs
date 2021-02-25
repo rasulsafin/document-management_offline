@@ -7,7 +7,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer;
+using MRS.DocumentManagement.Synchronizer.Legacy;
 
 namespace MRS.DocumentManagement.Services
 {

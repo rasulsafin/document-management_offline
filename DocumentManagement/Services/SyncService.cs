@@ -1,6 +1,6 @@
 ﻿//using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer;
+using MRS.DocumentManagement.Synchronizer.Legacy;
 
 namespace MRS.DocumentManagement.Utility
 {

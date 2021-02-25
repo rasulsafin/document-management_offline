@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class ProjectSynchro : ISynchroTable
     {
@@ -26,7 +27,7 @@ namespace MRS.DocumentManagement.Synchronizer
 
         public void CheckDBRevision(RevisionCollection local)
         {
-            var allId = context.Projects.Select(x => x.ID).ToList();
+            var allId = context.Projects.Unsynchronized().Select(x => x.ID).ToList();
 
             var revCollect = local.GetRevisions(NameTypeRevision.Projects);
             foreach (var id in allId)
@@ -68,7 +69,7 @@ namespace MRS.DocumentManagement.Synchronizer
                 await ItemSync();
 
                 if (!exist)
-                    context.Projects.Add(local);
+                    context.Projects.Unsynchronized().Add(local);
                 await context.SaveChangesAsync();
             }
         }
@@ -121,7 +122,7 @@ namespace MRS.DocumentManagement.Synchronizer
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
-                local = await context.Projects.FindAsync(id);
+                local = await context.Projects.Unsynchronized().FindAsync(id);
         }
 
         private async Task GetRemote(int id)
@@ -138,19 +139,19 @@ namespace MRS.DocumentManagement.Synchronizer
 
             foreach (var itemDto in remote.Items)
             {
-                var item = await context.Items.FindAsync((int)itemDto.ID);
+                var item = await context.Items.Unsynchronized().FindAsync((int)itemDto.ID);
                 var existItem = item != null;
                 if (!existItem)
                 {
                     item = mapper.Map<Item>(itemDto);
                     item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Add(item);
+                    context.Items.Unsynchronized().Add(item);
                 }
                 else
                 {
                     item = mapper.Map(itemDto, item);
                     item.ItemType = (int)itemDto.ItemType;
-                    context.Items.Update(item);
+                    context.Items.Unsynchronized().Update(item);
                 }
 
                 await context.SaveChangesAsync();

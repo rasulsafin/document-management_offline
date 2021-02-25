@@ -3,10 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer.Legacy
 {
     public class ItemSynchro : ISynchroTable
     {
@@ -23,7 +24,7 @@ namespace MRS.DocumentManagement.Synchronizer
 
         public void CheckDBRevision(RevisionCollection local)
         {
-            var allId = context.Items.Select(x => x.ID).ToList();
+            var allId = context.Items.Unsynchronized().Select(x => x.ID).ToList();
 
             var revCollect = local.GetRevisions(NameTypeRevision.Items);
             foreach (var id in allId)
@@ -41,7 +42,7 @@ namespace MRS.DocumentManagement.Synchronizer
             if (local != null)
             {
                 action.IsComplete = true;
-                context.Items.Remove(local);
+                context.Items.Unsynchronized().Remove(local);
             }
         }
 
@@ -63,7 +64,7 @@ namespace MRS.DocumentManagement.Synchronizer
             {
                 if (local == null)
                 {
-                    context.Items.Add(Convert(remote));
+                    context.Items.Unsynchronized().Add(Convert(remote));
                 }
                 else
                 {
@@ -123,7 +124,7 @@ namespace MRS.DocumentManagement.Synchronizer
         private async Task GetLocal(int id)
         {
             if (local?.ID != id)
-                local = await context.Items.FindAsync(id);
+                local = await context.Items.Unsynchronized().FindAsync(id);
         }
 
         private async Task GetRemote(int id)
