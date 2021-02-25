@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.Tdms.Helpers
+﻿namespace MRS.DocumentManagement.Connection.Tdms
 {
     public static class CommandID
     {

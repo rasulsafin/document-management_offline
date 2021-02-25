@@ -1,6 +1,4 @@
-﻿using TDMS;
-
-namespace MRS.DocumentManagement.Connection.Tdms.Helpers
+﻿namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 {
     /// <summary>
     /// Interface for object mapping.

@@ -10,6 +10,6 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string Title { get; set; }
 
-        public IEnumerable<ItemExternalDto> Items { get; set; }
+        public ICollection<ItemExternalDto> Items { get; set; }
     }
 }

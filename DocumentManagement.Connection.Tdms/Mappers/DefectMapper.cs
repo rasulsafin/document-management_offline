@@ -2,40 +2,39 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Helpers
+namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 {
     public class DefectMapper : IModelMapper<ObjectiveExternalDto, TDMSObject>
     {
+        private static readonly string SPLITTER = ";";
+
         public ObjectiveExternalDto ToDto(TDMSObject tdmsObject)
         {
-            if (tdmsObject.Attributes.Index[AttributeID.GUID] == -1)
-                tdmsObject.Attributes.Create(AttributeID.GUID);
-
-            var project = tdmsObject.Attributes[AttributeID.OBJECT_LINK].Object.GUID;
-            var parent = tdmsObject.Parent.GUID;
-
             ObjectiveExternalDto objectiveDto = new ObjectiveExternalDto();
 
             objectiveDto.ExternalID = tdmsObject.GUID;
-            objectiveDto.ProjectExternalID = project;
-            objectiveDto.ParentObjectiveExternalID = parent;
+            objectiveDto.ProjectExternalID = tdmsObject.Attributes[AttributeID.OBJECT_LINK].Object.GUID;
+            objectiveDto.ParentObjectiveExternalID = tdmsObject.Parent.GUID;
             objectiveDto.AuthorExternalID = tdmsObject.CreateUser.SysName;
             objectiveDto.ObjectiveType = new ObjectiveTypeExternalDto()
             {
-                Name = tdmsObject.ObjectDefName,
+                Name = ObjectTypeID.DEFECT,
             };
             objectiveDto.CreationDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.START_DATE].Value);
             objectiveDto.DueDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.DUE_DATE].Value);
+
+            if (tdmsObject.Attributes.Index[AttributeID.GUID] == -1)
+                tdmsObject.Attributes.Create(AttributeID.GUID);
+            else
+                objectiveDto.BimElements = GetBimElemenents(tdmsObject);
+
             objectiveDto.Title = tdmsObject.Attributes[AttributeID.NORM_DOC].Value.ToString();
             objectiveDto.Description = tdmsObject.Attributes[AttributeID.DESCRIPTION].Value.ToString();
-            objectiveDto.Status = ObjectiveStatus.Undefined;
-            objectiveDto.Items = new List<ItemExternalDto>();
-            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>();
-            objectiveDto.BimElements = new List<BimElementExternalDto>(); // TODO: 
+            objectiveDto.Status = GetStatus(tdmsObject.StatusName);
+            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>(); // TODO: DynamicField
 
             return objectiveDto;
         }
@@ -50,18 +49,15 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             model.Attributes[AttributeID.DESCRIPTION].Value = objectDto.Description;
             model.Attributes[AttributeID.AUTHOR].Value = GetUser(objectDto.AuthorExternalID);
 
-            // TODO: DynamicField
-            // model.Attributes[AttributeID.BUILDER].Value = ;
-
             if (objectDto.BimElements != null)
             {
                 if (model.Attributes.Index[AttributeID.GUID] == -1)
                     model.Attributes.Create(AttributeID.GUID);
 
-                model.Attributes[AttributeID.GUID].Value = objectDto.BimElements.ToString(); // TODO: Serialize to JSON
+                model.Attributes[AttributeID.GUID].Value = SetBimElements(objectDto.BimElements);
             }
 
-            var parent = TdmsConnection.tdms.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
+            var parent = TdmsConnection.TDMS.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
 
             model.Attributes[AttributeID.OBJECT_LINK].Value = parent.Attributes[AttributeID.OBJECT_LINK];
             model.Attributes[AttributeID.JOB_LINK].Value = parent;
@@ -69,9 +65,18 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
 
             model.Attributes[AttributeID.NUMBER].Value = parent.Objects.ObjectsByDef(ObjectTypeID.DEFECT).Count;
 
-            // TODO: Files.
+            // TODO: DynamicField
+            // model.Attributes[AttributeID.BUILDER].Value = ;
 
             return model;
+        }
+
+        private string SetBimElements(ICollection<BimElementExternalDto> bimElements)
+        {
+            if (bimElements == null)
+                return string.Empty;
+
+            return string.Join(SPLITTER, bimElements.Select(b => b.GlobalID));
         }
 
         private string SetStatus(ObjectiveStatus status) => status switch
@@ -81,6 +86,28 @@ namespace MRS.DocumentManagement.Connection.Tdms.Helpers
             _ => StatusID.DEFECT_CREATED,
         };
 
-        private TDMSUser GetUser(string id) => TdmsConnection.tdms.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
+        private ObjectiveStatus GetStatus(string statusTDMS)
+          =>  statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Ready :
+              statusTDMS == StatusID.DEFECT_INPROGRESS ? ObjectiveStatus.InProgress :
+              statusTDMS == StatusID.DEFECT_CREATED ? ObjectiveStatus.Open :
+              ObjectiveStatus.Undefined;
+
+        private TDMSUser GetUser(string id) =>
+            TdmsConnection.TDMS.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
+
+        private ICollection<BimElementExternalDto> GetBimElemenents(TDMSObject tdmsObject)
+        {
+            var list = new List<BimElementExternalDto>();
+            var links = tdmsObject.Attributes[AttributeID.GUID].Value.ToString().Split(SPLITTER, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string link in links)
+            {
+                list.Add(new BimElementExternalDto()
+                {
+                    GlobalID = link,
+                });
+            }
+
+            return list;
+        }
     }
 }
