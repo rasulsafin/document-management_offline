@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using MRS.DocumentManagement.Connection.Tdms.Helpers;
+using MRS.DocumentManagement.Connection.Tdms.Mappers;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject project = TdmsConnection.tdms.GetObjectByGUID(id);
+                TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(id);
                 return mapper.ToDto(project);
             }
             catch
@@ -23,19 +23,18 @@ namespace MRS.DocumentManagement.Connection.Tdms
             }
         }
 
-        public ProjectExternalDto Add(ProjectExternalDto projectDto)
+        public ProjectExternalDto Update(ProjectExternalDto projectDto)
         {
-            throw new InvalidOperationException();
-        }
-
-        public ProjectDto Update(ProjectDto projectDto)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public bool Remove(ProjectExternalDto projectDto)
-        {
-            throw new InvalidOperationException();
+            try
+            {
+                TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(projectDto.ExternalID);
+                mapper.ToModel(projectDto, project);
+                return mapper.ToDto(project);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public ICollection<ProjectExternalDto> GetListOfProjects()
@@ -43,17 +42,12 @@ namespace MRS.DocumentManagement.Connection.Tdms
             List<ProjectExternalDto> projects = new List<ProjectExternalDto>();
             try
             {
-                var queryCom = TdmsConnection.tdms.CreateQuery();
+                var queryCom = TdmsConnection.TDMS.CreateQuery();
                 queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.OBJECT);
 
                 foreach (TDMSObject obj in queryCom.Objects)
                 {
-                    projects.Add(new ProjectExternalDto()
-                    {
-                        ExternalID = obj.GUID,
-                        Title = obj.Description,
-                        // Items = 
-                    });
+                    projects.Add(mapper.ToDto(obj));
                 }
 
                 return projects;

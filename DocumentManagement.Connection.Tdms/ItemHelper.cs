@@ -4,9 +4,9 @@ using System.Linq;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Mappers
+namespace MRS.DocumentManagement.Connection.Tdms
 {
-    internal class ItemMapper
+    internal class ItemHelper
     {
         private static readonly IReadOnlyDictionary<string, ItemTypeDto> FILE_TYPES = new Dictionary<string, ItemTypeDto>
         {
@@ -16,28 +16,16 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             { FileTypeID.VIDEO, ItemTypeDto.Media },
         };
 
-        public ItemExternalDto ToDto(TDMSFile tdmsObject)
+        internal void SetItems(TDMSObject tdmsObject, IEnumerable<ItemExternalDto> items)
         {
-            var itemDto = new ItemExternalDto()
-            {
-                Name = tdmsObject.FileName,
-                ExternalItemId = tdmsObject.Handle,
-                ItemType = GetItemType(tdmsObject.FileDefName),
-            };
-
-            return itemDto;
-        }
-
-        internal void SetItems(TDMSObject tdmsObject, ObjectiveExternalDto objectDto)
-        {
-            if (objectDto.Items == null)
+            if (items == null)
                 return;
 
-            var checkedfiles = objectDto.Items.Where(d => System.IO.File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.Name));
+            var checkedfiles = items.Where(d => System.IO.File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.Name));
             foreach (var file in checkedfiles)
                 tdmsObject.Files.Create(FileTypeID.ANY, file.FullPath);
 
-            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => objectDto.Items.FirstOrDefault(item => item.Name == s.FileName) == default);
+            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => items.FirstOrDefault(item => item.Name == s.FileName) == default);
             foreach (var file in deletedFiles)
                 tdmsObject.Files.Remove(file);
 
@@ -47,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         }
 
         internal ICollection<ItemExternalDto> GetItems(TDMSObject tdmsObject)
-            => tdmsObject.Files?.Cast<TDMSFile>()?.Select(x => ToDto(x)).ToArray();
+            => tdmsObject.Files?.Cast<TDMSFile>()?.Select(x => ToDto(x)).ToList();
 
         private ItemTypeDto GetItemType(string fileDefName)
         {
@@ -56,6 +44,18 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 return ItemTypeDto.File;
 
            return typeDto;
+        }
+
+        private ItemExternalDto ToDto(TDMSFile tdmsObject)
+        {
+            var itemDto = new ItemExternalDto()
+            {
+                Name = tdmsObject.FileName,
+                ExternalItemId = tdmsObject.Handle,
+                ItemType = GetItemType(tdmsObject.FileDefName),
+            };
+
+            return itemDto;
         }
     }
 }

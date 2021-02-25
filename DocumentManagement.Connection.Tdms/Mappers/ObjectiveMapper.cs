@@ -9,9 +9,15 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
         public ObjectiveExternalDto ToDto(TDMSObject tdmsObject)
         {
-            var dto = GetMapper(tdmsObject)?.ToDto(tdmsObject);
-            dto.Items = itemHelper.GetItems(tdmsObject);
-            return dto;
+            try
+            {
+                var dto = GetMapper(tdmsObject)?.ToDto(tdmsObject);
+                dto.Items = itemHelper.GetItems(tdmsObject);
+                return dto;
+            } catch
+            {
+                return null;
+            }
         }
 
         public TDMSObject ToModel(ObjectiveExternalDto objectDto, TDMSObject tdmsObject)

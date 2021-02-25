@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using MRS.DocumentManagement.Connection.Tdms.Helpers;
+using System.Linq;
+using MRS.DocumentManagement.Connection.Tdms.Mappers;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
@@ -14,7 +15,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject objective = TdmsConnection.tdms.GetObjectByGUID(id);
+                TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(id);
                 return mapper.ToDto(objective);
             }
             catch
@@ -35,19 +36,16 @@ namespace MRS.DocumentManagement.Connection.Tdms
                     parent = objectiveDto.ParentObjectiveExternalID;
                     type = ObjectTypeID.DEFECT;
                 }
-                else if (objectiveDto.ObjectiveType.Name == ObjectTypeID.WORK)
+                else
                 {
-                    parent = objectiveDto.ProjectExternalID;
-                    type = ObjectTypeID.WORK;
-                } else
-                {
-                    throw new Exception();
+                    // Cannot create Job from Local
+                    throw new NotImplementedException();
                 }
 
                 if (string.IsNullOrEmpty(parent))
                     throw new Exception();
 
-                TDMSObject obj = TdmsConnection.tdms.GetObjectByGUID(parent);
+                TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(parent);
                 TDMSObject objective = obj.Objects.Create(type);
                 obj.Update();
                 mapper.ToModel(objectiveDto, objective);
@@ -66,7 +64,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject objective = TdmsConnection.tdms.GetObjectByGUID(objectiveDto.ExternalID);
+                TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(objectiveDto.ExternalID);
                 if (objective == null)
                     throw new NullReferenceException();
 
@@ -85,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject obj = TdmsConnection.tdms.GetObjectByGUID(id);
+                TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(id);
                 var parent = obj.Parent;
                 obj.Erase();
                 parent?.Update();
@@ -98,9 +96,32 @@ namespace MRS.DocumentManagement.Connection.Tdms
             }
         }
 
-        public IEnumerable<ObjectiveExternalDto> GetListOfObjectives(string id)
+        public IEnumerable<ObjectiveExternalDto> GetListOfObjectives()
         {
-            throw new NotImplementedException();
+            List<ObjectiveExternalDto> objectives = new List<ObjectiveExternalDto>();
+            try
+            {
+                return FindByDef(ObjectTypeID.WORK, FindByDef(ObjectTypeID.DEFECT, objectives));
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private List<ObjectiveExternalDto> FindByDef(string objectTypeId, List<ObjectiveExternalDto> list)
+        {
+            var queryCom = TdmsConnection.TDMS.CreateQuery();
+            queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, objectTypeId);
+
+            foreach (TDMSObject obj in queryCom.Objects)
+            {
+                var mapped = mapper.ToDto(obj);
+                if (mapped != null)
+                    list.Add(mapped);
+            }
+
+            return list;
         }
     }
 }

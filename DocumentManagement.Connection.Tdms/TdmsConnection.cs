@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Tdms.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
@@ -10,22 +9,22 @@ namespace MRS.DocumentManagement.Connection.Tdms
 {
     public class TdmsConnection : IConnection
     {
-        internal static TDMSApplication tdms;
+        internal static TDMSApplication TDMS;
 
         public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
-            tdms = new TDMSApplication();
+            TDMS = new TDMSApplication();
 
-            if (tdms.IsLoggedIn)
+            if (TDMS.IsLoggedIn)
             {
-                if (tdms.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
+                if (TDMS.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
                 {
                     return GetStatus(info);
                 }
                 else
                 {
-                    tdms.Quit();
-                    tdms = new TDMSApplication();
+                    TDMS.Quit();
+                    TDMS = new TDMSApplication();
                 }
             }
 
@@ -36,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 var server = info.AuthFieldValues[Auth.SERVER];
                 var db = info.AuthFieldValues[Auth.DATABASE];
 
-                tdms.Login(login, password, db, server);
+                TDMS.Login(login, password, db, server);
             }
             catch (Exception e)
             {
@@ -60,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
-            if (tdms == null)
+            if (TDMS == null)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
@@ -69,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 });
             }
 
-            if (tdms.IsLoggedIn == true)
+            if (TDMS.IsLoggedIn == true)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
@@ -104,15 +103,15 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public void Quit()
         {
-            tdms.Quit();
+            TDMS.Quit();
         }
 
         private ICollection<ObjectiveTypeDto> GetObjectiveTypes()
         {
             return new List<ObjectiveTypeDto>()
                 {
-                    new ObjectiveTypeDto() { Name = tdms.ObjectDefs[ObjectTypeID.DEFECT].Description },
-                    new ObjectiveTypeDto() { Name = tdms.ObjectDefs[ObjectTypeID.WORK].Description },
+                    new ObjectiveTypeDto() { Name = TDMS.ObjectDefs[ObjectTypeID.DEFECT].Description },
+                    new ObjectiveTypeDto() { Name = TDMS.ObjectDefs[ObjectTypeID.WORK].Description },
                 };
         }
 
@@ -121,7 +120,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             var list = new List<EnumerationTypeDto>();
             try
             {
-                var tdmsType = tdms.ObjectDefs[ObjectTypeID.COMPANY];
+                var tdmsType = TDMS.ObjectDefs[ObjectTypeID.COMPANY];
                 var enumerationType = new EnumerationTypeDto()
                 {
                     ExternalId = tdmsType.SysName,
@@ -129,7 +128,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                     EnumerationValues = new List<EnumerationValueDto>(),
                 };
 
-                var queryCom = tdms.CreateQuery();
+                var queryCom = TDMS.CreateQuery();
                 queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.COMPANY);
 
                 foreach (TDMSObject contractor in queryCom.Objects)
