@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public struct ConnectionStatusDto
+    public class ConnectionStatusDto
     {
         public RemoteConnectionStatusDto Status { get; set; }
 

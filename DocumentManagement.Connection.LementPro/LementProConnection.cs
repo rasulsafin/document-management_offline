@@ -6,7 +6,6 @@ using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro
@@ -38,21 +37,6 @@ namespace MRS.DocumentManagement.Connection.LementPro
             var authorizationResult = await authenticationService.SignInAsync(info);
             updatedInfo = authorizationResult.updatedInfo;
             return authorizationResult.authStatus;
-        }
-
-        public async Task<ProgressSync> GetProgressSyncronization()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> StartSyncronization()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task StopSyncronization()
-        {
-            throw new NotImplementedException();
         }
 
         public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)

@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class ObjectivesController : ControllerBase
     {
-        private IObjectiveService service;
+        private readonly IObjectiveService service;
 
         public ObjectivesController(IObjectiveService objectiveService) => service = objectiveService;
 
