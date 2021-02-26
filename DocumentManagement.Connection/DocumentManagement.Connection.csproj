@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj" />
     <ProjectReference Include="..\DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj" />
     <ProjectReference Include="..\DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj" />
     <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
