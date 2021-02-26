@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Database.Models
 
         public ICollection<UserProject> Users { get; set; }
 
-        public ICollection<ProjectItem> Items { get; set; }
+        public ICollection<Item> Items { get; set; }
 
         public string ExternalID { get; set; }
 

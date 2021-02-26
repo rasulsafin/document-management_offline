@@ -1,6 +1,6 @@
-#define TEST // Use to perform tests
+﻿#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
-#undef TEST // Disable one
+#undef DEVELOPMENT // Disable one
 
 using System;
 using Microsoft.EntityFrameworkCore;
@@ -51,10 +51,12 @@ namespace MRS.DocumentManagement.Database
         public DbSet<AuthFieldName> AuthFieldNames { get; set; }
 
         public DbSet<AuthFieldValue> AuthFieldValues { get; set; }
+
+        public DbSet<Synchronization> Synchronizations { get; set; }
+
         #endregion
 
         #region Bridges
-        public DbSet<ProjectItem> ProjectItems { get; set; }
 
         public DbSet<ObjectiveItem> ObjectiveItems { get; set; }
 
@@ -134,16 +136,10 @@ namespace MRS.DocumentManagement.Database
                 .WithMany(x => x.Users)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectItem>()
-                .HasKey(x => new { x.ItemID, x.ProjectID });
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Item)
-                .WithMany(x => x.Projects)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Project)
-                .WithMany(x => x.Items)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Item>()
+                    .HasOne(x => x.Project)
+                    .WithMany(x => x.Items)
+                    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ObjectiveItem>()
                 .HasKey(x => new { x.ObjectiveID, x.ItemID });

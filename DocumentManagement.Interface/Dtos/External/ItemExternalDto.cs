@@ -6,7 +6,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
     {
         public string Name { get; set; }
 
-        public string ExternalItemId { get; set; }
+        public string ExternalID { get; set; }
 
         public ItemTypeDto ItemType { get; set; }
 

@@ -37,8 +37,9 @@ namespace MRS.DocumentManagement.Synchronizer.Extensions
 
             foreach (var property in properties)
             {
-                if (typeof(int).Namespace != property.PropertyType.Namespace
-                    || property.Name.Contains("id", StringComparison.InvariantCultureIgnoreCase))
+                if (!string.Equals(property.PropertyType.Namespace, nameof(System))
+                    || property.Name.Contains("id", StringComparison.InvariantCultureIgnoreCase)
+                    || property.Name == nameof(ISynchronizable<T>.IsSynchronized))
                     continue;
 
                 var synchronizedValue = property.GetValue(tuple.Synchronized);

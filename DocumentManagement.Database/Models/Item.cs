@@ -13,7 +13,9 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string ExternalID { get; set; }
 
-        public ICollection<ProjectItem> Projects { get; set; }
+        public int? ProjectID { get; set; }
+
+        public Project Project { get; set; }
 
         public ICollection<ObjectiveItem> Objectives { get; set; }
 

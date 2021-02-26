@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -40,7 +41,8 @@ namespace MRS.DocumentManagement.Interface
         /// <summary>
         /// Get the context for working with this connection.
         /// </summary>
+        /// <param name="lastSynchronizationDate">DateTime of the last successful synchronization.</param>
         /// <returns>All data.</returns>
-        ConnectionContext GetContext();
+        ConnectionContext GetContext(DateTime lastSynchronizationDate);
     }
 }
