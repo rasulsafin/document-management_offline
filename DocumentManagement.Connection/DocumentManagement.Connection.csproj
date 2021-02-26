@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -12,6 +12,7 @@
   <ItemGroup>
     <ProjectReference Include="..\DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj" />
     <ProjectReference Include="..\DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj" />
     <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
     <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MRS.DocumentManagement.Connection.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -8,7 +9,7 @@ using System.Xml;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
-    public class YandexDiskController //: ICloudController
+    public class YandexDiskController
     {
         private string accessToken;
 
@@ -26,72 +27,72 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="FileNotFoundException"> File Not Found Exception </exception>
         /// <exception cref="TimeoutException" > Timeout Exception </exception>
-        ////public async Task<IEnumerable<DiskElement>> GetListAsync(string path = "/")
-        ////{
-        ////    try
-        ////    {
-        ////        HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
-        ////        WebResponse response = await request.GetResponseAsync();
-        ////        XmlDocument xml = new XmlDocument();
-        ////        using (Stream stream = response.GetResponseStream())
-        ////        {
-        ////            using (XmlReader xmlReader = XmlReader.Create(stream))
-        ////                xml.Load(xmlReader);
-        ////        }
-
-        ////        response.Close();
-        ////        List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
-        ////        return items;
-        ////    }
-        ////    catch (Exception ex)
-        ////    {
-        ////        throw WebExceptionHandler(ex);
-        ////    }
-        ////}
-
-        //public async Task<DiskElement> GetInfoAsync(string path = "/")
-        //{
-        //    try
-        //    {
-        //        HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
-        //        WebResponse response = await request.GetResponseAsync();
-        //        XmlDocument xml = new XmlDocument();
-        //        using (Stream stream = response.GetResponseStream())
-        //        {
-        //            using (XmlReader xmlReader = XmlReader.Create(stream))
-        //                xml.Load(xmlReader);
-        //        }
-
-        //        response.Close();
-        //        YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
-        //        return item;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw WebExceptionHandler(ex);
-        //    }
-        //}
-
-        #endregion
-        #region Create Directory
-        public async Task<bool> CreateDirAsync(string path, string nameDir)
+        public async Task<IEnumerable<CloudElement>> GetListAsync(string path = "/")
         {
             try
             {
-               // string newPath = PathManager.DirectoryName(path, nameDir);
-                //HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
-                //using (WebResponse response = await request.GetResponseAsync())
-                //{
-                //    if (response is HttpWebResponse http)
-                //    {
-                //        if (http.StatusCode == HttpStatusCode.Created)
-                //        {
-                //            return true;
-                //        }
-                //    }
+                HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
+                WebResponse response = await request.GetResponseAsync();
+                XmlDocument xml = new XmlDocument();
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (XmlReader xmlReader = XmlReader.Create(stream))
+                        xml.Load(xmlReader);
+                }
 
-                    return false;
-                //}
+                response.Close();
+                List<YandexDiskElement> items = YandexDiskElement.GetElements(xml.DocumentElement);
+                return items;
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+            }
+        }
+
+        public async Task<CloudElement> GetInfoAsync(string path = "/")
+        {
+            try
+            {
+                HttpWebRequest request = YandexHelper.RequestGetList(accessToken, path);
+                WebResponse response = await request.GetResponseAsync();
+                XmlDocument xml = new XmlDocument();
+                using (Stream stream = response.GetResponseStream())
+                {
+                    using (XmlReader xmlReader = XmlReader.Create(stream))
+                        xml.Load(xmlReader);
+                }
+
+                response.Close();
+                YandexDiskElement item = YandexDiskElement.GetElement(xml.DocumentElement);
+                return item;
+            }
+            catch (Exception ex)
+            {
+                throw WebExceptionHandler(ex);
+            }
+        }
+
+        #endregion
+        #region Create Directory
+        public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
+        {
+            try
+            {
+                string newPath = PathManager.DirectoryName(path, nameDir);
+                HttpWebRequest request = YandexHelper.RequestCreateDir(accessToken, newPath);
+                using (WebResponse response = await request.GetResponseAsync())
+                {
+                    if (response is HttpWebResponse http)
+                    {
+                        if (http.StatusCode == HttpStatusCode.Created)
+                        {
+                            return new YandexDiskElement() { };
+                        }
+                    }
+
+                    return null;
+                }
             }
             catch (Exception ex)
             {
@@ -298,105 +299,49 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// <param name="progressChenge"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<bool> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
         {
             try
             {
                 FileInfo fileInfo = new FileInfo(fileName);
-                //string diskName = PathManager.FileName(href, fileInfo.Name);
-               // HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
-                //using (var reader = fileInfo.OpenRead())
-                //{
-                //    request.ContentLength = reader.Length;
-                //    using (var writer = request.GetRequestStream())
-                //    {
-                //        const int BUFFER_LENGTH = 4096;
-                //        var total = (ulong)reader.Length;
-                //        ulong current = 0;
-                //        var buffer = new byte[BUFFER_LENGTH];
-                //        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                //        while (count > 0)
-                //        {
-                //            writer.Write(buffer, 0, count);
-                //            current += (ulong)count;
-                //            progressChenge?.Invoke(current, total);
-                //            count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                //        }
-                //    }
-                //}
-
-                //using (WebResponse response = await request.GetResponseAsync())
-                //{
-                //    if (response is HttpWebResponse httpResponse)
-                //    {
-                //        if (httpResponse.StatusCode == HttpStatusCode.Created) return true;
-                //        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return false;
-                //        if (httpResponse.StatusCode == HttpStatusCode.Continue) return false;
-                //    }
-                //}
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
-
-            return false;
-        }
-        #endregion
-        #region COPY TODO
-
-        /// <summary>
-        /// (COPY).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="copyPath"> the way in which you need to copy </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public Task<bool> CopyAsync(string originPath, string copyPath)
-        {
-            try
-            {
-                throw new NotImplementedException();
-            }
-            catch (Exception ex)
-            {
-                throw WebExceptionHandler(ex);
-            }
-        }
-        #endregion
-        #region MOVE TODO
-
-        /// <summary>
-        /// (MOVE).
-        /// </summary>
-        /// <param name="originPath"> path to the original file </param>
-        /// <param name="movePath"> the way in which it is necessary to move the file(or rename) </param>
-        /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        /// <remarks>https://yandex.ru/dev/disk/doc/dg/reference/copy.html.</remarks>
-        public async Task<bool> MoveAsync(string originPath, string movePath)
-        {
-            try
-            {
-                HttpWebRequest request = YandexHelper.RequestMove(accessToken, originPath, movePath);
-                using (WebResponse response = await request.GetResponseAsync())
+                string diskName = PathManager.FileName(href, fileInfo.Name);
+                HttpWebRequest request = YandexHelper.RequestLoadFile(accessToken, diskName);
+                using (var reader = fileInfo.OpenRead())
                 {
-                    if (response is HttpWebResponse http)
+                    request.ContentLength = reader.Length;
+                    using (var writer = request.GetRequestStream())
                     {
-                        if (http.StatusCode == HttpStatusCode.Created)
+                        const int BUFFER_LENGTH = 4096;
+                        var total = (ulong)reader.Length;
+                        ulong current = 0;
+                        var buffer = new byte[BUFFER_LENGTH];
+                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        while (count > 0)
                         {
-                            return true;
+                            writer.Write(buffer, 0, count);
+                            current += (ulong)count;
+                            progressChenge?.Invoke(current, total);
+                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
                         }
                     }
+                }
 
-                    return false;
+                using (WebResponse response = await request.GetResponseAsync())
+                {
+                    if (response is HttpWebResponse httpResponse)
+                    {
+                        if (httpResponse.StatusCode == HttpStatusCode.Created) return new YandexDiskElement();
+                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return null;
+                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return null;
+                    }
                 }
             }
             catch (Exception ex)
             {
                 throw WebExceptionHandler(ex);
             }
+
+            return null;
         }
         #endregion
 

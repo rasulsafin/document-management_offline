@@ -2,25 +2,25 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class ProjectSynchro : ISynchroTable
     {
-        // private ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private Project local;
         private ProjectDto remote;
         private IMapper mapper;
 
-        public ProjectSynchro(/*ICloudManager disk,*/ DMContext context, IMapper mapper)
+        public ProjectSynchro(ICloudManager disk, DMContext context, IMapper mapper)
         {
             this.mapper = mapper;
-            //this.disk = disk;
+            this.disk = disk;
             this.context = context;
         }
 

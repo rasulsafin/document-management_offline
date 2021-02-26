@@ -1,6 +1,4 @@
-﻿using MRS.DocumentManagement.Interface.SyncData;
-
-namespace MRS.DocumentManagement.Interface.Services
+﻿namespace MRS.DocumentManagement.Synchronizer
 {
     /// <summary>
     /// Manages synchronization

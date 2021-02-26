@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class SyncHelper
     {
@@ -54,33 +54,41 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
         {
             int id = action.ID;
 
-            switch (action.TypeAction)
+            try
             {
-                case SyncActionType.None:
-                    break;
-                case SyncActionType.Download:
-                    Revision remoteRev1 = synchro.GetRevisions(remote).Find(r => r.ID == id);
-                    await synchro.Download(action);
-                    synchro.SetRevision(local, remoteRev1);
-                    break;
-                case SyncActionType.Upload:
-                    Revision localRev1 = synchro.GetRevisions(local).Find(r => r.ID == id);
-                    await synchro.Upload(action);
-                    synchro.SetRevision(remote, localRev1);
-                    break;
-                case SyncActionType.DeleteLocal:
-                    Revision localRev2 = synchro.GetRevisions(local).Find(r => r.ID == id);
-                    await synchro.DeleteLocal(action);
-                    synchro.SetRevision(remote, localRev2);
-                    break;
-                case SyncActionType.DeleteRemote:
-                    Revision remoteRev2 = synchro.GetRevisions(remote).Find(r => r.ID == id);
-                    await synchro.DeleteRemote(action);
-                    synchro.SetRevision(local, remoteRev2);
-                    break;
-                case SyncActionType.Special:
-                    action.SpecialSynchronization = true;
-                    break;
+                switch (action.TypeAction)
+                {
+                    case SyncActionType.None:
+                        break;
+                    case SyncActionType.Download:
+                        Revision remoteRev1 = synchro.GetRevisions(remote).Find(r => r.ID == id);
+                        await synchro.Download(action);
+                        synchro.SetRevision(local, remoteRev1);
+                        break;
+                    case SyncActionType.Upload:
+                        Revision localRev1 = synchro.GetRevisions(local).Find(r => r.ID == id);
+                        await synchro.Upload(action);
+                        synchro.SetRevision(remote, localRev1);
+                        break;
+                    case SyncActionType.DeleteLocal:
+                        Revision localRev2 = synchro.GetRevisions(local).Find(r => r.ID == id);
+                        await synchro.DeleteLocal(action);
+                        synchro.SetRevision(remote, localRev2);
+                        break;
+                    case SyncActionType.DeleteRemote:
+                        Revision remoteRev2 = synchro.GetRevisions(remote).Find(r => r.ID == id);
+                        await synchro.DeleteRemote(action);
+                        synchro.SetRevision(local, remoteRev2);
+                        break;
+                    case SyncActionType.Special:
+                        action.SpecialSynchronization = true;
+                        break;
+                }
+            }
+            catch (System.Exception ex)
+            {
+                action.IsComplete = false;
+                action.Data = ex;
             }
         }
     }

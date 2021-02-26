@@ -1,27 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.SyncData;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class ObjectiveSynchro : ISynchroTable
     {
-       // private ICloudManager disk;
+        private ICloudManager disk;
         private DMContext context;
         private IMapper mapper;
         private Objective local;
         private ObjectiveDto remote;
 
-        public ObjectiveSynchro(/*ICloudManager disk,*/ DMContext context, IMapper mapper)
+        public ObjectiveSynchro(ICloudManager disk, DMContext context, IMapper mapper)
         {
-           // this.disk = disk;
+            this.disk = disk;
             this.context = context;
             this.mapper = mapper;
         }
@@ -39,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         public async Task DeleteRemote(SyncAction action)
         {
-           // await disk.Delete<ObjectiveDto>(action.ID.ToString());
+            // await disk.Delete<ObjectiveDto>(action.ID.ToString());
             action.IsComplete = true;
         }
 
@@ -87,7 +86,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
             {
                 action.IsComplete = true;
                 remote = mapper.Map<ObjectiveDto>(local);
-               // await disk.Push(remote, action.ID.ToString());
+                // await disk.Push(remote, action.ID.ToString());
             }
         }
 
@@ -211,8 +210,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private async Task GetRemote(int id)
         {
-          //  if (remote?.ID != (ID<ObjectiveDto>)id)
-             //   remote = await disk.Pull<ObjectiveDto>(id.ToString());
+            //  if (remote?.ID != (ID<ObjectiveDto>)id)
+            //   remote = await disk.Pull<ObjectiveDto>(id.ToString());
         }
     }
 }

@@ -1,15 +1,14 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection
+namespace MRS.DocumentManagement.Connection.Utils
 {
-    public class DiskElement
+    public class CloudElement
     {
-
         public string DisplayName { get; protected set; }
 
         public DateTime LastModified { get; protected set; }
 
-        public string ContentLength { get; protected set; }
+        public ulong ContentLength { get; protected set; }
 
         public string ContentType { get; protected set; }
 
@@ -17,7 +16,7 @@ namespace MRS.DocumentManagement.Connection
 
         public string Status { get; protected set; }
 
-        public string CreationDate { get; protected set; }
+        public DateTime CreationDate { get; protected set; }
 
         public string ResourceType { get; protected set; }
 

@@ -61,8 +61,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return request;
         }
 
-        
-
         public static HttpWebRequest RequestDownloadFile(string accessToken, string path)
         {
             var url = URI_API_YANDEX + path;

@@ -1,34 +1,27 @@
 ﻿#define TEST
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
-using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface.SyncData;
-using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Synchronizer
+namespace MRS.DocumentManagement.Synchronizer
 {
     public class SyncManager
     {
         private const string REVISIONS = "revisions";
         private const int COUNT_TRY = 3;
-        public static readonly string YANDEX = "YANDEX";
-
-
         private readonly IServiceScopeFactory factoryScope;
         private readonly IMapper mapper;
 
         #region field
 #if TEST
-      //  internal
+        internal
 #else
-      //  private
+        private
 #endif
-        //ICloudManager disk;
+        ICloudManager disk;
 
 #if TEST
         internal
@@ -72,9 +65,9 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
         }
         #endregion
 
-        public void Initialization(string token)
+        public void Initialization(ICloudManager manager)
         {
-           // disk = new CloudManager(new YandexDiskController(token));
+            disk = manager;
             Initilize = true;
         }
 
@@ -92,6 +85,11 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
                     break;
                 }
             }
+        }
+
+        public ICloudManager GetManager()
+        {
+            return disk;
         }
 
         public static async Task<List<SyncAction>> Analysis(
@@ -132,8 +130,8 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
             NowSync = true;
             NeedStopSync = false;
-           // RevisionCollection remoteRevisions = await disk.Pull<RevisionCollection>(REVISIONS);
-           // if (remoteRevisions == null) remoteRevisions = new RevisionCollection();
+            // RevisionCollection remoteRevisions = await disk.Pull<RevisionCollection>(REVISIONS);
+            // if (remoteRevisions == null) remoteRevisions = new RevisionCollection();
             var synchros = new ISynchroTable[]
             {
                // new UserSynchro(disk, context),
@@ -142,7 +140,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
                // new ObjectiveSynchro(disk, context, mapper),
                 // new ItemSynchro(disk, context),
             };
-           // List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
+            // List<SyncAction> syncActions = await Analysis(localRevisions, remoteRevisions, synchros);
             //if (syncActions.Count > 0)
             //{
             //    progress.Total = syncActions.Count;
@@ -193,7 +191,7 @@ namespace MRS.DocumentManagement.Connection.Synchronizer
 
         private void LoadRevisions()
         {
-           // string fileName = PathManager.GetLocalRevisionFile();
+            // string fileName = PathManager.GetLocalRevisionFile();
             //FileInfo info = new FileInfo(fileName);
             //try
             //{
