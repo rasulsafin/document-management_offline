@@ -7,7 +7,17 @@
     {
         public const string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";
 
+        // 2 MB
+        public const long UPLOAD_FILES_CHUNKS_SIZE = 5242880;
+
         public const int STATE_ARCHIVED = 2;
+
+        public const string REQUEST_UPLOAD_POSTEDFILE_FIELDNAME = "postedFile";
+        public const string REQUEST_UPLOAD_FILEPART_FIELDNAME = "filePart";
+        public const string REQUEST_UPLOAD_FILENAME_FIELDNAME = "fileName";
+        public const string REQUEST_UPLOAD_SIZE_FIELDNAME = "size";
+        public const string REQUEST_UPLOAD_ID_FIELDNAME = "id";
+        public const string REQUEST_UPLOAD_ENDUPLOAD_FIELDNAME = "endUpload";
 
         public const string AUTH_NAME_LOGIN = "login";
         public const string AUTH_NAME_PASSWORD = "password";

@@ -153,9 +153,33 @@
     <value>/Services/ObjectBase/Create.do</value>
     <comment>Method to create an object</comment>
   </data>
+  <data name="MethodObjectDelete" xml:space="preserve">
+    <value>/Services/ObjectBase/Delete.do</value>
+    <comment>Method to delete the object</comment>
+  </data>
+  <data name="MethodObjectFileAdd" xml:space="preserve">
+    <value>/Services/ObjectsBase/File/Add.do</value>
+    <comment>Method to upload file (less than 2 MB)</comment>
+  </data>
+  <data name="MethodObjectFileBeginUpload" xml:space="preserve">
+    <value>/Services/ObjectsBase/File/BeginUpload.do</value>
+    <comment>Method to begin upload large (more than 2 mb) file</comment>
+  </data>
+  <data name="MethodObjectFileEndUpload" xml:space="preserve">
+    <value>/Services/ObjectsBase/File/EndUpload.do</value>
+    <comment>Method to end upload</comment>
+  </data>
+  <data name="MethodObjectFileUploadPart" xml:space="preserve">
+    <value>/Services/ObjectsBase/File/UploadPart.do</value>
+    <comment>Method to continue or end uploading large file</comment>
+  </data>
   <data name="MethodObjectGet" xml:space="preserve">
     <value>/Services/ObjectBase/Get.do</value>
     <comment>Method to get object info</comment>
+  </data>
+  <data name="MethodObjectGetDefaultTemplate" xml:space="preserve">
+    <value>/Services/ObjectsBase/Template/GetDefaultTemplate.do</value>
+    <comment>Method to get default template</comment>
   </data>
   <data name="MethodTaskUpdate" xml:space="preserve">
     <value>/Services/Task/Edit.do</value>

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 using File = System.IO.File;
@@ -30,6 +29,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         public void Dispose()
             => RequestUtility?.Dispose();
+
+        public async Task<ObjectBaseCreateResult> AddFileAsync(string fileName, string filePath)
+        {
+            if (IsLargeFile(filePath))
+                return await AddLargeFileAsync(fileName, filePath);
+
+            return await AddSmallFileAsync(fileName, filePath);
+        }
 
         protected internal async Task<List<Category>> GetMenuCategoriesAsync()
         {
@@ -126,7 +133,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return typesTree.FirstOrDefault().Items;
         }
 
-        protected internal async Task<bool> DeleteObjectAsync(int objectId)
+        protected internal async Task<bool> ArchiveObjectAsync(int objectId)
         {
             var data = new { id = objectId };
 
@@ -177,6 +184,157 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             }
 
             return true;
+        }
+
+        protected internal async Task<ObjectBaseCreateResult> UploadFileAsync(int objectType, string fileName, string filePath)
+        {
+            if (!File.Exists(filePath))
+                return null;
+
+            var addResult = await AddFileAsync(fileName, filePath);
+
+            if (addResult == null || !addResult.IsSuccess.Value || !addResult.ID.HasValue)
+                return null;
+
+            var addedId = addResult.ID.Value;
+            var fileToUpload = new ObjectBaseToCreate
+            {
+                FileIds = new int[] { addedId },
+                Values = new ObjectBaseValueToCreate
+                {
+                    Name = fileName,
+                    Type = objectType,
+                    Favorites = string.Empty,
+                },
+            };
+
+            return await CreateObjectAsync(fileToUpload);
+        }
+
+        protected internal async Task<JToken> GetDefaultTemplate(int categoryId, int typeId)
+        {
+            var url = Resources.MethodObjectGetDefaultTemplate;
+            var data = new
+            {
+                categoryId,
+                typeId,
+            };
+
+            var response = await RequestUtility.GetResponseAsync(url, data);
+
+            return response;
+        }
+
+        protected internal async Task<List<int>> DeleteObjectAsync(int objectId)
+        {
+            var data = new { id = objectId };
+            var response = await RequestUtility.GetResponseAsync(Resources.MethodObjectDelete, data);
+
+            return response.ToObject<List<int>>();
+        }
+
+        protected bool IsLargeFile(string filePath)
+        {
+            var fileSize = new FileInfo(filePath).Length;
+            return fileSize >= UPLOAD_FILES_CHUNKS_SIZE;
+        }
+
+        protected async Task<ObjectBaseCreateResult> AddSmallFileAsync(string fileName, string filePath)
+        {
+            using var stream = File.OpenRead(filePath);
+            var totalSize = stream.Length;
+            var firstChunk = new byte[totalSize];
+            stream.Read(firstChunk);
+            var beginUploadResult = await BeginUploadAsync(fileName, firstChunk, totalSize);
+            var uploadId = beginUploadResult.ID;
+
+            var endUploadResult = await EndUploadAsync(uploadId.Value);
+            if (!endUploadResult.IsSuccess.GetValueOrDefault())
+                return new ObjectBaseCreateResult { IsSuccess = false };
+
+            return beginUploadResult;
+        }
+
+        protected async Task<ObjectBaseCreateResult> AddLargeFileAsync(string fileName, string filePath)
+        {
+            using var stream = File.OpenRead(filePath);
+            var firstChunk = new byte[UPLOAD_FILES_CHUNKS_SIZE];
+            var totalSize = stream.Length;
+            stream.Read(firstChunk);
+            var beginUploadResult = await BeginUploadAsync(fileName, firstChunk, totalSize);
+            if (beginUploadResult?.IsSuccess == null || !beginUploadResult.IsSuccess.Value)
+                return null;
+
+            var uploadId = beginUploadResult.ID;
+
+            while (stream.CanRead && stream.Position != stream.Length)
+            {
+                var notReadedByteLength = stream.Length - stream.Position;
+
+                // For some reason Lement Pro returns error if last chunk of some of the IFCs has not triple size
+                var isLastChunk = notReadedByteLength <= (UPLOAD_FILES_CHUNKS_SIZE * 3);
+                var chunkSize =
+                    isLastChunk
+                    ? notReadedByteLength
+                    : UPLOAD_FILES_CHUNKS_SIZE;
+
+                var chunk = new byte[chunkSize];
+                stream.Read(chunk);
+
+                var uploadPartResult = await UploadPartAsync(fileName, uploadId.Value, isLastChunk, chunk);
+                if (!uploadPartResult.IsSuccess.GetValueOrDefault())
+                    return new ObjectBaseCreateResult { IsSuccess = false };
+            }
+
+            return beginUploadResult;
+        }
+
+        protected async Task<ObjectBaseCreateResult> BeginUploadAsync(string fileName, byte[] filePart, long totalSize)
+        {
+            var url = Resources.MethodObjectFileBeginUpload;
+            var data = new Dictionary<string, string>
+            {
+                { REQUEST_UPLOAD_FILENAME_FIELDNAME, fileName },
+                { REQUEST_UPLOAD_SIZE_FIELDNAME, totalSize.ToString() },
+            };
+
+            var response = await SendUploadAsync(url, data, filePart, fileName);
+            return response;
+        }
+
+        protected async Task<ObjectBaseCreateResult> UploadPartAsync(string fileName, int id, bool endUpload, byte[] filePart)
+        {
+            var url = Resources.MethodObjectFileUploadPart;
+            var data = new Dictionary<string, string>
+            {
+                { REQUEST_UPLOAD_ID_FIELDNAME, id.ToString() },
+                { REQUEST_UPLOAD_ENDUPLOAD_FIELDNAME, endUpload.ToString() },
+            };
+
+            var response = await SendUploadAsync(url, data, filePart, fileName);
+            return response;
+        }
+
+        protected async Task<ObjectBaseCreateResult> EndUploadAsync(int id)
+        {
+            var url = Resources.MethodObjectFileEndUpload;
+            var data = new { id = id };
+
+            var response = await RequestUtility.GetResponseAsync(url, data);
+            return response.ToObject<ObjectBaseCreateResult>();
+        }
+
+        protected async Task<ObjectBaseCreateResult> SendUploadAsync(
+            string url,
+            Dictionary<string, string> data,
+            byte[] filePart,
+            string fileName)
+        {
+            var stream = new MemoryStream(filePart);
+            var response = await RequestUtility
+                .SendStreamWithDataAsync(url, stream, fileName, REQUEST_UPLOAD_FILEPART_FIELDNAME, data);
+
+            return response.ToObject<ObjectBaseCreateResult>();
         }
     }
 }

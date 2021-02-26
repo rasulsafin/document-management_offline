@@ -35,5 +35,17 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
 
         [DataMember(Name = "isResolution")]
         public bool? IsResolution { get; set; }
+
+        [DataMember(Name = "favorites")]
+        public string Favorites { get; set; }
+
+        [DataMember(Name = "parentModel")]
+        public int? ParentModel { get; set; }
+
+        [DataMember(Name = "bimVersionNum")]
+        public int? BimVersionNum { get; set; }
+
+        [DataMember(Name = "files")]
+        public dynamic Files { get; set; }
     }
 }

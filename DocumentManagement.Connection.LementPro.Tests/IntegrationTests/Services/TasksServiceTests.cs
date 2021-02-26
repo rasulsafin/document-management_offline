@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Models;
@@ -13,7 +13,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
 {
     [TestClass]
-    public class TasksServiceTests
+    public class TasksServiceTests : TasksService
     {
         private static TasksService service;
 
@@ -78,21 +78,45 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var newTaskValue = new ObjectBaseValueToCreate
             {
                 Type = 40179,
-                IsResolution = false,
                 Name = $"Задача от {DateTime.Now}",
                 Description = $"Описание новой задачи {Guid.NewGuid()}",
-                Project = "402014",
-                IsExpired = false,
                 I60099 = "44212",
                 StartDate = DateTime.Now.ToString(dateFormat),
-                BimRef = "402297",
             };
 
             var newTask = new ObjectBaseToCreate
             {
                 CanAutoEditParents = false,
                 Values = newTaskValue,
-                FileIds = new List<string>(),
+                FileIds = new List<int>(),
+            };
+
+            var result = await service.CreateTask(newTask);
+
+            Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
+        }
+
+        [TestMethod]
+        public async Task CreateTaskAsync_NewTaskWithUploadedFile_ReturnsTrue()
+        {
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var newTaskValue = new ObjectBaseValueToCreate
+            {
+                Type = 40179,
+                Name = $"Задача от {DateTime.Now}",
+                Description = $"Описание новой задачи {Guid.NewGuid()}",
+                I60099 = "44212",
+                StartDate = DateTime.Now.ToString(dateFormat),
+            };
+
+            var filePath = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";
+            var name = Path.GetFileName(filePath);
+            var uploaded = await service.CommonRequests.AddFileAsync(name, filePath);
+            var newTask = new ObjectBaseToCreate
+            {
+                CanAutoEditParents = false,
+                Values = newTaskValue,
+                FileIds = new List<int> { uploaded.ID.Value },
             };
 
             var result = await service.CreateTask(newTask);
@@ -120,7 +144,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             {
                 CanAutoEditParents = false,
                 Values = newTaskValue,
-                FileIds = new List<string>(),
+                FileIds = new List<int>(),
             };
             var created = await service.CreateTask(newTask);
 

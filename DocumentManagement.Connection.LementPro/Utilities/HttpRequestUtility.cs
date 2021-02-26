@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -79,12 +80,41 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return await response.Content.ReadAsStreamAsync();
         }
 
+        protected internal async Task<JToken> SendStreamAsync(string url, Stream stream, string fileName, string boundary, HttpMethod requestType = null)
+        {
+            using var request = InitializeRequest(url, requestType);
+            var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(stream), boundary, fileName);
+            request.Content = content;
+            var response = await connector.SendRequestAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JToken.Parse(responseContent);
+        }
+
+        protected internal async Task<JToken> SendStreamWithDataAsync(string url, Stream stream, string fileName, string boundary, Dictionary<string, string> data = default, HttpMethod requestType = null)
+        {
+            using var request = InitializeRequest(url, requestType);
+            var content = new MultipartFormDataContent();
+            content.Add(new StreamContent(stream), boundary, fileName);
+
+            if (data != default)
+            {
+                foreach (var item in data)
+                    content.Add(new StringContent(item.Value), item.Key);
+            }
+
+            request.Content = content;
+            var response = await connector.SendRequestAsync(request);
+            var responseContent = await response.Content.ReadAsStringAsync();
+            return JToken.Parse(responseContent);
+        }
+
         protected async Task<HttpResponseMessage> GetHttpResponseAsync<TData>(string url,
             TData data = default,
             HttpMethod requestType = null,
             HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            var request = InitializeRequest(url, requestType);
+            using var request = InitializeRequest(url, requestType);
 
             if (data != null)
             {

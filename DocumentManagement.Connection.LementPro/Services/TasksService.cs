@@ -11,36 +11,40 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
     public class TasksService : IDisposable
     {
         private readonly HttpRequestUtility requestUtility;
-        private readonly CommonRequestsUtility commonRequests;
+
+        public TasksService()
+        {
+        }
 
         public TasksService(
             HttpRequestUtility requestUtility,
             CommonRequestsUtility commonRequests)
         {
             this.requestUtility = requestUtility;
-            this.commonRequests = commonRequests;
+            CommonRequests = commonRequests;
         }
+
+        public CommonRequestsUtility CommonRequests { get; set; }
 
         public void Dispose()
         {
-            requestUtility.Dispose();
-            commonRequests.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task<IEnumerable<ObjectBase>> GetAllTasksAsync()
-            => await commonRequests.RetriveObjectsListAsync(OBJECTTYPE_SINGLE_TASK);
+            => await CommonRequests.RetriveObjectsListAsync(OBJECTTYPE_SINGLE_TASK);
 
         public async Task<ObjectBase> GetTaskAsync(int taskId)
-            => await commonRequests.GetObjectAsync(taskId);
+            => await CommonRequests.GetObjectAsync(taskId);
 
         public async Task<List<LementProType>> GetTasksTypesAsync()
-            => await commonRequests.GetObjectsTypes(OBJECTTYPE_SINGLE_TASK);
+            => await CommonRequests.GetObjectsTypes(OBJECTTYPE_SINGLE_TASK);
 
         public async Task<ObjectBaseCreateResult> CreateTask(ObjectBaseToCreate objectToCreate)
-            => await commonRequests.CreateObjectAsync(objectToCreate);
+            => await CommonRequests.CreateObjectAsync(objectToCreate);
 
         public async Task<bool> DeleteTaskAsync(int objectId)
-            => await commonRequests.DeleteObjectAsync(objectId);
+            => await CommonRequests.ArchiveObjectAsync(objectId);
 
         public async Task<ObjectBase> UpdateTaskAsync(TaskToUpdate taskToUpdate)
         {

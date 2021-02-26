@@ -12,10 +12,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "canAutoEditParents")]
         public bool? CanAutoEditParents { get; set; }
 
+        [DataMember(Name = "canAutoEditEndDate")]
+        public bool? CanAutoEditEndDate { get; set; }
+
         [DataMember(Name = "values")]
         public ObjectBaseValueToCreate Values { get; set; }
 
         [DataMember(Name = "fileIds")]
-        public IEnumerable<string> FileIds { get; set; }
+        public IEnumerable<int> FileIds { get; set; }
     }
 }

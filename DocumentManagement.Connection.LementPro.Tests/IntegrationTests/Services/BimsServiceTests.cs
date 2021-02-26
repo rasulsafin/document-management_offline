@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Services;
@@ -86,6 +84,34 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var result = await service.DownloadLastVersionAsync(bimId, path);
 
             Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task UpdateBimVersion_SmallFile_UpdatedSuccessful()
+        {
+            // Update is not working for the moment
+
+            //string path = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";
+            //string bimId = "436782";
+
+            //var result = await service.UpdateBimVersion(bimId, path);
+
+            //Assert.IsNotNull(result?.IsSuccess);
+            //Assert.IsTrue(result.IsSuccess.Value);
+        }
+
+        [TestMethod]
+        public async Task UpdateBimVersion_LargeFile_UpdatedSuccessful()
+        {
+            // Update is not working for the moment
+
+            //string path = "C:\\Users\\diismagilov\\Downloads\\00_Gladilova_AC_(IFC2x3)_05062020.ifc";
+            //string bimId = "436770";
+
+            //var result = await service.UpdateBimVersion(bimId, path);
+
+            //Assert.IsNotNull(result?.IsSuccess);
+            //Assert.IsTrue(result.IsSuccess.Value);
         }
     }
 }

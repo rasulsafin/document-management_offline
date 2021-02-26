@@ -142,11 +142,65 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Delete.do.
+        /// </summary>
+        internal static string MethodObjectDelete {
+            get {
+                return ResourceManager.GetString("MethodObjectDelete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/File/Add.do.
+        /// </summary>
+        internal static string MethodObjectFileAdd {
+            get {
+                return ResourceManager.GetString("MethodObjectFileAdd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/File/BeginUpload.do.
+        /// </summary>
+        internal static string MethodObjectFileBeginUpload {
+            get {
+                return ResourceManager.GetString("MethodObjectFileBeginUpload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/File/EndUpload.do.
+        /// </summary>
+        internal static string MethodObjectFileEndUpload {
+            get {
+                return ResourceManager.GetString("MethodObjectFileEndUpload", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/File/UploadPart.do.
+        /// </summary>
+        internal static string MethodObjectFileUploadPart {
+            get {
+                return ResourceManager.GetString("MethodObjectFileUploadPart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Get.do.
         /// </summary>
         internal static string MethodObjectGet {
             get {
                 return ResourceManager.GetString("MethodObjectGet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/Template/GetDefaultTemplate.do.
+        /// </summary>
+        internal static string MethodObjectGetDefaultTemplate {
+            get {
+                return ResourceManager.GetString("MethodObjectGetDefaultTemplate", resourceCulture);
             }
         }
         
