@@ -42,6 +42,7 @@ namespace MRS.DocumentManagement.Api
                         ValidAudience = AuthOptions.AUDIENCE,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
                         ValidateIssuerSigningKey = true,
+                        ValidateLifetime = false,
                     };
                 });
 
@@ -102,6 +103,9 @@ namespace MRS.DocumentManagement.Api
             });
             app.UseRouting();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            // TODO: uncomment and add Authenticate attribute to all controllers when roles are ready
+            // app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
             {
