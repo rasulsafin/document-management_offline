@@ -46,10 +46,14 @@ namespace MRS.DocumentManagement.Synchronizer.Extensions
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
 
-                var value = (Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue)) ? localValue
-                        : Equals(synchronizedValue, localValue)                                         ? remoteValue
-                        : tuple.Local.UpdatedAt > tuple.Remote.UpdatedAt                                ? localValue
-                            : remoteValue;
+                var localSyncronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
+                var localNotChanged = Equals(synchronizedValue, localValue);
+                var localMoreRelevant = tuple.Local.UpdatedAt > tuple.Remote.UpdatedAt;
+
+                var value = localSyncronizedAndNotChanged   ? localValue
+                        : localNotChanged                   ? remoteValue
+                        : localMoreRelevant                 ? localValue
+                        : remoteValue;
 
                 UpdateValue(property, value);
             }
