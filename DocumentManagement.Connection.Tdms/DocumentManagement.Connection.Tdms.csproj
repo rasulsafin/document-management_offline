@@ -7,21 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <COMReference Include="TDMS.dll">
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>50bd3023-f3e5-4bb5-88e1-3cb09989fb34</Guid>
-      <Lcid>0</Lcid>
-      <WrapperTool>tlbimp</WrapperTool>
-      <Isolated>false</Isolated>
-    </COMReference>
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="Interop.TDMS">
+      <HintPath>lib\Interop.TDMS.dll</HintPath>
+    </Reference>
+    <Reference Include="Interop.TDMSResourceServerLib">
+      <HintPath>lib\Interop.TDMSResourceServerLib.dll</HintPath>
+    </Reference>
     <Reference Include="Tdms.Core">
       <HintPath>lib\Tdms.Core.dll</HintPath>
     </Reference>

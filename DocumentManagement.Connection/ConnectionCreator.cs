@@ -28,6 +28,7 @@ namespace MRS.DocumentManagement.Connection
 
             var list = new List<ConnectionTypeDto>();
             var listOfTypes = System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
+                        .Where(x => x.Contains("DocumentManagement.Connection."))
                         .SelectMany(x => Assembly.Load(AssemblyName.GetAssemblyName(x)).GetTypes())
                         .Where(x => typeof(IConnection).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
