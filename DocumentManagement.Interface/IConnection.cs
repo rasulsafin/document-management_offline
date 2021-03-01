@@ -43,6 +43,6 @@ namespace MRS.DocumentManagement.Interface
         /// </summary>
         /// <param name="lastSynchronizationDate">DateTime of the last successful synchronization.</param>
         /// <returns>All data.</returns>
-        ConnectionContext GetContext(DateTime lastSynchronizationDate);
+        AConnectionContext GetContext(DateTime lastSynchronizationDate);
     }
 }

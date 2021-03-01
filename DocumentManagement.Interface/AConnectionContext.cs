@@ -7,7 +7,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public abstract class ConnectionContext
+    public abstract class AConnectionContext
     {
         protected List<ProjectExternalDto> projects;
         protected List<ObjectiveExternalDto> objectives;
@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Connection
         private readonly Lazy<ISynchronizer<ObjectiveExternalDto>> objectivesSynchronizer;
         private readonly Lazy<ISynchronizer<ItemExternalDto>> itemsSynchronizer;
 
-        protected ConnectionContext()
+        protected AConnectionContext()
         {
             projectsSynchronizer = new Lazy<ISynchronizer<ProjectExternalDto>>(
                     CreateProjectsSynchronizer,

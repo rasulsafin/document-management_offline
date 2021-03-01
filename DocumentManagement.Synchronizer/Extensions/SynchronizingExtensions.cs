@@ -59,6 +59,28 @@ namespace MRS.DocumentManagement.Synchronizer.Extensions
             }
         }
 
+        public static object GetPropertyValue<T>(this SynchronizingTuple<T> tuple, string propertyName)
+            where T : class, ISynchronizable<T>, new()
+        {
+            var propertyInfo = typeof(T).GetProperty(propertyName);
+            if (propertyInfo == null)
+                throw new ArgumentException(nameof(GetPropertyValue), nameof(propertyName));
+
+            bool TryGetValue(T source, out object value)
+            {
+                value = null;
+                if (source == null)
+                    return false;
+
+                value = propertyInfo.GetValue(source);
+                return value != default;
+            }
+
+            return TryGetValue(tuple.Local, out var result1)     ? result1 :
+                TryGetValue(tuple.Remote, out var result2)       ? result2 :
+                TryGetValue(tuple.Synchronized, out var result3) ? result3 : null;
+        }
+
         private static void LinkEntities<T>(this SynchronizingTuple<T> tuple)
                 where T : class, ISynchronizable<T>, new()
         {
