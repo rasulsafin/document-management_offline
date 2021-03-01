@@ -22,13 +22,14 @@ namespace MRS.DocumentManagement.Synchronizer
 
         public async Task<SynchronizingResult> Synchronize(
                 SynchronizingData data,
-                IConnection connection)
+                IConnection connection,
+                ConnectionInfoDto info)
         {
             var date = DateTime.UtcNow;
             var lastSynchronization = await data.Synchronizations.AnyAsync()
                     ? (await data.Synchronizations.LastAsync()).Date
                     : DateTime.MinValue;
-            var context = connection.GetContext(lastSynchronization);
+            var context = await connection.GetContext(info, lastSynchronization);
             await Synchronize(
                     context.ProjectsSynchronizer,
                     context.ItemsSynchronizer,

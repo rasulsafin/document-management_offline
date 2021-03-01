@@ -23,10 +23,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             authenticator = new Authenticator(authenticationService);
         }
 
+        public void Dispose()
+        {
+            connection.Dispose();
+        }
+
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
         {
             var authorizationResult = await authenticator.SignInAsync(info);
-            var updatedInfo = authorizationResult.updatedInfo;
+            updatedInfo = authorizationResult.updatedInfo;
             return authorizationResult.authStatus;
         }
 
@@ -73,9 +78,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             return type;
         }
 
-        public void Dispose()
+        public async Task<AConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
         {
-            connection.Dispose();
+            throw new NotImplementedException();
         }
     }
 }
