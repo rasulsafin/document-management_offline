@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = -1;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(comparer.NotNullEquals(existingItem, result));
@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = -1;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(comparer.NotNullEquals(existingItem, result));
@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = existingItem.Objectives.First().ObjectiveID;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
 
             Assert.IsNull(result);
         }
@@ -112,7 +112,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = existingItem.Projects.First().ProjectID;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
 
             Assert.IsNull(result);
         }
@@ -130,7 +130,7 @@ namespace MRS.DocumentManagement.Tests
             var itemsCount = context.Items.Unsynchronized().Count();
             var item = new ItemDto { ExternalID = externalId, ItemType = itemType, Name = name };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
 
             var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
                                                                                && i.ItemType == (int)itemType
@@ -153,7 +153,7 @@ namespace MRS.DocumentManagement.Tests
             var itemsCount = context.Items.Unsynchronized().Count();
             var item = new ItemDto { ExternalID = externalId, ItemType = itemType, Name = name };
 
-            var result = await helper.CheckItemToLink(context, mapper, item, projectType, parentId);
+            var result = await helper.CheckItemToLink(context, item, projectType, parentId);
 
             var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
                                                                                                          && i.ItemType == (int)itemType

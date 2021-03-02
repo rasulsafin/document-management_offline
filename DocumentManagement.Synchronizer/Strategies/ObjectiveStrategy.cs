@@ -10,35 +10,34 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer.Extensions;
 using MRS.DocumentManagement.Synchronizer.Models;
 
 namespace MRS.DocumentManagement.Synchronizer.Strategies
 {
-    internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
+    internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
         private readonly ItemStrategy itemStrategy;
 
-        public ProjectStrategy(IMapper mapper)
+        public ObjectiveStrategy(IMapper mapper)
             : base(mapper)
-            => itemStrategy = new ItemStrategy(mapper, Link, Unlink);
+        {
+            this.itemStrategy = new ItemStrategy(mapper, Link, Unlink);
+        }
 
-        protected override DbSet<Project> GetDBSet(DMContext context)
-            => context.Projects;
+        protected override DbSet<Objective> GetDBSet(DMContext context)
+            => context.Objectives;
 
-        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(AConnectionContext context)
-            => context.ProjectsSynchronizer;
+        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(AConnectionContext context)
+            => context.ObjectivesSynchronizer;
 
-        protected override bool DefaultFilter(SynchronizingData data, Project project)
-            => data.ProjectsFilter(project);
+        protected override bool DefaultFilter(SynchronizingData data, Objective objective)
+            => data.ObjectivesFilter(objective);
 
-        protected override IIncludableQueryable<Project, Project> Include(IQueryable<Project> set)
-            => base.Include(
-                set
-                   .Include(x => x.Users));
+        protected override IIncludableQueryable<Objective, Objective> Include(IQueryable<Objective> set)
+            => base.Include(set.Include(x => x.Items));
 
         protected override async Task AddToRemote(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext,
             object parent)
@@ -48,29 +47,27 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         }
 
         protected override async Task AddToLocal(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext,
             object parent)
         {
             await base.AddToLocal(tuple, data, connectionContext, parent);
             await SynchronizeItems(tuple, data, connectionContext);
-            AddUser(tuple, data);
         }
 
         protected override async Task Merge(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
             await base.Merge(tuple, data, connectionContext, parent);
-            AddUser(tuple, data);
         }
 
         protected override async Task RemoveFromLocal(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext,
             object parent)
@@ -80,7 +77,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         }
 
         protected override async Task RemoveFromRemote(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext,
             object parent)
@@ -90,54 +87,42 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         }
 
         private async Task SynchronizeItems(
-            SynchronizingTuple<Project> tuple,
+            SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             AConnectionContext connectionContext)
         {
-            await itemStrategy.Synchronize(
-                data,
-                connectionContext,
-                item => item.ProjectID.HasValue && item.ProjectID == (int)tuple.GetPropertyValue(nameof(Project.ID)),
-                tuple);
-        }
-
-        private void AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
-        {
-            var projectsFromDB = data.Context.Projects.Include(x => x.Users)
-               .Where(x => x.ExternalID == tuple.ExternalID);
-
-            foreach (var project in projectsFromDB)
-            {
-                project.Users ??= new List<UserProject>();
-
-                if (project.Users.Any(x => x.UserID == data.User.ID))
-                    continue;
-
-                project.Users.Add(
-                    new UserProject
-                    {
-                        ProjectID = project.ID,
-                        UserID = data.User.ID,
-                    });
-                data.Context.Projects.Update(project);
-            }
+            var items = await data.Context.ObjectiveItems
+               .Where(x => x.ObjectiveID == tuple.Local.ID || x.ObjectiveID == tuple.Synchronized.ID)
+               .ToListAsync();
+            await itemStrategy.Synchronize(data, connectionContext, item => items.Any(x => x.ItemID == item.ID), tuple);
         }
 
         private Task Link(Item item, object parent, SynchronizingData data)
         {
-            var tuple = (SynchronizingTuple<Project>)parent;
-            var project = item.IsSynchronized ? tuple.Synchronized : tuple.Local;
-            if (project == null)
+            var tuple = (SynchronizingTuple<Objective>)parent;
+            var objective = item.IsSynchronized ? tuple.Synchronized : tuple.Local;
+            if (objective == null)
                 throw new ArgumentException();
 
-            item.ProjectID = project.ID;
+            if (item.Objectives.All(x => x.ObjectiveID != objective.ID))
+            {
+                data.Context.ObjectiveItems.Add(new ObjectiveItem
+                {
+                    ItemID = item.ID,
+                    ObjectiveID = objective.ID,
+                });
+            }
+
             return Task.CompletedTask;
         }
 
-        private Task Unlink(Item item, object project, SynchronizingData data)
+        private Task Unlink(Item item, object parent, SynchronizingData data)
         {
-            item.ProjectID = null;
-            if (item.Objectives.Count > 0)
+            var parentTuple = (SynchronizingTuple<Objective>)parent;
+            var objective = item.IsSynchronized ? parentTuple.Synchronized : parentTuple.Local;
+            var link = item.Objectives.FirstOrDefault(x => x.ObjectiveID == objective.ID);
+            item.Objectives.Remove(link);
+            if (item.ProjectID != null || item.Objectives.Count > 0)
                 data.Context.Items.Update(item);
             else
                 data.Context.Items.Remove(item);

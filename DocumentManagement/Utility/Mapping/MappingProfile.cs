@@ -16,8 +16,7 @@ namespace MRS.DocumentManagement.Utility
         private void CreateMapToDto()
         {
             CreateMap<User, UserDto>();
-            CreateMap<Project, ProjectDto>()
-                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)));
+            CreateMap<Project, ProjectDto>();
             CreateMap<Project, ProjectToListDto>();
             CreateMap<Item, ItemDto>();
             CreateMap<ObjectiveType, ObjectiveTypeDto>();

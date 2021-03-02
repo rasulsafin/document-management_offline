@@ -41,10 +41,9 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
-            var dbItems = await context.ProjectItems
-                .Where(x => x.ProjectID == (int)projectID)
-                .Select(x => x.Item)
-                .ToListAsync();
+            var dbItems = (await context.Projects
+               .Include(x => x.Items)
+               .FirstOrDefaultAsync(x => x.ID == (int)projectID)).Items;
             return dbItems.Select(MapItemFromDB).ToList();
         }
 
@@ -71,7 +70,7 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        private ItemDto MapItemFromDB(Database.Models.Item dbItem) 
+        private ItemDto MapItemFromDB(Database.Models.Item dbItem)
             => mapper.Map<ItemDto>(dbItem);
     }
 }

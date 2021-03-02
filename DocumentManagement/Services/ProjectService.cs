@@ -37,7 +37,7 @@ namespace MRS.DocumentManagement.Services
                 return default;
 
             var projectToDb = mapper.Map<Project>(projectToCreate);
-            projectToDb.Items = new List<ProjectItem>();
+            projectToDb.Items = new List<Item>();
             foreach (var item in projectToCreate.Items)
             {
                 await LinkItem(item, projectToDb);
@@ -113,10 +113,11 @@ namespace MRS.DocumentManagement.Services
                     project.Users.Add(new UserProject
                     {
                         ProjectID = project.ID,
-                        UserID = (int)user
+                        UserID = (int)user,
                     });
                 }
             }
+
             context.Update(project);
             await context.SaveChangesAsync();
             return true;
@@ -155,15 +156,17 @@ namespace MRS.DocumentManagement.Services
         public async Task<bool> Update(ProjectDto project)
         {
             var projectID = project.ID;
-            var projectFromDb = await context.Projects.FindAsync((int)projectID);
+            var projectFromDb = await context.Projects
+               .Include(x => x.Items)
+               .FirstOrDefaultAsync(x => x.ID == (int)projectID);
             if (projectFromDb == null)
                 return false;
 
             projectFromDb = mapper.Map(project, projectFromDb);
 
-            projectFromDb.Items = new List<ProjectItem>();
-            var projectItems = context.ProjectItems.Where(i => i.ProjectID == projectFromDb.ID).ToList();
-            var itemsToUnlink = projectItems.Where(o => project.Items.Any(i => (int)i.ID == o.ItemID));
+            var projectItems = projectFromDb.Items;
+            projectFromDb.Items = new List<Item>();
+            var itemsToUnlink = projectItems.Where(o => project.Items.Any(i => (int)i.ID == o.ID));
 
             foreach (var item in project.Items)
             {
@@ -172,7 +175,7 @@ namespace MRS.DocumentManagement.Services
 
             foreach (var item in itemsToUnlink)
             {
-                await UnlinkItem(item.ItemID, projectFromDb.ID);
+                await UnlinkItem(item.ID, projectFromDb.ID);
             }
 
             context.Projects.Update(projectFromDb);
@@ -187,23 +190,25 @@ namespace MRS.DocumentManagement.Services
             if (dbItem == null)
                 return;
 
-            project.Items.Add(new ProjectItem
-            {
-                ProjectID = project.ID,
-                ItemID = dbItem.ID
-            });
+            dbItem.Project = project;
+            context.Items.Update(dbItem);
+            await context.SaveChangesAsync();
             synchronizator.Update(NameTypeRevision.Projects, project.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int projectID)
         {
-            var link = await context.ProjectItems
-                .Where(x => x.ItemID == (int)itemID)
-                .Where(x => x.ProjectID == (int)projectID)
-                .FirstOrDefaultAsync();
-            if (link == null)
+            var item = await context.Items
+               .Include(x => x.Objectives)
+               .Where(x => x.ID == (int)itemID)
+               .Where(x => x.ProjectID == (int)projectID)
+               .FirstOrDefaultAsync();
+            if (item == null)
                 return false;
-            context.ProjectItems.Remove(link);
+
+            if (item.Objectives.Count == 0)
+                context.Items.Remove(item);
+
             await context.SaveChangesAsync();
             synchronizator.Update(NameTypeRevision.Projects, projectID);
             return true;
