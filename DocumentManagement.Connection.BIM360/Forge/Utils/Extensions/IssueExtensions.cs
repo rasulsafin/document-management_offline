@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
 {
     public static class IssueExtensions
     {
-        private enum Status
+        internal enum Status
         {
             Draft,
             Open,
@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
         private static ICollection<ItemExternalDto> GetItems(Issue issue)
         {
             // use issuesService.GetAttachmentsAsync
-            // mb implement in syncronizer
+            // mb implement in Synchronizer
             throw new NotImplementedException();
         }
 
