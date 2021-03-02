@@ -3,7 +3,10 @@
 #undef DEVELOPMENT // Disable one
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Database
@@ -71,6 +74,22 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ConnectionInfoEnumerationValue> ConnectionInfoEnumerationValues { get; set; }
 
         #endregion
+
+        public override int SaveChanges()
+        {
+            foreach (var entityEntry in ChangeTracker
+               .Entries()
+               .Where(
+                    e => e.Entity is ISynchronizableBase &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
+            {
+                var synchronizable = (ISynchronizableBase)entityEntry.Entity;
+                if (!synchronizable.IsSynchronized)
+                    synchronizable.UpdatedAt = DateTime.Now;
+            }
+
+            return base.SaveChanges();
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
