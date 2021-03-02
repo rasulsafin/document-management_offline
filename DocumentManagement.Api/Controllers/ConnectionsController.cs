@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class ConnectionsController : ControllerBase
     {
-        private IConnectionService service;
+        private readonly IConnectionService service;
 
         public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
@@ -42,7 +42,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task<IActionResult> GetRemoteConnectionStatus([FromRoute] int userID)
         {
             var status = await service.GetRemoteConnectionStatus(new ID<UserDto>(userID));
-            return Ok(status);
+            return ValidateFoundObject(status);
         }
 
         [HttpGet]

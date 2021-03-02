@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -106,6 +105,8 @@ namespace MRS.DocumentManagement.Services
         public async Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID)
         {
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
+            if (connectionInfo == null)
+                return null;
             var connection = GetConnection(connectionInfo);
 
             return await connection.GetStatus(mapper.Map<ConnectionInfoDto>(connectionInfo));
@@ -114,6 +115,8 @@ namespace MRS.DocumentManagement.Services
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)
         {
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
+            if (connectionInfo == null)
+                return null;
             var list = connectionInfo.EnumerationValues
                 .Where(x => x.EnumerationValue.EnumerationTypeID == (int)enumerationTypeID)?
                 .Select(x => mapper.Map<EnumerationValueDto>(x.EnumerationValue));
@@ -137,6 +140,9 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<ConnectionInfo> GetConnectionInfoFromDb(User user)
         {
+            if (user == null)
+                return null;
+
             var info = await context.ConnectionInfos
                 .Include(x => x.ConnectionType)
                     .ThenInclude(x => x.AppProperties)
@@ -236,7 +242,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             return enumValueDb;
-        } 
+        }
         #endregion
     }
 }

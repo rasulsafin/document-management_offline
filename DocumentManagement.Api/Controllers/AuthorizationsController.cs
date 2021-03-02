@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class AuthorizationsController : ControllerBase
     {
-        private IAuthorizationService service;
+        private readonly IAuthorizationService service;
 
         public AuthorizationsController(IAuthorizationService authorizationService) => service = authorizationService;
 
@@ -88,7 +88,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 audience: AuthOptions.AUDIENCE,
                 claims: identity.Claims,
                 notBefore: DateTime.UtcNow,
-                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256Signature));
 
             var encodedJwt = new JwtSecurityTokenHandler().WriteToken(jwt);
             var result = (encodedJwt, user);
@@ -103,7 +103,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimsIdentity.DefaultNameClaimType, validatedUser.User.Login)
+                    new Claim(ClaimsIdentity.DefaultNameClaimType, validatedUser.User.Login),
                 };
 
                 if (validatedUser.User.Role != null)

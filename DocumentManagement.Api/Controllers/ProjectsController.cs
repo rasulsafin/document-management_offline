@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private IProjectService service;
+        private readonly IProjectService service;
 
         public ProjectsController(IProjectService projectService) => service = projectService;
 
