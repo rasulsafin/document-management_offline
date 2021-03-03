@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -42,8 +43,9 @@ namespace MRS.DocumentManagement.Services
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
             var dbItems = (await context.Projects
-               .Include(x => x.Items)
-               .FirstOrDefaultAsync(x => x.ID == (int)projectID)).Items;
+                   .Include(x => x.Items)
+                   .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
+             ?? Enumerable.Empty<Item>();
             return dbItems.Select(MapItemFromDB).ToList();
         }
 

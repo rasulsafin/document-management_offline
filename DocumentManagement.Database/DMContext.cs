@@ -15,6 +15,8 @@ namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {
+        private static readonly DateTime DEFAULT_DATE_TIME = new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc);
+
         public DMContext()
         {
         }
@@ -275,18 +277,19 @@ namespace MRS.DocumentManagement.Database
                     .WithOne()
                     .OnDelete(DeleteBehavior.SetNull);
 
+
             modelBuilder.Entity<Project>()
                     .Property(x => x.UpdatedAt)
-                    .HasDefaultValue(DateTime.UtcNow);
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
             modelBuilder.Entity<Objective>()
                     .Property(x => x.UpdatedAt)
-                    .HasDefaultValue(DateTime.UtcNow);
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
             modelBuilder.Entity<Item>()
                     .Property(x => x.UpdatedAt)
-                    .HasDefaultValue(DateTime.UtcNow);
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
             modelBuilder.Entity<DynamicField>()
                     .Property(x => x.UpdatedAt)
-                    .HasDefaultValue(DateTime.UtcNow);
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
         }
 
         private void UpdateDateTime()
