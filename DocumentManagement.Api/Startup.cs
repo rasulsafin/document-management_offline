@@ -11,10 +11,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
-//using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Synchronizer.Legacy;
 using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Api
@@ -77,7 +75,6 @@ namespace MRS.DocumentManagement.Api
 
             services.AddScoped<ItemHelper>();
 
-            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
@@ -88,7 +85,6 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
             services.AddSingleton<CryptographyHelper>();
-            services.AddSingleton<SyncManager>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

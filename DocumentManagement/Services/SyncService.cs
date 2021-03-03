@@ -1,18 +1,11 @@
-﻿//using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer.Legacy;
+﻿using MRS.DocumentManagement.Synchronizer;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class SyncService : ISyncService
+    public class SyncService
     {
-        private SyncManager syncManager;
-
         public SyncService(SyncManager syncManager)
         {
-            this.syncManager = syncManager;
         }
-
-        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update) { } //syncManager?.Update(table, id, type);
     }
 }

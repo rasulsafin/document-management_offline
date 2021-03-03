@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Utility
                         .AnyAsync(i => i.ItemID == (int)item.ID && i.ObjectiveID == parentId);
                     break;
                 case var _ when itemParentType == typeof(Project):
-                    alreadyLinked = dbItem.ProjectID != null;
+                    alreadyLinked = dbItem.ProjectID == parentId;
                     break;
             }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
@@ -56,19 +57,19 @@ namespace MRS.DocumentManagement.Tests
                     o.ObjectiveTypeID = objectiveTypes[0].ID;
                 });
                 context.Objectives.AddRange(objectives);
+
+                items[0].ProjectID = projects[0].ID;
+                items[1].ProjectID = projects[0].ID;
+
                 context.Items.AddRange(items);
                 context.SaveChanges();
 
                 context.ObjectiveItems.AddRange(new List<ObjectiveItem>
                 {
                     new ObjectiveItem { ItemID = items[0].ID, ObjectiveID = objectives[0].ID },
-                    new ObjectiveItem { ItemID = items[1].ID, ObjectiveID = objectives[0].ID }
+                    new ObjectiveItem { ItemID = items[1].ID, ObjectiveID = objectives[0].ID },
                 });
-                context.ProjectItems.AddRange(new List<ProjectItem>
-                {
-                    new ProjectItem { ItemID = items[0].ID, ProjectID = projects[0].ID },
-                    new ProjectItem { ItemID = items[1].ID, ProjectID = projects[0].ID }
-                });
+
                 context.SaveChanges();
             });
 
@@ -106,8 +107,8 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetProjectItems_ExistingProjectWithItems_ReturnsEnumerableWithItems()
         {
-            var existingProject = Context.Projects.Unsynchronized().First(p => p.Items.Any());
-            var projectItems = existingProject.Items.Select(pi => pi.Item);
+            var existingProject = Context.Projects.Include(x => x.Items).First(p => p.Items.Any());
+            var projectItems = existingProject.Items;
 
             var result = await service.GetItems(new ID<ProjectDto>(existingProject.ID));
 

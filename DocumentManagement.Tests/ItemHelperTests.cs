@@ -46,11 +46,11 @@ namespace MRS.DocumentManagement.Tests
                     o.ObjectiveTypeID = objectiveTypes[0].ID;
                 });
                 context.Objectives.AddRange(objectives);
+                items[0].ProjectID = projects[0].ID;
                 context.Items.AddRange(items);
                 context.SaveChanges();
 
                 context.ObjectiveItems.Add(new ObjectiveItem { ItemID = items[0].ID, ObjectiveID = objectives[0].ID });
-                context.ProjectItems.Add(new ProjectItem { ItemID = items[0].ID, ProjectID = projects[0].ID });
                 context.SaveChanges();
             });
         }
@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = -1;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(comparer.NotNullEquals(existingItem, result));
@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = -1;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(comparer.NotNullEquals(existingItem, result));
@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Tests
             var parentId = existingItem.Objectives.First().ObjectiveID;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
             Assert.IsNull(result);
         }
@@ -107,12 +107,12 @@ namespace MRS.DocumentManagement.Tests
         public async Task CheckItemToLink_ExistingItemLinkedToProjectParent_ReturnsNull()
         {
             var context = Fixture.Context;
-            var existingItem = context.Items.Unsynchronized().First(i => context.ProjectItems.Any(pi => pi.ItemID == i.ID));
-            var objectiveType = typeof(Project);
-            var parentId = existingItem.Projects.First().ProjectID;
+            var existingItem = context.Items.Unsynchronized().First(i => i.ProjectID != null);
+            var projectType = typeof(Project);
+            var parentId = existingItem.ProjectID ?? -1;
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
-            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, projectType, parentId);
 
             Assert.IsNull(result);
         }
@@ -130,7 +130,7 @@ namespace MRS.DocumentManagement.Tests
             var itemsCount = context.Items.Unsynchronized().Count();
             var item = new ItemDto { ExternalID = externalId, ItemType = itemType, Name = name };
 
-            var result = await helper.CheckItemToLink(context, item, objectiveType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
             var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
                                                                                && i.ItemType == (int)itemType
@@ -153,7 +153,7 @@ namespace MRS.DocumentManagement.Tests
             var itemsCount = context.Items.Unsynchronized().Count();
             var item = new ItemDto { ExternalID = externalId, ItemType = itemType, Name = name };
 
-            var result = await helper.CheckItemToLink(context, item, projectType, parentId);
+            var result = await helper.CheckItemToLink(context, mapper, item, projectType, parentId);
 
             var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
                                                                                                          && i.ItemType == (int)itemType

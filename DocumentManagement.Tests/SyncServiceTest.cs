@@ -1,9 +1,8 @@
 ﻿using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer.Legacy;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal class SyncServiceTest : ISyncService
+    internal class SyncServiceTest
     {
         public void StartSync()
         {
@@ -11,15 +10,6 @@ namespace MRS.DocumentManagement.Tests
 
         public void StopSync()
         {
-        }
-
-        public void Update(NameTypeRevision table, int id, TypeChange type = TypeChange.Update)
-        {
-        }
-
-        public ProgressSync GetProgress()
-        {
-            return default;
         }
     }
 }

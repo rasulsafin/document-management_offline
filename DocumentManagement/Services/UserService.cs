@@ -9,7 +9,6 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer.Legacy;
 using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Services
@@ -19,16 +18,13 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly CryptographyHelper cryptographyHelper;
-        private readonly ISyncService synchronizator;
 
         public UserService(DMContext context,
              IMapper mapper,
-             ISyncService synchronizator,
              CryptographyHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
-            this.synchronizator = synchronizator;
             cryptographyHelper = helper;
         }
 
@@ -54,7 +50,6 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
 
                 var userID = new ID<UserDto>(user.ID);
-                synchronizator.Update(NameTypeRevision.Users, user.ID);
                 return userID;
             }
             catch (DbUpdateException ex)
@@ -83,7 +78,6 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
             }
 
-            synchronizator.Update(NameTypeRevision.Users, user.ID, TypeChange.Delete);
             return true;
         }
 
@@ -125,7 +119,6 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
-                synchronizator.Update(NameTypeRevision.Users, storedUser.ID);
                 return true;
             }
             catch
