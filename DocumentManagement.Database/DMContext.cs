@@ -1,6 +1,6 @@
 ﻿#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
-#undef TEST // Disable one
+#undef DEVELOPMENT // Disable one
 
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
@@ -168,8 +168,12 @@ namespace MRS.DocumentManagement.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DynamicField>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.DynamicFields)
+               .HasOne(x => x.Objective)
+               .WithMany(x => x.DynamicFields)
+               .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DynamicField>()
+                .HasOne(x => x.ParentField)
+                .WithMany(x => x.ChildrenDynamicFields)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BimElement>()

@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.Title = tdmsObject.Attributes[AttributeID.WORK_NAME].Value.ToString();
             objectiveDto.Description = tdmsObject.Description;
             objectiveDto.Status = GetStatus(tdmsObject.StatusName);
-            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>(); // TODO: Dynamic fields as Volumes and Operations
+            objectiveDto.DynamicFields = GetDynamicFields(tdmsObject);
             objectiveDto.BimElements = GetBimElemenents(tdmsObject);
 
             return objectiveDto;
@@ -70,5 +70,32 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             ObjectiveStatus.Open => StatusID.WORK_OPEN,
             _ => StatusID.WORK_OPEN,
         };
+
+        private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
+        {
+            var list = new List<DynamicFieldExternalDto>();
+
+            // var units = new DynamicFieldExternalDto()
+            // {
+            //    ExternalID = tdmsObject.Attributes[AttributeID.UNIT].AttributeDefName,
+            //    Name = tdmsObject.Attributes[AttributeID.UNIT].Description,
+            //    Type = DynamicFieldType.STRING,
+            //    Value = tdmsObject.Attributes[AttributeID.UNIT].Value.ToString(),
+            // };
+
+            // list.Add(units);
+
+            // TODO:
+            // - Volumes (DF):
+            //    - Volume (float)
+            //    - Price (float)
+            //    - Ammount (float)
+            //    - Status (bool)
+            // - Operations (DF):
+            //    - name (string),
+            //    - status (bool)
+
+            return list;
+        }
     }
 }

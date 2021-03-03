@@ -9,5 +9,6 @@
         FLOAT,
         ENUM,
         DATE,
+        UNDEFINED,
     }
 }

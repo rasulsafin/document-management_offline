@@ -54,11 +54,11 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
 
-        /// <summary>
-        /// Gets list of dynamic fields owned by objective.
-        /// </summary>
-        /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns></returns>
-        // Task<IEnumerable<DynamicFieldInfoDto>> GetRequiredDynamicFields(ID<ObjectiveDto> objectiveID);
+        ///// <summary>
+        ///// Gets list of dynamic fields owned by objective.
+        ///// </summary>
+        ///// <param name="objectiveID">Objective's ID.</param>
+        ///// <returns></returns>
+        //Task<ICollection<IDynamicFieldDto>> GetRequiredDynamicFields(ID<ObjectiveDto> objectiveID);
     }
 }

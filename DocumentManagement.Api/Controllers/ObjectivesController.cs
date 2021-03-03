@@ -53,14 +53,15 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateCollection(objectives);
         }
 
-        [HttpGet]
-        [Route("dynamicfields/{objectiveID}")]
-        public async Task<IActionResult> GetRequiredDynamicFields([FromRoute] int objectiveID)
-        {
-            return Forbid();
-            //var dynamicFields = await service.GetRequiredDynamicFields(new ID<ObjectiveDto>(objectiveID));
-            //return ValidateCollection(dynamicFields);
-        }
+        //[HttpGet]
+        //[Route("dynamicfields/{objectiveID}")]
+        //public async Task<IActionResult> GetRequiredDynamicFields([FromRoute] int objectiveID)
+        //{
+        //    var dynamicFields = await service.GetRequiredDynamicFields(new ID<ObjectiveDto>(objectiveID));
+        //    return Ok(dynamicFields);
+        //    //
+        //    //return ValidateCollection(dynamicFields);
+        //}
 
         [HttpPost]
         [Route("report")]

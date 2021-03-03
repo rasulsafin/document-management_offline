@@ -17,32 +17,33 @@ namespace MRS.DocumentManagement.Interface.Dtos
                 return null;
             var jObject = JObject.Load(reader);
 
+            DynamicFieldType type = DynamicFieldType.UNDEFINED;
+
             if (jObject["type"] != null)
+                type = jObject["type"].ToObject<DynamicFieldType>();
+            else if (jObject["Type"] != null)
+                type = jObject["Type"].ToObject<DynamicFieldType>();
+
+            switch (type)
             {
-                var type = jObject["type"].ToObject<DynamicFieldType>();
+                case DynamicFieldType.OBJECT:
+                    return jObject.ToObject(typeof(DynamicFieldDto), serializer);
+                case DynamicFieldType.BOOL:
+                    return jObject.ToObject(typeof(BoolFieldDto), serializer);
+                case DynamicFieldType.STRING:
+                    return jObject.ToObject(typeof(StringFieldDto), serializer);
+                case DynamicFieldType.INTEGER:
+                    return jObject.ToObject(typeof(IntFieldDto), serializer);
+                case DynamicFieldType.FLOAT:
+                    return jObject.ToObject(typeof(FloatFieldDto), serializer);
+                case DynamicFieldType.DATE:
+                    return jObject.ToObject(typeof(DateFieldDto), serializer);
+                case DynamicFieldType.ENUM:
+                    return jObject.ToObject(typeof(EnumerationFieldDto), serializer);
+                default:
+                    throw new NotImplementedException();
 
-                switch (type)
-                {
-                    case DynamicFieldType.OBJECT:
-                        return jObject.ToObject(typeof(DynamicFieldDto), serializer);
-                    case DynamicFieldType.BOOL:
-                        return jObject.ToObject(typeof(BoolFieldDto), serializer);
-                    case DynamicFieldType.STRING:
-                        return jObject.ToObject(typeof(StringFieldDto), serializer);
-                    case DynamicFieldType.INTEGER:
-                        return jObject.ToObject(typeof(IntFieldDto), serializer);
-                    case DynamicFieldType.FLOAT:
-                        return jObject.ToObject(typeof(FloatFieldDto), serializer);
-                    case DynamicFieldType.DATE:
-                        return jObject.ToObject(typeof(DateFieldDto), serializer);
-                    case DynamicFieldType.ENUM:
-                        return jObject.ToObject(typeof(EnumerationFieldDto), serializer);
-                    default:
-                        throw new NotImplementedException();
-                }
             }
-
-            throw new NullReferenceException();
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
