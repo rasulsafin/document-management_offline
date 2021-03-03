@@ -30,6 +30,8 @@ namespace MRS.DocumentManagement.Synchronizer
             await project.Synchronize(data, context);
             await objective.Synchronize(data, context);
             await data.Context.Synchronizations.AddAsync(new Synchronization { Date = date });
+            await data.Context.SaveChangesAsync();
+            return null;
         }
     }
 }

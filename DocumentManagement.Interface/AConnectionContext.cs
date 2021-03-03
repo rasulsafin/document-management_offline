@@ -14,7 +14,6 @@ namespace MRS.DocumentManagement.Connection
 
         private readonly Lazy<ISynchronizer<ProjectExternalDto>> projectsSynchronizer;
         private readonly Lazy<ISynchronizer<ObjectiveExternalDto>> objectivesSynchronizer;
-        private readonly Lazy<ISynchronizer<ItemExternalDto>> itemsSynchronizer;
 
         protected AConnectionContext()
         {
@@ -23,9 +22,6 @@ namespace MRS.DocumentManagement.Connection
                     LazyThreadSafetyMode.ExecutionAndPublication);
             objectivesSynchronizer = new Lazy<ISynchronizer<ObjectiveExternalDto>>(
                     CreateObjectivesSynchronizer,
-                    LazyThreadSafetyMode.ExecutionAndPublication);
-            itemsSynchronizer = new Lazy<ISynchronizer<ItemExternalDto>>(
-                    CreateItemsSynchronizer,
                     LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
@@ -43,9 +39,6 @@ namespace MRS.DocumentManagement.Connection
         public ISynchronizer<ObjectiveExternalDto> ObjectivesSynchronizer
             => objectivesSynchronizer.Value;
 
-        public ISynchronizer<ItemExternalDto> ItemsSynchronizer
-            => itemsSynchronizer.Value;
-
         protected abstract Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects();
 
         protected abstract Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives();
@@ -53,7 +46,5 @@ namespace MRS.DocumentManagement.Connection
         protected abstract ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer();
 
         protected abstract ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer();
-
-        protected abstract ISynchronizer<ItemExternalDto> CreateItemsSynchronizer();
     }
 }

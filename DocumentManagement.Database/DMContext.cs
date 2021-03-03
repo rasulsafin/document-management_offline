@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MRS.DocumentManagement.Database.Models;
@@ -75,20 +77,16 @@ namespace MRS.DocumentManagement.Database
 
         #endregion
 
-        public override int SaveChanges()
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            foreach (var entityEntry in ChangeTracker
-               .Entries()
-               .Where(
-                    e => e.Entity is ISynchronizableBase &&
-                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
-            {
-                var synchronizable = (ISynchronizableBase)entityEntry.Entity;
-                if (!synchronizable.IsSynchronized)
-                    synchronizable.UpdatedAt = DateTime.Now;
-            }
+            UpdateDateTime();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
 
-            return base.SaveChanges();
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            UpdateDateTime();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -289,6 +287,20 @@ namespace MRS.DocumentManagement.Database
             modelBuilder.Entity<DynamicField>()
                     .Property(x => x.UpdatedAt)
                     .HasDefaultValue(DateTime.UtcNow);
+        }
+
+        private void UpdateDateTime()
+        {
+            foreach (var entityEntry in ChangeTracker
+               .Entries()
+               .Where(
+                    e => e.Entity is ISynchronizableBase &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
+            {
+                var synchronizable = (ISynchronizableBase) entityEntry.Entity;
+                if (!synchronizable.IsSynchronized)
+                    synchronizable.UpdatedAt = DateTime.Now;
+            }
         }
     }
 }

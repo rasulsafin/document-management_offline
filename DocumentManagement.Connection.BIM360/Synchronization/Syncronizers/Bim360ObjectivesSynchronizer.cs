@@ -1,24 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Synchronizers
+namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
     public class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
         private readonly IssuesService issuesService;
-        private readonly Bim360ItemsSynchronizer itemsSynchronizer;
+        private readonly Bim360ConnectionContext context;
 
-        public Bim360ObjectivesSynchronizer(ForgeConnection forgeConnection, Bim360ItemsSynchronizer synchronizer)
+        public Bim360ObjectivesSynchronizer(ForgeConnection forgeConnection, Bim360ConnectionContext context)
         {
             issuesService = new IssuesService(forgeConnection);
-            itemsSynchronizer = synchronizer;
+            this.context = context;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -51,7 +54,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Synchronizers
             {
                 if (string.IsNullOrWhiteSpace(item.ExternalID))
                 {
-                    // TODO retrive and use folder to post item
+                    var topFolder = (await projectsService.GetTopFoldersAsync(hub.ID, project.ID)).LastOrDefault();
                     var posted = await itemsSynchronizer.PostItem(item, folder);
                     var attached = await AttachItem(posted, issueId, containerId);
                     if (attached)
