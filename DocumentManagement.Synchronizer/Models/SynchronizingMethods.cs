@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MRS.DocumentManagement.Database.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Models
+namespace MRS.DocumentManagement.Synchronization.Models
 {
     public class SynchronizingMethods
     {

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MRS.DocumentManagement.Database.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Models
+namespace MRS.DocumentManagement.Synchronization.Models
 {
     public class SynchronizingResult
     {

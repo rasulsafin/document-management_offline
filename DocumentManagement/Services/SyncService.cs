@@ -1,11 +1,13 @@
-﻿using MRS.DocumentManagement.Synchronizer;
+﻿using AutoMapper;
+using MRS.DocumentManagement.Database;
 
 namespace MRS.DocumentManagement.Utility
 {
     public class SyncService
     {
-        public SyncService(SyncManager syncManager)
+        public SyncService(DMContext context, IMapper mapper)
         {
+            
         }
     }
 }

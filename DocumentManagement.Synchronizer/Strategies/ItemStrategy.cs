@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -10,10 +11,10 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer.Extensions;
-using MRS.DocumentManagement.Synchronizer.Models;
+using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Synchronizer.Strategies
+namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal class ItemStrategy : ASynchronizationStrategy<Item, ItemExternalDto>
     {
@@ -33,19 +34,19 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override DbSet<Item> GetDBSet(DMContext context)
             => context.Items;
 
-        protected override ISynchronizer<ItemExternalDto> GetSynchronizer(AConnectionContext context)
+        protected override ISynchronizer<ItemExternalDto> GetSynchronizer(IConnectionContext context)
             => throw new WarningException("Updating remote items must be in parent synchronizer");
 
         protected override IIncludableQueryable<Item, Item> Include(IQueryable<Item> set)
             => base.Include(set.Include(x => x.Objectives).Include(x => x.Project));
 
-        protected override bool DefaultFilter(SynchronizingData data, Item item)
-            => true;
+        protected override Expression<Func<Item, bool>> GetDefaultFilter(SynchronizingData data)
+            => x => true;
 
         protected override async Task AddToRemote(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             tuple.Merge();
@@ -56,21 +57,21 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task Merge(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
             => await NothingAction(tuple, data, connectionContext, parent);
 
         protected override async Task RemoveFromRemote(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
             => await NothingAction(tuple, data, connectionContext, parent);
 
         protected override async Task RemoveFromLocal(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             if (tuple.Local != null)

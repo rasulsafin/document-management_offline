@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Synchronizer.Models
+namespace MRS.DocumentManagement.Synchronization.Models
 {
     public enum SynchronizingStatus
     {

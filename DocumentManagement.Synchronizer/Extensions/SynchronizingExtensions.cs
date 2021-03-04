@@ -1,9 +1,9 @@
 using System;
 using System.Reflection;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronizer.Models;
+using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Extensions
+namespace MRS.DocumentManagement.Synchronization.Extensions
 {
     internal static class SynchronizingExtensions
     {
@@ -86,7 +86,6 @@ namespace MRS.DocumentManagement.Synchronizer.Extensions
         {
             tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
             tuple.Local.SynchronizationMateID = tuple.Synchronized.ID;
-            tuple.Synchronized.SynchronizationMateID = tuple.Local.ID;
         }
     }
 }

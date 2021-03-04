@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Synchronizer.Extensions;
-using MRS.DocumentManagement.Synchronizer.Models;
-using MRS.DocumentManagement.Synchronizer.Utils;
+using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Synchronization.Utils;
 
-namespace MRS.DocumentManagement.Synchronizer.Strategies
+namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal abstract class ASynchronizationStrategy<TDB, TDto>
         where TDB : class, ISynchronizable<TDB>, new()
@@ -23,16 +23,21 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
             => this.mapper = mapper;
 
         public async Task Synchronize(SynchronizingData data,
-            AConnectionContext connectionContext,
-            Predicate<TDB> filter = null,
+            IConnectionContext connectionContext,
+            IEnumerable<TDB> remoteCollection,
+            Expression<Func<TDB, bool>> filter = null,
             object parent = null)
         {
+            var defaultFiler = GetDefaultFilter(data);
+            var list = Include(GetDBSet(data.Context))
+               .Where(defaultFiler);
+
+            if (filter != null)
+                list = list.Where(filter);
+
             var tuples = TuplesUtils.CreateSynchronizingTuples(
-                Include(GetDBSet(data.Context))
-                   .Where(
-                        x => DefaultFilter(data, x) &&
-                            (filter == null || filter(x) || filter(x.SynchronizationMate))),
-                mapper.Map<IReadOnlyCollection<TDB>>(await connectionContext.Projects),
+                list,
+                remoteCollection,
                 IsEntitiesEquals);
 
             foreach (var tuple in tuples)
@@ -67,9 +72,9 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
 
         protected abstract DbSet<TDB> GetDBSet(DMContext context);
 
-        protected abstract ISynchronizer<TDto> GetSynchronizer(AConnectionContext context);
+        protected abstract ISynchronizer<TDto> GetSynchronizer(IConnectionContext context);
 
-        protected abstract bool DefaultFilter(SynchronizingData data, TDB item);
+        protected abstract Expression<Func<TDB, bool>> GetDefaultFilter(SynchronizingData data);
 
         protected virtual IIncludableQueryable<TDB, TDB> Include(IQueryable<TDB> set)
             => set.Include(x => x.SynchronizationMate);
@@ -79,7 +84,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
             var hasID = element.ID > 0;
             var isLocalsMate = tuple.Local != null && element.ID == tuple.Local.SynchronizationMateID;
             var isSynchronizedsMate = tuple.Synchronized != null &&
-                element.ID == tuple.Synchronized.SynchronizationMateID;
+                element.SynchronizationMateID == tuple.Synchronized.ID;
             var externalIDEquals = element.ExternalID != null && element.ExternalID == tuple.ExternalID;
             return (hasID && (isLocalsMate || isSynchronizedsMate)) || externalIDEquals;
         }
@@ -87,14 +92,14 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected virtual Task NothingAction(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
             => Task.CompletedTask;
 
         protected virtual async Task Merge(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
@@ -104,7 +109,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected virtual Task AddToLocal(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             UpdateDB(GetDBSet(data.Context), tuple);
@@ -114,7 +119,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected virtual async Task AddToRemote(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
@@ -124,7 +129,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected virtual Task RemoveFromLocal(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             RemoveFromDB(tuple, data);
@@ -134,7 +139,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected virtual async Task RemoveFromRemote(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             var project = mapper.Map<TDto>(tuple.Remote);

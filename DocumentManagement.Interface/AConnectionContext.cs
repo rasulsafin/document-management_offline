@@ -7,7 +7,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection
 {
-    public abstract class AConnectionContext
+    public abstract class AConnectionContext : IConnectionContext
     {
         protected List<ProjectExternalDto> projects;
         protected List<ObjectiveExternalDto> objectives;

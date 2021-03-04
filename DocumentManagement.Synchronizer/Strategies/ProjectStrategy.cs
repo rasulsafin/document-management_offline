@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer.Extensions;
-using MRS.DocumentManagement.Synchronizer.Models;
+using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Strategies
+namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
     {
@@ -26,11 +26,11 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override DbSet<Project> GetDBSet(DMContext context)
             => context.Projects;
 
-        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(AConnectionContext context)
+        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(IConnectionContext context)
             => context.ProjectsSynchronizer;
 
-        protected override bool DefaultFilter(SynchronizingData data, Project project)
-            => data.ProjectsFilter(project);
+        protected override Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
+            => data.ProjectsFilter;
 
         protected override IIncludableQueryable<Project, Project> Include(IQueryable<Project> set)
             => base.Include(
@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task AddToRemote(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -50,7 +50,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task AddToLocal(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await base.AddToLocal(tuple, data, connectionContext, parent);
@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task Merge(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task RemoveFromLocal(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task RemoveFromRemote(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -92,12 +92,15 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         private async Task SynchronizeItems(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext)
+            IConnectionContext connectionContext)
         {
+            var projectID = (int)tuple.GetPropertyValue(nameof(Project.ID));
             await itemStrategy.Synchronize(
                 data,
                 connectionContext,
-                item => item.ProjectID.HasValue && item.ProjectID == (int)tuple.GetPropertyValue(nameof(Project.ID)),
+                tuple.Remote?.Items?.ToList() ?? new List<Item>(),
+                item => (item.ProjectID.HasValue && item.ProjectID == projectID) ||
+                    (item.SynchronizationMate.ProjectID.HasValue && item.SynchronizationMate.ProjectID == projectID),
                 tuple);
         }
 

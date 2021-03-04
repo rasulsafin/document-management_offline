@@ -1,18 +1,17 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer.Models;
+using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Strategies
+namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
@@ -27,11 +26,11 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override DbSet<Objective> GetDBSet(DMContext context)
             => context.Objectives;
 
-        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(AConnectionContext context)
+        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(IConnectionContext context)
             => context.ObjectivesSynchronizer;
 
-        protected override bool DefaultFilter(SynchronizingData data, Objective objective)
-            => data.ObjectivesFilter(objective);
+        protected override Expression<Func<Objective, bool>> GetDefaultFilter(SynchronizingData data)
+            => data.ObjectivesFilter;
 
         protected override IIncludableQueryable<Objective, Objective> Include(IQueryable<Objective> set)
             => base.Include(set.Include(x => x.Items));
@@ -39,7 +38,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task AddToRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -49,7 +48,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task AddToLocal(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await base.AddToLocal(tuple, data, connectionContext, parent);
@@ -59,7 +58,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task Merge(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -69,7 +68,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task RemoveFromLocal(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -79,7 +78,7 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         protected override async Task RemoveFromRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext,
+            IConnectionContext connectionContext,
             object parent)
         {
             await SynchronizeItems(tuple, data, connectionContext);
@@ -89,12 +88,17 @@ namespace MRS.DocumentManagement.Synchronizer.Strategies
         private async Task SynchronizeItems(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            AConnectionContext connectionContext)
+            IConnectionContext connectionContext)
         {
             var items = await data.Context.ObjectiveItems
                .Where(x => x.ObjectiveID == tuple.Local.ID || x.ObjectiveID == tuple.Synchronized.ID)
                .ToListAsync();
-            await itemStrategy.Synchronize(data, connectionContext, item => items.Any(x => x.ItemID == item.ID), tuple);
+            await itemStrategy.Synchronize(
+                data,
+                connectionContext,
+                tuple.Remote.Items.Select(x => x.Item).ToList(),
+                item => items.Any(x => x.ItemID == item.ID || x.ItemID == item.SynchronizationMate.ID),
+                tuple);
         }
 
         private Task Link(Item item, object parent, SynchronizingData data)

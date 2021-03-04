@@ -44,6 +44,6 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="info">ConnectionInfoDto to fill in.</param>
         /// <param name="lastSynchronizationDate">DateTime of the last successful synchronization.</param>
         /// <returns>All data.</returns>
-        Task<AConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate);
+        Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate);
     }
 }

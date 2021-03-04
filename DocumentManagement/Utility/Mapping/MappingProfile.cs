@@ -11,6 +11,7 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateMapToDto();
             CreateMapToModel();
+            CreateMapForExternal();
         }
 
         private void CreateMapToDto()
@@ -81,6 +82,14 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<EnumerationTypeDto, EnumerationType>()
                 .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
             CreateMap<EnumerationValueDto, EnumerationValue>();
+        }
+
+        private void CreateMapForExternal()
+        {
+            CreateMap<ProjectExternalDto, Project>();
+            CreateMap<Project, ProjectExternalDto>();
+            CreateMap<ObjectiveExternalDto, Objective>();
+            CreateMap<Objective, ObjectiveExternalDto>();
         }
     }
 }

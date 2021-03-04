@@ -1,6 +1,6 @@
 using MRS.DocumentManagement.Database;
 
-namespace MRS.DocumentManagement.Synchronizer.Models
+namespace MRS.DocumentManagement.Synchronization.Models
 {
     internal class SynchronizingTuple<T>
             where T : ISynchronizable<T>

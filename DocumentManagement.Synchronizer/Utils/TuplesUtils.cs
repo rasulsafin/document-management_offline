@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronizer.Models;
+using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronizer.Utils
+namespace MRS.DocumentManagement.Synchronization.Utils
 {
     public static class TuplesUtils
     {
