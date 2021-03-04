@@ -66,7 +66,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             await SynchronizeItems(tuple, data, connectionContext);
             await base.Merge(tuple, data, connectionContext, parent);
-            AddUser(tuple, data);
         }
 
         protected override async Task RemoveFromLocal(
