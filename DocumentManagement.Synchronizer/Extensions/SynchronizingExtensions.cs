@@ -28,18 +28,12 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
             tuple.Synchronized ??= new T { IsSynchronized = true };
             tuple.LinkEntities();
 
-            void UpdateValue(PropertyInfo property, object value)
-            {
-                property.SetValue(tuple.Local, value);
-                property.SetValue(tuple.Remote, value);
-                property.SetValue(tuple.Synchronized, value);
-            }
-
             foreach (var property in properties)
             {
                 if (!string.Equals(property.PropertyType.Namespace, nameof(System))
-                    || property.Name.Contains("id", StringComparison.InvariantCultureIgnoreCase)
-                    || property.Name == nameof(ISynchronizable<T>.IsSynchronized))
+                 || property.Name.Contains("id", StringComparison.InvariantCultureIgnoreCase)
+                 || property.Name == nameof(ISynchronizable<T>.IsSynchronized)
+                 || property.Name == nameof(ISynchronizable<T>.UpdatedAt))
                     continue;
 
                 var synchronizedValue = property.GetValue(tuple.Synchronized);
@@ -55,7 +49,7 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                         : localMoreRelevant                 ? localValue
                         : remoteValue;
 
-                UpdateValue(property, value);
+                UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
             }
         }
 
@@ -85,7 +79,33 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 where T : class, ISynchronizable<T>, new()
         {
             tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
-            tuple.Local.SynchronizationMateID = tuple.Synchronized.ID;
+            tuple.Local.SynchronizationMate = tuple.Synchronized;
+        }
+
+        private static void UpdateValue<T>(T obj, PropertyInfo property, object oldValue, object newValue, Action action)
+        {
+            if (!Equals(oldValue, newValue))
+            {
+                property.SetValue(obj, newValue);
+                action();
+            }
+        }
+
+        private static void UpdateValue<T>(
+            SynchronizingTuple<T> tuple,
+            PropertyInfo property,
+            (object local, object synhronzied, object remote) oldValues,
+            object value)
+            where T : ISynchronizable<T>
+        {
+            UpdateValue(tuple.Local, property, oldValues.local, value, () => tuple.LocalChanged = true);
+            UpdateValue(
+                tuple.Synchronized,
+                property,
+                oldValues.synhronzied,
+                value,
+                () => tuple.SynchronizedChanged = true);
+            UpdateValue(tuple.Remote, property, oldValues.remote, value, () => tuple.RemoteChanged = true);
         }
     }
 }

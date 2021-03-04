@@ -159,15 +159,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             tuple.Merge();
 
-            if (tuple.Local.ID > 0)
-                set.Update(tuple.Local);
-            else
-                set.Add(tuple.Local);
-
-            if (tuple.Synchronized.ID > 0)
-                set.Update(tuple.Synchronized);
-            else
+            if (tuple.Synchronized.ID == 0)
                 set.Add(tuple.Synchronized);
+            else if (!tuple.SynchronizedChanged)
+                set.Update(tuple.Synchronized);
+
+            if (tuple.Local.ID == 0)
+                set.Add(tuple.Local);
+            else if (!tuple.RemoteChanged)
+                set.Update(tuple.Local);
         }
 
         private async Task UpdateRemote(
@@ -175,6 +175,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             Func<TDto, Task<TDto>> remoteFunc)
         {
             tuple.Merge();
+            if (!tuple.RemoteChanged)
+                return;
+
             var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote));
             tuple.Remote = mapper.Map<TDB>(result);
         }

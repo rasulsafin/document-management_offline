@@ -108,9 +108,9 @@ namespace MRS.DocumentManagement.Tests
             var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
 
-            ProjectSynchronizer.Verify(x => x.Add(new ProjectExternalDto()), Times.Never);
-            ProjectSynchronizer.Verify(x => x.Remove(new ProjectExternalDto()), Times.Never);
-            ProjectSynchronizer.Verify(x => x.Update(new ProjectExternalDto()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
             CheckProjects(synchronized, projectSynchronized);
             CheckSynchronizedProjects(local, synchronized);
@@ -152,9 +152,9 @@ namespace MRS.DocumentManagement.Tests
             var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
 
-            ProjectSynchronizer.Verify(x => x.Add(new ProjectExternalDto()), Times.Never);
-            ProjectSynchronizer.Verify(x => x.Remove(new ProjectExternalDto()), Times.Never);
-            ProjectSynchronizer.Verify(x => x.Update(new ProjectExternalDto()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
             CheckProjects(synchronized, projectSynchronized);
             CheckSynchronizedProjects(local, synchronized);
@@ -189,9 +189,9 @@ namespace MRS.DocumentManagement.Tests
             var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
 
-            ProjectSynchronizer.Verify(x => x.Add(new ProjectExternalDto()), Times.Once);
-            ProjectSynchronizer.Verify(x => x.Remove(new ProjectExternalDto()), Times.Never);
-            ProjectSynchronizer.Verify(x => x.Update(new ProjectExternalDto()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Once);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
             CheckSynchronizedProjects(local, synchronized);
         }

@@ -37,6 +37,12 @@ namespace MRS.DocumentManagement.Synchronization.Models
             }
         }
 
+        public bool LocalChanged { get; set; }
+
+        public bool SynchronizedChanged { get; set; }
+
+        public bool RemoteChanged { get; set; }
+
         public bool HasExternalID => string.IsNullOrEmpty(ExternalID);
 
         private void UpdateExternalID()
