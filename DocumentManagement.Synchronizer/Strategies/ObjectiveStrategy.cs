@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -101,35 +102,29 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 tuple);
         }
 
-        private Task Link(Item item, object parent, SynchronizingData data)
+        private Task Link(Item item, object parent, EntityType entityType)
         {
             var tuple = (SynchronizingTuple<Objective>)parent;
             var objective = item.IsSynchronized ? tuple.Synchronized : tuple.Local;
             if (objective == null)
-                throw new ArgumentException();
-
-            if (item.Objectives.All(x => x.ObjectiveID != objective.ID))
             {
-                data.Context.ObjectiveItems.Add(new ObjectiveItem
-                {
-                    ItemID = item.ID,
-                    ObjectiveID = objective.ID,
-                });
+                throw new ArgumentException(
+                    $"Parent doesn't contain {(item.IsSynchronized ? "synchronized" : "unsynchronized")} objective");
             }
+
+            objective.Items ??= new List<ObjectiveItem>();
+            objective.Items.Add(new ObjectiveItem
+            {
+                Item = item,
+                ObjectiveID = objective.ID,
+            });
 
             return Task.CompletedTask;
         }
 
-        private Task Unlink(Item item, object parent, SynchronizingData data)
+        private Task Unlink(Item item, object parent, EntityType entityType)
         {
-            var parentTuple = (SynchronizingTuple<Objective>)parent;
-            var objective = item.IsSynchronized ? parentTuple.Synchronized : parentTuple.Local;
-            var link = item.Objectives.FirstOrDefault(x => x.ObjectiveID == objective.ID);
-            item.Objectives.Remove(link);
-            if (item.ProjectID != null || item.Objectives.Count > 0)
-                data.Context.Items.Update(item);
-            else
-                data.Context.Items.Remove(item);
+
             return Task.CompletedTask;
         }
     }

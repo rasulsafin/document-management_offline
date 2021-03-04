@@ -90,6 +90,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Project, ProjectExternalDto>();
             CreateMap<ObjectiveExternalDto, Objective>();
             CreateMap<Objective, ObjectiveExternalDto>();
+            CreateMap<Item, ItemExternalDto>();
+            CreateMap<ItemExternalDto, Item>();
         }
     }
 }

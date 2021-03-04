@@ -125,25 +125,51 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
         }
 
-        private Task Link(Item item, object parent, SynchronizingData data)
+        private Task Link(Item item, object parent, EntityType entityType)
         {
-            var tuple = (SynchronizingTuple<Project>)parent;
-            var project = item.IsSynchronized ? tuple.Synchronized : tuple.Local;
-            if (project == null)
-                throw new ArgumentException();
-
-            item.ProjectID = project.ID;
+            var project = GetLinkingProject(item, parent, entityType);
+            project.Items ??= new List<Item>();
+            project.Items.Add(item);
             return Task.CompletedTask;
         }
 
-        private Task Unlink(Item item, object project, SynchronizingData data)
+        private Task Unlink(Item item, object parent, EntityType entityType)
         {
-            item.ProjectID = null;
-            if (item.Objectives.Count > 0)
-                data.Context.Items.Update(item);
-            else
-                data.Context.Items.Remove(item);
+            var project = GetLinkingProject(item, parent, entityType);
+            project.Items.Remove(item);
             return Task.CompletedTask;
+        }
+
+        private static Project GetLinkingProject(Item item, object parent, EntityType entityType)
+        {
+            var tuple = (SynchronizingTuple<Project>) parent;
+            Project project;
+
+            switch (entityType)
+            {
+                case EntityType.Local:
+                    project = tuple.Local;
+                    tuple.LocalChanged = true;
+                    break;
+                case EntityType.Synchronized:
+                    project = tuple.Synchronized;
+                    tuple.SynchronizedChanged = true;
+                    break;
+                case EntityType.Remote:
+                    project = tuple.Remote;
+                    tuple.RemoteChanged = true;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(entityType), entityType, null);
+            }
+
+            if (project == null)
+            {
+                throw new ArgumentException(
+                    $"Parent doesn't contain {(item.IsSynchronized ? "synchronized" : "unsynchronized")} project");
+            }
+
+            return project;
         }
     }
 }
