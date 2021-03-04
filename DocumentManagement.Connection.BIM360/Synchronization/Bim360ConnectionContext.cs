@@ -15,12 +15,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext
     {
+        internal readonly IssuesService IssuesService;
+        internal readonly HubsService HubsService;
+        internal readonly ProjectsService ProjectsService;
+        internal readonly ItemsService ItemsService;
+        internal readonly FoldersService FoldersService;
+        internal readonly ObjectsService ObjectsService;
+
         private readonly ForgeConnection connection;
-        private readonly IssuesService issuesService;
-        private readonly HubsService hubsService;
-        private readonly ProjectsService projectsService;
-        private readonly ItemsService itemsService;
-        private readonly FoldersService foldersService;
 
         private List<Hub> hubs;
         private List<Project> bimProjects;
@@ -31,14 +33,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             HubsService hubsService,
             ProjectsService projectsService,
             ItemsService itemsService,
-            FoldersService foldersService)
+            FoldersService foldersService,
+            ObjectsService objectsService)
         {
             this.connection = connection;
-            this.issuesService = issuesService;
-            this.hubsService = hubsService;
-            this.projectsService = projectsService;
-            this.itemsService = itemsService;
-            this.foldersService = foldersService;
+            IssuesService = issuesService;
+            HubsService = hubsService;
+            ProjectsService = projectsService;
+            ItemsService = itemsService;
+            FoldersService = foldersService;
+            ObjectsService = objectsService;
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
@@ -53,19 +57,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
             foreach (var project in await GetProjectsPrivate())
             {
-                var issues = await issuesService.GetIssuesAsync(project.Relationships.IssuesContainer.Data.ID);
+                var issues = await IssuesService.GetIssuesAsync(project.Relationships.IssuesContainer.Data.ID);
 
                 foreach (var issue in issues)
                 {
                     var dto = issue.ToExternalDto();
                     dto.Items ??= new List<ItemExternalDto>();
 
-                    var attachments = await issuesService.GetAttachmentsAsync(
+                    var attachments = await IssuesService.GetAttachmentsAsync(
                         project.Relationships.IssuesContainer.Data.ID,
                         issue.ID);
 
                     foreach (var attachment in attachments)
-                        dto.Items.Add((await itemsService.GetAsync(project.ID, attachment.Attributes.Urn)).ToDto());
+                        dto.Items.Add((await ItemsService.GetAsync(project.ID, attachment.Attributes.Urn)).ToDto());
 
                     objectives.Add(dto);
                 }
@@ -82,7 +86,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             {
                 var dto = project.ToDto();
                 var root = project.Relationships.RootFolder.Data;
-                var items = await foldersService.SearchAsync(
+                var items = await FoldersService.SearchAsync(
                     project.ID,
                     root.ID,
                     Enumerable.Empty<(string filteringField, string filteringValue)>());
@@ -99,13 +103,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             {
                 bimProjects = new List<Project>();
                 foreach (var hub in await GetHubs())
-                    bimProjects.AddRange(await projectsService.GetProjectsAsync(hub.ID));
+                    bimProjects.AddRange(await ProjectsService.GetProjectsAsync(hub.ID));
             }
 
             return bimProjects;
         }
 
         private async Task<List<Hub>> GetHubs()
-            => hubs ??= await hubsService.GetHubsAsync();
+            => hubs ??= await HubsService.GetHubsAsync();
     }
 }
