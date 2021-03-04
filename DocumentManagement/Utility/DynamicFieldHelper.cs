@@ -42,7 +42,6 @@ namespace MRS.DocumentManagement.Utility
             }
             else if (dynamicField.Type == DynamicFieldType.ENUM.ToString())
             {
-                // TODO: Test enum. Is this gonna work???
                 EnumerationFieldDto enumDynamicField = (EnumerationFieldDto)mapper.Map<IDynamicFieldDto>(dynamicField);
 
                 var enumValue = await context.EnumerationValues
@@ -97,8 +96,6 @@ namespace MRS.DocumentManagement.Utility
                         await UpdateDynamicField(child, objectiveID, dbField.ID);
                     }
                 }
-
-                // TODO: Enum Update?
             }
         }
 
@@ -111,7 +108,7 @@ namespace MRS.DocumentManagement.Utility
                 DynamicFieldType.INTEGER => (field as IntFieldDto).Value.ToString(),
                 DynamicFieldType.FLOAT => (field as FloatFieldDto).Value.ToString(),
                 DynamicFieldType.DATE => (field as DateFieldDto).Value.ToString(),
-                DynamicFieldType.ENUM => (field as EnumerationFieldDto).Value.ToString(),
+                DynamicFieldType.ENUM => (field as EnumerationFieldDto).Value.ID.ToString(),
                 _ => null,
             };
         }
