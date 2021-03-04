@@ -330,7 +330,7 @@ namespace MRS.DocumentManagement.Tests.Utility
         // private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_OBJECT =
         //    new DynamicFieldDto { Name = "object", Value = new List<IDynamicFieldDto>() { DYNAMIC_FIELD_TO_CREATE_DATE, DYNAMIC_FIELD_TO_CREATE_INT } };
 
-        // TODO: Enum Dynamic Fields
+        // TODO: Enum and Object Dynamic Fields 
         #endregion
 
         #region DYNAMIC_FIELDS

@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
             // list.Add(units);
 
-            // TODO:
+            // TODO: Dynamic fields
             // - Volumes (DF):
             //    - Volume (float)
             //    - Price (float)

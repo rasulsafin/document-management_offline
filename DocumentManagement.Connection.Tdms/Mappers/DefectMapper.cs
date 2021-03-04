@@ -113,7 +113,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
         {
             var list = new List<DynamicFieldExternalDto>();
-            // TODO:
+            // TODO: Dynamic fields
             // - Contractor (enum)
             // - Comment (string)
 
