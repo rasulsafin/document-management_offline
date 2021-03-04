@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class DynamicFieldDto : IDynamicFieldDto
+    public class DynamicFieldDto : IDynamicFieldDto<ICollection<IDynamicFieldDto>>
     {
         public ID<IDynamicFieldDto> ID { get; set; }
 
@@ -12,6 +12,6 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public string Name { get; set; }
 
         [JsonProperty(ItemConverterType = typeof(DynamicFieldDtoConverter))]
-        public ICollection<IDynamicFieldDto> Values { get; set; }
+        public ICollection<IDynamicFieldDto> Value { get; set; }
     }
 }

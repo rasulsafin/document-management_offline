@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class FloatFieldDto : IDynamicFieldDto
+    public class FloatFieldDto : IDynamicFieldDto<float>
     {
         public ID<IDynamicFieldDto> ID { get; set; }
 

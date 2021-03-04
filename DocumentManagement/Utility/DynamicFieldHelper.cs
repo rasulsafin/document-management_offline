@@ -32,10 +32,10 @@ namespace MRS.DocumentManagement.Utility
                 {
                     var result = await BuildObjectDynamicField(child);
 
-                    if (objDynamicField.Values == null)
-                        objDynamicField.Values = new List<IDynamicFieldDto>();
+                    if (objDynamicField.Value == null)
+                        objDynamicField.Value = new List<IDynamicFieldDto>();
 
-                    objDynamicField.Values.Add(result);
+                    objDynamicField.Value.Add(result);
                 }
 
                 return objDynamicField;
@@ -71,7 +71,7 @@ namespace MRS.DocumentManagement.Utility
 
             if (field is DynamicFieldDto dynamicFieldDto)
             {
-                foreach (var childField in dynamicFieldDto.Values)
+                foreach (var childField in dynamicFieldDto.Value)
                 {
                     await AddDynamicFields(childField, objectiveID, dynamicField.ID);
                 }
@@ -92,7 +92,7 @@ namespace MRS.DocumentManagement.Utility
 
                 if (field is DynamicFieldDto dynamicFieldDto)
                 {
-                    foreach (var child in dynamicFieldDto.Values)
+                    foreach (var child in dynamicFieldDto.Value)
                     {
                         await UpdateDynamicField(child, objectiveID, dbField.ID);
                     }

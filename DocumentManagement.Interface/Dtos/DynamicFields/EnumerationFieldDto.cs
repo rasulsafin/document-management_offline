@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class EnumerationFieldDto : IDynamicFieldDto
+    public class EnumerationFieldDto : IDynamicFieldDto<EnumerationValueDto>
     {
         public ID<IDynamicFieldDto> ID { get; set; }
 

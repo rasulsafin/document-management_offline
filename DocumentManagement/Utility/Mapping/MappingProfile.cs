@@ -63,6 +63,7 @@ namespace MRS.DocumentManagement.Utility
                 .ConvertUsing<DynamicFieldDtoTypeConverter>();
 
             CreateMap<DynamicField, DynamicFieldDto>();
+                //.ForMember(d => d.Value, o => o.Ignore());
             CreateMap<DynamicField, BoolFieldDto>();
             CreateMap<DynamicField, StringFieldDto>();
             CreateMap<DynamicField, IntFieldDto>();
@@ -127,7 +128,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<IDynamicFieldDto, DynamicField>()
                    .ConvertUsing<DynamicFieldTypeConverter>();
 
-            CreateMap<DynamicFieldDto, DynamicField>();
+            CreateMap<DynamicFieldDto, DynamicField>()
+                .ForMember(d => d.Value, o => o.Ignore());
             CreateMap<BoolFieldDto, DynamicField>();
             CreateMap<StringFieldDto, DynamicField>();
             CreateMap<IntFieldDto, DynamicField>();

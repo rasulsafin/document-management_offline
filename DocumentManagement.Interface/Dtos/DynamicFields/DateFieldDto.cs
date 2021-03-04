@@ -2,7 +2,7 @@
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class DateFieldDto : IDynamicFieldDto
+    public class DateFieldDto : IDynamicFieldDto<DateTime>
     {
         public ID<IDynamicFieldDto> ID { get; set; }
 
