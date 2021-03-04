@@ -1,6 +1,6 @@
 ﻿#define TEST // Use to perform tests
 #define DEVELOPMENT //Use to work with database
-#undef TEST // Disable one
+#undef DEVELOPMENT // Disable one
 
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
