@@ -54,6 +54,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connecti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.Tdms.Tests", "DocumentManagement.Connection.Tdms.Tests\DocumentManagement.Connection.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.LementPro", "DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj", "{4743FB4F-E042-449B-AF24-F57B2DB781A5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.LementPro.Tests", "DocumentManagement.Connection.LementPro.Tests\DocumentManagement.Connection.LementPro.Tests.csproj", "{FBDF7022-111F-4369-8517-898BCCD3550C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -124,6 +128,14 @@ Global
 		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4743FB4F-E042-449B-AF24-F57B2DB781A5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4743FB4F-E042-449B-AF24-F57B2DB781A5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4743FB4F-E042-449B-AF24-F57B2DB781A5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4743FB4F-E042-449B-AF24-F57B2DB781A5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBDF7022-111F-4369-8517-898BCCD3550C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBDF7022-111F-4369-8517-898BCCD3550C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBDF7022-111F-4369-8517-898BCCD3550C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBDF7022-111F-4369-8517-898BCCD3550C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
