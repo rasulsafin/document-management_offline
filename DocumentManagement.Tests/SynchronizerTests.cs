@@ -90,9 +90,7 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             projectSynchronized.IsSynchronized = true;
             projectLocal.SynchronizationMate = projectSynchronized;
-            await Fixture.Context.Projects.AddAsync(projectSynchronized);
-            await Fixture.Context.SaveChangesAsync();
-            await Fixture.Context.Projects.AddAsync(projectLocal);
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
             await synchronizer.Synchronize(
@@ -113,6 +111,7 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
             CheckProjects(synchronized, projectSynchronized);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
@@ -133,9 +132,7 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             projectSynchronized.IsSynchronized = true;
             projectLocal.SynchronizationMate = projectSynchronized;
-            await Fixture.Context.Projects.AddAsync(projectSynchronized);
-            await Fixture.Context.SaveChangesAsync();
-            await Fixture.Context.Projects.AddAsync(projectLocal);
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
             await synchronizer.Synchronize(
@@ -157,6 +154,7 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
             CheckProjects(synchronized, projectSynchronized);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
@@ -199,81 +197,204 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Synchronize_ProjectAddedRemote_AddProjectToLocalAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            var projectRemote = new ProjectExternalDto
+            {
+                ExternalID = "external_id",
+                Title = "Title",
+                UpdatedAt = DateTime.Now,
+            };
+            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User =  await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_ProjectRenamedLocal_RenameLocalProjectAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
+            var projectRemote = new ProjectExternalDto
+            {
+                ExternalID = "external_id",
+                Title = projectLocal.Title,
+                UpdatedAt = DateTime.Now,
+            };
+            projectLocal.Title = "New title";
+            projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
+            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            projectSynchronized.IsSynchronized = true;
+            projectLocal.SynchronizationMate = projectSynchronized;
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User = await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Once);
+            CheckProjects(local, projectLocal);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_ProjectRenamedRemote_RenameRemoteProjectAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
+            var oldTitle = projectLocal.Title;
+            var projectRemote = new ProjectExternalDto
+            {
+                ExternalID = "external_id",
+                Title = "New title",
+                UpdatedAt = DateTime.Now,
+            };
+            projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
+            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            projectSynchronized.IsSynchronized = true;
+            projectLocal.SynchronizationMate = projectSynchronized;
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User =  await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreNotEqual(oldTitle, local.Title);
+            Assert.AreNotEqual(oldTitle, synchronized.Title);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
-        public async Task Synchronize_ProjectRenamedLocalAndRemote_RenameRemoteProjectAndSynchronize()
+        public async Task Synchronize_ProjectRenamedLocalThenRemote_RenameLocalProjectAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            projectLocal.Title = "Local title";
+            var oldLocalTitle = projectLocal.Title;
+            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
+            var projectRemote = new ProjectExternalDto
+            {
+                ExternalID = "external_id",
+                Title = "Remote title",
+                UpdatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            var oldRemoteTitle = projectRemote.Title;
+            projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
+            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            projectSynchronized.IsSynchronized = true;
+            projectLocal.SynchronizationMate = projectSynchronized;
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User = await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreNotEqual(oldLocalTitle, local.Title);
+            Assert.AreEqual(oldRemoteTitle, synchronized.Title);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
-        public async Task Synchronize_ProjectRenamedLocalAndRemote_RenameLocalProjectAndSynchronize()
+        public async Task Synchronize_ProjectRenamedRemoteThenLocal_RenameRemoteProjectAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            projectLocal.Title = "Local title";
+            var oldLocalTitle = projectLocal.Title;
+            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
+            var projectRemote = new ProjectExternalDto
+            {
+                ExternalID = "external_id",
+                Title = "Remote title",
+                UpdatedAt = DateTime.UtcNow.AddDays(-1),
+            };
+            var oldRemoteTitle = projectRemote.Title;
+            projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
+            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            projectSynchronized.IsSynchronized = true;
+            projectLocal.SynchronizationMate = projectSynchronized;
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User = await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Once);
+            Assert.AreEqual(oldLocalTitle, local.Title);
+            Assert.AreNotEqual(oldRemoteTitle, synchronized.Title);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
@@ -660,11 +781,11 @@ namespace MRS.DocumentManagement.Tests
                 new ConnectionInfoDto());
         }
 
-        private void CheckProjects(Project a, Project b, bool isSynchronized = false)
+        private void CheckProjects(Project a, Project b, bool checkIDs = true)
         {
             Assert.AreEqual(a.Title, b.Title);
 
-            if (!isSynchronized)
+            if (checkIDs)
             {
                 Assert.AreEqual(a.SynchronizationMateID, b.SynchronizationMateID);
                 Assert.AreEqual(a.IsSynchronized, b.IsSynchronized);
@@ -673,7 +794,7 @@ namespace MRS.DocumentManagement.Tests
 
         private void CheckSynchronizedProjects(Project local, Project synchronized)
         {
-            CheckProjects(local, synchronized, true);
+            CheckProjects(local, synchronized, false);
 
             Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
             Assert.IsFalse(local.IsSynchronized);
