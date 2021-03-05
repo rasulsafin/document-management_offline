@@ -11,6 +11,8 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json.Linq;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -51,12 +53,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            throw new NotImplementedException();
+            var issue = obj.ToIssue();
+            var containerId = GetContainerId(issue);
+            issue = await issuesService.GetIssueAsync(containerId, issue.ID);
+            issue.Attributes.Status = ISSUE_STATUS_CLOSED;
+            var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
+
+            return updatedIssue.ToExternalDto();
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            throw new NotImplementedException();
+            var issue = obj.ToIssue();
+            var containerId = GetContainerId(issue);
+            var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
+
+            return updatedIssue.ToExternalDto();
         }
 
         private async Task<IEnumerable<Item>> AddItems(
@@ -107,6 +119,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             }
 
             return true;
+        }
+
+        private string GetContainerId(Issue issue)
+        {
+            if (issue?.Relationships?.Container == null)
+                return default;
+
+            var container = JToken.Parse(issue.Relationships.Container);
+            if (container == null)
+                return default;
+
+            var selfLink = (string)container["links"]["self"];
+            var urlParts = selfLink.Split('/');
+            var containersWordIndex = Array.FindIndex(urlParts, p => p == "containers");
+            var containerId = urlParts[containersWordIndex + 1];
+
+            return containerId;
         }
     }
 }
