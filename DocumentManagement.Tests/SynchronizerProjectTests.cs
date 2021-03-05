@@ -97,8 +97,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -130,8 +128,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -164,8 +160,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -199,8 +193,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -213,6 +205,64 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
             CheckSynchronizedProjects(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ProjectRemovedLocal_RemoveProjectFromRemoteAndSynchronize()
+        {
+            // Arrange.
+            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            Fixture.Context.Remove(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User =  await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+
+            // Assert.
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Once);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Projects.Synchronized().CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.Projects.Synchronized().CountAsync());
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ProjectRemovedRemote_RemoveProjectFromLocalAndSynchronize()
+        {
+            // Arrange.
+            // Arrange.
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
+            projectLocal.ExternalID = projectSynchronized.ExternalID = "external_id";
+            Context.Setup(x => x.Projects).ReturnsAsync(ArraySegment<ProjectExternalDto>.Empty);
+            projectSynchronized.IsSynchronized = true;
+            projectLocal.SynchronizationMate = projectSynchronized;
+            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User =  await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+
+            // Assert.
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Projects.Synchronized().CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.Projects.Synchronized().CountAsync());
         }
 
         [TestMethod]
@@ -230,8 +280,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -263,8 +311,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -300,8 +346,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -337,8 +381,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -371,8 +413,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -411,8 +451,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User =  await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -518,35 +556,79 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Synchronize_ItemRemovedFromRemoteProjectItemIsNeeded_UnlinkLocalItemAndSynchronize()
+        public async Task Synchronize_ItemRemovedFromRemoteProjectAndItemIsNeeded_UnlinkLocalItemAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (projectLocal, projectSynchronized, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            var item = MockData.DEFAULT_ITEMS[0];
+            item.Project = projectLocal;
+            item.Objectives ??= new List<ObjectiveItem>();
+            var objective = MockData.DEFAULT_OBJECTIVES[0];
+            item.Objectives.Add(new ObjectiveItem
+            {
+                Item = item,
+                Objective = objective,
+            });
+            objective.Project = projectLocal;
+            objective.ObjectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var itemSynchronized = MockData.DEFAULT_ITEMS[0];
+            itemSynchronized.IsSynchronized = true;
+            itemSynchronized.Project = projectSynchronized;
+            await Fixture.Context.Items.AddAsync(item);
+            await Fixture.Context.Items.AddAsync(itemSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                    ObjectivesFilter = x => false,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+
+            // Assert.
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
         }
 
         [TestMethod]
-        public async Task Synchronize_ItemRemovedFromRemoteProjectItemIsNotNeeded_RemoveItemAndSynchronize()
+        public async Task Synchronize_ItemRemovedFromRemoteProjectAndItemIsNotNeeded_RemoveItemAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (projectLocal, projectSynchronized, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            var item = MockData.DEFAULT_ITEMS[0];
+            item.Project = projectLocal;
+            item.Objectives ??= new List<ObjectiveItem>();
+            var itemSynchronized = MockData.DEFAULT_ITEMS[0];
+            itemSynchronized.IsSynchronized = true;
+            itemSynchronized.Project = projectSynchronized;
+            await Fixture.Context.Items.AddAsync(item);
+            await Fixture.Context.Items.AddAsync(itemSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                    ObjectivesFilter = x => false,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+
+            // Assert.
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
         }
 
         private void CheckProjects(Project a, Project b, bool checkIDs = true)
