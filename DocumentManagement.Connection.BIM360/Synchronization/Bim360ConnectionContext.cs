@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
@@ -22,34 +21,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         internal readonly FoldersService FoldersService;
         internal readonly ObjectsService ObjectsService;
 
-        private readonly ForgeConnection connection;
-
         private List<Hub> hubs;
         private List<Project> bimProjects;
 
-        public Bim360ConnectionContext(
-            ForgeConnection connection,
-            IssuesService issuesService,
-            HubsService hubsService,
-            ProjectsService projectsService,
-            ItemsService itemsService,
-            FoldersService foldersService,
-            ObjectsService objectsService)
+        public Bim360ConnectionContext()
         {
-            this.connection = connection;
-            IssuesService = issuesService;
-            HubsService = hubsService;
-            ProjectsService = projectsService;
-            ItemsService = itemsService;
-            FoldersService = foldersService;
-            ObjectsService = objectsService;
+            var connection = new ForgeConnection();
+            IssuesService = new IssuesService(connection);
+            HubsService = new HubsService(connection);
+            ProjectsService = new ProjectsService(connection);
+            ItemsService = new ItemsService(connection);
+            FoldersService = new FoldersService(connection);
+            ObjectsService = new ObjectsService(connection);
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
-            => new Bim360ObjectivesSynchronizer(connection, this);
+            => new Bim360ObjectivesSynchronizer(this);
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
-         => new Bim360ProjectsSynchronizer(connection, this);
+         => new Bim360ProjectsSynchronizer(this);
 
         protected override async Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
         {

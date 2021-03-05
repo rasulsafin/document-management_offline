@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
@@ -19,20 +18,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     public class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
         private readonly IssuesService issuesService;
-        private readonly Bim360ConnectionContext context;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly FoldersSyncHelper folderSyncHelper;
         private readonly ProjectsHelper projectsHelper;
         private readonly HubsHelper hubsHelper;
 
-        public Bim360ObjectivesSynchronizer(ForgeConnection forgeConnection, Bim360ConnectionContext context)
+        public Bim360ObjectivesSynchronizer(Bim360ConnectionContext context)
         {
-            issuesService = new IssuesService(forgeConnection);
+            issuesService = context.IssuesService;
             itemsSyncHelper = new ItemsSyncHelper(context.ItemsService, context.ProjectsService, context.ObjectsService);
             folderSyncHelper = new FoldersSyncHelper(context.FoldersService, context.ProjectsService);
             projectsHelper = new ProjectsHelper(context.ProjectsService);
             hubsHelper = new HubsHelper(context.HubsService);
-            this.context = context;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
