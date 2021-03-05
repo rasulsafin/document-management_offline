@@ -91,12 +91,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingData data,
             IConnectionContext connectionContext)
         {
-            var id1 = tuple.Local.ID;
-            var id2 = tuple.Synchronized.ID;
+            var id1 = tuple.Local?.ID ?? 0;
+            var id2 = tuple.Synchronized?.ID ?? 0;
             await itemStrategy.Synchronize(
                 data,
                 connectionContext,
-                tuple.Remote.Items.Select(x => x.Item).ToList(),
+                tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(),
                 item
                     => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
                     (item.SynchronizationMate != null &&
