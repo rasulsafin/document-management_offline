@@ -1,18 +1,10 @@
-﻿#define TEST // Use to perform tests
-#define DEVELOPMENT //Use to work with database
-#undef DEVELOPMENT // Disable one
-
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {
-        public DMContext()
-        {
-        }
-
         public DMContext(DbContextOptions<DMContext> opt)
             : base(opt)
         {
@@ -47,7 +39,7 @@ namespace MRS.DocumentManagement.Database
 
         public DbSet<AppProperty> AppProperties { get; set; }
 
-        public DbSet<AuthFieldName> AuthFieldNames{ get; set; }
+        public DbSet<AuthFieldName> AuthFieldNames { get; set; }
 
         public DbSet<AuthFieldValue> AuthFieldValues { get; set; }
         #endregion
@@ -68,23 +60,13 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ConnectionInfoEnumerationValue> ConnectionInfoEnumerationValues { get; set; }
         #endregion
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-#if DEVELOPMENT
-            optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
-#endif
-
-#if TEST
-            optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
-#endif
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
                 .HasOne(x => x.ConnectionInfo)
                 .WithOne(x => x.User)
                 .OnDelete(DeleteBehavior.SetNull);
+
             // Users should have unique logins
             modelBuilder.Entity<User>()
                 .HasIndex(x => x.Login)
