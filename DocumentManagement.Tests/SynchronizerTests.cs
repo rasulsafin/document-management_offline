@@ -5,7 +5,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Connection;
+using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
@@ -509,6 +509,7 @@ namespace MRS.DocumentManagement.Tests
             await Fixture.Context.Objectives.AddRangeAsync(objectiveSynchronized, objectiveLocal);
             await Fixture.Context.SaveChangesAsync();
 
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
@@ -526,7 +527,10 @@ namespace MRS.DocumentManagement.Tests
             ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
             ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
             ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
-            CheckProjects(local, objectiveLocal);
+            CheckObjectives(local, objectiveLocal);
+            CheckObjectives(synchronized, objectiveSynchronized);
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
@@ -807,8 +811,7 @@ namespace MRS.DocumentManagement.Tests
 
             if (checkIDs)
             {
-                Assert.AreEqual(a.SynchronizationMateID, b.SynchronizationMateID);
-                Assert.AreEqual(a.IsSynchronized, b.IsSynchronized);
+                CheckIDs(a, b);
             }
         }
 
@@ -816,9 +819,8 @@ namespace MRS.DocumentManagement.Tests
         {
             CheckProjects(local, synchronized, false);
 
-            Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
-            Assert.IsFalse(local.IsSynchronized);
-            Assert.IsTrue(synchronized.IsSynchronized);
+            CheckSynchronized(local, synchronized);
+
             Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
             Assert.AreEqual(local.Objectives?.Count ?? 0, synchronized.Objectives?.Count ?? 0);
             Assert.AreEqual(local.Users?.Count ?? 0, synchronized.Users?.Count ?? 0);
@@ -832,6 +834,57 @@ namespace MRS.DocumentManagement.Tests
             }
         }
 
+        private void CheckSynchronizedObjectives(Objective local, Objective synchronized)
+        {
+            CheckSynchronized(local, synchronized);
+
+            Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
+            Assert.AreEqual(local.ChildrenObjectives?.Count ?? 0, synchronized.ChildrenObjectives?.Count ?? 0);
+            Assert.AreEqual(local.DynamicFields?.Count ?? 0, synchronized.DynamicFields?.Count ?? 0);
+            Assert.AreEqual(local.BimElements?.Count ?? 0, synchronized.BimElements?.Count ?? 0);
+            Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
+
+            CheckObjectives(local, synchronized, false);
+
+            foreach (var childObjective in local.ChildrenObjectives ?? Enumerable.Empty<Objective>())
+            {
+                var synchronizedchildObjective = synchronized.ChildrenObjectives?
+                  .FirstOrDefault(x => childObjective.ExternalID == x.ExternalID || childObjective.SynchronizationMateID == x.ID);
+            }
+
+            foreach (var item in local.Items ?? Enumerable.Empty<ObjectiveItem>())
+            {
+                var synchronizedItem = synchronized.Items?
+                   .FirstOrDefault(x => item.ItemID == x.ItemID);
+                CheckSynchronizedItems(item.Item, synchronizedItem.Item);
+            }
+
+            foreach (var bimElement in local.BimElements ?? Enumerable.Empty<BimElementObjective>())
+            {
+                var synchronizedItem = synchronized.BimElements?
+                   .FirstOrDefault(x => bimElement.BimElementID == x.BimElementID);
+              //  CheckSynchronizedBimElements(bimElement.BimElement, bimElement.BimElement);
+            }
+        }
+
+        private void CheckObjectives(Objective a, Objective b, bool checkIDs = true)
+        {
+            Assert.AreEqual(a.ProjectID, b.ProjectID);
+            Assert.AreEqual(a.AuthorID, b.AuthorID);
+            Assert.AreEqual(a.ParentObjectiveID, b.ParentObjectiveID);
+            Assert.AreEqual(a.ObjectiveTypeID, b.ObjectiveTypeID);
+            Assert.AreEqual(a.CreationDate, b.CreationDate);
+            Assert.AreEqual(a.DueDate, b.DueDate);
+            Assert.AreEqual(a.Title, b.Title);
+            Assert.AreEqual(a.Description, b.Description);
+            Assert.AreEqual(a.Status, b.Status);
+
+            if (checkIDs)
+            {
+                CheckIDs(a, b);
+            }
+        }
+
         private void CheckSynchronizedItems(Item local, Item synchronized)
         {
             Assert.AreEqual(local.Name, synchronized.Name);
@@ -841,6 +894,19 @@ namespace MRS.DocumentManagement.Tests
             Assert.IsTrue(synchronized.IsSynchronized);
             Assert.AreEqual(local.ItemType, synchronized.ItemType);
             Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
+        }
+
+        private void CheckIDs(ISynchronizableBase a, ISynchronizableBase b)
+        {
+            Assert.AreEqual(a.SynchronizationMateID, b.SynchronizationMateID);
+            Assert.AreEqual(a.IsSynchronized, b.IsSynchronized);
+        }
+
+        private void CheckSynchronized(ISynchronizableBase local, ISynchronizableBase synchronized)
+        {
+            Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
+            Assert.IsFalse(local.IsSynchronized);
+            Assert.IsTrue(synchronized.IsSynchronized);
         }
 
         private async Task<(Project local, Project synchronized, ProjectExternalDto remote)> ArrangeProject()
@@ -862,5 +928,6 @@ namespace MRS.DocumentManagement.Tests
             await Fixture.Context.SaveChangesAsync();
             return (projectLocal, projectSynchronized, projectRemote);
         }
+
     }
 }
