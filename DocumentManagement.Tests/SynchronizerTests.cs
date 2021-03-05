@@ -481,17 +481,17 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             var project = await ArrangeProject();
-            var objectiveType = MockData.DEFAULT_OBJECTIVE_TYPES[0];
 
             var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
             var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
+            var objectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
             var objectiveRemote = new ObjectiveExternalDto
             {
                 ExternalID = "external_id",
                 ProjectExternalID = "project_external_id",
                 ParentObjectiveExternalID = string.Empty,
                 AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto() { Name = objectiveType.Name },
+                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
                 UpdatedAt = DateTime.Now,
                 CreationDate = objectiveLocal.CreationDate,
                 DueDate = objectiveLocal.DueDate,
@@ -502,6 +502,8 @@ namespace MRS.DocumentManagement.Tests
 
             objectiveLocal.ExternalID = objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
             objectiveLocal.Project = project.local;
+            objectiveLocal.ObjectiveType = objectiveType;
+            objectiveSynchronized.ObjectiveType = objectiveType;
             objectiveSynchronized.Project = project.synchronized;
             Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemote });
             objectiveSynchronized.IsSynchronized = true;
@@ -516,7 +518,7 @@ namespace MRS.DocumentManagement.Tests
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    ProjectsFilter = p => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
