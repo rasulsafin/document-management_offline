@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -79,9 +80,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return type;
         }
 
-        public async Task<AConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+            => await Bim360ConnectionContext.CreateContext(info, lastSynchronizationDate);
     }
 }

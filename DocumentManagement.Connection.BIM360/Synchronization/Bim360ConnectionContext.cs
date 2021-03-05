@@ -1,38 +1,60 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext
     {
-        internal readonly IssuesService IssuesService;
-        internal readonly HubsService HubsService;
-        internal readonly ProjectsService ProjectsService;
-        internal readonly ItemsService ItemsService;
-        internal readonly FoldersService FoldersService;
-        internal readonly ObjectsService ObjectsService;
-
         private List<Hub> hubs;
         private List<Project> bimProjects;
 
-        public Bim360ConnectionContext()
+        private Bim360ConnectionContext()
+        {
+        }
+
+        internal IssuesService IssuesService { get; private set; }
+
+        internal HubsService HubsService { get; private set; }
+
+        internal ProjectsService ProjectsService { get; private set; }
+
+        internal ItemsService ItemsService { get; private set; }
+
+        internal FoldersService FoldersService { get; private set; }
+
+        internal ObjectsService ObjectsService { get; private set; }
+
+        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoDto connectionInfo, DateTime lastSynchronizationDate)
         {
             var connection = new ForgeConnection();
-            IssuesService = new IssuesService(connection);
-            HubsService = new HubsService(connection);
-            ProjectsService = new ProjectsService(connection);
-            ItemsService = new ItemsService(connection);
-            FoldersService = new FoldersService(connection);
-            ObjectsService = new ObjectsService(connection);
+            var authService = new AuthenticationService(connection);
+            var authenticator = new Authenticator(authService);
+            var context = new Bim360ConnectionContext();
+
+            // Authorize
+            _ = await authenticator.SignInAsync(connectionInfo);
+            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
+
+            context.IssuesService = new IssuesService(connection);
+            context.HubsService = new HubsService(connection);
+            context.ProjectsService = new ProjectsService(connection);
+            context.ItemsService = new ItemsService(connection);
+            context.FoldersService = new FoldersService(connection);
+            context.ObjectsService = new ObjectsService(connection);
+
+            return context;
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()

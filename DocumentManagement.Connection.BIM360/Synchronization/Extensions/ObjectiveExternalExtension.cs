@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -26,22 +27,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     DueDate = objective.DueDate,
                     UpdatedAt = objective.UpdatedAt,
                 },
-            };
-        }
-
-        private static string GetDynamicField(ICollection<DynamicFieldExternalDto> dynamicFields, string fieldName)
-        {
-            // TODO: implement after dynamic fields will be implemented
-            return string.Empty;
-        }
-
-        private static string ParseStatus(ObjectiveStatus status)
-        {
-            return status switch
-            {
-                ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
-                ObjectiveStatus.Ready => nameof(Status.Close).ToLower(),
-                _ => string.Empty,
             };
         }
 
@@ -77,6 +62,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             return resultDto;
         }
 
+        private static string GetDynamicField(ICollection<DynamicFieldExternalDto> dynamicFields, string fieldName)
+        {
+            // TODO: remove boxing to dynamic after DynamicFieldExternalDto implementation
+            var field = dynamicFields.Select(f => (dynamic)f).FirstOrDefault(f => f.Name == fieldName);
+            return field.Value;
+        }
+
+        private static string ParseStatus(ObjectiveStatus status)
+        {
+            return status switch
+            {
+                ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
+                ObjectiveStatus.Ready => nameof(Status.Close).ToLower(),
+                _ => string.Empty,
+            };
+        }
+
         private static ICollection<ItemExternalDto> GetItems(Issue issue)
         {
             // use issuesService.GetAttachmentsAsync
@@ -88,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
         {
             return new List<DynamicFieldExternalDto>
             {
-                // At leasy NgIssueSubType and AssignedTo fields should be added
+                // TODO: At least NgIssueSubType fields should be added
 
                 //new DynamicFieldExternalDto
                 //{
