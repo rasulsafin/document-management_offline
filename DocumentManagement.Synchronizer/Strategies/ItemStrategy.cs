@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             this.unlink = unlink;
         }
 
-        public delegate Task LinkingFunc(Item item, object parent, EntityType entityType);
+        public delegate Task LinkingFunc(DMContext context, Item item, object parent, EntityType entityType);
 
         protected override DbSet<Item> GetDBSet(DMContext context)
             => context.Items;
@@ -40,7 +40,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             => throw new WarningException("Updating remote items must be in parent synchronizer");
 
         protected override IIncludableQueryable<Item, Item> Include(IQueryable<Item> set)
-            => base.Include(set.Include(x => x.Objectives).Include(x => x.Project));
+            => base.Include(
+                set.Include(x => x.Objectives)
+                   .Include(x => x.Project));
 
         protected override Expression<Func<Item, bool>> GetDefaultFilter(SynchronizingData data)
             => x => true;
@@ -52,8 +54,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             tuple.Merge();
-            await link(tuple.Local, parent, EntityType.Local);
-            await link(tuple.Synchronized, parent, EntityType.Synchronized);
+            await link(data.Context, tuple.Local, parent, EntityType.Local);
+            await link(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
         }
 
         protected override async Task AddToRemote(
@@ -63,8 +65,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             tuple.Merge();
-            await link(tuple.Remote, parent, EntityType.Remote);
-            await link(tuple.Synchronized, parent, EntityType.Synchronized);
+            await link(data.Context, tuple.Remote, parent, EntityType.Remote);
+            await link(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
         }
 
         protected override async Task Merge(
@@ -81,9 +83,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             if (tuple.Remote != null)
-                await unlink(tuple.Remote, parent, EntityType.Remote);
+                await unlink(data.Context, tuple.Remote, parent, EntityType.Remote);
             if (tuple.Synchronized != null)
-                await unlink(tuple.Synchronized, parent, EntityType.Synchronized);
+                await unlink(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
         }
 
         protected override async Task RemoveFromLocal(
@@ -93,9 +95,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             if (tuple.Local != null)
-                await unlink(tuple.Local, parent, EntityType.Local);
+                await unlink(data.Context, tuple.Local, parent, EntityType.Local);
             if (tuple.Synchronized != null)
-                await unlink(tuple.Synchronized, parent, EntityType.Synchronized);
+                await unlink(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
         }
 
         protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)

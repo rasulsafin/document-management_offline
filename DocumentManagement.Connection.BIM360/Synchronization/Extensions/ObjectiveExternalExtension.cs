@@ -88,14 +88,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
 
         private static ICollection<DynamicFieldExternalDto> GetDynamicFields(Issue issue)
         {
+            // At least NgIssueSubType fields should be added
+            // TODO: Remove dynamic after DynamicFieldExternalDto implementation
+            var issueSubType = issue.Attributes.NgIssueSubtypeID;
+            dynamic/*var*/ issueSubTypeField = new DynamicFieldExternalDto();
+            issueSubTypeField.Name = nameof(issue.Attributes.NgIssueSubtypeID);
+            issueSubTypeField.Value = issueSubType;
+
+            // TODO: use type instead of int
+            issueSubTypeField.Type = 1;
             return new List<DynamicFieldExternalDto>
             {
-                // TODO: At least NgIssueSubType fields should be added
-
-                //new DynamicFieldExternalDto
-                //{
-
-                //}
+                issueSubTypeField,
             };
         }
 

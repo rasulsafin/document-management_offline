@@ -110,7 +110,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 tuple);
         }
 
-        private Task Link(Item item, object parent, EntityType entityType)
+        private Task Link(DMContext context, Item item, object parent, EntityType entityType)
         {
             var objective = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
             objective.Items ??= new List<ObjectiveItem>();
@@ -122,7 +122,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return Task.CompletedTask;
         }
 
-        private Task Unlink(Item item, object parent, EntityType entityType)
+        private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
             var project = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
             project.Items.Remove(project.Items.First(x => x.Item == item));

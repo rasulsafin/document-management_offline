@@ -92,9 +92,10 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
                 .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeResolver>())
                 .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>());
-           CreateMap<Objective, ObjectiveExternalDto>()
+            CreateMap<Objective, ObjectiveExternalDto>()
                 .ForMember(x => x.ProjectExternalID, o => o.MapFrom(s => s.Project.ExternalID))
-                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>());
+                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
+                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)));
             CreateMap<Item, ItemExternalDto>();
             CreateMap<ItemExternalDto, Item>();
             CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();

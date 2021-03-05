@@ -45,6 +45,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
+            tuple.Merge();
             await SynchronizeItems(tuple, data, connectionContext);
             await base.AddToRemote(tuple, data, connectionContext, parent);
         }
@@ -129,7 +130,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
         }
 
-        private Task Link(Item item, object parent, EntityType entityType)
+        private Task Link(DMContext context, Item item, object parent, EntityType entityType)
         {
             var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
             project.Items ??= new List<Item>();
@@ -137,10 +138,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return Task.CompletedTask;
         }
 
-        private Task Unlink(Item item, object parent, EntityType entityType)
+        private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
             var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
-            project.Items.Remove(item);
+            item.ProjectID = null;
+
+            if (entityType == EntityType.Remote)
+                project.Items.Remove(item);
+            else if (item.Objectives?.Count == 0)
+                context.Items.Remove(item);
             return Task.CompletedTask;
         }
     }
