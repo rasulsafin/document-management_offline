@@ -51,6 +51,8 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddTransient<DynamicFieldTypeConverter>();
+            services.AddTransient<DynamicFieldDtoTypeConverter>();
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
@@ -76,6 +78,7 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
+            services.AddScoped<DynamicFieldHelper>();
 
             services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();

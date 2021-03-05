@@ -150,8 +150,12 @@ namespace MRS.DocumentManagement.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DynamicField>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.DynamicFields)
+               .HasOne(x => x.Objective)
+               .WithMany(x => x.DynamicFields)
+               .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DynamicField>()
+                .HasOne(x => x.ParentField)
+                .WithMany(x => x.ChildrenDynamicFields)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BimElement>()

@@ -298,22 +298,39 @@ namespace MRS.DocumentManagement.Tests.Utility
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO
-        public static List<DynamicFieldToCreateDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldToCreateDto>
+        public static List<IDynamicFieldDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<IDynamicFieldDto>
         {
-            new DynamicFieldToCreateDto(
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Key,
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Type,
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Value),
-            new DynamicFieldToCreateDto(
-                DYNAMIC_FIELD_TO_CREATE_DATE.Key,
-                DYNAMIC_FIELD_TO_CREATE_DATE.Type,
-                DYNAMIC_FIELD_TO_CREATE_DATE.Value),
+            new StringFieldDto()
+            {
+                Name = DYNAMIC_FIELD_TO_CREATE_STRING.Name,
+                Value = DYNAMIC_FIELD_TO_CREATE_STRING.Value,
+            },
+            new DateFieldDto()
+            {
+                Name = DYNAMIC_FIELD_TO_CREATE_DATE.Name,
+                Value = DYNAMIC_FIELD_TO_CREATE_DATE.Value,
+            },
         };
 
-        private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
-            new DynamicFieldToCreateDto("dropdown1", "dropdown", "1,2,3");
-        private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DATE =
-            new DynamicFieldToCreateDto("datetime2", "datetime", DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        private static readonly DateFieldDto DYNAMIC_FIELD_TO_CREATE_DATE =
+            new DateFieldDto() { Name = "datetime", Value = DateTime.Now };
+
+        private static readonly StringFieldDto DYNAMIC_FIELD_TO_CREATE_STRING =
+            new StringFieldDto() { Name = "string", Value = "value" };
+
+        private static readonly BoolFieldDto DYNAMIC_FIELD_TO_CREATE_BOOL =
+            new BoolFieldDto() { Name = "bool", Value = true };
+
+        private static readonly FloatFieldDto DYNAMIC_FIELD_TO_CREATE_FLOAT =
+            new FloatFieldDto() { Name = "float", Value = 3.14f };
+
+        private static readonly IntFieldDto DYNAMIC_FIELD_TO_CREATE_INT =
+            new IntFieldDto() { Name = "int", Value = 1 };
+
+        // private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_OBJECT =
+        //    new DynamicFieldDto { Name = "object", Value = new List<IDynamicFieldDto>() { DYNAMIC_FIELD_TO_CREATE_DATE, DYNAMIC_FIELD_TO_CREATE_INT } };
+
+        // TODO: Enum and Object Dynamic Fields 
         #endregion
 
         #region DYNAMIC_FIELDS
@@ -321,22 +338,24 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             new DynamicField
             {
-                Key = DYNAMIC_FIELD_DROPDOWN.Key,
-                Type = DYNAMIC_FIELD_DROPDOWN.Type,
-                Value = DYNAMIC_FIELD_DROPDOWN.Value,
+                Name = DYNAMIC_FIELD_STRING.Name,
+                Type = DYNAMIC_FIELD_STRING.Type,
+                Value = DYNAMIC_FIELD_STRING.Value,
             },
             new DynamicField
             {
-                Key = DYNAMIC_FIELD_DATE.Key,
+                Name = DYNAMIC_FIELD_DATE.Name,
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
             },
         };
 
-        private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =
-            new DynamicField { Key = "dropdown1", Type = "dropdown", Value = "1,2,3" };
+        private static readonly DynamicField DYNAMIC_FIELD_STRING =
+            new DynamicField { Name = "string", Type = DynamicFieldType.STRING.ToString(), Value = "value" };
+
         private static readonly DynamicField DYNAMIC_FIELD_DATE =
-            new DynamicField { Key = "datetime2", Type = "datetime", Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
+            new DynamicField { Name = "datetime", Type = DynamicFieldType.DATE.ToString(), Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
+
         #endregion
 
         public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()
