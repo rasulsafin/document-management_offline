@@ -33,6 +33,8 @@ namespace MRS.DocumentManagement.Tests
 
         private static Mock<IConnectionContext> Context { get; set; }
 
+        private static ObjectiveExternalDto ResultObjectiveExternalDto { get; set; }
+
         private static (Project local, Project synchronized, ProjectExternalDto remote) Project { get; set; }
 
         [TestInitialize]
@@ -63,11 +65,14 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Setup(x => x.Remove(It.IsAny<ProjectExternalDto>()))
                .Returns<ProjectExternalDto>(Task.FromResult);
             ObjectiveSynchronizer.Setup(x => x.Add(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
+               .Returns<ObjectiveExternalDto>(Task.FromResult)
+               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDto = x);
             ObjectiveSynchronizer.Setup(x => x.Update(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
+               .Returns<ObjectiveExternalDto>(Task.FromResult)
+               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDto = x);
             ObjectiveSynchronizer.Setup(x => x.Remove(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
+               .Returns<ObjectiveExternalDto>(Task.FromResult)
+               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDto = x);
             Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
 

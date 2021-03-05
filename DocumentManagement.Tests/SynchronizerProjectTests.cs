@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -32,6 +33,8 @@ namespace MRS.DocumentManagement.Tests
 
         private static Mock<IConnectionContext> Context { get; set; }
 
+        private static ProjectExternalDto ResultProjectExternalDto { get; set; }
+
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
         {
@@ -40,6 +43,7 @@ namespace MRS.DocumentManagement.Tests
                 mc.AddProfile(new MappingProfile());
             });
             mapper = mapperConfig.CreateMapper();
+            synchronizer = new Synchronizer(mapper);
         }
 
         [TestInitialize]
@@ -64,21 +68,17 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
             ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
+               .Returns<ProjectExternalDto>(Task.FromResult)
+               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
             ProjectSynchronizer.Setup(x => x.Update(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
+               .Returns<ProjectExternalDto>(Task.FromResult)
+               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
             ProjectSynchronizer.Setup(x => x.Remove(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
-            ObjectiveSynchronizer.Setup(x => x.Add(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
-            ObjectiveSynchronizer.Setup(x => x.Update(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
-            ObjectiveSynchronizer.Setup(x => x.Remove(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult);
+               .Returns<ProjectExternalDto>(Task.FromResult)
+               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
             Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
-
-            synchronizer = new Synchronizer(mapper);
+            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
         }
 
         [TestCleanup]
@@ -90,7 +90,6 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
 
             // Act.
             await synchronizer.Synchronize(
@@ -122,7 +121,6 @@ namespace MRS.DocumentManagement.Tests
             // Arrange.
             var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectRemote.Title = projectLocal.Title = "New same title";
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -157,7 +155,6 @@ namespace MRS.DocumentManagement.Tests
             // Arrange.
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
             Context.Setup(x => x.Projects).ReturnsAsync(ArraySegment<ProjectExternalDto>.Empty);
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Projects.AddAsync(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -180,6 +177,7 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
             CheckProjects(local, projectLocal);
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
@@ -194,7 +192,6 @@ namespace MRS.DocumentManagement.Tests
                 UpdatedAt = DateTime.Now,
             };
             Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
 
             // Act.
             await synchronizer.Synchronize(
@@ -224,7 +221,6 @@ namespace MRS.DocumentManagement.Tests
             // Arrange.
             var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectLocal.Title = "New title";
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -248,6 +244,7 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Once);
             CheckProjects(local, projectLocal);
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
@@ -258,7 +255,6 @@ namespace MRS.DocumentManagement.Tests
             var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             var oldTitle = projectLocal.Title;
             projectRemote.Title = "New title";
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.SaveChangesAsync();
 
             // Act.
@@ -295,7 +291,6 @@ namespace MRS.DocumentManagement.Tests
             projectRemote.Title = "Remote title";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(1);
             var oldRemoteTitle = projectRemote.Title;
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -333,7 +328,6 @@ namespace MRS.DocumentManagement.Tests
             projectRemote.Title = "Remote title";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             var oldRemoteTitle = projectRemote.Title;
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -357,7 +351,7 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Once);
             Assert.AreEqual(oldLocalTitle, local.Title);
             Assert.AreNotEqual(oldRemoteTitle, synchronized.Title);
-            Assert.AreNotEqual(projectRemote.Title, synchronized.Title);
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
@@ -368,7 +362,6 @@ namespace MRS.DocumentManagement.Tests
             var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             var item = MockData.DEFAULT_ITEMS[0];
             item.Project = projectLocal;
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Items.AddAsync(item);
             await Fixture.Context.SaveChangesAsync();
 
@@ -390,25 +383,50 @@ namespace MRS.DocumentManagement.Tests
             ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
             ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
             ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Once);
-            Assert.AreEqual(await Fixture.Context.Items.Synchronized().CountAsync(), 1);
-            Assert.AreEqual(await Fixture.Context.Items.Unsynchronized().CountAsync(), 1);
+            Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_RemoteProjectHasNewItem_AddItemToLocalAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (_, _, projectExternal) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            projectExternal.Items = new List<ItemExternalDto>
+            {
+                new ItemExternalDto
+                {
+                    ExternalID = "item_external_id",
+                    Name = "item_name",
+                    ItemType = ItemTypeDto.File,
+                    UpdatedAt = DateTime.UtcNow,
+                },
+            };
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User =  await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
                     ProjectsFilter = project => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstAsync();
+
+            // Assert.
+            ProjectSynchronizer.Verify(x => x.Add(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Remove(It.IsAny<ProjectExternalDto>()), Times.Never);
+            ProjectSynchronizer.Verify(x => x.Update(It.IsAny<ProjectExternalDto>()), Times.Never);
+            Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
+            CheckSynchronizedProjects(local, synchronized);
         }
 
         [TestMethod]
