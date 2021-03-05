@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Utility
 
         public Project Resolve(ObjectiveExternalDto source, Objective destination, Project destMember, ResolutionContext context)
         {
-            var project = dbContext.Projects.Synchronized().FirstOrDefault(x => x.ExternalID == source.ExternalID);
+            var project = dbContext.Projects.Synchronized().FirstOrDefault(x => x.ExternalID == source.ProjectExternalID);
             return project;
         }
     }

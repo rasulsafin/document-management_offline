@@ -30,11 +30,8 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
 
             foreach (var property in properties)
             {
-                if (!string.Equals(property.PropertyType.Namespace, nameof(System))
-                 || property.Name.Contains("id", StringComparison.InvariantCultureIgnoreCase)
-                 || property.Name == nameof(ISynchronizable<T>.IsSynchronized)
-                 || property.Name == nameof(ISynchronizable<T>.UpdatedAt))
-                    continue;
+                if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
+                        continue;
 
                 var synchronizedValue = property.GetValue(tuple.Synchronized);
                 var localValue = property.GetValue(tuple.Local);

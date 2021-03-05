@@ -10,6 +10,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Synchronization.Utils;
 
@@ -43,6 +44,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
+            tuple.Merge();
+            tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
+            tuple.Remote.Project = tuple.Synchronized.Project;
+
             await SynchronizeItems(tuple, data, connectionContext);
             await base.AddToRemote(tuple, data, connectionContext, parent);
         }

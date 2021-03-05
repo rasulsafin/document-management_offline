@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -77,8 +77,12 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
 
             IServiceCollection services = new ServiceCollection();
-            var resolver = new ObjectiveExternalDtoProjectIdResolver(Fixture.Context);
-            services.AddTransient<ObjectiveExternalDtoProjectIdResolver>(x => resolver);
+            var resolver1 = new ObjectiveExternalDtoProjectIdResolver(Fixture.Context);
+            services.AddTransient<ObjectiveExternalDtoProjectIdResolver>(x => resolver1);
+            var resolver2 = new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context);
+            services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>(x => resolver2);
+            var resolver3 = new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context);
+            services.AddTransient<ObjectiveExternalDtoObjectiveTypeIDResolver>(x => resolver3);
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
@@ -177,8 +181,8 @@ namespace MRS.DocumentManagement.Tests
                   Connection.Object,
                   new ConnectionInfoDto());
 
-            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
-            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+            var local = await Fixture.Context.Objectives.Include(x => x.Project).Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project).Synchronized().FirstAsync();
 
             // Assert.
             ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Once);
@@ -219,8 +223,8 @@ namespace MRS.DocumentManagement.Tests
                     Connection.Object,
                     new ConnectionInfoDto());
 
-            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
-            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+            var local = await Fixture.Context.Objectives.Include(x => x.Project).Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project).Synchronized().FirstAsync();
 
             // Assert.
             ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
@@ -528,9 +532,13 @@ namespace MRS.DocumentManagement.Tests
 
             objectiveLocal.ExternalID = objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
             objectiveLocal.Project = Project.local;
+            objectiveLocal.ProjectID = Project.local.ID;
             objectiveLocal.ObjectiveType = objectiveType;
+            objectiveLocal.ObjectiveTypeID = objectiveType.ID;
             objectiveSynchronized.ObjectiveType = objectiveType;
+            objectiveSynchronized.ObjectiveTypeID = objectiveType.ID;
             objectiveSynchronized.Project = Project.synchronized;
+            objectiveSynchronized.ProjectID = Project.synchronized.ID;
             Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemote });
             objectiveSynchronized.IsSynchronized = true;
             objectiveLocal.SynchronizationMate = objectiveSynchronized;
