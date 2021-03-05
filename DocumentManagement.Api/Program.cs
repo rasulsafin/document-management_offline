@@ -1,3 +1,7 @@
+using System;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
@@ -5,10 +9,20 @@ namespace MRS.DocumentManagement.Api
 {
     public class Program
     {
-#pragma warning disable CS1591
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            var mutexName = "Global\\DocumentManagement.Api." + GetAssemblyGuid();
+
+            using (var singleAppMutex = new Mutex(true, mutexName, out bool isNew))
+            {
+                if (!isNew)
+                {
+                    Console.WriteLine("DocumentManagement.Api service instance is already running, exiting.");
+                    return;
+                }
+
+                CreateHostBuilder(args).Build().Run();
+            }
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -17,6 +31,14 @@ namespace MRS.DocumentManagement.Api
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        private static string GetAssemblyGuid()
+        {
+            var attributes = Assembly.GetEntryAssembly().GetCustomAttributes(typeof(GuidAttribute), false);
+            if (attributes.Length == 0)
+                return string.Empty;
+
+            return ((GuidAttribute)attributes[0]).Value;
+        }
     }
-#pragma warning restore CS1591
 }
