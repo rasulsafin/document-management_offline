@@ -88,8 +88,10 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateMap<ProjectExternalDto, Project>();
             CreateMap<Project, ProjectExternalDto>();
-            CreateMap<ObjectiveExternalDto, Objective>();
-            CreateMap<Objective, ObjectiveExternalDto>();
+            CreateMap<ObjectiveExternalDto, Objective>()
+                .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>());
+            CreateMap<Objective, ObjectiveExternalDto>()
+                .ForMember(x => x.ProjectExternalID, o => o.MapFrom(s => s.Project.ExternalID));
             CreateMap<Item, ItemExternalDto>();
             CreateMap<ItemExternalDto, Item>();
             CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();

@@ -5,7 +5,6 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
@@ -18,7 +17,7 @@ using MRS.DocumentManagement.Utility;
 namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
-    public class SynchronizerTests
+    public class SynchronizerProjectTests
     {
         private static Synchronizer synchronizer;
         private static IMapper mapper;
@@ -34,7 +33,7 @@ namespace MRS.DocumentManagement.Tests
         private static Mock<IConnectionContext> Context { get; set; }
 
         [ClassInitialize]
-        public static void ClassSetup(TestContext unused)
+        public static void ClassSetup(TestContext _)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -90,7 +89,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectUnchanged_DoNothing()
         {
             // Arrange.
-            var (projectLocal, projectSynchronized, projectRemote) = await ArrangeProject();
+            var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
 
             // Act.
@@ -121,7 +120,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_LocalAndRemoteProjectsSame_Synchronize()
         {
             // Arrange.
-            var (projectLocal, projectSynchronized, projectRemote) = await ArrangeProject();
+            var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectRemote.Title = projectLocal.Title = "New same title";
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
@@ -223,7 +222,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectRenamedLocal_RenameRemoteProjectAndSynchronize()
         {
             // Arrange.
-            var (projectLocal, _, _) = await ArrangeProject();
+            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectLocal.Title = "New title";
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
             Fixture.Context.Projects.Update(projectLocal);
@@ -256,7 +255,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectRenamedRemote_RenameLocalProjectAndSynchronize()
         {
             // Arrange.
-            var (projectLocal, _, projectRemote) = await ArrangeProject();
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             var oldTitle = projectLocal.Title;
             projectRemote.Title = "New title";
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
@@ -290,7 +289,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectRenamedLocalThenRemote_RenameLocalProjectAndSynchronize()
         {
             // Arrange.
-            var (projectLocal, _, projectRemote) = await ArrangeProject();
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectLocal.Title = "Local title";
             var oldLocalTitle = projectLocal.Title;
             projectRemote.Title = "Remote title";
@@ -328,7 +327,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectRenamedRemoteThenLocal_RenameRemoteProjectAndSynchronize()
         {
             // Arrange.
-            var (projectLocal, _, projectRemote) = await ArrangeProject();
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             projectLocal.Title = "Local title";
             var oldLocalTitle = projectLocal.Title;
             projectRemote.Title = "Remote title";
@@ -366,7 +365,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_LocalProjectHasNewItem_AddItemToRemoteAndSynchronize()
         {
             // Arrange.
-            var (projectLocal, _, _) = await ArrangeProject();
+            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
             var item = MockData.DEFAULT_ITEMS[0];
             item.Project = projectLocal;
             Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
@@ -476,344 +475,13 @@ namespace MRS.DocumentManagement.Tests
                 new ConnectionInfoDto());
         }
 
-        [TestMethod]
-        public async Task Synchronize_ObjectivesUnchanged_DoNothing()
-        {
-            // Arrange.
-            var project = await ArrangeProject();
-
-            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
-            var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
-            var objectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-            var objectiveRemote = new ObjectiveExternalDto
-            {
-                ExternalID = "external_id",
-                ProjectExternalID = "project_external_id",
-                ParentObjectiveExternalID = string.Empty,
-                AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
-                UpdatedAt = DateTime.Now,
-                CreationDate = objectiveLocal.CreationDate,
-                DueDate = objectiveLocal.DueDate,
-                Title = objectiveLocal.Title,
-                Description = objectiveLocal.Description,
-                Status = (ObjectiveStatus)objectiveLocal.Status,
-            };
-
-            objectiveLocal.ExternalID = objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
-            objectiveLocal.Project = project.local;
-            objectiveLocal.ObjectiveType = objectiveType;
-            objectiveSynchronized.ObjectiveType = objectiveType;
-            objectiveSynchronized.Project = project.synchronized;
-            Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemote });
-            objectiveSynchronized.IsSynchronized = true;
-            objectiveLocal.SynchronizationMate = objectiveSynchronized;
-            await Fixture.Context.Objectives.AddRangeAsync(objectiveSynchronized, objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
-
-            // Act.
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = p => true,
-                },
-                Connection.Object,
-                new ConnectionInfoDto());
-            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
-            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
-
-            // Assert.
-            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
-            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
-            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
-            CheckObjectives(local, objectiveLocal);
-            CheckObjectives(synchronized, objectiveSynchronized);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
-            CheckSynchronizedObjectives(local, synchronized);
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalAndRemoteObjectiveSame_Synchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ObjectiveAddedLocal_AddProjectToRemoteAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ObjectiveAddedRemote_AddProjectToLocalAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ObjectiveHasLocalChanges_ApplyLocalChangesToRemoteAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ObjectiveHasRemoteChanges_ApplyRemoteChangesToRemoteAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ObjectivesHaveChanges_MergeObjectivesAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalObjectiveHasNewItem_AddItemToRemoteAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_RemoteObjectiveHasNewItem_AddItemToLocalAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalAndRemoteObjectiveHaveNewItems_AddItemsAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveItemFromRemoteAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ItemRemovedFromRemoteObjectiveAndItemIsNeeded_UnlinkLocalItemAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_ItemRemovedFromRemoteObjectiveAndItemIsNotNeeded_RemoveItemAndSynchronize()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalObjectiveChangeProject_RemoteAndSynchronizedObjectivesChangeProject()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_RemoteObjectiveChangeProject_LocalAndSynchronizedObjectivesChangeProject()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalObjectiveChangeParent_RemoteAndSynchronizedObjectivesChangeProject()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_RemoteObjectiveChangeParent_LocalAndSynchronizedObjectivesChangeParent()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
-        [TestMethod]
-        public async Task Synchronize_LocalAndRemoteObjectiveChangeParent_ChangeParentAtRemoteAndSynchronizedObjectives()
-        {
-            var connection = new Mock<IConnection>();
-            await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
-                },
-                connection.Object,
-                new ConnectionInfoDto());
-        }
-
         private void CheckProjects(Project a, Project b, bool checkIDs = true)
         {
             Assert.AreEqual(a.Title, b.Title);
 
             if (checkIDs)
             {
-                CheckIDs(a, b);
+                SynchronizerTestsHelper.CheckIDs(a, b);
             }
         }
 
@@ -821,7 +489,7 @@ namespace MRS.DocumentManagement.Tests
         {
             CheckProjects(local, synchronized, false);
 
-            CheckSynchronized(local, synchronized);
+            SynchronizerTestsHelper.CheckSynchronized(local, synchronized);
 
             Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
             Assert.AreEqual(local.Objectives?.Count ?? 0, synchronized.Objectives?.Count ?? 0);
@@ -832,104 +500,8 @@ namespace MRS.DocumentManagement.Tests
             {
                 var synchronizedItem = synchronized.Items?
                    .FirstOrDefault(x => item.ExternalID == x.ExternalID || item.SynchronizationMateID == x.ID);
-                CheckSynchronizedItems(item, synchronizedItem);
+                SynchronizerTestsHelper.CheckSynchronizedItems(item, synchronizedItem);
             }
         }
-
-        private void CheckSynchronizedObjectives(Objective local, Objective synchronized)
-        {
-            CheckSynchronized(local, synchronized);
-
-            Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
-            Assert.AreEqual(local.ChildrenObjectives?.Count ?? 0, synchronized.ChildrenObjectives?.Count ?? 0);
-            Assert.AreEqual(local.DynamicFields?.Count ?? 0, synchronized.DynamicFields?.Count ?? 0);
-            Assert.AreEqual(local.BimElements?.Count ?? 0, synchronized.BimElements?.Count ?? 0);
-            Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
-
-            CheckObjectives(local, synchronized, false);
-
-            foreach (var childObjective in local.ChildrenObjectives ?? Enumerable.Empty<Objective>())
-            {
-                var synchronizedchildObjective = synchronized.ChildrenObjectives?
-                  .FirstOrDefault(x => childObjective.ExternalID == x.ExternalID || childObjective.SynchronizationMateID == x.ID);
-            }
-
-            foreach (var item in local.Items ?? Enumerable.Empty<ObjectiveItem>())
-            {
-                var synchronizedItem = synchronized.Items?
-                   .FirstOrDefault(x => item.ItemID == x.ItemID);
-                CheckSynchronizedItems(item.Item, synchronizedItem.Item);
-            }
-
-            foreach (var bimElement in local.BimElements ?? Enumerable.Empty<BimElementObjective>())
-            {
-                var synchronizedItem = synchronized.BimElements?
-                   .FirstOrDefault(x => bimElement.BimElementID == x.BimElementID);
-              //  CheckSynchronizedBimElements(bimElement.BimElement, bimElement.BimElement);
-            }
-        }
-
-        private void CheckObjectives(Objective a, Objective b, bool checkIDs = true)
-        {
-            Assert.AreEqual(a.ProjectID, b.ProjectID);
-            Assert.AreEqual(a.AuthorID, b.AuthorID);
-            Assert.AreEqual(a.ParentObjectiveID, b.ParentObjectiveID);
-            Assert.AreEqual(a.ObjectiveTypeID, b.ObjectiveTypeID);
-            Assert.AreEqual(a.CreationDate, b.CreationDate);
-            Assert.AreEqual(a.DueDate, b.DueDate);
-            Assert.AreEqual(a.Title, b.Title);
-            Assert.AreEqual(a.Description, b.Description);
-            Assert.AreEqual(a.Status, b.Status);
-
-            if (checkIDs)
-            {
-                CheckIDs(a, b);
-            }
-        }
-
-        private void CheckSynchronizedItems(Item local, Item synchronized)
-        {
-            Assert.AreEqual(local.Name, synchronized.Name);
-            Assert.AreEqual(local.Project.SynchronizationMateID, synchronized.Project.ID);
-            Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
-            Assert.IsFalse(local.IsSynchronized);
-            Assert.IsTrue(synchronized.IsSynchronized);
-            Assert.AreEqual(local.ItemType, synchronized.ItemType);
-            Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
-        }
-
-        private void CheckIDs(ISynchronizableBase a, ISynchronizableBase b)
-        {
-            Assert.AreEqual(a.SynchronizationMateID, b.SynchronizationMateID);
-            Assert.AreEqual(a.IsSynchronized, b.IsSynchronized);
-        }
-
-        private void CheckSynchronized(ISynchronizableBase local, ISynchronizableBase synchronized)
-        {
-            Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
-            Assert.IsFalse(local.IsSynchronized);
-            Assert.IsTrue(synchronized.IsSynchronized);
-        }
-
-        private async Task<(Project local, Project synchronized, ProjectExternalDto remote)> ArrangeProject()
-        {
-            // Arrange.
-            var projectLocal = MockData.DEFAULT_PROJECTS[0];
-            var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
-            var projectRemote = new ProjectExternalDto
-            {
-                ExternalID = "external_id",
-                Title = projectLocal.Title,
-                UpdatedAt = DateTime.Now,
-            };
-            projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
-            Context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
-            projectSynchronized.IsSynchronized = true;
-            projectLocal.SynchronizationMate = projectSynchronized;
-            await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
-            await Fixture.Context.SaveChangesAsync();
-            return (projectLocal, projectSynchronized, projectRemote);
-        }
-
     }
 }

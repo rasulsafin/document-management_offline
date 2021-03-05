@@ -49,6 +49,7 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
