@@ -79,7 +79,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
-            => await NothingAction(tuple, data, connectionContext, parent);
+        {
+            if (tuple.Remote != null)
+                await unlink(tuple.Remote, parent, EntityType.Remote);
+            if (tuple.Synchronized != null)
+                await unlink(tuple.Synchronized, parent, EntityType.Synchronized);
+        }
 
         protected override async Task RemoveFromLocal(
             SynchronizingTuple<Item> tuple,

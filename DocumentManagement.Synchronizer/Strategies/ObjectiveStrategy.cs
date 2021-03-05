@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Synchronization.Utils;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
@@ -106,27 +107,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Link(Item item, object parent, EntityType entityType)
         {
-            var tuple = (SynchronizingTuple<Objective>)parent;
-            var objective = item.IsSynchronized ? tuple.Synchronized : tuple.Local;
-            if (objective == null)
-            {
-                throw new ArgumentException(
-                    $"Parent doesn't contain {(item.IsSynchronized ? "synchronized" : "unsynchronized")} objective");
-            }
-
+            var objective = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
             objective.Items ??= new List<ObjectiveItem>();
             objective.Items.Add(new ObjectiveItem
             {
                 Item = item,
                 ObjectiveID = objective.ID,
             });
-
             return Task.CompletedTask;
         }
 
         private Task Unlink(Item item, object parent, EntityType entityType)
         {
-
+            var project = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
+            project.Items.Remove(project.Items.First(x => x.Item == item));
             return Task.CompletedTask;
         }
     }

@@ -12,6 +12,7 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Synchronization.Utils;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
@@ -35,7 +36,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         protected override IIncludableQueryable<Project, Project> Include(IQueryable<Project> set)
             => base.Include(
                 set
-                   .Include(x => x.Users));
+                   .Include(x => x.Users)
+                   .Include(x => x.Items));
 
         protected override async Task AddToRemote(
             SynchronizingTuple<Project> tuple,
@@ -93,13 +95,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingData data,
             IConnectionContext connectionContext)
         {
-            var projectID = (int)tuple.GetPropertyValue(nameof(Project.ID));
+            var id1 = tuple.Local?.ID ?? 0;
+            var id2 = tuple.Synchronized?.ID ?? 0;
             await itemStrategy.Synchronize(
                 data,
                 connectionContext,
                 tuple.Remote?.Items?.ToList() ?? new List<Item>(),
-                item => (item.ProjectID.HasValue && item.ProjectID == projectID) ||
-                    (item.SynchronizationMate.ProjectID.HasValue && item.SynchronizationMate.ProjectID == projectID),
+                item => item.ProjectID == id1 || item.ProjectID == id2 ||
+                    (item.SynchronizationMate != null &&
+                        (item.SynchronizationMate.ProjectID == id1 || item.SynchronizationMate.ProjectID == id2)),
                 tuple);
         }
 
@@ -127,7 +131,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Link(Item item, object parent, EntityType entityType)
         {
-            var project = GetLinkingProject(item, parent, entityType);
+            var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
             project.Items ??= new List<Item>();
             project.Items.Add(item);
             return Task.CompletedTask;
@@ -135,41 +139,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Unlink(Item item, object parent, EntityType entityType)
         {
-            var project = GetLinkingProject(item, parent, entityType);
+            var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
             project.Items.Remove(item);
             return Task.CompletedTask;
-        }
-
-        private static Project GetLinkingProject(Item item, object parent, EntityType entityType)
-        {
-            var tuple = (SynchronizingTuple<Project>) parent;
-            Project project;
-
-            switch (entityType)
-            {
-                case EntityType.Local:
-                    project = tuple.Local;
-                    tuple.LocalChanged = true;
-                    break;
-                case EntityType.Synchronized:
-                    project = tuple.Synchronized;
-                    tuple.SynchronizedChanged = true;
-                    break;
-                case EntityType.Remote:
-                    project = tuple.Remote;
-                    tuple.RemoteChanged = true;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(entityType), entityType, null);
-            }
-
-            if (project == null)
-            {
-                throw new ArgumentException(
-                    $"Parent doesn't contain {(item.IsSynchronized ? "synchronized" : "unsynchronized")} project");
-            }
-
-            return project;
         }
     }
 }

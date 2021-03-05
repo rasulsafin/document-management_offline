@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Synchronization.Models
 
         public bool RemoteChanged { get; set; }
 
-        public bool HasExternalID => string.IsNullOrEmpty(ExternalID);
+        public bool HasExternalID => !string.IsNullOrEmpty(ExternalID);
 
         private void UpdateExternalID()
             => ExternalID ??= Synchronized?.ExternalID ?? Local?.ExternalID ?? Remote?.ExternalID;
