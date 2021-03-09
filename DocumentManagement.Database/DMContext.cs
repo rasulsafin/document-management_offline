@@ -1,7 +1,3 @@
-﻿#define TEST // Use to perform tests
-#define DEVELOPMENT //Use to work with database
-#undef DEVELOPMENT // Disable one
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,10 +12,6 @@ namespace MRS.DocumentManagement.Database
     public class DMContext : DbContext
     {
         private static readonly DateTime DEFAULT_DATE_TIME = new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc);
-
-        public DMContext()
-        {
-        }
 
         public DMContext(DbContextOptions<DMContext> opt)
             : base(opt)
@@ -91,23 +83,13 @@ namespace MRS.DocumentManagement.Database
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-#if DEVELOPMENT
-            optionsBuilder.UseSqlite("Data Source = ../DocumentManagement.Api/DocumentManagement.db");
-#endif
-
-#if TEST
-            optionsBuilder.UseSqlite("Data Source = DocumentManagement.db");
-#endif
-        }
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
                 .HasOne(x => x.ConnectionInfo)
                 .WithOne(x => x.User)
                 .OnDelete(DeleteBehavior.SetNull);
+
             // Users should have unique logins
             modelBuilder.Entity<User>()
                 .HasIndex(x => x.Login)
@@ -185,8 +167,12 @@ namespace MRS.DocumentManagement.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<DynamicField>()
-                .HasOne(x => x.Objective)
-                .WithMany(x => x.DynamicFields)
+               .HasOne(x => x.Objective)
+               .WithMany(x => x.DynamicFields)
+               .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<DynamicField>()
+                .HasOne(x => x.ParentField)
+                .WithMany(x => x.ChildrenDynamicFields)
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BimElement>()

@@ -49,6 +49,8 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddTransient<DynamicFieldTypeConverter>();
+            services.AddTransient<DynamicFieldDtoTypeConverter>();
             services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
@@ -75,6 +77,7 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
+            services.AddScoped<DynamicFieldHelper>();
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();

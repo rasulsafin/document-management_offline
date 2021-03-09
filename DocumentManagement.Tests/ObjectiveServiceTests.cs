@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -24,11 +26,16 @@ namespace MRS.DocumentManagement.Tests
         [ClassInitialize]
         public static void ClassSetup(TestContext _)
         {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            mapper = mapperConfig.CreateMapper();
+            IServiceCollection services = new ServiceCollection();
+
+            services.AddAutoMapper(typeof(MappingProfile));
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
+
+            var mockDfToDtoConverter = new Mock<DynamicFieldDtoTypeConverter>(mapper);
+            services.AddTransient<DynamicFieldDtoTypeConverter>(sp => mockDfToDtoConverter.Object);
+            var mockDtoToDfConverter = new Mock<DynamicFieldTypeConverter>(mapper);
+            services.AddTransient<DynamicFieldTypeConverter>(sp => mockDtoToDfConverter.Object);
         }
 
         [TestInitialize]
@@ -86,7 +93,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper());
+            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new DynamicFieldHelper(Fixture.Context, mapper));
         }
 
         [TestCleanup]
@@ -294,7 +301,7 @@ namespace MRS.DocumentManagement.Tests
             var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
-            var dynamicFields = new List<DynamicFieldToCreateDto>
+            var dynamicFields = new List<IDynamicFieldDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
@@ -355,7 +362,7 @@ namespace MRS.DocumentManagement.Tests
                     Name = dbItem.Name,
                 },
             };
-            var dynamicFields = new List<DynamicFieldToCreateDto>
+            var dynamicFields = new List<IDynamicFieldDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
@@ -521,22 +528,20 @@ namespace MRS.DocumentManagement.Tests
                             : ObjectiveStatus.Ready;
             var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
-            var newDynamicFields = new List<DynamicFieldDto>
+            var newDynamicFields = new List<IDynamicFieldDto>
             {
-                new DynamicFieldDto
+                new StringFieldDto
                 {
-                    Key = $"key{guid}",
-                    Type = $"type{guid}",
+                    Name = $"name{guid}",
                     Value = $"value{guid}",
                 },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
-            var existingDynamicFields = new List<DynamicFieldDto>
+            var existingDynamicFields = new List<IDynamicFieldDto>
             {
-                new DynamicFieldDto
+                new StringFieldDto
                 {
-                    Key = firstDynamicField.Key,
-                    Type = firstDynamicField.Type,
+                    Name = firstDynamicField.Name,
                     Value = firstDynamicField.Value,
                 },
             };
@@ -570,9 +575,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(dynamicFields.Count, changedObjective.DynamicFields.Count());
             updatedObjective.DynamicFields.ToList().ForEach(df =>
             {
-                Assert.IsTrue(dynamicFields.Any(cdf => cdf.Key == df.Key
-                                                    && cdf.Type == df.Type
-                                                    && cdf.Value == df.Value));
+                Assert.IsTrue(dynamicFields.Any(cdf => CompareDynamicFieldDtoToModel(cdf, df)));
             });
         }
 
@@ -726,22 +729,20 @@ namespace MRS.DocumentManagement.Tests
             var guid = Guid.NewGuid();
 
             // Dynamic fields
-            var newDynamicFields = new List<DynamicFieldDto>
+            var newDynamicFields = new List<IDynamicFieldDto>
             {
-                new DynamicFieldDto
+                new StringFieldDto
                 {
-                    Key = $"key{guid}",
-                    Type = $"type{guid}",
+                    Name = $"name{guid}",
                     Value = $"value{guid}",
                 },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
-            var existingDynamicFields = new List<DynamicFieldDto>
+            var existingDynamicFields = new List<IDynamicFieldDto>
             {
-                new DynamicFieldDto
+                new StringFieldDto
                 {
-                    Key = firstDynamicField.Key,
-                    Type = firstDynamicField.Type,
+                    Name = firstDynamicField.Name,
                     Value = firstDynamicField.Value,
                 },
             };
@@ -838,6 +839,13 @@ namespace MRS.DocumentManagement.Tests
             var result = await service.Update(notExistingObjective);
 
             Assert.IsFalse(result);
+        }
+
+
+        private bool CompareDynamicFieldDtoToModel(IDynamicFieldDto dto, DynamicField model)
+        {
+            return dto.Name == model.Name 
+                && dto.Type == (DynamicFieldType)Enum.Parse(typeof(DynamicFieldType), model.Type);
         }
     }
 }

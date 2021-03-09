@@ -92,10 +92,6 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     { YandexDiskAuth.KEY_CLIENT_SECRET, "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
                     { YandexDiskAuth.KEY_RETURN_URL, @"http://localhost:8000/oauth/" },
                 },
-                ObjectiveTypes = new List<ObjectiveTypeDto>()
-                {
-                    new ObjectiveTypeDto() { Name = "YandexDisk_Issue" },
-                },
             };
 
             return type;

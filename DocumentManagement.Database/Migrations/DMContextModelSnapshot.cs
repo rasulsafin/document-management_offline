@@ -189,10 +189,13 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<bool>("IsSynchronized")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ObjectiveID")
+                    b.Property<int?>("ObjectiveID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ParentFieldID")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("SynchronizationMateID")
@@ -212,6 +215,8 @@ namespace DocumentManagement.Database.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("ObjectiveID");
+
+                    b.HasIndex("ParentFieldID");
 
                     b.HasIndex("SynchronizationMateID")
                         .IsUnique();
@@ -653,8 +658,12 @@ namespace DocumentManagement.Database.Migrations
                     b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
                         .WithMany("DynamicFields")
                         .HasForeignKey("ObjectiveID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.DynamicField", "ParentField")
+                        .WithMany("ChildrenDynamicFields")
+                        .HasForeignKey("ParentFieldID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("MRS.DocumentManagement.Database.Models.DynamicField", "SynchronizationMate")
                         .WithOne()
@@ -662,6 +671,8 @@ namespace DocumentManagement.Database.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Objective");
+
+                    b.Navigation("ParentField");
 
                     b.Navigation("SynchronizationMate");
                 });
@@ -858,6 +869,11 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("EnumerationTypes");
 
                     b.Navigation("ObjectiveTypes");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
+                {
+                    b.Navigation("ChildrenDynamicFields");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>

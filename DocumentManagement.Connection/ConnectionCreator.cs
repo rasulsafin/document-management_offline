@@ -9,6 +9,9 @@ namespace MRS.DocumentManagement.Connection
 {
     public static class ConnectionCreator
     {
+        private static readonly string METHOD_NAME = "GetConnectionType";
+        private static readonly string SEARCH_PATTERN = "*DocumentManagement.Connection.*.dll";
+
         private static Dictionary<string, Type> connections;
 
         public static IConnection GetConnection(ConnectionTypeDto connectionTypeDto)
@@ -28,15 +31,15 @@ namespace MRS.DocumentManagement.Connection
             connections = new Dictionary<string, Type>();
 
             var list = new List<ConnectionTypeDto>();
-            var listOfTypes = System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, "*.dll")
+            var listOfTypes = System.IO.Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory, SEARCH_PATTERN)
                         .SelectMany(x => Assembly.Load(AssemblyName.GetAssemblyName(x)).GetTypes())
                         .Where(x => typeof(IConnection).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
             foreach (Type type in listOfTypes)
             {
                 var connection = Activator.CreateInstance(type);
-                var method = type.GetMethod(nameof(IConnection.GetConnectionType));
-                var result = (ConnectionTypeDto)method?.Invoke(connection, null);
+                var method = type.GetMethod("GetConnectionType");
+                var result = method?.Invoke(connection, null) as ConnectionTypeDto;
 
                 if (result == null)
                     continue;

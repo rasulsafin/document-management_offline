@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.Title = tdmsObject.Attributes[AttributeID.NORM_DOC].Value.ToString();
             objectiveDto.Description = tdmsObject.Attributes[AttributeID.DESCRIPTION].Value.ToString();
             objectiveDto.Status = GetStatus(tdmsObject.StatusName);
-            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>(); // TODO: DynamicField
+            objectiveDto.DynamicFields = GetDynamicFields(tdmsObject);
 
             return objectiveDto;
         }
@@ -106,6 +106,26 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                     GlobalID = link,
                 });
             }
+
+            return list;
+        }
+
+        private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
+        {
+            var list = new List<DynamicFieldExternalDto>();
+            // TODO: Dynamic fields
+            // - Contractor (enum)
+            // - Comment (string)
+
+            var comment = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.COMMENT].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.COMMENT].Description,
+                Type = DynamicFieldType.STRING,
+                Value = tdmsObject.Attributes[AttributeID.COMMENT].Value.ToString(),
+            };
+
+            list.Add(comment);
 
             return list;
         }
