@@ -102,6 +102,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)
             => base.IsEntitiesEquals(element, tuple) ||
-                element.Name == (string)tuple.GetPropertyValue(nameof(Item.Name));
+                element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
     }
 }

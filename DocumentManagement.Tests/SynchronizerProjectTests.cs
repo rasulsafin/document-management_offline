@@ -237,7 +237,6 @@ namespace MRS.DocumentManagement.Tests
         public async Task Synchronize_ProjectRemovedRemote_RemoveProjectFromLocalAndSynchronize()
         {
             // Arrange.
-            // Arrange.
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
             var projectSynchronized = MockData.DEFAULT_PROJECTS[0];
             projectLocal.ExternalID = projectSynchronized.ExternalID = "external_id";
@@ -439,7 +438,7 @@ namespace MRS.DocumentManagement.Tests
                 new ItemExternalDto
                 {
                     ExternalID = "item_external_id",
-                    Name = "item_name",
+                    FileName = "item_name",
                     ItemType = ItemTypeDto.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
@@ -481,7 +480,7 @@ namespace MRS.DocumentManagement.Tests
                 new ItemExternalDto
                 {
                     ExternalID = "item_external_id",
-                    Name = "item_name",
+                    FileName = "item_name",
                     ItemType = ItemTypeDto.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
@@ -519,7 +518,7 @@ namespace MRS.DocumentManagement.Tests
             var itemExternal = new ItemExternalDto
             {
                 ExternalID = "item_external_id",
-                Name = "item_name",
+                FileName = "item_name",
                 ItemType = ItemTypeDto.File,
                 UpdatedAt = DateTime.UtcNow,
             };

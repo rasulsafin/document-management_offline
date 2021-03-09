@@ -268,7 +268,7 @@ namespace MRS.DocumentManagement.Tests
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name,
+                    Name = dbItem.RelativePath,
                 },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -359,7 +359,7 @@ namespace MRS.DocumentManagement.Tests
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name,
+                    Name = dbItem.RelativePath,
                 },
             };
             var dynamicFields = new List<IDynamicFieldDto>
@@ -673,7 +673,7 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
                     ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name,
+                    Name = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;
@@ -709,7 +709,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 Assert.IsTrue(items.Any(ci => ci.ExternalID == i.ExternalID
                                                     && (int)ci.ItemType == i.ItemType
-                                                    && ci.Name == i.Name));
+                                                    && ci.Name == i.RelativePath));
             });
         }
 
@@ -771,7 +771,7 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
                     ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name,
+                    Name = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;

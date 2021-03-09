@@ -283,11 +283,11 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<int>("ItemType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("TEXT");
-
                     b.Property<int?>("ProjectID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("RelativePath")
+                        .HasColumnType("TEXT");
 
                     b.Property<int?>("SynchronizationMateID")
                         .HasColumnType("INTEGER");

@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Tests
 
         public override bool NotNullEquals([DisallowNull] Item x, [DisallowNull] Item y)
         {
-            var dataEquals = x.ItemType == y.ItemType && x.Name == y.Name;
+            var dataEquals = x.ItemType == y.ItemType && x.RelativePath == y.RelativePath;
             if (!IgnoreIDs)
                 dataEquals = dataEquals && x.ID == y.ID;
             return dataEquals;

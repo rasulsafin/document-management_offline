@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
 
             item = new ItemExternalDto()
             {
-                Name = System.IO.Path.GetFileName(TEST_FILE_PATH),
+                FileName = System.IO.Path.GetFileName(TEST_FILE_PATH),
                 FullPath = TEST_FILE_PATH,
                 ItemType = ItemTypeDto.File,
             };
@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
             Assert.AreEqual(oldCont + 1, newCount);
 
             // Remove added item
-            var itemToRemove = updatedProject.Items.FirstOrDefault(x => x.Name == item.Name);
+            var itemToRemove = updatedProject.Items.FirstOrDefault(x => x.FileName == item.FileName);
             updatedProject.Items.Remove(itemToRemove);
             project = projectService.Update(updatedProject);
 

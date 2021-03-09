@@ -155,6 +155,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<ItemExternalDto, Item>();
             CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
             CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
+            CreateMap<ItemExternalDto, ObjectiveItem>()
+               .ForMember(x => x.Item, o => o.MapFrom(x => x));
         }
     }
 }
