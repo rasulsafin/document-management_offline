@@ -8,7 +8,7 @@ namespace MRS.DocumentManagement.Database.Models
         [ForbidMergeAttribute]
         public int ID { get; set; }
 
-        public string Name { get; set; }
+        public string RelativePath { get; set; }
 
         public int ItemType { get; set; }
 

@@ -90,7 +90,7 @@ namespace MRS.DocumentManagement.Tests
 
             Assert.AreEqual(dtoId, result.ID);
             Assert.AreEqual(existingItem.ExternalID, result.ExternalID);
-            Assert.AreEqual(existingItem.Name, result.Name);
+            Assert.AreEqual(existingItem.RelativePath, result.Name);
             Assert.AreEqual(existingItem.ItemType, (int)result.ItemType);
         }
 
@@ -118,7 +118,7 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
                                                && (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
-                                               && ri.Name == i.Name));
+                                               && ri.Name == i.RelativePath));
             });
         }
 
@@ -154,7 +154,7 @@ namespace MRS.DocumentManagement.Tests
                 Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
                                                && (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
-                                               && ri.Name == i.Name));
+                                               && ri.Name == i.RelativePath));
             });
         }
 
@@ -198,7 +198,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.IsTrue(result);
             Assert.IsTrue(updatedItem.ExternalID == newExternalItemId);
             Assert.IsTrue(updatedItem.ItemType == newItemType);
-            Assert.IsTrue(updatedItem.Name == newName);
+            Assert.IsTrue(updatedItem.RelativePath == newName);
         }
 
         [TestMethod]

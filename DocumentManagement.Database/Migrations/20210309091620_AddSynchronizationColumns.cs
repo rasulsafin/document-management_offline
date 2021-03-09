@@ -7,6 +7,19 @@ namespace DocumentManagement.Database.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "ProjectItems");
+
+            migrationBuilder.RenameColumn(
+                name: "Name",
+                table: "Items",
+                newName: "RelativePath");
+
+            migrationBuilder.RenameColumn(
+                name: "ExternalItemId",
+                table: "Items",
+                newName: "ExternalID");
+
             migrationBuilder.AddColumn<string>(
                 name: "ExternalID",
                 table: "Projects",
@@ -31,7 +44,7 @@ namespace DocumentManagement.Database.Migrations
                 table: "Projects",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 952, DateTimeKind.Utc).AddTicks(9266));
+                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<string>(
                 name: "ExternalID",
@@ -57,13 +70,7 @@ namespace DocumentManagement.Database.Migrations
                 table: "Objectives",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc).AddTicks(8519));
-
-            migrationBuilder.AddColumn<string>(
-                name: "ExternalID",
-                table: "Items",
-                type: "TEXT",
-                nullable: true);
+                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsSynchronized",
@@ -71,6 +78,12 @@ namespace DocumentManagement.Database.Migrations
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: false);
+
+            migrationBuilder.AddColumn<int>(
+                name: "ProjectID",
+                table: "Items",
+                type: "INTEGER",
+                nullable: true);
 
             migrationBuilder.AddColumn<int>(
                 name: "SynchronizationMateID",
@@ -83,13 +96,7 @@ namespace DocumentManagement.Database.Migrations
                 table: "Items",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc).AddTicks(9171));
-
-            migrationBuilder.AddColumn<string>(
-                name: "ExternalID",
-                table: "DynamicFields",
-                type: "TEXT",
-                nullable: true);
+                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
 
             migrationBuilder.AddColumn<bool>(
                 name: "IsSynchronized",
@@ -109,7 +116,20 @@ namespace DocumentManagement.Database.Migrations
                 table: "DynamicFields",
                 type: "TEXT",
                 nullable: false,
-                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc).AddTicks(9694));
+                defaultValue: new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
+
+            migrationBuilder.CreateTable(
+                name: "Synchronizations",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Date = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Synchronizations", x => x.ID);
+                });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Projects_SynchronizationMateID",
@@ -122,6 +142,11 @@ namespace DocumentManagement.Database.Migrations
                 table: "Objectives",
                 column: "SynchronizationMateID",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Items_ProjectID",
+                table: "Items",
+                column: "ProjectID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Items_SynchronizationMateID",
@@ -152,6 +177,14 @@ namespace DocumentManagement.Database.Migrations
                 onDelete: ReferentialAction.SetNull);
 
             migrationBuilder.AddForeignKey(
+                name: "FK_Items_Projects_ProjectID",
+                table: "Items",
+                column: "ProjectID",
+                principalTable: "Projects",
+                principalColumn: "ID",
+                onDelete: ReferentialAction.Cascade);
+
+            migrationBuilder.AddForeignKey(
                 name: "FK_Objectives_Objectives_SynchronizationMateID",
                 table: "Objectives",
                 column: "SynchronizationMateID",
@@ -179,12 +212,19 @@ namespace DocumentManagement.Database.Migrations
                 table: "Items");
 
             migrationBuilder.DropForeignKey(
+                name: "FK_Items_Projects_ProjectID",
+                table: "Items");
+
+            migrationBuilder.DropForeignKey(
                 name: "FK_Objectives_Objectives_SynchronizationMateID",
                 table: "Objectives");
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Projects_Projects_SynchronizationMateID",
                 table: "Projects");
+
+            migrationBuilder.DropTable(
+                name: "Synchronizations");
 
             migrationBuilder.DropIndex(
                 name: "IX_Projects_SynchronizationMateID",
@@ -193,6 +233,10 @@ namespace DocumentManagement.Database.Migrations
             migrationBuilder.DropIndex(
                 name: "IX_Objectives_SynchronizationMateID",
                 table: "Objectives");
+
+            migrationBuilder.DropIndex(
+                name: "IX_Items_ProjectID",
+                table: "Items");
 
             migrationBuilder.DropIndex(
                 name: "IX_Items_SynchronizationMateID",
@@ -235,11 +279,11 @@ namespace DocumentManagement.Database.Migrations
                 table: "Objectives");
 
             migrationBuilder.DropColumn(
-                name: "ExternalID",
+                name: "IsSynchronized",
                 table: "Items");
 
             migrationBuilder.DropColumn(
-                name: "IsSynchronized",
+                name: "ProjectID",
                 table: "Items");
 
             migrationBuilder.DropColumn(
@@ -249,10 +293,6 @@ namespace DocumentManagement.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "UpdatedAt",
                 table: "Items");
-
-            migrationBuilder.DropColumn(
-                name: "ExternalID",
-                table: "DynamicFields");
 
             migrationBuilder.DropColumn(
                 name: "IsSynchronized",
@@ -265,6 +305,45 @@ namespace DocumentManagement.Database.Migrations
             migrationBuilder.DropColumn(
                 name: "UpdatedAt",
                 table: "DynamicFields");
+
+            migrationBuilder.RenameColumn(
+                name: "RelativePath",
+                table: "Items",
+                newName: "Name");
+
+            migrationBuilder.RenameColumn(
+                name: "ExternalID",
+                table: "Items",
+                newName: "ExternalItemId");
+
+            migrationBuilder.CreateTable(
+                name: "ProjectItems",
+                columns: table => new
+                {
+                    ItemID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProjectID = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectItems", x => new { x.ItemID, x.ProjectID });
+                    table.ForeignKey(
+                        name: "FK_ProjectItems_Items_ItemID",
+                        column: x => x.ItemID,
+                        principalTable: "Items",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectItems_Projects_ProjectID",
+                        column: x => x.ProjectID,
+                        principalTable: "Projects",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectItems_ProjectID",
+                table: "ProjectItems",
+                column: "ProjectID");
         }
     }
 }

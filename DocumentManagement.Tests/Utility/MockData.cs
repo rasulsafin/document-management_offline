@@ -250,19 +250,19 @@ namespace MRS.DocumentManagement.Tests.Utility
             {
                 ExternalID = FILE_ITEM.ExternalID,
                 ItemType = FILE_ITEM.ItemType,
-                Name = FILE_ITEM.Name,
+                RelativePath = FILE_ITEM.RelativePath,
             },
             new Item
             {
                 ExternalID = BIM_ITEM.ExternalID,
                 ItemType = BIM_ITEM.ItemType,
-                Name = BIM_ITEM.Name,
+                RelativePath = BIM_ITEM.RelativePath,
             },
             new Item
             {
                 ExternalID = MEDIA_ITEM.ExternalID,
                 ItemType = MEDIA_ITEM.ItemType,
-                Name = MEDIA_ITEM.Name,
+                RelativePath = MEDIA_ITEM.RelativePath,
             },
         };
 
@@ -270,19 +270,19 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
-            Name = "File element",
+            RelativePath = "File element",
         };
         private static readonly Item BIM_ITEM = new Item
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
-            Name = "Bim element",
+            RelativePath = "Bim element",
         };
         private static readonly Item MEDIA_ITEM = new Item
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
-            Name = "Media element",
+            RelativePath = "Media element",
         };
         #endregion
 

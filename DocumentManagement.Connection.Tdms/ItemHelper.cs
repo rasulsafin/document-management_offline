@@ -21,11 +21,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             if (items == null)
                 return;
 
-            var checkedfiles = items.Where(d => System.IO.File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.Name));
+            var checkedfiles = items.Where(d => System.IO.File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.FileName));
             foreach (var file in checkedfiles)
                 tdmsObject.Files.Create(FileTypeID.ANY, file.FullPath);
 
-            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => items.FirstOrDefault(item => item.Name == s.FileName) == default);
+            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => items.FirstOrDefault(item => item.FileName == s.FileName) == default);
             foreach (var file in deletedFiles)
                 tdmsObject.Files.Remove(file);
 
@@ -50,7 +50,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             var itemDto = new ItemExternalDto()
             {
-                Name = tdmsObject.FileName,
+                FileName = tdmsObject.FileName,
                 ExternalID = tdmsObject.Handle,
                 ItemType = GetItemType(tdmsObject.FileDefName),
             };

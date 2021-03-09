@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
 
             item = new ItemExternalDto()
             {
-                Name = System.IO.Path.GetFileName(TEST_FILE_PATH),
+                FileName = System.IO.Path.GetFileName(TEST_FILE_PATH),
                 FullPath = TEST_FILE_PATH,
                 ItemType = ItemTypeDto.File,
             };

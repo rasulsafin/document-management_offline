@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Tests
     {
         public static void CheckSynchronizedItems(Item local, Item synchronized)
         {
-            Assert.AreEqual(local.Name, synchronized.Name);
+            Assert.AreEqual(local.RelativePath, synchronized.RelativePath);
             Assert.AreEqual(local.Project.SynchronizationMateID, synchronized.Project.ID);
             Assert.AreEqual(local.SynchronizationMateID, synchronized.ID);
             Assert.IsFalse(local.IsSynchronized);
