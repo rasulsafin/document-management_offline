@@ -78,12 +78,10 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
 
             IServiceCollection services = new ServiceCollection();
-            var resolver1 = new ObjectiveExternalDtoProjectIdResolver(Fixture.Context);
-            services.AddTransient(x => resolver1);
-            var resolver2 = new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context);
-            services.AddTransient(x => resolver2);
-            var resolver3 = new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context);
-            services.AddTransient(x => resolver3);
+            services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(Fixture.Context));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context));
+            services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context, mapper));
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
@@ -170,6 +168,17 @@ namespace MRS.DocumentManagement.Tests
             await Fixture.Context.Objectives.AddAsync(objectiveLocal);
             await Fixture.Context.SaveChangesAsync();
 
+            await Fixture.Context.BimElementObjectives.AddAsync(
+                new BimElementObjective
+                {
+                    BimElement = new BimElement
+                    {
+                        ParentName = "parent",
+                        GlobalID = "guid",
+                    },
+                    Objective = objectiveLocal,
+                });
+
             // Act.
             await synchronizer.Synchronize(
                   new SynchronizingData
@@ -207,6 +216,14 @@ namespace MRS.DocumentManagement.Tests
                 DueDate = DateTime.UtcNow,
                 Title = "Title",
                 Description = "Description",
+                BimElements = new List<BimElementExternalDto>
+                {
+                    new BimElementExternalDto
+                    {
+                        GlobalID = "guid",
+                        ParentName = "1.ifc",
+                    },
+                },
                 Status = ObjectiveStatus.Open,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -649,35 +666,283 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Synchronize_LocalObjectiveChangeProject_RemoteAndSynchronizedObjectivesChangeProject()
+        public async Task Synchronize_LocalObjectiveHasNewBimElement_AddBimElementToRemoteAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (objectiveLocal, _, _) = await ArrangeObjective();
+            objectiveLocal.BimElements ??= new List<BimElementObjective>();
+            objectiveLocal.BimElements.Add(
+                new BimElementObjective
+                {
+                    BimElement = new BimElement
+                    {
+                        GlobalID = "guid",
+                        ParentName = "1.ifc",
+                    },
+                });
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
-        public async Task Synchronize_RemoteObjectiveChangeProject_LocalAndSynchronizedObjectivesChangeProject()
+        public async Task Synchronize_RemoteObjectiveHasNewBimElement_AddBimElementToLocalAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (_, _, objectiveRemote) = await ArrangeObjective();
+            objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
+            objectiveRemote.BimElements.Add(
+                new BimElementExternalDto
+                {
+                    GlobalID = "guid",
+                    ParentName = "1.ifc",
+                });
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ObjectivesHaveNewSameBimElements_SynchronizeBimElements()
+        {
+            // Arrange.
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.BimElements ??= new List<BimElementObjective>();
+            var element = new BimElement
+            {
+                GlobalID = "guid",
+                ParentName = "1.ifc",
+            };
+            objectiveLocal.BimElements.Add(new BimElementObjective { BimElement = element });
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
+            objectiveRemote.BimElements.Add(mapper.Map<BimElementExternalDto>(element));
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ObjectivesHaveNewBimElements_SynchronizeBimElements()
+        {
+            // Arrange.
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.BimElements ??= new List<BimElementObjective>();
+            objectiveLocal.BimElements.Add(
+                new BimElementObjective
+                {
+                    BimElement = new BimElement
+                    {
+                        GlobalID = "guid",
+                        ParentName = "1.ifc",
+                    },
+                });
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
+            objectiveRemote.BimElements.Add(new BimElementExternalDto
+            {
+                GlobalID = "external_global_id",
+                ParentName = "external_parent_name",
+            });
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(2, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(4, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_BimElementRemovedFromLocalObjective_RemoveBimElementFromRemoteObjectiveAndSynchronize()
+        {
+            // Arrange.
+            var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            objectiveSynchronized.BimElements ??= new List<BimElementObjective>();
+            var element = new BimElement
+            {
+                GlobalID = "guid",
+                ParentName = "1.ifc",
+            };
+            objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
+            Fixture.Context.Objectives.Update(objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+            objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
+            objectiveRemote.BimElements.Add(mapper.Map<BimElementExternalDto>(element));
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(0, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_BimElementRemovedFromRemoteObjective_RemoveBimElementFromLocalObjectiveAndSynchronize()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.BimElements ??= new List<BimElementObjective>();
+            objectiveSynchronized.BimElements ??= new List<BimElementObjective>();
+            var element = new BimElement
+            {
+                GlobalID = "guid",
+                ParentName = "1.ifc",
+            };
+            objectiveLocal.BimElements.Add(new BimElementObjective { BimElement = element });
+            objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            Fixture.Context.Objectives.Update(objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.BimElements.CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.BimElementObjectives.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        /*[TestMethod]
+        public async Task Synchronize_LocalObjectiveChangeProject_RemoteAndSynchronizedObjectivesChangeProject()
+        {
+            // Arrange.
+            var newParent = new Project
+            {
+                Title = "Title2",
+            };
+            await Fixture.Context.Projects.AddAsync(newParent);
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.Project = newParent;
+            Fixture.Context.Objectives.Update(objectiveLocal);
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            CheckObjectives(local, objectiveLocal);
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public Task Synchronize_RemoteObjectiveChangeProject_LocalAndSynchronizedObjectivesChangeProject()
+        {
+            // TODO:
+            return Task.CompletedTask;
         }
 
         [TestMethod]
@@ -799,7 +1064,7 @@ namespace MRS.DocumentManagement.Tests
             //CheckSynchronizedObjectives(local, synchronized);
             //Assert.AreEqual(localAndSynchronizedParentId, synchronized.ExternalID);
             //Assert.AreEqual(localAndSynchronizedParentId, remote.ExternalID);
-        }
+        }*/
 
         private void CheckSynchronizedObjectives(Objective local, Objective synchronized)
         {
@@ -808,7 +1073,6 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
             Assert.AreEqual(local.ChildrenObjectives?.Count ?? 0, synchronized.ChildrenObjectives?.Count ?? 0);
             Assert.AreEqual(local.DynamicFields?.Count ?? 0, synchronized.DynamicFields?.Count ?? 0);
-            Assert.AreEqual(local.BimElements?.Count ?? 0, synchronized.BimElements?.Count ?? 0);
             Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
 
             CheckObjectives(local, synchronized, false);
@@ -826,13 +1090,6 @@ namespace MRS.DocumentManagement.Tests
                 Assert.AreNotEqual(null, synchronizedItem);
                 SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem?.Item);
             }
-
-            foreach (var bimElement in local.BimElements ?? Enumerable.Empty<BimElementObjective>())
-            {
-                var synchronizedItem = synchronized.BimElements?
-                   .FirstOrDefault(x => bimElement.BimElementID == x.BimElementID);
-                //  CheckSynchronizedBimElements(bimElement.BimElement, bimElement.BimElement);
-            }
         }
 
         private void CheckObjectives(Objective a, Objective b, bool checkIDs = true)
@@ -846,11 +1103,28 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(a.Title, b.Title);
             Assert.AreEqual(a.Description, b.Description);
             Assert.AreEqual(a.Status, b.Status);
+            Assert.AreEqual(a.BimElements?.Count ?? 0, b.BimElements?.Count ?? 0);
+
+            foreach (var bimElement in a.BimElements ?? Enumerable.Empty<BimElementObjective>())
+            {
+                var synchronizedElement = b.BimElements?.FirstOrDefault(
+                    x => bimElement.BimElement.ParentName == x.BimElement.ParentName &&
+                        bimElement.BimElement.GlobalID == x.BimElement.GlobalID);
+                Assert.AreNotEqual(null, synchronizedElement);
+                CheckSynchronizedBimElements(bimElement.BimElement, bimElement.BimElement);
+            }
 
             if (checkIDs)
             {
                 SynchronizerTestsHelper.CheckIDs(a, b);
             }
+        }
+
+        private void CheckSynchronizedBimElements(BimElement local, BimElement synchronized)
+        {
+            Assert.AreEqual(local.ElementName, synchronized.ElementName);
+            Assert.AreEqual(local.ParentName, synchronized.ParentName);
+            Assert.AreEqual(local.GlobalID, synchronized.GlobalID);
         }
 
         private async Task<(Objective local, Objective synchronized, ObjectiveExternalDto remote)> ArrangeObjective(bool emptyRemote = false)

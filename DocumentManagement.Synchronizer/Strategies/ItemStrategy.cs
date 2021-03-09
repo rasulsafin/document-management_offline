@@ -69,12 +69,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             await link(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
         }
 
-        protected override async Task Merge(
+        protected override async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
-            => await NothingAction(tuple, data, connectionContext, parent);
+        {
+            await NothingAction(tuple, data, connectionContext, parent);
+            return new SynchronizingResult { Status = SynchronizingStatus.Successful };
+        }
 
         protected override async Task RemoveFromRemote(
             SynchronizingTuple<Item> tuple,

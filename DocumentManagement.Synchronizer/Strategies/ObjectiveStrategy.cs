@@ -48,6 +48,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
             tuple.Remote.Project = tuple.Synchronized.Project;
 
+            MergeBimElements(tuple);
             await SynchronizeItems(tuple, data, connectionContext);
             await base.AddToRemote(tuple, data, connectionContext, parent);
         }
@@ -63,18 +64,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             tuple.Local.Project = data.Context.Projects
                .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
 
+            MergeBimElements(tuple);
             await base.AddToLocal(tuple, data, connectionContext, parent);
             await SynchronizeItems(tuple, data, connectionContext);
         }
 
-        protected override async Task Merge(
+        protected override async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
+            MergeBimElements(tuple);
             await SynchronizeItems(tuple, data, connectionContext);
-            await base.Merge(tuple, data, connectionContext, parent);
+            return await base.Merge(tuple, data, connectionContext, parent);
         }
 
         protected override async Task RemoveFromLocal(
@@ -141,6 +144,27 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             if (item.Project == null && item.Objectives?.Count == 0)
                 context.Items.Remove(item);
             return Task.CompletedTask;
+        }
+
+        private void MergeBimElements(SynchronizingTuple<Objective> tuple)
+        {
+            tuple.Local.BimElements ??= new List<BimElementObjective>();
+            tuple.Synchronized.BimElements ??= new List<BimElementObjective>();
+            tuple.Remote.BimElements ??= new List<BimElementObjective>();
+
+            CollectionUtils.Merge(
+                tuple,
+                tuple.Local.BimElements,
+                tuple.Synchronized.BimElements,
+                tuple.Remote.BimElements,
+                (a, b) => string.Equals(a.ParentName, b.ParentName, StringComparison.InvariantCultureIgnoreCase) &&
+                    string.Equals(a.GlobalID, b.GlobalID),
+                (element, objective) => new BimElementObjective
+                {
+                    BimElement = element,
+                    Objective = objective,
+                },
+                x => x.BimElement);
         }
     }
 }

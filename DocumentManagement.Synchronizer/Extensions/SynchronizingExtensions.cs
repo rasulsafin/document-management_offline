@@ -9,14 +9,15 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
     {
         public static SynchronizingAction DetermineAction<T>(this SynchronizingTuple<T> tuple)
                 where T : ISynchronizable<T>
-        {
-            return tuple.Synchronized == null && tuple.Local == null     ? SynchronizingAction.AddToLocal
-                    : tuple.Synchronized == null && tuple.Remote == null ? SynchronizingAction.AddToRemote
-                    : tuple.Local == null && tuple.Remote == null        ? SynchronizingAction.RemoveFromLocal
-                    : tuple.Local == null && tuple.HasExternalID         ? SynchronizingAction.RemoveFromRemote
-                    : tuple.Remote == null && tuple.HasExternalID        ? SynchronizingAction.RemoveFromLocal
-                                                                           : SynchronizingAction.Merge;
-        }
+            => DetermineAction((tuple.Local, tuple.Synchronized, tuple.Remote));
+
+        public static SynchronizingAction DetermineAction<T>(this (T local, T synchronized, T remote) tuple)
+            => tuple.synchronized == null && tuple.local == null     ? SynchronizingAction.AddToLocal
+                : tuple.synchronized == null && tuple.remote == null ? SynchronizingAction.AddToRemote
+                : tuple.local == null && tuple.remote == null        ? SynchronizingAction.RemoveFromLocal
+                : tuple.local == null                                ? SynchronizingAction.RemoveFromRemote
+                : tuple.remote == null                               ? SynchronizingAction.RemoveFromLocal
+                                                                       : SynchronizingAction.Merge;
 
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
                 where T : class, ISynchronizable<T>, new()

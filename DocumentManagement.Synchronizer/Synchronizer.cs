@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Synchronization.Strategies;
+using MRS.DocumentManagement.Synchronization.Utils;
 
 namespace MRS.DocumentManagement.Synchronization
 {
@@ -36,6 +36,8 @@ namespace MRS.DocumentManagement.Synchronization
                 context,
                 mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives));
             await data.Context.Synchronizations.AddAsync(new Database.Models.Synchronization { Date = date });
+            await data.Context.SaveChangesAsync();
+            await SynchronizationFinalizer.Finalize(data);
             await data.Context.SaveChangesAsync();
             return null;
         }

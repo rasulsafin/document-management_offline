@@ -148,15 +148,21 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeResolver>())
                 .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>());
             CreateMap<Objective, ObjectiveExternalDto>()
-                .ForMember(x => x.ProjectExternalID, o => o.MapFrom(s => s.Project.ExternalID))
-                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
-                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)));
+               .ForMember(x => x.ProjectExternalID, o => o.MapFrom(s => s.Project.ExternalID))
+               .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
+               .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
+               .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)));
             CreateMap<Item, ItemExternalDto>();
             CreateMap<ItemExternalDto, Item>();
             CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
             CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
+
+            CreateMap<BimElement, BimElementExternalDto>();
+            CreateMap<BimElementExternalDto, BimElementObjective>()
+               .ConvertUsing<BimElementObjectiveTypeConverter>();
+            CreateMap<BimElementExternalDto, BimElement>();
         }
     }
 }
