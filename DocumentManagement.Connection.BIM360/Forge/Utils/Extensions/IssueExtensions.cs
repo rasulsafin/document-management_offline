@@ -8,6 +8,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
     {
         public static Issue GetPatchableIssue(this Issue issue)
         {
+            if (issue.Attributes?.PermittedAttributes == null)
+                return issue;
+
             var result = new Issue
             {
                 ID = issue.ID,

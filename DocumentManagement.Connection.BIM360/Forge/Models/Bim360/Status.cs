@@ -4,6 +4,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
     {
         Draft,
         Open,
-        Close,
+        Closed,
     }
 }

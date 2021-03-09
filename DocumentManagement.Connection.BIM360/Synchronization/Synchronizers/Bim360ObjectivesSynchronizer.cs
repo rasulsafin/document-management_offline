@@ -12,6 +12,7 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -36,22 +37,33 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             var issue = obj.ToIssue();
 
-            // TODO: check will issues containerId recorded as ProjectExternalID or it is necessary to get it in another way (retrieve from projectservice by id)
             var hub = await hubsHelper.GetDefaultHubAsync();
             var project = await projectsHelper.GetProjectAsync(hub.ID, p => p.ID == obj.ProjectExternalID);
-            var containerId = project.Relationships.IssuesContainer.Data.ID;
-            var created = await issuesService.PostIssueAsync(containerId, issue);
-            var added = await AddItems(obj.Items, hub.ID, project.ID, created.ID, containerId);
-            if (!added.Any())
+            var containerId = project.Relationships?.IssuesContainer?.Data?.ID;
+            if (containerId == null)
                 return null;
 
-            return created.ToExternalDto();
+            var created = await issuesService.PostIssueAsync(containerId, issue);
+
+            if (obj.Items != null && obj.Items.Any())
+            {
+                var added = await AddItems(obj.Items, hub.ID, project.ID, created.ID, containerId);
+                if (!added.Any())
+                    return null;
+            }
+
+            var parsedToDto = created.ToExternalDto();
+            parsedToDto.ProjectExternalID = project.ID;
+            return parsedToDto;
         }
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
             var issue = obj.ToIssue();
-            var containerId = GetContainerId(issue);
+            var containerId = await GetContainerId(obj);
+            if (containerId == null)
+                return null;
+
             issue = await issuesService.GetIssueAsync(containerId, issue.ID);
             issue.Attributes.Status = ISSUE_STATUS_CLOSED;
             var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
@@ -62,7 +74,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
             var issue = obj.ToIssue();
-            var containerId = GetContainerId(issue);
+            var containerId = await GetContainerId(obj);
+            if (containerId == null)
+                return null;
+
+            issue.Attributes.PermittedAttributes
+                = (await issuesService.GetIssueAsync(containerId, issue.ID)).Attributes.PermittedAttributes;
             var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
 
             return updatedIssue.ToExternalDto();
@@ -118,19 +135,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             return true;
         }
 
-        private string GetContainerId(Issue issue)
+        private async Task<string> GetContainerId(ObjectiveExternalDto obj)
         {
-            if (issue?.Relationships?.Container == null)
-                return default;
-
-            var container = JToken.Parse(issue.Relationships.Container);
-            if (container == null)
-                return default;
-
-            var selfLink = (string)container["links"]["self"];
-            var urlParts = selfLink.Split('/');
-            var containersWordIndex = Array.FindIndex(urlParts, p => p == "containers");
-            var containerId = urlParts[containersWordIndex + 1];
+            var hub = await hubsHelper.GetDefaultHubAsync();
+            var project = await projectsHelper.GetProjectAsync(hub.ID, p => p.ID == obj.ProjectExternalID);
+            var containerId = project.Relationships?.IssuesContainer?.Data?.ID;
 
             return containerId;
         }

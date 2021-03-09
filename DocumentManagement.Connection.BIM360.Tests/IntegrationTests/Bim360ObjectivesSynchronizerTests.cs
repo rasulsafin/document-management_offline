@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -54,18 +55,23 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
                 UpdatedAt = DateTime.Now,
                 CreationDate = DateTime.Now,
-                DueDate = DateTime.MaxValue,
+                DueDate = DateTime.Now.AddDays(2),
                 Title = "First type OPEN issue",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
+                DynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    new DynamicFieldExternalDto
+                    {
+                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
+                    },
+                },
             };
 
             var result = await synchronizer.Add(objective);
 
             Assert.IsNotNull(result?.ExternalID);
-
-            // Delete added issue
-            await synchronizer.Remove(result);
         }
 
         [TestMethod]
@@ -74,22 +80,31 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             // Add
             var objective = new ObjectiveExternalDto
             {
-                ProjectExternalID = "e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
+                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
                 ParentObjectiveExternalID = string.Empty,
                 AuthorExternalID = "author_external_id",
                 ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
                 UpdatedAt = DateTime.Now,
                 CreationDate = DateTime.Now,
-                DueDate = DateTime.MaxValue,
+                DueDate = DateTime.Now.AddDays(2),
                 Title = "First type OPEN issue",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
+                DynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    new DynamicFieldExternalDto
+                    {
+                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
+                    },
+                },
             };
             var added = await synchronizer.Add(objective);
             if (added?.ExternalID == null)
                 Assert.Fail("Objective adding failed. There is nothing to remove.");
 
             // Remove
+            await Task.Delay(3000);
             var result = await synchronizer.Remove(added);
 
             Assert.IsNotNull(result);
@@ -104,16 +119,24 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             // Add
             var objective = new ObjectiveExternalDto
             {
-                ProjectExternalID = "e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
+                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
                 ParentObjectiveExternalID = string.Empty,
                 AuthorExternalID = "author_external_id",
                 ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
                 UpdatedAt = DateTime.Now,
                 CreationDate = DateTime.Now,
-                DueDate = DateTime.MaxValue,
+                DueDate = DateTime.Now.AddDays(2),
                 Title = title,
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
+                DynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    new DynamicFieldExternalDto
+                    {
+                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
+                    },
+                },
             };
             var added = await synchronizer.Add(objective);
             if (added?.ExternalID == null)

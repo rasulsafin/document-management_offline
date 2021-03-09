@@ -23,9 +23,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     NgIssueSubtypeID =
                         GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.NgIssueSubtypeID)),
                     AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
-                    CreatedAt = objective.CreationDate,
-                    DueDate = objective.DueDate,
-                    UpdatedAt = objective.UpdatedAt,
+                    CreatedAt = objective.CreationDate == default ? null : objective.CreationDate,
+                    DueDate = objective.DueDate == default ? null : objective.DueDate,
+                    UpdatedAt = objective.UpdatedAt == default ? null : objective.UpdatedAt,
                 },
             };
         }
@@ -64,9 +64,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
 
         private static string GetDynamicField(ICollection<DynamicFieldExternalDto> dynamicFields, string fieldName)
         {
-            // TODO: remove boxing to dynamic after DynamicFieldExternalDto implementation
-            var field = dynamicFields.Select(f => (dynamic)f).FirstOrDefault(f => f.Name == fieldName);
-            return field.Value;
+            var field = dynamicFields?.FirstOrDefault(f => f.Name == fieldName);
+            return field?.Value;
         }
 
         private static string ParseStatus(ObjectiveStatus status)
@@ -74,8 +73,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             return status switch
             {
                 ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
-                ObjectiveStatus.Ready => nameof(Status.Close).ToLower(),
-                _ => string.Empty,
+                ObjectiveStatus.Ready => nameof(Status.Closed).ToLower(),
+                _ => null,
             };
         }
 
@@ -83,20 +82,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
         {
             // use issuesService.GetAttachmentsAsync
             // mb implement in Synchronizer
-            throw new NotImplementedException();
+            return new List<ItemExternalDto>();
         }
 
         private static ICollection<DynamicFieldExternalDto> GetDynamicFields(Issue issue)
         {
             // At least NgIssueSubType fields should be added
-            // TODO: Remove dynamic after DynamicFieldExternalDto implementation
             var issueSubType = issue.Attributes.NgIssueSubtypeID;
-            dynamic/*var*/ issueSubTypeField = new DynamicFieldExternalDto();
-            issueSubTypeField.Name = nameof(issue.Attributes.NgIssueSubtypeID);
-            issueSubTypeField.Value = issueSubType;
-
-            // TODO: use type instead of int
-            issueSubTypeField.Type = 1;
+            var issueSubTypeField = new DynamicFieldExternalDto
+            {
+                Name = nameof(issue.Attributes.NgIssueSubtypeID),
+                Value = issueSubType,
+                Type = DynamicFieldType.STRING,
+            };
             return new List<DynamicFieldExternalDto>
             {
                 issueSubTypeField,
@@ -106,13 +104,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
         private static ObjectiveStatus ParseStatus(string stringStatus)
         {
             if (string.IsNullOrWhiteSpace(stringStatus) ||
-                Enum.TryParse<Status>(stringStatus, true, out var parsedStatus))
+                !Enum.TryParse<Status>(stringStatus, true, out var parsedStatus))
                 return ObjectiveStatus.Undefined;
 
             return parsedStatus switch
             {
                 Status.Open => ObjectiveStatus.Open,
-                Status.Close => ObjectiveStatus.Ready,
+                Status.Closed => ObjectiveStatus.Ready,
                 _ => ObjectiveStatus.Undefined,
             };
         }
