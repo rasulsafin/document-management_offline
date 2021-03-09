@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Synchronization
         public Synchronizer(IMapper mapper)
             => this.mapper = mapper;
 
-        public async Task<SynchronizingResult> Synchronize(
+        public async Task<List<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
                 ConnectionInfoDto info)

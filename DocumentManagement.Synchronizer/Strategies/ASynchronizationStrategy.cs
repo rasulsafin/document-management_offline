@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         protected ASynchronizationStrategy(IMapper mapper)
             => this.mapper = mapper;
 
-        public async Task Synchronize(SynchronizingData data,
+        public async Task<List<SynchronizingResult>> Synchronize(SynchronizingData data,
             IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
             Expression<Func<TDB, bool>> filter = null,
@@ -40,6 +40,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 remoteCollection,
                 IsEntitiesEquals);
 
+            List<SynchronizingResult> results = new List<SynchronizingResult>();
+
             foreach (var tuple in tuples)
             {
                 var action = tuple.DetermineAction();
@@ -50,7 +52,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         await NothingAction(tuple, data, connectionContext, parent);
                         break;
                     case SynchronizingAction.Merge:
-                        await Merge(tuple, data, connectionContext, parent);
+                        results.Add(await Merge(tuple, data, connectionContext, parent));
                         break;
                     case SynchronizingAction.AddToLocal:
                         await AddToLocal(tuple, data, connectionContext, parent);
@@ -68,6 +70,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
                 }
             }
+
+            return results;
         }
 
         protected abstract DbSet<TDB> GetDBSet(DMContext context);
@@ -96,14 +100,23 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
             => Task.CompletedTask;
 
-        protected virtual async Task Merge(
+        protected virtual async Task<SynchronizingResult> Merge(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
-            UpdateDB(GetDBSet(data.Context), tuple);
+            try
+            {
+                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
+                UpdateDB(GetDBSet(data.Context), tuple);
+
+                return new SynchronizingResult() { Status = SynchronizingStatus.Successful, Object = tuple.Local };
+            }
+            catch
+            {
+                return new SynchronizingResult() { Status = SynchronizingStatus.Unsuccessful };
+            }
         }
 
         protected virtual Task AddToLocal(
