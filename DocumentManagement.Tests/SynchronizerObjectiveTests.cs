@@ -109,8 +109,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = p => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -205,12 +203,12 @@ namespace MRS.DocumentManagement.Tests
                 ExternalID = "external_id",
                 ProjectExternalID = Project.remote.ExternalID,
                 ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
-                CreationDate = DateTime.Now,
-                DueDate = DateTime.Now,
+                CreationDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow,
                 Title = "Title",
                 Description = "Description",
                 Status = ObjectiveStatus.Open,
-                UpdatedAt = DateTime.Now,
+                UpdatedAt = DateTime.UtcNow,
             };
             Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemote });
 
@@ -249,8 +247,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = p => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -275,8 +271,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = p => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -356,7 +350,7 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
-            objectiveRemote.UpdatedAt = DateTime.Now.AddDays(1);
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(1);
             var title = objectiveLocal.Title = "New local title";
             var description = objectiveRemote.Description = "New remote description";
             var dueDateIrrelevant = objectiveLocal.DueDate = new DateTime(2021, 3, 10);
@@ -411,8 +405,6 @@ namespace MRS.DocumentManagement.Tests
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = p => true,
                 },
                 Connection.Object,
                 new ConnectionInfoDto());
@@ -432,81 +424,228 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Synchronize_RemoteObjectiveHasNewItem_AddItemToLocalAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (_, _, remoteObjective) = await ArrangeObjective();
+            remoteObjective.Items.Add(
+                new ItemExternalDto
+                {
+                    ExternalID = "new_external_item_id",
+                    FileName = "1.txt",
+                    ItemType = ItemTypeDto.File,
+                    UpdatedAt = DateTime.UtcNow,
+                });
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(remoteObjective), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_LocalAndRemoteObjectiveHaveNewItems_AddItemsAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (objectiveLocal, _, remoteObjective) = await ArrangeObjective();
+            var item = MockData.DEFAULT_ITEMS[0];
+            item.Objectives ??= new List<ObjectiveItem>();
+            item.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = item,
+                    Objective = objectiveLocal,
+                });
+            await Fixture.Context.Items.AddAsync(item);
+            await Fixture.Context.SaveChangesAsync();
+            remoteObjective.Items.Add(
+                new ItemExternalDto
+                {
+                    ExternalID = "new_external_item_id",
+                    FileName = "1.txt",
+                    ItemType = ItemTypeDto.File,
+                    UpdatedAt = DateTime.UtcNow,
+                });
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(2, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(2, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveItemFromRemoteAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var item = MockData.DEFAULT_ITEMS[0];
+            var externalItem = new ItemExternalDto
+            {
+                ExternalID = "new_external_item_id",
+                FileName = "1.txt",
+                ItemType = ItemTypeDto.File,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            objectiveRemote.Items.Add(externalItem);
+            item.Objectives ??= new List<ObjectiveItem>();
+            item.IsSynchronized = true;
+            item.ExternalID = externalItem.ExternalID;
+            item.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = item,
+                    Objective = objectiveSynchronized,
+                });
+            await Fixture.Context.Items.AddAsync(item);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_ItemRemovedFromRemoteObjectiveAndItemIsNeeded_UnlinkLocalItemAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var localItem = MockData.DEFAULT_ITEMS[0];
+            var synchronizedItem = MockData.DEFAULT_ITEMS[0];
+            synchronizedItem.Objectives ??= new List<ObjectiveItem>();
+            synchronizedItem.IsSynchronized = true;
+            synchronizedItem.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = synchronizedItem,
+                    Objective = objectiveSynchronized,
+                });
+            localItem.Project = Project.local;
+            localItem.Objectives ??= new List<ObjectiveItem>();
+            localItem.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = localItem,
+                    Objective = objectiveLocal,
+                });
+            await Fixture.Context.Items.AddRangeAsync(localItem, synchronizedItem);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                    ProjectsFilter = x => false,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
         public async Task Synchronize_ItemRemovedFromRemoteObjectiveAndItemIsNotNeeded_RemoveItemAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var localItem = MockData.DEFAULT_ITEMS[0];
+            var synchronizedItem = MockData.DEFAULT_ITEMS[0];
+            synchronizedItem.Objectives ??= new List<ObjectiveItem>();
+            synchronizedItem.IsSynchronized = true;
+            synchronizedItem.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = synchronizedItem,
+                    Objective = objectiveSynchronized,
+                });
+            localItem.Objectives ??= new List<ObjectiveItem>();
+            localItem.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = localItem,
+                    Objective = objectiveLocal,
+                });
+            await Fixture.Context.Items.AddRangeAsync(localItem, synchronizedItem);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
-                    ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                    ProjectsFilter = x => false,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
@@ -714,7 +853,7 @@ namespace MRS.DocumentManagement.Tests
             }
         }
 
-        private async Task<(Objective local, Objective synchronized, ObjectiveExternalDto remote)> ArrangeObjective(bool emtyRemote = false)
+        private async Task<(Objective local, Objective synchronized, ObjectiveExternalDto remote)> ArrangeObjective(bool emptyRemote = false)
         {
             var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
             var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
@@ -731,6 +870,7 @@ namespace MRS.DocumentManagement.Tests
                 DueDate = objectiveLocal.DueDate,
                 Title = objectiveLocal.Title,
                 Description = objectiveLocal.Description,
+                Items = new List<ItemExternalDto>(),
                 Status = (ObjectiveStatus)objectiveLocal.Status,
             };
 
@@ -745,8 +885,8 @@ namespace MRS.DocumentManagement.Tests
             objectiveSynchronized.ProjectID = Project.synchronized.ID;
             Context
                .Setup(x => x.Objectives)
-               .ReturnsAsync(emtyRemote ? ArraySegment<ObjectiveExternalDto>.Empty : new[] { objectiveRemote });
-            if (emtyRemote)
+               .ReturnsAsync(emptyRemote ? ArraySegment<ObjectiveExternalDto>.Empty : new[] { objectiveRemote });
+            if (emptyRemote)
                 objectiveRemote = null;
             objectiveSynchronized.IsSynchronized = true;
             objectiveLocal.SynchronizationMate = objectiveSynchronized;

@@ -129,8 +129,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var project = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
-            project.Items.Remove(project.Items.First(x => x.Item == item));
+            var objective = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
+
+            if (entityType == EntityType.Remote)
+            {
+                objective.Items.Remove(objective.Items.First(x => Equals(x.Item, item)));
+                return Task.CompletedTask;
+            }
+
+            item.Objectives.Remove(item.Objectives.First(x => Equals(x.Objective, objective)));
+            if (item.Project == null && item.Objectives?.Count == 0)
+                context.Items.Remove(item);
             return Task.CompletedTask;
         }
     }
