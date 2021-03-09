@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
@@ -13,6 +14,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
     public class Bim360ObjectivesSynchronizerTests
     {
         public static Bim360ObjectivesSynchronizer synchronizer;
+        private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
@@ -65,6 +67,43 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                     {
                         Name = nameof(Issue.Attributes.NgIssueSubtypeID),
                         Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
+                    },
+                },
+            };
+
+            var result = await synchronizer.Add(objective);
+
+            Assert.IsNotNull(result?.ExternalID);
+        }
+
+        [TestMethod]
+        public async Task Add_ObjectiveWithEmptyIdWithItems_AddedSuccessfully()
+        {
+            var objective = new ObjectiveExternalDto
+            {
+                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
+                ParentObjectiveExternalID = string.Empty,
+                AuthorExternalID = "author_external_id",
+                ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
+                UpdatedAt = DateTime.Now,
+                CreationDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(2),
+                Title = "First type OPEN issue",
+                Description = "ASAP: everything wrong! redo!!!",
+                Status = ObjectiveStatus.Open,
+                DynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    new DynamicFieldExternalDto
+                    {
+                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
+                    },
+                },
+                Items = new List<ItemExternalDto>
+                {
+                    new ItemExternalDto
+                    {
+                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
                     },
                 },
             };

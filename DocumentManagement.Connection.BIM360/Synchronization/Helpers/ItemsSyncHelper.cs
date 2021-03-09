@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -29,7 +26,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
         internal async Task<Item> PostItem(ItemExternalDto item, Folder folder, string projectId)
         {
-            var fileName = Path.GetFileName(item.FileName);
+            var fileName = Path.GetFileName(item.FullPath);
 
             // STEP 5. Create a Storage Object.
             var objectToUpload = new StorageObject
@@ -62,9 +59,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             var parsedId = storage.ParseStorageId();
             var bucketKey = parsedId.bucketKey;
             var hashedName = parsedId.hashedName;
-
-            var documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            var filePath = PathManager.DirectoryName(documentsFolder, PathManager.GetDir(item.FileName));
+            var filePath = item.FullPath;
             await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
 
             // STEP 7. Create first version

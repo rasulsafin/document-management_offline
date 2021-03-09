@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
@@ -10,9 +9,7 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -45,12 +42,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var created = await issuesService.PostIssueAsync(containerId, issue);
 
-            if (obj.Items != null && obj.Items.Any())
-            {
-                var added = await AddItems(obj.Items, hub.ID, project.ID, created.ID, containerId);
-                if (!added.Any())
-                    return null;
-            }
+            var added = await AddItems(obj.Items, hub.ID, project.ID, created.ID, containerId);
+            if (!added.Any())
+                return null;
 
             var parsedToDto = created.ToExternalDto();
             parsedToDto.ProjectExternalID = project.ID;
@@ -92,6 +86,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             string issueId,
             string containerId)
         {
+            if (items == null)
+                return null;
+
             var resultItems = new List<Item>();
             foreach (var item in items)
             {
