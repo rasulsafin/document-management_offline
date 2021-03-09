@@ -224,8 +224,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (root == null)
                 Assert.Fail("Can't take root folder");
             var files = await foldersService.SearchAsync(project.ID,
-                    root.ID,
-                    Array.Empty<(string filteringField, string filteringValue)>());
+                    root.ID);
             if (files == null || files.Count == 0)
                 Assert.Fail("Files are empty");
             var file = files[random.Next(files.Count)];

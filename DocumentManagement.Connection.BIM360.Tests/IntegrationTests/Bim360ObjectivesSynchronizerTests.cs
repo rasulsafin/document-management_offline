@@ -103,6 +103,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 {
                     new ItemExternalDto
                     {
+                        FileName = Path.GetFileName(TEST_FILE_PATH),
                         FullPath = Path.GetFullPath(TEST_FILE_PATH),
                     },
                 },

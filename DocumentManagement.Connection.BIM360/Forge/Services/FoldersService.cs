@@ -45,11 +45,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<(Version version, Item item)>> SearchAsync(
                 string projectId,
                 string folderId,
-                IEnumerable<(string filteringField, string filteringValue)> filters)
+                IEnumerable<(string filteringField, string filteringValue)> filters = null)
         {
             var stringBuilder = new StringBuilder(Resources.GetProjectsFoldersSearchMethod);
-            foreach ((string field, string filterValue) in filters)
-                stringBuilder.AppendFormat(FILTER_QUERY_PARAMETER, field, filterValue);
+            if (filters != null)
+            {
+                foreach ((string field, string filterValue) in filters)
+                    stringBuilder.AppendFormat(FILTER_QUERY_PARAMETER, field, filterValue);
+            }
+
             if (stringBuilder.Length > 0)
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
 

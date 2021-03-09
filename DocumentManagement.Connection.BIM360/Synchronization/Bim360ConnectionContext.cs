@@ -100,8 +100,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
                 var root = project.Relationships.RootFolder.Data;
                 var items = await FoldersService.SearchAsync(
                     project.ID,
-                    root.ID,
-                    Enumerable.Empty<(string filteringField, string filteringValue)>());
+                    root.ID);
                 dto.Items = items.Select(x => x.item.ToDto()).ToList();
                 projects.Add(dto);
             }

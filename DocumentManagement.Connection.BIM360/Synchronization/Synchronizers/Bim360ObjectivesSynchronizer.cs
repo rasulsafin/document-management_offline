@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
@@ -6,6 +7,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -33,28 +35,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
             var issue = obj.ToIssue();
-
-            var hub = await hubsHelper.GetDefaultHubAsync();
-            var project = await projectsHelper.GetProjectAsync(hub.ID, p => p.ID == obj.ProjectExternalID);
-            var containerId = project.Relationships?.IssuesContainer?.Data?.ID;
+            var (containerId, hubId, projectId) = await GetContainerId(obj);
             if (containerId == null)
                 return null;
 
             var created = await issuesService.PostIssueAsync(containerId, issue);
 
-            var added = await AddItems(obj.Items, hub.ID, project.ID, created.ID, containerId);
-            if (!added.Any())
-                return null;
-
             var parsedToDto = created.ToExternalDto();
-            parsedToDto.ProjectExternalID = project.ID;
+            parsedToDto.ProjectExternalID = projectId;
+
+            if (obj.Items?.Any() ?? false)
+            {
+                var added = await AddItems(obj.Items, hubId, projectId, created.ID, containerId);
+                parsedToDto.Items = added?.Select(i => i.ToDto())?.ToList();
+            }
+
             return parsedToDto;
         }
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
             var issue = obj.ToIssue();
-            var containerId = await GetContainerId(obj);
+            var (containerId, _, _) = await GetContainerId(obj);
             if (containerId == null)
                 return null;
 
@@ -68,7 +70,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
             var issue = obj.ToIssue();
-            var containerId = await GetContainerId(obj);
+            var (containerId, hubId, projectId) = await GetContainerId(obj);
             if (containerId == null)
                 return null;
 
@@ -86,18 +88,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             string issueId,
             string containerId)
         {
-            if (items == null)
+            var folder = await folderSyncHelper.GetDefaultFolderAsync(hubId, projectId);
+            if (folder == default)
                 return null;
 
             var resultItems = new List<Item>();
+            var existingItems = await folderSyncHelper.GetFolderItemsAsync(projectId, folder.ID);
+
             foreach (var item in items)
             {
+                // If item with the same name already exists add existing item
+                var itemWithSameNameExists = existingItems.FirstOrDefault(i => i.Attributes.DisplayName.Equals(item.FileName, StringComparison.InvariantCultureIgnoreCase));
+                if (itemWithSameNameExists != null)
+                {
+                    resultItems.Add(itemWithSameNameExists);
+                    continue;
+                }
+
                 if (string.IsNullOrWhiteSpace(item.ExternalID))
                 {
-                    var folder = await folderSyncHelper.GetDefaultFolderAsync(hubId, projectId);
-                    if (folder == default)
-                        return null;
-
                     var posted = await itemsSyncHelper.PostItem(item, folder, projectId);
                     var attached = await AttachItem(posted, issueId, containerId);
                     if (attached)
@@ -132,13 +141,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             return true;
         }
 
-        private async Task<string> GetContainerId(ObjectiveExternalDto obj)
+        private async Task<(string containerId, string hubId, string projectId)> GetContainerId(ObjectiveExternalDto obj)
         {
             var hub = await hubsHelper.GetDefaultHubAsync();
             var project = await projectsHelper.GetProjectAsync(hub.ID, p => p.ID == obj.ProjectExternalID);
             var containerId = project.Relationships?.IssuesContainer?.Data?.ID;
 
-            return containerId;
+            return (containerId, hub.ID, project.ID);
         }
     }
 }

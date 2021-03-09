@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
@@ -28,6 +29,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             var folder = (await foldersService.GetFoldersAsync(projectId, topFolder.ID)).FirstOrDefault();
 
             return folder;
+        }
+
+        public async Task<IEnumerable<Item>> GetFolderItemsAsync(string projectId, string folderId)
+        {
+            var fileTuples = await foldersService.SearchAsync(projectId, folderId);
+            return fileTuples.Select(t => t.item);
         }
     }
 }
