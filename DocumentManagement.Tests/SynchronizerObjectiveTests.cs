@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -391,17 +392,41 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Synchronize_LocalObjectiveHasNewItem_AddItemToRemoteAndSynchronize()
         {
-            var connection = new Mock<IConnection>();
+            // Arrange.
+            var (objectiveLocal, _, _) = await ArrangeObjective();
+            var item = MockData.DEFAULT_ITEMS[0];
+            item.Objectives ??= new List<ObjectiveItem>();
+            item.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = item,
+                    Objective = objectiveLocal,
+                });
+            await Fixture.Context.Items.AddAsync(item);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
             await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
-                    User = new User(),
+                    User = await Fixture.Context.Users.FirstAsync(),
                     ObjectivesFilter = objective => true,
-                    ProjectsFilter = project => true,
+                    ProjectsFilter = p => true,
                 },
-                connection.Object,
+                Connection.Object,
                 new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
         }
 
         [TestMethod]
@@ -658,8 +683,9 @@ namespace MRS.DocumentManagement.Tests
             foreach (var item in local.Items ?? Enumerable.Empty<ObjectiveItem>())
             {
                 var synchronizedItem = synchronized.Items?
-                   .FirstOrDefault(x => item.ItemID == x.ItemID);
-                SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem.Item);
+                   .FirstOrDefault(x => item.Item.SynchronizationMateID == x.ItemID);
+                Assert.AreNotEqual(null, synchronizedItem);
+                SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem?.Item);
             }
 
             foreach (var bimElement in local.BimElements ?? Enumerable.Empty<BimElementObjective>())
