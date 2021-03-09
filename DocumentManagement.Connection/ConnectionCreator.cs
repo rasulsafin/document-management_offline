@@ -9,7 +9,6 @@ namespace MRS.DocumentManagement.Connection
 {
     public static class ConnectionCreator
     {
-        private static readonly string METHOD_NAME = "GetConnectionType";
         private static readonly string SEARCH_PATTERN = "*DocumentManagement.Connection.*.dll";
 
         private static Dictionary<string, Type> connections;
@@ -38,7 +37,7 @@ namespace MRS.DocumentManagement.Connection
             foreach (Type type in listOfTypes)
             {
                 var connection = Activator.CreateInstance(type);
-                var method = type.GetMethod("GetConnectionType");
+                var method = type.GetMethod(nameof(IConnection.GetConnectionType));
                 var result = method?.Invoke(connection, null) as ConnectionTypeDto;
 
                 if (result == null)
