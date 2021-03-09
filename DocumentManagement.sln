@@ -45,18 +45,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connecti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Utils", "DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Synchronizer", "DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Synchronizer", "DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tdms", "DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj", "{6B2CB931-05A8-436C-A577-0B214C6371AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.Tdms.Tests", "DocumentManagement.Connection.Tdms.Tests\DocumentManagement.Connection.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tdms.Tests", "DocumentManagement.Connection.Tdms.Tests\DocumentManagement.Connection.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.LementPro", "DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj", "{4743FB4F-E042-449B-AF24-F57B2DB781A5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.LementPro.Tests", "DocumentManagement.Connection.LementPro.Tests\DocumentManagement.Connection.LementPro.Tests.csproj", "{FBDF7022-111F-4369-8517-898BCCD3550C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.LementPro.Tests", "DocumentManagement.Connection.LementPro.Tests\DocumentManagement.Connection.LementPro.Tests.csproj", "{FBDF7022-111F-4369-8517-898BCCD3550C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F0DDE61F-8B24-4933-8CD7-3B72AC61434E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Connections", "Connections", "{D6D41822-CE95-4B4A-A095-3BC461268736}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -139,6 +143,18 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{4FCADB27-F8FB-45BF-9380-C9C5770C225E} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{60447240-DC7B-4598-9613-9545AB000D04} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{9B5DEA4C-2247-4846-B885-B1D20B8E8480} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{CD3E74B2-84F3-4797-9F72-F22424021ED7} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{D1CC8DE3-3847-43F2-9088-23C5ECECF385} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{6B2CB931-05A8-436C-A577-0B214C6371AC} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{4743FB4F-E042-449B-AF24-F57B2DB781A5} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{FBDF7022-111F-4369-8517-898BCCD3550C} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}
