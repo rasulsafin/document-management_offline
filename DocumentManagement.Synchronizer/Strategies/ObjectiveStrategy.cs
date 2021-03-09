@@ -58,6 +58,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
+            tuple.Merge();
+            tuple.Synchronized.Project = tuple.Remote.Project;
+            tuple.Local.Project = data.Context.Projects
+               .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
+
             await base.AddToLocal(tuple, data, connectionContext, parent);
             await SynchronizeItems(tuple, data, connectionContext);
         }
