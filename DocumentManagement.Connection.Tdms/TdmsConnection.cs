@@ -148,5 +148,10 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
             return list;
         }
+
+        public Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

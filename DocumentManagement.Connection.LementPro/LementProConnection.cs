@@ -71,5 +71,10 @@ namespace MRS.DocumentManagement.Connection.LementPro
         {
             throw new NotImplementedException();
         }
+
+        public Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

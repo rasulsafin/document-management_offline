@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             var itemDto = new ItemExternalDto()
             {
                 Name = tdmsObject.FileName,
-                ExternalItemId = tdmsObject.Handle,
+                ExternalID = tdmsObject.Handle,
                 ItemType = GetItemType(tdmsObject.FileDefName),
             };
 

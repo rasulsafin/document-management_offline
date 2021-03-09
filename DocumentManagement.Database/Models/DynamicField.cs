@@ -25,8 +25,6 @@ namespace MRS.DocumentManagement.Database.Models
 
         public ICollection<DynamicField> ChildrenDynamicFields { get; set; }
 
-        public string ExternalID { get; set; }
-
         public DateTime UpdatedAt { get; set; }
 
         public bool IsSynchronized { get; set; }

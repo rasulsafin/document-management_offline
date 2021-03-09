@@ -547,7 +547,7 @@ namespace MRS.DocumentManagement.Tests
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
-            var dynamicFields = new List<DynamicFieldDto>();
+            var dynamicFields = new List<IDynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
             var changedObjective = new ObjectiveDto
@@ -748,7 +748,7 @@ namespace MRS.DocumentManagement.Tests
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
-            var dynamicFields = new List<DynamicFieldDto>();
+            var dynamicFields = new List<IDynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
 

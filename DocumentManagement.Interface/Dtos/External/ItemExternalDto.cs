@@ -8,6 +8,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string ExternalID { get; set; }
 
+        public string FullPath { get; set; }
+
         public ItemTypeDto ItemType { get; set; }
 
         public DateTime UpdatedAt { get; set; }

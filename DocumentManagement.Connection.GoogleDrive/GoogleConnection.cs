@@ -56,6 +56,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return type;
         }
 
+        public Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
         {
             return await Connect(info);

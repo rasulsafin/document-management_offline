@@ -97,5 +97,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return type;
         }
 
+        public Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
