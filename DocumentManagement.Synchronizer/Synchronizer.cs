@@ -27,26 +27,65 @@ namespace MRS.DocumentManagement.Synchronization
         {
             var results = new List<SynchronizingResult>();
 
-            var date = DateTime.UtcNow;
-            var lastSynchronization = await data.Context.Synchronizations.OrderBy(x => x.Date).LastOrDefaultAsync();
-            var context = await connection.GetContext(info, lastSynchronization?.Date ?? DateTime.MinValue);
-            var project = new ProjectStrategy(mapper);
-            var objective = new ObjectiveStrategy(mapper);
+            try
+            {
+                var date = DateTime.UtcNow;
+                var lastSynchronization = await data.Context.Synchronizations.OrderBy(x => x.Date).LastOrDefaultAsync();
+                var context = await connection.GetContext(info, lastSynchronization?.Date ?? DateTime.MinValue);
+                var project = new ProjectStrategy(mapper);
+                var objective = new ObjectiveStrategy(mapper);
 
-            results.AddRange(await project.Synchronize(
-                data,
-                context,
-                mapper.Map<IReadOnlyCollection<Project>>(await context.Projects)));
+                try
+                {
+                    results.AddRange(await project.Synchronize(
+                        data,
+                        context,
+                        mapper.Map<IReadOnlyCollection<Project>>(await context.Projects)));
+                }
+                catch (Exception e)
+                {
+                    results.Add(
+                        new SynchronizingResult()
+                        {
+                            Exception = e,
+                        });
 
-            results.AddRange(await objective.Synchronize(
-                data,
-                context,
-                mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives)));
+                    return results;
+                }
 
-            await data.Context.Synchronizations.AddAsync(new Database.Models.Synchronization { Date = date });
-            await data.Context.SaveChangesAsync();
-            await SynchronizationFinalizer.Finalize(data);
-            await data.Context.SaveChangesAsync();
+                try
+                {
+                    results.AddRange(await objective.Synchronize(
+                    data,
+                    context,
+                    mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives)));
+                }
+                catch (Exception e)
+                {
+                    results.Add(
+                        new SynchronizingResult()
+                        {
+                            Exception = e,
+                        });
+
+                    return results;
+                }
+
+                await data.Context.Synchronizations.AddAsync(new Database.Models.Synchronization { Date = date });
+                await data.Context.SaveChangesAsync();
+                await SynchronizationFinalizer.Finalize(data);
+                await data.Context.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                results.Add(
+                    new SynchronizingResult()
+                    {
+                        Exception = e,
+                    });
+
+                return results;
+            }
 
             return results;
         }
