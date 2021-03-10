@@ -37,9 +37,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             await NothingAction(tuple, data, connectionContext, parent);
-
-            // TODO: improve this.
-            return new SynchronizingResult();
+            return null;
         }
 
         protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)

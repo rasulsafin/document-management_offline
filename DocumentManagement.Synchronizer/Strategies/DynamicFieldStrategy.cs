@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,24 +21,56 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
         }
 
-        protected override async Task AddToLocal(
+        protected override async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeChildren(tuple, data, connectionContext, parent);
-            await base.AddToLocal(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+
+                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
+                    throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Local");
+
+                return await base.AddToLocal(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
         }
 
-        protected override async Task AddToRemote(
+        protected override async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeChildren(tuple, data, connectionContext, parent);
-            await base.AddToRemote(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+
+                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
+                    throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Remote");
+
+                return await base.AddToRemote(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
         protected override async Task<SynchronizingResult> Merge(
@@ -46,34 +79,82 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeChildren(tuple, data, connectionContext, parent);
-            return await base.Merge(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+
+                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
+                    throw new Exception("Exception created while Synchronizing children in Merge Dynamic Field");
+
+                return await base.Merge(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected override async Task RemoveFromLocal(
+        protected override async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeChildren(tuple, data, connectionContext, parent);
-            await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+
+                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
+                    throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Local");
+
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected override async Task RemoveFromRemote(
+        protected override async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeChildren(tuple, data, connectionContext, parent);
-            await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+
+                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
+                    throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Remote");
+
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
         }
 
         protected override DbSet<DynamicField> GetDBSet(DMContext context)
             => context.DynamicFields;
 
-        private async Task SynchronizeChildren(
+        private async Task<List<SynchronizingResult>> SynchronizeChildren(
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
@@ -85,7 +166,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var subStrategy = new DynamicFieldStrategy(mapper, Link, Update, Unlink);
                 var id1 = tuple.Local?.ID ?? 0;
                 var id2 = tuple.Synchronized?.ID ?? 0;
-                await subStrategy.Synchronize(
+                var results = await subStrategy.Synchronize(
                     data,
                     connectionContext,
                     tuple.Remote?.ChildrenDynamicFields?.ToList() ?? new List<DynamicField>(),
@@ -95,7 +176,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                                 field.SynchronizationMate.ParentFieldID == id2)),
                     tuple);
                 SynchronizeChanges(parent as ISynchronizationChanges, tuple);
+                return results;
             }
+
+            return null;
         }
 
         private bool HasChildren(DynamicField field)
