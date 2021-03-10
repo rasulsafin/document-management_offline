@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Type = 40179,
                 Name = $"Задача от {DateTime.Now}",
                 Description = $"Описание новой задачи {Guid.NewGuid()}",
-                I60099 = "44212",
+                //I60099 = "44212",
                 StartDate = DateTime.Now.ToString(dateFormat),
             };
 
@@ -153,7 +153,40 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             var result = await service.DeleteTaskAsync(created.ID.Value);
 
-            Assert.IsTrue(result);
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetTaskAsync_DeletedTask_ReturnsTrue()
+        {
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var newTaskValue = new ObjectBaseValueToCreate
+            {
+                Type = 40179,
+                IsResolution = false,
+                Name = $"Задача от {DateTime.Now}",
+                Description = $"Описание новой задачи {Guid.NewGuid()}",
+                Project = "402014",
+                IsExpired = false,
+                I60099 = "44212",
+                StartDate = DateTime.Now.ToString(dateFormat),
+                BimRef = "402297",
+            };
+            var newTask = new ObjectBaseToCreate
+            {
+                CanAutoEditParents = false,
+                Values = newTaskValue,
+                FileIds = new List<int>(),
+            };
+            var created = await service.CreateTask(newTask);
+
+            // Wait for creating (2 sec is enough usually)
+            await Task.Delay(3000);
+            await service.DeleteTaskAsync(created.ID.Value);
+
+            var result = await service.GetTaskAsync(created.ID.Value);
+
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]

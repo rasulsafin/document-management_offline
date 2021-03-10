@@ -27,9 +27,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public void Dispose()
         {
-            connector.Dispose();
-            authenticationService.Dispose();
-            requestUtility.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)

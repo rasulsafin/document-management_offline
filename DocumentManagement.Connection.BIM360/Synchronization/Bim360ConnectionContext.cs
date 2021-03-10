@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             => new Bim360ObjectivesSynchronizer(this);
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
-         => new Bim360ProjectsSynchronizer(this);
+            => new Bim360ProjectsSynchronizer(this);
 
         protected override async Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
         {
