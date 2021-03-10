@@ -8,6 +8,8 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
 
+        public string ExternalId { get; set; }
+
         public int? ConnectionTypeID { get; set; }
 
         public ConnectionType ConnectionType { get; set; }

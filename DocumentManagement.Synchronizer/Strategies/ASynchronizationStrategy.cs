@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 remoteCollection,
                 IsEntitiesEquals);
 
-            List<SynchronizingResult> results = new List<SynchronizingResult>();
+            var results = new List<SynchronizingResult>();
 
             foreach (var tuple in tuples)
             {
@@ -52,19 +52,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         await NothingAction(tuple, data, connectionContext, parent);
                         break;
                     case SynchronizingAction.Merge:
-                        results.Add(await Merge(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent));
                         break;
                     case SynchronizingAction.AddToLocal:
-                        await AddToLocal(tuple, data, connectionContext, parent);
+                        results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent));
                         break;
                     case SynchronizingAction.AddToRemote:
-                        await AddToRemote(tuple, data, connectionContext, parent);
+                        results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent));
                         break;
                     case SynchronizingAction.RemoveFromLocal:
-                        await RemoveFromLocal(tuple, data, connectionContext, parent);
+                        results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent));
                         break;
                     case SynchronizingAction.RemoveFromRemote:
-                        await RemoveFromRemote(tuple, data, connectionContext, parent);
+                        results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
@@ -97,8 +97,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
-            => Task.CompletedTask;
+            object parent) => Task.CompletedTask;
 
         protected virtual async Task<SynchronizingResult> Merge(
             SynchronizingTuple<TDB> tuple,
@@ -111,53 +110,108 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
                 UpdateDB(GetDBSet(data.Context), tuple);
 
-                return new SynchronizingResult() { Status = SynchronizingStatus.Successful, Object = tuple.Local };
+                return null;
             }
-            catch
+            catch (Exception e)
             {
-                return new SynchronizingResult() { Status = SynchronizingStatus.Unsuccessful };
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
             }
         }
 
-        protected virtual Task AddToLocal(
+        protected virtual Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            UpdateDB(GetDBSet(data.Context), tuple);
-            return Task.CompletedTask;
+            try
+            {
+                UpdateDB(GetDBSet(data.Context), tuple);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult(new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                });
+            }
         }
 
-        protected virtual async Task AddToRemote(
+        protected virtual async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
-            UpdateDB(GetDBSet(data.Context), tuple);
+            try
+            {
+                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
+                UpdateDB(GetDBSet(data.Context), tuple);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected virtual Task RemoveFromLocal(
+        protected virtual Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            RemoveFromDB(tuple, data);
-            return Task.CompletedTask;
+            try
+            {
+                RemoveFromDB(tuple, data);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return Task.FromResult(new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                });
+            }
         }
 
-        protected virtual async Task RemoveFromRemote(
+        protected virtual async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            var project = mapper.Map<TDto>(tuple.Remote);
-            await GetSynchronizer(connectionContext).Remove(project);
-            RemoveFromDB(tuple, data);
+            try
+            {
+                var project = mapper.Map<TDto>(tuple.Remote);
+                await GetSynchronizer(connectionContext).Remove(project);
+                RemoveFromDB(tuple, data);
+                return null;
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
         }
 
         private void RemoveFromDB(SynchronizingTuple<TDB> tuple, SynchronizingData data)

@@ -107,6 +107,9 @@ namespace MRS.DocumentManagement.Database
                 .HasIndex(x => x.Name)
                 .IsUnique(true);
             modelBuilder.Entity<ObjectiveType>()
+                .HasIndex(x => x.ExternalId)
+                .IsUnique(true);
+            modelBuilder.Entity<ObjectiveType>()
                 .HasMany(x => x.Objectives)
                 .WithOne(x => x.ObjectiveType)
                 .OnDelete(DeleteBehavior.Restrict);

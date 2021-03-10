@@ -6,6 +6,6 @@
         Open,
         InProgress,
         Ready,
-        Late
+        Late,
     }
 }

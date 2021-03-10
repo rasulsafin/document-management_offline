@@ -1,22 +1,20 @@
-using System.Collections.Generic;
+using System;
 using MRS.DocumentManagement.Database;
 
 namespace MRS.DocumentManagement.Synchronization.Models
 {
+    public enum ObjectType
+    {
+        Local,
+        Remote,
+    }
+
     public class SynchronizingResult
     {
-        public SynchronizingStatus Status { get; set; }
-
         public ISynchronizableBase Object { get; set; }
 
-        //public List<(SynchronizingStatus, ISynchronizableBase)> Result { get; set; }
+        public ObjectType ObjectType { get; set; }
 
-       // public List<(SynchronizingStatus, Project)> Projects { get; set; }
-
-        //public List<(SynchronizingStatus, Objective)> Objectives { get; set; }
-
-        //public List<(SynchronizingStatus, Item)> Items { get; set; }
-
-        //public List<(SynchronizingStatus, DynamicField)> DynamicFields { get; set; }
+        public Exception Exception { get; set; }
     }
 }

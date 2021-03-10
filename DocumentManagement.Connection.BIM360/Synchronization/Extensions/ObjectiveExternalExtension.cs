@@ -68,16 +68,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             return field?.Value;
         }
 
-        private static string ParseStatus(ObjectiveStatus status)
-        {
-            return status switch
-            {
-                ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
-                ObjectiveStatus.Ready => nameof(Status.Closed).ToLower(),
-                _ => null,
-            };
-        }
-
         private static ICollection<ItemExternalDto> GetItems(Issue issue)
         {
             // use issuesService.GetAttachmentsAsync
@@ -98,6 +88,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             return new List<DynamicFieldExternalDto>
             {
                 issueSubTypeField,
+            };
+        }
+
+        private static string ParseStatus(ObjectiveStatus status)
+        {
+            return status switch
+            {
+                ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
+                ObjectiveStatus.Ready => nameof(Status.Closed).ToLower(),
+                _ => null,
             };
         }
 

@@ -20,4 +20,13 @@
     <ProjectReference Include="..\DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Resources\IntegrationTestFile.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Resources\TestIcon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
