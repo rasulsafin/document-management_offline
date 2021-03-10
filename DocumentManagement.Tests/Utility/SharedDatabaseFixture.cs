@@ -1,8 +1,8 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System;
+using System.Data.Common;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
-using System;
-using System.Data.Common;
 
 namespace MRS.DocumentManagement.Tests.Utility
 {
@@ -18,8 +18,7 @@ namespace MRS.DocumentManagement.Tests.Utility
 
         public SharedDatabaseFixture(Action<DMContext> seedAction = null)
         {
-            //Connection = new Npgsql.NpgsqlConnection("Server=127.0.0.1;Port=5432;Database=DocumentManagement;User Id=postgres;Password=123;");
-            Context = Seed(seedAction); 
+            Context = Seed(seedAction);
             Connection.Open();
             //Connection = RelationalOptionsExtension.Extract(options).Connection;
         }
@@ -28,7 +27,6 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             options = new DbContextOptionsBuilder<DMContext>().UseSqlite(CreateInMemoryDatabase()).Options;
             var context = new DMContext(options);
-            //var context = new DMContext(new DbContextOptionsBuilder<DMContext>().UseNpgsql(Connection).Options);
 
             if (transaction != null)
                 context.Database.UseTransaction(transaction);

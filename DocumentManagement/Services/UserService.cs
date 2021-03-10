@@ -1,15 +1,16 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -18,11 +19,16 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly CryptographyHelper cryptographyHelper;
+        private readonly ISyncService synchronizator;
 
-        public UserService(DMContext context, IMapper mapper, CryptographyHelper helper)
+        public UserService(DMContext context,
+             IMapper mapper,
+             ISyncService synchronizator,
+             CryptographyHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
+            this.synchronizator = synchronizator;
             cryptographyHelper = helper;
         }
 
@@ -43,9 +49,13 @@ namespace MRS.DocumentManagement.Services
                 var user = mapper.Map<User>(data);
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
+                // context.Users.
                 context.Users.Add(user);
                 await context.SaveChangesAsync();
-                return new ID<UserDto>(user.ID);
+
+                var userID = new ID<UserDto>(user.ID);
+                synchronizator.Update(NameTypeRevision.Users, user.ID);
+                return userID;
             }
             catch (DbUpdateException ex)
             {
@@ -73,6 +83,7 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
             }
 
+            synchronizator.Update(NameTypeRevision.Users, user.ID, TypeChange.Delete);
             return true;
         }
 
@@ -114,6 +125,7 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
+                synchronizator.Update(NameTypeRevision.Users, storedUser.ID);
                 return true;
             }
             catch

@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System;
-using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace DocumentManagement.Api.Controllers
@@ -48,9 +47,10 @@ namespace DocumentManagement.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllObjectiveTypes()
+        [Route("list/{connectionTypeId}")]
+        public async Task<IActionResult> GetAllObjectiveTypes([FromRoute] int connectionTypeId)
         {
-            var allTypes = await service.GetAllObjectiveTypes();
+            var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));
             return ValidateCollection(allTypes);
         }
 

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>MRS.DocumentManagement.Connection.YandexDisk</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+  </ItemGroup>
+
+</Project>

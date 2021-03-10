@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Interface;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
@@ -11,53 +10,49 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class ConnectionsController : ControllerBase
     {
-        private IConnectionService service;
+        private readonly IConnectionService service;
 
         public ConnectionsController(IConnectionService connectionService) => service = connectionService;
 
-        [HttpGet]
-        public async Task<IActionResult> GetAvailableConnections()
-        {
-            var availableConnections = await service.GetAvailableConnections();
-            return ValidateCollection(availableConnections);
-        }
-
         [HttpPost]
-        public async Task<IActionResult> LinkRemoteConnection(RemoteConnectionToCreateDto connectionInfo)
+        public async Task<IActionResult> Add([FromBody] ConnectionInfoToCreateDto connectionInfo)
         {
-            var linked = await service.LinkRemoteConnection(connectionInfo);
-            return Forbid();
+            var connectionInfoId = await service.Add(connectionInfo);
+            return ValidateId(connectionInfoId);
         }
 
         [HttpGet]
-        [Route("status")]
-        public async Task<IActionResult> GetRemoteConnectionStatus()
+        [Route("connect/{userID}")]
+        public async Task<IActionResult> Connect([FromRoute] int userID)
         {
-            var status = await service.GetRemoteConnectionStatus();
-            return Forbid();
-        }
-
-        [HttpPut]
-        public async Task<IActionResult> Reconnect(RemoteConnectionToCreateDto connectionInfo)
-        {
-            var reconnected = await service.Reconnect(connectionInfo);
-            return Forbid();
+            var result = await service.Connect(new ID<UserDto>(userID));
+            return Ok(result);
         }
 
         [HttpGet]
-        [Route("current")]
-        public async Task<IActionResult> GetCurrentConnection(int userId)
+        [Route("{userID}")]
+        public async Task<IActionResult> Get([FromRoute] int userID)
         {
-            var connection = await service.GetCurrentConnection(new ID<UserDto>(userId));
-            return ValidateFoundObject(connection);
+            var connectionInfoDto = await service.Get(new ID<UserDto>(userID));
+            return ValidateFoundObject(connectionInfoDto);
         }
 
-        //[HttpGet]
-        //[Route("variants")]
-        //public async Task<IActionResult> GetEnumVariants(string dynamicFieldKey)
-        //{
-        //    var variants = await service.GetEnumVariants(dynamicFieldKey);
-        //    return Forbid();
-        //}
+        [HttpGet]
+        [Route("status/{userID}")]
+        public async Task<IActionResult> GetRemoteConnectionStatus([FromRoute] int userID)
+        {
+            var status = await service.GetRemoteConnectionStatus(new ID<UserDto>(userID));
+            return ValidateFoundObject(status);
+        }
+
+        [HttpGet]
+        [Route("enumerationValues")]
+        public async Task<IActionResult> GetEnumerationVariants([FromQuery] int userID, [FromQuery]int enumerationTypeID)
+        {
+            var result = await service.GetEnumerationVariants(new ID<UserDto>(userID), new ID<EnumerationTypeDto>(enumerationTypeID));
+            return ValidateFoundObject(result);
+        }
+
+            // TODO: Syncronization!
     }
 }

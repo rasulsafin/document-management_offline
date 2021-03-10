@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utils.ReportCreator;
 
@@ -19,13 +20,19 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
+        private readonly ISyncService synchronizator;
         private readonly ReportHelper reportHelper = new ReportHelper();
 
-        public ObjectiveService(DMContext context, IMapper mapper, ItemHelper itemHelper)
+        public ObjectiveService(DMContext context
+            , IMapper mapper
+            , ItemHelper itemHelper
+            , ISyncService synchronizator
+            )
         {
             this.context = context;
             this.mapper = mapper;
             this.itemHelper = itemHelper;
+            this.synchronizator = synchronizator;
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
@@ -40,7 +47,7 @@ namespace MRS.DocumentManagement.Services
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
             {
                 var dbBim = await context.BimElements
-                    .Where(x => x.ItemID == (int)bim.ItemID)
+                    .Where(x => x.ParentName == bim.ParentName)
                     .Where(x => x.GlobalID == bim.GlobalID)
                     .FirstOrDefaultAsync();
                 if (dbBim == null)
@@ -72,7 +79,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             await context.SaveChangesAsync();
-
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return mapper.Map<ObjectiveToListDto>(objective);
         }
 
@@ -167,6 +174,7 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Objectives.Remove(objective);
             await context.SaveChangesAsync();
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID, TypeChange.Delete);
             return true;
         }
 
@@ -216,7 +224,7 @@ namespace MRS.DocumentManagement.Services
             var currentBimLinks = objective.BimElements.ToList();
             var linksToRemove = currentBimLinks
                 .Where(x => !newBimElements.Any(e =>
-                    (int)e.ItemID == x.BimElement.ItemID
+                    e.ParentName == x.BimElement.ParentName
                     && e.GlobalID == x.BimElement.GlobalID))
                 .ToList();
             context.BimElementObjectives.RemoveRange(linksToRemove);
@@ -226,7 +234,7 @@ namespace MRS.DocumentManagement.Services
             foreach (var bim in newBimElements)
             {
                 // See if objective already had this bim element referenced
-                var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ItemID == (int)bim.ItemID && x.BimElement.GlobalID == bim.GlobalID);
+                var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ParentName == bim.ParentName && x.BimElement.GlobalID == bim.GlobalID);
                 if (dbBim != null)
                 {
                     objective.BimElements.Add(dbBim);
@@ -234,7 +242,7 @@ namespace MRS.DocumentManagement.Services
                 else
                 {
                     // Bim element was not referenced. Does it exist?
-                    var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ItemID == (int)bim.ItemID && x.GlobalID == bim.GlobalID);
+                    var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ParentName == bim.ParentName && x.GlobalID == bim.GlobalID);
                     if (bimElement == null)
                     {
                         // Bim element does not exist at all - should be created
@@ -265,6 +273,7 @@ namespace MRS.DocumentManagement.Services
 
             context.Update(objective);
             await context.SaveChangesAsync();
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return true;
         }
 
@@ -273,12 +282,14 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
-
+            synchronizator.Update(NameTypeRevision.Items, dbItem.ID);
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
                 ItemID = dbItem.ID,
             });
+
+            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
@@ -291,6 +302,8 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
+            synchronizator.Update(NameTypeRevision.Objectives, objectiveID);
+
             return true;
         }
 

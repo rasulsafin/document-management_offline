@@ -64,8 +64,6 @@ namespace MRS.DocumentManagement.Tests
                     objectives[2].ObjectiveTypeID = objectiveTypes[1].ID;
                 }
 
-                var bimFile = items.First(i => i.ItemType == (int)ItemTypeDto.Bim);
-                bimElements.ForEach(e => e.ItemID = bimFile.ID);
                 context.BimElements.AddRange(bimElements);
 
                 context.Objectives.AddRange(objectives);
@@ -87,7 +85,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper());
+            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new SyncServiceTest());
         }
 
         [TestCleanup]
@@ -134,7 +132,8 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = existingBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(existingBimElement.ItemID),
+                    ElementName = existingBimElement.ElementName,
+                    ParentName = existingBimElement.ParentName,
                 },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -172,7 +171,8 @@ namespace MRS.DocumentManagement.Tests
                 new BimElementDto
                 {
                     GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(1),
+                    ElementName = "Doorway",
+                    ParentName = "MEGA",
                 },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -211,12 +211,14 @@ namespace MRS.DocumentManagement.Tests
                     new BimElementDto
                     {
                         GlobalID = existingBimElement.GlobalID,
-                        ItemID = new ID<ItemDto>(existingBimElement.ItemID),
+                        ElementName = existingBimElement.ElementName,
+                        ParentName = existingBimElement.ParentName,
                     },
                     new BimElementDto
                     {
                         GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                        ItemID = new ID<ItemDto>(1),
+                        ElementName = "Floor",
+                        ParentName = "Home",
                     },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -329,15 +331,17 @@ namespace MRS.DocumentManagement.Tests
             var dbItem = Fixture.Context.Items.First();
             var bimList = new List<BimElementDto>
             {
-                    new BimElementDto
+                     new BimElementDto
                     {
                         GlobalID = existingBimElement.GlobalID,
-                        ItemID = new ID<ItemDto>(existingBimElement.ItemID),
+                        ElementName = existingBimElement.ElementName,
+                        ParentName = existingBimElement.ParentName,
                     },
                     new BimElementDto
                     {
                         GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                        ItemID = new ID<ItemDto>(1),
+                        ElementName = "Floor",
+                        ParentName = "Home",
                     },
             };
             var items = new List<ItemDto>
@@ -589,16 +593,18 @@ namespace MRS.DocumentManagement.Tests
             var firstBimElement = existingObjective.BimElements.First().BimElement;
             var changedBimElements = new List<BimElementDto>
             {
-                new BimElementDto
-                {
-                    GlobalID = firstBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
-                },
-                new BimElementDto
-                {
-                    GlobalID = $"newBimsGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
-                },
+                 new BimElementDto
+                    {
+                        GlobalID = firstBimElement.GlobalID,
+                        ElementName = firstBimElement.ElementName,
+                        ParentName = firstBimElement.ParentName,
+                    },
+                 new BimElementDto
+                    {
+                        GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
+                        ElementName = firstBimElement.ElementName,
+                        ParentName = firstBimElement.ParentName,
+                    },
             };
             var newBimElementsCount = changedBimElements.Count - 1;
             var changedObjective = new ObjectiveDto
@@ -627,7 +633,7 @@ namespace MRS.DocumentManagement.Tests
             updatedObjective.BimElements.ToList().ForEach(be =>
             {
                 Assert.IsTrue(changedBimElements.Any(cbe => cbe.GlobalID == be.BimElement.GlobalID
-                                                            && (int)cbe.ItemID == be.BimElement.ItemID));
+                                                            && cbe.ParentName == be.BimElement.ParentName));
             });
         }
 
@@ -777,16 +783,18 @@ namespace MRS.DocumentManagement.Tests
             var firstBimElement = existingObjective.BimElements.First().BimElement;
             var changedBimElements = new List<BimElementDto>
             {
-                new BimElementDto
-                {
-                    GlobalID = firstBimElement.GlobalID,
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
-                },
-                new BimElementDto
-                {
-                    GlobalID = $"newBimsGlobalId{Guid.NewGuid()}",
-                    ItemID = new ID<ItemDto>(firstBimElement.ItemID),
-                },
+                 new BimElementDto
+                    {
+                        GlobalID = firstBimElement.GlobalID,
+                        ElementName = firstBimElement.ElementName,
+                        ParentName = firstBimElement.ParentName,
+                    },
+                 new BimElementDto
+                    {
+                        GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
+                        ElementName = "Floor",
+                        ParentName = "Home",
+                    },
             };
             var newBimElementsCount = changedBimElements.Count - 1;
 

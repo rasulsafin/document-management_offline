@@ -16,21 +16,85 @@ namespace DocumentManagement.Database.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.1");
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AppProperty", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConnectionTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ConnectionTypeID");
+
+                    b.ToTable("AppProperties");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AuthFieldName", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConnectionTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ConnectionTypeID");
+
+                    b.ToTable("AuthFieldNames");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AuthFieldValue", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ConnectionInfoID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Key")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ConnectionInfoID");
+
+                    b.ToTable("AuthFieldValues");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.BimElement", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ElementName")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("GlobalID")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ItemID")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ParentName")
+                        .HasColumnType("TEXT");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("ItemID");
 
                     b.ToTable("BimElements");
                 });
@@ -56,15 +120,61 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AuthFieldNames")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ConnectionTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ConnectionTypeID");
+
+                    b.ToTable("ConnectionInfos");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfoEnumerationType", b =>
+                {
+                    b.Property<int>("ConnectionInfoID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EnumerationTypeID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ConnectionInfoID", "EnumerationTypeID");
+
+                    b.HasIndex("EnumerationTypeID");
+
+                    b.ToTable("ConnectionInfoEnumerationTypes");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfoEnumerationValue", b =>
+                {
+                    b.Property<int>("ConnectionInfoID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EnumerationValueID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ConnectionInfoID", "EnumerationValueID");
+
+                    b.HasIndex("EnumerationValueID");
+
+                    b.ToTable("ConnectionInfoEnumerationValues");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionType", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
-                    b.ToTable("ConnectionInfos");
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("ConnectionTypes");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
@@ -92,42 +202,48 @@ namespace DocumentManagement.Database.Migrations
                     b.ToTable("DynamicFields");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDm", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ConnectionInfoID")
+                    b.Property<int?>("ConnectionTypeID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ConnectionInfoID");
+                    b.HasIndex("ConnectionTypeID");
 
-                    b.ToTable("EnumDms");
+                    b.ToTable("EnumerationTypes");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDmValue", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationValue", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EnumDmID")
+                    b.Property<int>("EnumerationTypeID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Value")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EnumDmID");
+                    b.HasIndex("EnumerationTypeID");
 
-                    b.ToTable("EnumDmValues");
+                    b.ToTable("EnumerationValues");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Item", b =>
@@ -217,10 +333,15 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ConnectionTypeID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ConnectionTypeID");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -318,27 +439,13 @@ namespace DocumentManagement.Database.Migrations
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ConnectionInfoID");
+                    b.HasIndex("ConnectionInfoID")
+                        .IsUnique();
 
                     b.HasIndex("Login")
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.UserEnumDmValue", b =>
-                {
-                    b.Property<int>("EnumDmValueID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("UserID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("EnumDmValueID", "UserID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("UserEnumDmValues");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.UserProject", b =>
@@ -371,15 +478,37 @@ namespace DocumentManagement.Database.Migrations
                     b.ToTable("UserRoles");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.BimElement", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AppProperty", b =>
                 {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
-                        .WithMany("BimElements")
-                        .HasForeignKey("ItemID")
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
+                        .WithMany("AppProperties")
+                        .HasForeignKey("ConnectionTypeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Item");
+                    b.Navigation("ConnectionType");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AuthFieldName", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
+                        .WithMany("AuthFieldNames")
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConnectionType");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AuthFieldValue", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
+                        .WithMany("AuthFieldValues")
+                        .HasForeignKey("ConnectionInfoID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConnectionInfo");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.BimElementObjective", b =>
@@ -401,6 +530,55 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("Objective");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfo", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
+                        .WithMany("ConnectionInfos")
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConnectionType");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfoEnumerationType", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
+                        .WithMany("EnumerationTypes")
+                        .HasForeignKey("ConnectionInfoID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.EnumerationType", "EnumerationType")
+                        .WithMany("ConnectionInfos")
+                        .HasForeignKey("EnumerationTypeID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConnectionInfo");
+
+                    b.Navigation("EnumerationType");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfoEnumerationValue", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
+                        .WithMany("EnumerationValues")
+                        .HasForeignKey("ConnectionInfoID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.EnumerationValue", "EnumerationValue")
+                        .WithMany("ConnectionInfos")
+                        .HasForeignKey("EnumerationValueID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ConnectionInfo");
+
+                    b.Navigation("EnumerationValue");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
@@ -412,26 +590,25 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("Objective");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDm", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>
                 {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
-                        .WithMany("EnumDms")
-                        .HasForeignKey("ConnectionInfoID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
+                        .WithMany("EnumerationTypes")
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.Navigation("ConnectionInfo");
+                    b.Navigation("ConnectionType");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDmValue", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationValue", b =>
                 {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.EnumDm", "EnumDm")
-                        .WithMany("EnumDmValues")
-                        .HasForeignKey("EnumDmID")
+                    b.HasOne("MRS.DocumentManagement.Database.Models.EnumerationType", "EnumerationType")
+                        .WithMany("EnumerationValues")
+                        .HasForeignKey("EnumerationTypeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("EnumDm");
+                    b.Navigation("EnumerationType");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>
@@ -486,6 +663,16 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("Objective");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ObjectiveType", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionType", "ConnectionType")
+                        .WithMany("ObjectiveTypes")
+                        .HasForeignKey("ConnectionTypeID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ConnectionType");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ProjectItem", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
@@ -508,30 +695,11 @@ namespace DocumentManagement.Database.Migrations
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.User", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
-                        .WithMany("Users")
-                        .HasForeignKey("ConnectionInfoID")
+                        .WithOne("User")
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.User", "ConnectionInfoID")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("ConnectionInfo");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.UserEnumDmValue", b =>
-                {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.EnumDmValue", "EnumDmValue")
-                        .WithMany("Users")
-                        .HasForeignKey("EnumDmValueID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MRS.DocumentManagement.Database.Models.User", "User")
-                        .WithMany("EnumDmValues")
-                        .HasForeignKey("UserID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("EnumDmValue");
-
-                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.UserProject", b =>
@@ -579,25 +747,42 @@ namespace DocumentManagement.Database.Migrations
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionInfo", b =>
                 {
-                    b.Navigation("EnumDms");
+                    b.Navigation("AuthFieldValues");
 
-                    b.Navigation("Users");
+                    b.Navigation("EnumerationTypes");
+
+                    b.Navigation("EnumerationValues");
+
+                    b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDm", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ConnectionType", b =>
                 {
-                    b.Navigation("EnumDmValues");
+                    b.Navigation("AppProperties");
+
+                    b.Navigation("AuthFieldNames");
+
+                    b.Navigation("ConnectionInfos");
+
+                    b.Navigation("EnumerationTypes");
+
+                    b.Navigation("ObjectiveTypes");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumDmValue", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>
                 {
-                    b.Navigation("Users");
+                    b.Navigation("ConnectionInfos");
+
+                    b.Navigation("EnumerationValues");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationValue", b =>
+                {
+                    b.Navigation("ConnectionInfos");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Item", b =>
                 {
-                    b.Navigation("BimElements");
-
                     b.Navigation("Objectives");
 
                     b.Navigation("Projects");
@@ -635,8 +820,6 @@ namespace DocumentManagement.Database.Migrations
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.User", b =>
                 {
-                    b.Navigation("EnumDmValues");
-
                     b.Navigation("Objectives");
 
                     b.Navigation("Projects");

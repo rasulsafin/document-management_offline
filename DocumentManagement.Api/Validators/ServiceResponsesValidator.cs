@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Interface;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 
 namespace MRS.DocumentManagement.Api.Validators
 {
@@ -17,7 +15,7 @@ namespace MRS.DocumentManagement.Api.Validators
 
         internal static IActionResult ValidateCollection<T>(IEnumerable<T> collection)
         {
-            return new OkObjectResult(collection);            
+            return new OkObjectResult(collection);
         }
 
         internal static IActionResult ValidateFoundObject<T>(T foundObject)

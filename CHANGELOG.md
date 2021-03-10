@@ -9,12 +9,29 @@
 ### Исправлено:
 ### Безопасность:
 
+
+## 0.8.1 - 2021-03-10
+
+### Добавлено:
+
+* Синхронизация с Яндекс Диском;
+* Синхронизация с Google Drive.
+
+### Изменено:
+
+* Генерация отчетов по задачам;
+* Привязка ifc элементов к задачам.
+
+### Исправлено:
+
+
 ## [0.8.0] - 2021-02-15
 
 ### Добавлено:
 
 * Работа с БД;
 * Web API;
+* Поддержка типов перечеслений для внешних документооборотов.
 
 ### Удалено:
 
@@ -43,6 +60,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[0.8.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.1
 [0.8.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.0
 [0.7.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.7.0
 [0.6.0]: http://virta.briogroup.ru:3000/mrs/view/releases/tag/0.6.0

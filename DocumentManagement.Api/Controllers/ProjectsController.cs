@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Interface;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
@@ -12,7 +11,7 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private IProjectService service;
+        private readonly IProjectService service;
 
         public ProjectsController(IProjectService projectService) => service = projectService;
 

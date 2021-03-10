@@ -1,12 +1,13 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+using MRS.DocumentManagement.Synchronizer;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -14,23 +15,26 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ISyncService syncService;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper)
+        public ObjectiveTypeService(DMContext context, IMapper mapper, ISyncService syncService )
         {
             this.context = context;
             this.mapper = mapper;
+            this.syncService = syncService;
         }
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
-            try 
+            try
             {
                 var objType = new Database.Models.ObjectiveType
                 {
-                    Name = typeName
+                    Name = typeName,
                 };
                 context.ObjectiveTypes.Add(objType);
                 await context.SaveChangesAsync();
+                syncService.Update(NameTypeRevision.ObjectiveTypes, objType.ID);
                 return (ID<ObjectiveTypeDto>)objType.ID;
             }
             catch (DbUpdateException ex)
@@ -52,20 +56,21 @@ namespace MRS.DocumentManagement.Services
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
-        public async Task<IEnumerable<ObjectiveTypeDto>> GetAllObjectiveTypes()
+        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
-            var db = await context.ObjectiveTypes.ToListAsync();
+            var db = await context.ObjectiveTypes.Where(x => x.ConnectionTypeID == null || x.ConnectionTypeID == (int)id).ToListAsync();
             return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
         {
-            try 
-            { 
+            try
+            {
                 var type = await context.ObjectiveTypes.FindAsync((int)id);
                 if (type == null)
                     return false;
                 context.ObjectiveTypes.Remove(type);
+                syncService.Update(NameTypeRevision.ObjectiveTypes, type.ID, TypeChange.Delete);
                 await context.SaveChangesAsync();
                 return true;
             }

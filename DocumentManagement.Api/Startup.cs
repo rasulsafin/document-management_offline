@@ -1,5 +1,6 @@
-using AutoMapper;
-using MRS.DocumentManagement.Utility;
+using System;
+using System.IO;
+using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -10,24 +11,20 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
+//using MRS.DocumentManagement.Connection.Synchronizer;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using System;
-using System.IO;
-using System.Reflection;
+using MRS.DocumentManagement.Synchronizer;
+using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Api
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
@@ -44,17 +41,17 @@ namespace MRS.DocumentManagement.Api
                         ValidateAudience = true,
                         ValidAudience = AuthOptions.AUDIENCE,
                         IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
-                        ValidateIssuerSigningKey = true
+                        ValidateIssuerSigningKey = true,
+                        ValidateLifetime = false,
                     };
                 });
 
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-
-            IMapper mapper = mapperConfig.CreateMapper();
-            services.AddSingleton(mapper);
+            // Mapping
+            services.AddTransient<ConnectionTypeAppPropertiesResolver>();
+            services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
+            services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
+            services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
+            services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
             {
@@ -67,9 +64,9 @@ namespace MRS.DocumentManagement.Api
             {
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "0.8.0",
+                    Version = "0.8.1",
                     Title = "BRIO DM",
-                    Description = "DM API details"
+                    Description = "DM API details",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -79,6 +76,8 @@ namespace MRS.DocumentManagement.Api
             });
 
             services.AddScoped<ItemHelper>();
+
+            services.AddScoped<ISyncService, SyncService>();
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<IItemService, ItemService>();
@@ -86,33 +85,28 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
             services.AddSingleton<CryptographyHelper>();
+            services.AddSingleton<SyncManager>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
-            //else
-            //    app.UseExceptionHandler("/error");
-
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = string.Empty;
             });
-
-            //app.UseHttpsRedirection();
-
             app.UseRouting();
-
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
+            // TODO: uncomment and add Authenticate attribute to all controllers when roles are ready
+            // app.UseAuthentication();
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();

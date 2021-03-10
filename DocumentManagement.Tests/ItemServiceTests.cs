@@ -1,15 +1,15 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Tests.Utility;
-using System;
-using System.Collections.Generic;
+using AutoMapper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
-using AutoMapper;
+using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Database;
 
 namespace MRS.DocumentManagement.Tests
 {

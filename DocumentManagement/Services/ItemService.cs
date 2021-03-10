@@ -1,11 +1,12 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -20,11 +21,24 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
         }
 
+        public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            // TODO: Delete Items from Remote Connection
+            throw new NotImplementedException();
+        }
+
+        public Task<IEnumerable<ItemDto>> DownloadItems(IEnumerable<ID<ItemDto>> itemIds)
+        {
+            // TODO: Download Items from Remote Connection to Local storage
+            throw new NotImplementedException();
+        }
+
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
             var dbItem = await context.Items.FindAsync((int)itemID);
             return dbItem == null ? null : MapItemFromDB(dbItem);
         }
+
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
             var dbItems = await context.ProjectItems
