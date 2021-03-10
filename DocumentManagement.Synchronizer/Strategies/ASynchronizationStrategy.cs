@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
     internal abstract class ASynchronizationStrategy<TDB, TDto>
         where TDB : class, ISynchronizable<TDB>, new()
     {
-        private readonly IMapper mapper;
+        protected readonly IMapper mapper;
 
         protected ASynchronizationStrategy(IMapper mapper)
             => this.mapper = mapper;

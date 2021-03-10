@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
@@ -12,7 +13,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string Value { get; set; }
 
-        public string ParentExternalID { get; set; }
+        public ICollection<DynamicFieldExternalDto> ChildrenDynamicFields { get; set; }
 
         public DateTime UpdatedAt { get; set; }
     }

@@ -41,13 +41,13 @@ namespace MRS.DocumentManagement.Database.Models
         [ForbidMergeAttribute]
         public ICollection<Objective> ChildrenObjectives { get; set; }
 
-        [ForbidMergeAttribute] // TODO: Remove this
+        [ForbidMergeAttribute]
         public ICollection<DynamicField> DynamicFields { get; set; }
 
         [ForbidMergeAttribute]
         public ICollection<ObjectiveItem> Items { get; set; }
 
-        [ForbidMergeAttribute] // TODO: Remove this?
+        [ForbidMergeAttribute]
         public ICollection<BimElementObjective> BimElements { get; set; }
 
         [ForbidMergeAttribute]

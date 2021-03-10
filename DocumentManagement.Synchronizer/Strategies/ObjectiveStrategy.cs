@@ -19,11 +19,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
     internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
         private readonly ItemStrategy itemStrategy;
+        private readonly DynamicFieldStrategy dynamicFieldStrategy;
 
         public ObjectiveStrategy(IMapper mapper)
             : base(mapper)
         {
-            this.itemStrategy = new ItemStrategy(mapper, Link, Unlink);
+            itemStrategy = new ItemStrategy(mapper, LinkItem, UnlinkItem);
+            dynamicFieldStrategy = new DynamicFieldStrategy(mapper, LinkDynamicField, UpdateDynamicField, UnlinkDynamicField);
         }
 
         protected override DbSet<Objective> GetDBSet(DMContext context)
@@ -49,7 +51,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             tuple.Remote.Project = tuple.Synchronized.Project;
 
             MergeBimElements(tuple);
-            await SynchronizeItems(tuple, data, connectionContext);
+            await SynchronizeChildren(tuple, data, connectionContext);
             await base.AddToRemote(tuple, data, connectionContext, parent);
         }
 
@@ -66,7 +68,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             MergeBimElements(tuple);
             await base.AddToLocal(tuple, data, connectionContext, parent);
-            await SynchronizeItems(tuple, data, connectionContext);
+            await SynchronizeChildren(tuple, data, connectionContext);
         }
 
         protected override async Task<SynchronizingResult> Merge(
@@ -76,7 +78,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent)
         {
             MergeBimElements(tuple);
-            await SynchronizeItems(tuple, data, connectionContext);
+            await SynchronizeChildren(tuple, data, connectionContext);
             return await base.Merge(tuple, data, connectionContext, parent);
         }
 
@@ -86,7 +88,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeItems(tuple, data, connectionContext);
+            await SynchronizeChildren(tuple, data, connectionContext);
             await base.RemoveFromLocal(tuple, data, connectionContext, parent);
         }
 
@@ -96,11 +98,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeItems(tuple, data, connectionContext);
+            await SynchronizeChildren(tuple, data, connectionContext);
             await base.RemoveFromRemote(tuple, data, connectionContext, parent);
         }
 
-        private async Task SynchronizeItems(
+        private async Task SynchronizeChildren(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext)
@@ -116,11 +118,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     (item.SynchronizationMate != null &&
                         item.SynchronizationMate.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2)),
                 tuple);
+            await dynamicFieldStrategy.Synchronize(
+                data,
+                connectionContext,
+                tuple.Remote?.DynamicFields?.ToList() ?? new List<DynamicField>(),
+                field => field.ObjectiveID == id1 || field.ObjectiveID == id2 ||
+                    (field.SynchronizationMate != null &&
+                        (field.SynchronizationMate.ObjectiveID == id1 || field.SynchronizationMate.ObjectiveID == id2)),
+                tuple);
         }
 
-        private Task Link(DMContext context, Item item, object parent, EntityType entityType)
+        private Task LinkItem(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var objective = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
+            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
             objective.Items ??= new List<ObjectiveItem>();
             objective.Items.Add(new ObjectiveItem
             {
@@ -130,9 +140,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return Task.CompletedTask;
         }
 
-        private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
+        private Task UnlinkItem(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var objective = ItemsUtils.GetLinked<Objective>(item, parent, entityType);
+            var objective =  LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
 
             if (entityType == EntityType.Remote)
             {
@@ -143,6 +153,36 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             item.Objectives.Remove(item.Objectives.First(x => Equals(x.Objective, objective)));
             if (item.Project == null && item.Objectives?.Count == 0)
                 context.Items.Remove(item);
+            return Task.CompletedTask;
+        }
+
+        private Task UnlinkDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
+        {
+            var objective =  LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
+            field.Objective = null;
+
+            if (entityType == EntityType.Remote)
+                objective.DynamicFields.Remove(field);
+            else if (field.ParentFieldID == null)
+                context.DynamicFields.Remove(field);
+            else
+                context.DynamicFields.Update(field);
+            return Task.CompletedTask;
+        }
+
+        private Task UpdateDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
+        {
+            LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
+            if (entityType != EntityType.Remote)
+                context.DynamicFields.Update(field);
+            return Task.CompletedTask;
+        }
+
+        private Task LinkDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
+        {
+            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
+            objective.DynamicFields ??= new List<DynamicField>();
+            objective.DynamicFields.Add(field);
             return Task.CompletedTask;
         }
 

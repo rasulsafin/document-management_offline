@@ -132,7 +132,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Link(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
+            var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
             project.Items ??= new List<Item>();
             project.Items.Add(item);
             return Task.CompletedTask;
@@ -140,13 +140,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var project = ItemsUtils.GetLinked<Project>(item, parent, entityType);
+            var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
             item.ProjectID = null;
 
             if (entityType == EntityType.Remote)
                 project.Items.Remove(item);
             else if (item.Objectives?.Count == 0)
                 context.Items.Remove(item);
+            else
+                context.Items.Update(item);
             return Task.CompletedTask;
         }
     }

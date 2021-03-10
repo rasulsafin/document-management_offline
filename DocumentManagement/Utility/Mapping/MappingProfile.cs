@@ -163,6 +163,9 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<BimElementExternalDto, BimElementObjective>()
                .ConvertUsing<BimElementObjectiveTypeConverter>();
             CreateMap<BimElementExternalDto, BimElement>();
+
+            CreateMap<DynamicField, DynamicFieldExternalDto>();
+            CreateMap<DynamicFieldExternalDto, DynamicField>();
         }
     }
 }

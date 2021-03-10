@@ -2,7 +2,7 @@ using MRS.DocumentManagement.Database;
 
 namespace MRS.DocumentManagement.Synchronization.Models
 {
-    internal class SynchronizingTuple<T>
+    internal class SynchronizingTuple<T> : ISynchronizationChanges
             where T : ISynchronizable<T>
     {
         private T remote;

@@ -1,13 +1,12 @@
 using System;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Utils
 {
-    internal class ItemsUtils
+    internal class LinkingUtils
     {
-        public static T GetLinked<T>(Item item, object parent, EntityType entityType)
+        public static T CheckAndUpdateLinking<T>(object parent, EntityType entityType)
             where T : ISynchronizable<T>
         {
             var tuple = (SynchronizingTuple<T>)parent;
@@ -32,10 +31,7 @@ namespace MRS.DocumentManagement.Synchronization.Utils
             }
 
             if (linked == null)
-            {
-                throw new ArgumentException(
-                    $"Parent doesn't contain {entityType} project");
-            }
+                throw new ArgumentException($"Parent doesn't contain {entityType} {typeof(T).Name}");
 
             return linked;
         }

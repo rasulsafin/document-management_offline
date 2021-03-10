@@ -341,12 +341,14 @@ namespace MRS.DocumentManagement.Tests.Utility
                 Name = DYNAMIC_FIELD_STRING.Name,
                 Type = DYNAMIC_FIELD_STRING.Type,
                 Value = DYNAMIC_FIELD_STRING.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_DATE.Name,
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
         };
 

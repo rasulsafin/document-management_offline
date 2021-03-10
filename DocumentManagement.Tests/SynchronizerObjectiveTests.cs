@@ -904,6 +904,279 @@ namespace MRS.DocumentManagement.Tests
             CheckSynchronizedObjectives(local, synchronized);
         }
 
+        [TestMethod]
+        public async Task Synchronize_LocalObjectiveHasNewDynamicFieldWithSubfield_AddDynamicFieldToRemoteAndSynchronize()
+        {
+            // Arrange.
+            var (objectiveLocal, _, _) = await ArrangeObjective();
+            objectiveLocal.DynamicFields ??= new List<DynamicField>();
+            objectiveLocal.DynamicFields.Add(
+                new DynamicField
+                {
+                    Name = "Big DF",
+                    ChildrenDynamicFields = new List<DynamicField>
+                    {
+                        new DynamicField
+                        {
+                            Name = "Small DF",
+                            Value = "value",
+                        },
+                    },
+                });
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(4, await Fixture.Context.DynamicFields.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_LocalObjectiveHasNewSubfield_AddDynamicFieldToRemoteAndSynchronize()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.DynamicFields ??= new List<DynamicField>();
+            objectiveSynchronized.DynamicFields ??= new List<DynamicField>();
+            objectiveRemote.DynamicFields ??= new List<DynamicFieldExternalDto>();
+
+            var localField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            localField.ChildrenDynamicFields.Add(MockData.DEFAULT_DYNAMIC_FIELDS[1]);
+            objectiveLocal.DynamicFields.Add(localField);
+
+            var synchronizedField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            synchronizedField.IsSynchronized = true;
+            localField.SynchronizationMate = synchronizedField;
+            objectiveSynchronized.DynamicFields.Add(synchronizedField);
+
+            var remoteField = new DynamicFieldExternalDto
+            {
+                ExternalID = "ex_field",
+                Name = localField.Name,
+                Value = localField.Value,
+                Type = DynamicFieldType.DATE,
+            };
+            localField.ExternalID = synchronizedField.ExternalID = remoteField.ExternalID;
+            objectiveRemote.DynamicFields.Add(remoteField);
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(4, await Fixture.Context.DynamicFields.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_RemoteObjectiveHasNewDynamicField_AddDynamicFieldToLocalAndSynchronize()
+        {
+            // Arrange.
+            var (_, _, objectiveRemote) = await ArrangeObjective();
+            var field = mapper.Map<DynamicFieldExternalDto>(MockData.DEFAULT_DYNAMIC_FIELDS[0]);
+            field.ExternalID = "ex_field";
+            objectiveRemote.DynamicFields = new List<DynamicFieldExternalDto> { field };
+
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(2, await Fixture.Context.DynamicFields.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_DynamicFieldsHaveChanges_MergeFieldsAndSynchronize()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+
+            var localField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            objectiveLocal.DynamicFields = new List<DynamicField> { localField };
+
+            var synchronizedField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            synchronizedField.IsSynchronized = true;
+            localField.SynchronizationMate = synchronizedField;
+            objectiveSynchronized.DynamicFields = new List<DynamicField> { synchronizedField };
+
+            var remoteField = new DynamicFieldExternalDto
+            {
+                ExternalID = "ex_field",
+                Name = localField.Name,
+                Value = localField.Value,
+                Type = DynamicFieldType.DATE,
+                UpdatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            localField.ExternalID = synchronizedField.ExternalID = remoteField.ExternalID;
+            objectiveRemote.DynamicFields = new List<DynamicFieldExternalDto> { remoteField };
+
+            var newName = localField.Name = "New Name";
+            var newValue = remoteField.Value = "New Value";
+            var relevantType = (remoteField.Type = DynamicFieldType.FLOAT).ToString();
+            var irrelevantType = localField.Type = DynamicFieldType.INTEGER.ToString();
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+            var dynamicField = synchronized.DynamicFields.First();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(2, await Fixture.Context.DynamicFields.CountAsync());
+            Assert.AreEqual(newName, dynamicField.Name);
+            Assert.AreEqual(newValue, dynamicField.Value);
+            Assert.AreEqual(relevantType, dynamicField.Type);
+            Assert.AreNotEqual(irrelevantType, dynamicField.Type);
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_DynamicFieldRemovedFromLocal_RemoveDynamicFieldFromRemoteAndSynchronize()
+        {
+            // ( ´･･)ﾉ(._.`) TODO: Refactor it.
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+
+            var synchronizedField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            synchronizedField.IsSynchronized = true;
+            objectiveSynchronized.DynamicFields = new List<DynamicField> { synchronizedField };
+
+            var remoteField = new DynamicFieldExternalDto
+            {
+                ExternalID = "ex_field",
+                Name = synchronizedField.Name,
+                Value = synchronizedField.Value,
+                Type = DynamicFieldType.DATE,
+                UpdatedAt = DateTime.UtcNow.AddDays(1),
+            };
+            synchronizedField.ExternalID = remoteField.ExternalID;
+            objectiveRemote.DynamicFields = new List<DynamicFieldExternalDto> { remoteField };
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Once);
+            Assert.AreEqual(0, await Fixture.Context.DynamicFields.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_DynamicFieldRemovedFromRemote_RemoveDynamicFieldFromLocalAndSynchronize()
+        {
+            // ( ´･･)ﾉ(._.`) TODO: Refactor it.
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+
+            var localField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            objectiveLocal.DynamicFields = new List<DynamicField> { localField };
+
+            var synchronizedField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
+            synchronizedField.IsSynchronized = true;
+            localField.SynchronizationMate = synchronizedField;
+            objectiveSynchronized.DynamicFields = new List<DynamicField> { synchronizedField };
+
+            localField.ExternalID = synchronizedField.ExternalID = "ex_field";
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            await synchronizer.Synchronize(
+                new SynchronizingData
+                {
+                    Context = Fixture.Context,
+                    User = await Fixture.Context.Users.FirstAsync(),
+                },
+                Connection.Object,
+                new ConnectionInfoDto());
+            var local = await Fixture.Context.Objectives.Unsynchronized().FirstAsync();
+            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstAsync();
+
+            // Assert.
+            ObjectiveSynchronizer.Verify(x => x.Add(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Remove(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            ObjectiveSynchronizer.Verify(x => x.Update(It.IsAny<ObjectiveExternalDto>()), Times.Never);
+            Assert.AreEqual(0, await Fixture.Context.DynamicFields.CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
         /*[TestMethod]
         public async Task Synchronize_LocalObjectiveChangeProject_RemoteAndSynchronizedObjectivesChangeProject()
         {
@@ -1090,6 +1363,14 @@ namespace MRS.DocumentManagement.Tests
                 Assert.AreNotEqual(null, synchronizedItem);
                 SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem?.Item);
             }
+
+            foreach (var item in local.DynamicFields ?? Enumerable.Empty<DynamicField>())
+            {
+                var synchronizedItem = synchronized.DynamicFields?
+                   .FirstOrDefault(x => item.SynchronizationMateID == x.ID);
+                Assert.AreNotEqual(null, synchronizedItem);
+                CheckSynchronizedDynamicFields(item, synchronizedItem);
+            }
         }
 
         private void CheckObjectives(Objective a, Objective b, bool checkIDs = true)
@@ -1125,6 +1406,25 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(local.ElementName, synchronized.ElementName);
             Assert.AreEqual(local.ParentName, synchronized.ParentName);
             Assert.AreEqual(local.GlobalID, synchronized.GlobalID);
+        }
+
+        private void CheckSynchronizedDynamicFields(DynamicField local, DynamicField synchronized)
+        {
+            Assert.AreEqual(local.Name, synchronized.Name);
+            Assert.AreEqual(local.Type, synchronized.Type);
+            Assert.AreEqual(local.Value, synchronized.Value);
+
+            SynchronizerTestsHelper.CheckSynchronized(local, synchronized);
+
+            Assert.AreEqual(local.ChildrenDynamicFields?.Count ?? 0, synchronized.ChildrenDynamicFields?.Count ?? 0);
+
+            foreach (var item in local.ChildrenDynamicFields ?? Enumerable.Empty<DynamicField>())
+            {
+                var synchronizedItem = synchronized.ChildrenDynamicFields?
+                   .FirstOrDefault(x => item.SynchronizationMateID == x.ID);
+                Assert.AreNotEqual(null, synchronizedItem);
+                CheckSynchronizedDynamicFields(item, synchronizedItem);
+            }
         }
 
         private async Task<(Objective local, Objective synchronized, ObjectiveExternalDto remote)> ArrangeObjective(bool emptyRemote = false)
