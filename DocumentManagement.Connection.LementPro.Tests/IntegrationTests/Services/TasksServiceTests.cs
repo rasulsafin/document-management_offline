@@ -190,7 +190,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         }
 
         [TestMethod]
-        public async Task UpdateTaskAsync_CreatedNewTask_ReturnsTrue()
+        public async Task UpdateTaskAsync_ExistingTask_ReturnsTrue()
         {
             var id = 402015;
             var userId = 44212;

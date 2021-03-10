@@ -21,12 +21,19 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
-            var fileIds = await UploadFiles(obj.Items);
             var lementIssue = obj.ToModelToCreate();
-            lementIssue.FileIds = fileIds;
+            if (obj.Items?.Any() ?? false)
+            {
+                var fileIds = await UploadFiles(obj.Items);
+                lementIssue.FileIds = fileIds;
+            }
+
             var createResult = await tasksService.CreateTask(lementIssue);
             if (!createResult.IsSuccess.GetValueOrDefault())
                 return null;
+
+            // Wait for creating
+            await Task.Delay(3000);
 
             var task = await tasksService.GetTaskAsync(createResult.ID.Value);
             var parsedToDto = task.ToObjectiveExternalDto();

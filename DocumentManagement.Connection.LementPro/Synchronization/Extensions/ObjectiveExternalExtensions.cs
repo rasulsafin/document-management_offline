@@ -9,9 +9,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
     {
         internal static ObjectBaseToCreate ToModelToCreate(this ObjectiveExternalDto objective)
         {
+            if (!int.TryParse(objective.ObjectiveType.ExternalId, out var parsedTypeId))
+                return null;
+
             var modelValue = new ObjectBaseValueToCreate
             {
-                // Type should be mapped outside of the extension
+                Type = parsedTypeId,
                 Name = objective.Title,
                 Description = objective.Description,
                 StartDate = objective.CreationDate.ToString(DATE_FORMAT),
@@ -24,14 +27,19 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         internal static TaskToUpdate ToModelToUpdate(this ObjectiveExternalDto objective)
         {
+            if (!int.TryParse(objective.ObjectiveType.ExternalId, out var parsedTypeId))
+                return null;
+
             var modelValue = new TaskValueToUpdate
             {
-                // Type should be mapped outside of the extension
+                Type = parsedTypeId,
                 Name = objective.Title,
                 Description = objective.Description,
                 StartDate = objective.CreationDate.ToString(DATE_FORMAT),
                 IsExpired = IsExpired(objective.Status),
-                LastModifiedDate = objective.UpdatedAt.ToString(DATE_FORMAT),
+                LastModifiedDate = objective.UpdatedAt == default
+                                ? null
+                                : objective.UpdatedAt.ToString(DATE_FORMAT),
             };
 
             if (!int.TryParse(objective.ExternalID, out var parsedId))
@@ -57,9 +65,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 },
                 Title = model.Values.Name,
                 Description = model.Values.Description,
-                CreationDate = DateTime.ParseExact(model.Values.StartDate, DATE_FORMAT, null),
-                Status = ParseStatus(model.Values.IsExpired),
+                CreationDate = DateTime.Parse(model.Values.StartDate),
+                Status = ParseStatus(model),
                 ProjectExternalID = model.Values.Project?.ID?.ToString(),
+                ExternalID = model.ID.ToString(),
             };
 
             return resultDto;
@@ -68,9 +77,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
         private static bool IsExpired(ObjectiveStatus status)
             => status == ObjectiveStatus.Late;
 
-        private static ObjectiveStatus ParseStatus(bool? isExpired)
+        private static ObjectiveStatus ParseStatus(ObjectBase model)
         {
-            return isExpired switch
+            if (model.State.GetValueOrDefault() == STATE_ARCHIVED)
+                return ObjectiveStatus.Ready;
+
+            return model.Values.IsExpired switch
             {
                 null => ObjectiveStatus.Undefined,
                 true => ObjectiveStatus.Late,
