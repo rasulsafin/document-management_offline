@@ -20,26 +20,35 @@ namespace MRS.DocumentManagement.Synchronization
         public Synchronizer(IMapper mapper)
             => this.mapper = mapper;
 
-        public async Task<List<SynchronizingResult>> Synchronize(
+        public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
                 ConnectionInfoDto info)
         {
+            var results = new List<SynchronizingResult>();
+
             var date = DateTime.UtcNow;
             var lastSynchronization = await data.Context.Synchronizations.OrderBy(x => x.Date).LastOrDefaultAsync();
             var context = await connection.GetContext(info, lastSynchronization?.Date ?? DateTime.MinValue);
             var project = new ProjectStrategy(mapper);
             var objective = new ObjectiveStrategy(mapper);
-            await project.Synchronize(data, context, mapper.Map<IReadOnlyCollection<Project>>(await context.Projects));
-            await objective.Synchronize(
+
+            results.AddRange(await project.Synchronize(
                 data,
                 context,
-                mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives));
+                mapper.Map<IReadOnlyCollection<Project>>(await context.Projects)));
+
+            results.AddRange(await objective.Synchronize(
+                data,
+                context,
+                mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives)));
+
             await data.Context.Synchronizations.AddAsync(new Database.Models.Synchronization { Date = date });
             await data.Context.SaveChangesAsync();
             await SynchronizationFinalizer.Finalize(data);
             await data.Context.SaveChangesAsync();
-            return null;
+
+            return results;
         }
     }
 }

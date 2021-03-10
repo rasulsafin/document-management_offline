@@ -38,35 +38,69 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         protected override IIncludableQueryable<Objective, Objective> Include(IQueryable<Objective> set)
             => base.Include(set.Include(x => x.Items));
 
-        protected override async Task AddToRemote(
+        protected override async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            tuple.Merge();
-            tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
-            tuple.Remote.Project = tuple.Synchronized.Project;
+            try
+            {
+                tuple.Merge();
+                tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
+                tuple.Remote.Project = tuple.Synchronized.Project;
 
-            MergeBimElements(tuple);
-            await SynchronizeItems(tuple, data, connectionContext);
-            await base.AddToRemote(tuple, data, connectionContext, parent);
+                MergeBimElements(tuple);
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                if (resultAfterItemSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing Items in Add Objective To Remote");
+
+                return await base.AddToRemote(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected override async Task AddToLocal(
+        protected override async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            tuple.Merge();
-            tuple.Synchronized.Project = tuple.Remote.Project;
-            tuple.Local.Project = data.Context.Projects
-               .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
+            try
+            {
+                tuple.Merge();
+                tuple.Synchronized.Project = tuple.Remote.Project;
+                tuple.Local.Project = data.Context.Projects
+                   .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
 
-            MergeBimElements(tuple);
-            await base.AddToLocal(tuple, data, connectionContext, parent);
-            await SynchronizeItems(tuple, data, connectionContext);
+                MergeBimElements(tuple);
+                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent);
+                if (resultAfterBase != null)
+                    throw resultAfterBase.Exception;
+
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                if (resultAfterItemSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing Items in Add Objective To Local");
+
+                return null;
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
         }
 
         protected override async Task<SynchronizingResult> Merge(
@@ -75,39 +109,84 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
-            MergeBimElements(tuple);
-            await SynchronizeItems(tuple, data, connectionContext);
-            return await base.Merge(tuple, data, connectionContext, parent);
+            try
+            {
+                MergeBimElements(tuple);
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                if (resultAfterItemSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing Items in Merge Objective");
+
+                return await base.Merge(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected override async Task RemoveFromLocal(
+        protected override async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeItems(tuple, data, connectionContext);
-            await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                if (resultAfterItemSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing Items in Remove Objective From Local");
+
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
         }
 
-        protected override async Task RemoveFromRemote(
+        protected override async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent)
         {
-            await SynchronizeItems(tuple, data, connectionContext);
-            await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+            try
+            {
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                if (resultAfterItemSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing Items in Remove Objective From Remote");
+
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+            }
+            catch (Exception e)
+            {
+                return new SynchronizingResult()
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
         }
 
-        private async Task SynchronizeItems(
+        private async Task<List<SynchronizingResult>> SynchronizeItems(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext)
         {
             var id1 = tuple.Local?.ID ?? 0;
             var id2 = tuple.Synchronized?.ID ?? 0;
-            await itemStrategy.Synchronize(
+            return await itemStrategy.Synchronize(
                 data,
                 connectionContext,
                 tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(),
