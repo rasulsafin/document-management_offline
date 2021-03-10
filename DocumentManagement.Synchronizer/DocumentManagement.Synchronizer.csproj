@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Synchronizer</RootNamespace>
+    <RootNamespace>MRS.DocumentManagement.Synchronization</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

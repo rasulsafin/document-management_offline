@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Synchronizer.Extensions
+namespace MRS.DocumentManagement.Synchronization.Extensions
 {
     internal static class CollectionExtentions
     {
