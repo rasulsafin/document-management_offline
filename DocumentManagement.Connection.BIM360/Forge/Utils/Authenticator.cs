@@ -141,7 +141,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             await CheckAccessAsync(true);
 
             // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
+            var result = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
             return (result, connectionInfo);
         }

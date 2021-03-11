@@ -15,14 +15,14 @@ namespace MRS.DocumentManagement.Interface
         /// </summary>
         /// <param name="info">Information about the connection.</param>
         /// <returns>Result success and additional result data.</returns>
-        Task<ConnectionStatusDto> Connect(ConnectionInfoDto info);
+        Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info);
 
         /// <summary>
         /// Current status of the connection.
         /// </summary>
         /// <param name="info">Information about the connection.</param>
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info);
+        Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info);
 
         /// <summary>
         /// Method fills all the relevant fields in ConnectionInfo
@@ -30,13 +30,13 @@ namespace MRS.DocumentManagement.Interface
         /// </summary>
         /// <param name="info">ConnectionInfoDto to fill in.</param>
         /// <returns>Filed ConnectionInfoDto.</returns>
-        Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info);
+        Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info);
 
         /// <summary>
         /// Get the information about the current Connection.
         /// </summary>
         /// <returns>Filed ConnectionTypeDto.</returns>
-        ConnectionTypeDto GetConnectionType();
+        ConnectionTypeExternalDto GetConnectionType();
 
         /// <summary>
         /// Get the context for working with this connection.
@@ -44,6 +44,6 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="info">ConnectionInfoDto to fill in.</param>
         /// <param name="lastSynchronizationDate">DateTime of the last successful synchronization.</param>
         /// <returns>All data.</returns>
-        Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate);
+        Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate);
     }
 }

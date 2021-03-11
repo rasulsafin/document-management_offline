@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             {
                 var errorStatus = new ConnectionStatusDto
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = "Connection with given credentials failed",
                 };
                 return (errorStatus, null);
@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             AccessToken = token;
             AccessEnd = expires;
-            var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
+            var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
             return (successStatus, connectionInfoDto);
         }

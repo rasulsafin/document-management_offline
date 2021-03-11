@@ -41,12 +41,12 @@ namespace MRS.DocumentManagement.Services
         {
             User user = await FindUserFromDb((int)userID);
             if (user == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Пользователь отсутвует в базе!", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", };
 
             // Get connection info from user
             var connectionInfo = await GetConnectionInfoFromDb(user);
             if (connectionInfo == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
             var connection = GetConnection(connectionInfo);
             var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);

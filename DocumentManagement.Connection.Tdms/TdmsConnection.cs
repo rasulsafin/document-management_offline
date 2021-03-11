@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = e.Message,
                 });
             }
@@ -63,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.NeedReconnect,
+                    Status = RemoteConnectionStatus.NeedReconnect,
                     Message = "NeedReconnect",
                 });
             }
@@ -72,14 +72,14 @@ namespace MRS.DocumentManagement.Connection.Tdms
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.OK,
+                    Status = RemoteConnectionStatus.OK,
                     Message = "Ok",
                 });
             }
 
             return Task.FromResult(new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.Error,
+                Status = RemoteConnectionStatus.Error,
                 Message = "Error",
             });
         }

@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public enum RemoteConnectionStatusDto
+    public enum RemoteConnectionStatus
     {
         NotLinked,
         OK,

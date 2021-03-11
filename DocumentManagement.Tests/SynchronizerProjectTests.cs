@@ -439,7 +439,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = "item_external_id",
                     FileName = "item_name",
-                    ItemType = ItemTypeDto.File,
+                    ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
             };
@@ -481,7 +481,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = "item_external_id",
                     FileName = "item_name",
-                    ItemType = ItemTypeDto.File,
+                    ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
             };
@@ -519,7 +519,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 ExternalID = "item_external_id",
                 FileName = "item_name",
-                ItemType = ItemTypeDto.File,
+                ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
             };
             projectRemote.Items = new List<ItemExternalDto> { itemExternal };

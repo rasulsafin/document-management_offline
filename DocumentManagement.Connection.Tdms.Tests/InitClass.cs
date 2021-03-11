@@ -31,7 +31,7 @@ namespace DocumentManagement.Connection.Tdms.Tests
             // Authorize
             var signInTask = connection.Connect(connectionInfo);
             signInTask.Wait();
-            if (signInTask.Result.Status != RemoteConnectionStatusDto.OK)
+            if (signInTask.Result.Status != RemoteConnectionStatus.OK)
             {
                 Assert.Fail("Authorization failed");
             }

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Connection.Interface\DocumentManagement.Connection.Interface.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,9 +4,9 @@
     {
         public string Name { get; }
         public string ExternalItemId { get; set; }
-        public ItemTypeDto ItemType { get; }
+        public ItemType ItemType { get; }
 
-        public ItemToCreateDto(string name, string externalId, ItemTypeDto itemType)
+        public ItemToCreateDto(string name, string externalId, ItemType itemType)
         {
             Name = name;
             ExternalItemId = externalId;

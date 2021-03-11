@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             // Authorize
             var signInTask = authenticator.SignInAsync(connectionInfo);
             signInTask.Wait();
-            if (signInTask.Result.authStatus.Status != RemoteConnectionStatusDto.OK)
+            if (signInTask.Result.authStatus.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];

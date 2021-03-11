@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string FullPath { get; set; }
 
-        public ItemTypeDto ItemType { get; set; }
+        public ItemType ItemType { get; set; }
 
         public DateTime UpdatedAt { get; set; }
     }

@@ -9,6 +9,7 @@
         public static readonly string DESCRIPTION = "ATTR_TEXT";
         public static readonly string GUID = "ATTR_GUID";
         public static readonly string COMMENT = "ATTR_SOLUTION";
+        public static readonly string COMPANY = "ATTR_COMPANY";
         public static readonly string JOB_LINK = "ATTR_WORK";
         public static readonly string OBJECT_LINK = "ATTR_OBJECT";
         public static readonly string PARENT = "ATTR_PARENT";

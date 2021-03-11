@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             var (authStatus, updatedInfo) = await service.SignInAsync(connectionInfo);
 
-            Assert.IsTrue(authStatus.Status == RemoteConnectionStatusDto.OK);
+            Assert.IsTrue(authStatus.Status == RemoteConnectionStatus.OK);
             Assert.IsNotNull(updatedInfo);
         }
 
@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             var (authStatus, updatedInfo) = await service.SignInAsync(connectionInfo);
 
-            Assert.IsTrue(authStatus.Status != RemoteConnectionStatusDto.OK);
+            Assert.IsTrue(authStatus.Status != RemoteConnectionStatus.OK);
             Assert.IsNull(updatedInfo);
         }
     }

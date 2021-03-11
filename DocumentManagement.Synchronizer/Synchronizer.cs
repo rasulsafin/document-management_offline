@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Synchronization
         public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
-                ConnectionInfoDto info)
+                ConnectionInfoExternalDto info)
         {
             var results = new List<SynchronizingResult>();
 

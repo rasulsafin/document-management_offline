@@ -8,6 +8,6 @@
 
         public string ExternalID { get; set; }
 
-        public ItemTypeDto ItemType { get; set; }
+        public ItemType ItemType { get; set; }
     }
 }

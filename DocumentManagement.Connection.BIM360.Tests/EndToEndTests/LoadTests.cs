@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
-            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+            if (authorizationResult.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
@@ -203,7 +203,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
-            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+            if (authorizationResult.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
@@ -251,7 +251,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         {
             // Authorize
             var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
-            if (authorizationResult.Status != RemoteConnectionStatusDto.OK)
+            if (authorizationResult.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];

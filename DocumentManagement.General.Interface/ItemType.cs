@@ -1,6 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public enum ItemTypeDto
+    public enum ItemType
     {
         File,
         Bim,

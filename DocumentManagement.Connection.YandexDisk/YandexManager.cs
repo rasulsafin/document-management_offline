@@ -95,18 +95,18 @@ namespace MRS.DocumentManagement.Connection
         public async Task<ConnectionStatusDto> GetStatusAsync()
         {
             if (controller == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "Controller null" };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "Controller null" };
             try
             {
                 var list = await controller.GetListAsync(PathManager.GetAppDir());
                 if (list != null)
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good" };
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good" };
             }
             catch (TimeoutException)
             {
             }
 
-            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "No network" };
+            return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "No network" };
         }
 
         public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)

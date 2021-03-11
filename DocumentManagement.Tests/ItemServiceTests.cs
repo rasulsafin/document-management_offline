@@ -187,7 +187,7 @@ namespace MRS.DocumentManagement.Tests
             var item = new ItemDto
             {
                 ID = new ID<ItemDto>(existingItem.ID),
-                ItemType = (ItemTypeDto)newItemType,
+                ItemType = (ItemType)newItemType,
                 ExternalID = newExternalItemId,
                 Name = newName
             };

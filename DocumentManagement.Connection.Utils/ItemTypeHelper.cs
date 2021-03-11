@@ -12,14 +12,14 @@ namespace MRS.DocumentManagement.Connection.Utils
         private static readonly IReadOnlyCollection<string> BIM_EXTENSIONS = new[] { ".ifc" };
         private static readonly IReadOnlyCollection<string> MEDIA_EXTENSIONS = new[] { ".jpg", ".mp4" };
 
-        public static ItemTypeDto GetTypeByName(string fileName)
+        public static ItemType GetTypeByName(string fileName)
         {
             var extension = Path.GetExtension(fileName);
             return BIM_EXTENSIONS.Any(s => string.Equals(s, extension, StringComparison.InvariantCultureIgnoreCase))
-                ? ItemTypeDto.Bim
+                ? ItemType.Bim
                 : MEDIA_EXTENSIONS.Any(s => string.Equals(s, extension, StringComparison.InvariantCultureIgnoreCase))
-                    ? ItemTypeDto.Media
-                    : ItemTypeDto.File;
+                    ? ItemType.Media
+                    : ItemType.File;
         }
     }
 }

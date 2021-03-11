@@ -1,8 +1,8 @@
 ﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class EnumerationValueDto
+    public class EnumerationValueExternalDto
     {
-        public int ID { get; set; }
+        public string ExternalID { get; set; }
 
         public string Value { get; set; }
     }

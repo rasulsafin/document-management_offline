@@ -24,13 +24,13 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 await driveController.InitializationAsync(info);
                 manager = new GoogleDriveManager(driveController);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }

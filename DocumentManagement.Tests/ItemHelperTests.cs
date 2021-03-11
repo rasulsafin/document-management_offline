@@ -124,7 +124,7 @@ namespace MRS.DocumentManagement.Tests
             var guid = Guid.NewGuid();
             var externalId = $"ExternalItemId{guid}";
             var name = $"Name{guid}";
-            var itemType = ItemTypeDto.Bim;
+            var itemType = ItemType.Bim;
             var objectiveType = typeof(Objective);
             var parentId = context.Objectives.Unsynchronized().First().ID;
             var itemsCount = context.Items.Unsynchronized().Count();
@@ -147,7 +147,7 @@ namespace MRS.DocumentManagement.Tests
             var guid = Guid.NewGuid();
             var externalId = $"ExternalItemId{guid}";
             var name = $"Name{guid}";
-            var itemType = ItemTypeDto.Bim;
+            var itemType = ItemType.Bim;
             var projectType = typeof(Project);
             var parentId = context.Projects.Unsynchronized().First().ID;
             var itemsCount = context.Items.Unsynchronized().Count();

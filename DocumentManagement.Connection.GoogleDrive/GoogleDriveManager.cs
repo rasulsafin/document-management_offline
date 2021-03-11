@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 {
                     return new ConnectionStatusDto()
                     {
-                        Status = RemoteConnectionStatusDto.OK,
+                        Status = RemoteConnectionStatus.OK,
                         Message = "Good",
                     };
                 }
@@ -47,14 +47,14 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
 
             return new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Status = RemoteConnectionStatus.NeedReconnect,
                 Message = "Not connect",
             };
         }

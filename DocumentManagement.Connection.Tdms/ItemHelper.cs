@@ -8,12 +8,12 @@ namespace MRS.DocumentManagement.Connection.Tdms
 {
     internal class ItemHelper
     {
-        private static readonly IReadOnlyDictionary<string, ItemTypeDto> FILE_TYPES = new Dictionary<string, ItemTypeDto>
+        private static readonly IReadOnlyDictionary<string, ItemType> FILE_TYPES = new Dictionary<string, ItemType>
         {
-            { FileTypeID.IFC, ItemTypeDto.Bim },
-            { FileTypeID.CAD, ItemTypeDto.Bim },
-            { FileTypeID.PICTURE, ItemTypeDto.Media },
-            { FileTypeID.VIDEO, ItemTypeDto.Media },
+            { FileTypeID.IFC, ItemType.Bim },
+            { FileTypeID.CAD, ItemType.Bim },
+            { FileTypeID.PICTURE, ItemType.Media },
+            { FileTypeID.VIDEO, ItemType.Media },
         };
 
         internal void SetItems(TDMSObject tdmsObject, IEnumerable<ItemExternalDto> items)
@@ -37,11 +37,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
         internal ICollection<ItemExternalDto> GetItems(TDMSObject tdmsObject)
             => tdmsObject.Files?.Cast<TDMSFile>()?.Select(x => ToDto(x)).ToList();
 
-        private ItemTypeDto GetItemType(string fileDefName)
+        private ItemType GetItemType(string fileDefName)
         {
-           var result = FILE_TYPES.TryGetValue(fileDefName, out ItemTypeDto typeDto);
+           var result = FILE_TYPES.TryGetValue(fileDefName, out ItemType typeDto);
            if (!result)
-                return ItemTypeDto.File;
+                return ItemType.File;
 
            return typeDto;
         }

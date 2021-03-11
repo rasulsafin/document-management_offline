@@ -448,7 +448,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = "new_external_item_id",
                     FileName = "1.txt",
-                    ItemType = ItemTypeDto.File,
+                    ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 });
 
@@ -494,7 +494,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = "new_external_item_id",
                     FileName = "1.txt",
-                    ItemType = ItemTypeDto.File,
+                    ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 });
 
@@ -530,7 +530,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 ExternalID = "new_external_item_id",
                 FileName = "1.txt",
-                ItemType = ItemTypeDto.File,
+                ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
             };
             objectiveRemote.Items.Add(externalItem);

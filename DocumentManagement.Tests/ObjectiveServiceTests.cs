@@ -267,7 +267,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
-                    ItemType = (ItemTypeDto)dbItem.ItemType,
+                    ItemType = (ItemType)dbItem.ItemType,
                     Name = dbItem.RelativePath,
                 },
             };
@@ -358,7 +358,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
-                    ItemType = (ItemTypeDto)dbItem.ItemType,
+                    ItemType = (ItemType)dbItem.ItemType,
                     Name = dbItem.RelativePath,
                 },
             };
@@ -659,7 +659,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ItemType = ItemTypeDto.Media,
+                    ItemType = ItemType.Media,
                     ExternalID = $"ExternalItemId{guid}",
                     Name = $"Name{guid}",
                 },
@@ -672,7 +672,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
-                    ItemType = (ItemTypeDto)firstItem.ItemType,
+                    ItemType = (ItemType)firstItem.ItemType,
                     Name = firstItem.RelativePath,
                 },
             };
@@ -757,7 +757,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ItemType = ItemTypeDto.Media,
+                    ItemType = ItemType.Media,
                     ExternalID = $"ExternalItemId{guid}",
                     Name = $"Name{guid}",
                 },
@@ -770,7 +770,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
-                    ItemType = (ItemTypeDto)firstItem.ItemType,
+                    ItemType = (ItemType)firstItem.ItemType,
                     Name = firstItem.RelativePath,
                 },
             };

@@ -31,16 +31,16 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
                     manager = new YandexManager(new YandexDiskController(token));
 
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
                 }
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Data app not correct", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Data app not correct", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
             return new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Status = RemoteConnectionStatus.NeedReconnect,
                 Message = "Manager null",
             };
         }
