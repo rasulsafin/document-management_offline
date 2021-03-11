@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
@@ -20,6 +21,14 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             : base(mapper, link, update, unlink)
         {
         }
+
+        protected override IIncludableQueryable<DynamicField, DynamicField> Include(IQueryable<DynamicField> set)
+        {
+            return base.Include(set.Include(x => x.ParentField));
+        }
+
+        protected override IEnumerable<DynamicField> Order(IEnumerable<DynamicField> list)
+            => list.OrderByParent(x => x.ParentField);
 
         protected override async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<DynamicField> tuple,

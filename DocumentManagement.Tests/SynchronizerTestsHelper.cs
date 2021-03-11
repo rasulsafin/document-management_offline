@@ -55,5 +55,27 @@ namespace MRS.DocumentManagement.Tests
             await fixture.Context.SaveChangesAsync();
             return (projectLocal, projectSynchronized, projectRemote);
         }
+
+        public static void CheckSynchronizerCalls<T>(
+            Mock<ISynchronizer<T>> synchronizer,
+            SynchronizerCall call,
+            Times times = default)
+        {
+            if (times == default)
+                times = Times.Once();
+
+            synchronizer.Verify(x => x.Add(It.IsAny<T>()), call == SynchronizerCall.Add ? times : Times.Never());
+            synchronizer.Verify(x => x.Remove(It.IsAny<T>()), call == SynchronizerCall.Remove ? times : Times.Never());
+            synchronizer.Verify(x => x.Update(It.IsAny<T>()), call == SynchronizerCall.Update ? times : Times.Never());
+
+        }
+
+        public enum SynchronizerCall
+        {
+            Nothing,
+            Add,
+            Update,
+            Remove,
+        }
     }
 }

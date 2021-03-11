@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Synchronization
                     results.AddRange(await project.Synchronize(
                         data,
                         context,
-                        mapper.Map<IReadOnlyCollection<Project>>(await context.Projects)));
+                        project.Map(await context.Projects)));
                 }
                 catch (Exception e)
                 {
@@ -55,10 +55,11 @@ namespace MRS.DocumentManagement.Synchronization
 
                 try
                 {
-                    results.AddRange(await objective.Synchronize(
-                    data,
-                    context,
-                    mapper.Map<IReadOnlyCollection<Objective>>(await context.Objectives)));
+                    results.AddRange(
+                        await objective.Synchronize(
+                            data,
+                            context,
+                            objective.Map(await context.Objectives)));
                 }
                 catch (Exception e)
                 {

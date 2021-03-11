@@ -36,8 +36,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 list = list.Where(filter);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
-                list,
-                remoteCollection,
+                Order(list),
+                Order(remoteCollection),
                 IsEntitiesEquals);
 
             var results = new List<SynchronizingResult>();
@@ -74,6 +74,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return results;
         }
 
+        public virtual IReadOnlyCollection<TDB> Map(IReadOnlyCollection<TDto> externalDtos)
+            => mapper.Map<IReadOnlyCollection<TDB>>(externalDtos);
+
         protected abstract DbSet<TDB> GetDBSet(DMContext context);
 
         protected abstract ISynchronizer<TDto> GetSynchronizer(IConnectionContext context);
@@ -82,6 +85,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         protected virtual IIncludableQueryable<TDB, TDB> Include(IQueryable<TDB> set)
             => set.Include(x => x.SynchronizationMate);
+
+        protected virtual IEnumerable<TDB> Order(IEnumerable<TDB> list)
+            => list;
 
         protected virtual bool IsEntitiesEquals(TDB element, SynchronizingTuple<TDB> tuple)
         {
@@ -132,7 +138,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 UpdateDB(GetDBSet(data.Context), tuple);
-                return null;
+                return Task.FromResult<SynchronizingResult>(null);
             }
             catch (Exception e)
             {
@@ -177,7 +183,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 RemoveFromDB(tuple, data);
-                return null;
+                return Task.FromResult<SynchronizingResult>(null);
             }
             catch (Exception e)
             {

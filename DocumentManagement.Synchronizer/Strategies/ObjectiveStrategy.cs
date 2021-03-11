@@ -7,6 +7,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -28,6 +29,23 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             dynamicFieldStrategy = new DynamicFieldStrategy(mapper, LinkDynamicField, UpdateDynamicField, UnlinkDynamicField);
         }
 
+        public override IReadOnlyCollection<Objective> Map(IReadOnlyCollection<ObjectiveExternalDto> externalDtos)
+        {
+            var objectives = base.Map(externalDtos);
+
+            foreach (var objective in objectives)
+            {
+                var external = externalDtos.First(x => x.ExternalID == objective.ExternalID);
+                if (!string.IsNullOrEmpty(external.ParentObjectiveExternalID))
+                {
+                    objective.ParentObjective =
+                        objectives.First(x => x.ExternalID == external.ParentObjectiveExternalID);
+                }
+            }
+
+            return objectives;
+        }
+
         protected override DbSet<Objective> GetDBSet(DMContext context)
             => context.Objectives;
 
@@ -38,7 +56,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             => data.ObjectivesFilter;
 
         protected override IIncludableQueryable<Objective, Objective> Include(IQueryable<Objective> set)
-            => base.Include(set.Include(x => x.Items));
+            => base.Include(
+                set.Include(x => x.Items)
+                   .Include(x => x.ParentObjective));
+
+        protected override IEnumerable<Objective> Order(IEnumerable<Objective> objectives)
+            => objectives.OrderByParent(x => x.ParentObjective);
 
         protected override async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Objective> tuple,
@@ -49,6 +72,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
+                CreateObjectiveParentLink(data, tuple);
                 tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
                 tuple.Remote.Project = tuple.Synchronized.Project;
 
@@ -79,6 +103,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
+                CreateObjectiveParentLink(data, tuple);
                 tuple.Synchronized.Project = tuple.Remote.Project;
                 tuple.Local.Project = data.Context.Projects
                    .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
@@ -286,6 +311,28 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     Objective = objective,
                 },
                 x => x.BimElement);
+        }
+
+        private void CreateObjectiveParentLink(SynchronizingData data, SynchronizingTuple<Objective> tuple)
+        {
+            if (tuple.Local.ParentObjective != null)
+            {
+                tuple.Synchronized.ParentObjective =
+                    tuple.Remote.ParentObjective = tuple.Local.ParentObjective.SynchronizationMate;
+            }
+            else if (tuple.Remote.ParentObjective != null)
+            {
+                var allObjectives = data.Context.Objectives.Local.Concat(data.Context.Objectives).ToList();
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                tuple.Synchronized.ParentObjective = allObjectives
+                   .First(
+                        x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && x.IsSynchronized);
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                tuple.Local.ParentObjective = allObjectives
+                   .First(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && !x.IsSynchronized);
+            }
         }
     }
 }

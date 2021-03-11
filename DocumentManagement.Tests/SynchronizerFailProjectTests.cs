@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -82,16 +83,7 @@ namespace MRS.DocumentManagement.Tests
             await Fixture.Context.SaveChangesAsync();
 
             // Act.
-            var result = await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = await Fixture.Context.Users.FirstAsync(),
-                },
-                Connection.Object,
-                new ConnectionInfoDto());
-            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
+            var (local, synchronized, result) = await SynchronizingResults();
 
             // Assert.
             CheckSynchronizer();
@@ -112,16 +104,7 @@ namespace MRS.DocumentManagement.Tests
                .Throws(new Exception());
 
             // Act.
-            var result = await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = await Fixture.Context.Users.FirstAsync(),
-                },
-                Connection.Object,
-                new ConnectionInfoDto());
-            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
+            var (local, synchronized, result) = await SynchronizingResults();
 
             // Assert.
             CheckSynchronizer();
@@ -141,19 +124,27 @@ namespace MRS.DocumentManagement.Tests
                 .Throws(new Exception());
 
             // Act.
-            await synchronizer.Synchronize(
+            await SynchronizingResults();
+
+            // Assert.
+            CheckSynchronizer();
+            Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
+        }
+        
+        private static async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
+        {
+            var result = await synchronizer.Synchronize(
                 new SynchronizingData
                 {
                     Context = Fixture.Context,
                     User = await Fixture.Context.Users.FirstAsync(),
                 },
                 Connection.Object,
-                new ConnectionInfoDto());
-
-            // Assert.
-            CheckSynchronizer();
-            Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
-            Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
+                new ConnectionInfoExternalDto());
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
+            return (local, synchronized, result);
         }
 
         private void CheckProjects(Project a, Project b, bool checkIDs = true)
@@ -161,9 +152,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(a.Title, b.Title);
 
             if (checkIDs)
-            {
                 SynchronizerTestsHelper.CheckIDs(a, b);
-            }
         }
 
         private void CheckSynchronizer()
