@@ -101,17 +101,14 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return type;
         }
 
-        public void Quit()
-        {
-            TDMS.Quit();
-        }
+        public void Quit() => TDMS.Quit();
 
         private ICollection<ObjectiveTypeExternalDto> GetObjectiveTypes()
         {
             return new List<ObjectiveTypeExternalDto>()
                 {
-                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.DEFECT].Description },
-                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.WORK].Description },
+                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.DEFECT].Description, ExternalId = ObjectTypeID.DEFECT },
+                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.WORK].Description, ExternalId = ObjectTypeID.WORK },
                 };
         }
 

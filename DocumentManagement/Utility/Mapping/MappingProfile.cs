@@ -63,14 +63,14 @@ namespace MRS.DocumentManagement.Utility
                 .ConvertUsing<DynamicFieldDtoTypeConverter>();
 
             CreateMap<DynamicField, DynamicFieldDto>();
-                //.ForMember(d => d.Value, o => o.Ignore());
             CreateMap<DynamicField, BoolFieldDto>();
             CreateMap<DynamicField, StringFieldDto>();
             CreateMap<DynamicField, IntFieldDto>();
             CreateMap<DynamicField, FloatFieldDto>();
             CreateMap<DynamicField, DateFieldDto>();
             CreateMap<DynamicField, EnumerationFieldDto>()
-                 .ForMember(d => d.Value, o => o.Ignore());
+                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldValuePropertyResolver>())
+                 .ForMember(d => d.EnumerationType, o => o.MapFrom<DynamicFieldEnumerationTypePropertyResolver>());
         }
 
         private void CreateMapToModel()
