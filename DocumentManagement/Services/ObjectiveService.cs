@@ -131,8 +131,8 @@ namespace MRS.DocumentManagement.Services
 
                 foreach (var item in objectiveToReport.Items)
                 {
-                    var newName = Path.Combine(path, item.Name.TrimStart('\\'));
-                    item.Name = newName;
+                    var newName = Path.Combine(path, item.RelativePath.TrimStart('\\'));
+                    item.RelativePath = newName;
                 }
 
                 objectives.Add(objectiveToReport);

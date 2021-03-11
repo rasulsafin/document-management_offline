@@ -2,13 +2,13 @@
 {
     public struct ItemToCreateDto
     {
-        public string Name { get; }
+        public string RelativePath { get; }
         public string ExternalItemId { get; set; }
         public ItemType ItemType { get; }
 
-        public ItemToCreateDto(string name, string externalId, ItemType itemType)
+        public ItemToCreateDto(string relativePath, string externalId, ItemType itemType)
         {
-            Name = name;
+            RelativePath = relativePath;
             ExternalItemId = externalId;
             ItemType = itemType;
         }

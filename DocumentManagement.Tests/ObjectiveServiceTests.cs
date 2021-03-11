@@ -268,7 +268,7 @@ namespace MRS.DocumentManagement.Tests
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemType)dbItem.ItemType,
-                    Name = dbItem.RelativePath,
+                    RelativePath = dbItem.RelativePath,
                 },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -359,7 +359,7 @@ namespace MRS.DocumentManagement.Tests
                     ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemType)dbItem.ItemType,
-                    Name = dbItem.RelativePath,
+                    RelativePath = dbItem.RelativePath,
                 },
             };
             var dynamicFields = new List<IDynamicFieldDto>
@@ -661,7 +661,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ItemType = ItemType.Media,
                     ExternalID = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}",
+                    RelativePath = $"Name{guid}",
                 },
             };
             var firstItem = existingObjective.Items.First().Item;
@@ -673,7 +673,7 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
                     ItemType = (ItemType)firstItem.ItemType,
-                    Name = firstItem.RelativePath,
+                    RelativePath = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;
@@ -709,7 +709,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 Assert.IsTrue(items.Any(ci => ci.ExternalID == i.ExternalID
                                                     && (int)ci.ItemType == i.ItemType
-                                                    && ci.Name == i.RelativePath));
+                                                    && ci.RelativePath == i.RelativePath));
             });
         }
 
@@ -759,7 +759,7 @@ namespace MRS.DocumentManagement.Tests
                 {
                     ItemType = ItemType.Media,
                     ExternalID = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}",
+                    RelativePath = $"Name{guid}",
                 },
             };
             var firstItem = existingObjective.Items.First().Item;
@@ -771,7 +771,7 @@ namespace MRS.DocumentManagement.Tests
                     ID = new ID<ItemDto>(firstItem.ID),
                     ExternalID = firstItem.ExternalID,
                     ItemType = (ItemType)firstItem.ItemType,
-                    Name = firstItem.RelativePath,
+                    RelativePath = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;

@@ -4,7 +4,7 @@
     {
         public ID<ItemDto> ID { get; set; }
 
-        public string Name { get; set; }
+        public string RelativePath { get; set; }
 
         public string ExternalID { get; set; }
 
