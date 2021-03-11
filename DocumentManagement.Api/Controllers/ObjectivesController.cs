@@ -67,8 +67,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("report")]
         public async Task<IActionResult> GenerateReport([FromBody] IEnumerable<ID<ObjectiveDto>> data, [FromQuery] string path, [FromQuery] int userID, [FromQuery] string projectName)
         {
-            var result = await service.GenerateReport(data, path, userID, projectName);
-            return ValidateFoundRelatedResult(result);
+            try
+            {
+                var result = await service.GenerateReport(data, path, userID, projectName);
+                return Ok(result);
+            }
+            catch (System.Exception ex)
+            {
+                return CreateProblemResult(this, 500, "Failed to create report", ex.Message);
+            }
         }
     }
 }
