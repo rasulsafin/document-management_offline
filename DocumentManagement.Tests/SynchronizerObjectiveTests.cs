@@ -89,6 +89,8 @@ namespace MRS.DocumentManagement.Tests
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context));
             services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context, mapper));
+            services.AddTransient(x => new DynamicFieldValueResolver(Fixture.Context));
+            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(Fixture.Context));
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
