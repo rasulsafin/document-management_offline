@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ProjectExternalDto> Update(ProjectExternalDto projectDto)
         {
-            TDMSObject project = TdmsConnection.connection.GetObjectByGUID(projectDto.ExternalID);
+            TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(projectDto.ExternalID);
             mapper.ToModel(projectDto, project);
             return Task.FromResult(mapper.ToDto(project));
         }
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             List<ProjectExternalDto> projects = new List<ProjectExternalDto>();
             try
             {
-                var queryCom = TdmsConnection.connection.CreateQuery();
+                var queryCom = TdmsConnection.TDMS.CreateQuery();
                 queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.OBJECT);
 
                 foreach (TDMSObject obj in queryCom.Objects)
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject project = TdmsConnection.connection.GetObjectByGUID(id);
+                TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(id);
                 return mapper.ToDto(project);
             }
             catch
