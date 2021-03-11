@@ -2,7 +2,7 @@
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class ConnectionInfoExternalDto
+    public class ConnectionInfoExternalDto : IConnectionInfoDto
     {
         public ConnectionTypeExternalDto ConnectionType { get; set; }
 

@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection
 
         private static Dictionary<string, Type> connections;
 
-        public static IConnection GetConnection(ConnectionTypeDto connectionTypeDto)
+        public static IConnection GetConnection(ConnectionTypeExternalDto connectionTypeDto)
         {
             if (connections == null)
                 GetAllConnectionTypes();

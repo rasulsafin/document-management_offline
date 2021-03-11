@@ -5,7 +5,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class ConnectionTypeDtoAppPropertiesResolver : IValueResolver<ConnectionTypeDto, ConnectionType, IEnumerable<AppProperty>>
+    public class ConnectionTypeDtoAppPropertiesResolver : IValueResolver<IConnectionTypeDto, ConnectionType, IEnumerable<AppProperty>>
     {
         private readonly CryptographyHelper helper;
 
@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Utility
             this.helper = helper;
         }
 
-        public IEnumerable<AppProperty> Resolve(ConnectionTypeDto source, ConnectionType destination, IEnumerable<AppProperty> destMember, ResolutionContext context)
+        public IEnumerable<AppProperty> Resolve(IConnectionTypeDto source, ConnectionType destination, IEnumerable<AppProperty> destMember, ResolutionContext context)
         {
             var list = new List<AppProperty>();
             foreach (var property in source.AppProperties)

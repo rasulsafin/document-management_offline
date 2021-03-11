@@ -2,7 +2,7 @@
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class ConnectionTypeDto
+    public class ConnectionTypeDto : IConnectionTypeDto
     {
         public ID<ConnectionTypeDto> ID { get; set; }
 

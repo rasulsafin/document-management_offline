@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Services
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
             var connection = GetConnection(connectionInfo);
-            var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
+            var connectionInfoDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
             // Connect to Remote
             var status = await connection.Connect(connectionInfoDto);
@@ -61,20 +61,20 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             // Update types stored in connection info
-            var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
+            var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
             var typesToRemove = currentEnumerationTypes?
-                .Where(x => newTypes.All(t => t.ExternalId != x.EnumerationType.ExternalId))
+                .Where(x => newTypes.All(t => t.ExternalID!= x.EnumerationType.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
             var newValues = connectionInfoDto.EnumerationTypes?
-                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueDto>();
+                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
                 .Where(x => !newValues.Any(t =>
-                    t.ExternalId == x.EnumerationValue.ExternalId))
+                    t.ExternalID == x.EnumerationValue.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
 
@@ -109,7 +109,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
             var connection = GetConnection(connectionInfo);
 
-            return await connection.GetStatus(mapper.Map<ConnectionInfoDto>(connectionInfo));
+            return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
         }
 
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)
@@ -160,11 +160,11 @@ namespace MRS.DocumentManagement.Services
 
         private IConnection GetConnection(ConnectionInfo connectionInfo)
         {
-            var type = mapper.Map<ConnectionTypeDto>(connectionInfo.ConnectionType);
+            var type = mapper.Map<ConnectionTypeExternalDto>(connectionInfo.ConnectionType);
             return ConnectionCreator.GetConnection(type);
         }
 
-        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
+        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeExternalDto enumType, ConnectionInfo connectionInfo)
         {
             var enumTypeDb = await CheckEnumerationTypeToLink(enumType, (int)connectionInfo.ID);
             if (enumTypeDb != null)
@@ -181,7 +181,7 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
+        private async Task LinkEnumerationValues(EnumerationValueExternalDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
         {
             var enumValueDb = await CheckEnumerationValueToLink(enumVal, type, (int)connectionInfo.ID);
             if (enumValueDb == null)
@@ -196,10 +196,10 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        private async Task<EnumerationType> CheckEnumerationTypeToLink(EnumerationTypeDto enumTypeDto, int connectionInfoID)
+        private async Task<EnumerationType> CheckEnumerationTypeToLink(EnumerationTypeExternalDto enumTypeDto, int connectionInfoID)
         {
             var enumTypeDb = await context.EnumerationTypes
-                    .FirstOrDefaultAsync(i => i.ExternalId == enumTypeDto.ExternalId);
+                    .FirstOrDefaultAsync(i => i.ExternalId == enumTypeDto.ExternalID);
 
             if (enumTypeDb == null)
             {
@@ -221,10 +221,10 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, EnumerationType type, int connectionInfoID)
+        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueExternalDto enumValueDto, EnumerationType type, int connectionInfoID)
         {
             var enumValueDb = await context.EnumerationValues
-                    .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalId);
+                    .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalID);
 
             if (enumValueDb == null)
             {

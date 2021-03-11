@@ -143,6 +143,7 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateMap<ProjectExternalDto, Project>();
             CreateMap<Project, ProjectExternalDto>();
+
             CreateMap<ObjectiveExternalDto, Objective>()
                 .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
                 .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeResolver>())
@@ -152,10 +153,9 @@ namespace MRS.DocumentManagement.Utility
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
                .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)));
+
             CreateMap<Item, ItemExternalDto>();
             CreateMap<ItemExternalDto, Item>();
-            CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
-            CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
 
@@ -166,6 +166,27 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<DynamicField, DynamicFieldExternalDto>();
             CreateMap<DynamicFieldExternalDto, DynamicField>();
+
+            CreateMap<ConnectionInfo, ConnectionInfoExternalDto>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>());
+            CreateMap<ConnectionInfoExternalDto, ConnectionInfo>()
+                .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoDtoAuthFieldValuesResolver>());
+
+            CreateMap<ConnectionType, ConnectionTypeExternalDto>()
+                .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(x => x.Name)))
+                .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeAppPropertiesResolver>());
+            CreateMap<ConnectionTypeExternalDto, ConnectionType>()
+             .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(name => new AuthFieldName() { Name = name })))
+             .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeDtoAppPropertiesResolver>());
+
+            CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
+            CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
+
+            CreateMap<EnumerationType, EnumerationTypeExternalDto>();
+            CreateMap<EnumerationTypeExternalDto, EnumerationType>();
+
+            CreateMap<EnumerationValue, EnumerationValueExternalDto>();
+            CreateMap<EnumerationValueExternalDto, EnumerationValue>();
         }
     }
 }
