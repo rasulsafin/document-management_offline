@@ -117,10 +117,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             var list = new List<EnumerationTypeExternalDto>();
             try
             {
+                /// Companies
                 var tdmsType = TDMS.ObjectDefs[ObjectTypeID.COMPANY];
                 var enumerationType = new EnumerationTypeExternalDto()
                 {
-                    ExternalID = tdmsType.SysName,
+                    ExternalID = ObjectTypeID.COMPANY,
                     Name = tdmsType.Description,
                     EnumerationValues = new List<EnumerationValueExternalDto>(),
                 };

@@ -164,8 +164,10 @@ namespace MRS.DocumentManagement.Utility
                .ConvertUsing<BimElementObjectiveTypeConverter>();
             CreateMap<BimElementExternalDto, BimElement>();
 
-            CreateMap<DynamicField, DynamicFieldExternalDto>();
-            CreateMap<DynamicFieldExternalDto, DynamicField>();
+            CreateMap<DynamicField, DynamicFieldExternalDto>()
+                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldValueResolver>());
+            CreateMap<DynamicFieldExternalDto, DynamicField>()
+                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalDtoValueResolver>());
 
             CreateMap<ConnectionInfo, ConnectionInfoExternalDto>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>());

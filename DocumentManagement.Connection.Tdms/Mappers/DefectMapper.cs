@@ -90,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         };
 
         private ObjectiveStatus GetStatus(string statusTDMS)
-          =>  statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Ready :
+          => statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Ready :
               statusTDMS == StatusID.DEFECT_INPROGRESS ? ObjectiveStatus.InProgress :
               statusTDMS == StatusID.DEFECT_CREATED ? ObjectiveStatus.Open :
               ObjectiveStatus.Undefined;
@@ -115,10 +115,21 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
         private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
         {
-            var list = new List<DynamicFieldExternalDto>();
-            // TODO: Dynamic fields
-            // - Contractor (enum)
-            // - Comment (string)
+            var contractor = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.BUILDER].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.BUILDER].Description,
+                Type = DynamicFieldType.ENUM,
+                Value = tdmsObject.Attributes[AttributeID.BUILDER].Object.GUID,
+            };
+
+            var company = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.COMPANY].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.COMPANY].Description,
+                Type = DynamicFieldType.ENUM,
+                Value = tdmsObject.Attributes[AttributeID.COMPANY].Object?.GUID,
+            };
 
             var comment = new DynamicFieldExternalDto()
             {
@@ -128,9 +139,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 Value = tdmsObject.Attributes[AttributeID.COMMENT].Value.ToString(),
             };
 
-            list.Add(comment);
-
-            return list;
+            return new List<DynamicFieldExternalDto>() { comment, contractor, company };
         }
     }
 }

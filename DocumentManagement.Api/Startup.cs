@@ -45,13 +45,25 @@ namespace MRS.DocumentManagement.Api
                 });
 
             // Mapping
+            services.AddTransient<DynamicFieldTypeConverter>();
+            services.AddTransient<DynamicFieldDtoTypeConverter>();
+            services.AddTransient<BimElementObjectiveTypeConverter>();
+
             services.AddTransient<ConnectionTypeAppPropertiesResolver>();
             services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
-            services.AddTransient<DynamicFieldTypeConverter>();
-            services.AddTransient<DynamicFieldDtoTypeConverter>();
+
+            services.AddTransient<DynamicFieldEnumerationTypePropertyResolver>();
+            services.AddTransient<DynamicFieldExternalDtoValueResolver>();
+            services.AddTransient<DynamicFieldValuePropertyResolver>();
+            services.AddTransient<DynamicFieldValueResolver>();
+
             services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
+            services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>();
+            services.AddTransient<ObjectiveExternalDtoObjectiveTypeIDResolver>();
+            services.AddTransient<ObjectiveObjectiveTypeResolver>();
+
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
