@@ -15,9 +15,8 @@ namespace DocumentManagement.Connection.Tdms.Tests
         public static void AssemblyInit(TestContext context)
         {
             connection = new TdmsConnection();
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(1),
                 ConnectionType = connection.GetConnectionType(),
                 AuthFieldValues = new Dictionary<string, string>()
                 {

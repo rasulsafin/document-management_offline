@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             if (string.IsNullOrEmpty(parent))
                 throw new Exception();
 
-            TDMSObject obj = TdmsConnection.connection.GetObjectByGUID(parent);
+            TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(parent);
             TDMSObject objective = obj.Objects.Create(type);
             obj.Update();
             mapper.ToModel(objectiveDto, objective);
@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ObjectiveExternalDto> Update(ObjectiveExternalDto objectiveDto)
         {
-            TDMSObject objective = TdmsConnection.connection.GetObjectByGUID(objectiveDto.ExternalID);
+            TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(objectiveDto.ExternalID);
             if (objective == null)
                 throw new NullReferenceException();
 
@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto objectiveDto)
         {
-            TDMSObject obj = TdmsConnection.connection.GetObjectByGUID(objectiveDto.ExternalID);
+            TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(objectiveDto.ExternalID);
             var parent = obj.Parent;
             obj.Erase();
             parent?.Update();
@@ -81,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             try
             {
-                TDMSObject objective = TdmsConnection.connection.GetObjectByGUID(id);
+                TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(id);
                 return mapper.ToDto(objective);
             }
             catch
@@ -92,7 +92,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         private List<ObjectiveExternalDto> FindByDef(string objectTypeId, List<ObjectiveExternalDto> list)
         {
-            var queryCom = TdmsConnection.connection.CreateQuery();
+            var queryCom = TdmsConnection.TDMS.CreateQuery();
             queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, objectTypeId);
 
             foreach (TDMSObject obj in queryCom.Objects)
