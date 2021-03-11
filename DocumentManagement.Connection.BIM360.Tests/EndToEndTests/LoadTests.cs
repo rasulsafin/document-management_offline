@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static AuthenticationService authService;
         private static HubsService hubsService;
         private static ProjectsService projectsService;
-        private static ConnectionInfoDto connectionInfo;
+        private static ConnectionInfoExternalDto connectionInfo;
         private static ObjectsService objectsService;
         private static ItemsService itemsService;
         private static FoldersService foldersService;
@@ -49,10 +49,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             foldersService = new FoldersService(connection);
             versionsService = new VersionsService(connection);
 
-            connectionInfo = new ConnectionInfoDto
+            connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(2),
-                ConnectionType = new ConnectionTypeDto
+                ConnectionType = new ConnectionTypeExternalDto
                 {
                     AppProperties = new Dictionary<string, string>
                     {
@@ -66,7 +65,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                         "refreshtoken",
                         "end",
                     },
-                    ID = new ID<ConnectionTypeDto>(2),
                     Name = "BIM360",
                 },
             };

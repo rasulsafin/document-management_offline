@@ -36,10 +36,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var projectsService = new ProjectsService(connection);
             issuesService = new IssuesService(connection);
 
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(2),
-                ConnectionType = new ConnectionTypeDto
+                ConnectionType = new ConnectionTypeExternalDto
                 {
                     AppProperties = new Dictionary<string, string>
                     {
@@ -53,7 +52,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                         "refreshtoken",
                         "end",
                     },
-                    ID = new ID<ConnectionTypeDto>(2),
                     Name = "BIM360",
                 },
             };

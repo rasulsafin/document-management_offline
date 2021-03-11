@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         private readonly AuthenticationService authenticationService;
         private readonly HttpRequestUtility requestUtility;
 
-        private ConnectionInfoDto updatedInfo;
+        private ConnectionInfoExternalDto updatedInfo;
 
         public LementProConnection()
         {
@@ -30,19 +30,19 @@ namespace MRS.DocumentManagement.Connection.LementPro
             GC.SuppressFinalize(this);
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             var authorizationResult = await authenticationService.SignInAsync(info);
             updatedInfo = authorizationResult.updatedInfo;
             return authorizationResult.authStatus;
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
             => Task.FromResult(updatedInfo);
 
-        public ConnectionTypeDto GetConnectionType()
+        public ConnectionTypeExternalDto GetConnectionType()
         {
-            var type = new ConnectionTypeDto
+            var type = new ConnectionTypeExternalDto
             {
                 Name = "LementPro",
                 AuthFieldNames = new List<string>
@@ -59,18 +59,18 @@ namespace MRS.DocumentManagement.Connection.LementPro
         }
 
         // Do we need this?
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             throw new NotImplementedException();
         }
 
         // Do we need this?
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
         {
             throw new NotImplementedException();
         }

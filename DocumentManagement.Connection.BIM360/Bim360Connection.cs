@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private Authenticator authenticator;
         private ForgeConnection connection;
 
-        private ConnectionInfoDto updatedInfo;
+        private ConnectionInfoExternalDto updatedInfo;
 
         public Bim360Connection()
         {
@@ -30,37 +30,30 @@ namespace MRS.DocumentManagement.Connection.Bim360
             connection.Dispose();
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             var authorizationResult = await authenticator.SignInAsync(info);
             updatedInfo = authorizationResult.updatedInfo;
             return authorizationResult.authStatus;
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
+        {
+            // TODO: use connection info to check correctness
+            return Task.FromResult(authenticator.IsLogged);
+        }
+
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<ConnectionStatusDto> GetStatus()
-        {
-            throw new NotImplementedException();
-        }
-
-        public async Task<bool> IsAuthDataCorrect()
-            => authenticator.IsLogged;
-
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
             => Task.FromResult(updatedInfo);
 
-        public ConnectionTypeDto GetConnectionType()
+        public ConnectionTypeExternalDto GetConnectionType()
         {
-            var type = new ConnectionTypeDto
+            var type = new ConnectionTypeExternalDto
             {
                 Name = "BIM360",
                 AuthFieldNames = new List<string>
@@ -80,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return type;
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
             => await Bim360ConnectionContext.CreateContext(info, lastSynchronizationDate);
     }
 }

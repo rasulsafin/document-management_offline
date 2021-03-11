@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         internal BimsService BimsService { get; private set; }
 
-        public static async Task<LementProConnectionContext> CreateContext(ConnectionInfoDto info, DateTime lastSynchronizationDate)
+        public static async Task<LementProConnectionContext> CreateContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
         {
             var connection = new HttpConnection();
             var requestUtility = new HttpRequestUtility(connection);

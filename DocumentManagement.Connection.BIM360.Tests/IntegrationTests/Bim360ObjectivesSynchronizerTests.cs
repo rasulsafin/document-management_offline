@@ -20,10 +20,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         public static async Task ClassInitialize(TestContext unused)
         {
             var lastSyncDate = DateTime.MinValue;
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(2),
-                ConnectionType = new ConnectionTypeDto
+                ConnectionType = new ConnectionTypeExternalDto
                 {
                     AppProperties = new Dictionary<string, string>
                     {
@@ -37,7 +36,6 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                         "refreshtoken",
                         "end",
                     },
-                    ID = new ID<ConnectionTypeDto>(2),
                     Name = "BIM360",
                 },
             };

@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
         }
 
-        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoDto info)
+        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoExternalDto info)
         {
             var cancellationTokenSource = new CancellationTokenSource();
 

@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
         internal ObjectsService ObjectsService { get; private set; }
 
-        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoDto connectionInfo, DateTime lastSynchronizationDate)
+        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoExternalDto connectionInfo, DateTime lastSynchronizationDate)
         {
             var connection = new ForgeConnection();
             var authService = new AuthenticationService(connection);

@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             var login = "diismagilov";
             var password = "DYZDFMwZ";
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
                 AuthFieldValues = new Dictionary<string, string>
                 {
