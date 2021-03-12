@@ -9,9 +9,15 @@ using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms
 {
-    public class TdmsObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
+    public class TdmsObjectivesSynchronizer : TdmsSynchronizer, ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly ObjectiveMapper mapper = new ObjectiveMapper();
+        private readonly ObjectiveMapper mapper;
+
+        public TdmsObjectivesSynchronizer(TDMSApplication tdms)
+            : base(tdms)
+        {
+            this.mapper = new ObjectiveMapper(tdms);
+        }
 
         public Task<ObjectiveExternalDto> Add(ObjectiveExternalDto objectiveDto)
         {
@@ -32,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             if (string.IsNullOrEmpty(parent))
                 throw new Exception();
 
-            TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(parent);
+            TDMSObject obj = tdms.GetObjectByGUID(parent);
             TDMSObject objective = obj.Objects.Create(type);
             obj.Update();
             mapper.ToModel(objectiveDto, objective);
@@ -44,7 +50,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ObjectiveExternalDto> Update(ObjectiveExternalDto objectiveDto)
         {
-            TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(objectiveDto.ExternalID);
+            TDMSObject objective = tdms.GetObjectByGUID(objectiveDto.ExternalID);
             if (objective == null)
                 throw new NullReferenceException();
 
@@ -56,7 +62,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto objectiveDto)
         {
-            TDMSObject obj = TdmsConnection.TDMS.GetObjectByGUID(objectiveDto.ExternalID);
+            TDMSObject obj = tdms.GetObjectByGUID(objectiveDto.ExternalID);
             var parent = obj.Parent;
             obj.Erase();
             parent?.Update();
@@ -64,24 +70,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return Task.FromResult(objectiveDto);
         }
 
-        public IEnumerable<ObjectiveExternalDto> GetListOfObjectives()
-        {
-            List<ObjectiveExternalDto> objectives = new List<ObjectiveExternalDto>();
-            try
-            {
-                return FindByDef(ObjectTypeID.WORK, FindByDef(ObjectTypeID.DEFECT, objectives));
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public ObjectiveExternalDto Get(string id)
+        public ObjectiveExternalDto GetById(string id)
         {
             try
             {
-                TDMSObject objective = TdmsConnection.TDMS.GetObjectByGUID(id);
+                TDMSObject objective = tdms.GetObjectByGUID(id);
                 return mapper.ToDto(objective);
             }
             catch
@@ -90,19 +83,25 @@ namespace MRS.DocumentManagement.Connection.Tdms
             }
         }
 
-        private List<ObjectiveExternalDto> FindByDef(string objectTypeId, List<ObjectiveExternalDto> list)
+        public Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            var queryCom = TdmsConnection.TDMS.CreateQuery();
-            queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, objectTypeId);
+            var jobs = FindByDef(ObjectTypeID.WORK, date);
+            var issues = FindByDef(ObjectTypeID.DEFECT, date);
 
-            foreach (TDMSObject obj in queryCom.Objects)
+            return Task.FromResult<IReadOnlyCollection<string>>(jobs.Concat(issues).ToList());
+        }
+
+        public Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
+        {
+            var objectives = new List<ObjectiveExternalDto>();
+            foreach (var objectiveId in ids)
             {
-                var mapped = mapper.ToDto(obj);
-                if (mapped != null)
-                    list.Add(mapped);
+                var objective = GetById(objectiveId);
+                if (objective != null)
+                    objectives.Add(objective);
             }
 
-            return list;
+            return Task.FromResult<IReadOnlyCollection<ObjectiveExternalDto>>(objectives);
         }
     }
 }

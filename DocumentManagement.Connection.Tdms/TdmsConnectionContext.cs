@@ -1,33 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Tdms.Mappers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms
 {
     public class TdmsConnectionContext : AConnectionContext
     {
-        protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
+        private readonly TDMSApplication tdms;
+
+        public TdmsConnectionContext(TDMSApplication tdms)
         {
-            throw new NotImplementedException();
+            this.tdms = tdms;
         }
 
-        protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
-        {
-            throw new NotImplementedException();
-        }
+        protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer() 
+            => new TdmsObjectivesSynchronizer(tdms);
 
-        protected override Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects()
-        {
-            throw new NotImplementedException();
-        }
+        protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer() 
+            => new TdmsProjectsSynchronizer(tdms);
     }
 }

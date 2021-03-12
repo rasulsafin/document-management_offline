@@ -1,15 +1,15 @@
 ﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Tdms;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.Tdms.Tests
+namespace MRS.DocumentManagement.Connection.Tdms.Tests
 {
     [TestClass]
     public class InitClass
     {
         private static TdmsConnection connection;
+        public static IConnectionContext connectionContext;
 
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
@@ -34,6 +34,9 @@ namespace DocumentManagement.Connection.Tdms.Tests
             {
                 Assert.Fail("Authorization failed");
             }
+
+            connectionContext = connection.GetContext(connectionInfo).Result;
+            Assert.IsNotNull(connectionContext);
         }
 
         [AssemblyCleanup]

@@ -9,22 +9,22 @@ namespace MRS.DocumentManagement.Connection.Tdms
 {
     public class TdmsConnection : IConnection, IDisposable
     {
-        internal static TDMSApplication TDMS;
+        private static TDMSApplication tdms;
 
         public Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
-            TDMS = new TDMSApplication();
+            tdms = new TDMSApplication();
 
-            if (TDMS.IsLoggedIn)
+            if (tdms.IsLoggedIn)
             {
-                if (TDMS.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
+                if (tdms.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
                 {
                     return GetStatus(info);
                 }
                 else
                 {
-                    TDMS.Quit();
-                    TDMS = new TDMSApplication();
+                    tdms.Quit();
+                    tdms = new TDMSApplication();
                 }
             }
 
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 var server = info.AuthFieldValues[Auth.SERVER];
                 var db = info.AuthFieldValues[Auth.DATABASE];
 
-                TDMS.Login(login, password, db, server);
+                tdms.Login(login, password, db, server);
             }
             catch (Exception e)
             {
@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            if (TDMS == null)
+            if (tdms == null)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 });
             }
 
-            if (TDMS.IsLoggedIn == true)
+            if (tdms.IsLoggedIn == true)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
@@ -101,14 +101,14 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return type;
         }
 
-        public void Quit() => TDMS.Quit();
+        public void Quit() => tdms.Quit();
 
         private ICollection<ObjectiveTypeExternalDto> GetObjectiveTypes()
         {
             return new List<ObjectiveTypeExternalDto>()
                 {
-                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.DEFECT].Description, ExternalId = ObjectTypeID.DEFECT },
-                    new ObjectiveTypeExternalDto() { Name = TDMS.ObjectDefs[ObjectTypeID.WORK].Description, ExternalId = ObjectTypeID.WORK },
+                    new ObjectiveTypeExternalDto() { Name = tdms.ObjectDefs[ObjectTypeID.DEFECT].Description, ExternalId = ObjectTypeID.DEFECT },
+                    new ObjectiveTypeExternalDto() { Name = tdms.ObjectDefs[ObjectTypeID.WORK].Description, ExternalId = ObjectTypeID.WORK },
                 };
         }
 
@@ -118,7 +118,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             try
             {
                 /// Companies
-                var tdmsType = TDMS.ObjectDefs[ObjectTypeID.COMPANY];
+                var tdmsType = tdms.ObjectDefs[ObjectTypeID.COMPANY];
                 var enumerationType = new EnumerationTypeExternalDto()
                 {
                     ExternalID = ObjectTypeID.COMPANY,
@@ -126,7 +126,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
                     EnumerationValues = new List<EnumerationValueExternalDto>(),
                 };
 
-                var queryCom = TDMS.CreateQuery();
+                var queryCom = tdms.CreateQuery();
                 queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.COMPANY);
 
                 foreach (TDMSObject contractor in queryCom.Objects)
@@ -147,11 +147,12 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return list;
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
-        {
-            throw new NotImplementedException();
-        }
+        public void Dispose() => tdms.Quit();
 
-        public void Dispose() => TDMS.Quit();
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            await Connect(info);
+            return new TdmsConnectionContext(tdms);
+        }
     }
 }

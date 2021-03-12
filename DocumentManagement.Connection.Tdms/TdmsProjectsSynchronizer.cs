@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Tdms.Mappers;
@@ -9,9 +10,12 @@ using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms
 {
-    public class TdmsProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
+    public class TdmsProjectsSynchronizer : TdmsSynchronizer, ISynchronizer<ProjectExternalDto>
     {
         private readonly ProjectMapper mapper = new ProjectMapper();
+
+        public TdmsProjectsSynchronizer(TDMSApplication tdms)
+            : base(tdms) { }
 
         public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
             => throw new SecurityException();
@@ -21,43 +25,38 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<ProjectExternalDto> Update(ProjectExternalDto projectDto)
         {
-            TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(projectDto.ExternalID);
+            TDMSObject project = tdms.GetObjectByGUID(projectDto.ExternalID);
             mapper.ToModel(projectDto, project);
             return Task.FromResult(mapper.ToDto(project));
         }
 
-        public ICollection<ProjectExternalDto> GetListOfProjects()
-        {
-            List<ProjectExternalDto> projects = new List<ProjectExternalDto>();
-            try
-            {
-                var queryCom = TdmsConnection.TDMS.CreateQuery();
-                queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.OBJECT);
-
-                foreach (TDMSObject obj in queryCom.Objects)
-                {
-                    projects.Add(mapper.ToDto(obj));
-                }
-
-                return projects;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public ProjectExternalDto Get(string id)
+        public ProjectExternalDto GetById(string id)
         {
             try
             {
-                TDMSObject project = TdmsConnection.TDMS.GetObjectByGUID(id);
+                TDMSObject project = tdms.GetObjectByGUID(id);
                 return mapper.ToDto(project);
             }
             catch
             {
                 return null;
             }
+        }
+
+        public Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date) => 
+            Task.FromResult<IReadOnlyCollection<string>>(FindByDef(ObjectTypeID.OBJECT, date));
+
+        public Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
+        {
+            var projects = new List<ProjectExternalDto>();
+            foreach (var projectId in ids)
+            {
+                var project = GetById(projectId);
+                if (project != null)
+                    projects.Add(project);
+            }
+
+            return Task.FromResult<IReadOnlyCollection<ProjectExternalDto>>(projects);
         }
     }
 }
