@@ -66,7 +66,6 @@ namespace MRS.DocumentManagement.Services
 
             dbItem.ItemType = (int)item.ItemType;
             dbItem.RelativePath = item.RelativePath;
-            dbItem.ExternalID = item.ExternalID;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
             return true;

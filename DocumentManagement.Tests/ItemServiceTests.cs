@@ -89,7 +89,6 @@ namespace MRS.DocumentManagement.Tests
             var result = await service.Find(dtoId);
 
             Assert.AreEqual(dtoId, result.ID);
-            Assert.AreEqual(existingItem.ExternalID, result.ExternalID);
             Assert.AreEqual(existingItem.RelativePath, result.RelativePath);
             Assert.AreEqual(existingItem.ItemType, (int)result.ItemType);
         }
@@ -115,8 +114,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(projectItems.Count(), result.Count());
             projectItems.ToList().ForEach(i =>
             {
-                Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
-                                               && (int)ri.ID == i.ID
+                Assert.IsTrue(result.Any(ri => (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
                                                && ri.RelativePath == i.RelativePath));
             });
@@ -151,8 +149,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(objectiveItems.Count(), result.Count());
             objectiveItems.ToList().ForEach(i =>
             {
-                Assert.IsTrue(result.Any(ri => ri.ExternalID == i.ExternalID
-                                               && (int)ri.ID == i.ID
+                Assert.IsTrue(result.Any(ri => (int)ri.ID == i.ID
                                                && (int)ri.ItemType == i.ItemType
                                                && ri.RelativePath == i.RelativePath));
             });
@@ -188,7 +185,6 @@ namespace MRS.DocumentManagement.Tests
             {
                 ID = new ID<ItemDto>(existingItem.ID),
                 ItemType = (ItemType)newItemType,
-                ExternalID = newExternalItemId,
                 RelativePath = newName
             };
 

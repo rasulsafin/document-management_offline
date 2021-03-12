@@ -265,7 +265,6 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemType)dbItem.ItemType,
                     RelativePath = dbItem.RelativePath,
@@ -356,7 +355,6 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ExternalID = dbItem.ExternalID,
                     ID = new ID<ItemDto>(dbItem.ID),
                     ItemType = (ItemType)dbItem.ItemType,
                     RelativePath = dbItem.RelativePath,
@@ -660,7 +658,6 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ItemType = ItemType.Media,
-                    ExternalID = $"ExternalItemId{guid}",
                     RelativePath = $"Name{guid}",
                 },
             };
@@ -671,7 +668,6 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
-                    ExternalID = firstItem.ExternalID,
                     ItemType = (ItemType)firstItem.ItemType,
                     RelativePath = firstItem.RelativePath,
                 },
@@ -707,8 +703,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(updatedObjective.Items.Count, items.Count);
             updatedObjective.Items.Select(oi => oi.Item).ToList().ForEach(i =>
             {
-                Assert.IsTrue(items.Any(ci => ci.ExternalID == i.ExternalID
-                                                    && (int)ci.ItemType == i.ItemType
+                Assert.IsTrue(items.Any(ci => (int)ci.ItemType == i.ItemType
                                                     && ci.RelativePath == i.RelativePath));
             });
         }
@@ -758,7 +753,6 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ItemType = ItemType.Media,
-                    ExternalID = $"ExternalItemId{guid}",
                     RelativePath = $"Name{guid}",
                 },
             };
@@ -769,7 +763,6 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
-                    ExternalID = firstItem.ExternalID,
                     ItemType = (ItemType)firstItem.ItemType,
                     RelativePath = firstItem.RelativePath,
                 },

@@ -128,7 +128,7 @@ namespace MRS.DocumentManagement.Tests
             var objectiveType = typeof(Objective);
             var parentId = context.Objectives.Unsynchronized().First().ID;
             var itemsCount = context.Items.Unsynchronized().Count();
-            var item = new ItemDto { ExternalID = externalId, ItemType = itemType, RelativePath = name };
+            var item = new ItemDto { ItemType = itemType, RelativePath = name };
 
             var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
@@ -151,7 +151,7 @@ namespace MRS.DocumentManagement.Tests
             var projectType = typeof(Project);
             var parentId = context.Projects.Unsynchronized().First().ID;
             var itemsCount = context.Items.Unsynchronized().Count();
-            var item = new ItemDto { ExternalID = externalId, ItemType = itemType, RelativePath = name };
+            var item = new ItemDto { ItemType = itemType, RelativePath = name };
 
             var result = await helper.CheckItemToLink(context, mapper, item, projectType, parentId);
 

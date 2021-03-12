@@ -26,8 +26,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
             Expression<Func<TDB, bool>> filter = null,
-            object parent = null)
+            object parent = null,
+            IProgress<double> progress = null)
         {
+            progress?.Report(0.0);
             var defaultFiler = GetDefaultFilter(data);
             var list = Include(GetDBSet(data.Context))
                .Where(defaultFiler);
@@ -41,6 +43,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 IsEntitiesEquals);
 
             var results = new List<SynchronizingResult>();
+            var i = 0;
 
             foreach (var tuple in tuples)
             {
@@ -69,8 +72,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
                 }
+
+                progress?.Report(++i / (double)tuples.Count);
             }
 
+            progress?.Report(1.0);
             return results;
         }
 

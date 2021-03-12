@@ -6,8 +6,6 @@
 
         public string RelativePath { get; set; }
 
-        public string ExternalID { get; set; }
-
         public ItemType ItemType { get; set; }
     }
 }
