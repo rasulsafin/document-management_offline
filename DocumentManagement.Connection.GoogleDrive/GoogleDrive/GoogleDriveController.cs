@@ -185,7 +185,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
                 {
-                    var element = infos.First(x => x.DisplayName == name);
+                    var element = infos.FirstOrDefault(x => x.DisplayName == name);
                     if (element != null)
                     {
                         var request = service.Files.Update(fileDrive, element.Href, stream, contentType);

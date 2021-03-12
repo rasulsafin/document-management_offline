@@ -23,13 +23,13 @@ namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synch
             {
                 ConnectionType = new ConnectionTypeExternalDto
                 {
-                    Name = "Yandex Disk",
+                    Name = "Google Drive",
                     AuthFieldNames = new List<string>() { "token" },
                     AppProperties = new Dictionary<string, string>
                     {
-                        { "CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051" },
-                        { "CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
-                        { "RETURN_URL", @"http://localhost:8000/oauth/" },
+                        { "APPLICATION_NAME", "BRIO MRS" },
+                        { "CLIENT_ID", "1827523568-ha5m7ddtvckjqfrmvkpbhdsl478rdkfm.apps.googleusercontent.com" },
+                        { "CLIENT_SECRET", "fA-2MtecetmXLuGKXROXrCzt" },
                     },
                 },
             };
