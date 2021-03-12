@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public GoogleDriveManager(GoogleDriveController driveController)
         {
-            this.controller = driveController;
+            controller = driveController;
         }
 
         public string DirAppHref { get; private set; }
@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 string json = JsonConvert.SerializeObject(@object);
                 return await controller.SetContentAsync(json, tableHref, name);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 T @object = JsonConvert.DeserializeObject<T>(json);
                 return @object;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -106,6 +106,22 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return false;
         }
 
+        public async Task<List<T>> PullAll<T>(string path)
+        {
+            var resultCollection = new List<T>();
+            try
+            {
+                var elements = await GetRemoteDirectoryFiles(path);
+                foreach (var item in elements)
+                    resultCollection.Add(await Pull<T>(item.Href));
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return resultCollection;
+        }
+
         public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
         {
             string dirHref = await GetDirHref(remoteDirName);
@@ -121,6 +137,18 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public async Task<bool> PullFile(string href, string fileName)
         {
             return await controller.DownloadFileAsync(href, fileName);
+        }
+
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        {
+            try
+            {
+                return await controller.GetListAsync(directoryPath);
+            }
+            catch (FileNotFoundException)
+            {
+                return Enumerable.Empty<CloudElement>();
+            }
         }
 
         private async Task<string> GetDirHref(string dirName)

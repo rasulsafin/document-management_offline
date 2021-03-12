@@ -25,7 +25,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
         private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
 
-
         private UserCredential credential;
         private DriveService service;
 
