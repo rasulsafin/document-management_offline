@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
@@ -77,9 +78,20 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                     request.Q = $"'root' in parents";
                 if (!string.IsNullOrEmpty(nextPageToken))
                     request.PageToken = nextPageToken;
-                var fileList = await request.ExecuteAsync();
-                result.AddRange(fileList.Files);
-                nextPageToken = fileList.NextPageToken;
+
+                try
+                {
+                    var fileList = await request.ExecuteAsync();
+                    result.AddRange(fileList.Files);
+                    nextPageToken = fileList.NextPageToken;
+                }
+                catch (GoogleApiException ge)
+                {
+                    if (ge.Error.Code == 404)
+                        throw new FileNotFoundException();
+
+                    throw;
+                }
             }
             while (!string.IsNullOrEmpty(nextPageToken));
 
@@ -273,9 +285,12 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 {
                     if (infos.Any(x => x.DisplayName == fileInfo.Name))
                     {
-                        var href = infos.First().Href;
-                        var request = service.Files.Update(fileDrive, href, stream, contentType);
-                        result = await request.UploadAsync();
+                        fileDrive.Id = infos.First().Href;
+
+                        // TODO: Change this
+                        // Do not update file for the moment
+                        //var request = service.Files.Update(fileDrive, href, stream, contentType);
+                        //result = await request.UploadAsync();
                     }
                     else
                     {
