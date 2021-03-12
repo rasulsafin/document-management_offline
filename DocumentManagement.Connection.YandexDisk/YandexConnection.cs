@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -12,7 +13,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         private const string NAME_CONNECTION = "Yandex Disk";
         private YandexManager manager;
 
-        public YandexConnection() { }
+        public YandexConnection()
+        {
+        }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
@@ -20,8 +23,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             {
                 if (await IsAuthDataCorrect(info))
                 {
-
                     YandexDiskAuth auth = new YandexDiskAuth();
+                    if (info.AuthFieldValues == null)
+                        info.AuthFieldValues = new Dictionary<string, string>();
+
                     if (!info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
                     {
                         var tokenNew = await auth.GetYandexDiskToken(info);
@@ -97,9 +102,14 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return type;
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
         {
-            throw new NotImplementedException();
+            var connectResult = await Connect(info);
+            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
+                return null;
+
+            return YandexConnectionContext.CreateContext(lastSynchronizationDate, manager);
         }
+
     }
 }

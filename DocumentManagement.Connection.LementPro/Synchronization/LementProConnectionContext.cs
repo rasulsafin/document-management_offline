@@ -40,9 +40,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
-        {
-            throw new NotImplementedException();
-        }
+            => new LementProObjectivesSynchronizer(this);
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
         {

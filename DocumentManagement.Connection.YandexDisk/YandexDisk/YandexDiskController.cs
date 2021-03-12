@@ -1,11 +1,11 @@
-﻿using MRS.DocumentManagement.Connection.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using MRS.DocumentManagement.Connection.Utils;
 
 namespace MRS.DocumentManagement.Connection.YandexDisk
 {
@@ -106,9 +106,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// </summary>
         /// <param name="path">The path to the file on the disk. </param>
         /// <param name="content">Content</param>
-        /// <param name="progressChenge"> to transfer the progress </param>
+        /// <param name="progressChange"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        public async Task<bool> SetContentAsync(string path, string content, Action<ulong, ulong> progressChenge = null)
+        public async Task<bool> SetContentAsync(string path, string content, Action<ulong, ulong> progressChange = null)
         {
             try
             {
@@ -127,7 +127,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                         {
                             writer.Write(buffer, 0, count);
                             current += (ulong)count;
-                            progressChenge?.Invoke(current, total);
+                            progressChange?.Invoke(current, total);
                             count = reader.Read(buffer, 0, BUFFER_LENGTH);
                         }
                     }
@@ -274,7 +274,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                 {
                     if (response is HttpWebResponse http)
                     {
-                        if (http.StatusCode == HttpStatusCode.OK)
+                        // For successful deletion empty folder or file success code is NoContent according with API description
+                        // For successful deletion non-empty folder success code is Accepted
+                        if (http.StatusCode == HttpStatusCode.NoContent || http.StatusCode == HttpStatusCode.Accepted)
                         {
                             return true;
                         }
@@ -296,10 +298,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// </summary>
         /// <param name="href">The path to the file on the disk. </param>
         /// <param name="fileName">The path to the file on the computer.</param>
-        /// <param name="progressChenge"> to transfer the progress </param>
+        /// <param name="progressChange"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="TimeoutException">The server timeout has expired.</exception>
-        public async Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChenge = null)
+        public async Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChange = null)
         {
             try
             {
@@ -320,7 +322,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                         {
                             writer.Write(buffer, 0, count);
                             current += (ulong)count;
-                            progressChenge?.Invoke(current, total);
+                            progressChange?.Invoke(current, total);
                             count = reader.Read(buffer, 0, BUFFER_LENGTH);
                         }
                     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Interface;
