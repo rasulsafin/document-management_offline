@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -13,7 +14,7 @@ namespace MRS.DocumentManagement.Connection
 
         private static Dictionary<string, Type> connections;
 
-        public static IConnection GetConnection(ConnectionTypeExternalDto connectionTypeDto)
+        public static IConnection GetConnection(ConnectionType connectionTypeDto)
         {
             if (connections == null)
                 GetAllConnectionTypes();

@@ -141,7 +141,7 @@ namespace MRS.DocumentManagement.Tests
                     User = await Fixture.Context.Users.FirstAsync(),
                 },
                 Connection.Object,
-                new ConnectionInfoExternalDto());
+                new ConnectionInfo());
             var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
             return (local, synchronized, result);

@@ -1324,7 +1324,7 @@ namespace MRS.DocumentManagement.Tests
             var synchronizationResult = await synchronizer.Synchronize(
                 data,
                 Connection.Object,
-                new ConnectionInfoExternalDto());
+                new ConnectionInfo());
             return synchronizationResult;
         }
     }

@@ -515,7 +515,7 @@ namespace MRS.DocumentManagement.Tests
             var synchronizationResult = await synchronizer.Synchronize(
                 data,
                 Connection.Object,
-                new ConnectionInfoExternalDto());
+                new ConnectionInfo());
 
             var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();

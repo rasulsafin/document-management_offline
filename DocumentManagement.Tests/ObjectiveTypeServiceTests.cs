@@ -42,7 +42,6 @@ namespace MRS.DocumentManagement.Tests
                 context.ObjectiveTypes.AddRange(types);
                 context.SaveChanges();
             });
-            var syncService = new Mock<SyncService>();
             service = new ObjectiveTypeService(Fixture.Context, mapper);
         }
 

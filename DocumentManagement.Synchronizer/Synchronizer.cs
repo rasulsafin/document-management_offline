@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Synchronization
         public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
-                ConnectionInfoExternalDto info)
+                ConnectionInfo info)
         {
             var results = new List<SynchronizingResult>();
 
@@ -31,7 +31,9 @@ namespace MRS.DocumentManagement.Synchronization
             {
                 var date = DateTime.UtcNow;
                 var lastSynchronization = await data.Context.Synchronizations.OrderBy(x => x.Date).LastOrDefaultAsync();
-                var context = await connection.GetContext(info, lastSynchronization?.Date ?? DateTime.MinValue);
+                var context = await connection.GetContext(
+                    mapper.Map<ConnectionInfoExternalDto>(info),
+                    lastSynchronization?.Date ?? DateTime.MinValue);
                 var project = new ProjectStrategy(mapper);
                 var objective = new ObjectiveStrategy(mapper);
 

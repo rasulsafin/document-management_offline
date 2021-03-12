@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -6,21 +7,27 @@ using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Synchronization;
+using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ConnectionService : IConnectionService
     {
+        private static readonly Dictionary<string, Task<ICollection<SynchronizingResult>>> SYNCHRONIZATIONS =
+            new Dictionary<string, Task<ICollection<SynchronizingResult>>>();
+
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly Synchronizer synchronizer;
 
         public ConnectionService(DMContext context, IMapper mapper)
         {
             this.context = context;
             this.mapper = mapper;
+            synchronizer = new Synchronizer(mapper);
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -48,7 +55,7 @@ namespace MRS.DocumentManagement.Services
             if (connectionInfo == null)
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
-            var connection = GetConnection(connectionInfo);
+            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
             var connectionInfoDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
             // Connect to Remote
@@ -107,7 +114,7 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
             if (connectionInfo == null)
                 return null;
-            var connection = GetConnection(connectionInfo);
+            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
 
             return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
         }
@@ -122,6 +129,53 @@ namespace MRS.DocumentManagement.Services
                 .Select(x => mapper.Map<EnumerationValueDto>(x.EnumerationValue));
 
             return list;
+        }
+
+        public async Task<string> Synchronize(ID<UserDto> userID)
+        {
+            var iUserID = (int)userID;
+            var user = await context.Users.Include(x => x.ConnectionInfo).FirstOrDefaultAsync(x => x.ID == iUserID);
+            if (user == null)
+                return null;
+
+            var data = new SynchronizingData
+            {
+                Context = context,
+                User = user,
+                ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
+                ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
+            };
+
+            var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
+            var info = user.ConnectionInfo;
+            var id = Guid.NewGuid().ToString();
+            var task = synchronizer.Synchronize(data, connection, info);
+            SYNCHRONIZATIONS.Add(id, task);
+            return id;
+        }
+
+        public Task<bool> IsSynchronizationComplete(string synchronizationID)
+        {
+            if (SYNCHRONIZATIONS.TryGetValue(synchronizationID, out var task))
+            {
+                var result = task.IsCompleted;
+                SYNCHRONIZATIONS.Remove(synchronizationID);
+                return Task.FromResult(result);
+            }
+
+            throw new ArgumentException($"The synchronization {synchronizationID} doesn't exist");
+        }
+
+        public Task<bool> GetSynchronizationResult(string synchronizationID)
+        {
+            if (SYNCHRONIZATIONS.TryGetValue(synchronizationID, out var task))
+            {
+                var result = task.Result.Count <= 0;
+                SYNCHRONIZATIONS.Remove(synchronizationID);
+                return Task.FromResult(result);
+            }
+
+            throw new ArgumentException($"The synchronization {synchronizationID} doesn't exist");
         }
 
         #region private method
@@ -156,12 +210,6 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == user.ConnectionInfoID);
 
             return info;
-        }
-
-        private IConnection GetConnection(ConnectionInfo connectionInfo)
-        {
-            var type = mapper.Map<ConnectionTypeExternalDto>(connectionInfo.ConnectionType);
-            return ConnectionCreator.GetConnection(type);
         }
 
         private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeExternalDto enumType, ConnectionInfo connectionInfo)
