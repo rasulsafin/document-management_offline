@@ -19,7 +19,6 @@ namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchr
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
         {
-            var lastSyncDate = DateTime.MinValue;
             var connectionInfo = new ConnectionInfoExternalDto
             {
                 ConnectionType = new ConnectionTypeExternalDto
@@ -36,7 +35,7 @@ namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchr
             };
 
             var connection = new YandexConnection();
-            var context = await connection.GetContext(connectionInfo, lastSyncDate);
+            var context = await connection.GetContext(connectionInfo);
             synchronizer = new YandexProjectsSynchronizer((YandexConnectionContext)context);
         }
 

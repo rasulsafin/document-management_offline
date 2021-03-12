@@ -79,8 +79,11 @@ namespace MRS.DocumentManagement.Connection
             try
             {
                 var elements = await GetRemoteDirectoryFiles(path);
-                foreach (var item in elements)
-                    resultCollection.Add(await Pull<T>(item.Href));
+                foreach (var item in elements.Where(e => !e.IsDirectory))
+                {
+                    var remoteItem = await Pull<T>(Path.GetFileNameWithoutExtension(item.Href));
+                    resultCollection.Add(remoteItem);
+                }
             }
             catch (FileNotFoundException)
             {
