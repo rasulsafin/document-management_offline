@@ -14,13 +14,17 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
         private static TdmsObjectivesSynchronizer objectiveService;
         private static ObjectiveExternalDto objectiveDefect;
         private static BimElementExternalDto bimElement;
-        private static ItemExternalDto item;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
             // TODO: Find job and find issues and use their guids to test?
             objectiveService = new TdmsObjectivesSynchronizer();
+
+            bimElement = new BimElementExternalDto()
+            {
+                GlobalID = Guid.NewGuid().ToString(),
+            };
 
             var objectiveTypeDefect = new ObjectiveTypeExternalDto()
             {
@@ -32,16 +36,25 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
                 Name = ObjectTypeID.WORK,
             };
 
-            bimElement = new BimElementExternalDto()
-            {
-                GlobalID = Guid.NewGuid().ToString(),
-            };
-
-            item = new ItemExternalDto()
+            var item = new ItemExternalDto()
             {
                 FileName = System.IO.Path.GetFileName(TEST_FILE_PATH),
                 FullPath = TEST_FILE_PATH,
                 ItemType = ItemType.File,
+            };
+
+            var dynamicFieldOne = new DynamicFieldExternalDto()
+            {
+                ExternalID = AttributeID.BUILDER,
+                Type = DynamicFieldType.ENUM,
+                Value = "{FA51CC89-881B-4753-958B-71AF73F75D85}",
+            };
+
+            var dynamicFieldTwo = new DynamicFieldExternalDto()
+            {
+                ExternalID = AttributeID.COMMENT,
+                Type = DynamicFieldType.STRING,
+                Value = "Comment",
             };
 
             objectiveDefect = new ObjectiveExternalDto()
@@ -56,7 +69,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
                 Description = "Test objective creation",
                 Status = ObjectiveStatus.InProgress,
                 Items = new List<ItemExternalDto>() { item },
-                DynamicFields = default,
+                DynamicFields = new List<DynamicFieldExternalDto> { dynamicFieldOne, dynamicFieldTwo },
                 BimElements = new List<BimElementExternalDto>() { bimElement },
             };
         }
@@ -117,12 +130,12 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
             Assert.IsNotNull(res);
         }
 
-        [TestMethod]
-        public void GetListOfObjectives_ReturnsListOfObjectiveDto()
-        {
-            // Warning! Really slow.
-            //var list = objectiveService.GetListOfObjectives();
-            //Assert.IsNotNull(list);
-        }
+        //[TestMethod]
+        //public void GetListOfObjectives_ReturnsListOfObjectiveDto()
+        //{
+        //    // Warning! Really slow.
+        //    var list = objectiveService.GetListOfObjectives();
+        //    Assert.IsNotNull(list);
+        //}
     }
 }
