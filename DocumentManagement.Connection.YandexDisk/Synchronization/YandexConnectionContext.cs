@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchronizers;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -29,14 +29,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
             => new YandexProjectsSynchronizer(this);
 
-        protected override Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
-        {
-            throw new NotImplementedException();
-        }
+        protected async override Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
+            => await YandexManager.PullAll<ObjectiveExternalDto>(PathManager.GetTableDir(nameof(ObjectiveExternalDto)));
 
-        protected override Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects()
-        {
-            throw new NotImplementedException();
-        }
+        protected async override Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects()
+            => await YandexManager.PullAll<ProjectExternalDto>(PathManager.GetTableDir(nameof(ProjectExternalDto)));
     }
 }
