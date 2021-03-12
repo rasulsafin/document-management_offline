@@ -13,8 +13,8 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
     [TestClass]
     public class Bim360ObjectivesSynchronizerTests
     {
-        public static Bim360ObjectivesSynchronizer synchronizer;
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
+        private static Bim360ObjectivesSynchronizer synchronizer;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)

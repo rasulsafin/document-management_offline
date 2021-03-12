@@ -1,36 +1,45 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization;
+using MRS.DocumentManagement;
+using MRS.DocumentManagement.Connection.YandexDisk;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Synchronization
+namespace DocumentManagement.Connection.YandexDisk.Tests
 {
     [TestClass]
-    public class LementProObjectivesSynchronizerTests
+    public class YandexObjectivesSynchronizerTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
-        private static LementProObjectivesSynchronizer synchronizer;
+        private static YandexObjectivesSynchronizer synchronizer;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
         {
             var lastSyncDate = DateTime.MinValue;
-            var login = "diismagilov";
-            var password = "DYZDFMwZ";
             var connectionInfo = new ConnectionInfoExternalDto
             {
-                AuthFieldValues = new Dictionary<string, string>
+                ConnectionType = new ConnectionTypeExternalDto
                 {
-                    { "login", login },
-                    { "password", password },
+                    Name = "Yandex Disk",
+                    AuthFieldNames = new List<string>() { "token" },
+                    AppProperties = new Dictionary<string, string>
+                    {
+                        { "CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051" },
+                        { "CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
+                        { "RETURN_URL", @"http://localhost:8000/oauth/" },
+                    },
                 },
             };
 
-            var context = await LementProConnectionContext.CreateContext(connectionInfo, lastSyncDate);
-            synchronizer = new LementProObjectivesSynchronizer(context);
+            var connection = new YandexConnection();
+            var context = await connection.GetContext(connectionInfo, lastSyncDate);
+            synchronizer = new YandexObjectivesSynchronizer((YandexConnectionContext)context);
         }
 
         [TestMethod]
@@ -75,6 +84,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
             var result = await synchronizer.Add(objective);
 
             Assert.IsNotNull(result?.ExternalID);
+            Assert.IsFalse(result.Items.Any(i => string.IsNullOrWhiteSpace(i.ExternalID)));
         }
 
         [TestMethod]
@@ -95,7 +105,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Assert.Fail("Objective adding failed. There is nothing to remove.");
 
             // Remove
-            await Task.Delay(3000);
             var result = await synchronizer.Remove(added);
 
             Assert.IsNotNull(result);

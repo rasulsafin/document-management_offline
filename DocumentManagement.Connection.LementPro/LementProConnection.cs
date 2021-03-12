@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Services;
+using MRS.DocumentManagement.Connection.LementPro.Synchronization;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface;
@@ -27,6 +28,9 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public void Dispose()
         {
+            connector.Dispose();
+            authenticationService.Dispose();
+            requestUtility.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -70,9 +74,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
             throw new NotImplementedException();
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
+            => await LementProConnectionContext.CreateContext(info, lastSynchronizationDate);
     }
 }
