@@ -28,5 +28,8 @@
         public static readonly string OBJECT_NAME = "ATTR_OBJECT_NAME";
         public static readonly string NAME = "ATTR_NAME";
         public static readonly string UNIT = "ATTR_UNIT";
+        public static readonly string CHECKLIST_CLASS_NAME = "ATTR_CHECKLIST_CLASS_NAME";
+        public static readonly string AMOUNT = "ATTR_AMOUNT";
+        public static readonly string PRICE = "ATTR_PRICE";
     }
 }

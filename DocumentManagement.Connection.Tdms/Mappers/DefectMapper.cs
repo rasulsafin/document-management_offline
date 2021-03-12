@@ -65,12 +65,6 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
             model.Attributes[AttributeID.NUMBER].Value = parent.Objects.ObjectsByDef(ObjectTypeID.DEFECT).Count;
 
-            // TODO: DynamicField
-            // 
-            // model.Attributes[AttributeID.BUILDER].Value = ;
-            // model.Attributes[AttributeID.COMPANY].Value = ;
-            // model.Attributes[AttributeID.COMMENT].Value = ;
-
             return model;
         }
 
@@ -120,7 +114,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 ExternalID = tdmsObject.Attributes[AttributeID.BUILDER].AttributeDefName,
                 Name = tdmsObject.Attributes[AttributeID.BUILDER].Description,
                 Type = DynamicFieldType.ENUM,
-                Value = tdmsObject.Attributes[AttributeID.BUILDER].Object.GUID,
+                Value = tdmsObject.Attributes[AttributeID.BUILDER].Object?.GUID,
             };
 
             var company = new DynamicFieldExternalDto()
@@ -136,7 +130,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 ExternalID = tdmsObject.Attributes[AttributeID.COMMENT].AttributeDefName,
                 Name = tdmsObject.Attributes[AttributeID.COMMENT].Description,
                 Type = DynamicFieldType.STRING,
-                Value = tdmsObject.Attributes[AttributeID.COMMENT].Value.ToString(),
+                Value = tdmsObject.Attributes[AttributeID.COMMENT].Value?.ToString(),
             };
 
             return new List<DynamicFieldExternalDto>() { comment, contractor, company };

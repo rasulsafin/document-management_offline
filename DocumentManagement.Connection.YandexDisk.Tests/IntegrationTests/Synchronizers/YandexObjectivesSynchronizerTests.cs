@@ -7,10 +7,9 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.YandexDisk.Tests
+namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class YandexObjectivesSynchronizerTests

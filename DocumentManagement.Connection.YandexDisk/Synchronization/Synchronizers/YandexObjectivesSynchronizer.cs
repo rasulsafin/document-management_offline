@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchronizers
+namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization
 {
     public class YandexObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
@@ -25,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchroni
                 return null;
 
             var createdObjective = await manager.Pull<ObjectiveExternalDto>(newId);
-            await UploadFiles(createdObjective.Items);
+            await ItemsSyncHelper.UploadFiles(createdObjective.Items, manager);
 
             return createdObjective;
         }
@@ -47,30 +43,8 @@ namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization.Synchroni
                 return null;
 
             var updated = await Add(obj);
-            await UploadFiles(updated.Items);
+            await ItemsSyncHelper.UploadFiles(updated.Items, manager);
             return updated;
-        }
-
-        private async Task UploadFiles(ICollection<ItemExternalDto> items)
-        {
-            if (items == null)
-                return;
-
-            var remoteDirectoryName = PathManager.FILES_DIRECTORY;
-            var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetDir(remoteDirectoryName));
-
-            foreach (var item in items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID)))
-            {
-                var itemsRemoteVersion = existingRemoteFiles.FirstOrDefault(i => i.DisplayName == item.FileName);
-                if (itemsRemoteVersion?.Href != default)
-                {
-                    item.ExternalID = itemsRemoteVersion.Href;
-                    continue;
-                }
-
-                var uploadedHref = await manager.PushFile(remoteDirectoryName, Path.GetDirectoryName(item.FullPath), item.FileName);
-                item.ExternalID = uploadedHref;
-            }
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
+﻿using System.Collections.Generic;
+using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms.Mappers
@@ -24,6 +25,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         {
             GetMapper(tdmsObject)?.ToModel(objectDto, tdmsObject);
             itemHelper.SetItems(tdmsObject, objectDto.Items);
+            SetDynamicField(objectDto, tdmsObject);
 
             return tdmsObject;
         }
@@ -36,6 +38,35 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 return new DefectMapper();
             else
                 return null;
+        }
+
+        private void SetDynamicField(ObjectiveExternalDto objectDto, TDMSObject tdmsObject)
+        {
+            foreach (var field in objectDto.DynamicFields)
+            {
+                if (tdmsObject.Attributes.Index[field.ExternalID] == -1)
+                    continue;
+
+                switch (field.Type)
+                {
+                    case DynamicFieldType.BOOL:
+                    case DynamicFieldType.FLOAT:
+                    case DynamicFieldType.INTEGER:
+                    case DynamicFieldType.STRING:
+                        tdmsObject.Attributes[field.ExternalID].Value = field.Value;
+                        break;
+                    case DynamicFieldType.DATE:
+                        tdmsObject.Attributes[field.ExternalID].Value = System.DateTime.Parse(field.Value);
+                        break;
+                    case DynamicFieldType.ENUM:
+                        tdmsObject.Attributes[field.ExternalID].Value = TdmsConnection.TDMS.GetObjectByGUID(field.Value);
+                        break;
+                    case DynamicFieldType.OBJECT:
+                        //TODO: ObjectType
+                    default:
+                        return;
+                }
+            }
         }
     }
 }

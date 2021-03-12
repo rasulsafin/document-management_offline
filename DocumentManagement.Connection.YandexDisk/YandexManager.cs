@@ -73,6 +73,22 @@ namespace MRS.DocumentManagement.Connection
             return false;
         }
 
+        public async Task<List<T>> PullAll<T>(string path)
+        {
+            var resultCollection = new List<T>();
+            try
+            {
+                var elements = await GetRemoteDirectoryFiles(path);
+                foreach (var item in elements)
+                    resultCollection.Add(await Pull<T>(item.Href));
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return resultCollection;
+        }
+
         public async Task<bool> DeleteFile(string path)
         {
             return await controller.DeleteAsync(path);
