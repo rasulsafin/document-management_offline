@@ -4,14 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.GoogleDrive;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
+namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
-    public class YandexProjectsSynchronizerTests
+    public class GoogleProjectsSynchronizerTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
         private static StorageProjectSynchronizer synchronizer;
@@ -34,7 +34,7 @@ namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchr
                 },
             };
 
-            var connection = new YandexConnection();
+            var connection = new GoogleConnection();
             var context = await connection.GetContext(connectionInfo);
             synchronizer = (StorageProjectSynchronizer)context.ProjectsSynchronizer;
         }

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Utils
 {
@@ -55,5 +56,20 @@ namespace MRS.DocumentManagement.Connection.Utils
         /// <param name="id">id объекта.</param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         Task<bool> Delete<T>(string id);
+
+        /// <summary>
+        /// Pulls all items from remote path.
+        /// </summary>
+        /// <typeparam name="T">Type of items.</typeparam>
+        /// <param name="path">Remote folder path.</param>
+        /// <returns>List of items.</returns>
+        Task<List<T>> PullAll<T>(string path);
+
+        /// <summary>
+        /// Gets cloud elements from remote folder.
+        /// </summary>
+        /// <param name="directoryPath">Remote folder path.</param>
+        /// <returns>Enumeration of cloud elements.</returns>
+        Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/");
     }
 }

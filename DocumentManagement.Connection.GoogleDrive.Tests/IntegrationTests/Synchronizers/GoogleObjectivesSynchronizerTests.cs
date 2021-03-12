@@ -5,15 +5,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
+using MRS.DocumentManagement.Connection.GoogleDrive;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
+namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
-    public class YandexObjectivesSynchronizerTests
+    public class GoogleObjectivesSynchronizerTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
         private static StorageObjectiveSynchronizer synchronizer;
@@ -25,18 +24,18 @@ namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchr
             {
                 ConnectionType = new ConnectionTypeExternalDto
                 {
-                    Name = "Yandex Disk",
+                    Name = "Google Drive",
                     AuthFieldNames = new List<string>() { "token" },
                     AppProperties = new Dictionary<string, string>
                     {
-                        { "CLIENT_ID", "b1a5acbc911b4b31bc68673169f57051" },
-                        { "CLIENT_SECRET", "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
-                        { "RETURN_URL", @"http://localhost:8000/oauth/" },
+                        { "APPLICATION_NAME", "BRIO MRS" },
+                        { "CLIENT_ID", "1827523568-ha5m7ddtvckjqfrmvkpbhdsl478rdkfm.apps.googleusercontent.com" },
+                        { "CLIENT_SECRET", "fA-2MtecetmXLuGKXROXrCzt" },
                     },
                 },
             };
 
-            var connection = new YandexConnection();
+            var connection = new GoogleConnection();
             var context = await connection.GetContext(connectionInfo);
             synchronizer = (StorageObjectiveSynchronizer)context.ObjectivesSynchronizer;
         }

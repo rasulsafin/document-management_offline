@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -56,11 +57,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return type;
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
-        {
-            throw new NotImplementedException();
-        }
-
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             return await Connect(info);
@@ -86,6 +82,15 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
             info.AuthFieldValues = connectionInfo.AuthFieldValues;
             return Task.FromResult(info);
+        }
+
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            var connectResult = await Connect(info);
+            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
+                return null;
+
+            return GoogleDriveConnectionContext.CreateContext(manager);
         }
     }
 }

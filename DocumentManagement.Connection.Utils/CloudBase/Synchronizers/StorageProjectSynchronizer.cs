@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization
+namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
 {
-    public class YandexProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
+    public class StorageProjectSynchronizer : ISynchronizer<ProjectExternalDto>
     {
-        private readonly YandexManager manager;
+        private readonly ICloudManager manager;
         private List<ProjectExternalDto> projects;
 
-        public YandexProjectsSynchronizer(YandexConnectionContext context)
-            => manager = context.YandexManager;
+        public StorageProjectSynchronizer(ICloudManager manager)
+            => this.manager = manager;
 
         public async Task<ProjectExternalDto> Add(ProjectExternalDto project)
         {
