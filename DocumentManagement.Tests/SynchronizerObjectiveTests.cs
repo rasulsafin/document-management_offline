@@ -58,8 +58,7 @@ namespace MRS.DocumentManagement.Tests
             ResultObjectiveExternalDtos = new List<ObjectiveExternalDto>();
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
-            Connection.Setup(x => x.GetContext(It.IsAny<ConnectionInfoExternalDto>(), It.IsAny<DateTime>()))
-               .ReturnsAsync(Context.Object);
+            Connection.Setup(x => x.GetContext(It.IsAny<ConnectionInfoExternalDto>())).ReturnsAsync(Context.Object);
             ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
             ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
@@ -91,13 +90,14 @@ namespace MRS.DocumentManagement.Tests
             services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context, mapper));
             services.AddTransient(x => new DynamicFieldValueResolver(Fixture.Context));
             services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(Fixture.Context));
+            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
 
             synchronizer = new Synchronizer(mapper);
 
-            Project = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            Project = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
         }
 
         [TestCleanup]
@@ -152,7 +152,7 @@ namespace MRS.DocumentManagement.Tests
             objectiveLocal.Project = Project.local;
             objectiveLocal.ObjectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
 
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Objectives.AddAsync(objectiveLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -209,7 +209,7 @@ namespace MRS.DocumentManagement.Tests
                 Status = ObjectiveStatus.Open,
                 UpdatedAt = DateTime.UtcNow,
             };
-            Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemote });
+            MockRemoteObjectives(new[] { objectiveRemote });
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -244,7 +244,7 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             await ArrangeObjective(true);
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
 
             // Act.
             var (_, _, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -928,7 +928,7 @@ namespace MRS.DocumentManagement.Tests
                 await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
             objectivesLocal[1].ParentObjective = objectivesLocal[0];
 
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Objectives.AddRangeAsync(objectivesLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -1017,7 +1017,7 @@ namespace MRS.DocumentManagement.Tests
                 Title = "Title2",
             };
 
-            Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemoteChild, objectiveRemoteParent });
+            MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemoteParent });
 
             // Act.
             var synchronizationResult = await Synchronize();
@@ -1057,7 +1057,7 @@ namespace MRS.DocumentManagement.Tests
                 Title = "Title2",
             };
 
-            Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemoteChild, objectiveRemote });
+            MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
 
             // Act.
             var synchronizationResult = await Synchronize();
@@ -1109,7 +1109,7 @@ namespace MRS.DocumentManagement.Tests
                 },
             };
 
-            Context.Setup(x => x.Objectives).ReturnsAsync(new[] { objectiveRemoteChild, objectiveRemote });
+            MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
             Fixture.Context.Objectives.Update(objectiveSynchronized);
             await Fixture.Context.SaveChangesAsync();
 
@@ -1250,7 +1250,7 @@ namespace MRS.DocumentManagement.Tests
                 CheckSynchronizedDynamicFields(item, synchronizedItem);
             }
         }
-        
+
         private void CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall call, Times times = default)
             => SynchronizerTestsHelper.CheckSynchronizerCalls(ObjectiveSynchronizer, call, times);
 
@@ -1286,11 +1286,7 @@ namespace MRS.DocumentManagement.Tests
             objectiveSynchronized.ProjectID = Project.synchronized.ID;
 
             if (!dontSetupRemote)
-            {
-                Context
-                   .Setup(x => x.Objectives)
-                   .ReturnsAsync(new[] { objectiveRemote });
-            }
+                MockRemoteObjectives(new[] { objectiveRemote });
 
             objectiveSynchronized.IsSynchronized = true;
             objectiveLocal.SynchronizationMate = objectiveSynchronized;
@@ -1299,7 +1295,7 @@ namespace MRS.DocumentManagement.Tests
 
             return (objectiveLocal, objectiveSynchronized, objectiveRemote);
         }
-        
+
         private static async
             Task<(Objective local, Objective synchronized, ICollection<SynchronizingResult> synchronizationResult)>
             GetObjectivesAfterSynchronize(bool ignoreProjects = false)
@@ -1320,12 +1316,15 @@ namespace MRS.DocumentManagement.Tests
 
             if (ignoreProjects)
                 data.ProjectsFilter = x => false;
-            
+
             var synchronizationResult = await synchronizer.Synchronize(
                 data,
                 Connection.Object,
                 new ConnectionInfo());
             return synchronizationResult;
         }
+
+        private void MockRemoteObjectives(IReadOnlyCollection<ObjectiveExternalDto> array)
+            => SynchronizerTestsHelper.MockGetRemote(ObjectiveSynchronizer, array, x => x.ExternalID);
     }
 }

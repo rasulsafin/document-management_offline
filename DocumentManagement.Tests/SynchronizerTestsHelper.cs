@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -12,6 +14,14 @@ namespace MRS.DocumentManagement.Tests
 {
     internal class SynchronizerTestsHelper
     {
+        public enum SynchronizerCall
+        {
+            Nothing,
+            Add,
+            Update,
+            Remove,
+        }
+
         public static void CheckSynchronizedItems(Item local, Item synchronized)
         {
             Assert.AreEqual(local.RelativePath, synchronized.RelativePath);
@@ -36,7 +46,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.IsTrue(synchronized.IsSynchronized);
         }
 
-        public static async Task<(Project local, Project synchronized, ProjectExternalDto remote)> ArrangeProject(Mock<IConnectionContext> context, SharedDatabaseFixture fixture)
+        public static async Task<(Project local, Project synchronized, ProjectExternalDto remote)> ArrangeProject(Mock<ISynchronizer<ProjectExternalDto>> projectSynchronizer, SharedDatabaseFixture fixture)
         {
             // Arrange.
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
@@ -48,7 +58,7 @@ namespace MRS.DocumentManagement.Tests
                 UpdatedAt = DateTime.Now,
             };
             projectLocal.ExternalID = projectSynchronized.ExternalID = projectRemote.ExternalID;
-            context.Setup(x => x.Projects).ReturnsAsync(new[] { projectRemote });
+            MockGetRemote(projectSynchronizer, new[] { projectRemote }, x => x.ExternalID);
             projectSynchronized.IsSynchronized = true;
             projectLocal.SynchronizationMate = projectSynchronized;
             await fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
@@ -67,15 +77,16 @@ namespace MRS.DocumentManagement.Tests
             synchronizer.Verify(x => x.Add(It.IsAny<T>()), call == SynchronizerCall.Add ? times : Times.Never());
             synchronizer.Verify(x => x.Remove(It.IsAny<T>()), call == SynchronizerCall.Remove ? times : Times.Never());
             synchronizer.Verify(x => x.Update(It.IsAny<T>()), call == SynchronizerCall.Update ? times : Times.Never());
-
         }
 
-        public enum SynchronizerCall
+        public static void MockGetRemote<T>(Mock<ISynchronizer<T>> synchronizer, IReadOnlyCollection<T> array, Func<T, string> getIDFunc)
         {
-            Nothing,
-            Add,
-            Update,
-            Remove,
+            synchronizer
+               .Setup(x => x.GetUpdatedIDs(It.IsAny<DateTime>()))
+               .ReturnsAsync(array.Select(getIDFunc).ToArray());
+            synchronizer
+               .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
+               .ReturnsAsync(array);
         }
     }
 }

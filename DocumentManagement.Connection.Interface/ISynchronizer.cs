@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Interface
@@ -28,5 +30,19 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="obj">Entity to be updated.</param>
         /// <returns>The updated entity.</returns>
         Task<T> Update(T obj);
+
+        /// <summary>
+        /// Gets external identifiers for entities updated after the date.
+        /// </summary>
+        /// <param name="date">Date of the last synchronization.</param>
+        /// <returns>Collection of external ids of changed entities.</returns>
+        Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date);
+
+        /// <summary>
+        /// Gets entities by ids.
+        /// </summary>
+        /// <param name="ids">Entity IDs to synchronizing.</param>
+        /// <returns>Entities with equals ids.</returns>
+        Task<IReadOnlyCollection<T>> Get(IReadOnlyCollection<string> ids);
     }
 }

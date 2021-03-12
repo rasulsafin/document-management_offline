@@ -66,7 +66,8 @@ namespace MRS.DocumentManagement.Tests
 
             Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
-            Context.Setup(x => x.Objectives).ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
+            ObjectiveSynchronizer.Setup(x => x.Get(It.IsAny<List<string>>()))
+               .ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
         }
 
         [TestCleanup]
@@ -78,7 +79,12 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
-            Context.Setup(x => x.Projects).Throws(new Exception());
+            ProjectSynchronizer
+               .Setup(x => x.GetUpdatedIDs(It.IsAny<DateTime>()))
+               .ReturnsAsync(new[] { "id" });
+            ProjectSynchronizer
+               .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
+               .Throws(new Exception());
             await Fixture.Context.Projects.AddAsync(projectLocal);
             await Fixture.Context.SaveChangesAsync();
 
@@ -97,7 +103,12 @@ namespace MRS.DocumentManagement.Tests
         {
             // Arrange.
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
-            Context.Setup(x => x.Projects).ReturnsAsync(ArraySegment<ProjectExternalDto>.Empty);
+            ProjectSynchronizer
+               .Setup(x => x.GetUpdatedIDs(It.IsAny<DateTime>()))
+               .ReturnsAsync(ArraySegment<string>.Empty);
+            ProjectSynchronizer
+               .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
+               .ReturnsAsync(ArraySegment<ProjectExternalDto>.Empty);
             await Fixture.Context.Projects.AddAsync(projectLocal);
             await Fixture.Context.SaveChangesAsync();
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
@@ -117,7 +128,7 @@ namespace MRS.DocumentManagement.Tests
         public async Task SynchronizeFail_ProjectRemovedLocal_ButCouldNotRemoveFromRemote_DoNothing()
         {
             // Arrange.
-            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(Context, Fixture);
+            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             Fixture.Context.Remove(projectLocal);
             await Fixture.Context.SaveChangesAsync();
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
@@ -131,7 +142,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
             Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
         }
-        
+
         private static async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
         {
             var result = await synchronizer.Synchronize(

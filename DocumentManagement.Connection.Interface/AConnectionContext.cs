@@ -9,9 +9,6 @@ namespace MRS.DocumentManagement.Connection
 {
     public abstract class AConnectionContext : IConnectionContext
     {
-        protected List<ProjectExternalDto> projects;
-        protected List<ObjectiveExternalDto> objectives;
-
         private readonly Lazy<ISynchronizer<ProjectExternalDto>> projectsSynchronizer;
         private readonly Lazy<ISynchronizer<ObjectiveExternalDto>> objectivesSynchronizer;
 
@@ -25,23 +22,11 @@ namespace MRS.DocumentManagement.Connection
                     LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
-        public Task<IReadOnlyCollection<ProjectExternalDto>> Projects
-            => projects != null ? Task.FromResult((IReadOnlyCollection<ProjectExternalDto>)projects) : GetProjects();
-
-        public Task<IReadOnlyCollection<ObjectiveExternalDto>> Objectives
-            => objectives != null
-                    ? Task.FromResult((IReadOnlyCollection<ObjectiveExternalDto>)objectives)
-                    : GetObjectives();
-
         public ISynchronizer<ProjectExternalDto> ProjectsSynchronizer
             => projectsSynchronizer.Value;
 
         public ISynchronizer<ObjectiveExternalDto> ObjectivesSynchronizer
             => objectivesSynchronizer.Value;
-
-        protected abstract Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects();
-
-        protected abstract Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives();
 
         protected abstract ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer();
 

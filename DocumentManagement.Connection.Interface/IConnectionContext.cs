@@ -1,17 +1,20 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Interface
 {
+    /// <summary>
+    /// Context of the working with external connection.
+    /// </summary>
     public interface IConnectionContext
     {
-        Task<IReadOnlyCollection<ProjectExternalDto>> Projects { get; }
-
-        Task<IReadOnlyCollection<ObjectiveExternalDto>> Objectives { get; }
-
+        /// <summary>
+        /// Gets synchronizer for projects.
+        /// </summary>
         ISynchronizer<ProjectExternalDto> ProjectsSynchronizer { get; }
 
+        /// <summary>
+        /// Gets synchronizer for objectives.
+        /// </summary>
         ISynchronizer<ObjectiveExternalDto> ObjectivesSynchronizer { get; }
     }
 }
