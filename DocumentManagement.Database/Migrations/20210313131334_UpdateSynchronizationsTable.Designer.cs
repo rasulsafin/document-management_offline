@@ -3,14 +3,16 @@ using System;
 using MRS.DocumentManagement.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    partial class DMContextModelSnapshot : ModelSnapshot
+    [Migration("20210313131334_UpdateSynchronizationsTable")]
+    partial class UpdateSynchronizationsTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

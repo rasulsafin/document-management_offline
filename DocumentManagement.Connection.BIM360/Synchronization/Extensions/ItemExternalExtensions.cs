@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
             => new ItemExternalDto
             {
                 ExternalID = item.ID,
-                FileName = item.Attributes.Name,
+                FileName = item.Attributes.DisplayName,
                 ItemType = ItemTypeHelper.GetTypeByName(item.Attributes.Name),
                 UpdatedAt = item.Attributes.LastModifiedTime ?? default,
             };

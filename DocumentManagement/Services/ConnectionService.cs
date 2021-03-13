@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
@@ -11,6 +12,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -22,12 +24,14 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
+        private readonly DbContextOptions<DMContext> options;
 
-        public ConnectionService(DMContext context, IMapper mapper)
+        public ConnectionService(DMContext context, IMapper mapper, DbContextOptions<DMContext> options)
         {
             this.context = context;
             this.mapper = mapper;
-            synchronizer = new Synchronizer(mapper);
+            this.options = options;
+            synchronizer = new Synchronizer();
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -134,20 +138,46 @@ namespace MRS.DocumentManagement.Services
         public async Task<string> Synchronize(ID<UserDto> userID)
         {
             var iUserID = (int)userID;
-            var user = await context.Users.Include(x => x.ConnectionInfo).FirstOrDefaultAsync(x => x.ID == iUserID);
+            var user = await context.Users
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                        .ThenInclude(x => x.AppProperties)
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                        .ThenInclude(x => x.AuthFieldNames)
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.AuthFieldValues)
+                .FirstOrDefaultAsync(x => x.ID == iUserID);
             if (user == null)
                 return null;
 
+            var dm = new DMContext(options);
+            IServiceCollection services = new ServiceCollection();
+            services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(dm));
+            services.AddTransient(x => new BimElementObjectiveTypeConverter(dm));
+            services.AddTransient(x => new DynamicFieldValueResolver(dm));
+            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(dm));
+            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddTransient(x => new ObjectiveProjectIDResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(dm));
+            services.AddTransient(x => new ObjectiveObjectiveTypeResolver(dm));
+            services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddAutoMapper(typeof(MappingProfile));
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+
             var data = new SynchronizingData
             {
-                Context = context,
+                Context = dm,
+                Mapper = serviceProvider.GetService<IMapper>(),
                 User = user,
                 ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
                 ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
             };
 
             var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
-            var info = user.ConnectionInfo;
+            var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var id = Guid.NewGuid().ToString();
             var task = synchronizer.Synchronize(data, connection, info);
             SYNCHRONIZATIONS.Add(id, task);
@@ -159,7 +189,6 @@ namespace MRS.DocumentManagement.Services
             if (SYNCHRONIZATIONS.TryGetValue(synchronizationID, out var task))
             {
                 var result = task.IsCompleted;
-                SYNCHRONIZATIONS.Remove(synchronizationID);
                 return Task.FromResult(result);
             }
 

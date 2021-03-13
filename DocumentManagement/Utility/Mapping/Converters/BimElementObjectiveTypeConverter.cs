@@ -9,13 +9,11 @@ namespace MRS.DocumentManagement.Utility
 {
     public class BimElementObjectiveTypeConverter : ITypeConverter<BimElementExternalDto, BimElementObjective>
     {
-        private readonly IMapper mapper;
         private readonly DMContext dbContext;
 
-        public BimElementObjectiveTypeConverter(DMContext dbContext, IMapper mapper)
+        public BimElementObjectiveTypeConverter(DMContext dbContext)
         {
             this.dbContext = dbContext;
-            this.mapper = mapper;
         }
 
         public BimElementObjective Convert(
@@ -28,7 +26,11 @@ namespace MRS.DocumentManagement.Utility
 
             return new BimElementObjective
             {
-                BimElement = exist ?? mapper.Map<BimElement>(source),
+                BimElement = exist ?? new BimElement
+                {
+                    ParentName = source.ParentName,
+                    GlobalID = source.GlobalID,
+                },
             };
         }
     }

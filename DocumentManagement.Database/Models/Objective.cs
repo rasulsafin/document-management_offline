@@ -36,6 +36,7 @@ namespace MRS.DocumentManagement.Database.Models
 
         public int ObjectiveTypeID { get; set; }
 
+        [ForbidMergeAttribute]
         public ObjectiveType ObjectiveType { get; set; }
 
         [ForbidMergeAttribute]

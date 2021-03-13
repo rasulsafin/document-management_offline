@@ -73,6 +73,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
+                tuple.Merge();
+                AddUser(tuple, data);
+
                 var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
@@ -80,8 +83,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Add Project To Local");
-
-                AddUser(tuple, data);
 
                 return null;
             }
@@ -107,6 +108,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Merge Project");
+
+                AddUser(tuple, data);
 
                 return await base.Merge(tuple, data, connectionContext, parent);
             }
@@ -185,29 +188,24 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 item => item.ProjectID == id1 || item.ProjectID == id2 ||
                     (item.SynchronizationMate != null &&
                         (item.SynchronizationMate.ProjectID == id1 || item.SynchronizationMate.ProjectID == id2)),
+                null,
                 tuple);
         }
 
         private void AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
         {
-            var projectsFromDB = data.Context.Projects.Include(x => x.Users)
-               .Where(x => x.ExternalID == tuple.ExternalID);
-
-            foreach (var project in projectsFromDB)
-            {
-                project.Users ??= new List<UserProject>();
-
-                if (project.Users.Any(x => x.UserID == data.User.ID))
-                    continue;
-
-                project.Users.Add(
+            void AddUserLocal(Project project)
+                => project.Users = new List<UserProject>
+                {
                     new UserProject
                     {
-                        ProjectID = project.ID,
+                        Project = project,
                         UserID = data.User.ID,
-                    });
-                data.Context.Projects.Update(project);
-            }
+                    },
+                };
+
+            AddUserLocal(tuple.Local);
+            AddUserLocal(tuple.Synchronized);
         }
 
         private Task Link(DMContext context, Item item, object parent, EntityType entityType)

@@ -183,6 +183,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         (field.SynchronizationMate != null &&
                             (field.SynchronizationMate.ParentFieldID == id1 ||
                                 field.SynchronizationMate.ParentFieldID == id2)),
+                    null,
                     tuple);
                 SynchronizeChanges(parent as ISynchronizationChanges, tuple);
                 return results;

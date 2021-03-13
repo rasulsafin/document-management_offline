@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         public class ProjectRelationships
         {
             [DataMember(Name = "hub")]
-            public dynamic Hub { get; set; }
+            public DataContainer<ObjectInfo> Hub { get; set; }
 
             [DataMember(Name = "rootFolder")]
             public DataContainer<ObjectInfo> RootFolder { get; set; }

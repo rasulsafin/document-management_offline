@@ -23,28 +23,29 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     NgIssueSubtypeID =
                         GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.NgIssueSubtypeID)),
                     AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
-                    CreatedAt = objective.CreationDate == default ? null : objective.CreationDate,
-                    DueDate = objective.DueDate == default ? null : objective.DueDate,
-                    UpdatedAt = objective.UpdatedAt == default ? null : objective.UpdatedAt,
+                    CreatedAt = objective.CreationDate == default ? (DateTime?)null : objective.CreationDate,
+                    DueDate = objective.DueDate == default ? (DateTime?)null : objective.DueDate,
+                    UpdatedAt = objective.UpdatedAt == default ? (DateTime?)null : objective.UpdatedAt,
                 },
             };
         }
 
-        internal static ObjectiveExternalDto ToExternalDto(this Issue issue)
+        internal static ObjectiveExternalDto ToExternalDto(this Issue issue, string project)
         {
             var resultDto = new ObjectiveExternalDto
             {
                 ExternalID = issue.ID,
 
                 // TODO: check via tests what GET request returns for issue.Relationships.Container URL
-                // ProjectExternalID,
-                AuthorExternalID = issue.Attributes.Owner,
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = issue.Attributes.NgIssueTypeID },
+                
+                //AuthorExternalID = issue.Attributes.Owner,
+                ObjectiveType = new ObjectiveTypeExternalDto { Name = "Test Job Type" },//issue.Attributes.NgIssueTypeID },
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,
-                Status = ParseStatus(issue.Attributes.Status),
-                DynamicFields = GetDynamicFields(issue),
-                Items = GetItems(issue),
+                ProjectExternalID = project,
+                //Status = ParseStatus(issue.Attributes.Status),
+                //DynamicFields = GetDynamicFields(issue),
+                //Items = GetItems(issue),
 
                 // TODO: add BimElements retrieving
                 // BimElements,

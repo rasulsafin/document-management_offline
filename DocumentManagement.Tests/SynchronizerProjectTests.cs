@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Tests
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
-            synchronizer = new Synchronizer(mapper);
+            synchronizer = new Synchronizer();
 
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();

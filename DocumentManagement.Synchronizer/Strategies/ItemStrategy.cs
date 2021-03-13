@@ -22,6 +22,45 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
         }
 
+        protected override async Task<SynchronizingResult> AddToLocal(SynchronizingTuple<Item> tuple, SynchronizingData data, IConnectionContext connectionContext, object parent)
+        {
+            (int project, int objective) GetParents(bool local)
+            {
+                var i = 0;
+                var objective1 = 0;
+
+                switch (parent)
+                {
+                    case SynchronizingTuple<Objective> objectiveTuple:
+                        var obj = local ? objectiveTuple.Local : objectiveTuple.Synchronized;
+                        i = obj.ProjectID;
+                        objective1 = obj.ID;
+                        break;
+                    case SynchronizingTuple<Project> projectTuple:
+                        i = (local ? projectTuple.Local : projectTuple.Synchronized).ID;
+                        break;
+                }
+
+                return (i, objective1);
+            }
+
+            var external = tuple.ExternalID;
+            var path = tuple.Remote.RelativePath;
+            (int project, int objective) = GetParents(true);
+            tuple.Local = await data.Context.Items
+               .FirstOrDefaultAsync(
+                    x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
+                        (x.ExternalID == external || x.RelativePath == path));
+            (project, objective) = GetParents(false);
+            tuple.Synchronized = await data.Context.Items
+               .FirstOrDefaultAsync(
+                    x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
+                        (x.ExternalID == external || x.RelativePath == path));
+            if (tuple.DetermineAction() == SynchronizingAction.Merge)
+                return await base.Merge(tuple, data, connectionContext, parent);
+            return await base.AddToLocal(tuple, data, connectionContext, parent);
+        }
+
         protected override DbSet<Item> GetDBSet(DMContext context)
             => context.Items;
 
@@ -42,6 +81,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)
             => base.IsEntitiesEquals(element, tuple) ||
-                element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
+                 element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
     }
 }

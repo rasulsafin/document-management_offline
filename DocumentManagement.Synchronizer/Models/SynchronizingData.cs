@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using AutoMapper;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 
@@ -8,6 +9,8 @@ namespace MRS.DocumentManagement.Synchronization.Models
     public class SynchronizingData
     {
         public DMContext Context { get; set; }
+
+        public IMapper Mapper { get; set; }
 
         public User User { get; set; }
 

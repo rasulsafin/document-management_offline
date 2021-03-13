@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
@@ -17,16 +16,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
     public class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly FoldersSyncHelper folderSyncHelper;
         private readonly ProjectsHelper projectsHelper;
         private readonly HubsHelper hubsHelper;
+        private readonly Bim360ConnectionContext context;
 
         public Bim360ObjectivesSynchronizer(Bim360ConnectionContext context)
         {
-            issuesService = context.IssuesService;
-            itemsSyncHelper = new ItemsSyncHelper(context.ItemsService, context.ProjectsService, context.ObjectsService);
+            this.context = context;
+            itemsSyncHelper = new ItemsSyncHelper(
+                context.ItemsService,
+                context.ProjectsService,
+                context.ObjectsService,
+                context.VersionsService);
             folderSyncHelper = new FoldersSyncHelper(context.FoldersService, context.ProjectsService);
             projectsHelper = new ProjectsHelper(context.ProjectsService);
             hubsHelper = new HubsHelper(context.HubsService);
@@ -39,9 +42,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            var created = await issuesService.PostIssueAsync(containerId, issue);
+            var created = await context.IssuesService.PostIssueAsync(containerId, issue);
 
-            var parsedToDto = created.ToExternalDto();
+            var parsedToDto = created.ToExternalDto(
+                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+                   .Key);
             parsedToDto.ProjectExternalID = projectId;
 
             if (obj.Items?.Any() ?? false)
@@ -60,11 +65,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            issue = await issuesService.GetIssueAsync(containerId, issue.ID);
+            issue = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
             issue.Attributes.Status = ISSUE_STATUS_CLOSED;
-            var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
+            var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
-            return updatedIssue.ToExternalDto();
+            return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+               .Key);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
@@ -75,10 +81,67 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 return null;
 
             issue.Attributes.PermittedAttributes
-                = (await issuesService.GetIssueAsync(containerId, issue.ID)).Attributes.PermittedAttributes;
-            var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
+                = (await context.IssuesService.GetIssueAsync(containerId, issue.ID)).Attributes.PermittedAttributes;
+            var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
-            return updatedIssue.ToExternalDto();
+            return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+               .Key);
+        }
+
+        public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
+        {
+            var objectives = new List<ObjectiveExternalDto>();
+            await context.UpdateProjects(false);
+
+            foreach (var project in context.Projects)
+            {
+                var issues = await context.IssuesService.GetIssuesAsync(project.Value.Item1.Relationships.IssuesContainer.Data.ID);
+
+                foreach (var issue in issues)
+                {
+                    var dto = issue.ToExternalDto(project.Key);
+                    dto.Items ??= new List<ItemExternalDto>();
+
+                    var attachments = await context.IssuesService.GetAttachmentsAsync(
+                        project.Value.Item1.Relationships.IssuesContainer.Data.ID,
+                        issue.ID);
+
+                    foreach (var attachment in attachments)
+                        dto.Items.Add((await context.ItemsService.GetAsync(project.Value.Item1.ID, attachment.Attributes.Urn)).ToDto());
+
+                    objectives.Add(dto);
+                }
+            }
+
+            return objectives.Select(x => x.ExternalID).ToArray();
+        }
+
+        public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
+        {
+            var objectives = new List<ObjectiveExternalDto>();
+            await context.UpdateProjects(false);
+
+            foreach (var project in context.Projects)
+            {
+                var issues = await context.IssuesService.GetIssuesAsync(project.Value.Item1.Relationships.IssuesContainer.Data.ID);
+
+                foreach (var issue in issues)
+                {
+                    var dto = issue.ToExternalDto(project.Key);
+                    dto.Items ??= new List<ItemExternalDto>();
+
+                    var attachments = await context.IssuesService.GetAttachmentsAsync(
+                        project.Value.Item1.Relationships.IssuesContainer.Data.ID,
+                        issue.ID);
+
+                    foreach (var attachment in attachments)
+                        dto.Items.Add((await context.ItemsService.GetAsync(project.Value.Item1.ID, attachment.Attributes.Urn)).ToDto());
+
+                    objectives.Add(dto);
+                }
+            }
+
+            return objectives;
         }
 
         private async Task<IEnumerable<Item>> AddItems(
@@ -88,8 +151,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             string issueId,
             string containerId)
         {
-            var folder = await folderSyncHelper.GetDefaultFolderAsync(hubId, projectId);
-            if (folder == default)
+            if (!context.DefaultFolders.TryGetValue(projectId, out var folder))
                 return null;
 
             var resultItems = new List<Item>();
@@ -131,7 +193,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             try
             {
-                await issuesService.PostIssuesAttachmentsAsync(containerId, attachment);
+                await context.IssuesService.PostIssuesAttachmentsAsync(containerId, attachment);
             }
             catch
             {

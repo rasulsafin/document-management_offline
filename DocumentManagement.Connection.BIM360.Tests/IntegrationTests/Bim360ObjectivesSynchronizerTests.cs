@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 },
             };
 
-            var context = await Bim360ConnectionContext.CreateContext(connectionInfo, lastSyncDate);
+            var context = await Bim360ConnectionContext.CreateContext(connectionInfo);
             synchronizer = new Bim360ObjectivesSynchronizer(context);
         }
 

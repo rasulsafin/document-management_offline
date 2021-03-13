@@ -1,25 +1,25 @@
-﻿using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using System.Linq;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class ObjectiveExternalDtoProjectIdResolver : IValueResolver<ObjectiveExternalDto, Objective, int>
+    public class ObjectiveExternalDtoProjectResolver : IValueResolver<ObjectiveExternalDto, Objective, Project>
     {
         private readonly DMContext dbContext;
 
-        public ObjectiveExternalDtoProjectIdResolver(DMContext dbContext)
+        public ObjectiveExternalDtoProjectResolver(DMContext dbContext)
         {
             this.dbContext = dbContext;
         }
 
-        public int Resolve(ObjectiveExternalDto source, Objective destination, int destMember, ResolutionContext context)
+        public Project Resolve(ObjectiveExternalDto source, Objective destination, Project destMember, ResolutionContext context)
         {
             var project = dbContext.Projects.Synchronized().FirstOrDefault(x => x.ExternalID == source.ProjectExternalID);
-            return project?.ID ?? 0;
+            return project;
         }
     }
 }

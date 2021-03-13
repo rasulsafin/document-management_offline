@@ -63,6 +63,9 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>();
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeIDResolver>();
             services.AddTransient<ObjectiveObjectiveTypeResolver>();
+            services.AddTransient<ObjectiveProjectIDResolver>();
+            services.AddTransient<ObjectiveExternalDtoProjectResolver>();
+            services.AddTransient<BimElementObjectiveTypeConverter>();
 
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 

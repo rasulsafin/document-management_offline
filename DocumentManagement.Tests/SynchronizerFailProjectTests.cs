@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Tests
                 mc.AddProfile(new MappingProfile());
             });
             mapper = mapperConfig.CreateMapper();
-            synchronizer = new Synchronizer(mapper);
+            synchronizer = new Synchronizer();
         }
 
         [TestInitialize]

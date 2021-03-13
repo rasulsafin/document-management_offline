@@ -145,17 +145,18 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Project, ProjectExternalDto>();
 
             CreateMap<ObjectiveExternalDto, Objective>()
-                .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
-                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeResolver>())
-                .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>());
+               .ForMember(x => x.ProjectID, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
+               .ForMember(x=>x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectResolver>())
+               .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>());
             CreateMap<Objective, ObjectiveExternalDto>()
-               .ForMember(x => x.ProjectExternalID, o => o.MapFrom(s => s.Project.ExternalID))
+               .ForMember(x => x.ProjectExternalID, o => o.MapFrom<ObjectiveProjectIDResolver>())
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
                .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)));
 
             CreateMap<Item, ItemExternalDto>();
-            CreateMap<ItemExternalDto, Item>();
+            CreateMap<ItemExternalDto, Item>()
+               .ForMember(x => x.RelativePath, o => o.MapFrom(x => x.FileName));
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
 

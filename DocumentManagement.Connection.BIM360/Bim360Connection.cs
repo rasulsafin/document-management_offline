@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return type;
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
-            => await Bim360ConnectionContext.CreateContext(info, lastSynchronizationDate);
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+            => await Bim360ConnectionContext.CreateContext(info);
     }
 }

@@ -128,10 +128,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             sentTime = DateTime.UtcNow;
             if (!IsLogged || mustUpdate)
             {
-                if (string.IsNullOrEmpty(AccessToken))
+                //if (string.IsNullOrEmpty(AccessToken))
                     await ThreeLeggedAsync();
-                else
-                    await RefreshConnectionAsync();
+                //else
+                //    await RefreshConnectionAsync();
             }
         }
 

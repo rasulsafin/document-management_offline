@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
@@ -17,12 +16,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext
     {
-        private List<Hub> hubs;
-        private List<Project> bimProjects;
+        private FoldersSyncHelper foldersSyncHelper;
 
         private Bim360ConnectionContext()
         {
         }
+
+        internal List<Hub> Hubs { get; } = new List<Hub>();
+
+        internal Dictionary<string, (Project, ProjectExternalDto)> Projects { get; } =
+            new Dictionary<string, (Project, ProjectExternalDto)>();
+
+        internal Dictionary<string, (Issue, ObjectiveExternalDto)> Objectives { get; } =
+            new Dictionary<string, (Issue, ObjectiveExternalDto)>();
+
+        internal Dictionary<string, Folder> DefaultFolders { get; } = new Dictionary<string, Folder>();
 
         internal IssuesService IssuesService { get; private set; }
 
@@ -36,7 +44,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
         internal ObjectsService ObjectsService { get; private set; }
 
-        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoExternalDto connectionInfo, DateTime lastSynchronizationDate)
+        internal VersionsService VersionsService { get; private set; }
+
+        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoExternalDto connectionInfo)
         {
             var connection = new ForgeConnection();
             var authService = new AuthenticationService(connection);
@@ -53,8 +63,35 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             context.ItemsService = new ItemsService(connection);
             context.FoldersService = new FoldersService(connection);
             context.ObjectsService = new ObjectsService(connection);
+            context.VersionsService = new VersionsService(connection);
+            context.foldersSyncHelper = new FoldersSyncHelper(context.FoldersService, context.ProjectsService);
 
             return context;
+        }
+
+        internal async Task UpdateProjects(bool mustUpdate)
+        {
+            await UpdateHubs();
+            if (!mustUpdate && Projects.Count != 0)
+                return;
+
+            foreach (var hub in Hubs)
+            {
+                var projectsInHub = await ProjectsService.GetProjectsAsync(hub.ID);
+
+                foreach (var p in projectsInHub)
+                {
+                    if (Projects.ContainsKey(p.ID))
+                        Projects.Remove(p.ID);
+                    Projects.Add(p.ID, (p, p.ToDto()));
+
+                    if (!DefaultFolders.ContainsKey(p.ID))
+                    {
+                        var folder = await foldersSyncHelper.GetDefaultFolderAsync(hub.ID, p.ID);
+                        DefaultFolders.Add(p.ID, folder);
+                    }
+                }
+            }
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
@@ -63,64 +100,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
             => new Bim360ProjectsSynchronizer(this);
 
-        protected override async Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
+        private async Task UpdateHubs()
         {
-            objectives = new List<ObjectiveExternalDto>();
-
-            foreach (var project in await GetProjectsPrivate())
-            {
-                var issues = await IssuesService.GetIssuesAsync(project.Relationships.IssuesContainer.Data.ID);
-
-                foreach (var issue in issues)
-                {
-                    var dto = issue.ToExternalDto();
-                    dto.Items ??= new List<ItemExternalDto>();
-
-                    var attachments = await IssuesService.GetAttachmentsAsync(
-                        project.Relationships.IssuesContainer.Data.ID,
-                        issue.ID);
-
-                    foreach (var attachment in attachments)
-                        dto.Items.Add((await ItemsService.GetAsync(project.ID, attachment.Attributes.Urn)).ToDto());
-
-                    objectives.Add(dto);
-                }
-            }
-
-            return objectives;
+            if (Hubs.Count == 0)
+                Hubs.AddRange(await HubsService.GetHubsAsync());
         }
-
-        protected override async Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects()
-        {
-            projects = new List<ProjectExternalDto>();
-
-            foreach (var project in await GetProjectsPrivate())
-            {
-                var dto = project.ToDto();
-                var root = project.Relationships.RootFolder.Data;
-                var items = await FoldersService.SearchAsync(
-                    project.ID,
-                    root.ID);
-                dto.Items = items.Select(x => x.item.ToDto()).ToList();
-                projects.Add(dto);
-            }
-
-            return projects;
-        }
-
-        private async Task<List<Project>> GetProjectsPrivate()
-        {
-            if (bimProjects == null)
-            {
-                bimProjects = new List<Project>();
-                foreach (var hub in await GetHubs())
-                    bimProjects.AddRange(await ProjectsService.GetProjectsAsync(hub.ID));
-            }
-
-            return bimProjects;
-        }
-
-        private async Task<List<Hub>> GetHubs()
-            => hubs ??= await HubsService.GetHubsAsync();
     }
 }

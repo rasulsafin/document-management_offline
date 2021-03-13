@@ -73,8 +73,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 CreateObjectiveParentLink(data, tuple);
-                tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
-                tuple.Remote.Project = tuple.Synchronized.Project;
+                var project = await data.Context.Projects.Include(x => x.SynchronizationMate)
+                   .FirstOrDefaultAsync(x => x.ID == tuple.Local.ProjectID);
+                tuple.Synchronized.ProjectID = project?.SynchronizationMateID ?? 0;
+                tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
 
                 MergeBimElements(tuple);
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
@@ -104,9 +106,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 CreateObjectiveParentLink(data, tuple);
-                tuple.Synchronized.Project = tuple.Remote.Project;
-                tuple.Local.Project = data.Context.Projects
-                   .FirstOrDefault(x => x.SynchronizationMateID == tuple.Synchronized.Project.ID);
+                tuple.Synchronized.ProjectID = tuple.Remote.ProjectID;
+                var id = tuple.Synchronized.ProjectID;
+                tuple.Local.Project = await data.Context.Projects
+                   .FirstOrDefaultAsync(x => x.SynchronizationMateID == id);
 
                 MergeBimElements(tuple);
                 var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent);
@@ -221,6 +224,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
                     (item.SynchronizationMate != null &&
                         item.SynchronizationMate.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2)),
+                null,
                 tuple);
             var fieldResult = await dynamicFieldStrategy.Synchronize(
                 data,
@@ -229,6 +233,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 field => field.ObjectiveID == id1 || field.ObjectiveID == id2 ||
                     (field.SynchronizationMate != null &&
                         (field.SynchronizationMate.ObjectiveID == id1 || field.SynchronizationMate.ObjectiveID == id2)),
+                null,
                 tuple);
 
             return itemsResult.Concat(fieldResult).ToList();

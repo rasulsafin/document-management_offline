@@ -26,6 +26,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
             Expression<Func<TDB, bool>> filter = null,
+            Func<TDB, bool> filter2 = null,
             object parent = null,
             IProgress<double> progress = null)
         {
@@ -37,9 +38,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             if (filter != null)
                 list = list.Where(filter);
 
+            var func = filter?.Compile() ?? (x => true);
+
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 Order(list),
-                Order(remoteCollection),
+                Order(filter2 == null ? remoteCollection : remoteCollection.Where(filter2)),
                 IsEntitiesEquals);
 
             var results = new List<SynchronizingResult>();
@@ -148,7 +151,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
             catch (Exception e)
             {
-                return Task.FromResult(new SynchronizingResult()
+                return Task.FromResult(new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Remote,
@@ -171,6 +174,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
             catch (Exception e)
             {
+                tuple.Local.SynchronizationMate = null;
                 return new SynchronizingResult()
                 {
                     Exception = e,

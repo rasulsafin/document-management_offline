@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
@@ -15,12 +16,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         private readonly ItemsService itemsService;
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
+        private readonly VersionsService versionsService;
 
-        public ItemsSyncHelper(ItemsService itemsService, ProjectsService projectsService, ObjectsService objectsService)
+        public ItemsSyncHelper(ItemsService itemsService, ProjectsService projectsService, ObjectsService objectsService, VersionsService versionsService)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
             this.objectsService = objectsService;
+            this.versionsService = versionsService;
         }
 
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
@@ -101,6 +104,29 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
                 return null;
 
             return addedItem.item;
+        }
+
+        internal async Task Remove(string projectID, ItemExternalDto item)
+        {
+            // Delete uploaded item by marking version as "deleted"
+            var deletedVersion = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = item.FileName,
+                    Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Item = new ObjectInfo
+                    {
+                        ID = item.ExternalID,
+                        Type = ITEM_TYPE,
+                    }.ToDataContainer(),
+                },
+            };
+
+            await versionsService.PostVersionAsync(projectID, deletedVersion);
         }
     }
 }
