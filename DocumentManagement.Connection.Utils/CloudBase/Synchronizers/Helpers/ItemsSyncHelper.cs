@@ -2,14 +2,13 @@
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization
+namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
 {
     internal class ItemsSyncHelper
     {
-        internal static async Task UploadFiles(ICollection<ItemExternalDto> items, YandexManager manager)
+        internal static async Task UploadFiles(ICollection<ItemExternalDto> items, ICloudManager manager)
         {
             if (items == null)
                 return;

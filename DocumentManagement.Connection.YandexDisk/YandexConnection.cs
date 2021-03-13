@@ -102,13 +102,13 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return type;
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
             var connectResult = await Connect(info);
             if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
                 return null;
 
-            return YandexConnectionContext.CreateContext(lastSynchronizationDate, manager);
+            return YandexConnectionContext.CreateContext(manager);
         }
 
     }

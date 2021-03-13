@@ -7,6 +7,12 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
     internal class ObjectiveMapper
     {
         private readonly ItemHelper itemHelper = new ItemHelper();
+        private readonly TDMSApplication tdms;
+
+        public ObjectiveMapper(TDMSApplication tdms)
+        {
+            this.tdms = tdms;
+        }
 
         public ObjectiveExternalDto ToDto(TDMSObject tdmsObject)
         {
@@ -35,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             if (tdmsObject.ObjectDefName == ObjectTypeID.WORK)
                 return new JobMapper();
             else if (tdmsObject.ObjectDefName == ObjectTypeID.DEFECT)
-                return new DefectMapper();
+                return new DefectMapper(tdms);
             else
                 return null;
         }
@@ -59,7 +65,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                         tdmsObject.Attributes[field.ExternalID].Value = System.DateTime.Parse(field.Value);
                         break;
                     case DynamicFieldType.ENUM:
-                        tdmsObject.Attributes[field.ExternalID].Value = TdmsConnection.TDMS.GetObjectByGUID(field.Value);
+                        tdmsObject.Attributes[field.ExternalID].Value = tdms.GetObjectByGUID(field.Value);
                         break;
                     case DynamicFieldType.OBJECT:
                         //TODO: ObjectType

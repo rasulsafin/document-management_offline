@@ -10,6 +10,12 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
     public class DefectMapper : IModelMapper<ObjectiveExternalDto, TDMSObject>
     {
         private static readonly string SPLITTER = ";";
+        private readonly TDMSApplication tdms;
+
+        public DefectMapper(TDMSApplication tdms)
+        {
+            this.tdms = tdms;
+        }
 
         public ObjectiveExternalDto ToDto(TDMSObject tdmsObject)
         {
@@ -57,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 model.Attributes[AttributeID.GUID].Value = SetBimElements(objectDto.BimElements);
             }
 
-            var parent = TdmsConnection.TDMS.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
+            var parent = tdms.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
 
             model.Attributes[AttributeID.OBJECT_LINK].Value = parent.Attributes[AttributeID.OBJECT_LINK];
             model.Attributes[AttributeID.JOB_LINK].Value = parent;
@@ -90,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
               ObjectiveStatus.Undefined;
 
         private TDMSUser GetUser(string id) =>
-            TdmsConnection.TDMS.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
+            tdms.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
 
         private ICollection<BimElementExternalDto> GetBimElemenents(TDMSObject tdmsObject)
         {

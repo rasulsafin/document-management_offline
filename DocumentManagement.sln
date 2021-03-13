@@ -60,6 +60,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.General.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{856587D1-4377-4816-9EBD-8C786DDBE81B}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk.Tests", "DocumentManagement.Connection.YandexDisk.Tests\DocumentManagement.Connection.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.GoogleDrive.Tests", "DocumentManagement.Connection.GoogleDrive.Tests\DocumentManagement.Connection.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -138,6 +142,14 @@ Global
 		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -155,6 +167,8 @@ Global
 		{FBDF7022-111F-4369-8517-898BCCD3550C} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
 		{B0800032-F53B-4CC8-A07F-45829DCB5C48} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}
