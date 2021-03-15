@@ -75,13 +75,13 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return false;
         }
 
-        public async Task<T> Pull<T>(string id)
+        public async Task<T> Pull<T>(string name)
         {
             try
             {
                 var tableHref = await GetTableHref<T>();
-                string name = string.Format(REC_FILE, id);
-                string json = await controller.GetContentAsync(tableHref, name);
+                string nameWithExtension = string.Format(REC_FILE, name);
+                string json = await controller.GetContentAsync(tableHref, nameWithExtension);
                 T @object = JsonConvert.DeserializeObject<T>(json);
                 return @object;
             }
@@ -111,9 +111,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             var resultCollection = new List<T>();
             try
             {
-                var elements = await GetRemoteDirectoryFiles(path);
+                var tableHref = await GetTableHref<T>();
+                var elements = await GetRemoteDirectoryFiles(tableHref);
                 foreach (var item in elements)
-                    resultCollection.Add(await Pull<T>(item.Href));
+                    resultCollection.Add(await Pull<T>(Path.GetFileNameWithoutExtension(item.DisplayName)));
             }
             catch (FileNotFoundException)
             {
@@ -122,10 +123,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return resultCollection;
         }
 
-        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
             string dirHref = await GetDirHref(remoteDirName);
-            var res = await controller.LoadFileAsync(dirHref, Path.Combine(localDirName, fileName));
+            var res = await controller.LoadFileAsync(dirHref, fullPath);
             return res.Href;
         }
 
@@ -139,11 +140,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return await controller.DownloadFileAsync(href, fileName);
         }
 
-        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryHref = "/")
         {
             try
             {
-                return await controller.GetListAsync(directoryPath);
+                return await controller.GetListAsync(directoryHref);
             }
             catch (FileNotFoundException)
             {

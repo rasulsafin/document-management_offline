@@ -127,14 +127,13 @@ namespace MRS.DocumentManagement.Connection
             return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "No network" };
         }
 
-        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
             try
             {
                 await CheckDir(remoteDirName);
                 string path = PathManager.GetDir(remoteDirName);
-                string file = Path.Combine(localDirName, fileName);
-                var created = await controller.LoadFileAsync(path, file);
+                var created = await controller.LoadFileAsync(path, fullPath);
                 if (created == null)
                     return null;
 

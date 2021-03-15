@@ -44,10 +44,9 @@ namespace MRS.DocumentManagement.Connection.Utils
         /// Отправить файл.
         /// </summary>
         /// <param name="remoteDirName">Название подпапки в папке приложения 'BRIO MRS'.</param>
-        /// <param name="localDirName">Локальный путь (папка должна быть создана).</param>
-        /// <param name="fileName">имя файла.</param>
+        /// <param name="fullPath">Full path to the file.</param>
         /// <returns>Push result.</returns>
-        Task<string> PushFile(string remoteDirName, string localDirName, string fileName);
+        Task<string> PushFile(string remoteDirName, string fullPath);
 
         /// <summary>
         /// Удалить объект из папки.

@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
                     continue;
                 }
 
-                var uploadedHref = await manager.PushFile(remoteDirectoryName, Path.GetDirectoryName(item.FullPath), item.FileName);
+                var uploadedHref = await manager.PushFile(remoteDirectoryName, item.FullPath);
                 item.ExternalID = uploadedHref;
             }
         }

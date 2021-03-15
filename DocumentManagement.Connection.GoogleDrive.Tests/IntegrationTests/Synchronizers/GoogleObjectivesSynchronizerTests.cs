@@ -157,7 +157,7 @@ namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synch
 
             var result = await synchronizer.GetUpdatedIDs(creationTime);
 
-            Assert.IsNotNull(result.FirstOrDefault(o => o == added.ExternalID));
+            Assert.IsTrue(result.Any(o => o == added.ExternalID));
         }
     }
 }

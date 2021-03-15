@@ -79,6 +79,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 if (!string.IsNullOrEmpty(nextPageToken))
                     request.PageToken = nextPageToken;
 
+                // Exclude trashed files
+                request.Q = $"{request.Q} and trashed = false";
+
                 try
                 {
                     var fileList = await request.ExecuteAsync();
@@ -96,7 +99,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             while (!string.IsNullOrEmpty(nextPageToken));
 
             List<GoogleDriveElement> elements = new List<GoogleDriveElement>();
-            foreach (Google.Apis.Drive.v3.Data.File item in result)
+            foreach (var item in result)
             {
                 var element = new GoogleDriveElement(item);
                 elements.Add(element);
@@ -223,7 +226,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             if (info.IsDirectory)
             {
                 var infos = await GetListAsync(idParent);
-                var element = infos.First(x => x.DisplayName == name);
+                var element = infos.FirstOrDefault(x => x.DisplayName == name);
                 if (element != null)
                 {
                     using (var stream = new MemoryStream())
@@ -285,7 +288,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 {
                     if (infos.Any(x => x.DisplayName == fileInfo.Name))
                     {
-                        fileDrive.Id = infos.First().Href;
+                        fileDrive.Id = infos.FirstOrDefault()?.Href;
 
                         // TODO: Change this
                         // Do not update file for the moment
@@ -297,6 +300,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                         fileDrive.Parents = new List<string> { idParent };
                         var request = service.Files.Create(fileDrive, stream, contentType);
                         result = await request.UploadAsync();
+                        var updatedInfos = await GetListAsync(idParent);
+                        fileDrive.Id = updatedInfos.FirstOrDefault(i => i.DisplayName == fileInfo.Name)?.Href;
                     }
                 }
 

@@ -118,5 +118,24 @@ namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synch
             Assert.IsNotNull(result?.Title);
             Assert.AreEqual(newTitle, result.Title);
         }
+
+        [TestMethod]
+        public async Task GetUpdatedIDs_AtLeastOneProjectAdded_RetrivedSuccessful()
+        {
+            var creationTime = DateTime.Now;
+            var project = new ProjectExternalDto
+            {
+                Title = "TestProject123",
+                UpdatedAt = creationTime,
+            };
+            var added = await synchronizer.Add(project);
+            if (added?.ExternalID == null)
+                Assert.Fail();
+            await Task.Delay(1000);
+
+            var result = await synchronizer.GetUpdatedIDs(creationTime);
+
+            Assert.IsTrue(result.Any(o => o == added.ExternalID));
+        }
     }
 }
