@@ -82,6 +82,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             var existingFiles = items.Where(i => !string.IsNullOrWhiteSpace(i.ExternalID));
             var filesToUpload = items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
 
+            // At the moment only BIM files are implemented
+            filesToUpload = filesToUpload.Where(i => i.ItemType == ItemType.Bim);
+
             foreach (var file in filesToUpload)
             {
                 var uploaded = await tasksService.CommonRequests.AddFileAsync(file.FileName, file.FullPath);
@@ -124,6 +127,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
                 foreach (var task in lementTasks)
                 {
+                    // It is necessary to get full info about issue to get last updated info
                     var fullInfoTask = await tasksService.GetTaskAsync(task.ID.Value);
                     var objective = fullInfoTask.ToObjectiveExternalDto();
                     objective.Items = GetIssueFiles(task, files);
