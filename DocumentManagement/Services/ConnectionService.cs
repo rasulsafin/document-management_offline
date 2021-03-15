@@ -60,19 +60,20 @@ namespace MRS.DocumentManagement.Services
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
             var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
-            var connectionInfoDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
+            var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
             // Connect to Remote
-            var status = await connection.Connect(connectionInfoDto);
+            var status = await connection.Connect(connectionInfoExternalDto);
 
             // Update connection info
-            connectionInfoDto = await connection.UpdateConnectionInfo(connectionInfoDto);
-            connectionInfo = mapper.Map(connectionInfoDto, connectionInfo);
+            connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
+            connectionInfo = mapper.Map(connectionInfoExternalDto, connectionInfo);
+
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
 
             // Update types stored in connection info
-            var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
+            var newTypes = connectionInfoExternalDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
             var typesToRemove = currentEnumerationTypes?
                 .Where(x => newTypes.All(t => t.ExternalID!= x.EnumerationType.ExternalId))
@@ -80,7 +81,7 @@ namespace MRS.DocumentManagement.Services
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
-            var newValues = connectionInfoDto.EnumerationTypes?
+            var newValues = connectionInfoExternalDto.EnumerationTypes?
                 .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
