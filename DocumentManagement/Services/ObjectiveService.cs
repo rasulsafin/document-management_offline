@@ -119,7 +119,7 @@ namespace MRS.DocumentManagement.Services
             reportCount.Date = date;
             await context.SaveChangesAsync();
 
-            string reportID = $"{date.ToString("ddMMyyyy")}-{count}";
+            string reportID = $"{date:ddMMyyyy}-{count}";
 
             List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
             var objNum = 1;

@@ -74,12 +74,13 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID)
         {
-            var iuserID = (int)userID;
+            var iUserID = (int)userID;
             var dbProjects = await context.Users
-                .Where(x => x.ID == iuserID)
-                .SelectMany(x => x.Projects)
-                .Select(x => x.Project)
-                .ToListAsync();
+               .Where(x => x.ID == iUserID)
+               .SelectMany(x => x.Projects)
+               .Select(x => x.Project)
+               .Unsynchronized()
+               .ToListAsync();
 
             var userProjects = dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
             return userProjects;
