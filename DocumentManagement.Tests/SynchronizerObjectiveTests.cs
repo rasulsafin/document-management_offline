@@ -91,6 +91,7 @@ namespace MRS.DocumentManagement.Tests
             services.AddTransient(x => new DynamicFieldValueResolver(Fixture.Context));
             services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(Fixture.Context));
             services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
             services.AddTransient(x => new ObjectiveProjectIDResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveObjectiveTypeResolver(Fixture.Context));
@@ -1315,6 +1316,7 @@ namespace MRS.DocumentManagement.Tests
             {
                 Context = Fixture.Context,
                 User = await Fixture.Context.Users.FirstAsync(),
+                Mapper = mapper,
             };
 
             if (ignoreProjects)
@@ -1323,7 +1325,7 @@ namespace MRS.DocumentManagement.Tests
             var synchronizationResult = await synchronizer.Synchronize(
                 data,
                 Connection.Object,
-                new ConnectionInfo());
+                new ConnectionInfoExternalDto());
             return synchronizationResult;
         }
 
