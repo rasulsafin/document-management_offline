@@ -180,8 +180,8 @@ namespace MRS.DocumentManagement.Services
             var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var id = Guid.NewGuid().ToString();
-            var task = synchronizer.Synchronize(data, connection, info);
-            SYNCHRONIZATIONS.Add(id, task);
+            var task = Task.Factory.StartNew(async () => await synchronizer.Synchronize(data, connection, info), TaskCreationOptions.LongRunning);
+            SYNCHRONIZATIONS.Add(id, task.Unwrap());
             return id;
         }
 
