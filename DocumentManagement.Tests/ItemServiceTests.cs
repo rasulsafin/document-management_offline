@@ -179,20 +179,18 @@ namespace MRS.DocumentManagement.Tests
             var existingItem = Context.Items.Unsynchronized().First();
             var guid = Guid.NewGuid();
             var newItemType = existingItem.ItemType != 1 ? 1 : 2;
-            var newExternalItemId = $"newExternalItemId{guid}";
             var newName = $"newName{guid}";
             var item = new ItemDto
             {
                 ID = new ID<ItemDto>(existingItem.ID),
                 ItemType = (ItemType)newItemType,
-                RelativePath = newName
+                RelativePath = newName,
             };
 
             var result = await service.Update(item);
 
             var updatedItem = Context.Items.Unsynchronized().First(i => i.ID == existingItem.ID);
             Assert.IsTrue(result);
-            Assert.IsTrue(updatedItem.ExternalID == newExternalItemId);
             Assert.IsTrue(updatedItem.ItemType == newItemType);
             Assert.IsTrue(updatedItem.RelativePath == newName);
         }

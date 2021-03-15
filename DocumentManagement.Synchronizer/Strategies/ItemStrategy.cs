@@ -57,7 +57,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
                         (x.ExternalID == external || x.RelativePath == path));
             if (tuple.DetermineAction() == SynchronizingAction.Merge)
-                return await base.Merge(tuple, data, connectionContext, parent);
+                tuple.Remote.RelativePath = tuple.Local.RelativePath;
             return await base.AddToLocal(tuple, data, connectionContext, parent);
         }
 

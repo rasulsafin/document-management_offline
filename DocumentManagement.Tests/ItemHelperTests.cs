@@ -122,7 +122,6 @@ namespace MRS.DocumentManagement.Tests
         {
             var context = Fixture.Context;
             var guid = Guid.NewGuid();
-            var externalId = $"ExternalItemId{guid}";
             var name = $"Name{guid}";
             var itemType = ItemType.Bim;
             var objectiveType = typeof(Objective);
@@ -132,9 +131,10 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await helper.CheckItemToLink(context, mapper, item, objectiveType, parentId);
 
-            var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
-                                                                               && i.ItemType == (int)itemType
-                                                                               && i.RelativePath == name);
+            var addedItem = context.Items
+               .Unsynchronized()
+               .FirstOrDefault(i => i.ItemType == (int)itemType && i.RelativePath == name);
+
             Assert.IsNotNull(result);
             Assert.IsNotNull(addedItem);
             Assert.AreEqual(itemsCount + 1, context.Items.Unsynchronized().Count());
@@ -145,7 +145,6 @@ namespace MRS.DocumentManagement.Tests
         {
             var context = Fixture.Context;
             var guid = Guid.NewGuid();
-            var externalId = $"ExternalItemId{guid}";
             var name = $"Name{guid}";
             var itemType = ItemType.Bim;
             var projectType = typeof(Project);
@@ -155,9 +154,10 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await helper.CheckItemToLink(context, mapper, item, projectType, parentId);
 
-            var addedItem = context.Items.Unsynchronized().FirstOrDefault(i => i.ExternalID == externalId
-                                                                                                         && i.ItemType == (int)itemType
-                                                                                                         && i.RelativePath == name);
+            var addedItem = context.Items
+               .Unsynchronized()
+               .FirstOrDefault(i => i.ItemType == (int)itemType && i.RelativePath == name);
+
             Assert.IsNotNull(result);
             Assert.IsNotNull(addedItem);
             Assert.AreEqual(itemsCount + 1, context.Items.Unsynchronized().Count());
