@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
@@ -12,6 +13,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
     {
         private readonly TasksService tasksService;
         private readonly BimsService bimsService;
+
+        private List<ObjectiveExternalDto> objectives;
 
         public LementProObjectivesSynchronizer(LementProConnectionContext context)
         {
@@ -58,6 +61,21 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             return updatedModel.ToObjectiveExternalDto();
         }
 
+        public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
+        {
+            await CheckCashedElements();
+            return objectives
+                .Where(o => o.UpdatedAt != default)
+                .Where(o => o.UpdatedAt <= date)
+                .Select(o => o.ExternalID).ToList();
+        }
+
+        public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
+        {
+            await CheckCashedElements();
+            return objectives.Where(o => ids.Contains(o.ExternalID)).ToList();
+        }
+
         private async Task<IEnumerable<int>> UploadFiles(ICollection<ItemExternalDto> items)
         {
             var fileIds = new List<int>();
@@ -93,6 +111,37 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             task.Values.Files.ForEach(f => items.Add(f.ToItemExternalDto()));
 
             return items;
+        }
+
+        private async Task CheckCashedElements()
+        {
+            if (objectives == null)
+            {
+                objectives = new List<ObjectiveExternalDto>();
+
+                var lementTasks = await tasksService.GetAllTasksAsync();
+                var files = await bimsService.GetAllBimFilesAsync();
+
+                foreach (var task in lementTasks)
+                {
+                    var fullInfoTask = await tasksService.GetTaskAsync(task.ID.Value);
+                    var objective = fullInfoTask.ToObjectiveExternalDto();
+                    objective.Items = GetIssueFiles(task, files);
+                    objectives.Add(objective);
+                }
+            }
+        }
+
+        private ICollection<ItemExternalDto> GetIssueFiles(ObjectBase issue, IEnumerable<ObjectBase> allBims)
+        {
+            var files = new List<ItemExternalDto>();
+            var bimRef = issue.Values.BimRef;
+            var bimFile = allBims.FirstOrDefault(b => b.ID == bimRef?.ID)?.ToItemExternalDto();
+            if (bimFile != null)
+                files.Add(bimFile);
+
+            // TODO implement adding non-BIM files after implementing functionality for them
+            return files;
         }
     }
 }

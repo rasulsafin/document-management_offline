@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         internal BimsService BimsService { get; private set; }
 
-        public static async Task<LementProConnectionContext> CreateContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
+        public static async Task<LementProConnectionContext> CreateContext(ConnectionInfoExternalDto info)
         {
             var connection = new HttpConnection();
             var requestUtility = new HttpRequestUtility(connection);
@@ -45,39 +45,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
         {
             throw new NotImplementedException();
-        }
-
-        protected override async Task<IReadOnlyCollection<ObjectiveExternalDto>> GetObjectives()
-        {
-            var lementTasks = await TasksService.GetAllTasksAsync();
-            var files = await BimsService.GetAllBimFilesAsync();
-            objectives = new List<ObjectiveExternalDto>();
-
-            foreach (var task in lementTasks)
-            {
-                var objective = task.ToObjectiveExternalDto();
-                objective.Items = GetIssueFiles(task, files);
-                objectives.Add(objective);
-            }
-
-            return objectives;
-        }
-
-        protected override async Task<IReadOnlyCollection<ProjectExternalDto>> GetProjects()
-        {
-            throw new NotImplementedException("Projects managaring is not implemented");
-        }
-
-        private ICollection<ItemExternalDto> GetIssueFiles(ObjectBase issue, IEnumerable<ObjectBase> allBims)
-        {
-            var files = new List<ItemExternalDto>();
-            var bimRef = issue.Values.BimRef;
-            var bimFile = allBims.FirstOrDefault(b => b.ID == bimRef.ID).ToItemExternalDto();
-            if (bimFile != null)
-                files.Add(bimFile);
-
-            // TODO implement adding non-BIM files after implementing functionality for them
-            return files;
         }
     }
 }

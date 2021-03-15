@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -65,11 +66,16 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 },
                 Title = model.Values.Name,
                 Description = model.Values.Description,
-                CreationDate = DateTime.Parse(model.Values.StartDate),
                 Status = ParseStatus(model),
                 ProjectExternalID = model.Values.Project?.ID?.ToString(),
                 ExternalID = model.ID.ToString(),
             };
+
+            if (model.Values.StartDate != null)
+                resultDto.CreationDate = DateTime.Parse(model.Values.StartDate, CultureInfo.InvariantCulture);
+
+            if (model.Values.LastModifiedDate != null)
+                resultDto.UpdatedAt = DateTime.Parse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture);
 
             return resultDto;
         }

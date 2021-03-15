@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Synchronization;
@@ -17,7 +18,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
         {
-            var lastSyncDate = DateTime.MinValue;
             var login = "diismagilov";
             var password = "DYZDFMwZ";
             var connectionInfo = new ConnectionInfoExternalDto
@@ -29,7 +29,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 },
             };
 
-            var context = await LementProConnectionContext.CreateContext(connectionInfo, lastSyncDate);
+            var context = await LementProConnectionContext.CreateContext(connectionInfo);
             synchronizer = new LementProObjectivesSynchronizer(context);
         }
 
@@ -122,11 +122,44 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Assert.Fail("Objective adding failed. There is nothing to update.");
 
             // Update
+            await Task.Delay(3000);
             var newTitle = added.Title = $"UPDATED: {title}";
             var result = await synchronizer.Update(added);
 
             Assert.IsNotNull(result?.Title);
             Assert.AreEqual(newTitle, result.Title);
+        }
+
+        [TestMethod]
+        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
+        {
+            var creationTime = DateTime.Now;
+            var objective = new ObjectiveExternalDto
+            {
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = "40179" },
+                CreationDate = creationTime,
+                DueDate = DateTime.Now.AddDays(2),
+                Title = "First type OPEN issue",
+                Description = "ASAP: everything wrong! redo!!!",
+                Status = ObjectiveStatus.Open,
+                UpdatedAt = creationTime,
+                Items = new List<ItemExternalDto>
+                {
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
+                    },
+                },
+            };
+            var added = await synchronizer.Add(objective);
+            if (added?.ExternalID == null)
+                Assert.Fail();
+            await Task.Delay(3000);
+
+            var result = await synchronizer.GetUpdatedIDs(creationTime);
+
+            Assert.IsTrue(result.Any(o => o == added.ExternalID));
         }
     }
 }

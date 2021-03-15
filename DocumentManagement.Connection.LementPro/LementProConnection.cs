@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
             throw new NotImplementedException();
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info, DateTime lastSynchronizationDate)
-            => await LementProConnectionContext.CreateContext(info, lastSynchronizationDate);
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+            => await LementProConnectionContext.CreateContext(info);
     }
 }
