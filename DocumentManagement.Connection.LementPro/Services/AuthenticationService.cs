@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         private HttpRequestUtility requestUtility;
 
         // Is created as scoped as this service
-        private ConnectionInfoDto connectionInfoDto;
+        private ConnectionInfoExternalDto connectionInfoDto;
 
         public AuthenticationService(HttpRequestUtility requestUtility)
         {
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         public void Dispose()
             => requestUtility.Dispose();
 
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoDto updatedInfo)> SignInAsync(ConnectionInfoDto info)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto info)
         {
             connectionInfoDto = info;
             var login = connectionInfoDto.AuthFieldValues[AUTH_NAME_LOGIN];
@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             {
                 var errorStatus = new ConnectionStatusDto
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = "Connection with given credentials failed",
                 };
                 return (errorStatus, null);
@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             AccessToken = token;
             AccessEnd = expires;
-            var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
+            var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
             return (successStatus, connectionInfoDto);
         }
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             return true;
         }
 
-        protected void SetAuthValue(ConnectionInfoDto info, string key, string value)
+        protected void SetAuthValue(ConnectionInfoExternalDto info, string key, string value)
         {
             info.AuthFieldValues ??= new Dictionary<string, string>();
             SetDictionaryValue(info.AuthFieldValues, key, value);

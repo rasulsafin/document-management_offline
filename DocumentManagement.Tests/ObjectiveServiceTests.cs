@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
@@ -92,7 +93,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new DynamicFieldHelper(Fixture.Context, mapper), new SyncServiceTest());
+            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new DynamicFieldHelper(Fixture.Context, mapper));
         }
 
         [TestCleanup]
@@ -105,8 +106,8 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var objectiveToCreate = new ObjectiveToCreateDto
             {
                 Title = title,
@@ -121,7 +122,7 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
         }
 
         [TestMethod]
@@ -130,8 +131,8 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
             var bimList = new List<BimElementDto>
@@ -155,11 +156,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(bimList.Count, addedObjective.BimElements.Count);
             Assert.AreEqual(bimElementsCount, Fixture.Context.BimElements.Count());
         }
@@ -170,8 +171,8 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var bimList = new List<BimElementDto>
             {
@@ -194,11 +195,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(bimList.Count, addedObjective.BimElements.Count);
             Assert.AreEqual(bimElementsCount + bimList.Count, Fixture.Context.BimElements.Count());
         }
@@ -209,8 +210,8 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
             var bimList = new List<BimElementDto>
@@ -240,11 +241,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(bimList.Count, addedObjective.BimElements.Count);
             Assert.AreEqual(bimElementsCount + 1, Fixture.Context.BimElements.Count());
         }
@@ -255,19 +256,18 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
-            var dbItem = Fixture.Context.Items.First();
+            var dbItem = Fixture.Context.Items.Unsynchronized().First();
             var items = new List<ItemDto>
             {
                 new ItemDto
                 {
-                    ExternalItemId = dbItem.ExternalItemId,
                     ID = new ID<ItemDto>(dbItem.ID),
-                    ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name,
+                    ItemType = (ItemType)dbItem.ItemType,
+                    RelativePath = dbItem.RelativePath,
                 },
             };
             var objectiveToCreate = new ObjectiveToCreateDto
@@ -282,11 +282,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(items.Count, addedObjective.Items.Count);
         }
 
@@ -296,8 +296,8 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
             var dynamicFields = new List<IDynamicFieldDto>
@@ -317,11 +317,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(dynamicFields.Count, addedObjective.DynamicFields.Count);
         }
 
@@ -331,11 +331,11 @@ namespace MRS.DocumentManagement.Tests
             var title = $"Test issue {Guid.NewGuid()}";
             var status = ObjectiveStatus.Open;
             var type = Fixture.Context.ObjectiveTypes.First();
-            var project = Fixture.Context.Projects.First();
-            var objectivesCount = Fixture.Context.Objectives.Count();
+            var project = Fixture.Context.Projects.Unsynchronized().First();
+            var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
-            var dbItem = Fixture.Context.Items.First();
+            var dbItem = Fixture.Context.Items.Unsynchronized().First();
             var bimList = new List<BimElementDto>
             {
                      new BimElementDto
@@ -355,10 +355,9 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ExternalItemId = dbItem.ExternalItemId,
                     ID = new ID<ItemDto>(dbItem.ID),
-                    ItemType = (ItemTypeDto)dbItem.ItemType,
-                    Name = dbItem.Name,
+                    ItemType = (ItemType)dbItem.ItemType,
+                    RelativePath = dbItem.RelativePath,
                 },
             };
             var dynamicFields = new List<IDynamicFieldDto>
@@ -380,11 +379,11 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Add(objectiveToCreate);
 
-            var addedObjective = Fixture.Context.Objectives.First(o => o.Title == title);
+            var addedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.Title == title);
             Assert.AreEqual(title, result.Title);
             Assert.AreEqual(status, result.Status);
             Assert.AreEqual(type.ID, (int)result.ObjectiveType.ID);
-            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Count());
+            Assert.AreEqual(objectivesCount + 1, Fixture.Context.Objectives.Unsynchronized().Count());
             Assert.AreEqual(items.Count, addedObjective.Items.Count);
             Assert.AreEqual(dynamicFields.Count, addedObjective.DynamicFields.Count);
             Assert.AreEqual(bimList.Count, addedObjective.BimElements.Count);
@@ -394,7 +393,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Find_ExistingObjective_ReturnsObjectiveWithIncludedFields()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -423,7 +422,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task GetObjectives_ExistingProjectWithObjectives_ReturnsEnumerableWithProjectObjectives()
         {
-            var existingProject = Fixture.Context.Projects.First(p => p.Objectives.Count > 0);
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First(p => p.Objectives.Count > 0);
             var dtoId = new ID<ProjectDto>(existingProject.ID);
 
             var result = await service.GetObjectives(dtoId);
@@ -445,14 +444,14 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Remove_ExistingObjective_ReturnsTrueAndDeletesRelatedBridges()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
             var startObjectiveItemsCount = Fixture.Context.ObjectiveItems.Count();
             var relatedObjectiveItemsCount = Fixture.Context.ObjectiveItems.Where(oi => oi.ObjectiveID == existingObjective.ID).Count();
-            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Count();
-            var relatedDynamicFields = Fixture.Context.DynamicFields.Where(f => f.ObjectiveID == existingObjective.ID).Count();
+            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
+            var relatedDynamicFields = Fixture.Context.DynamicFields.Unsynchronized().Where(f => f.ObjectiveID == existingObjective.ID).Count();
             var startBeoCount = Fixture.Context.BimElementObjectives.Count();
             var relatedBeo = Fixture.Context.BimElementObjectives.Where(beo => beo.ObjectiveID == existingObjective.ID).Count();
             var dtoId = new ID<ObjectiveDto>(existingObjective.ID);
@@ -461,7 +460,7 @@ namespace MRS.DocumentManagement.Tests
 
             Assert.IsTrue(result);
             Assert.AreEqual(startObjectiveItemsCount - relatedObjectiveItemsCount, Fixture.Context.ObjectiveItems.Count());
-            Assert.AreEqual(startDynamicFieldsCount - relatedDynamicFields, Fixture.Context.DynamicFields.Count());
+            Assert.AreEqual(startDynamicFieldsCount - relatedDynamicFields, Fixture.Context.DynamicFields.Unsynchronized().Count());
             Assert.AreEqual(startBeoCount - relatedBeo, Fixture.Context.BimElementObjectives.Count());
         }
 
@@ -478,7 +477,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Update_ExistingObjectiveWithoutAdditionalFields_ReturnsTrueAndClearsAdditionalFields()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -487,7 +486,7 @@ namespace MRS.DocumentManagement.Tests
             var newStatus = (ObjectiveStatus)existingObjective.Status != ObjectiveStatus.InProgress
                             ? ObjectiveStatus.InProgress
                             : ObjectiveStatus.Ready;
-            var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
+            var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var changedObjective = new ObjectiveDto
             {
                 AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
@@ -503,7 +502,7 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Update(changedObjective);
 
-            var updatedObjective = Fixture.Context.Objectives.First(o => o.ID == existingObjective.ID);
+            var updatedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.ID == existingObjective.ID);
             Assert.IsTrue(result);
             Assert.AreEqual(newDescription, updatedObjective.Description);
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
@@ -516,7 +515,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Update_ExistingObjectiveWithDynamicFields_ReturnsTrueAndUpdatesDynamicFields()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -525,7 +524,7 @@ namespace MRS.DocumentManagement.Tests
             var newStatus = (ObjectiveStatus)existingObjective.Status != ObjectiveStatus.InProgress
                             ? ObjectiveStatus.InProgress
                             : ObjectiveStatus.Ready;
-            var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
+            var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
             var newDynamicFields = new List<IDynamicFieldDto>
             {
@@ -545,7 +544,7 @@ namespace MRS.DocumentManagement.Tests
                 },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
-            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Count();
+            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
             var dynamicFields = new List<IDynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
@@ -565,12 +564,12 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Update(changedObjective);
 
-            var updatedObjective = Fixture.Context.Objectives.First(o => o.ID == existingObjective.ID);
+            var updatedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.ID == existingObjective.ID);
             Assert.IsTrue(result);
             Assert.AreEqual(newDescription, updatedObjective.Description);
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
             Assert.AreEqual(newTitle, updatedObjective.Title);
-            Assert.AreEqual(startDynamicFieldsCount - deletingDynamicFieldsCount + newDynamicFields.Count, Fixture.Context.DynamicFields.Count());
+            Assert.AreEqual(startDynamicFieldsCount - deletingDynamicFieldsCount + newDynamicFields.Count, Fixture.Context.DynamicFields.Unsynchronized().Count());
             Assert.AreEqual(dynamicFields.Count, changedObjective.DynamicFields.Count());
             updatedObjective.DynamicFields.ToList().ForEach(df =>
             {
@@ -581,7 +580,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Update_ExistingObjectiveWithBimElements_ReturnsTrueAndUpdatesBimElements()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -590,7 +589,7 @@ namespace MRS.DocumentManagement.Tests
             var newStatus = (ObjectiveStatus)existingObjective.Status != ObjectiveStatus.InProgress
                             ? ObjectiveStatus.InProgress
                             : ObjectiveStatus.Ready;
-            var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
+            var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var startBimElementsCount = Fixture.Context.BimElementObjectives.Count();
             var deletingBimElementsCount = existingObjective.BimElements.Count - 1;
             var firstBimElement = existingObjective.BimElements.First().BimElement;
@@ -626,7 +625,7 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Update(changedObjective);
 
-            var updatedObjective = Fixture.Context.Objectives.First(o => o.ID == existingObjective.ID);
+            var updatedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.ID == existingObjective.ID);
             Assert.IsTrue(result);
             Assert.AreEqual(newDescription, updatedObjective.Description);
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
@@ -643,7 +642,7 @@ namespace MRS.DocumentManagement.Tests
         [TestMethod]
         public async Task Update_ExistingObjectiveWithItems_ReturnsTrueAndUpdatesItems()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -652,15 +651,14 @@ namespace MRS.DocumentManagement.Tests
             var newStatus = (ObjectiveStatus)existingObjective.Status != ObjectiveStatus.InProgress
                             ? ObjectiveStatus.InProgress
                             : ObjectiveStatus.Ready;
-            var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
+            var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
             var newItems = new List<ItemDto>
             {
                 new ItemDto
                 {
-                    ItemType = ItemTypeDto.Media,
-                    ExternalItemId = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}",
+                    ItemType = ItemType.Media,
+                    RelativePath = $"Name{guid}",
                 },
             };
             var firstItem = existingObjective.Items.First().Item;
@@ -670,9 +668,8 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
-                    ExternalItemId = firstItem.ExternalItemId,
-                    ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name,
+                    ItemType = (ItemType)firstItem.ItemType,
+                    RelativePath = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;
@@ -696,7 +693,7 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Update(changedObjective);
 
-            var updatedObjective = Fixture.Context.Objectives.First(o => o.ID == existingObjective.ID);
+            var updatedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.ID == existingObjective.ID);
             Assert.IsTrue(result);
             Assert.AreEqual(newDescription, updatedObjective.Description);
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
@@ -706,16 +703,15 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(updatedObjective.Items.Count, items.Count);
             updatedObjective.Items.Select(oi => oi.Item).ToList().ForEach(i =>
             {
-                Assert.IsTrue(items.Any(ci => ci.ExternalItemId == i.ExternalItemId
-                                                    && (int)ci.ItemType == i.ItemType
-                                                    && ci.Name == i.Name));
+                Assert.IsTrue(items.Any(ci => (int)ci.ItemType == i.ItemType
+                                                    && ci.RelativePath == i.RelativePath));
             });
         }
 
         [TestMethod]
         public async Task Update_ExistingObjectiveWithAdditionalFields_ReturnsTrueAndUpdatesAdditionalFields()
         {
-            var existingObjective = Fixture.Context.Objectives
+            var existingObjective = Fixture.Context.Objectives.Unsynchronized()
                 .First(o => o.DynamicFields.Count > 0
                             && o.BimElements.Count > 0
                             && o.Items.Count > 0);
@@ -724,7 +720,7 @@ namespace MRS.DocumentManagement.Tests
             var newStatus = (ObjectiveStatus)existingObjective.Status != ObjectiveStatus.InProgress
                             ? ObjectiveStatus.InProgress
                             : ObjectiveStatus.Ready;
-            var newProject = Fixture.Context.Projects.First(p => p.ID != existingObjective.ProjectID);
+            var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
 
             // Dynamic fields
@@ -746,7 +742,7 @@ namespace MRS.DocumentManagement.Tests
                 },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
-            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Count();
+            var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
             var dynamicFields = new List<IDynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
@@ -756,9 +752,8 @@ namespace MRS.DocumentManagement.Tests
             {
                 new ItemDto
                 {
-                    ItemType = ItemTypeDto.Media,
-                    ExternalItemId = $"ExternalItemId{guid}",
-                    Name = $"Name{guid}",
+                    ItemType = ItemType.Media,
+                    RelativePath = $"Name{guid}",
                 },
             };
             var firstItem = existingObjective.Items.First().Item;
@@ -768,9 +763,8 @@ namespace MRS.DocumentManagement.Tests
                 new ItemDto
                 {
                     ID = new ID<ItemDto>(firstItem.ID),
-                    ExternalItemId = firstItem.ExternalItemId,
-                    ItemType = (ItemTypeDto)firstItem.ItemType,
-                    Name = firstItem.Name,
+                    ItemType = (ItemType)firstItem.ItemType,
+                    RelativePath = firstItem.RelativePath,
                 },
             };
             var startItemsCount = existingObjective.Items.Count;
@@ -817,14 +811,14 @@ namespace MRS.DocumentManagement.Tests
 
             var result = await service.Update(changedObjective);
 
-            var updatedObjective = Fixture.Context.Objectives.First(o => o.ID == existingObjective.ID);
+            var updatedObjective = Fixture.Context.Objectives.Unsynchronized().First(o => o.ID == existingObjective.ID);
             Assert.IsTrue(result);
             Assert.AreEqual(newDescription, updatedObjective.Description);
             Assert.AreEqual((int)newStatus, updatedObjective.Status);
             Assert.AreEqual(newTitle, updatedObjective.Title);
             Assert.AreEqual(startItemsCount - deletingItemsCount + newItems.Count, updatedObjective.Items.Count);
             Assert.AreEqual(updatedObjective.Items.Count, items.Count);
-            Assert.AreEqual(startDynamicFieldsCount - deletingDynamicFieldsCount + newDynamicFields.Count, Fixture.Context.DynamicFields.Count());
+            Assert.AreEqual(startDynamicFieldsCount - deletingDynamicFieldsCount + newDynamicFields.Count, Fixture.Context.DynamicFields.Unsynchronized().Count());
             Assert.AreEqual(dynamicFields.Count, changedObjective.DynamicFields.Count());
             Assert.AreEqual(changedBimElements.Count, updatedObjective.BimElements.Count);
             Assert.AreEqual(startBimElementsCount - deletingBimElementsCount + newBimElementsCount, Fixture.Context.BimElementObjectives.Count());

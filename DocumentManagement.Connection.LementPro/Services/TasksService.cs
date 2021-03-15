@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         public async Task<ObjectBaseCreateResult> CreateTask(ObjectBaseToCreate objectToCreate)
             => await CommonRequests.CreateObjectAsync(objectToCreate);
 
-        public async Task<bool> DeleteTaskAsync(int objectId)
+        public async Task<ObjectBase> DeleteTaskAsync(int objectId)
             => await CommonRequests.ArchiveObjectAsync(objectId);
 
         public async Task<ObjectBase> UpdateTaskAsync(TaskToUpdate taskToUpdate)

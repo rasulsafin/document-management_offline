@@ -248,41 +248,41 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             new Item
             {
-                ExternalItemId = FILE_ITEM.ExternalItemId,
+                ExternalID = FILE_ITEM.ExternalID,
                 ItemType = FILE_ITEM.ItemType,
-                Name = FILE_ITEM.Name,
+                RelativePath = FILE_ITEM.RelativePath,
             },
             new Item
             {
-                ExternalItemId = BIM_ITEM.ExternalItemId,
+                ExternalID = BIM_ITEM.ExternalID,
                 ItemType = BIM_ITEM.ItemType,
-                Name = BIM_ITEM.Name,
+                RelativePath = BIM_ITEM.RelativePath,
             },
             new Item
             {
-                ExternalItemId = MEDIA_ITEM.ExternalItemId,
+                ExternalID = MEDIA_ITEM.ExternalID,
                 ItemType = MEDIA_ITEM.ItemType,
-                Name = MEDIA_ITEM.Name,
+                RelativePath = MEDIA_ITEM.RelativePath,
             },
         };
 
         private static readonly Item FILE_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
-            Name = "File element",
+            RelativePath = "File element",
         };
         private static readonly Item BIM_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
-            Name = "Bim element",
+            RelativePath = "Bim element",
         };
         private static readonly Item MEDIA_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
-            Name = "Media element",
+            RelativePath = "Media element",
         };
         #endregion
 
@@ -341,12 +341,14 @@ namespace MRS.DocumentManagement.Tests.Utility
                 Name = DYNAMIC_FIELD_STRING.Name,
                 Type = DYNAMIC_FIELD_STRING.Type,
                 Value = DYNAMIC_FIELD_STRING.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_DATE.Name,
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
         };
 

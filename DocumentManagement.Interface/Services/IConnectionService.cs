@@ -45,25 +45,25 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID);
 
-        #region TODO
+        /// <summary>
+        /// Synchronize user's data.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <returns>Result of the synchronization.</returns>
+        Task<string> Synchronize(ID<UserDto> userID);
 
-        // TODO: Syncronization!
-        // Task<bool> StartSyncronization(ID<UserDto> userID);
-        // Task<bool> StopSyncronization(ID<UserDto> userID);
-        // Task<?> GetProgressSyncronization(ConnectionInfoDto info);
-        //
-        // OR
-        //
-        // Task<bool> Sync(System.IProgress<SyncData.ProgressSync> prog, System.Threading.CancellationToken token);
+        /// <summary>
+        /// Gets status of synchronization.
+        /// </summary>
+        /// <param name="synchronizationID">Synchronization's id.</param>
+        /// <returns>True if synchronization is completed.</returns>
+        Task<bool> IsSynchronizationComplete(string synchronizationID);
 
-        // TODO: In case user can have several connections?
-        // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
-
-        // TODO: If we need different method than connect?
-        // Task<bool> Reconnect(ConnectionInfoToCreateDto connectionInfo);
-
-        // TODO: Update connectionInfo from user's request?
-        // Task<bool> Update(ConnectionInfoDto connectionInfo);
-        #endregion
+        /// <summary>
+        /// Gets synchronization result.
+        /// </summary>
+        /// <param name="synchronizationID">Synchronization's id.</param>
+        /// <returns>True if synchronization is completed without errors.</returns>
+        Task<bool> GetSynchronizationResult(string synchronizationID);
     }
 }

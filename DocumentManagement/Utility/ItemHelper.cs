@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Utility
             if (dbItem == null)
             {
                 dbItem = mapper.Map<Item>(item);
-                context.Items.Add(dbItem);
+                await context.Items.AddAsync(dbItem);
                 await context.SaveChangesAsync();
                 return dbItem;
             }
@@ -32,15 +32,11 @@ namespace MRS.DocumentManagement.Utility
                         .AnyAsync(i => i.ItemID == (int)item.ID && i.ObjectiveID == parentId);
                     break;
                 case var _ when itemParentType == typeof(Project):
-                    alreadyLinked = await context.ProjectItems
-                        .AnyAsync(i => i.ItemID == (int)item.ID && i.ProjectID == parentId);
+                    alreadyLinked = dbItem.ProjectID == parentId;
                     break;
             }
 
-            if (alreadyLinked)
-                return null;
-
-            return dbItem;
+            return alreadyLinked ? null : dbItem;
         }
     }
 }

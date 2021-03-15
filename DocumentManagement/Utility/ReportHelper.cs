@@ -75,9 +75,9 @@ namespace MRS.DocumentManagement.Utility
         }
 
         private XElement GenerateXElement(ItemDto file)
-            => PICTURES_EXTENSIONS.Contains(Path.GetExtension(file.Name).ToLower())
+            => PICTURES_EXTENSIONS.Contains(Path.GetExtension(file.RelativePath).ToLower())
                     ? new XElement(HORIZONTAL_ELEMENT,
-                            new XElement(IMAGE, file.Name))
+                            new XElement(IMAGE, file.RelativePath))
                     : null;
     }
 }

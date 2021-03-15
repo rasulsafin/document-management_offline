@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
@@ -10,8 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\DocumentManagement.Connection.Interface\DocumentManagement.Connection.Interface.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj" />
-      <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
     </ItemGroup>
 
     <ItemGroup>

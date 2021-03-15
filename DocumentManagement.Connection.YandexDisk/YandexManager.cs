@@ -14,7 +14,6 @@ namespace MRS.DocumentManagement.Connection
 {
     public class YandexManager : ICloudManager
     {
-        private string accessToken;
         private YandexDiskController controller;
         private List<string> tables = new List<string>();
         private List<string> directories = new List<string>();
@@ -35,7 +34,7 @@ namespace MRS.DocumentManagement.Connection
                 string json = JsonConvert.SerializeObject(@object);
                 return await controller.SetContentAsync(path, json);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -74,6 +73,25 @@ namespace MRS.DocumentManagement.Connection
             return false;
         }
 
+        public async Task<List<T>> PullAll<T>(string path)
+        {
+            var resultCollection = new List<T>();
+            try
+            {
+                var elements = await GetRemoteDirectoryFiles(path);
+                foreach (var item in elements.Where(e => !e.IsDirectory))
+                {
+                    var remoteItem = await Pull<T>(Path.GetFileNameWithoutExtension(item.Href));
+                    resultCollection.Add(remoteItem);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return resultCollection;
+        }
+
         public async Task<bool> DeleteFile(string path)
         {
             return await controller.DeleteAsync(path);
@@ -95,44 +113,61 @@ namespace MRS.DocumentManagement.Connection
         public async Task<ConnectionStatusDto> GetStatusAsync()
         {
             if (controller == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "Controller null" };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "Controller null" };
             try
             {
                 var list = await controller.GetListAsync(PathManager.GetAppDir());
                 if (list != null)
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good" };
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good" };
             }
             catch (TimeoutException)
             {
             }
 
-            return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.NeedReconnect, Message = "No network" };
+            return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "No network" };
         }
 
-        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
             try
             {
                 await CheckDir(remoteDirName);
                 string path = PathManager.GetDir(remoteDirName);
-                string file = Path.Combine(localDirName, fileName);
-                await controller.LoadFileAsync(path, file);
+                var created = await controller.LoadFileAsync(path, fullPath);
+                if (created == null)
+                    return null;
+
                 return path;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
             return string.Empty;
         }
 
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        {
+            try
+            {
+                return await controller.GetListAsync(directoryPath);
+            }
+            catch (FileNotFoundException)
+            {
+                return Enumerable.Empty<CloudElement>();
+            }
+        }
+
         private async Task<bool> CheckTableDir<T>()
         {
-            if (!isInit) await Initialize();
+            if (!isInit)
+                await Initialize();
+
             string tableName = typeof(T).Name;
             bool result = tables.Any(x => x == tableName);
             if (result)
                 return true;
+
             IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
             foreach (CloudElement element in list)
             {
@@ -144,22 +179,19 @@ namespace MRS.DocumentManagement.Connection
 
             if (!result)
                 await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
+
             return result;
         }
 
         private async Task Initialize()
         {
             IEnumerable<CloudElement> list = await controller.GetListAsync();
-            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APP_DIR))
-            {
-                await controller.CreateDirAsync("/", PathManager.APP_DIR);
-            }
+            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APP_DIRECTORY))
+                await controller.CreateDirAsync("/", PathManager.APP_DIRECTORY);
 
             list = await controller.GetListAsync(PathManager.GetAppDir());
-            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.TABLE_DIR))
-            {
+            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.TABLE_DIRECTORY))
                 await controller.CreateDirAsync("/", PathManager.GetTablesDir());
-            }
 
             isInit = true;
         }
@@ -167,7 +199,9 @@ namespace MRS.DocumentManagement.Connection
         private async Task<bool> CheckDir(string dirName)
         {
             bool res = directories.Any(x => x == dirName);
-            if (res) return true;
+            if (res)
+                return true;
+
             IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetAppDir());
             foreach (CloudElement element in list)
             {
@@ -179,6 +213,7 @@ namespace MRS.DocumentManagement.Connection
 
             if (!res)
                 await controller.CreateDirAsync(PathManager.GetAppDir(), dirName);
+
             return res;
         }
     }

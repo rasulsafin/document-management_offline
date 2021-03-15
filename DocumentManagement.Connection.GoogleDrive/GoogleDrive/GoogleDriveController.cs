@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
 using Google.Apis.Drive.v3;
@@ -25,7 +26,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
         private static readonly string MIME_TYPE_FOLDER = "application/vnd.google-apps.folder";
 
-
         private UserCredential credential;
         private DriveService service;
 
@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
         }
 
-        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoDto info)
+        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoExternalDto info)
         {
             var cancellationTokenSource = new CancellationTokenSource();
 
@@ -78,14 +78,28 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                     request.Q = $"'root' in parents";
                 if (!string.IsNullOrEmpty(nextPageToken))
                     request.PageToken = nextPageToken;
-                var fileList = await request.ExecuteAsync();
-                result.AddRange(fileList.Files);
-                nextPageToken = fileList.NextPageToken;
+
+                // Exclude trashed files
+                request.Q = $"{request.Q} and trashed = false";
+
+                try
+                {
+                    var fileList = await request.ExecuteAsync();
+                    result.AddRange(fileList.Files);
+                    nextPageToken = fileList.NextPageToken;
+                }
+                catch (GoogleApiException ge)
+                {
+                    if (ge.Error.Code == 404)
+                        throw new FileNotFoundException();
+
+                    throw;
+                }
             }
             while (!string.IsNullOrEmpty(nextPageToken));
 
             List<GoogleDriveElement> elements = new List<GoogleDriveElement>();
-            foreach (Google.Apis.Drive.v3.Data.File item in result)
+            foreach (var item in result)
             {
                 var element = new GoogleDriveElement(item);
                 elements.Add(element);
@@ -186,7 +200,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(content)))
                 {
-                    var element = infos.First(x => x.DisplayName == name);
+                    var element = infos.FirstOrDefault(x => x.DisplayName == name);
                     if (element != null)
                     {
                         var request = service.Files.Update(fileDrive, element.Href, stream, contentType);
@@ -212,7 +226,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             if (info.IsDirectory)
             {
                 var infos = await GetListAsync(idParent);
-                var element = infos.First(x => x.DisplayName == name);
+                var element = infos.FirstOrDefault(x => x.DisplayName == name);
                 if (element != null)
                 {
                     using (var stream = new MemoryStream())
@@ -274,15 +288,20 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 {
                     if (infos.Any(x => x.DisplayName == fileInfo.Name))
                     {
-                        var href = infos.First().Href;
-                        var request = service.Files.Update(fileDrive, href, stream, contentType);
-                        result = await request.UploadAsync();
+                        fileDrive.Id = infos.FirstOrDefault()?.Href;
+
+                        // TODO: Change this
+                        // Do not update file for the moment
+                        //var request = service.Files.Update(fileDrive, href, stream, contentType);
+                        //result = await request.UploadAsync();
                     }
                     else
                     {
                         fileDrive.Parents = new List<string> { idParent };
                         var request = service.Files.Create(fileDrive, stream, contentType);
                         result = await request.UploadAsync();
+                        var updatedInfos = await GetListAsync(idParent);
+                        fileDrive.Id = updatedInfos.FirstOrDefault(i => i.DisplayName == fileInfo.Name)?.Href;
                     }
                 }
 

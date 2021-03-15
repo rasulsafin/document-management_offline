@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utils.ReportCreator;
 
@@ -21,29 +21,26 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
         private readonly DynamicFieldHelper dynamicFieldHelper;
-        private readonly ISyncService synchronizator;
         private readonly ReportHelper reportHelper = new ReportHelper();
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
             ItemHelper itemHelper,
-            DynamicFieldHelper dynamicFieldHelper,
-            ISyncService synchronizator)
+            DynamicFieldHelper dynamicFieldHelper)
         {
             this.context = context;
             this.mapper = mapper;
             this.itemHelper = itemHelper;
             this.dynamicFieldHelper = dynamicFieldHelper;
-            this.synchronizator = synchronizator;
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
         {
             var objective = mapper.Map<Objective>(data);
-            context.Objectives.Add(objective);
+            await context.Objectives.AddAsync(objective);
             await context.SaveChangesAsync();
 
-            objective.ObjectiveType = context.ObjectiveTypes.Find(objective.ObjectiveTypeID);
+            objective.ObjectiveType = await context.ObjectiveTypes.FindAsync(objective.ObjectiveTypeID);
 
             objective.BimElements = new List<BimElementObjective>();
             foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
@@ -79,7 +76,6 @@ namespace MRS.DocumentManagement.Services
             }
 
             await context.SaveChangesAsync();
-            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return mapper.Map<ObjectiveToListDto>(objective);
         }
 
@@ -135,8 +131,8 @@ namespace MRS.DocumentManagement.Services
 
                 foreach (var item in objectiveToReport.Items)
                 {
-                    var newName = Path.Combine(path, item.Name.TrimStart('\\'));
-                    item.Name = newName;
+                    var newName = Path.Combine(path, item.RelativePath.TrimStart('\\'));
+                    item.RelativePath = newName;
                 }
 
                 objectives.Add(objectiveToReport);
@@ -153,7 +149,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
         {
-            var dbProject = await context.Projects
+            var dbProject = await context.Projects.Unsynchronized()
                 .Include(x => x.Objectives)
                 .ThenInclude(x => x.DynamicFields)
                 .Include(x => x.Objectives)
@@ -176,7 +172,6 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.Objectives.Remove(objective);
             await context.SaveChangesAsync();
-            synchronizator.Update(NameTypeRevision.Objectives, objective.ID, TypeChange.Delete);
             return true;
         }
 
@@ -252,7 +247,6 @@ namespace MRS.DocumentManagement.Services
 
             context.Update(objective);
             await context.SaveChangesAsync();
-            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
             return true;
         }
 
@@ -261,14 +255,11 @@ namespace MRS.DocumentManagement.Services
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             if (dbItem == null)
                 return;
-            synchronizator.Update(NameTypeRevision.Items, dbItem.ID);
             objective.Items.Add(new ObjectiveItem
             {
                 ObjectiveID = objective.ID,
                 ItemID = dbItem.ID,
             });
-
-            synchronizator.Update(NameTypeRevision.Objectives, objective.ID);
         }
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
@@ -281,7 +272,6 @@ namespace MRS.DocumentManagement.Services
                 return false;
             context.ObjectiveItems.Remove(link);
             await context.SaveChangesAsync();
-            synchronizator.Update(NameTypeRevision.Objectives, objectiveID);
 
             return true;
         }

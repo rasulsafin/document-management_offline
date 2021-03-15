@@ -276,7 +276,7 @@ namespace DocumentManagement.Connection.Tests
             Fixture.Context.Items.AddRange(MockData.DEFAULT_ITEMS);
             Fixture.Context.SaveChanges();
 
-            var itemName = Fixture.Context.Items.Where(x => x.ItemType == (int)ItemTypeDto.Bim).FirstOrDefault().Name;
+            var itemName = Fixture.Context.Items.Where(x => x.ItemType == (int)ItemTypeDto.Bim).FirstOrDefault().RelativePath;
             foreach (var bimElem in MockData.DEFAULT_BIM_ELEMENTS)
             {
                 bimElem.ParentName = itemName;
@@ -428,7 +428,7 @@ namespace DocumentManagement.Connection.Tests
             {
                 var bimDto = mapper.Map<BimElementDto>(bim);
 
-                bimDto.ParentName = item.Name;
+                bimDto.ParentName = item.RelativePath;
                 expBim.Add(bimDto);
             }
 

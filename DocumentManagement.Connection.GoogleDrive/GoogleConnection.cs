@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -9,14 +10,14 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     public class GoogleConnection : IConnection
     {
         private const string NAME_CONNECT = "Google Drive";
-        private ConnectionInfoDto connectionInfo;
+        private ConnectionInfoExternalDto connectionInfo;
         private GoogleDriveManager manager;
 
         public GoogleConnection()
         {
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             try
             {
@@ -24,21 +25,21 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 await driveController.InitializationAsync(info);
                 manager = new GoogleDriveManager(driveController);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
         }
 
-        public ConnectionTypeDto GetConnectionType()
+        public ConnectionTypeExternalDto GetConnectionType()
         {
-            var type = new ConnectionTypeDto
+            var type = new ConnectionTypeExternalDto
             {
                 Name = NAME_CONNECT,
                 AuthFieldNames = new List<string>
@@ -56,12 +57,12 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return type;
         }
 
-        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             return await Connect(info);
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             if (connect.Name == NAME_CONNECT)
@@ -77,10 +78,19 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return Task.FromResult(false);
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.AuthFieldValues = connectionInfo.AuthFieldValues;
             return Task.FromResult(info);
+        }
+
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            var connectResult = await Connect(info);
+            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
+                return null;
+
+            return GoogleDriveConnectionContext.CreateContext(manager);
         }
     }
 }

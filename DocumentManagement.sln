@@ -6,13 +6,12 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F5838427-97CC-44DA-8075-49A8C7480065} = {F5838427-97CC-44DA-8075-49A8C7480065}
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA} = {C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.IntegrationTests", "DocumentManagement.Tests\DocumentManagement.IntegrationTests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA} = {C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Api", "DocumentManagement.Api\DocumentManagement.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
@@ -28,13 +27,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
-	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tests", "DocumentManagement.Connection.Tests\DocumentManagement.Connection.Tests.csproj", "{60447240-DC7B-4598-9613-9545AB000D04}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection", "DocumentManagement.Connection\DocumentManagement.Connection.csproj", "{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive", "DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
@@ -61,6 +53,16 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F0DDE61F-8B24-4933-8CD7-3B72AC61434E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Connections", "Connections", "{D6D41822-CE95-4B4A-A095-3BC461268736}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.Interface", "DocumentManagement.Connection.Interface\DocumentManagement.Connection.Interface.csproj", "{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.General.Interface", "DocumentManagement.General.Interface\DocumentManagement.General.Interface.csproj", "{B0800032-F53B-4CC8-A07F-45829DCB5C48}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{856587D1-4377-4816-9EBD-8C786DDBE81B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk.Tests", "DocumentManagement.Connection.YandexDisk.Tests\DocumentManagement.Connection.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.GoogleDrive.Tests", "DocumentManagement.Connection.GoogleDrive.Tests\DocumentManagement.Connection.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -96,14 +98,6 @@ Global
 		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{60447240-DC7B-4598-9613-9545AB000D04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{60447240-DC7B-4598-9613-9545AB000D04}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{60447240-DC7B-4598-9613-9545AB000D04}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{60447240-DC7B-4598-9613-9545AB000D04}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C6C8E9DD-5A71-4597-8B9E-107EFF9F5BBA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B5DEA4C-2247-4846-B885-B1D20B8E8480}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -140,14 +134,30 @@ Global
 		{FBDF7022-111F-4369-8517-898BCCD3550C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FBDF7022-111F-4369-8517-898BCCD3550C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBDF7022-111F-4369-8517-898BCCD3550C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{4FCADB27-F8FB-45BF-9380-C9C5770C225E} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
 		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E} = {D6D41822-CE95-4B4A-A095-3BC461268736}
-		{60447240-DC7B-4598-9613-9545AB000D04} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{9B5DEA4C-2247-4846-B885-B1D20B8E8480} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{CD3E74B2-84F3-4797-9F72-F22424021ED7} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{D1CC8DE3-3847-43F2-9088-23C5ECECF385} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
@@ -155,6 +165,10 @@ Global
 		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{4743FB4F-E042-449B-AF24-F57B2DB781A5} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{FBDF7022-111F-4369-8517-898BCCD3550C} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}

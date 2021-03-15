@@ -57,45 +57,33 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         private ObjectiveStatus GetStatus(string statusTDMS)
             => statusTDMS == StatusID.WORK_COMPLETED ? ObjectiveStatus.Ready :
                 statusTDMS == StatusID.WORK_IN_PROGRESS ? ObjectiveStatus.InProgress :
-                statusTDMS == StatusID.WORK_LATE        ? ObjectiveStatus.Late :
-                statusTDMS == StatusID.WORK_OPEN        ? ObjectiveStatus.Open :
+                statusTDMS == StatusID.WORK_LATE ? ObjectiveStatus.Late :
+                statusTDMS == StatusID.WORK_OPEN ? ObjectiveStatus.Open :
                 ObjectiveStatus.Undefined;
 
         private string SetStatus(ObjectiveStatus status)
             => status switch
-        {
-            ObjectiveStatus.Ready => StatusID.WORK_COMPLETED,
-            ObjectiveStatus.InProgress => StatusID.WORK_IN_PROGRESS,
-            ObjectiveStatus.Late => StatusID.WORK_LATE,
-            ObjectiveStatus.Open => StatusID.WORK_OPEN,
-            _ => StatusID.WORK_OPEN,
-        };
+            {
+                ObjectiveStatus.Ready => StatusID.WORK_COMPLETED,
+                ObjectiveStatus.InProgress => StatusID.WORK_IN_PROGRESS,
+                ObjectiveStatus.Late => StatusID.WORK_LATE,
+                ObjectiveStatus.Open => StatusID.WORK_OPEN,
+                _ => StatusID.WORK_OPEN,
+            };
 
         private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
         {
-            var list = new List<DynamicFieldExternalDto>();
+            //// TODO: Dynamic fields
+            //// - Volumes (DF):
+            ////    - Volume (float)
+            ////    - Price (float)
+            ////    - Ammount (float)
+            ////    - Status (bool)
+            //// - Operations (DF):
+            ////    - name (string),
+            ////    - status (bool)
 
-            // var units = new DynamicFieldExternalDto()
-            // {
-            //    ExternalID = tdmsObject.Attributes[AttributeID.UNIT].AttributeDefName,
-            //    Name = tdmsObject.Attributes[AttributeID.UNIT].Description,
-            //    Type = DynamicFieldType.STRING,
-            //    Value = tdmsObject.Attributes[AttributeID.UNIT].Value.ToString(),
-            // };
-
-            // list.Add(units);
-
-            // TODO: Dynamic fields
-            // - Volumes (DF):
-            //    - Volume (float)
-            //    - Price (float)
-            //    - Ammount (float)
-            //    - Status (bool)
-            // - Operations (DF):
-            //    - name (string),
-            //    - status (bool)
-
-            return list;
+            return new List<DynamicFieldExternalDto>() { };
         }
     }
 }

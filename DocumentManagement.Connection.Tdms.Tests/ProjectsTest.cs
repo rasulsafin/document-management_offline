@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -12,39 +14,39 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
         // TODO: Find project and use its guid to test?
         private static readonly string PROJECT_GUID = "{3033B554-5652-482A-85F1-4915D04250AD}";
 
-        private static ProjectService projectService;
+        private static TdmsProjectsSynchronizer projectService;
         private static ItemExternalDto item;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
-            projectService = new ProjectService();
+            projectService = InitClass.connectionContext.ProjectsSynchronizer as TdmsProjectsSynchronizer;
 
             item = new ItemExternalDto()
             {
-                Name = System.IO.Path.GetFileName(TEST_FILE_PATH),
+                FileName = System.IO.Path.GetFileName(TEST_FILE_PATH),
                 FullPath = TEST_FILE_PATH,
-                ItemType = ItemTypeDto.File,
+                ItemType = ItemType.File,
             };
         }
 
         [TestMethod]
         public void GetProject_ExistingProjectID_ReturnsProjectExternalDto()
         {
-            var res = projectService.Get(PROJECT_GUID);
+            var res = projectService.GetById(PROJECT_GUID);
             Assert.IsNotNull(res);
             Assert.IsTrue(res.Items.Count > 0);
         }
 
         [TestMethod]
-        public void UpdateProject_ExistingProjectID_ReturnsProjectExternalDto()
+        public async Task UpdateProject_ExistingProjectID_ReturnsProjectExternalDto()
         {
-            var project = projectService.Get(PROJECT_GUID);
+            var project = projectService.GetById(PROJECT_GUID);
             var oldCont = project.Items?.Count;
 
             project.Items.Add(item);
 
-            var updatedProject = projectService.Update(project);
+            var updatedProject = await projectService.Update(project);
             var newCount = updatedProject.Items?.Count;
 
             Assert.IsNotNull(updatedProject);
@@ -52,19 +54,42 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
             Assert.AreEqual(oldCont + 1, newCount);
 
             // Remove added item
-            var itemToRemove = updatedProject.Items.FirstOrDefault(x => x.Name == item.Name);
+            var itemToRemove = updatedProject.Items.FirstOrDefault(x => x.FileName == item.FileName);
             updatedProject.Items.Remove(itemToRemove);
-            project = projectService.Update(updatedProject);
+            project = await projectService.Update(updatedProject);
 
             Assert.AreEqual(oldCont, project.Items.Count);
         }
 
         [TestMethod]
-        public void GetListOfProject_ReturnsListOfProjectDto()
+        public async Task GetListOfProject_ReturnsListOfProjectDto()
         {
-            var list = projectService.GetListOfProjects();
+            var list = await projectService.Get(new List<string> { PROJECT_GUID });
             Assert.IsNotNull(list);
             Assert.IsTrue(list.Count > 0);
+        }
+
+        [TestMethod]
+        public async Task GetUpdatedIDs_UpdatedTomorrow_ReturnsEmptyList()
+        {
+            var res = await projectService.GetUpdatedIDs(DateTime.Now.AddDays(1));
+            Assert.AreEqual(res.Count, 0);
+        }
+
+        [TestMethod]
+        public async Task GetUpdatedIDs_UpdatedYesterday_ReturnsUpdatedListWithMoreThanOneValue()
+        {
+            var project = projectService.GetById(PROJECT_GUID);
+            project.Items.Add(item);
+            var updatedProject = await projectService.Update(project);
+
+            var res = await projectService.GetUpdatedIDs(DateTime.Now.AddDays(-1));
+            Assert.IsTrue(res.Count > 0);
+
+            // Remove added item
+            var itemToRemove = updatedProject.Items.FirstOrDefault(x => x.FileName == item.FileName);
+            updatedProject.Items.Remove(itemToRemove);
+            project = await projectService.Update(updatedProject);
         }
     }
 }

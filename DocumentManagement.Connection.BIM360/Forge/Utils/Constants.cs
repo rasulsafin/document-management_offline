@@ -47,5 +47,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         internal static readonly string AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE = "authorization_code";
         internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
+
+        internal static readonly string ISSUE_STATUS_OPEN = "open";
+        internal static readonly string ISSUE_STATUS_DRAFT = "draft";
+        internal static readonly string ISSUE_STATUS_CLOSED = "closed";
     }
 }

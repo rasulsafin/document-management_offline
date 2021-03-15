@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -12,16 +13,20 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         private const string NAME_CONNECTION = "Yandex Disk";
         private YandexManager manager;
 
-        public YandexConnection() { }
+        public YandexConnection()
+        {
+        }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             try
             {
                 if (await IsAuthDataCorrect(info))
                 {
-
                     YandexDiskAuth auth = new YandexDiskAuth();
+                    if (info.AuthFieldValues == null)
+                        info.AuthFieldValues = new Dictionary<string, string>();
+
                     if (!info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
                     {
                         var tokenNew = await auth.GetYandexDiskToken(info);
@@ -31,27 +36,27 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
                     manager = new YandexManager(new YandexDiskController(token));
 
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
                 }
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Data app not correct", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Data app not correct", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             return Task.FromResult(info);
         }
 
-        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             if (manager != null)
             {
@@ -60,12 +65,12 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
             return new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Status = RemoteConnectionStatus.NeedReconnect,
                 Message = "Manager null",
             };
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             if (connect.Name == NAME_CONNECTION)
@@ -80,9 +85,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return Task.FromResult(false);
         }
 
-        public ConnectionTypeDto GetConnectionType()
+        public ConnectionTypeExternalDto GetConnectionType()
         {
-            var type = new ConnectionTypeDto
+            var type = new ConnectionTypeExternalDto
             {
                 Name = NAME_CONNECTION,
                 AuthFieldNames = new List<string>() { "token" },
@@ -95,6 +100,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             };
 
             return type;
+        }
+
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            var connectResult = await Connect(info);
+            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
+                return null;
+
+            return YandexConnectionContext.CreateContext(manager);
         }
 
     }

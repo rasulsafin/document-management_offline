@@ -1,23 +1,22 @@
 ﻿using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Tdms;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.Tdms.Tests
+namespace MRS.DocumentManagement.Connection.Tdms.Tests
 {
     [TestClass]
     public class InitClass
     {
         private static TdmsConnection connection;
+        public static IConnectionContext connectionContext;
 
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
         {
             connection = new TdmsConnection();
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(1),
                 ConnectionType = connection.GetConnectionType(),
                 AuthFieldValues = new Dictionary<string, string>()
                 {
@@ -31,10 +30,13 @@ namespace DocumentManagement.Connection.Tdms.Tests
             // Authorize
             var signInTask = connection.Connect(connectionInfo);
             signInTask.Wait();
-            if (signInTask.Result.Status != RemoteConnectionStatusDto.OK)
+            if (signInTask.Result.Status != RemoteConnectionStatus.OK)
             {
                 Assert.Fail("Authorization failed");
             }
+
+            connectionContext = connection.GetContext(connectionInfo).Result;
+            Assert.IsNotNull(connectionContext);
         }
 
         [AssemblyCleanup]
