@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         public string Text { get; set; }
 
         [DataMember(Name = "urlPart")]
-        public string RrlPart { get; set; }
+        public string UrlPart { get; set; }
 
         [DataMember(Name = "categoryId")]
         public string CategoryId { get; set; }

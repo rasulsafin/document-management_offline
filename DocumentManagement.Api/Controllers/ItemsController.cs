@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task<IActionResult> DeleteItems([FromBody] IEnumerable<ID<ItemDto>> data)
         {
             var result = await service.DeleteItems(data);
-            return result ? Ok(result) : BadRequest(result);
+            return result ? (IActionResult)Ok() : BadRequest();
         }
     }
 }

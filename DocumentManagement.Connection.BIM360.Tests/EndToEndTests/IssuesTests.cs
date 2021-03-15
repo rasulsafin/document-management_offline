@@ -36,10 +36,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var projectsService = new ProjectsService(connection);
             issuesService = new IssuesService(connection);
 
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
-                ID = new ID<ConnectionInfoDto>(2),
-                ConnectionType = new ConnectionTypeDto
+                ConnectionType = new ConnectionTypeExternalDto
                 {
                     AppProperties = new Dictionary<string, string>
                     {
@@ -53,7 +52,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                         "refreshtoken",
                         "end",
                     },
-                    ID = new ID<ConnectionTypeDto>(2),
                     Name = "BIM360",
                 },
             };
@@ -61,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             // Authorize
             var signInTask = authenticator.SignInAsync(connectionInfo);
             signInTask.Wait();
-            if (signInTask.Result.authStatus.Status != RemoteConnectionStatusDto.OK)
+            if (signInTask.Result.authStatus.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
@@ -174,8 +172,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             Assert.IsNotNull(root, "Can't take root folder");
 
             var files = await foldersService.SearchAsync(project.ID,
-                    root.ID,
-                    Array.Empty<(string filteringField, string filteringValue)>());
+                    root.ID);
 
             Assert.IsNotNull(files);
             Assert.IsFalse(files.Count == 0, "Files are empty");

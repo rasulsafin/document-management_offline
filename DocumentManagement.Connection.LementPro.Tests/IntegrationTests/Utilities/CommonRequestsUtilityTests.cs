@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var requestsUtility = new HttpRequestUtility(new HttpConnection());
             var service = new AuthenticationService(requestsUtility);
 
-            var connectionInfo = new ConnectionInfoDto
+            var connectionInfo = new ConnectionInfoExternalDto
             {
                 AuthFieldValues = new Dictionary<string, string>
                 {
@@ -136,7 +136,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         }
 
         [TestMethod]
-        public async Task DeleteObjectAsync_ExistingObject_ReturnsNotEmptyList()
+        public async Task DeleteObjectAsync_JustUploadedFile_ReturnsNotEmptyList()
         {
             var bimTypeId = 40170;
             var filePath = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";

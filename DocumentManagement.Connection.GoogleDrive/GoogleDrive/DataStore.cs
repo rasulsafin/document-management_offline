@@ -11,9 +11,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
     public class DataStore : IDataStore
     {
-        private ConnectionInfoDto info;
+        private ConnectionInfoExternalDto info;
 
-        public DataStore(ConnectionInfoDto info)
+        public DataStore(ConnectionInfoExternalDto info)
         {
             this.info = info;
             CheckAndCreateDictionary();

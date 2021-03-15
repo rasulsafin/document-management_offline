@@ -133,20 +133,21 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             return typesTree.FirstOrDefault().Items;
         }
 
-        protected internal async Task<bool> ArchiveObjectAsync(int objectId)
+        protected internal async Task<ObjectBase> ArchiveObjectAsync(int objectId)
         {
             var data = new { id = objectId };
 
             try
             {
                 await RequestUtility.GetResponseAsync(Resources.MethodObjectArchive, data);
+                var deleted = await GetObjectAsync(objectId);
+
+                return deleted;
             }
             catch
             {
-                return false;
+                return null;
             }
-
-            return true;
         }
 
         protected internal async Task<List<TypeAttribute>> GetTypesAttributesDefinitionAsync(string typeId)

@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public GoogleDriveManager(GoogleDriveController driveController)
         {
-            this.controller = driveController;
+            controller = driveController;
         }
 
         public string DirAppHref { get; private set; }
@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 {
                     return new ConnectionStatusDto()
                     {
-                        Status = RemoteConnectionStatusDto.OK,
+                        Status = RemoteConnectionStatus.OK,
                         Message = "Good",
                     };
                 }
@@ -47,14 +47,14 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
 
             return new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Status = RemoteConnectionStatus.NeedReconnect,
                 Message = "Not connect",
             };
         }
@@ -68,24 +68,24 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 string json = JsonConvert.SerializeObject(@object);
                 return await controller.SetContentAsync(json, tableHref, name);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
             return false;
         }
 
-        public async Task<T> Pull<T>(string id)
+        public async Task<T> Pull<T>(string name)
         {
             try
             {
                 var tableHref = await GetTableHref<T>();
-                string name = string.Format(REC_FILE, id);
-                string json = await controller.GetContentAsync(tableHref, name);
+                string nameWithExtension = string.Format(REC_FILE, name);
+                string json = await controller.GetContentAsync(tableHref, nameWithExtension);
                 T @object = JsonConvert.DeserializeObject<T>(json);
                 return @object;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
             }
 
@@ -106,10 +106,27 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return false;
         }
 
-        public async Task<string> PushFile(string remoteDirName, string localDirName, string fileName)
+        public async Task<List<T>> PullAll<T>(string path)
+        {
+            var resultCollection = new List<T>();
+            try
+            {
+                var tableHref = await GetTableHref<T>();
+                var elements = await GetRemoteDirectoryFiles(tableHref);
+                foreach (var item in elements)
+                    resultCollection.Add(await Pull<T>(Path.GetFileNameWithoutExtension(item.DisplayName)));
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return resultCollection;
+        }
+
+        public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
             string dirHref = await GetDirHref(remoteDirName);
-            var res = await controller.LoadFileAsync(dirHref, Path.Combine(localDirName, fileName));
+            var res = await controller.LoadFileAsync(dirHref, fullPath);
             return res.Href;
         }
 
@@ -121,6 +138,18 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public async Task<bool> PullFile(string href, string fileName)
         {
             return await controller.DownloadFileAsync(href, fileName);
+        }
+
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryHref = "/")
+        {
+            try
+            {
+                return await controller.GetListAsync(directoryHref);
+            }
+            catch (FileNotFoundException)
+            {
+                return Enumerable.Empty<CloudElement>();
+            }
         }
 
         private async Task<string> GetDirHref(string dirName)

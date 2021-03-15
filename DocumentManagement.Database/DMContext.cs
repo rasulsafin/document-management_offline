@@ -1,10 +1,18 @@
-﻿using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using MRS.DocumentManagement.Database.Models;
 
 namespace MRS.DocumentManagement.Database
 {
     public class DMContext : DbContext
     {
+        private static readonly DateTime DEFAULT_DATE_TIME = new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc);
+
         public DMContext(DbContextOptions<DMContext> opt)
             : base(opt)
         {
@@ -42,10 +50,12 @@ namespace MRS.DocumentManagement.Database
         public DbSet<AuthFieldName> AuthFieldNames { get; set; }
 
         public DbSet<AuthFieldValue> AuthFieldValues { get; set; }
+
+        public DbSet<Synchronization> Synchronizations { get; set; }
+
         #endregion
 
         #region Bridges
-        public DbSet<ProjectItem> ProjectItems { get; set; }
 
         public DbSet<ObjectiveItem> ObjectiveItems { get; set; }
 
@@ -58,7 +68,20 @@ namespace MRS.DocumentManagement.Database
         public DbSet<ConnectionInfoEnumerationType> ConnectionInfoEnumerationTypes { get; set; }
 
         public DbSet<ConnectionInfoEnumerationValue> ConnectionInfoEnumerationValues { get; set; }
+
         #endregion
+
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            UpdateDateTime();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
+        {
+            UpdateDateTime();
+            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -82,6 +105,9 @@ namespace MRS.DocumentManagement.Database
 
             modelBuilder.Entity<ObjectiveType>()
                 .HasIndex(x => x.Name)
+                .IsUnique(true);
+            modelBuilder.Entity<ObjectiveType>()
+                .HasIndex(x => x.ExternalId)
                 .IsUnique(true);
             modelBuilder.Entity<ObjectiveType>()
                 .HasMany(x => x.Objectives)
@@ -114,16 +140,10 @@ namespace MRS.DocumentManagement.Database
                 .WithMany(x => x.Users)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<ProjectItem>()
-                .HasKey(x => new { x.ItemID, x.ProjectID });
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Item)
-                .WithMany(x => x.Projects)
-                .OnDelete(DeleteBehavior.Cascade);
-            modelBuilder.Entity<ProjectItem>()
-                .HasOne(x => x.Project)
-                .WithMany(x => x.Items)
-                .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Item>()
+                    .HasOne(x => x.Project)
+                    .WithMany(x => x.Items)
+                    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ObjectiveItem>()
                 .HasKey(x => new { x.ObjectiveID, x.ItemID });
@@ -228,6 +248,51 @@ namespace MRS.DocumentManagement.Database
                 .HasMany(x => x.AuthFieldValues)
                 .WithOne(x => x.ConnectionInfo)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Project>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Objective>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<Item>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+            modelBuilder.Entity<DynamicField>()
+                    .HasOne(x => x.SynchronizationMate)
+                    .WithOne()
+                    .OnDelete(DeleteBehavior.SetNull);
+
+
+            modelBuilder.Entity<Project>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
+            modelBuilder.Entity<Objective>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
+            modelBuilder.Entity<Item>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
+            modelBuilder.Entity<DynamicField>()
+                    .Property(x => x.UpdatedAt)
+                    .HasDefaultValue(DEFAULT_DATE_TIME);
+        }
+
+        private void UpdateDateTime()
+        {
+            foreach (var entityEntry in ChangeTracker
+               .Entries()
+               .Where(
+                    e => e.Entity is ISynchronizableBase &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
+            {
+                var synchronizable = (ISynchronizableBase) entityEntry.Entity;
+                if (!synchronizable.IsSynchronized)
+                    synchronizable.UpdatedAt = DateTime.Now;
+            }
         }
     }
 }

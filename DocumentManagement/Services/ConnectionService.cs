@@ -1,26 +1,37 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Synchronization;
+using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Services
 {
     public class ConnectionService : IConnectionService
     {
+        private static readonly Dictionary<string, Task<ICollection<SynchronizingResult>>> SYNCHRONIZATIONS =
+            new Dictionary<string, Task<ICollection<SynchronizingResult>>>();
+
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly Synchronizer synchronizer;
+        private readonly DbContextOptions<DMContext> options;
 
-        public ConnectionService(DMContext context, IMapper mapper)
+        public ConnectionService(DMContext context, IMapper mapper, DbContextOptions<DMContext> options)
         {
             this.context = context;
             this.mapper = mapper;
+            this.options = options;
+            synchronizer = new Synchronizer();
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -41,41 +52,41 @@ namespace MRS.DocumentManagement.Services
         {
             User user = await FindUserFromDb((int)userID);
             if (user == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Пользователь отсутвует в базе!", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", };
 
             // Get connection info from user
             var connectionInfo = await GetConnectionInfoFromDb(user);
             if (connectionInfo == null)
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
-            var connection = GetConnection(connectionInfo);
-            var connectionInfoDto = mapper.Map<ConnectionInfoDto>(connectionInfo);
+            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
+            var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
             // Connect to Remote
-            var status = await connection.Connect(connectionInfoDto);
+            var status = await connection.Connect(connectionInfoExternalDto);
 
             // Update connection info
-            connectionInfoDto = await connection.UpdateConnectionInfo(connectionInfoDto);
-            connectionInfo = mapper.Map(connectionInfoDto, connectionInfo);
+            connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
+            connectionInfo = mapper.Map(connectionInfoExternalDto, connectionInfo);
+
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
 
             // Update types stored in connection info
-            var newTypes = connectionInfoDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeDto>();
+            var newTypes = connectionInfoExternalDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
             var typesToRemove = currentEnumerationTypes?
-                .Where(x => !newTypes.Any(t =>
-                    t.ExternalId == x.EnumerationType.ExternalId))
+                .Where(x => newTypes.All(t => t.ExternalID!= x.EnumerationType.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
-            var newValues = connectionInfoDto.EnumerationTypes?
-                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueDto>();
+            var newValues = connectionInfoExternalDto.EnumerationTypes?
+                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
                 .Where(x => !newValues.Any(t =>
-                    t.ExternalId == x.EnumerationValue.ExternalId))
+                    t.ExternalID == x.EnumerationValue.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
 
@@ -108,9 +119,9 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
             if (connectionInfo == null)
                 return null;
-            var connection = GetConnection(connectionInfo);
+            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
 
-            return await connection.GetStatus(mapper.Map<ConnectionInfoDto>(connectionInfo));
+            return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
         }
 
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)
@@ -123,6 +134,78 @@ namespace MRS.DocumentManagement.Services
                 .Select(x => mapper.Map<EnumerationValueDto>(x.EnumerationValue));
 
             return list;
+        }
+
+        public async Task<string> Synchronize(ID<UserDto> userID)
+        {
+            var iUserID = (int)userID;
+            var user = await context.Users
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                        .ThenInclude(x => x.AppProperties)
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                        .ThenInclude(x => x.AuthFieldNames)
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.AuthFieldValues)
+                .FirstOrDefaultAsync(x => x.ID == iUserID);
+            if (user == null)
+                return null;
+
+            var dm = new DMContext(options);
+            IServiceCollection services = new ServiceCollection();
+            services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(dm));
+            services.AddTransient(x => new BimElementObjectiveTypeConverter(dm));
+            services.AddTransient(x => new DynamicFieldValueResolver(dm));
+            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(dm));
+            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddTransient(x => new ObjectiveProjectIDResolver(dm));
+            services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(dm));
+            services.AddTransient(x => new ObjectiveObjectiveTypeResolver(dm));
+            services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddAutoMapper(typeof(MappingProfile));
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+
+            var data = new SynchronizingData
+            {
+                Context = dm,
+                Mapper = serviceProvider.GetService<IMapper>(),
+                User = user,
+                ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
+                ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
+            };
+
+            var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
+            var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
+            var id = Guid.NewGuid().ToString();
+            var task = Task.Factory.StartNew(async () => await synchronizer.Synchronize(data, connection, info), TaskCreationOptions.LongRunning);
+            SYNCHRONIZATIONS.Add(id, task.Unwrap());
+            return id;
+        }
+
+        public Task<bool> IsSynchronizationComplete(string synchronizationID)
+        {
+            if (SYNCHRONIZATIONS.TryGetValue(synchronizationID, out var task))
+            {
+                var result = task.IsCompleted;
+                return Task.FromResult(result);
+            }
+
+            throw new ArgumentException($"The synchronization {synchronizationID} doesn't exist");
+        }
+
+        public Task<bool> GetSynchronizationResult(string synchronizationID)
+        {
+            if (SYNCHRONIZATIONS.TryGetValue(synchronizationID, out var task))
+            {
+                var result = task.Result.Count <= 0;
+                SYNCHRONIZATIONS.Remove(synchronizationID);
+                return Task.FromResult(result);
+            }
+
+            throw new ArgumentException($"The synchronization {synchronizationID} doesn't exist");
         }
 
         #region private method
@@ -159,13 +242,7 @@ namespace MRS.DocumentManagement.Services
             return info;
         }
 
-        private IConnection GetConnection(ConnectionInfo connectionInfo)
-        {
-            var type = mapper.Map<ConnectionTypeDto>(connectionInfo.ConnectionType);
-            return ConnectionCreator.GetConnection(type);
-        }
-
-        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeDto enumType, ConnectionInfo connectionInfo)
+        private async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeExternalDto enumType, ConnectionInfo connectionInfo)
         {
             var enumTypeDb = await CheckEnumerationTypeToLink(enumType, (int)connectionInfo.ID);
             if (enumTypeDb != null)
@@ -182,7 +259,7 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task LinkEnumerationValues(EnumerationValueDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
+        private async Task LinkEnumerationValues(EnumerationValueExternalDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
         {
             var enumValueDb = await CheckEnumerationValueToLink(enumVal, type, (int)connectionInfo.ID);
             if (enumValueDb == null)
@@ -197,10 +274,10 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        private async Task<EnumerationType> CheckEnumerationTypeToLink(EnumerationTypeDto enumTypeDto, int connectionInfoID)
+        private async Task<EnumerationType> CheckEnumerationTypeToLink(EnumerationTypeExternalDto enumTypeDto, int connectionInfoID)
         {
             var enumTypeDb = await context.EnumerationTypes
-                    .FirstOrDefaultAsync(i => i.ExternalId == enumTypeDto.ExternalId);
+                    .FirstOrDefaultAsync(i => i.ExternalId == enumTypeDto.ExternalID);
 
             if (enumTypeDb == null)
             {
@@ -222,10 +299,10 @@ namespace MRS.DocumentManagement.Services
             return enumTypeDb;
         }
 
-        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueDto enumValueDto, EnumerationType type, int connectionInfoID)
+        private async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueExternalDto enumValueDto, EnumerationType type, int connectionInfoID)
         {
             var enumValueDb = await context.EnumerationValues
-                    .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalId);
+                    .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalID);
 
             if (enumValueDb == null)
             {

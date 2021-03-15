@@ -40,18 +40,6 @@ namespace MRS.DocumentManagement.Utility
 
                 return objDynamicField;
             }
-            else if (dynamicField.Type == DynamicFieldType.ENUM.ToString())
-            {
-                EnumerationFieldDto enumDynamicField = (EnumerationFieldDto)mapper.Map<IDynamicFieldDto>(dynamicField);
-
-                var enumValue = await context.EnumerationValues
-                    .Include(x => x.EnumerationType)
-                    .FirstOrDefaultAsync(x => x.ID == int.Parse(dynamicField.Value));
-                enumDynamicField.EnumerationType = mapper.Map<EnumerationTypeDto>(enumValue.EnumerationType);
-                enumDynamicField.Value = mapper.Map<EnumerationValueDto>(enumValue);
-
-                return enumDynamicField;
-            }
 
             return mapper.Map<IDynamicFieldDto>(dynamicField);
         }

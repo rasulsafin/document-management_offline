@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         private DateTime sentTime;
 
         // Is created as scoped as this service
-        private ConnectionInfoDto connectionInfoDto;
+        private ConnectionInfoExternalDto connectionInfoDto;
 
         public Authenticator(AuthenticationService service)
             => this.service = service;
@@ -128,20 +128,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             sentTime = DateTime.UtcNow;
             if (!IsLogged || mustUpdate)
             {
-                if (string.IsNullOrEmpty(AccessToken))
+                //if (string.IsNullOrEmpty(AccessToken))
                     await ThreeLeggedAsync();
-                else
-                    await RefreshConnectionAsync();
+                //else
+                //    await RefreshConnectionAsync();
             }
         }
 
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoDto updatedInfo)> SignInAsync(ConnectionInfoDto connectionInfo)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto connectionInfo)
         {
             connectionInfoDto = connectionInfo;
             await CheckAccessAsync(true);
 
             // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
+            var result = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
             return (result, connectionInfo);
         }
@@ -255,13 +255,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             SaveData(bearer);
         }
 
-        private void SetAuthValue(ConnectionInfoDto info, string key, string value)
+        private void SetAuthValue(ConnectionInfoExternalDto info, string key, string value)
         {
             info.AuthFieldValues ??= new Dictionary<string, string>();
             SetDictionaryValue(info.AuthFieldValues, key, value);
         }
 
-        private void SetAppProperty(ConnectionInfoDto info, string key, string value)
+        private void SetAppProperty(ConnectionInfoExternalDto info, string key, string value)
         {
             info.ConnectionType.AppProperties ??= new Dictionary<string, string>();
             SetDictionaryValue(info.ConnectionType.AppProperties, key, value);

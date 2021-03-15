@@ -41,11 +41,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             // TODO: check required fields from user.
             if (string.IsNullOrEmpty(issue.Attributes.Title))
-                throw new Exception($"{nameof(Issue.IssueAttributes.Title)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.Title)} is empty");
             if (string.IsNullOrEmpty(issue.Attributes.NgIssueTypeID))
-                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueTypeID)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.NgIssueTypeID)} is empty");
             if (string.IsNullOrEmpty(issue.Attributes.NgIssueSubtypeID))
-                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueSubtypeID)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.NgIssueSubtypeID)} is empty");
 
             var response = await connection.SendAsync(
                     ForgeSettings.AuthorizedPost(issue),

@@ -249,4 +249,8 @@
     <value>/issues/v1/containers/{0}/quality-issues/{1}/attachments?&amp;page[limit]={2}&amp;page[offset]={3}</value>
     <comment>Retrieves information about all the attachments associated with a specific BIM 360 issue in a project</comment>
   </data>
+  <data name="GetProjectsItemMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/items/{1}</value>
+    <comment>Retrieves metadata for a specified item. Items represent word documents, fusion design files, drawings, spreadsheets, etc.</comment>
+  </data>
 </root>

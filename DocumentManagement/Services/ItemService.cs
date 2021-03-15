@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -41,10 +42,10 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
-            var dbItems = await context.ProjectItems
-                .Where(x => x.ProjectID == (int)projectID)
-                .Select(x => x.Item)
-                .ToListAsync();
+            var dbItems = (await context.Projects
+                   .Include(x => x.Items)
+                   .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
+             ?? Enumerable.Empty<Item>();
             return dbItems.Select(MapItemFromDB).ToList();
         }
 
@@ -64,14 +65,13 @@ namespace MRS.DocumentManagement.Services
                 return false;
 
             dbItem.ItemType = (int)item.ItemType;
-            dbItem.Name = item.Name;
-            dbItem.ExternalItemId = item.ExternalItemId;
+            dbItem.RelativePath = item.RelativePath;
             context.Items.Update(dbItem);
             await context.SaveChangesAsync();
             return true;
         }
 
-        private ItemDto MapItemFromDB(Database.Models.Item dbItem) 
+        private ItemDto MapItemFromDB(Database.Models.Item dbItem)
             => mapper.Map<ItemDto>(dbItem);
     }
 }
