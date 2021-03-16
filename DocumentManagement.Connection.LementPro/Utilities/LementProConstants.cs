@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public static readonly string OBJECTTYPE_BIM_ATTRIBUTE_VERSION = "modelVersions";
         public static readonly string OBJECTTYPE_TASKS = "Tasks";
         public static readonly string OBJECTTYPE_SINGLE_TASK = "Task";
-        public static readonly string OBJECTTYPE_PROJECTS = "Project";
+        public static readonly string OBJECTTYPE_PROJECT = "Project";
 
         public static readonly string RESPONSE_OBJECT_NAME = "object";
         public static readonly string RESPONSE_COLLECTION_ITEMS_NAME = "items";

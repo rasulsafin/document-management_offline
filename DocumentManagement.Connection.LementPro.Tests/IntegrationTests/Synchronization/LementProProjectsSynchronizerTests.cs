@@ -38,5 +38,20 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
 
             Assert.IsTrue(result.Any());
         }
+
+        [TestMethod]
+        public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully()
+        {
+            var creationDateTime = DateTime.Now;
+            var project = new ProjectExternalDto
+            {
+                Title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}",
+                UpdatedAt = creationDateTime,
+            };
+
+            var result = await synchronizer.Add(project);
+
+            Assert.IsNotNull(result?.ExternalID);
+        }
     }
 }

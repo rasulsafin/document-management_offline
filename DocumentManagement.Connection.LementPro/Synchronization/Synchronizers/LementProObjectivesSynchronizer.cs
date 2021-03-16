@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 lementIssue.FileIds = fileIds;
             }
 
-            var createResult = await tasksService.CreateTask(lementIssue);
+            var createResult = await tasksService.CreateTaskAsync(lementIssue);
             if (!createResult.IsSuccess.GetValueOrDefault())
                 return null;
 

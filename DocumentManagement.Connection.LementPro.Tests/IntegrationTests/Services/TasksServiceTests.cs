@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 FileIds = new List<int>(),
             };
 
-            var result = await service.CreateTask(newTask);
+            var result = await service.CreateTaskAsync(newTask);
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
@@ -119,7 +119,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 FileIds = new List<int> { uploaded.ID.Value },
             };
 
-            var result = await service.CreateTask(newTask);
+            var result = await service.CreateTaskAsync(newTask);
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
@@ -146,7 +146,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Values = newTaskValue,
                 FileIds = new List<int>(),
             };
-            var created = await service.CreateTask(newTask);
+            var created = await service.CreateTaskAsync(newTask);
 
             // Wait for creating (2 sec is enough usually)
             await Task.Delay(3000);
@@ -178,7 +178,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Values = newTaskValue,
                 FileIds = new List<int>(),
             };
-            var created = await service.CreateTask(newTask);
+            var created = await service.CreateTaskAsync(newTask);
 
             // Wait for creating (2 sec is enough usually)
             await Task.Delay(3000);

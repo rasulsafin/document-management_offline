@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
@@ -59,6 +60,36 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var result = await service.GetProjectAsync(taskId);
 
             Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task GetDefaultProjectTypeAsync_AtLeasOneProjectTypeExists_ReturnsFirstProjectType()
+        {
+            var result = await service.GetDefaultProjectTypeAsync();
+
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        public async Task CreateProjecAsync_NewProjectWithCorrectFields_ReturnsTrue()
+        {
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var newTaskValue = new ObjectBaseValueToCreate
+            {
+                Type = 40178,
+                Name = $"CreatedByIntegrTest {DateTime.Now.ToShortTimeString()}",
+                StartDate = DateTime.Now.ToString(dateFormat),
+            };
+
+            var newTask = new ObjectBaseToCreate
+            {
+                Values = newTaskValue,
+                FileIds = new List<int>(),
+            };
+
+            var result = await service.CreateProjectAsync(newTask);
+
+            Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
     }
 }

@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
     [TestClass]
     public class LementProObjectivesSynchronizerTests
     {
-        private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
+        private static readonly string TEST_FILE_PATH = "Resources/HelloWallIfc4TEST.ifc";
         private static LementProObjectivesSynchronizer synchronizer;
 
         [ClassInitialize]
@@ -52,14 +52,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         }
 
         [TestMethod]
-        public async Task Add_ObjectiveWithEmptyIdWithItems_AddedSuccessfully()
+        public async Task Add_ObjectiveWithEmptyIdWithBim_AddedSuccessfully()
         {
             var objective = new ObjectiveExternalDto
             {
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = "40179" },
                 CreationDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue",
+                Title = "First type OPEN issue with BIM",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
                 Items = new List<ItemExternalDto>
@@ -68,6 +68,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                     {
                         FileName = Path.GetFileName(TEST_FILE_PATH),
                         FullPath = Path.GetFullPath(TEST_FILE_PATH),
+                        ItemType = ItemType.Bim,
                     },
                 },
             };
@@ -143,14 +144,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
                 UpdatedAt = creationTime,
-                Items = new List<ItemExternalDto>
-                {
-                    new ItemExternalDto
-                    {
-                        FileName = Path.GetFileName(TEST_FILE_PATH),
-                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
-                    },
-                },
             };
             var added = await synchronizer.Add(objective);
             if (added?.ExternalID == null)

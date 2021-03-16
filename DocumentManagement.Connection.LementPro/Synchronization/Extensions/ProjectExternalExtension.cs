@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 {
@@ -19,6 +21,19 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 dto.UpdatedAt = parsedLastModified;
 
             return dto;
+        }
+
+        internal static ObjectBaseToCreate ToModelToCreate(this ProjectExternalDto dto)
+        {
+            return new ObjectBaseToCreate
+            {
+                FileIds = Enumerable.Empty<int>(),
+                Values = new ObjectBaseValueToCreate
+                {
+                    Name = dto.Title,
+                    StartDate = DateTime.Now.ToString(DATE_FORMAT),
+                },
+            };
         }
     }
 }

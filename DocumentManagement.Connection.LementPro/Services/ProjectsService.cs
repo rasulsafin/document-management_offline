@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
@@ -24,9 +25,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         }
 
         public async Task<IEnumerable<ObjectBase>> GetAllProjectsAsync()
-            => await commonRequests.RetriveObjectsListAsync(OBJECTTYPE_PROJECTS);
+            => await commonRequests.RetriveObjectsListAsync(OBJECTTYPE_PROJECT);
 
         public async Task<ObjectBase> GetProjectAsync(int projectId)
             => await commonRequests.GetObjectAsync(projectId);
+
+        public async Task<LementProType> GetDefaultProjectTypeAsync()
+            => (await commonRequests.GetObjectsTypes(OBJECTTYPE_PROJECT)).FirstOrDefault();
+
+        public async Task<ObjectBaseCreateResult> CreateProjectAsync(ObjectBaseToCreate projectToCreate)
+            => await commonRequests.CreateObjectAsync(projectToCreate);
     }
 }

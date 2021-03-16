@@ -33,12 +33,24 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 .Select(o => o.ExternalID).ToList();
         }
 
-        #region NOT IMPLEMENTED METHODS
-        public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Add(ProjectExternalDto obj)
         {
-            throw new NotImplementedException();
+            var defaultProjectType = projectsService.GetDefaultProjectTypeAsync();
+            var newProject = obj.ToModelToCreate();
+            newProject.Values.Type = (await defaultProjectType).ID;
+            var createResult = await projectsService.CreateProjectAsync(newProject);
+            if (!createResult.IsSuccess.GetValueOrDefault())
+                return null;
+
+            // Wait for creating
+            await Task.Delay(3000);
+
+            var created = await projectsService.GetProjectAsync(createResult.ID.Value);
+
+            return created.ToProjectExternalDto();
         }
 
+        #region NOT IMPLEMENTED METHODS
         public Task<ProjectExternalDto> Remove(ProjectExternalDto obj)
         {
             throw new NotImplementedException();

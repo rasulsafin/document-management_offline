@@ -8,6 +8,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "type")]
         public int? Type { get; set; }
 
+        [DataMember(Name = "controllers")]
+        public string Controllers { get; set; }
+
+        [DataMember(Name = "executors")]
+        public string Executors { get; set; }
+
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
