@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -98,7 +100,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             var dto = project.ToDto();
             var root = project.Relationships.RootFolder.Data;
-            var items = await context.FoldersService.SearchAsync(project.ID, root.ID);
+            var dataMemberName =
+                new[]
+                {
+                    (typeof(Version), nameof(Version.Attributes)),
+                    (typeof(Version.VersionAttributes), nameof(Version.VersionAttributes.Hidden)),
+                }.GetPathOfDataMembers();
+            var filter = new[] { (dataMemberName, "false") };
+            var items = await context.FoldersService.SearchAsync(project.ID, root.ID, filter);
             dto.Items = items.Select(x => x.item.ToDto()).ToList();
             return dto;
         }
