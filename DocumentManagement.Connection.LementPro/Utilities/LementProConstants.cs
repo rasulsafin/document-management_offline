@@ -1,4 +1,8 @@
-﻿namespace MRS.DocumentManagement.Connection.LementPro
+﻿using System;
+using System.Globalization;
+using MRS.DocumentManagement.Interface.Dtos;
+
+namespace MRS.DocumentManagement.Connection.LementPro
 {
     /// <summary>
     /// Contains constants to use in LementProConnection.
@@ -35,6 +39,7 @@
         public static readonly string OBJECTTYPE_BIM_ATTRIBUTE_VERSION = "modelVersions";
         public static readonly string OBJECTTYPE_TASKS = "Tasks";
         public static readonly string OBJECTTYPE_SINGLE_TASK = "Task";
+        public static readonly string OBJECTTYPE_PROJECTS = "Project";
 
         public static readonly string RESPONSE_OBJECT_NAME = "object";
         public static readonly string RESPONSE_COLLECTION_ITEMS_NAME = "items";
@@ -42,5 +47,15 @@
         public static readonly string RESPONSE_COOKIES_EXPIRES_NAME = "expires";
         public static readonly char RESPONSE_COOKIE_VALUES_SEPARATOR = ';';
         public static readonly char RESPONSE_COOKIE_KEY_VALUE_SEPARATOR = '=';
+
+        private static readonly int DEFAULT_PROJECT_STUB_ID = -1;
+        private static readonly string DEFAULT_PROJECT_STUB_TITLE = "Default Project";
+
+        public static ProjectExternalDto DEFAULT_PROJECT_STUB => new ProjectExternalDto
+        {
+            ExternalID = DEFAULT_PROJECT_STUB_ID.ToString(CultureInfo.InvariantCulture),
+            Title = DEFAULT_PROJECT_STUB_TITLE,
+            UpdatedAt = DateTime.MinValue.AddMilliseconds(1),
+        };
     }
 }

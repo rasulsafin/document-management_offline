@@ -43,6 +43,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                                 : objective.UpdatedAt.ToString(DATE_FORMAT),
             };
 
+            if (objective.ProjectExternalID != DEFAULT_PROJECT_STUB.ExternalID
+                && int.TryParse(objective.ProjectExternalID, out var parsedExternalId))
+            {
+                modelValue.Project = parsedExternalId;
+            }
+
             if (!int.TryParse(objective.ExternalID, out var parsedId))
                 return null;
 
@@ -67,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 Title = model.Values.Name,
                 Description = model.Values.Description,
                 Status = ParseStatus(model),
-                ProjectExternalID = model.Values.Project?.ID?.ToString(),
+                ProjectExternalID = model.Values.Project?.ID?.ToString() ?? DEFAULT_PROJECT_STUB.ExternalID.ToString(),
                 ExternalID = model.ID.ToString(),
             };
 

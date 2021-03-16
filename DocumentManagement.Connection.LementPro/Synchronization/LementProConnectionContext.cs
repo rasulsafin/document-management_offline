@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
@@ -21,6 +18,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         internal BimsService BimsService { get; private set; }
 
+        internal ProjectsService ProjectsService { get; private set; }
+
         public static async Task<LementProConnectionContext> CreateContext(ConnectionInfoExternalDto info)
         {
             var connection = new HttpConnection();
@@ -32,6 +31,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             {
                 TasksService = new TasksService(requestUtility, commonRequests),
                 BimsService = new BimsService(requestUtility, commonRequests),
+                ProjectsService = new ProjectsService(requestUtility, commonRequests),
             };
 
             await authService.SignInAsync(info);
@@ -43,8 +43,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             => new LementProObjectivesSynchronizer(this);
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
-        {
-            throw new NotImplementedException();
-        }
+            => new LementProProjectsSynchronizer(this);
     }
 }
