@@ -87,6 +87,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
             foreach (var file in filesToUpload)
             {
+                if (string.IsNullOrWhiteSpace(file.FileName) || string.IsNullOrWhiteSpace(file.FullPath))
+                    continue;
+
                 var uploaded = await tasksService.CommonRequests.AddFileAsync(file.FileName, file.FullPath);
                 if (uploaded.IsSuccess.GetValueOrDefault())
                     fileIds.Add(uploaded.ID.Value);

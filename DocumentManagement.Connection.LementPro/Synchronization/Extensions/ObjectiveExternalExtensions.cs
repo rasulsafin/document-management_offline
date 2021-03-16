@@ -26,12 +26,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             return model;
         }
 
-        internal static TaskToUpdate ToModelToUpdate(this ObjectiveExternalDto objective)
+        internal static ObjectBaseToUpdate ToModelToUpdate(this ObjectiveExternalDto objective)
         {
             if (!int.TryParse(objective.ObjectiveType.ExternalId, out var parsedTypeId))
                 return null;
 
-            var modelValue = new TaskValueToUpdate
+            var modelValue = new ObjectBaseValueToUpdate
             {
                 Type = parsedTypeId,
                 Name = objective.Title,
@@ -52,7 +52,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             if (!int.TryParse(objective.ExternalID, out var parsedId))
                 return null;
 
-            var model = new TaskToUpdate
+            var model = new ObjectBaseToUpdate
             {
                 ID = parsedId,
                 Values = modelValue,

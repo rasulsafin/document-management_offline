@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         public async Task<ObjectBase> DeleteTaskAsync(int objectId)
             => await CommonRequests.ArchiveObjectAsync(objectId);
 
-        public async Task<ObjectBase> UpdateTaskAsync(TaskToUpdate taskToUpdate)
+        public async Task<ObjectBase> UpdateTaskAsync(ObjectBaseToUpdate taskToUpdate)
         {
             var response = await requestUtility.GetResponseAsync(Resources.MethodTaskUpdate, taskToUpdate);
 

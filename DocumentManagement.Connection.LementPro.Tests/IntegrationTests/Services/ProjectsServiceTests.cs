@@ -91,5 +91,32 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
+
+        [TestMethod]
+        public async Task UpdateProjectAsync_ExistingProject_ReturnsUpdatedObject()
+        {
+            var projectId = 402014;
+            var existingTask = await service.GetProjectAsync(projectId);
+            var updatedLabel = $"UPDATED: {existingTask.Values.Name}";
+
+            var updatedProjectValue = new ObjectBaseValueToUpdate
+            {
+                ID = existingTask.ID,
+                CreationDate = existingTask.Values.CreationDate,
+                Name = updatedLabel,
+                Type = existingTask.Values.Type.ID,
+                StartDate = existingTask.Values.StartDate,
+            };
+            var taskToUpdate = new ObjectBaseToUpdate
+            {
+                ID = existingTask.ID,
+                Values = updatedProjectValue,
+            };
+
+            var result = await service.UpdateProjectAsync(taskToUpdate);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(updatedLabel, result.Values.Name);
+        }
     }
 }

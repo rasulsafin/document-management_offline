@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         }
 
         [TestMethod]
-        public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully()
+        public async Task Add_ProjectWithEmptyId_AddedSuccessfully()
         {
             var creationDateTime = DateTime.Now;
             var project = new ProjectExternalDto
@@ -52,6 +52,31 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
             var result = await synchronizer.Add(project);
 
             Assert.IsNotNull(result?.ExternalID);
+        }
+
+        [TestMethod]
+        public async Task Update_JustAddedProject_UpdatedSuccessfully()
+        {
+            var creationDateTime = DateTime.Now;
+            var title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}";
+
+            // Add
+            var project = new ProjectExternalDto
+            {
+                Title = title,
+                UpdatedAt = creationDateTime,
+            };
+            var added = await synchronizer.Add(project);
+            if (added?.ExternalID == null)
+                Assert.Fail("Objective adding failed. There is nothing to update.");
+
+            // Update
+            await Task.Delay(3000);
+            var newTitle = added.Title = $"UPDATED: {title}";
+            var result = await synchronizer.Update(added);
+
+            Assert.IsNotNull(result?.Title);
+            Assert.AreEqual(newTitle, result.Title);
         }
     }
 }

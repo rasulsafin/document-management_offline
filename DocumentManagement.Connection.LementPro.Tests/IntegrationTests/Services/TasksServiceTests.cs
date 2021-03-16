@@ -196,7 +196,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var userId = 44212;
             var existingTask = await service.GetTaskAsync(id);
 
-            var updatedTaskValue = new TaskValueToUpdate
+            var updatedTaskValue = new ObjectBaseValueToUpdate
             {
                 BimRef = existingTask.Values.BimRef.ID,
                 Type = existingTask.Values.Type.ID,
@@ -205,7 +205,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 I60099 = userId,
                 StartDate = "2020-05-10T12:55:37.000Z",
             };
-            var taskToUpdate = new TaskToUpdate
+            var taskToUpdate = new ObjectBaseToUpdate
             {
                 ID = id,
                 Values = updatedTaskValue,

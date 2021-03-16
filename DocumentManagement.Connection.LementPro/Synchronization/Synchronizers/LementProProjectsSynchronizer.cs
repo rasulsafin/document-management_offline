@@ -50,17 +50,22 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             return created.ToProjectExternalDto();
         }
 
-        #region NOT IMPLEMENTED METHODS
-        public Task<ProjectExternalDto> Remove(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Remove(ProjectExternalDto obj)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ProjectExternalDto> Update(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Update(ProjectExternalDto obj)
         {
-            throw new NotImplementedException();
+            if (!int.TryParse(obj.ExternalID, out var parsedId))
+                return null;
+
+            var existingProjectsObject = await projectsService.GetProjectAsync(parsedId);
+            var modelToUpdate = obj.ToModelToUpdate(existingProjectsObject);
+            var updated = await projectsService.UpdateProjectAsync(modelToUpdate);
+
+            return updated.ToProjectExternalDto();
         }
-        #endregion
 
         private async Task CheckCashedElements()
         {

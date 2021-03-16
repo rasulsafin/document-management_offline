@@ -48,12 +48,12 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public static readonly char RESPONSE_COOKIE_VALUES_SEPARATOR = ';';
         public static readonly char RESPONSE_COOKIE_KEY_VALUE_SEPARATOR = '=';
 
-        private static readonly int DEFAULT_PROJECT_STUB_ID = -1;
+        private static readonly string DEFAULT_PROJECT_STUB_ID = "LementPro 63cbe66b-b7fb-4465-a5b4-d585765b33af";
         private static readonly string DEFAULT_PROJECT_STUB_TITLE = "Default Project";
 
         public static ProjectExternalDto DEFAULT_PROJECT_STUB => new ProjectExternalDto
         {
-            ExternalID = DEFAULT_PROJECT_STUB_ID.ToString(CultureInfo.InvariantCulture),
+            ExternalID = DEFAULT_PROJECT_STUB_ID,
             Title = DEFAULT_PROJECT_STUB_TITLE,
             UpdatedAt = DateTime.MinValue.AddMilliseconds(1),
         };
