@@ -52,7 +52,11 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         public async Task<ProjectExternalDto> Remove(ProjectExternalDto obj)
         {
-            throw new NotImplementedException();
+            if (!int.TryParse(obj.ExternalID, out var parsedId))
+                return null;
+
+            var deleted = await projectsService.DeleteProjectAsync(parsedId);
+            return deleted.ToProjectExternalDto();
         }
 
         public async Task<ProjectExternalDto> Update(ProjectExternalDto obj)

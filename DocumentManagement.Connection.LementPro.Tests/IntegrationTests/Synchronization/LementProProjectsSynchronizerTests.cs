@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
             };
             var added = await synchronizer.Add(project);
             if (added?.ExternalID == null)
-                Assert.Fail("Objective adding failed. There is nothing to update.");
+                Assert.Fail("Project adding failed. There is nothing to update.");
 
             // Update
             await Task.Delay(3000);
@@ -77,6 +77,27 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
 
             Assert.IsNotNull(result?.Title);
             Assert.AreEqual(newTitle, result.Title);
+        }
+
+        [TestMethod]
+        public async Task Remove_JustAddedProject_RemovedSuccessfully()
+        {
+            // Add
+            var creationDateTime = DateTime.Now;
+            var project = new ProjectExternalDto
+            {
+                Title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}",
+                UpdatedAt = creationDateTime,
+            };
+            var added = await synchronizer.Add(project);
+            if (added?.ExternalID == null)
+                Assert.Fail("Project adding failed. There is nothing to delete.");
+
+            // Remove
+            await Task.Delay(3000);
+            var result = await synchronizer.Remove(added);
+
+            Assert.IsNotNull(result);
         }
     }
 }

@@ -55,9 +55,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         [TestMethod]
         public async Task GetProjectAsync_ExistingProject_ReturnsProject()
         {
-            var taskId = 402014;
+            var projectId = 402014;
 
-            var result = await service.GetProjectAsync(taskId);
+            var result = await service.GetProjectAsync(projectId);
 
             Assert.IsNotNull(result);
         }
@@ -74,20 +74,20 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         public async Task CreateProjecAsync_NewProjectWithCorrectFields_ReturnsTrue()
         {
             var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
-            var newTaskValue = new ObjectBaseValueToCreate
+            var newProjectValue = new ObjectBaseValueToCreate
             {
                 Type = 40178,
                 Name = $"CreatedByIntegrTest {DateTime.Now.ToShortTimeString()}",
                 StartDate = DateTime.Now.ToString(dateFormat),
             };
 
-            var newTask = new ObjectBaseToCreate
+            var newProject = new ObjectBaseToCreate
             {
-                Values = newTaskValue,
+                Values = newProjectValue,
                 FileIds = new List<int>(),
             };
 
-            var result = await service.CreateProjectAsync(newTask);
+            var result = await service.CreateProjectAsync(newProject);
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
@@ -96,27 +96,53 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         public async Task UpdateProjectAsync_ExistingProject_ReturnsUpdatedObject()
         {
             var projectId = 402014;
-            var existingTask = await service.GetProjectAsync(projectId);
-            var updatedLabel = $"UPDATED: {existingTask.Values.Name}";
+            var existingProject = await service.GetProjectAsync(projectId);
+            var updatedLabel = $"UPDATED: {existingProject.Values.Name}";
 
             var updatedProjectValue = new ObjectBaseValueToUpdate
             {
-                ID = existingTask.ID,
-                CreationDate = existingTask.Values.CreationDate,
+                ID = existingProject.ID,
+                CreationDate = existingProject.Values.CreationDate,
                 Name = updatedLabel,
-                Type = existingTask.Values.Type.ID,
-                StartDate = existingTask.Values.StartDate,
+                Type = existingProject.Values.Type.ID,
+                StartDate = existingProject.Values.StartDate,
             };
-            var taskToUpdate = new ObjectBaseToUpdate
+            var projectToUpdate = new ObjectBaseToUpdate
             {
-                ID = existingTask.ID,
+                ID = existingProject.ID,
                 Values = updatedProjectValue,
             };
 
-            var result = await service.UpdateProjectAsync(taskToUpdate);
+            var result = await service.UpdateProjectAsync(projectToUpdate);
 
             Assert.IsNotNull(result);
             Assert.AreEqual(updatedLabel, result.Values.Name);
+        }
+
+        [TestMethod]
+        public async Task DeleteTaskAsync_CreatedNewTask_ReturnsTrue()
+        {
+            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var newProjectValue = new ObjectBaseValueToCreate
+            {
+                Type = 40178,
+                Name = $"CreatedByIntegrTest {DateTime.Now.ToShortTimeString()}",
+                StartDate = DateTime.Now.ToString(dateFormat),
+            };
+
+            var newProject = new ObjectBaseToCreate
+            {
+                Values = newProjectValue,
+                FileIds = new List<int>(),
+            };
+            var created = await service.CreateProjectAsync(newProject);
+
+            // Wait for creating (2 sec is enough usually)
+            await Task.Delay(3000);
+
+            var result = await service.DeleteProjectAsync(created.ID.Value);
+
+            Assert.IsNotNull(result);
         }
     }
 }

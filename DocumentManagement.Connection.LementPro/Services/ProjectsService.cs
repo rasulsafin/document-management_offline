@@ -45,5 +45,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             var updatedTask = response[RESPONSE_OBJECT_NAME].ToObject<ObjectBase>();
             return updatedTask;
         }
+
+        public async Task<ObjectBase> DeleteProjectAsync(int projectId)
+            => await commonRequests.ArchiveObjectAsync(projectId);
     }
 }
