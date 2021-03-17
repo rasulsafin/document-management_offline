@@ -97,9 +97,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
-                await update(data.Context, tuple.Local, parent, EntityType.Local);
-                await update(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
-                await update(data.Context, tuple.Remote, parent, EntityType.Remote);
+                if (tuple.LocalChanged)
+                    await update(data.Context, tuple.Local, parent, EntityType.Local);
+                if (tuple.SynchronizedChanged)
+                    await update(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                if (tuple.RemoteChanged)
+                    await update(data.Context, tuple.Remote, parent, EntityType.Remote);
                 return null;
             }
             catch (Exception e)
