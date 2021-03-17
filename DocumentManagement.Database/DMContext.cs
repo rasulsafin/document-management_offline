@@ -113,6 +113,10 @@ namespace MRS.DocumentManagement.Database
                 .HasMany(x => x.Objectives)
                 .WithOne(x => x.ObjectiveType)
                 .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<ObjectiveType>()
+                .HasMany(x => x.DefaultDynamicFields)
+                .WithOne(x => x.ObjectiveType)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<ConnectionType>()
                  .HasIndex(x => x.Name)

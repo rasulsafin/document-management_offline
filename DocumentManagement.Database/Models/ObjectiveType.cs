@@ -15,5 +15,7 @@ namespace MRS.DocumentManagement.Database.Models
         public ConnectionType ConnectionType { get; set; }
 
         public ICollection<Objective> Objectives { get; set; }
+
+        public ICollection<DynamicField> DefaultDynamicFields { get; set; }
     }
 }

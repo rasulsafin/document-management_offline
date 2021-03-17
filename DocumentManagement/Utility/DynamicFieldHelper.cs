@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -20,31 +19,30 @@ namespace MRS.DocumentManagement.Utility
             this.mapper = mapper;
         }
 
-        internal async Task<IDynamicFieldDto> BuildObjectDynamicField(DynamicField dynamicField)
+        internal async Task<DynamicFieldDto> BuildObjectDynamicField(DynamicField dynamicField)
         {
             if (dynamicField.Type == DynamicFieldType.OBJECT.ToString())
             {
-                DynamicFieldDto objDynamicField = (DynamicFieldDto)mapper.Map<IDynamicFieldDto>(dynamicField);
+                DynamicFieldDto objDynamicField = mapper.Map<DynamicFieldDto>(dynamicField);
 
                 var children = context.DynamicFields.Where(x => x.ParentFieldID == dynamicField.ID);
 
+                var value = new List<DynamicFieldDto>();
                 foreach (var child in children)
                 {
                     var result = await BuildObjectDynamicField(child);
-
-                    if (objDynamicField.Value == null)
-                        objDynamicField.Value = new List<IDynamicFieldDto>();
-
-                    objDynamicField.Value.Add(result);
+                    value.Add(result);
                 }
+
+                objDynamicField.Value = value;
 
                 return objDynamicField;
             }
 
-            return mapper.Map<IDynamicFieldDto>(dynamicField);
+            return mapper.Map<DynamicFieldDto>(dynamicField);
         }
 
-        internal async Task AddDynamicFields(IDynamicFieldDto field, int objectiveID, int parentID = -1)
+        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int parentID = -1)
         {
             var dynamicField = mapper.Map<DynamicField>(field);
 
@@ -56,16 +54,18 @@ namespace MRS.DocumentManagement.Utility
             await context.DynamicFields.AddAsync(dynamicField);
             await context.SaveChangesAsync();
 
-            if (field is DynamicFieldDto dynamicFieldDto)
+            if (field.Type == DynamicFieldType.OBJECT)
             {
-                foreach (var childField in dynamicFieldDto.Value)
+                var children = field.Value as ICollection<DynamicFieldDto>;
+
+                foreach (var childField in children)
                 {
                     await AddDynamicFields(childField, objectiveID, dynamicField.ID);
                 }
             }
         }
 
-        internal async Task UpdateDynamicField(IDynamicFieldDto field, int objectiveID, int parentID = -1)
+        internal async Task UpdateDynamicField(DynamicFieldDto field, int objectiveID, int parentID = -1)
         {
             var dbField = await context.DynamicFields.FindAsync((int)field.ID);
             if (dbField == null)
@@ -77,9 +77,11 @@ namespace MRS.DocumentManagement.Utility
                 dbField.Name = field.Name;
                 dbField.Value = GetValue(field);
 
-                if (field is DynamicFieldDto dynamicFieldDto)
+                if (field.Type == DynamicFieldType.OBJECT)
                 {
-                    foreach (var child in dynamicFieldDto.Value)
+                    var children = field.Value as ICollection<DynamicFieldDto>;
+
+                    foreach (var child in children)
                     {
                         await UpdateDynamicField(child, objectiveID, dbField.ID);
                     }
@@ -87,16 +89,16 @@ namespace MRS.DocumentManagement.Utility
             }
         }
 
-        private string GetValue(IDynamicFieldDto field)
+        private string GetValue(DynamicFieldDto field)
         {
             return field.Type switch
             {
-                DynamicFieldType.STRING => (field as StringFieldDto).Value,
-                DynamicFieldType.BOOL => (field as BoolFieldDto).Value.ToString(),
-                DynamicFieldType.INTEGER => (field as IntFieldDto).Value.ToString(),
-                DynamicFieldType.FLOAT => (field as FloatFieldDto).Value.ToString(),
-                DynamicFieldType.DATE => (field as DateFieldDto).Value.ToString(),
-                DynamicFieldType.ENUM => (field as EnumerationFieldDto).Value.ID.ToString(),
+                DynamicFieldType.STRING
+                    or DynamicFieldType.BOOL
+                    or DynamicFieldType.INTEGER
+                    or DynamicFieldType.FLOAT
+                    or DynamicFieldType.DATE => field.Value.ToString(),
+                DynamicFieldType.ENUM => (field.Value as Enumeration).Value.ID.ToString(),
                 _ => null,
             };
         }

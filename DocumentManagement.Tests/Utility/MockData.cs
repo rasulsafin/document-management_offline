@@ -298,34 +298,36 @@ namespace MRS.DocumentManagement.Tests.Utility
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO
-        public static List<IDynamicFieldDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<IDynamicFieldDto>
+        public static List<DynamicFieldDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldDto>
         {
-            new StringFieldDto()
+            new DynamicFieldDto()
             {
                 Name = DYNAMIC_FIELD_TO_CREATE_STRING.Name,
                 Value = DYNAMIC_FIELD_TO_CREATE_STRING.Value,
+                Type = DYNAMIC_FIELD_TO_CREATE_STRING.Type,
             },
-            new DateFieldDto()
+            new DynamicFieldDto()
             {
                 Name = DYNAMIC_FIELD_TO_CREATE_DATE.Name,
                 Value = DYNAMIC_FIELD_TO_CREATE_DATE.Value,
+                Type = DYNAMIC_FIELD_TO_CREATE_DATE.Type,
             },
         };
 
-        private static readonly DateFieldDto DYNAMIC_FIELD_TO_CREATE_DATE =
-            new DateFieldDto() { Name = "datetime", Value = DateTime.Now };
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_DATE =
+            new DynamicFieldDto() { Name = "datetime", Value = DateTime.Now, Type = DynamicFieldType.DATE, };
 
-        private static readonly StringFieldDto DYNAMIC_FIELD_TO_CREATE_STRING =
-            new StringFieldDto() { Name = "string", Value = "value" };
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_STRING =
+            new DynamicFieldDto() { Name = "string", Value = "value", Type = DynamicFieldType.STRING, };
 
-        private static readonly BoolFieldDto DYNAMIC_FIELD_TO_CREATE_BOOL =
-            new BoolFieldDto() { Name = "bool", Value = true };
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_BOOL =
+            new DynamicFieldDto() { Name = "bool", Value = true, Type = DynamicFieldType.BOOL, };
 
-        private static readonly FloatFieldDto DYNAMIC_FIELD_TO_CREATE_FLOAT =
-            new FloatFieldDto() { Name = "float", Value = 3.14f };
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_FLOAT =
+            new DynamicFieldDto() { Name = "float", Value = 3.14f, Type = DynamicFieldType.FLOAT, };
 
-        private static readonly IntFieldDto DYNAMIC_FIELD_TO_CREATE_INT =
-            new IntFieldDto() { Name = "int", Value = 1 };
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_INT =
+            new DynamicFieldDto() { Name = "int", Value = 1, Type = DynamicFieldType.INTEGER, };
 
         // private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_OBJECT =
         //    new DynamicFieldDto { Name = "object", Value = new List<IDynamicFieldDto>() { DYNAMIC_FIELD_TO_CREATE_DATE, DYNAMIC_FIELD_TO_CREATE_INT } };

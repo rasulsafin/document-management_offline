@@ -73,34 +73,10 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
 
             // Update types stored in connection info
-            var newTypes = connectionInfoExternalDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
-            var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
-            var typesToRemove = currentEnumerationTypes?
-                .Where(x => newTypes.All(t => t.ExternalID!= x.EnumerationType.ExternalId))
-                .ToList();
-            context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
+            await UpdateEnumerationObjects(connectionInfo, connectionInfoExternalDto);
 
-            // Update values stored in connection info
-            var newValues = connectionInfoExternalDto.EnumerationTypes?
-                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
-            var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
-            var valuesToRemove = currentEnumerationValues?
-                .Where(x => !newValues.Any(t =>
-                    t.ExternalID == x.EnumerationValue.ExternalId))
-                .ToList();
-            context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
-
-            foreach (var enumType in newTypes)
-            {
-                var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
-                if (linkedType != null)
-                {
-                    foreach (var enumVal in newValues)
-                    {
-                        await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
-                    }
-                }
-            }
+            // Update objective types stored in connection type
+            mapper.Map(connectionInfoExternalDto.ConnectionType.ObjectiveTypes, connectionInfo.ConnectionType.ObjectiveTypes);
 
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
@@ -158,8 +134,8 @@ namespace MRS.DocumentManagement.Services
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(dm));
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(dm));
             services.AddTransient(x => new BimElementObjectiveTypeConverter(dm));
-            services.AddTransient(x => new DynamicFieldValueResolver(dm));
-            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(dm));
+            services.AddTransient(x => new DynamicFieldModelToExternalValueResolver(dm));
+            services.AddTransient(x => new DynamicFieldExternalToModelValueResolver(dm));
             services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
             services.AddTransient(x => new ObjectiveProjectIDResolver(dm));
             services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(dm));
@@ -208,7 +184,7 @@ namespace MRS.DocumentManagement.Services
             throw new ArgumentException($"The synchronization {synchronizationID} doesn't exist");
         }
 
-        #region private method
+        #region private methods
         private async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
             User user = await FindUserFromDb(userID);
@@ -230,6 +206,9 @@ namespace MRS.DocumentManagement.Services
             var info = await context.ConnectionInfos
                 .Include(x => x.ConnectionType)
                     .ThenInclude(x => x.AppProperties)
+                .Include(x => x.ConnectionType)
+                    .ThenInclude(x => x.ObjectiveTypes)
+                        .ThenInclude(x => x.DefaultDynamicFields)
                 .Include(x => x.ConnectionType)
                     .ThenInclude(x => x.AuthFieldNames)
                 .Include(x => x.EnumerationTypes)
@@ -320,6 +299,42 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             return enumValueDb;
+        }
+
+        private async Task UpdateEnumerationObjects(ConnectionInfo connectionInfo, ConnectionInfoExternalDto connectionInfoExternalDto)
+        {
+            // Update types stored in connection info
+            var newTypes = connectionInfoExternalDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
+            var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
+            var typesToRemove = currentEnumerationTypes?
+                .Where(x => newTypes.All(t => t.ExternalID != x.EnumerationType.ExternalId))
+                .ToList();
+            context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
+
+            // Update values stored in connection info
+            var newValues = connectionInfoExternalDto.EnumerationTypes?
+                .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
+            var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
+            var valuesToRemove = currentEnumerationValues?
+                .Where(x => !newValues.Any(t =>
+                    t.ExternalID == x.EnumerationValue.ExternalId))
+                .ToList();
+            context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
+
+            foreach (var enumType in newTypes)
+            {
+                var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
+                if (linkedType != null)
+                {
+                    foreach (var enumVal in newValues)
+                    {
+                        await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
+                    }
+                }
+            }
+
+            context.Update(connectionInfo);
+            await context.SaveChangesAsync();
         }
         #endregion
     }
