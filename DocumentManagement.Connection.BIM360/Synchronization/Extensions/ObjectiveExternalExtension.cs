@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Extensions
@@ -21,7 +22,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     Description = objective.Description,
                     Status = ParseStatus(objective.Status),
                     NgIssueSubtypeID =
-                        GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.NgIssueSubtypeID)),
+                        GetDynamicField(
+                            objective.DynamicFields,
+                            typeof(Issue.IssueAttributes).GetDataMemberName(
+                                nameof(Issue.IssueAttributes.NgIssueSubtypeID))),
                     AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
                     CreatedAt = objective.CreationDate == default ? (DateTime?)null : objective.CreationDate,
                     DueDate = objective.DueDate == default ? (DateTime?)null : objective.DueDate,
@@ -35,17 +39,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             var resultDto = new ObjectiveExternalDto
             {
                 ExternalID = issue.ID,
-
-                // TODO: check via tests what GET request returns for issue.Relationships.Container URL
-                
-                //AuthorExternalID = issue.Attributes.Owner,
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = "Test Job Type" },//issue.Attributes.NgIssueTypeID },
+                AuthorExternalID = issue.Attributes.Owner,
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = issue.Type },
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,
                 ProjectExternalID = project,
-                //Status = ParseStatus(issue.Attributes.Status),
-                //DynamicFields = GetDynamicFields(issue),
-                //Items = GetItems(issue),
+                Status = ParseStatus(issue.Attributes.Status),
+                DynamicFields = GetDynamicFields(issue),
+                Items = GetItems(issue),
 
                 // TODO: add BimElements retrieving
                 // BimElements,
@@ -65,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
 
         private static string GetDynamicField(ICollection<DynamicFieldExternalDto> dynamicFields, string fieldName)
         {
-            var field = dynamicFields?.FirstOrDefault(f => f.Name == fieldName);
+            var field = dynamicFields?.FirstOrDefault(f => f.ExternalID == fieldName);
             return field?.Value;
         }
 
@@ -82,7 +83,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             var issueSubType = issue.Attributes.NgIssueSubtypeID;
             var issueSubTypeField = new DynamicFieldExternalDto
             {
-                Name = nameof(issue.Attributes.NgIssueSubtypeID),
+                ExternalID =
+                    typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueSubtypeID)),
+                Name = nameof(Issue.IssueAttributes.NgIssueSubtypeID),
                 Value = issueSubType,
                 Type = DynamicFieldType.STRING,
             };

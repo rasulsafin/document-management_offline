@@ -115,6 +115,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                 foreach (var issue in issues)
                 {
+                    if (ids.Contains(issue.ID))
+                        continue;
                     var dto = await GetFullObjectiveExternalDto(issue, project.Key, container);
                     ids.Add(dto.ExternalID);
                     objectives.Add(issue.ID, (issue, dto));

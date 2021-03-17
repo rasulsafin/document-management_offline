@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public ForgeConnection()
             : base()
-            => Timeout = 30;
+            => client.Timeout = TimeSpan.FromSeconds(30);
 
         public string Token { get; set; }
 
@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                     stringBuilder.AppendFormat(Constants.FILTER_QUERY_PARAMETER, field, filterValue);
             }
 
-            if (stringBuilder.Length > 0 && stringBuilder[^1] != '&')
+            if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
 
             return stringBuilder.ToString();
