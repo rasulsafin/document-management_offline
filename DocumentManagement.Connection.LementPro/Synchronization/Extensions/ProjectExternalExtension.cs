@@ -48,9 +48,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 ID = parsedId,
                 Type = oldValues.Type.ID,
                 Name = dto.Title,
-                LastModifiedDate = dto.UpdatedAt == default
-                                ? null
-                                : dto.UpdatedAt.ToString(DATE_FORMAT),
+                LastModifiedDate = dto.UpdatedAt.ToString(DATE_FORMAT),
                 Description = oldValues.Description,
                 StartDate = oldStartDate.ToString(DATE_FORMAT),
             };

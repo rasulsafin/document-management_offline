@@ -14,7 +14,10 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public static readonly int STATE_ARCHIVED = 2;
 
-        public static readonly string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";
+        /// <summary>
+        /// ISO 8601.
+        /// </summary>
+        public static readonly string DATE_FORMAT = "O";
 
         public static readonly string REQUEST_UPLOAD_POSTEDFILE_FIELDNAME = "postedFile";
         public static readonly string REQUEST_UPLOAD_FILEPART_FIELDNAME = "filePart";

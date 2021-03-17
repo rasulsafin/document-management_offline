@@ -38,9 +38,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 Description = objective.Description,
                 StartDate = objective.CreationDate.ToString(DATE_FORMAT),
                 IsExpired = IsExpired(objective.Status),
-                LastModifiedDate = objective.UpdatedAt == default
-                                ? null
-                                : objective.UpdatedAt.ToString(DATE_FORMAT),
+                LastModifiedDate = objective.UpdatedAt.ToString(DATE_FORMAT),
             };
 
             if (objective.ProjectExternalID != DEFAULT_PROJECT_STUB.ExternalID

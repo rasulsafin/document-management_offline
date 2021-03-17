@@ -65,7 +65,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
         {
             await CheckCashedElements();
             return objectives
-                .Where(o => o.UpdatedAt != default)
                 .Where(o => o.UpdatedAt <= date)
                 .Select(o => o.ExternalID).ToList();
         }

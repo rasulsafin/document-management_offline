@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
         [TestMethod]
         public async Task CreateProjecAsync_NewProjectWithCorrectFields_ReturnsTrue()
         {
-            var dateFormat = "yyyy - MM - ddThh: mm:ss.FFFZ";
+            var dateFormat = "O";
             var newProjectValue = new ObjectBaseValueToCreate
             {
                 Type = 40178,
