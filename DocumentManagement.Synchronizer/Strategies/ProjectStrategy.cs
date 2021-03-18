@@ -133,15 +133,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing Items in Remove Project From Local");
-
                 return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -158,15 +154,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing Items in Remove Project From Remote");
-
                 return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Remote,

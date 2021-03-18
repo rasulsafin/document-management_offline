@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ID<ObjectiveDto>? ParentObjectiveID { get; set; }
 
-        public ID<UserDto> AuthorID { get; set; }
+        public ID<UserDto>? AuthorID { get; set; }
 
         public ID<ObjectiveTypeDto> ObjectiveTypeID { get; set; }
 

@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Synchronization
                        .Select(x => x.Object.ExternalID)
                        .ToArray();
 
-                    await data.Context.SaveChangesAsync();
+                    await data.Context.SynchronizationSaveAsync(date);
                 }
                 catch (Exception e)
                 {
@@ -110,12 +110,18 @@ namespace MRS.DocumentManagement.Synchronization
         private async Task<string[]> GetUpdatedIDs<TDB, TDto>(DateTime date, IQueryable<TDB> set, ISynchronizer<TDto> synchronizer)
             where TDB : class, ISynchronizable<TDB>
         {
+            // TODO: GetAllIDs to know what is removed from remote.
             var remoteUpdated = (await synchronizer.GetUpdatedIDs(date)).ToArray();
             var localUpdated = await set.Where(x => x.UpdatedAt > date)
                .Where(x => x.ExternalID != null)
                .Select(x => x.ExternalID)
                .ToListAsync();
-            return remoteUpdated.Union(localUpdated).ToArray();
+            var localRemoved = await set
+               .GroupBy(x => x.ExternalID)
+               .Where(x => x.Count() < 2)
+               .Select(x => x.Key)
+               .ToListAsync();
+            return remoteUpdated.Union(localUpdated).Union(localRemoved).ToArray();
         }
     }
 }

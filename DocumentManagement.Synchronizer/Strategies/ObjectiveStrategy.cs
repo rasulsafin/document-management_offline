@@ -167,15 +167,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
-                if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Remove Objective From Local");
-
                 return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -192,15 +188,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
-                if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Remove Objective From Remote");
-
                 return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Remote,
