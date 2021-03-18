@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public int? Identifier { get; set; }
 
             [DataMember(Name = "status")]
-            public string Status { get; set; }
+            public Status Status { get; set; }
 
             [DataMember(Name = "assigned_to")]
             public string AssignedTo { get; set; }
@@ -115,7 +115,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object QualityUrns { get; set; }
 
             [DataMember(Name = "permitted_statuses")]
-            public string[] PermittedStatuses { get; set; }
+            public Status[] PermittedStatuses { get; set; }
 
             [DataMember(Name = "permitted_attributes")]
             public string[] PermittedAttributes { get; set; }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -45,7 +46,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<(Version version, Item item)>> SearchAsync(
                 string projectId,
                 string folderId,
-                IEnumerable<(string filteringField, string filteringValue)> filters = null)
+                IEnumerable<Filter> filters = null)
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),

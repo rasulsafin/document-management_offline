@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<List<Issue>> GetIssuesAsync(
             string containerID,
-            IEnumerable<(string filteringField, string filteringValue)> filters = null)
+            IEnumerable<Filter> filters = null)
             => await GetItemsByPages<Issue>(
                 ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
                 containerID);

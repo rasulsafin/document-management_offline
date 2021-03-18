@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
@@ -73,10 +74,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 return null;
 
             issue = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
-            issue.Attributes.Status = ISSUE_STATUS_CLOSED;
-            var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
-            return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+            if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
+            {
+                issue.Attributes.Status = Status.Open;
+                issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+            }
+
+            issue.Attributes.Status = Status.Void;
+            issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+
+            return issue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
                .Key);
         }
 
@@ -92,7 +100,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
             return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-               .Key);
+                   .Key);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
@@ -104,19 +112,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             foreach (var project in context.Projects)
             {
                 var container = project.Value.Item1.Relationships.IssuesContainer.Data.ID;
+                var statusKey = typeof(Issue.IssueAttributes)
+                   .GetDataMemberName(nameof(Issue.IssueAttributes.Status));
+                var statusFilter = new Filter(
+                    statusKey,
+                    Status.Draft.GetEnumMemberValue(),
+                    Status.Answered.GetEnumMemberValue(),
+                    Status.Closed.GetEnumMemberValue(),
+                    Status.Open.GetEnumMemberValue());
+                var updatedFilter = new Filter(FILTER_KEY_ISSUE_UPDATED_AFTER, date.ToString("O"));
                 var filters = new[]
-                {
-                    ("synced_after", // typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.Attributes.UpdatedAt)),
-                        date.ToString("O")),
-                };
-                var issues = await context.IssuesService.GetIssuesAsync(
-                    container,
-                    filters);
+                    {
+                        updatedFilter,
+                        statusFilter,
+                    };
+                var issues = await context.IssuesService.GetIssuesAsync(container, filters);
 
-                foreach (var issue in issues)
+                foreach (var issue in issues.Where(issue => !ids.Contains(issue.ID)))
                 {
-                    if (ids.Contains(issue.ID))
-                        continue;
                     var dto = await GetFullObjectiveExternalDto(issue, project.Key, container);
                     ids.Add(dto.ExternalID);
                     objectives.Add(issue.ID, (issue, dto));

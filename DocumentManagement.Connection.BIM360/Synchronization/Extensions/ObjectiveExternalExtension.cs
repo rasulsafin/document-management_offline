@@ -95,28 +95,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             };
         }
 
-        private static string ParseStatus(ObjectiveStatus status)
+        private static Status ParseStatus(ObjectiveStatus status)
         {
             return status switch
             {
-                ObjectiveStatus.Open => nameof(Status.Open).ToLower(),
-                ObjectiveStatus.Ready => nameof(Status.Closed).ToLower(),
-                _ => null,
+                ObjectiveStatus.Open => Status.Open,
+                ObjectiveStatus.InProgress => Status.Open,
+                ObjectiveStatus.Ready => Status.Closed,
+                _ => Status.Draft
             };
         }
 
-        private static ObjectiveStatus ParseStatus(string stringStatus)
-        {
-            if (string.IsNullOrWhiteSpace(stringStatus) ||
-                !Enum.TryParse<Status>(stringStatus, true, out var parsedStatus))
-                return ObjectiveStatus.Undefined;
-
-            return parsedStatus switch
+        private static ObjectiveStatus ParseStatus(Status status)
+            => status switch
             {
                 Status.Open => ObjectiveStatus.Open,
                 Status.Closed => ObjectiveStatus.Ready,
+                Status.Answered => ObjectiveStatus.Ready,
                 _ => ObjectiveStatus.Undefined,
             };
-        }
     }
 }
