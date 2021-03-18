@@ -1,4 +1,6 @@
+using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -47,15 +49,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             var external = tuple.ExternalID;
             var path = tuple.Remote.RelativePath;
             (int project, int objective) = GetParents(true);
-            tuple.Local = await data.Context.Items
-               .FirstOrDefaultAsync(
-                    x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
-                        (x.ExternalID == external || x.RelativePath == path));
+            Expression<Func<Item, bool>> predicate =
+                x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
+                    (x.ExternalID == external || x.RelativePath == path);
+            tuple.Local = await data.Context.Items.FirstOrDefaultAsync(predicate);
             (project, objective) = GetParents(false);
-            tuple.Synchronized = await data.Context.Items
-               .FirstOrDefaultAsync(
-                    x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
-                        (x.ExternalID == external || x.RelativePath == path));
+            tuple.Synchronized = await data.Context.Items.FirstOrDefaultAsync(predicate);
             if (tuple.DetermineAction() == SynchronizingAction.Merge)
                 tuple.Remote.RelativePath = tuple.Local.RelativePath;
             return await base.AddToLocal(tuple, data, connectionContext, parent);
