@@ -36,6 +36,9 @@ namespace MRS.DocumentManagement.Services
                 .Where(x => ids.Contains(x.ID))
                 .ToListAsync();
             var mapped = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+            var project = await context.Projects
+                .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
+                .FirstOrDefaultAsync();
 
             var user = await context.Users
                 .Include(x => x.ConnectionInfo)
@@ -52,7 +55,7 @@ namespace MRS.DocumentManagement.Services
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var storage = await connection.GetStorage(info);
 
-            return await storage.DownloadFiles(dbItems.Select(x => mapper.Map<ItemExternalDto>(x)));
+            return await Task.Run(() => { return storage.DownloadFiles(project.ExternalID, dbItems.Select(x => mapper.Map<ItemExternalDto>(x))); });
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)

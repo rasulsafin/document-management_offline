@@ -12,15 +12,16 @@ namespace MRS.DocumentManagement.Interface
         /// <summary>
         /// Download files from remote storage.
         /// </summary>
+        /// <param name="projectId">Id of the project to download from.</param>
         /// <param name="itemExternalDto">Items to download.</param>
         /// <returns>Download result.</returns>
-        Task<bool> DownloadFiles(IEnumerable<ItemExternalDto> itemExternalDto);
+        bool DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto);
 
         /// <summary>
         /// Deletes files from remote storage.
         /// </summary>
         /// <param name="itemExternalDto">Items to delete.</param>
         /// <returns>Deletion result.</returns>
-        Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto);
+        bool DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto);
     }
 }
