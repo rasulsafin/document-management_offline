@@ -19,12 +19,8 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         {
             var newId = Guid.NewGuid().ToString();
             project.ExternalID = newId;
-            var createSuccess = await manager.Push(project, newId);
-            if (!createSuccess)
-                return null;
+            var createdProject = await PushProject(project, newId);
 
-            var createdProject = await manager.Pull<ProjectExternalDto>(newId);
-            await ItemsSyncHelper.UploadFiles(createdProject.Items, manager);
             return createdProject;
         }
 
@@ -51,13 +47,20 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
 
         public async Task<ProjectExternalDto> Update(ProjectExternalDto project)
         {
-            var removedObjective = await Remove(project);
-            if (removedObjective == null)
+            var updated = await PushProject(project);
+            return updated;
+        }
+
+        private async Task<ProjectExternalDto> PushProject(ProjectExternalDto project, string newId = null)
+        {
+            newId ??= project.ExternalID;
+            var createSuccess = await manager.Push(project, newId);
+            if (!createSuccess)
                 return null;
 
-            var updated = await Add(project);
-            await ItemsSyncHelper.UploadFiles(updated.Items, manager);
-            return updated;
+            var createdProject = await manager.Pull<ProjectExternalDto>(newId);
+            await ItemsSyncHelper.UploadFiles(createdProject.Items, manager);
+            return createdProject;
         }
 
         private async Task CheckCashedElements()

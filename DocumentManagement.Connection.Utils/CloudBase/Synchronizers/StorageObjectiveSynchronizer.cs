@@ -19,12 +19,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         {
             var newId = Guid.NewGuid().ToString();
             obj.ExternalID = newId;
-            var createSuccess = await manager.Push(obj, newId);
-            if (!createSuccess)
-                return null;
-
-            var createdObjective = await manager.Pull<ObjectiveExternalDto>(newId);
-            await ItemsSyncHelper.UploadFiles(createdObjective.Items, manager);
+            var createdObjective = await PushObjective(obj, newId);
 
             return createdObjective;
         }
@@ -55,13 +50,21 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            var removedObjective = await Remove(obj);
-            if (removedObjective == null)
+            var updated = await PushObjective(obj);
+            return updated;
+        }
+
+        private async Task<ObjectiveExternalDto> PushObjective(ObjectiveExternalDto obj, string newId = null)
+        {
+            newId ??= obj.ExternalID;
+            var createSuccess = await manager.Push(obj, newId);
+            if (!createSuccess)
                 return null;
 
-            var updated = await Add(obj);
-            await ItemsSyncHelper.UploadFiles(updated.Items, manager);
-            return updated;
+            var createdObjective = await manager.Pull<ObjectiveExternalDto>(newId);
+            await ItemsSyncHelper.UploadFiles(createdObjective.Items, manager);
+
+            return createdObjective;
         }
 
         private async Task CheckCashedElements()
