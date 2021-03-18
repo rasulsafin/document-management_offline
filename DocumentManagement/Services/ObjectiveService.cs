@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Services
             return objective;
         }
 
-        public async Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
         {
             int count = 0;
             DateTime date = DateTime.Now.Date;
@@ -119,7 +119,7 @@ namespace MRS.DocumentManagement.Services
             reportCount.Date = date;
             await context.SaveChangesAsync();
 
-            string reportID = $"{date:ddMMyyyy}-{count}";
+            string reportID = $"{date:yyyyMMdd}-{count}";
 
             List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
             var objNum = 1;
@@ -144,7 +144,10 @@ namespace MRS.DocumentManagement.Services
             ReportCreator reportCreator = new ReportCreator();
             reportCreator.CreateReport(xmlDoc, path);
 
-            return true;
+            return new ObjectiveReportCreationResultDto()
+            {
+                ReportPath = path,
+            };
         }
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
