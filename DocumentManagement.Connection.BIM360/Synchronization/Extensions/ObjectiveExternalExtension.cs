@@ -4,6 +4,7 @@ using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Extensions
 {
@@ -30,6 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     CreatedAt = objective.CreationDate == default ? (DateTime?)null : objective.CreationDate,
                     DueDate = objective.DueDate == default ? (DateTime?)null : objective.DueDate,
                     UpdatedAt = objective.UpdatedAt == default ? (DateTime?)null : objective.UpdatedAt,
+                    LocationDescription = GetBimElements(objective),
                 },
             };
         }
@@ -47,9 +49,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                 Status = ParseStatus(issue.Attributes.Status),
                 DynamicFields = GetDynamicFields(issue),
                 Items = GetItems(issue),
-
-                // TODO: add BimElements retrieving
-                // BimElements,
+                BimElements = GetBimElements(issue),
             };
 
             if (issue.Attributes.CreatedAt.HasValue)
@@ -94,6 +94,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                 issueSubTypeField,
             };
         }
+
+        private static ICollection<BimElementExternalDto> GetBimElements(Issue issue)
+            => string.IsNullOrWhiteSpace(issue.Attributes.LocationDescription)
+                ? ArraySegment<BimElementExternalDto>.Empty
+                : JsonConvert.DeserializeObject<ICollection<BimElementExternalDto>>(
+                    issue.Attributes.LocationDescription);
+
+        private static string GetBimElements(ObjectiveExternalDto objectiveExternalDto)
+            => objectiveExternalDto.BimElements == null
+                ? null
+                : JsonConvert.SerializeObject(objectiveExternalDto.BimElements);
 
         private static Status ParseStatus(ObjectiveStatus status)
         {

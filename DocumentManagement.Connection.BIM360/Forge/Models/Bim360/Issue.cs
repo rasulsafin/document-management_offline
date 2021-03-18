@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string Description { get; set; }
 
             [DataMember(Name = "location_description")]
-            public object LocationDescription { get; set; }
+            public string LocationDescription { get; set; }
 
             [DataMember(Name = "markup_metadata")]
             public object MarkupMetadata { get; set; }

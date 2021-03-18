@@ -95,8 +95,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            issue.Attributes.PermittedAttributes
-                = (await context.IssuesService.GetIssueAsync(containerId, issue.ID)).Attributes.PermittedAttributes;
+            var issueFromRemote = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
+            issue.Attributes.PermittedAttributes = issueFromRemote.Attributes.PermittedAttributes;
+            issue.Attributes.NgIssueTypeID = issueFromRemote.Attributes.NgIssueTypeID;
             var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
             return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
