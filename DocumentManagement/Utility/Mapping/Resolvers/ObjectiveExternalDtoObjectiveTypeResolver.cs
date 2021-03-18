@@ -17,7 +17,8 @@ namespace MRS.DocumentManagement.Utility
 
         public ObjectiveType Resolve(ObjectiveExternalDto source, Objective destination, ObjectiveType destMember, ResolutionContext context)
         {
-            var objectiveType = dbContext.ObjectiveTypes.FirstOrDefault(x => x.Name == source.ObjectiveType.Name);
+            var objectiveType = dbContext.ObjectiveTypes
+               .FirstOrDefault(x => x.Name == source.ObjectiveType.Name || x.ExternalId == source.ExternalID);
             return objectiveType;
         }
     }

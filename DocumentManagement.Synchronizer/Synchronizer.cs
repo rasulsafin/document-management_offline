@@ -70,13 +70,11 @@ namespace MRS.DocumentManagement.Synchronization
                         lastSynchronization,
                         data.Context.Objectives,
                         context.ObjectivesSynchronizer);
-                    var ids2 = ids.ToArray();
-                    var OBJECTIVE_EXTERNAL_DTOS = await context.ObjectivesSynchronizer.Get(ids);
                     results.AddRange(
                         await objective.Synchronize(
                             data,
                             context,
-                            objective.Map(OBJECTIVE_EXTERNAL_DTOS),
+                            objective.Map(await context.ObjectivesSynchronizer.Get(ids)),
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
                              && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
@@ -96,9 +94,9 @@ namespace MRS.DocumentManagement.Synchronization
                         Date = date,
                         UserID = data.User.ID,
                     });
-                await data.Context.SaveChangesAsync();
+                await data.Context.SynchronizationSaveAsync(date);
                 await SynchronizationFinalizer.Finalize(data);
-                await data.Context.SaveChangesAsync();
+                await data.Context.SynchronizationSaveAsync(date);
             }
             catch (Exception e)
             {
