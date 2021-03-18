@@ -5,6 +5,7 @@ using AutoMapper;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Utility
 {
@@ -79,7 +80,7 @@ namespace MRS.DocumentManagement.Utility
 
                 if (field.Type == DynamicFieldType.OBJECT)
                 {
-                    var children = field.Value as ICollection<DynamicFieldDto>;
+                    var children = (field.Value as JArray).ToObject<ICollection<DynamicFieldDto>>();
 
                     foreach (var child in children)
                     {
@@ -98,7 +99,7 @@ namespace MRS.DocumentManagement.Utility
                     or DynamicFieldType.INTEGER
                     or DynamicFieldType.FLOAT
                     or DynamicFieldType.DATE => field.Value.ToString(),
-                DynamicFieldType.ENUM => (field.Value as Enumeration).Value.ID.ToString(),
+                DynamicFieldType.ENUM => (field.Value as JObject).ToObject<Enumeration>().Value.ID.ToString(),
                 _ => null,
             };
         }
