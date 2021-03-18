@@ -75,5 +75,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => await Bim360ConnectionContext.CreateContext(info);
+
+        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
