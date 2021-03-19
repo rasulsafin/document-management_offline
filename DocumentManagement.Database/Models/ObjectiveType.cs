@@ -16,6 +16,6 @@ namespace MRS.DocumentManagement.Database.Models
 
         public ICollection<Objective> Objectives { get; set; }
 
-        public ICollection<DynamicField> DefaultDynamicFields { get; set; }
+        public ICollection<DynamicFieldInfo> DefaultDynamicFields { get; set; }
     }
 }

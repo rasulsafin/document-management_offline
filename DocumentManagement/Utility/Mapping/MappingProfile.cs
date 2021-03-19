@@ -40,7 +40,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<EnumerationValue, EnumerationValueDto>();
 
             CreateMap<DynamicField, DynamicFieldDto>()
-                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>());
+               .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
+               .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
         }
 
         private void CreateObjectiveMapToDto()
@@ -144,6 +145,9 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldModelToExternalValueResolver>());
             CreateMap<DynamicFieldExternalDto, DynamicField>()
                 .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalToModelValueResolver>());
+
+            CreateMap<DynamicFieldInfo, DynamicFieldExternalDto>();
+            CreateMap<DynamicFieldExternalDto, DynamicFieldInfo>();
 
             CreateMap<ConnectionInfo, ConnectionInfoExternalDto>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>())

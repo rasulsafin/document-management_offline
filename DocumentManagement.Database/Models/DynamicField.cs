@@ -18,12 +18,6 @@ namespace MRS.DocumentManagement.Database.Models
         public string Value { get; set; }
 
         [ForbidMergeAttribute]
-        public int? ObjectiveTypeID { get; set; }
-
-        [ForbidMergeAttribute]
-        public ObjectiveType ObjectiveType { get; set; }
-
-        [ForbidMergeAttribute]
         public int? ObjectiveID { get; set; }
 
         [ForbidMergeAttribute]
