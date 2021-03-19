@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -28,10 +29,33 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public Task<IEnumerable<ItemDto>> DownloadItems(IEnumerable<ID<ItemDto>> itemIds)
+        public async Task<bool> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
-            // TODO: Download Items from Remote Connection to Local storage
-            throw new NotImplementedException();
+            var ids = itemIds.Select(x => (int)x).ToArray();
+            var dbItems = await context.Items
+                .Where(x => ids.Contains(x.ID))
+                .ToListAsync();
+            var mapped = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+            var project = await context.Projects
+                .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
+                .FirstOrDefaultAsync();
+
+            var user = await context.Users
+                .Include(x => x.ConnectionInfo)
+                .ThenInclude(x => x.ConnectionType)
+                .ThenInclude(x => x.AppProperties)
+                .Include(x => x.ConnectionInfo)
+                .ThenInclude(x => x.ConnectionType)
+                .ThenInclude(x => x.AuthFieldNames)
+                .Include(x => x.ConnectionInfo)
+                .ThenInclude(x => x.AuthFieldValues)
+                .FirstOrDefaultAsync(x => x.ID == (int)userID);
+
+            var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
+            var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
+            var storage = await connection.GetStorage(info);
+
+            return await storage.DownloadFiles(project.ExternalID, dbItems.Select(x => mapper.Map<ItemExternalDto>(x)));
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)

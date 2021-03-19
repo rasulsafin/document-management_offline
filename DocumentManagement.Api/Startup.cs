@@ -76,6 +76,10 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ObjectiveExternalDtoProjectResolver>();
             services.AddTransient<BimElementObjectiveTypeConverter>();
 
+            services.AddTransient<ItemFileNameResolver>();
+            services.AddTransient<ItemFullPathResolver>();
+            services.AddTransient<ItemExternalDtoRelativePathResolver>();
+
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
