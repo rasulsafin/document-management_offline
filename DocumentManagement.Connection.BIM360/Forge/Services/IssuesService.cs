@@ -16,8 +16,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public IssuesService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Issue>> GetIssuesAsync(string containerID)
-            => await GetItemsByPages<Issue>(Resources.GetIssuesMethod, containerID);
+        public async Task<List<Issue>> GetIssuesAsync(
+            string containerID,
+            IEnumerable<Filter> filters = null)
+            => await GetItemsByPages<Issue>(
+                ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
+                containerID);
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
         {
@@ -67,10 +71,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<Issue> GetIssueAsync(string containerID, string issueID)
         {
             var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedGet(),
-                    Resources.GetIssueMethod,
-                    containerID,
-                    issueID);
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetIssueMethod,
+                containerID,
+                issueID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 

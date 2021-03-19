@@ -27,9 +27,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         internal Dictionary<string, (Project, ProjectExternalDto)> Projects { get; } =
             new Dictionary<string, (Project, ProjectExternalDto)>();
 
-        internal Dictionary<string, (Issue, ObjectiveExternalDto)> Objectives { get; } =
-            new Dictionary<string, (Issue, ObjectiveExternalDto)>();
-
         internal Dictionary<string, Folder> DefaultFolders { get; } = new Dictionary<string, Folder>();
 
         internal IssuesService IssuesService { get; private set; }

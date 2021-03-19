@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -17,7 +17,6 @@ namespace MRS.DocumentManagement.Utility
         private void CreateMapToDto()
         {
             CreateObjectiveMapToDto();
-            CreateDynamicFieldMapToDto();
 
             CreateMap<User, UserDto>();
 
@@ -37,9 +36,11 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<BimElement, BimElementDto>();
 
-            CreateMap<EnumerationType, EnumerationTypeDto>()
-                .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
+            CreateMap<EnumerationType, EnumerationTypeDto>();
             CreateMap<EnumerationValue, EnumerationValueDto>();
+
+            CreateMap<DynamicField, DynamicFieldDto>()
+                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>());
         }
 
         private void CreateObjectiveMapToDto()
@@ -57,26 +58,9 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
         }
 
-        private void CreateDynamicFieldMapToDto()
-        {
-            CreateMap<DynamicField, IDynamicFieldDto>()
-                .ConvertUsing<DynamicFieldDtoTypeConverter>();
-
-            CreateMap<DynamicField, DynamicFieldDto>();
-            CreateMap<DynamicField, BoolFieldDto>();
-            CreateMap<DynamicField, StringFieldDto>();
-            CreateMap<DynamicField, IntFieldDto>();
-            CreateMap<DynamicField, FloatFieldDto>();
-            CreateMap<DynamicField, DateFieldDto>();
-            CreateMap<DynamicField, EnumerationFieldDto>()
-                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldValuePropertyResolver>())
-                 .ForMember(d => d.EnumerationType, o => o.MapFrom<DynamicFieldEnumerationTypePropertyResolver>());
-        }
-
         private void CreateMapToModel()
         {
             CreateObjectiveMapToModel();
-            CreateDynamicFieldToModel();
 
             CreateMap<ProjectDto, Project>()
                 .ForMember(d => d.Items, o => o.Ignore());
@@ -105,6 +89,9 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<EnumerationTypeDto, EnumerationType>()
                 .ForMember(d => d.EnumerationValues, opt => opt.Ignore());
             CreateMap<EnumerationValueDto, EnumerationValue>();
+
+            CreateMap<DynamicFieldDto, DynamicField>()
+              .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
         }
 
         private void CreateObjectiveMapToModel()
@@ -123,22 +110,6 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Items, o => o.Ignore());
         }
 
-        private void CreateDynamicFieldToModel()
-        {
-            CreateMap<IDynamicFieldDto, DynamicField>()
-                   .ConvertUsing<DynamicFieldTypeConverter>();
-
-            CreateMap<DynamicFieldDto, DynamicField>()
-                .ForMember(d => d.Value, o => o.Ignore());
-            CreateMap<BoolFieldDto, DynamicField>();
-            CreateMap<StringFieldDto, DynamicField>();
-            CreateMap<IntFieldDto, DynamicField>();
-            CreateMap<FloatFieldDto, DynamicField>();
-            CreateMap<DateFieldDto, DynamicField>();
-            CreateMap<EnumerationFieldDto, DynamicField>()
-                .ForMember(d => d.Value, o => o.MapFrom(s => s.Value.ID));
-        }
-
         private void CreateMapForExternal()
         {
             CreateMap<ProjectExternalDto, Project>();
@@ -154,9 +125,11 @@ namespace MRS.DocumentManagement.Utility
                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
                .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)));
 
-            CreateMap<Item, ItemExternalDto>();
+            CreateMap<Item, ItemExternalDto>()
+                .ForMember(x => x.FileName, o => o.MapFrom<ItemFileNameResolver>())
+                .ForMember(x => x.FullPath, o => o.MapFrom<ItemFullPathResolver>());
             CreateMap<ItemExternalDto, Item>()
-               .ForMember(x => x.RelativePath, o => o.MapFrom(x => x.FileName));
+               .ForMember(x => x.RelativePath, o => o.MapFrom<ItemExternalDtoRelativePathResolver>());
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
 
@@ -166,16 +139,17 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<BimElementExternalDto, BimElement>();
 
             CreateMap<DynamicField, DynamicFieldExternalDto>()
-                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldValueResolver>());
+                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldModelToExternalValueResolver>());
             CreateMap<DynamicFieldExternalDto, DynamicField>()
-                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalDtoValueResolver>());
+                .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalToModelValueResolver>());
 
             CreateMap<ConnectionInfo, ConnectionInfoExternalDto>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>())
                 .ForMember(d => d.EnumerationTypes, o => o.MapFrom(s => s.EnumerationTypes.Select(x => x.EnumerationType)));
             CreateMap<ConnectionInfoExternalDto, ConnectionInfo>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoDtoAuthFieldValuesResolver>())
-                .ForMember(d => d.EnumerationTypes, o => o.Ignore());
+                .ForMember(d => d.EnumerationTypes, o => o.Ignore())
+                .ForMember(d => d.ConnectionType, o => o.Ignore());
 
             CreateMap<ConnectionType, ConnectionTypeExternalDto>()
                 .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(x => x.Name)))

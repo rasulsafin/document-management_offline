@@ -23,21 +23,6 @@ namespace MRS.DocumentManagement.Tests
 
         private static SharedDatabaseFixture Fixture { get; set; }
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext _)
-        {
-            IServiceCollection services = new ServiceCollection();
-
-            services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            mapper = serviceProvider.GetService<IMapper>();
-
-            var mockDfToDtoConverter = new Mock<DynamicFieldDtoTypeConverter>(mapper);
-            services.AddTransient<DynamicFieldDtoTypeConverter>(sp => mockDfToDtoConverter.Object);
-            var mockDtoToDfConverter = new Mock<DynamicFieldTypeConverter>(mapper);
-            services.AddTransient<DynamicFieldTypeConverter>(sp => mockDtoToDfConverter.Object);
-        }
-
         [TestInitialize]
         public void Setup()
         {
@@ -92,6 +77,12 @@ namespace MRS.DocumentManagement.Tests
                 });
                 context.SaveChanges();
             });
+
+            IServiceCollection services = new ServiceCollection();
+            services.AddTransient<DynamicFieldModelToDtoValueResolver>(x => new DynamicFieldModelToDtoValueResolver(Fixture.Context, mapper));
+            services.AddAutoMapper(typeof(MappingProfile));
+            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
 
             service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new DynamicFieldHelper(Fixture.Context, mapper));
         }
@@ -300,7 +291,7 @@ namespace MRS.DocumentManagement.Tests
             var objectivesCount = Fixture.Context.Objectives.Unsynchronized().Count();
             var bimElementsCount = Fixture.Context.BimElements.Count();
             var existingBimElement = Fixture.Context.BimElements.First();
-            var dynamicFields = new List<IDynamicFieldDto>
+            var dynamicFields = new List<DynamicFieldDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
@@ -360,7 +351,7 @@ namespace MRS.DocumentManagement.Tests
                     RelativePath = dbItem.RelativePath,
                 },
             };
-            var dynamicFields = new List<IDynamicFieldDto>
+            var dynamicFields = new List<DynamicFieldDto>
             {
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[0],
                 MockData.DEFAULT_DYNAMIC_FIELDS_TO_CREATE[1],
@@ -526,26 +517,28 @@ namespace MRS.DocumentManagement.Tests
                             : ObjectiveStatus.Ready;
             var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var guid = Guid.NewGuid();
-            var newDynamicFields = new List<IDynamicFieldDto>
+            var newDynamicFields = new List<DynamicFieldDto>
             {
-                new StringFieldDto
+                new DynamicFieldDto
                 {
                     Name = $"name{guid}",
                     Value = $"value{guid}",
+                    Type = DynamicFieldType.STRING,
                 },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
-            var existingDynamicFields = new List<IDynamicFieldDto>
+            var existingDynamicFields = new List<DynamicFieldDto>
             {
-                new StringFieldDto
+                new DynamicFieldDto
                 {
                     Name = firstDynamicField.Name,
                     Value = firstDynamicField.Value,
+                    Type = DynamicFieldType.STRING,
                 },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
-            var dynamicFields = new List<IDynamicFieldDto>();
+            var dynamicFields = new List<DynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
             var changedObjective = new ObjectiveDto
@@ -724,26 +717,28 @@ namespace MRS.DocumentManagement.Tests
             var guid = Guid.NewGuid();
 
             // Dynamic fields
-            var newDynamicFields = new List<IDynamicFieldDto>
+            var newDynamicFields = new List<DynamicFieldDto>
             {
-                new StringFieldDto
+                new DynamicFieldDto
                 {
                     Name = $"name{guid}",
                     Value = $"value{guid}",
+                    Type = DynamicFieldType.STRING,
                 },
             };
             var firstDynamicField = existingObjective.DynamicFields.First();
-            var existingDynamicFields = new List<IDynamicFieldDto>
+            var existingDynamicFields = new List<DynamicFieldDto>
             {
-                new StringFieldDto
+                new DynamicFieldDto
                 {
                     Name = firstDynamicField.Name,
                     Value = firstDynamicField.Value,
+                    Type = DynamicFieldType.STRING,
                 },
             };
             var deletingDynamicFieldsCount = existingObjective.DynamicFields.Count - 1;
             var startDynamicFieldsCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
-            var dynamicFields = new List<IDynamicFieldDto>();
+            var dynamicFields = new List<DynamicFieldDto>();
             dynamicFields.AddRange(newDynamicFields);
             dynamicFields.AddRange(existingDynamicFields);
 
@@ -835,9 +830,9 @@ namespace MRS.DocumentManagement.Tests
         }
 
 
-        private bool CompareDynamicFieldDtoToModel(IDynamicFieldDto dto, DynamicField model)
+        private bool CompareDynamicFieldDtoToModel(DynamicFieldDto dto, DynamicField model)
         {
-            return dto.Name == model.Name 
+            return dto.Name == model.Name
                 && dto.Type == (DynamicFieldType)Enum.Parse(typeof(DynamicFieldType), model.Type);
         }
     }
