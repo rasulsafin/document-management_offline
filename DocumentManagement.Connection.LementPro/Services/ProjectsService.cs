@@ -12,13 +12,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
     public class ProjectsService : IDisposable
     {
         private readonly HttpRequestUtility requestUtility;
-        private readonly CommonRequestsUtility commonRequests;
 
         public ProjectsService(HttpRequestUtility requestUtility, CommonRequestsUtility commonRequests)
         {
             this.requestUtility = requestUtility;
-            this.commonRequests = commonRequests;
+            CommonRequests = commonRequests;
         }
+
+        public CommonRequestsUtility CommonRequests { get; private set; }
 
         public void Dispose()
         {
@@ -26,16 +27,16 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         }
 
         public async Task<IEnumerable<ObjectBase>> GetAllProjectsAsync()
-            => await commonRequests.RetriveObjectsListAsync(OBJECTTYPE_PROJECT);
+            => await CommonRequests.RetriveObjectsListAsync(OBJECTTYPE_PROJECT);
 
         public async Task<ObjectBase> GetProjectAsync(int projectId)
-            => await commonRequests.GetObjectAsync(projectId);
+            => await CommonRequests.GetObjectAsync(projectId);
 
         public async Task<LementProType> GetDefaultProjectTypeAsync()
-            => (await commonRequests.GetObjectsTypes(OBJECTTYPE_PROJECT)).FirstOrDefault();
+            => (await CommonRequests.GetObjectsTypes(OBJECTTYPE_PROJECT)).FirstOrDefault();
 
         public async Task<ObjectBaseCreateResult> CreateProjectAsync(ObjectBaseToCreate projectToCreate)
-            => await commonRequests.CreateObjectAsync(projectToCreate);
+            => await CommonRequests.CreateObjectAsync(projectToCreate);
 
         public async Task<ObjectBase> UpdateProjectAsync(ObjectBaseToUpdate taskToUpdate)
         {
@@ -47,6 +48,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         }
 
         public async Task<ObjectBase> DeleteProjectAsync(int projectId)
-            => await commonRequests.ArchiveObjectAsync(projectId);
+            => await CommonRequests.ArchiveObjectAsync(projectId);
     }
 }

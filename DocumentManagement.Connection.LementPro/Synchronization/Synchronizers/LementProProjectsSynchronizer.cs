@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
+using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -32,10 +34,18 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 .Select(o => o.ExternalID).ToList();
         }
 
-        public async Task<ProjectExternalDto> Add(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Add(ProjectExternalDto project)
         {
             var defaultProjectType = projectsService.GetDefaultProjectTypeAsync();
-            var newProject = obj.ToModelToCreate();
+            var newProject = project.ToModelToCreate();
+            var isItemsAdding = project.Items?.Any() ?? false;
+
+            if (isItemsAdding)
+            {
+                var fileIds = await ItemsSynchronizationHelper.UploadFilesAsync(project.Items, projectsService.CommonRequests);
+                newProject.FileIds = fileIds;
+            }
+
             newProject.Values.Type = (await defaultProjectType).ID;
             var createResult = await projectsService.CreateProjectAsync(newProject);
             if (!createResult.IsSuccess.GetValueOrDefault())
@@ -45,29 +55,45 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             await Task.Delay(3000);
 
             var created = await projectsService.GetProjectAsync(createResult.ID.Value);
+            var parsedToDto = created.ToProjectExternalDto();
 
-            return created.ToProjectExternalDto();
+            if (isItemsAdding)
+                parsedToDto.Items = created.Values.Files.ToDtoItems(project.Items);
+
+            return parsedToDto;
         }
 
-        public async Task<ProjectExternalDto> Remove(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Remove(ProjectExternalDto project)
         {
-            if (!int.TryParse(obj.ExternalID, out var parsedId))
+            if (!int.TryParse(project.ExternalID, out var parsedId))
                 return null;
 
             var deleted = await projectsService.DeleteProjectAsync(parsedId);
             return deleted.ToProjectExternalDto();
         }
 
-        public async Task<ProjectExternalDto> Update(ProjectExternalDto obj)
+        public async Task<ProjectExternalDto> Update(ProjectExternalDto project)
         {
-            if (!int.TryParse(obj.ExternalID, out var parsedId))
+            var isItemsAdding = project.Items?.Any() ?? false;
+            if (!int.TryParse(project.ExternalID, out var parsedId))
                 return null;
 
-            var existingProjectsObject = await projectsService.GetProjectAsync(parsedId);
-            var modelToUpdate = obj.ToModelToUpdate(existingProjectsObject);
-            var updated = await projectsService.UpdateProjectAsync(modelToUpdate);
+            var existingProjectsModel = await projectsService.GetProjectAsync(parsedId);
+            var modelToUpdate = project.ToModelToUpdate(existingProjectsModel);
 
-            return updated.ToProjectExternalDto();
+            if (isItemsAdding)
+            {
+                modelToUpdate = await ItemsSynchronizationHelper
+                    .UpdateFilesAsync(existingProjectsModel, modelToUpdate, project.Items, projectsService.CommonRequests);
+            }
+
+            var updated = await projectsService.UpdateProjectAsync(modelToUpdate);
+            var parsedResult = updated.ToProjectExternalDto();
+
+            if (isItemsAdding)
+                parsedResult.Items = updated.Values.Files.ToDtoItems(project.Items);
+
+            return parsedResult;
         }
 
         private async Task CheckCashedElements()

@@ -16,9 +16,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         public ObjectBaseValueToUpdate Values { get; set; }
 
         [DataMember(Name = "addedFileIds")]
-        public List<string> AddedFileIds { get; set; }
+        public List<int> AddedFileIds { get; set; }
 
         [DataMember(Name = "removedFileIds")]
-        public List<string> RemovedFileIds { get; set; }
+        public List<int> RemovedFileIds { get; set; }
     }
 }

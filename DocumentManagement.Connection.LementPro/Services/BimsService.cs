@@ -129,5 +129,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             return lastVersion;
         }
+
+        public async Task<IEnumerable<int>> DeleteBimAsync(int bimId)
+            => await commonRequests.DeleteObjectAsync(bimId);
     }
 }

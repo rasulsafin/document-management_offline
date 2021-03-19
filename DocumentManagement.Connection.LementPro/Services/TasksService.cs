@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             CommonRequests = commonRequests;
         }
 
-        public CommonRequestsUtility CommonRequests { get; set; }
+        public CommonRequestsUtility CommonRequests { get; private set; }
 
         public void Dispose()
         {

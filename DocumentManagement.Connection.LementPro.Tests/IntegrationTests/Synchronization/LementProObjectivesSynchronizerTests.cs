@@ -146,6 +146,55 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         }
 
         [TestMethod]
+        public async Task Update_JustAddedObjectiveWithItems_UpdatedSuccessfully()
+        {
+            var title = "First type OPEN issue";
+            var itemToRemoveName = Path.GetFileName(TEST_BIM_FILE_PATH);
+
+            // Add
+            var objective = new ObjectiveExternalDto
+            {
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = "40179" },
+                CreationDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(2),
+                Title = title,
+                Description = "ASAP: everything wrong! redo!!!",
+                Status = ObjectiveStatus.Open,
+                Items = new List<ItemExternalDto>
+                {   new ItemExternalDto
+                    {
+                        FileName = itemToRemoveName,
+                        FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),
+                        ItemType = ItemType.Bim,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_PNG_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_PNG_FILE_PATH),
+                        ItemType = ItemType.Media,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_TXT_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_TXT_FILE_PATH),
+                        ItemType = ItemType.File,
+                    },
+                },
+            };
+            var added = await synchronizer.Add(objective);
+            if (added?.ExternalID == null)
+                Assert.Fail("Objective adding failed. There is nothing to update.");
+
+            // Update
+            await Task.Delay(3000);
+            added.Items = added.Items.Where(i => i.FileName != itemToRemoveName).ToList();
+            var result = await synchronizer.Update(added);
+
+            Assert.IsNotNull(result?.Title);
+            Assert.AreEqual(objective.Items.Count - 1, result.Items.Count);
+        }
+
+        [TestMethod]
         public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
         {
             var creationTime = DateTime.Now;
