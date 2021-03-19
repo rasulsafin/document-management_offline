@@ -12,7 +12,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
     [TestClass]
     public class LementProObjectivesSynchronizerTests
     {
-        private static readonly string TEST_FILE_PATH = "Resources/HelloWallIfc4TEST.ifc";
+        private static readonly string TEST_BIM_FILE_PATH = "Resources/HelloWallIfc4TEST.ifc";
+        private static readonly string TEST_PNG_FILE_PATH = "Resources/TestIcon.png";
+        private static readonly string TEST_TXT_FILE_PATH = "Resources/IntegrationTestFile.txt";
         private static LementProObjectivesSynchronizer synchronizer;
 
         [ClassInitialize]
@@ -52,23 +54,35 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         }
 
         [TestMethod]
-        public async Task Add_ObjectiveWithEmptyIdWithBim_AddedSuccessfully()
+        public async Task Add_ObjectiveWithEmptyIdWithFiles_AddedSuccessfully()
         {
             var objective = new ObjectiveExternalDto
             {
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = "40179" },
                 CreationDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue with BIM",
+                Title = "First type OPEN issue with FILES",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
                 Items = new List<ItemExternalDto>
                 {
                     new ItemExternalDto
                     {
-                        FileName = Path.GetFileName(TEST_FILE_PATH),
-                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
+                        FileName = Path.GetFileName(TEST_BIM_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),
                         ItemType = ItemType.Bim,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_PNG_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_PNG_FILE_PATH),
+                        ItemType = ItemType.Media,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_TXT_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_TXT_FILE_PATH),
+                        ItemType = ItemType.File,
                     },
                 },
             };

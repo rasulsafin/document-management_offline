@@ -81,9 +81,6 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             var existingFiles = items.Where(i => !string.IsNullOrWhiteSpace(i.ExternalID));
             var filesToUpload = items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
 
-            // At the moment only BIM files are implemented
-            filesToUpload = filesToUpload.Where(i => i.ItemType == ItemType.Bim);
-
             foreach (var file in filesToUpload)
             {
                 if (string.IsNullOrWhiteSpace(file.FileName) || string.IsNullOrWhiteSpace(file.FullPath))
