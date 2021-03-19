@@ -54,12 +54,12 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         private async Task<ProjectExternalDto> PushProject(ProjectExternalDto project, string newId = null)
         {
             newId ??= project.ExternalID;
+            await ItemsSyncHelper.UploadFiles(project.Items, manager);
             var createSuccess = await manager.Push(project, newId);
             if (!createSuccess)
                 return null;
 
             var createdProject = await manager.Pull<ProjectExternalDto>(newId);
-            await ItemsSyncHelper.UploadFiles(createdProject.Items, manager);
             return createdProject;
         }
 
