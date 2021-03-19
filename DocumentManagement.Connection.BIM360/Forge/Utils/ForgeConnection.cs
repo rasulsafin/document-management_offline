@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -20,9 +21,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public ForgeConnection()
             : base()
-            => Timeout = 15;
+            => client.Timeout = TimeSpan.FromSeconds(30);
 
         public string Token { get; set; }
+
+        public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
+        {
+            var stringBuilder = new StringBuilder(uri);
+            if (filters != null)
+            {
+                if (stringBuilder[^1] != '&')
+                    stringBuilder.Append('&');
+                foreach (var filter in filters)
+                    stringBuilder.AppendFormat(filter.ToString());
+            }
+
+            if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+
+            return stringBuilder.ToString();
+        }
 
         public async Task<Stream> GetResponseStreamAuthorizedAsync(
                 HttpMethod methodType,

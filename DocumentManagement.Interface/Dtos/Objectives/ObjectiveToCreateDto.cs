@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
@@ -26,8 +26,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public IEnumerable<ItemDto> Items { get; set; }
 
-        [JsonProperty(ItemConverterType = typeof(DynamicFieldDtoConverter))]
-        public ICollection<IDynamicFieldDto> DynamicFields { get; set; }
+        public ICollection<DynamicFieldDto> DynamicFields { get; set; }
 
         public IEnumerable<BimElementDto> BimElements { get; set; }
     }

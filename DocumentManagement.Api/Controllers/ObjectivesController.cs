@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
@@ -12,8 +15,13 @@ namespace MRS.DocumentManagement.Api.Controllers
     public class ObjectivesController : ControllerBase
     {
         private readonly IObjectiveService service;
+        private readonly IStringLocalizer<SharedLocalization> localizer;
 
-        public ObjectivesController(IObjectiveService objectiveService) => service = objectiveService;
+        public ObjectivesController(IObjectiveService objectiveService, IStringLocalizer<SharedLocalization> localizer)
+        {
+            service = objectiveService;
+            this.localizer = localizer;
+        }
 
         [HttpPost]
         public async Task<IActionResult> Add([FromBody] ObjectiveToCreateDto data)
@@ -65,10 +73,25 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpPost]
         [Route("report")]
-        public async Task<IActionResult> GenerateReport([FromBody] IEnumerable<ID<ObjectiveDto>> data, [FromQuery] string path, [FromQuery] int userID, [FromQuery] string projectName)
+        public async Task<IActionResult> GenerateReport([FromBody] IEnumerable<ID<ObjectiveDto>> data,
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_PathIsRequired")]
+            string path,
+            [FromQuery]
+            [CheckValidID]
+            int userID,
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_ProjectNameIsRequired")] string projectName)
         {
-            var result = await service.GenerateReport(data, path, userID, projectName);
-            return ValidateFoundRelatedResult(result);
+            try
+            {
+                var result = await service.GenerateReport(data, path, userID, projectName);
+                return Ok(result);
+            }
+            catch (System.Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer[SharedLocalization.FAILED_TO_CREATE_REPORT], ex.Message);
+            }
         }
     }
 }

@@ -111,5 +111,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return YandexConnectionContext.CreateContext(manager);
         }
 
+        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

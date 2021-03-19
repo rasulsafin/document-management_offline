@@ -70,7 +70,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             objective.DynamicFields = new List<DynamicField>();
-            foreach (var field in data.DynamicFields ?? Enumerable.Empty<IDynamicFieldDto>())
+            foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
             {
                 await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
             }
@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             var objective = mapper.Map<ObjectiveDto>(dbObjective);
-            objective.DynamicFields = new List<IDynamicFieldDto>();
+            objective.DynamicFields = new List<DynamicFieldDto>();
 
             var listFromDb = dbObjective.DynamicFields;
             foreach (var field in listFromDb)
@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Services
             return objective;
         }
 
-        public async Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
         {
             int count = 0;
             DateTime date = DateTime.Now.Date;
@@ -119,7 +119,7 @@ namespace MRS.DocumentManagement.Services
             reportCount.Date = date;
             await context.SaveChangesAsync();
 
-            string reportID = $"{date:ddMMyyyy}-{count}";
+            string reportID = $"{date:yyyyMMdd}-{count}";
 
             List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
             var objNum = 1;
@@ -144,7 +144,10 @@ namespace MRS.DocumentManagement.Services
             ReportCreator reportCreator = new ReportCreator();
             reportCreator.CreateReport(xmlDoc, path);
 
-            return true;
+            return new ObjectiveReportCreationResultDto()
+            {
+                ReportPath = path,
+            };
         }
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
@@ -184,7 +187,7 @@ namespace MRS.DocumentManagement.Services
 
             objective = mapper.Map(objData, objective);
 
-            var newFields = objData.DynamicFields ?? Enumerable.Empty<IDynamicFieldDto>();
+            var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
             var currentObjectiveFields = objective.DynamicFields.ToList();
             var fieldsToRemove = currentObjectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);

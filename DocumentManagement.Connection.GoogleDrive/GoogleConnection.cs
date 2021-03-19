@@ -94,5 +94,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
             return GoogleDriveConnectionContext.CreateContext(manager);
         }
+
+        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

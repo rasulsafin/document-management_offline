@@ -4,7 +4,7 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
 {
-    public static class IssueExtensions
+    internal static class IssueExtensions
     {
         public static Issue GetPatchableIssue(this Issue issue)
         {

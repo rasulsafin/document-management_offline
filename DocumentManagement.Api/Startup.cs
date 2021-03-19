@@ -1,9 +1,11 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,6 +30,13 @@ namespace MRS.DocumentManagement.Api
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<Database.DMContext>(options => options.UseSqlite(connection));
 
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddMvc()
+                    .AddDataAnnotationsLocalization(options =>
+                    {
+                        options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedLocalization));
+                    });
+
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
                 {
@@ -45,8 +54,6 @@ namespace MRS.DocumentManagement.Api
                 });
 
             // Mapping
-            services.AddTransient<DynamicFieldTypeConverter>();
-            services.AddTransient<DynamicFieldDtoTypeConverter>();
             services.AddTransient<BimElementObjectiveTypeConverter>();
 
             services.AddTransient<ConnectionTypeAppPropertiesResolver>();
@@ -54,10 +61,10 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
 
-            services.AddTransient<DynamicFieldEnumerationTypePropertyResolver>();
-            services.AddTransient<DynamicFieldExternalDtoValueResolver>();
-            services.AddTransient<DynamicFieldValuePropertyResolver>();
-            services.AddTransient<DynamicFieldValueResolver>();
+            services.AddTransient<DynamicFieldDtoToModelValueResolver>();
+            services.AddTransient<DynamicFieldExternalToModelValueResolver>();
+            services.AddTransient<DynamicFieldModelToDtoValueResolver>();
+            services.AddTransient<DynamicFieldModelToExternalValueResolver>();
 
             services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>();
@@ -66,6 +73,10 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ObjectiveProjectIDResolver>();
             services.AddTransient<ObjectiveExternalDtoProjectResolver>();
             services.AddTransient<BimElementObjectiveTypeConverter>();
+
+            services.AddTransient<ItemFileNameResolver>();
+            services.AddTransient<ItemFullPathResolver>();
+            services.AddTransient<ItemExternalDtoRelativePathResolver>();
 
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
@@ -118,6 +129,18 @@ namespace MRS.DocumentManagement.Api
             });
             app.UseRouting();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            var supportedCultures = new[]
+            {
+                new CultureInfo("ru-RU"),
+                new CultureInfo("en-US"),
+            };
+            app.UseRequestLocalization(options =>
+            {
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+            });
 
             // TODO: uncomment and add Authenticate attribute to all controllers when roles are ready
             // app.UseAuthentication();

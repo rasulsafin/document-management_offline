@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
@@ -21,6 +22,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly ProjectsHelper projectsHelper;
         private readonly HubsHelper hubsHelper;
         private readonly Bim360ConnectionContext context;
+        private readonly Dictionary<string, (Issue, ObjectiveExternalDto)> objectives =
+            new Dictionary<string, (Issue, ObjectiveExternalDto)>();
 
         public Bim360ObjectivesSynchronizer(Bim360ConnectionContext context)
         {
@@ -41,6 +44,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var (containerId, hubId, projectId) = await GetContainerId(obj);
             if (containerId == null)
                 return null;
+
+            // TODO: do it with dynamic field.
+            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
+            issue.Attributes.NgIssueTypeID = types[0].ID;
+            issue.Attributes.NgIssueSubtypeID = types[0].Subtypes[0].ID;
 
             var created = await context.IssuesService.PostIssueAsync(containerId, issue);
 
@@ -66,10 +74,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 return null;
 
             issue = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
-            issue.Attributes.Status = ISSUE_STATUS_CLOSED;
-            var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
-            return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+            if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
+            {
+                issue.Attributes.Status = Status.Open;
+                issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+            }
+
+            issue.Attributes.Status = Status.Void;
+            issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+
+            return issue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
                .Key);
         }
 
@@ -80,68 +95,102 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            issue.Attributes.PermittedAttributes
-                = (await context.IssuesService.GetIssueAsync(containerId, issue.ID)).Attributes.PermittedAttributes;
+            var issueFromRemote = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
+            issue.Attributes.PermittedAttributes = issueFromRemote.Attributes.PermittedAttributes;
+            issue.Attributes.NgIssueTypeID = issueFromRemote.Attributes.NgIssueTypeID;
             var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
             return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-               .Key);
+                   .Key);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            var objectives = new List<ObjectiveExternalDto>();
+            var ids = new List<string>();
             await context.UpdateProjects(false);
+            objectives.Clear();
 
             foreach (var project in context.Projects)
             {
-                var issues = await context.IssuesService.GetIssuesAsync(project.Value.Item1.Relationships.IssuesContainer.Data.ID);
+                var container = project.Value.Item1.Relationships.IssuesContainer.Data.ID;
+                var statusKey = typeof(Issue.IssueAttributes)
+                   .GetDataMemberName(nameof(Issue.IssueAttributes.Status));
+                var statusFilter = new Filter(
+                    statusKey,
+                    Status.Draft.GetEnumMemberValue(),
+                    Status.Answered.GetEnumMemberValue(),
+                    Status.Closed.GetEnumMemberValue(),
+                    Status.Open.GetEnumMemberValue());
+                var updatedFilter = new Filter(FILTER_KEY_ISSUE_UPDATED_AFTER, date.ToString("O"));
+                var filters = new[]
+                    {
+                        updatedFilter,
+                        statusFilter,
+                    };
+                var issues = await context.IssuesService.GetIssuesAsync(container, filters);
 
-                foreach (var issue in issues)
+                foreach (var issue in issues.Where(issue => !ids.Contains(issue.ID)))
                 {
-                    var dto = issue.ToExternalDto(project.Key);
-                    dto.Items ??= new List<ItemExternalDto>();
-
-                    var attachments = await context.IssuesService.GetAttachmentsAsync(
-                        project.Value.Item1.Relationships.IssuesContainer.Data.ID,
-                        issue.ID);
-
-                    foreach (var attachment in attachments)
-                        dto.Items.Add((await context.ItemsService.GetAsync(project.Value.Item1.ID, attachment.Attributes.Urn)).ToDto());
-
-                    objectives.Add(dto);
+                    var dto = await GetFullObjectiveExternalDto(issue, project.Key, container);
+                    ids.Add(dto.ExternalID);
+                    objectives.Add(issue.ID, (issue, dto));
                 }
             }
 
-            return objectives.Select(x => x.ExternalID).ToArray();
+            return ids;
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            var objectives = new List<ObjectiveExternalDto>();
+            var result = new List<ObjectiveExternalDto>();
             await context.UpdateProjects(false);
 
-            foreach (var project in context.Projects)
+            foreach (var id in ids)
             {
-                var issues = await context.IssuesService.GetIssuesAsync(project.Value.Item1.Relationships.IssuesContainer.Data.ID);
-
-                foreach (var issue in issues)
+                if (objectives.TryGetValue(id, out var objective))
                 {
-                    var dto = issue.ToExternalDto(project.Key);
-                    dto.Items ??= new List<ItemExternalDto>();
+                    result.Add(objective.Item2);
+                }
+                else
+                {
+                    foreach (var project in context.Projects)
+                    {
+                        Issue found = null;
+                        var container = project.Value.Item1.Relationships.IssuesContainer.Data.ID;
 
-                    var attachments = await context.IssuesService.GetAttachmentsAsync(
-                        project.Value.Item1.Relationships.IssuesContainer.Data.ID,
-                        issue.ID);
+                        try
+                        {
+                            found = await context.IssuesService.GetIssueAsync(container, id);
+                        }
+                        catch
+                        {
+                        }
 
-                    foreach (var attachment in attachments)
-                        dto.Items.Add((await context.ItemsService.GetAsync(project.Value.Item1.ID, attachment.Attributes.Urn)).ToDto());
-
-                    objectives.Add(dto);
+                        if (found != null)
+                        {
+                            result.Add(await GetFullObjectiveExternalDto(found, project.Key, container));
+                            break;
+                        }
+                    }
                 }
             }
 
-            return objectives;
+            return result;
+        }
+
+        private async Task<ObjectiveExternalDto> GetFullObjectiveExternalDto(
+            Issue issue,
+            string projectID,
+            string container)
+        {
+            var dto = issue.ToExternalDto(projectID);
+            dto.Items ??= new List<ItemExternalDto>();
+
+            var attachments = await context.IssuesService.GetAttachmentsAsync(container, issue.ID);
+
+            foreach (var attachment in attachments)
+                dto.Items.Add((await context.ItemsService.GetAsync(projectID, attachment.Attributes.Urn)).ToDto());
+            return dto;
         }
 
         private async Task<IEnumerable<Item>> AddItems(

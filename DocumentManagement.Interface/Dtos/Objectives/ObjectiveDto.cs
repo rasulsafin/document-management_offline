@@ -28,8 +28,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ICollection<ItemDto> Items { get; set; }
 
-        [JsonProperty(ItemConverterType = typeof(DynamicFieldDtoConverter))]
-        public ICollection<IDynamicFieldDto> DynamicFields { get; set; }
+        public ICollection<DynamicFieldDto> DynamicFields { get; set; }
 
         public ICollection<BimElementDto> BimElements { get; set; }
     }

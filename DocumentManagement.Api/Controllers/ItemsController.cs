@@ -47,10 +47,11 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> DowmloadItems([FromBody] IEnumerable<ID<ItemDto>> data)
+        [Route("{userID}")]
+        public async Task<IActionResult> DownloadItems([FromRoute] int userID, [FromBody] IEnumerable<ID<ItemDto>> data)
         {
-            var items = await service.DownloadItems(data);
-            return ValidateCollection(items);
+            var result = await service.DownloadItems(new ID<UserDto>(userID), data);
+            return result ? (IActionResult)Ok() : BadRequest();
         }
 
         [HttpPost]

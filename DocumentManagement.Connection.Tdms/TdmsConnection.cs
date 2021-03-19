@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -107,9 +108,54 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             return new List<ObjectiveTypeExternalDto>()
                 {
-                    new ObjectiveTypeExternalDto() { Name = tdms.ObjectDefs[ObjectTypeID.DEFECT].Description, ExternalId = ObjectTypeID.DEFECT },
+                    new ObjectiveTypeExternalDto()
+                    {
+                        Name = tdms.ObjectDefs[ObjectTypeID.DEFECT].Description,
+                        ExternalId = ObjectTypeID.DEFECT,
+                        DefaultDynamicFields = GetDefectDefaultDynamicFields(),
+                    },
                     new ObjectiveTypeExternalDto() { Name = tdms.ObjectDefs[ObjectTypeID.WORK].Description, ExternalId = ObjectTypeID.WORK },
                 };
+        }
+
+        private ICollection<DynamicFieldExternalDto> GetDefectDefaultDynamicFields()
+        {
+            var list = new List<DynamicFieldExternalDto>();
+
+            var definitions = tdms.ObjectDefs;
+            string defaultCompanyValue = GetEnumerationTypes()
+                        .Where(x => x.ExternalID == ObjectTypeID.COMPANY)
+                        .FirstOrDefault().EnumerationValues
+                        .FirstOrDefault()?.ExternalID;
+
+            var defectDef = definitions.Cast<TDMSObjectDef>().FirstOrDefault(x => x.SysName == ObjectTypeID.DEFECT);
+            list.AddIsNotNull(ConstructDynamicFieldDto(
+                defectDef,
+                AttributeID.BUILDER,
+                DynamicFieldType.ENUM,
+                defaultCompanyValue));
+            list.AddIsNotNull(ConstructDynamicFieldDto(
+                defectDef,
+                AttributeID.COMPANY,
+                DynamicFieldType.ENUM,
+                defaultCompanyValue));
+
+            return list;
+        }
+
+        private DynamicFieldExternalDto ConstructDynamicFieldDto(TDMSObjectDef objectDef, string attributeId, DynamicFieldType type, string defaultValue)
+        {
+            var attributeDef = objectDef.AttributeDefs.Cast<TDMSAttributeDef>().FirstOrDefault(a => a.SysName == attributeId);
+            if (attributeDef == null)
+                return null;
+
+            return new DynamicFieldExternalDto()
+            {
+                ExternalID = attributeDef.SysName,
+                Name = attributeDef.Description,
+                Type = type,
+                Value = defaultValue,
+            };
         }
 
         private ICollection<EnumerationTypeExternalDto> GetEnumerationTypes()
@@ -153,6 +199,12 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             await Connect(info);
             return new TdmsConnectionContext(tdms);
+        }
+
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            await Connect(info);
+            return new TdmsStorage(tdms);
         }
     }
 }

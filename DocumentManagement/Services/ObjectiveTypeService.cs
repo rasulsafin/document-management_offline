@@ -41,20 +41,26 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
-            var dbObjective = await context.ObjectiveTypes.FindAsync((int)id);
+            var dbObjective = await context.ObjectiveTypes
+                .Include(x => x.DefaultDynamicFields)
+                .FirstOrDefaultAsync(x => x.ID == (int)id);
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
             var dbObjective = await context.ObjectiveTypes
+                .Include(x => x.DefaultDynamicFields)
                 .FirstOrDefaultAsync(x => x.Name == typename);
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
-            var db = await context.ObjectiveTypes.Where(x => x.ConnectionTypeID == null || x.ConnectionTypeID == (int)id).ToListAsync();
+            var db = await context.ObjectiveTypes
+                .Include(x => x.DefaultDynamicFields)
+                .Where(x => x.ConnectionTypeID == null || x.ConnectionTypeID == (int)id)
+                .ToListAsync();
             return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
 
