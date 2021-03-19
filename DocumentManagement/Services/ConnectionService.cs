@@ -24,13 +24,13 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
-        private readonly DbContextOptions<DMContext> options;
+        private readonly IServiceScopeFactory  serviceScopeFactory;
 
-        public ConnectionService(DMContext context, IMapper mapper, DbContextOptions<DMContext> options)
+        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
         {
             this.context = context;
             this.mapper = mapper;
-            this.options = options;
+            this.serviceScopeFactory = serviceScopeFactory;
             synchronizer = new Synchronizer();
         }
 
@@ -155,27 +155,14 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == iUserID);
             if (user == null)
                 return null;
+            var id = Guid.NewGuid().ToString();
 
-            var dm = new DMContext(options);
-            IServiceCollection services = new ServiceCollection();
-            services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(dm));
-            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(dm));
-            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(dm));
-            services.AddTransient(x => new BimElementObjectiveTypeConverter(dm));
-            services.AddTransient(x => new DynamicFieldValueResolver(dm));
-            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(dm));
-            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
-            services.AddTransient(x => new ObjectiveProjectIDResolver(dm));
-            services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(dm));
-            services.AddTransient(x => new ObjectiveObjectiveTypeResolver(dm));
-            services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
-            services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            var scope = serviceScopeFactory.CreateScope();
 
             var data = new SynchronizingData
             {
-                Context = dm,
-                Mapper = serviceProvider.GetService<IMapper>(),
+                Context = scope.ServiceProvider.GetRequiredService<DMContext>(),
+                Mapper = scope.ServiceProvider.GetRequiredService<IMapper>(),
                 User = user,
                 ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
                 ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
@@ -183,9 +170,22 @@ namespace MRS.DocumentManagement.Services
 
             var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
-            var id = Guid.NewGuid().ToString();
-            var task = Task.Factory.StartNew(async () => await synchronizer.Synchronize(data, connection, info), TaskCreationOptions.LongRunning);
+
+            var task = Task.Factory.StartNew(
+                async () =>
+                {
+                    try
+                    {
+                        return await synchronizer.Synchronize(data, connection, info);
+                    }
+                    finally
+                    {
+                        scope.Dispose();
+                    }
+                },
+                TaskCreationOptions.LongRunning);
             SYNCHRONIZATIONS.Add(id, task.Unwrap());
+
             return id;
         }
 
