@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             string parent = string.Empty;
             string type = string.Empty;
 
-            if (objectiveDto.ObjectiveType.Name == ObjectTypeID.DEFECT)
+            if (objectiveDto.ObjectiveType.ExternalId == ObjectTypeID.DEFECT)
             {
                 parent = objectiveDto.ParentObjectiveExternalID;
                 type = ObjectTypeID.DEFECT;
@@ -85,8 +85,8 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            //FOR TESTS
-            date = new DateTime(2021, 1, 1);
+            ////FOR TESTS
+            //date = new DateTime(2021, 1, 1);
 
             var jobs = FindByDef(ObjectTypeID.WORK, date);
             var issues = FindByDef(ObjectTypeID.DEFECT, date);

@@ -71,6 +71,8 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
             model.Attributes[AttributeID.NUMBER].Value = parent.Objects.ObjectsByDef(ObjectTypeID.DEFECT).Count;
 
+            // TODO: Dynamic Fields
+
             return model;
         }
 
@@ -141,5 +143,12 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
             return new List<DynamicFieldExternalDto>() { comment, contractor, company };
         }
+
+        //private ICollection<DynamicFieldExternalDto> SetDynamicFields(TDMSObject tdmsObject)
+        //{
+        // tdmsObject.Attributes[AttributeID.BUILDER] =
+        // tdmsObject.Attributes[AttributeID.COMPANY] = 
+        //}
+
     }
 }

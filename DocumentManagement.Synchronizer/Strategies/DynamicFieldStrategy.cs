@@ -64,6 +64,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
+                tuple.Merge();
+                tuple.Remote.ExternalID = tuple.Local.ExternalID;
+
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
