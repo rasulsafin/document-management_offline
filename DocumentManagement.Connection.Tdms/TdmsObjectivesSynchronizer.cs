@@ -85,6 +85,9 @@ namespace MRS.DocumentManagement.Connection.Tdms
 
         public Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
+            //FOR TESTS
+            date = new DateTime(2021, 1, 1);
+
             var jobs = FindByDef(ObjectTypeID.WORK, date);
             var issues = FindByDef(ObjectTypeID.DEFECT, date);
 
@@ -92,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         }
 
         public Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
-        {
+        { 
             var objectives = new List<ObjectiveExternalDto>();
             foreach (var objectiveId in ids)
             {

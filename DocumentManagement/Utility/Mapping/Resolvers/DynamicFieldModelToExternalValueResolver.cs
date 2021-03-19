@@ -6,11 +6,11 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class DynamicFieldValueResolver : IValueResolver<DynamicField, DynamicFieldExternalDto, string>
+    public class DynamicFieldModelToExternalValueResolver : IValueResolver<DynamicField, DynamicFieldExternalDto, string>
     {
         private readonly DMContext dbContext;
 
-        public DynamicFieldValueResolver(DMContext dbContext)
+        public DynamicFieldModelToExternalValueResolver(DMContext dbContext)
         {
             this.dbContext = dbContext;
         }

@@ -88,8 +88,8 @@ namespace MRS.DocumentManagement.Tests
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context));
             services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context));
-            services.AddTransient(x => new DynamicFieldValueResolver(Fixture.Context));
-            services.AddTransient(x => new DynamicFieldExternalDtoValueResolver(Fixture.Context));
+            services.AddTransient(x => new DynamicFieldModelToExternalValueResolver(Fixture.Context));
+            services.AddTransient(x => new DynamicFieldExternalToModelValueResolver(Fixture.Context));
             services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
             services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
             services.AddTransient(x => new ObjectiveProjectIDResolver(Fixture.Context));

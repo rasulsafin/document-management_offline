@@ -70,7 +70,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             objective.DynamicFields = new List<DynamicField>();
-            foreach (var field in data.DynamicFields ?? Enumerable.Empty<IDynamicFieldDto>())
+            foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
             {
                 await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
             }
@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
 
             var objective = mapper.Map<ObjectiveDto>(dbObjective);
-            objective.DynamicFields = new List<IDynamicFieldDto>();
+            objective.DynamicFields = new List<DynamicFieldDto>();
 
             var listFromDb = dbObjective.DynamicFields;
             foreach (var field in listFromDb)
@@ -187,7 +187,7 @@ namespace MRS.DocumentManagement.Services
 
             objective = mapper.Map(objData, objective);
 
-            var newFields = objData.DynamicFields ?? Enumerable.Empty<IDynamicFieldDto>();
+            var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
             var currentObjectiveFields = objective.DynamicFields.ToList();
             var fieldsToRemove = currentObjectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
             context.DynamicFields.RemoveRange(fieldsToRemove);
