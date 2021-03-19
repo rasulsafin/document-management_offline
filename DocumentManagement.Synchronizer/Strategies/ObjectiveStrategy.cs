@@ -58,7 +58,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         protected override IIncludableQueryable<Objective, Objective> Include(IQueryable<Objective> set)
             => base.Include(
                 set.Include(x => x.Items)
-                   .Include(x => x.ParentObjective));
+                   .Include(x => x.ParentObjective)
+                   .Include(x => x.BimElements)
+                   .ThenInclude(x => x.BimElement));
 
         protected override IEnumerable<Objective> Order(IEnumerable<Objective> objectives)
             => objectives.OrderByParent(x => x.ParentObjective);
