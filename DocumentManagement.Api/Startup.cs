@@ -54,8 +54,6 @@ namespace MRS.DocumentManagement.Api
                 });
 
             // Mapping
-            services.AddTransient<DynamicFieldTypeConverter>();
-            services.AddTransient<DynamicFieldDtoTypeConverter>();
             services.AddTransient<BimElementObjectiveTypeConverter>();
 
             services.AddTransient<ConnectionTypeAppPropertiesResolver>();
@@ -63,10 +61,10 @@ namespace MRS.DocumentManagement.Api
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
             services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
 
-            services.AddTransient<DynamicFieldEnumerationTypePropertyResolver>();
-            services.AddTransient<DynamicFieldExternalDtoValueResolver>();
-            services.AddTransient<DynamicFieldValuePropertyResolver>();
-            services.AddTransient<DynamicFieldValueResolver>();
+            services.AddTransient<DynamicFieldDtoToModelValueResolver>();
+            services.AddTransient<DynamicFieldExternalToModelValueResolver>();
+            services.AddTransient<DynamicFieldModelToDtoValueResolver>();
+            services.AddTransient<DynamicFieldModelToExternalValueResolver>();
 
             services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>();

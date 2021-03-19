@@ -1,17 +1,13 @@
-﻿using System.Collections.Generic;
-using Newtonsoft.Json;
-
-namespace MRS.DocumentManagement.Interface.Dtos
+﻿namespace MRS.DocumentManagement.Interface.Dtos
 {
-    public class DynamicFieldDto : IDynamicFieldDto<ICollection<IDynamicFieldDto>>
+    public class DynamicFieldDto
     {
-        public ID<IDynamicFieldDto> ID { get; set; }
+        public ID<DynamicFieldDto> ID { get; set; }
 
-        public DynamicFieldType Type { get => DynamicFieldType.OBJECT; }
+        public DynamicFieldType Type { get; set; }
 
         public string Name { get; set; }
 
-        [JsonProperty(ItemConverterType = typeof(DynamicFieldDtoConverter))]
-        public ICollection<IDynamicFieldDto> Value { get; set; }
+        public object Value { get; set; }
     }
 }
