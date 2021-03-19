@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
@@ -16,22 +17,24 @@ namespace MRS.DocumentManagement.Connection.Tdms
             this.tdms = tdms;
         }
 
-        public bool DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
         {
             throw new NotImplementedException();
         }
 
-        public bool DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
         {
-            TDMSObject obj = tdms.GetObjectByGUID(projectId);
-            foreach (var item in itemExternalDto)
+            await Task.Run(() =>
             {
-                var tdmsfile = obj.Files.Cast<TDMSFile>().First(f =>
-                    item.ExternalID == f.Handle);
+                TDMSObject obj = tdms.GetObjectByGUID(projectId);
+                foreach (var item in itemExternalDto)
+                {
+                    var tdmsfile = obj.Files.Cast<TDMSFile>().First(f =>
+                        item.ExternalID == f.Handle);
 
-                tdmsfile?.CheckOut(item.FullPath);
-            }
-
+                    tdmsfile?.CheckOut(item.FullPath);
+                }
+            });
             return true;
         }
     }

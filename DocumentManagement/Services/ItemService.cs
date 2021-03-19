@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Services
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var storage = await connection.GetStorage(info);
 
-            return await Task.Run(() => { return storage.DownloadFiles(project.ExternalID, dbItems.Select(x => mapper.Map<ItemExternalDto>(x))); });
+            return await storage.DownloadFiles(project.ExternalID, dbItems.Select(x => mapper.Map<ItemExternalDto>(x)));
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
