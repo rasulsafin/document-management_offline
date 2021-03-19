@@ -51,8 +51,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="path">Path to report storage.</param>
         /// <param name="userID">ID of the user, who generates the report.</param>
         /// <param name="projectName">Name of the project.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
+        /// <returns>Object representing the result of report creation process.</returns>
+        Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
 
         ///// <summary>
         ///// Gets list of dynamic fields owned by objective.
