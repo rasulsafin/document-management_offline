@@ -169,7 +169,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         }
 
         // TODO: MB move this method (and future upload method) to separate FileService?
-        protected internal async Task<bool> DownloadFileAsync(string fileId, string filePath)
+        protected internal async Task<bool> DownloadFileAsync(int fileId, string filePath)
         {
             var data = new { fileId = fileId };
             var url = Resources.MethodFileDownload;

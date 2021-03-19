@@ -77,9 +77,10 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => await LementProConnectionContext.CreateContext(info);
 
-        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            await Connect(info);
+            return new LementProConnectionStorage(requestUtility);
         }
     }
 }
