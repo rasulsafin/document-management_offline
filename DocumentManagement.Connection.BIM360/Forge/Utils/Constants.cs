@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";
 
-        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]={1}&";
+        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}&";
 
         internal static readonly int ITEMS_ON_PAGE = 100;
         internal static readonly string JSON_API_VERSION = "1.0";
@@ -48,8 +48,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE = "authorization_code";
         internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
 
-        internal static readonly string ISSUE_STATUS_OPEN = "open";
-        internal static readonly string ISSUE_STATUS_DRAFT = "draft";
-        internal static readonly string ISSUE_STATUS_CLOSED = "closed";
+        internal static readonly string FILTER_KEY_ISSUE_UPDATED_AFTER = "synced_after";
     }
 }

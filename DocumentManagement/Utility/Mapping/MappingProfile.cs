@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -118,16 +118,20 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<ObjectiveExternalDto, Objective>()
                .ForMember(x => x.ProjectID, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
                .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectResolver>())
-               .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>());
+               .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>())
+               .ForMember(d => d.AuthorID, с => с.MapFrom(ex => ex.AuthorExternalID));
             CreateMap<Objective, ObjectiveExternalDto>()
                .ForMember(x => x.ProjectExternalID, o => o.MapFrom<ObjectiveProjectIDResolver>())
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
-               .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)));
+               .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)))
+               .ForMember(ex => ex.AuthorExternalID, с => с.MapFrom(d => d.AuthorID));
 
-            CreateMap<Item, ItemExternalDto>();
+            CreateMap<Item, ItemExternalDto>()
+                .ForMember(x => x.FileName, o => o.MapFrom<ItemFileNameResolver>())
+                .ForMember(x => x.FullPath, o => o.MapFrom<ItemFullPathResolver>());
             CreateMap<ItemExternalDto, Item>()
-               .ForMember(x => x.RelativePath, o => o.MapFrom(x => x.FileName));
+               .ForMember(x => x.RelativePath, o => o.MapFrom<ItemExternalDtoRelativePathResolver>());
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
 

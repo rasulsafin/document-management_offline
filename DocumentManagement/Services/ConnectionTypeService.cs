@@ -73,37 +73,47 @@ namespace MRS.DocumentManagement.Services
             {
                 foreach (var typeDto in listOfTypes)
                 {
-                    var type = mapper.Map<ConnectionType>(typeDto);
-                    var typeFromDb = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == typeDto.Name);
+                    var type = await context.ConnectionTypes
+                       .Include(x => x.AppProperties)
+                       .Include(x => x.ObjectiveTypes)
+                       .FirstOrDefaultAsync(x => x.Name == typeDto.Name);
+                    var update = type != null;
 
-                    // TODO: Update if exists?
-                    if (typeFromDb != null)
-                        continue;
-
-                    await context.ConnectionTypes.AddAsync(type);
-                    await context.SaveChangesAsync();
-
-                    foreach (var property in type.AppProperties)
+                    if (update)
                     {
-                        property.ConnectionType = type;
+                        var properties = type.AppProperties.ToDictionary(x => x.Key, x => x.ID);
+                        var objectivesTypes = type.ObjectiveTypes.ToDictionary(x => x.ExternalId, x => x.ID);
 
-                        var propFromDb = await context.AppProperties.FirstOrDefaultAsync(x => x.Key == property.Key && x.ConnectionTypeID == type.ID);
+                        type = mapper.Map(typeDto, type);
 
-                        // TODO: Update if exists?
-                        if (propFromDb != null)
-                            continue;
+                        foreach (var property in type.AppProperties)
+                            property.ID = properties.TryGetValue(property.Key, out var value) ? value : 0;
 
-                        await context.AppProperties.AddAsync(property);
-                        await context.SaveChangesAsync();
+                        foreach (var objectiveType in type.ObjectiveTypes)
+                        {
+                            objectiveType.ID = objectivesTypes.TryGetValue(objectiveType.ExternalId, out var value)
+                                ? value
+                                : 0;
+                        }
+
+                        context.ConnectionTypes.Update(type);
                     }
+                    else
+                    {
+                        type = mapper.Map<ConnectionType>(typeDto);
+                        await context.ConnectionTypes.AddAsync(type);
+                    }
+
+                    await context.SaveChangesAsync();
                 }
 
-                await context.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateException ex)
             {
-                throw new InvalidDataException($"Something went wrong with presented ConnectionTypes", ex.InnerException);
+                throw new InvalidDataException(
+                    $"Something went wrong with presented ConnectionTypes",
+                    ex.InnerException);
             }
         }
 

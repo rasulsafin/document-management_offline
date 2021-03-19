@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
                 return false;
 
             var pathToDownload = $"{path}{fileDetails.FileName}";
-            var downloadResult = await commonRequests.DownloadFileAsync(fileDetails.ID.ToString(), pathToDownload);
+            var downloadResult = await commonRequests.DownloadFileAsync(fileDetails.ID.Value, pathToDownload);
 
             return downloadResult;
         }
@@ -129,5 +129,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             return lastVersion;
         }
+
+        public async Task<IEnumerable<int>> DeleteBimAsync(int bimId)
+            => await commonRequests.DeleteObjectAsync(bimId);
     }
 }

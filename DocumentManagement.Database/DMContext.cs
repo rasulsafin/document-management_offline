@@ -83,6 +83,12 @@ namespace MRS.DocumentManagement.Database
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
+        public Task<int> SynchronizationSaveAsync(DateTime dateTime, CancellationToken cancellationToken = new CancellationToken())
+        {
+            UpdateDateTime(dateTime);
+            return base.SaveChangesAsync(true, cancellationToken);
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>()
@@ -285,7 +291,7 @@ namespace MRS.DocumentManagement.Database
                     .HasDefaultValue(DEFAULT_DATE_TIME);
         }
 
-        private void UpdateDateTime()
+        private void UpdateDateTime(DateTime dateTime = default)
         {
             foreach (var entityEntry in ChangeTracker
                .Entries()
@@ -293,9 +299,8 @@ namespace MRS.DocumentManagement.Database
                     e => e.Entity is ISynchronizableBase &&
                         (e.State == EntityState.Added || e.State == EntityState.Modified)))
             {
-                var synchronizable = (ISynchronizableBase) entityEntry.Entity;
-                if (!synchronizable.IsSynchronized)
-                    synchronizable.UpdatedAt = DateTime.Now;
+                var synchronizable = (ISynchronizableBase)entityEntry.Entity;
+                synchronizable.UpdatedAt = dateTime == default ? DateTime.UtcNow : dateTime;
             }
         }
     }

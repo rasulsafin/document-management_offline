@@ -21,6 +21,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Resources\HelloWallIfc4TEST.ifc">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\IntegrationTestFile.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

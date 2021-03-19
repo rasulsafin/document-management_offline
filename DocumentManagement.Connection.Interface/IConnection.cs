@@ -44,5 +44,12 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="info">ConnectionInfoDto to fill in.</param>
         /// <returns>All data.</returns>
         Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info);
+
+        /// <summary>
+        /// Get the wrapper for working with this connection's storage.
+        /// </summary>
+        /// <param name="info">ConnectionInfoDto to fill in.</param>
+        /// <returns>All data.</returns>
+        Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info);
     }
 }

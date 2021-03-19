@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace MRS.DocumentManagement.Connection.LementPro.Models
 {
     [DataContract]
-    public class TaskToUpdate
+    public class ObjectBaseToUpdate
     {
         [DataMember(Name = "id")]
         public int? ID { get; set; }
@@ -13,12 +13,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         public bool? CanAutoEditParents { get; set; }
 
         [DataMember(Name = "values")]
-        public TaskValueToUpdate Values { get; set; }
+        public ObjectBaseValueToUpdate Values { get; set; }
 
         [DataMember(Name = "addedFileIds")]
-        public List<string> AddedFileIds { get; set; }
+        public List<int> AddedFileIds { get; set; }
 
         [DataMember(Name = "removedFileIds")]
-        public List<string> RemovedFileIds { get; set; }
+        public List<int> RemovedFileIds { get; set; }
     }
 }

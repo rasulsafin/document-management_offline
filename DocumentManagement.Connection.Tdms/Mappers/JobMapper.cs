@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.AuthorExternalID = tdmsObject.CreateUser.SysName;
             objectiveDto.ObjectiveType = new ObjectiveTypeExternalDto()
             {
-                Name = ObjectTypeID.WORK,
+                ExternalId = ObjectTypeID.WORK,
             };
             objectiveDto.CreationDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.START_DATE].Value);
             objectiveDto.DueDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.DUE_DATE].Value);
@@ -48,6 +48,8 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 list.Add(new BimElementExternalDto()
                 {
                     GlobalID = link.Attributes[AttributeID.ENTITY_GLOBAL_ID].Value.ToString(),
+                    ParentName = link.Uplinks[0]?.Attributes[AttributeID.FILE_NAME]?.Value.ToString(),
+                    ElementName = link.Attributes[AttributeID.ENTITY_NAME]?.Value.ToString(),
                 });
             }
 

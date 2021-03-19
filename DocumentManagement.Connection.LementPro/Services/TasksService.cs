@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             CommonRequests = commonRequests;
         }
 
-        public CommonRequestsUtility CommonRequests { get; set; }
+        public CommonRequestsUtility CommonRequests { get; private set; }
 
         public void Dispose()
         {
@@ -40,13 +40,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
         public async Task<List<LementProType>> GetTasksTypesAsync()
             => await CommonRequests.GetObjectsTypes(OBJECTTYPE_SINGLE_TASK);
 
-        public async Task<ObjectBaseCreateResult> CreateTask(ObjectBaseToCreate objectToCreate)
+        public async Task<ObjectBaseCreateResult> CreateTaskAsync(ObjectBaseToCreate objectToCreate)
             => await CommonRequests.CreateObjectAsync(objectToCreate);
 
         public async Task<ObjectBase> DeleteTaskAsync(int objectId)
             => await CommonRequests.ArchiveObjectAsync(objectId);
 
-        public async Task<ObjectBase> UpdateTaskAsync(TaskToUpdate taskToUpdate)
+        public async Task<ObjectBase> UpdateTaskAsync(ObjectBaseToUpdate taskToUpdate)
         {
             var response = await requestUtility.GetResponseAsync(Resources.MethodTaskUpdate, taskToUpdate);
 

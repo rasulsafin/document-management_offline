@@ -151,6 +151,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /Services/ObjectBase/Edit.do.
+        /// </summary>
+        internal static string MethodObjectEdit {
+            get {
+                return ResourceManager.GetString("MethodObjectEdit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /Services/ObjectsBase/File/Add.do.
         /// </summary>
         internal static string MethodObjectFileAdd {

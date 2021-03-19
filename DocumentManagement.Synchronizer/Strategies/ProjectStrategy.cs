@@ -48,6 +48,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
+                AddUser(tuple, data);
                 var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Add Project To Remote");
@@ -132,15 +133,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing Items in Remove Project From Local");
-
                 return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -157,15 +154,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing Items in Remove Project From Remote");
-
                 return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Remote,
@@ -195,14 +188,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         private void AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
         {
             void AddUserLocal(Project project)
-                => project.Users = new List<UserProject>
+            {
+                project.Users ??= new List<UserProject>();
+
+                if (project.Users.All(x => x.UserID != data.User.ID))
                 {
-                    new UserProject
-                    {
-                        Project = project,
-                        UserID = data.User.ID,
-                    },
-                };
+                    project.Users.Add(
+                        new UserProject
+                        {
+                            Project = project,
+                            UserID = data.User.ID,
+                        });
+                }
+            }
 
             AddUserLocal(tuple.Local);
             AddUserLocal(tuple.Synchronized);

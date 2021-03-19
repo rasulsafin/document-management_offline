@@ -200,5 +200,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             await Connect(info);
             return new TdmsConnectionContext(tdms);
         }
+
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            await Connect(info);
+            return new TdmsStorage(tdms);
+        }
     }
 }

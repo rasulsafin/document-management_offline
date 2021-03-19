@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -45,23 +46,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<(Version version, Item item)>> SearchAsync(
                 string projectId,
                 string folderId,
-                IEnumerable<(string filteringField, string filteringValue)> filters = null)
+                IEnumerable<Filter> filters = null)
         {
-            var stringBuilder = new StringBuilder(Resources.GetProjectsFoldersSearchMethod);
-            if (filters != null)
-            {
-                foreach ((string field, string filterValue) in filters)
-                    stringBuilder.AppendFormat(FILTER_QUERY_PARAMETER, field, filterValue);
-            }
-
-            if (stringBuilder.Length > 0)
-                stringBuilder.Remove(stringBuilder.Length - 1, 1);
-
             var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedGet(),
-                    stringBuilder.ToString(),
-                    projectId,
-                    folderId);
+                ForgeSettings.AuthorizedGet(),
+                ForgeConnection.SetFilters(Resources.GetProjectsFoldersSearchMethod, filters),
+                projectId,
+                folderId);
 
             var versions = response[DATA_PROPERTY]?.ToObject<Version[]>();
             var items = response[INCLUDED_PROPERTY]?.ToObject<Item[]>() ?? Array.Empty<Item>();

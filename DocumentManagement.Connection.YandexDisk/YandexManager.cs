@@ -97,11 +97,11 @@ namespace MRS.DocumentManagement.Connection
             return await controller.DeleteAsync(path);
         }
 
-        public async Task<bool> PullFile(string href, string fileName)
+        public async Task<bool> PullFile(string href, string filePath)
         {
             try
             {
-                return await controller.DownloadFileAsync(href, fileName);
+                return await controller.DownloadFileAsync(href, filePath);
             }
             catch (FileNotFoundException)
             {

@@ -25,13 +25,15 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
             var lementIssue = obj.ToModelToCreate();
-            if (obj.Items?.Any() ?? false)
+            var isItemsAdding = obj.Items?.Any() ?? false;
+
+            if (isItemsAdding)
             {
-                var fileIds = await UploadFiles(obj.Items);
+                var fileIds = await ItemsSynchronizationHelper.UploadFilesAsync(obj.Items, tasksService.CommonRequests);
                 lementIssue.FileIds = fileIds;
             }
 
-            var createResult = await tasksService.CreateTask(lementIssue);
+            var createResult = await tasksService.CreateTaskAsync(lementIssue);
             if (!createResult.IsSuccess.GetValueOrDefault())
                 return null;
 
@@ -40,7 +42,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
             var task = await tasksService.GetTaskAsync(createResult.ID.Value);
             var parsedToDto = task.ToObjectiveExternalDto();
-            parsedToDto.Items = await FindAttachedItems(task);
+            if (isItemsAdding)
+                parsedToDto.Items = task.Values.Files.ToDtoItems(obj.Items);
+
+            parsedToDto.Items = await FindAttachedItems(task, obj.Items);
             return parsedToDto;
         }
 
@@ -55,17 +60,32 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
+            var isItemsAdding = obj.Items?.Any() ?? false;
+            if (!int.TryParse(obj.ExternalID, out var parsedId))
+                return null;
+
+            var existingObjectiveModel = await tasksService.GetTaskAsync(parsedId);
             var modelToUpdate = obj.ToModelToUpdate();
 
-            var updatedModel = await tasksService.UpdateTaskAsync(modelToUpdate);
-            return updatedModel.ToObjectiveExternalDto();
+            if (isItemsAdding)
+            {
+                modelToUpdate = await ItemsSynchronizationHelper
+                    .UpdateFilesAsync(existingObjectiveModel, modelToUpdate, obj.Items, tasksService.CommonRequests);
+            }
+
+            var updatedResult = await tasksService.UpdateTaskAsync(modelToUpdate);
+            var parsedResult = updatedResult.ToObjectiveExternalDto();
+
+            if (isItemsAdding)
+                parsedResult.Items = updatedResult.Values.Files.ToDtoItems(obj.Items);
+
+            return parsedResult;
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
             await CheckCashedElements();
             return objectives
-                .Where(o => o.UpdatedAt != default)
                 .Where(o => o.UpdatedAt <= date)
                 .Select(o => o.ExternalID).ToList();
         }
@@ -76,41 +96,20 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             return objectives.Where(o => ids.Contains(o.ExternalID)).ToList();
         }
 
-        private async Task<IEnumerable<int>> UploadFiles(ICollection<ItemExternalDto> items)
+        private async Task<ICollection<ItemExternalDto>> FindAttachedItems(ObjectBase task, ICollection<ItemExternalDto> items)
         {
-            var fileIds = new List<int>();
-            var existingFiles = items.Where(i => !string.IsNullOrWhiteSpace(i.ExternalID));
-            var filesToUpload = items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
-
-            foreach (var file in filesToUpload)
-            {
-                var uploaded = await tasksService.CommonRequests.AddFileAsync(file.FileName, file.FullPath);
-                if (uploaded.IsSuccess.GetValueOrDefault())
-                    fileIds.Add(uploaded.ID.Value);
-            }
-
-            foreach (var file in existingFiles)
-            {
-                if (int.TryParse(file.ExternalID, out var parsed))
-                    fileIds.Add(parsed);
-            }
-
-            return fileIds;
-        }
-
-        private async Task<ICollection<ItemExternalDto>> FindAttachedItems(ObjectBase task)
-        {
-            var items = new List<ItemExternalDto>();
+            var resultItems = new List<ItemExternalDto>();
             if (task.Values?.BimRef?.ID != null)
             {
                 var bim = await bimsService.GetBimLastVersion(task.Values.BimRef.ID.Value.ToString());
                 if (bim != null)
-                    items.Add(bim.ToItemExternalDto());
+                    resultItems.Add(bim.ToItemExternalDto());
             }
 
-            task.Values.Files.ForEach(f => items.Add(f.ToItemExternalDto()));
+            var attachedFiles = task.Values.Files.ToDtoItems(items);
+            resultItems.AddRange(attachedFiles);
 
-            return items;
+            return resultItems;
         }
 
         private async Task CheckCashedElements()
@@ -124,6 +123,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
                 foreach (var task in lementTasks)
                 {
+                    // It is necessary to get full info about issue to get last updated info
                     var fullInfoTask = await tasksService.GetTaskAsync(task.ID.Value);
                     var objective = fullInfoTask.ToObjectiveExternalDto();
                     objective.Items = GetIssueFiles(task, files);
