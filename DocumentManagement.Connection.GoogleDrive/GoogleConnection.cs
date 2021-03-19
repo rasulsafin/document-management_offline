@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
+using MRS.DocumentManagement.Connection.Utils.CloudBase;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -21,8 +22,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
             try
             {
+                connectionInfo = info;
                 GoogleDriveController driveController = new GoogleDriveController();
-                await driveController.InitializationAsync(info);
+                await driveController.InitializationAsync(connectionInfo);
                 manager = new GoogleDriveManager(driveController);
 
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
@@ -44,7 +46,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 Name = NAME_CONNECT,
                 AuthFieldNames = new List<string>
                 {
-                    "token",
+                    // Token stored as 'user' by sdk. See DataStore.StoreAsync
+                    "user",
                 },
                 AppProperties = new Dictionary<string, string>
                 {
@@ -93,9 +96,10 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return GoogleDriveConnectionContext.CreateContext(manager);
         }
 
-        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            await Connect(info);
+            return new CommonConnectionStorage(manager);
         }
     }
 }

@@ -26,21 +26,19 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             return model;
         }
 
-        internal static TaskToUpdate ToModelToUpdate(this ObjectiveExternalDto objective)
+        internal static ObjectBaseToUpdate ToModelToUpdate(this ObjectiveExternalDto objective)
         {
             if (!int.TryParse(objective.ObjectiveType.ExternalId, out var parsedTypeId))
                 return null;
 
-            var modelValue = new TaskValueToUpdate
+            var modelValue = new ObjectBaseValueToUpdate
             {
                 Type = parsedTypeId,
                 Name = objective.Title,
                 Description = objective.Description,
                 StartDate = objective.CreationDate.ToString(DATE_FORMAT),
                 IsExpired = IsExpired(objective.Status),
-                LastModifiedDate = objective.UpdatedAt == default
-                                ? null
-                                : objective.UpdatedAt.ToString(DATE_FORMAT),
+                LastModifiedDate = objective.UpdatedAt.ToString(DATE_FORMAT),
             };
 
             if (objective.ProjectExternalID != DEFAULT_PROJECT_STUB.ExternalID
@@ -52,7 +50,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             if (!int.TryParse(objective.ExternalID, out var parsedId))
                 return null;
 
-            var model = new TaskToUpdate
+            var model = new ObjectBaseToUpdate
             {
                 ID = parsedId,
                 Values = modelValue,

@@ -157,6 +157,10 @@
     <value>/Services/ObjectBase/Delete.do</value>
     <comment>Method to delete the object</comment>
   </data>
+  <data name="MethodObjectEdit" xml:space="preserve">
+    <value>/Services/ObjectBase/Edit.do</value>
+    <comment>Method to edit the object</comment>
+  </data>
   <data name="MethodObjectFileAdd" xml:space="preserve">
     <value>/Services/ObjectsBase/File/Add.do</value>
     <comment>Method to upload file (less than 2 MB)</comment>

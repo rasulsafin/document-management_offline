@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 FileIds = new List<int>(),
             };
 
-            var result = await service.CreateTask(newTask);
+            var result = await service.CreateTaskAsync(newTask);
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
@@ -109,17 +109,20 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 StartDate = DateTime.Now.ToString(dateFormat),
             };
 
-            var filePath = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";
-            var name = Path.GetFileName(filePath);
-            var uploaded = await service.CommonRequests.AddFileAsync(name, filePath);
+            var filePath1 = "C:\\Users\\diismagilov\\Downloads\\red-circle.png";
+            var name1 = Path.GetFileName(filePath1);
+            var uploaded1 = await service.CommonRequests.AddFileAsync(name1, filePath1);
+            var filePath2 = "C:\\Users\\diismagilov\\Downloads\\server.png";
+            var name2 = Path.GetFileName(filePath2);
+            var uploaded2 = await service.CommonRequests.AddFileAsync(name2, filePath2);
             var newTask = new ObjectBaseToCreate
             {
                 CanAutoEditParents = false,
                 Values = newTaskValue,
-                FileIds = new List<int> { uploaded.ID.Value },
+                FileIds = new List<int> { uploaded1.ID.Value, uploaded2.ID.Value },
             };
 
-            var result = await service.CreateTask(newTask);
+            var result = await service.CreateTaskAsync(newTask);
 
             Assert.IsTrue(result.IsSuccess.GetValueOrDefault());
         }
@@ -146,7 +149,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Values = newTaskValue,
                 FileIds = new List<int>(),
             };
-            var created = await service.CreateTask(newTask);
+            var created = await service.CreateTaskAsync(newTask);
 
             // Wait for creating (2 sec is enough usually)
             await Task.Delay(3000);
@@ -178,7 +181,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Values = newTaskValue,
                 FileIds = new List<int>(),
             };
-            var created = await service.CreateTask(newTask);
+            var created = await service.CreateTaskAsync(newTask);
 
             // Wait for creating (2 sec is enough usually)
             await Task.Delay(3000);
@@ -196,7 +199,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
             var userId = 44212;
             var existingTask = await service.GetTaskAsync(id);
 
-            var updatedTaskValue = new TaskValueToUpdate
+            var updatedTaskValue = new ObjectBaseValueToUpdate
             {
                 BimRef = existingTask.Values.BimRef.ID,
                 Type = existingTask.Values.Type.ID,
@@ -205,7 +208,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 I60099 = userId,
                 StartDate = "2020-05-10T12:55:37.000Z",
             };
-            var taskToUpdate = new TaskToUpdate
+            var taskToUpdate = new ObjectBaseToUpdate
             {
                 ID = id,
                 Values = updatedTaskValue,

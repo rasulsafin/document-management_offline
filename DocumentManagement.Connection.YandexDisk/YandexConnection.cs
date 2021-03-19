@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils.CloudBase;
 using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -111,9 +112,10 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return YandexConnectionContext.CreateContext(manager);
         }
 
-        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            await Connect(info);
+            return new CommonConnectionStorage(manager);
         }
     }
 }

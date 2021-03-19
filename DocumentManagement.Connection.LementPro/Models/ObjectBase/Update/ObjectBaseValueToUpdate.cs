@@ -3,7 +3,7 @@
 namespace MRS.DocumentManagement.Connection.LementPro.Models
 {
     [DataContract]
-    public class TaskValueToUpdate
+    public class ObjectBaseValueToUpdate
     {
         [DataMember(Name = "type")]
         public int? Type { get; set; }

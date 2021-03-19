@@ -14,7 +14,10 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public static readonly int STATE_ARCHIVED = 2;
 
-        public static readonly string DATE_FORMAT = "yyyy - MM - ddThh: mm:ss.FFFZ";
+        /// <summary>
+        /// ISO 8601.
+        /// </summary>
+        public static readonly string DATE_FORMAT = "O";
 
         public static readonly string REQUEST_UPLOAD_POSTEDFILE_FIELDNAME = "postedFile";
         public static readonly string REQUEST_UPLOAD_FILEPART_FIELDNAME = "filePart";
@@ -39,7 +42,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public static readonly string OBJECTTYPE_BIM_ATTRIBUTE_VERSION = "modelVersions";
         public static readonly string OBJECTTYPE_TASKS = "Tasks";
         public static readonly string OBJECTTYPE_SINGLE_TASK = "Task";
-        public static readonly string OBJECTTYPE_PROJECTS = "Project";
+        public static readonly string OBJECTTYPE_PROJECT = "Project";
 
         public static readonly string RESPONSE_OBJECT_NAME = "object";
         public static readonly string RESPONSE_COLLECTION_ITEMS_NAME = "items";
@@ -48,12 +51,12 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public static readonly char RESPONSE_COOKIE_VALUES_SEPARATOR = ';';
         public static readonly char RESPONSE_COOKIE_KEY_VALUE_SEPARATOR = '=';
 
-        private static readonly int DEFAULT_PROJECT_STUB_ID = -1;
+        private static readonly string DEFAULT_PROJECT_STUB_ID = "LementPro 63cbe66b-b7fb-4465-a5b4-d585765b33af";
         private static readonly string DEFAULT_PROJECT_STUB_TITLE = "Default Project";
 
         public static ProjectExternalDto DEFAULT_PROJECT_STUB => new ProjectExternalDto
         {
-            ExternalID = DEFAULT_PROJECT_STUB_ID.ToString(CultureInfo.InvariantCulture),
+            ExternalID = DEFAULT_PROJECT_STUB_ID,
             Title = DEFAULT_PROJECT_STUB_TITLE,
             UpdatedAt = DateTime.MinValue.AddMilliseconds(1),
         };
