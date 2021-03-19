@@ -68,6 +68,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
                     { "RETURN_URL", "http://localhost:8000/oauth/" },
                 },
+                ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+                {
+                    new ObjectiveTypeExternalDto
+                    {
+                        ExternalId = Constants.ISSUE_TYPE,
+                        Name = "Issue",
+                    },
+                },
             };
 
             return type;
