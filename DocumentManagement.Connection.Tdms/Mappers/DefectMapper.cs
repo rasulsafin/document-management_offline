@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.AuthorExternalID = tdmsObject.CreateUser.SysName;
             objectiveDto.ObjectiveType = new ObjectiveTypeExternalDto()
             {
-                Name = ObjectTypeID.DEFECT,
+                ExternalId = ObjectTypeID.DEFECT,
             };
             objectiveDto.CreationDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.START_DATE].Value);
             objectiveDto.DueDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.DUE_DATE].Value);

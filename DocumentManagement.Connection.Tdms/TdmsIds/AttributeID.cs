@@ -31,5 +31,7 @@
         public static readonly string CHECKLIST_CLASS_NAME = "ATTR_CHECKLIST_CLASS_NAME";
         public static readonly string AMOUNT = "ATTR_AMOUNT";
         public static readonly string PRICE = "ATTR_PRICE";
+        public static readonly string FILE_NAME = "ATTR_FILE_NAME";
+        public static readonly string ENTITY_NAME = "ATTR_ENTITY_NAME";
     }
 }
