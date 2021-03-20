@@ -44,6 +44,7 @@ namespace MRS.DocumentManagement.Utility
                .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
 
             CreateMap<DynamicFieldInfo, DynamicFieldDto>()
+                .ForMember(d => d.ID, o => o.MapFrom(s => new ID<DynamicFieldDto>()))
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
                 .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
         }
