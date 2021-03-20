@@ -7,6 +7,8 @@ namespace MRS.DocumentManagement.Database.Models
     {
         public int ID { get; set; }
 
+        public string ExternalID { get; set; }
+
         [Required]
         [MinLength(1)]
         public string Login { get; set; }

@@ -126,14 +126,15 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<ObjectiveExternalDto, Objective>()
                .ForMember(x => x.ProjectID, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
                .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectResolver>())
-               .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIDResolver>())
-               .ForMember(d => d.AuthorID, с => с.MapFrom(ex => ex.AuthorExternalID));
+               .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIdResolver>())
+               .ForMember(d => d.AuthorID, с => с.MapFrom<ObjectiveExternalDtoAuthorIdResolver>())
+               .ForMember(d => d.Author, с => с.MapFrom<ObjectiveExternalDtoAuthorResolver>());
             CreateMap<Objective, ObjectiveExternalDto>()
                .ForMember(x => x.ProjectExternalID, o => o.MapFrom<ObjectiveProjectIDResolver>())
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
                .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
                .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)))
-               .ForMember(ex => ex.AuthorExternalID, с => с.MapFrom(d => d.AuthorID));
+               .ForMember(x => x.AuthorExternalID, с => с.MapFrom(d => d.Author.ExternalID));
 
             CreateMap<Item, ItemExternalDto>()
                 .ForMember(x => x.FileName, o => o.MapFrom<ItemFileNameResolver>())

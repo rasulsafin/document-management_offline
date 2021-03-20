@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Tests
             IServiceCollection services = new ServiceCollection();
             services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIDResolver(Fixture.Context));
+            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIdResolver(Fixture.Context));
             services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context));
             services.AddTransient(x => new DynamicFieldModelToExternalValueResolver(Fixture.Context));
             services.AddTransient(x => new DynamicFieldExternalToModelValueResolver(Fixture.Context));

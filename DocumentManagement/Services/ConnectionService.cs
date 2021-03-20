@@ -69,6 +69,8 @@ namespace MRS.DocumentManagement.Services
             connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
             connectionInfo = mapper.Map(connectionInfoExternalDto, connectionInfo);
 
+            user.ExternalID = connectionInfoExternalDto.UserExternalID;
+
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
 
@@ -114,9 +116,9 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<string> Synchronize(ID<UserDto> userID)
         {
-            var connect = await Connect(userID);
-            if (connect.Status != RemoteConnectionStatus.OK)
-                throw new Exception();
+            //var connect = await Connect(userID);
+            //if (connect.Status != RemoteConnectionStatus.OK)
+            //    throw new Exception();
 
             var iUserID = (int)userID;
             var user = await context.Users
