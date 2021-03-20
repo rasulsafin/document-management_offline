@@ -42,6 +42,10 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicField, DynamicFieldDto>()
                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
                .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
+
+            CreateMap<DynamicFieldInfo, DynamicFieldDto>()
+                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
+                .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
         }
 
         private void CreateObjectiveMapToDto()
@@ -93,6 +97,9 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<DynamicFieldDto, DynamicField>()
               .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
+
+            CreateMap<DynamicFieldDto, DynamicFieldInfo>()
+               .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
         }
 
         private void CreateObjectiveMapToModel()

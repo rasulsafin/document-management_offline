@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MRS.DocumentManagement.Database.Models
 {
-    public class DynamicField : ISynchronizable<DynamicField>
+    public class DynamicField : ISynchronizable<DynamicField>, IDynamicField
     {
         [ForbidMergeAttribute]
         public int ID { get; set; }
