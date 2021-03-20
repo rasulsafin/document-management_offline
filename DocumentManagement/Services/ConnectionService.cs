@@ -164,7 +164,8 @@ namespace MRS.DocumentManagement.Services
                     try
                     {
                         var synchronizationResult = await synchronizer.Synchronize(data, connection, info);
-                        await UpdateConnectionInfo(scopedContext, info, user.ConnectionInfo);
+                        //TODO: Delete or fix. This method is crushing everithing.
+                        //await UpdateConnectionInfo(scopedContext, info, user.ConnectionInfo);
                         return synchronizationResult;
                     }
                     finally
@@ -354,29 +355,29 @@ namespace MRS.DocumentManagement.Services
             await context.SaveChangesAsync();
         }
 
-        private async Task UpdateConnectionInfo(DMContext scopedContext, ConnectionInfoExternalDto source, ConnectionInfo destination)
-        {
-            var helper = new CryptographyHelper();
-            foreach (var remote in source.AuthFieldValues)
-            {
-                var encryptedValue = helper.EncryptAes(remote.Value);
-                var found = destination.AuthFieldValues.FirstOrDefault(d => d.Key == remote.Key);
-                if (found != null)
-                {
-                    found.Value = encryptedValue;
-                    continue;
-                }
+        //private async Task UpdateConnectionInfo(DMContext scopedContext, ConnectionInfoExternalDto source, ConnectionInfo destination)
+        //{
+        //    var helper = new CryptographyHelper();
+        //    foreach (var remote in source.AuthFieldValues)
+        //    {
+        //        var encryptedValue = helper.EncryptAes(remote.Value);
+        //        var found = destination.AuthFieldValues.FirstOrDefault(d => d.Key == remote.Key);
+        //        if (found != null)
+        //        {
+        //            found.Value = encryptedValue;
+        //            continue;
+        //        }
 
-                destination.AuthFieldValues.Add(new AuthFieldValue
-                {
-                    Key = remote.Key,
-                    Value = encryptedValue,
-                });
-            }
+        //        destination.AuthFieldValues.Add(new AuthFieldValue
+        //        {
+        //            Key = remote.Key,
+        //            Value = encryptedValue,
+        //        });
+        //    }
 
-            scopedContext.Update(destination);
-            await scopedContext.SaveChangesAsync();
-        }
+        //    scopedContext.Update(destination);
+        //    await scopedContext.SaveChangesAsync();
+        //}
         #endregion
     }
 }
