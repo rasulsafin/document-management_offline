@@ -189,7 +189,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var attachments = await context.IssuesService.GetAttachmentsAsync(container, issue.ID);
 
             foreach (var attachment in attachments)
-                dto.Items.Add((await context.ItemsService.GetAsync(projectID, attachment.Attributes.Urn)).ToDto());
+                dto.Items.Add((await context.ItemsService.GetAsync(projectID, attachment.Attributes.Urn)).item.ToDto());
             return dto;
         }
 

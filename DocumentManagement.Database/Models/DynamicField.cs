@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MRS.DocumentManagement.Database.Models
 {
-    public class DynamicField : ISynchronizable<DynamicField>
+    public class DynamicField : ISynchronizable<DynamicField>, IDynamicField
     {
         [ForbidMergeAttribute]
         public int ID { get; set; }
@@ -16,12 +16,6 @@ namespace MRS.DocumentManagement.Database.Models
         public string Name { get; set; }
 
         public string Value { get; set; }
-
-        [ForbidMergeAttribute]
-        public int? ObjectiveTypeID { get; set; }
-
-        [ForbidMergeAttribute]
-        public ObjectiveType ObjectiveType { get; set; }
 
         [ForbidMergeAttribute]
         public int? ObjectiveID { get; set; }

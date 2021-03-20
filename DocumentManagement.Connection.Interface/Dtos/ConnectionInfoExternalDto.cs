@@ -9,5 +9,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public IDictionary<string, string> AuthFieldValues { get; set; }
 
         public ICollection<EnumerationTypeExternalDto> EnumerationTypes { get; set; }
+
+        public string UserExternalID { get; set; }
     }
 }

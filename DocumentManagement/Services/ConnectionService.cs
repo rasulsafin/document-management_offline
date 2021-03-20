@@ -69,6 +69,8 @@ namespace MRS.DocumentManagement.Services
             connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
             connectionInfo = mapper.Map(connectionInfoExternalDto, connectionInfo);
 
+            user.ExternalID = connectionInfoExternalDto.UserExternalID;
+
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
 

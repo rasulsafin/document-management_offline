@@ -6,11 +6,11 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class ObjectiveExternalDtoObjectiveTypeIDResolver : IValueResolver<ObjectiveExternalDto, Objective, int>
+    public class ObjectiveExternalDtoObjectiveTypeIdResolver : IValueResolver<ObjectiveExternalDto, Objective, int>
     {
         private readonly DMContext dbContext;
 
-        public ObjectiveExternalDtoObjectiveTypeIDResolver(DMContext dbContext)
+        public ObjectiveExternalDtoObjectiveTypeIdResolver(DMContext dbContext)
         {
             this.dbContext = dbContext;
         }

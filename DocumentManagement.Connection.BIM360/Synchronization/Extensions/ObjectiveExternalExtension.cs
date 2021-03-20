@@ -17,7 +17,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                 ID = objective.ExternalID,
                 Attributes = new Issue.IssueAttributes
                 {
-                    Owner = objective.AuthorExternalID,
                     NgIssueTypeID = objective.ObjectiveType.Name,
                     Title = objective.Title,
                     Description = objective.Description,
@@ -41,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             var resultDto = new ObjectiveExternalDto
             {
                 ExternalID = issue.ID,
-                AuthorExternalID = issue.Attributes.Owner,
+                AuthorExternalID = issue.Attributes.CreatedBy,
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = issue.Type },
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,

@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class DynamicFieldModelToDtoValueResolver : IValueResolver<DynamicField, DynamicFieldDto, object>
+    public class DynamicFieldModelToDtoValueResolver : IValueResolver<IDynamicField, DynamicFieldDto, object>
     {
         private readonly DMContext dbContext;
         private readonly IMapper mapper;
@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Utility
             this.mapper = mapper;
         }
 
-        public object Resolve(DynamicField source, DynamicFieldDto destination, object destMember, ResolutionContext context)
+        public object Resolve(IDynamicField source, DynamicFieldDto destination, object destMember, ResolutionContext context)
         {
             var type = (DynamicFieldType)Enum.Parse(typeof(DynamicFieldType), source.Type);
 

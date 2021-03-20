@@ -54,6 +54,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
         {
             info.EnumerationTypes = GetEnumerationTypes();
             info.ConnectionType.ObjectiveTypes = GetObjectiveTypes();
+            info.UserExternalID = tdms.CurrentUser.SysName;
 
             return Task.FromResult(info);
         }

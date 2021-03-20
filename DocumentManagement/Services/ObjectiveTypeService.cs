@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Services
         {
             var db = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
-                .Where(x => x.ConnectionTypeID == null || x.ConnectionTypeID == (int)id)
+                .Where(x => x.ConnectionTypeID == Check((int)id))
                 .ToListAsync();
             return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
@@ -80,5 +80,7 @@ namespace MRS.DocumentManagement.Services
                 throw new InvalidDataException($"Can't remove objective type with key {id}", ex.InnerException);
             }
         }
+
+        private int? Check(int id) => id == -1 ? null : id;
     }
 }

@@ -31,6 +31,8 @@ namespace MRS.DocumentManagement.Database
 
         public DbSet<DynamicField> DynamicFields { get; set; }
 
+        public DbSet<DynamicFieldInfo> DynamicFieldInfos { get; set; }
+
         public DbSet<BimElement> BimElements { get; set; }
 
         public DbSet<ConnectionInfo> ConnectionInfos { get; set; }
@@ -184,6 +186,11 @@ namespace MRS.DocumentManagement.Database
                .WithMany(x => x.DynamicFields)
                .OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<DynamicField>()
+                .HasOne(x => x.ParentField)
+                .WithMany(x => x.ChildrenDynamicFields)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<DynamicFieldInfo>()
                 .HasOne(x => x.ParentField)
                 .WithMany(x => x.ChildrenDynamicFields)
                 .OnDelete(DeleteBehavior.Cascade);
