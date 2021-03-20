@@ -154,8 +154,10 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<DynamicFieldExternalDto, DynamicField>()
                 .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalToModelValueResolver>());
 
-            CreateMap<DynamicFieldInfo, DynamicFieldExternalDto>();
-            CreateMap<DynamicFieldExternalDto, DynamicFieldInfo>();
+            CreateMap<DynamicFieldInfo, DynamicFieldExternalDto>()
+                  .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldModelToExternalValueResolver>());
+            CreateMap<DynamicFieldExternalDto, DynamicFieldInfo>()
+                  .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldExternalToModelValueResolver>());
 
             CreateMap<ConnectionInfo, ConnectionInfoExternalDto>()
                 .ForMember(d => d.AuthFieldValues, o => o.MapFrom<ConnectionInfoAuthFieldValuesResolver>())

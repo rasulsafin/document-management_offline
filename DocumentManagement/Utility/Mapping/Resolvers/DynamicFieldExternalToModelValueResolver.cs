@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class DynamicFieldExternalToModelValueResolver : IValueResolver<DynamicFieldExternalDto, DynamicField, string>
+    public class DynamicFieldExternalToModelValueResolver : IValueResolver<DynamicFieldExternalDto, IDynamicField, string>
     {
         private readonly DMContext dbContext;
 
@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement.Utility
             this.dbContext = dbContext;
         }
 
-        public string Resolve(DynamicFieldExternalDto source, DynamicField destination, string destMember, ResolutionContext context)
+        public string Resolve(DynamicFieldExternalDto source, IDynamicField destination, string destMember, ResolutionContext context)
         {
             if (source.Type == DynamicFieldType.ENUM && source.Value != null)
                 return dbContext.EnumerationValues.FirstOrDefault(x => x.ExternalId == source.Value).ID.ToString();
