@@ -60,7 +60,9 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Objective, ObjectiveToReportDto>()
                 .ForMember(d => d.ID, opt => opt.Ignore())
                 .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
-                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
+                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)
+                                                                    .Where(x => x.ItemType == (int)ItemType.Media
+                                                                                && !x.RelativePath.EndsWith("*.mp4"))))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
         }
 
@@ -178,6 +180,7 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
             CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
+              // .ForMember(d => d.ID, o => o.Ignore());
 
             CreateMap<EnumerationType, EnumerationTypeExternalDto>();
             CreateMap<EnumerationTypeExternalDto, EnumerationType>();
