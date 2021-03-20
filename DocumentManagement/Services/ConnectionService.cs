@@ -78,7 +78,19 @@ namespace MRS.DocumentManagement.Services
             await UpdateEnumerationObjects(connectionInfo, connectionInfoExternalDto);
 
             // Update objective types stored in connection type
-            mapper.Map(connectionInfoExternalDto.ConnectionType.ObjectiveTypes, connectionInfo.ConnectionType.ObjectiveTypes);
+            foreach (var externalType in connectionInfoExternalDto.ConnectionType.ObjectiveTypes)
+            {
+                var dbType = connectionInfo.ConnectionType.ObjectiveTypes.FirstOrDefault(x => x.ExternalId == externalType.ExternalId);
+                if (dbType != null)
+                {
+                    dbType.DefaultDynamicFields = mapper.Map<ICollection<DynamicFieldInfo>>(externalType.DefaultDynamicFields);
+                    dbType.Name = externalType.Name;
+                } else
+                {
+                    var newType = mapper.Map<ObjectiveType>(externalType);
+                    connectionInfo.ConnectionType.ObjectiveTypes.Add(newType);
+                }
+            }
 
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
