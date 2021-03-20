@@ -61,6 +61,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             if (manager != null)
             {
+                // TODO: make it the proper way.
                 return await manager.GetStatusAsync();
             }
 
@@ -105,16 +106,11 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
-            var connectResult = await Connect(info);
-            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
-                return null;
-
             return YandexConnectionContext.CreateContext(manager);
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            await Connect(info);
             return new CommonConnectionStorage(manager);
         }
     }
