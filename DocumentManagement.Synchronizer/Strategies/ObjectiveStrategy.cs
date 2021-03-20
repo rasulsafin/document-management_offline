@@ -59,6 +59,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             => base.Include(
                 set.Include(x => x.Items)
                    .Include(x => x.ParentObjective)
+                   .Include(x => x.Author)
                    .Include(x => x.BimElements)
                    .ThenInclude(x => x.BimElement));
 
