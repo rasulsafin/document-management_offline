@@ -114,10 +114,6 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<string> Synchronize(ID<UserDto> userID)
         {
-            var connect = await Connect(userID);
-            if (connect.Status != RemoteConnectionStatus.OK)
-                throw new Exception();
-
             var iUserID = (int)userID;
             var user = await context.Users
                 .Include(x => x.ConnectionInfo)

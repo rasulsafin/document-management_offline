@@ -62,6 +62,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
+            // TODO: fix this.
             return await Connect(info);
         }
 
@@ -89,16 +90,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
-            var connectResult = await Connect(info);
-            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
-                return null;
-
             return GoogleDriveConnectionContext.CreateContext(manager);
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            await Connect(info);
             return new CommonConnectionStorage(manager);
         }
     }
