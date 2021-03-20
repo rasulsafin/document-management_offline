@@ -57,5 +57,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     Resources.PostRefreshTokenMethod);
             return data.ToObject<Token>();
         }
+
+        public async Task<User> GetMe()
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetUsersMeMethod);
+            return response.ToObject<User>();
+        }
     }
 }

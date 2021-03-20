@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public ItemsService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<Item> GetAsync(string projectId, string itemID)
+        public async Task<(Item item, Version version)> GetAsync(string projectId, string itemID)
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 projectId,
                 itemID);
 
-            return response[DATA_PROPERTY]?.ToObject<Item>();
+            return (response[DATA_PROPERTY]?.ToObject<Item>(), response[INCLUDED_PROPERTY]?.ToObject<Version>());
         }
 
         public async Task<(Item item, Version version)> PostItemAsync(string projectId, Item item, Version version)

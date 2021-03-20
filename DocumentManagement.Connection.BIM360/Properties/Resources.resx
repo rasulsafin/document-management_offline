@@ -253,4 +253,8 @@
     <value>/data/v1/projects/{0}/items/{1}</value>
     <comment>Retrieves metadata for a specified item. Items represent word documents, fusion design files, drawings, spreadsheets, etc.</comment>
   </data>
+  <data name="GetUsersMeMethod" xml:space="preserve">
+    <value>/userprofile/v1/users/@me</value>
+    <comment>Get the profile information of an authorizing end user in a three-legged context</comment>
+  </data>
 </root>

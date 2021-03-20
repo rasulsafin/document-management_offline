@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
@@ -12,9 +12,9 @@ namespace MRS.DocumentManagement.Connection.Bim360
 {
     public class Bim360Connection : IConnection, IDisposable
     {
-        private AuthenticationService authenticationService;
-        private Authenticator authenticator;
-        private ForgeConnection connection;
+        private readonly AuthenticationService authenticationService;
+        private readonly Authenticator authenticator;
+        private readonly ForgeConnection connection;
 
         private ConnectionInfoExternalDto updatedInfo;
 
@@ -34,13 +34,8 @@ namespace MRS.DocumentManagement.Connection.Bim360
         {
             var authorizationResult = await authenticator.SignInAsync(info);
             updatedInfo = authorizationResult.updatedInfo;
+            updatedInfo.UserExternalID = (await authenticationService.GetMe()).UserId;
             return authorizationResult.authStatus;
-        }
-
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
-        {
-            // TODO: use connection info to check correctness
-            return Task.FromResult(authenticator.IsLogged);
         }
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
@@ -49,7 +44,9 @@ namespace MRS.DocumentManagement.Connection.Bim360
         }
 
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
-            => Task.FromResult(updatedInfo);
+        {
+            return Task.FromResult(updatedInfo);
+        }
 
         public ConnectionTypeExternalDto GetConnectionType()
         {
@@ -84,9 +81,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => await Bim360ConnectionContext.CreateContext(info);
 
-        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            await Connect(info);
+            return Bim360Storage.Create(info);
         }
     }
 }

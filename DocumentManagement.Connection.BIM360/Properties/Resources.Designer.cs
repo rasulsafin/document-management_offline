@@ -259,6 +259,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /userprofile/v1/users/@me.
+        /// </summary>
+        internal static string GetUsersMeMethod {
+            get {
+                return ResourceManager.GetString("GetUsersMeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}.
         /// </summary>
         internal static string PatchIssuesMethod {
