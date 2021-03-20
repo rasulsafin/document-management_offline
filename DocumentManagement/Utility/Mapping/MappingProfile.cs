@@ -96,10 +96,11 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<EnumerationValueDto, EnumerationValue>();
 
             CreateMap<DynamicFieldDto, DynamicField>()
-              .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
+                .ForMember(d => d.ExternalID, o => o.MapFrom(s => s.Key))
+                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
 
             CreateMap<DynamicFieldDto, DynamicFieldInfo>()
-               .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
+                .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
         }
 
         private void CreateObjectiveMapToModel()
@@ -110,11 +111,10 @@ namespace MRS.DocumentManagement.Utility
                .ForMember(d => d.DynamicFields, opt => opt.Ignore())
                .ForMember(d => d.BimElements, opt => opt.Ignore())
                .ForMember(d => d.Items, o => o.Ignore())
-               .ForMember(d => d.ParentObjectiveID, opt => opt.Ignore());
+               .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(s => (int?)s.ParentObjectiveID));
             CreateMap<ObjectiveDto, Objective>()
                 .ForMember(d => d.DynamicFields, opt => opt.Ignore())
                 .ForMember(d => d.BimElements, opt => opt.Ignore())
-                .ForMember(d => d.ParentObjectiveID, opt => opt.Ignore())
                 .ForMember(d => d.Items, o => o.Ignore());
         }
 

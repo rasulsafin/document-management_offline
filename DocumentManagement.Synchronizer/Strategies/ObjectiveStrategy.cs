@@ -242,12 +242,22 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 Item = item,
                 ObjectiveID = objective.ID,
             });
+            if (entityType == EntityType.Remote)
+            {
+                item.Objectives ??= new List<ObjectiveItem>() { new ObjectiveItem
+                    {
+                    Item = item,
+                    ObjectiveID = objective.ID,
+                    Objective = objective,
+                    },
+                };
+            }
             return Task.CompletedTask;
         }
 
         private Task UnlinkItem(DMContext context, Item item, object parent, EntityType entityType)
         {
-            var objective =  LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
+            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
 
             if (entityType == EntityType.Remote)
             {
