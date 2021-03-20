@@ -45,16 +45,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            // TODO: do it with dynamic field.
             var types = await context.IssuesService.GetIssueTypesAsync(containerId);
-            issue.Attributes.NgIssueTypeID = types[0].ID;
-            issue.Attributes.NgIssueSubtypeID = types[0].Subtypes[0].ID;
+            var dynamicFieldID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == dynamicFieldID);
+            var type = types.FirstOrDefault(x => x.Title == dynamicField.Value) ?? types[0];
+            issue.Attributes.NgIssueTypeID = type.ID;
+            issue.Attributes.NgIssueSubtypeID = type.Subtypes[0].ID;
 
             var created = await context.IssuesService.PostIssueAsync(containerId, issue);
 
             var parsedToDto = created.ToExternalDto(
                 context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-                   .Key);
+                   .Key,
+                types.First(x => x.ID == created.Attributes.NgIssueTypeID).Title);
             parsedToDto.ProjectExternalID = projectId;
 
             if (obj.Items?.Any() ?? false)
@@ -84,8 +87,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             issue.Attributes.Status = Status.Void;
             issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
 
-            return issue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-               .Key);
+            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
+            return issue.ToExternalDto(
+                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+                   .Key,
+                types.First(x => x.ID == issue.Attributes.NgIssueTypeID).Title);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
@@ -98,10 +104,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var issueFromRemote = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
             issue.Attributes.PermittedAttributes = issueFromRemote.Attributes.PermittedAttributes;
             issue.Attributes.NgIssueTypeID = issueFromRemote.Attributes.NgIssueTypeID;
+            issue.Attributes.NgIssueSubtypeID = issueFromRemote.Attributes.NgIssueSubtypeID;
             var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
 
-            return updatedIssue.ToExternalDto(context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-                   .Key);
+            return updatedIssue.ToExternalDto(
+                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
+                   .Key,
+                types.First(x => x.ID == updatedIssue.Attributes.NgIssueTypeID).Title);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
@@ -183,7 +193,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             string projectID,
             string container)
         {
-            var dto = issue.ToExternalDto(projectID);
+            var types = await context.IssuesService.GetIssueTypesAsync(container);
+            var dto = issue.ToExternalDto(projectID, types.First(x => x.ID == issue.Attributes.NgIssueTypeID).Title);
             dto.Items ??= new List<ItemExternalDto>();
 
             var attachments = await context.IssuesService.GetAttachmentsAsync(container, issue.ID);

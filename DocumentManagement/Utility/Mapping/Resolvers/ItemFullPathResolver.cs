@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Utility
             var project = dbContext.Projects
                 .Where(x => x.ID == projectID)
                 .FirstOrDefault();
-            return PathHelper.GetFullPath(project.Title, PathHelper.GetFileName(source.RelativePath));
+            return PathHelper.GetFullPath(project.Title, source.RelativePath);
         }
     }
 }

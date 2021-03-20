@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using MRS.DocumentManagement.Interface.Dtos;
+
 namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public static class Constants
@@ -49,5 +53,68 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
 
         internal static readonly string FILTER_KEY_ISSUE_UPDATED_AFTER = "synced_after";
+
+        internal static readonly Lazy<EnumerationTypeExternalDto> STANDARD_NG_TYPES =
+            new Lazy<EnumerationTypeExternalDto>(
+                () => new EnumerationTypeExternalDto()
+                {
+                    EnumerationValues = new List<EnumerationValueExternalDto>
+                    {
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Design",
+                            Value = "Design",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Quality",
+                            Value = "Quality",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Safety",
+                            Value = "Safety",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Punch List",
+                            Value = "Punch List",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Commissioning",
+                            Value = "Commissioning",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Work List",
+                            Value = "Work List",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Observation",
+                            Value = "Observation",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Warranty",
+                            Value = "Warranty",
+                        },
+                        new EnumerationValueExternalDto
+                        {
+                            ExternalID = "Coordination",
+                            Value = "Coordination",
+                        },
+                        UNDEFINED_NG_TYPE,
+                    },
+                    Name = "Type",
+                    ExternalID = "ng_issue_type_id",
+                });
+
+        internal static readonly EnumerationValueExternalDto UNDEFINED_NG_TYPE = new EnumerationValueExternalDto
+        {
+            ExternalID = string.Empty,
+            Value = "Undefined",
+        };
     }
 }

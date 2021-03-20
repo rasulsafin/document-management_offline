@@ -46,12 +46,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoExternalDto connectionInfo)
         {
             var connection = new ForgeConnection();
-            var authService = new AuthenticationService(connection);
-            var authenticator = new Authenticator(authService);
             var context = new Bim360ConnectionContext();
-
-            // Authorize
-            _ = await authenticator.SignInAsync(connectionInfo);
+            
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
             context.IssuesService = new IssuesService(connection);

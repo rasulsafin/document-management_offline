@@ -1,13 +1,14 @@
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
     [DataContract]
-    [JsonConverter(typeof(StringEnumConverter))]
+    [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
     public enum Status
     {
+        Undefined,
         [EnumMember(Value = "draft")]
         Draft,
         [EnumMember(Value = "open")]

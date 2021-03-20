@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Utility
             => Path.GetFileName(path);
 
         public static string GetFullPath(string projectName, string fileName)
-            => Path.GetFullPath(Path.Combine(Database, projectName, fileName));
+            => Path.GetFullPath(Path.Combine(Database, projectName, fileName.TrimStart('/', '\\')));
 
         public static string GetRelativePath(string fileName, ItemType type)
         {

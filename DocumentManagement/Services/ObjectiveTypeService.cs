@@ -81,6 +81,6 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        private int? Check(int id) => id == -1 ? null : id;
+        private int? Check(int id) => id == -1 ? (int?)null : id;
     }
 }

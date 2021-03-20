@@ -1,9 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -15,8 +18,6 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly AuthenticationService authenticationService;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
-
-        private ConnectionInfoExternalDto updatedInfo;
 
         public Bim360Connection()
         {
@@ -33,19 +34,32 @@ namespace MRS.DocumentManagement.Connection.Bim360
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             var authorizationResult = await authenticator.SignInAsync(info);
-            updatedInfo = authorizationResult.updatedInfo;
-            updatedInfo.UserExternalID = (await authenticationService.GetMe()).UserId;
             return authorizationResult.authStatus;
         }
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            return Task.FromResult(
+                new ConnectionStatusDto { Status = RemoteConnectionStatus.OK });
         }
 
-        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
+        public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
-            return Task.FromResult(updatedInfo);
+            info.EnumerationTypes = GetEnumerationTypes();
+            info.ConnectionType.ObjectiveTypes.First().DefaultDynamicFields = new List<DynamicFieldExternalDto>
+            {
+                new DynamicFieldExternalDto
+                {
+                    ExternalID =
+                        typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
+                    Name = "Type",
+                    Type = DynamicFieldType.ENUM,
+                    Value = Constants.UNDEFINED_NG_TYPE.ExternalID,
+                },
+            };
+            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
+            info.UserExternalID = (await authenticationService.GetMe()).UserId;
+            return info;
         }
 
         public ConnectionTypeExternalDto GetConnectionType()
@@ -81,10 +95,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => await Bim360ConnectionContext.CreateContext(info);
 
-        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
-        {
-            await Connect(info);
-            return Bim360Storage.Create(info);
-        }
+        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+            => Task.FromResult<IConnectionStorage>(Bim360Storage.Create(info));
+
+        private ICollection<EnumerationTypeExternalDto> GetEnumerationTypes()
+            => new List<EnumerationTypeExternalDto> { Constants.STANDARD_NG_TYPES.Value };
     }
 }
