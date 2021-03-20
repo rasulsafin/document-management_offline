@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Utils.CloudBase;
@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     {
         private const string AUTH_FIELD_KEY_TOKEN = "token";
         private const string NAME_CONNECTION = "Yandex Disk";
-        private YandexManager manager;
+        private static YandexManager manager;
 
         public YandexConnection()
         {

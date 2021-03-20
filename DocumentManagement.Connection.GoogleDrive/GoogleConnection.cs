@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     {
         private const string NAME_CONNECT = "Google Drive";
         private ConnectionInfoExternalDto connectionInfo;
-        private GoogleDriveManager manager;
+        private static GoogleDriveManager manager;
 
         public GoogleConnection()
         {
