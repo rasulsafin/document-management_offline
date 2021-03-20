@@ -113,9 +113,10 @@ namespace MRS.DocumentManagement.Utility
                .ForMember(d => d.Items, o => o.Ignore())
                .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(s => (int?)s.ParentObjectiveID));
             CreateMap<ObjectiveDto, Objective>()
-                .ForMember(d => d.DynamicFields, opt => opt.Ignore())
-                .ForMember(d => d.BimElements, opt => opt.Ignore())
-                .ForMember(d => d.Items, o => o.Ignore());
+               .ForMember(d => d.DynamicFields, opt => opt.Ignore())
+               .ForMember(d => d.BimElements, opt => opt.Ignore())
+               .ForMember(d => d.Items, o => o.Ignore())
+               .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(s => (int?)s.ParentObjectiveID));
         }
 
         private void CreateMapForExternal()
