@@ -71,8 +71,6 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
             model.Attributes[AttributeID.NUMBER].Value = parent.Objects.ObjectsByDef(ObjectTypeID.DEFECT).Count;
 
-            SetDynamicFields(model, objectDto);
-
             return model;
         }
 
@@ -142,35 +140,6 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             };
 
             return new List<DynamicFieldExternalDto>() { comment, contractor, company };
-        }
-
-        private void SetDynamicFields(TDMSObject tdmsObject, ObjectiveExternalDto objectDto)
-        {
-            SetDynamicValueObject(AttributeID.BUILDER, objectDto.DynamicFields, tdmsObject);
-            SetDynamicValueObject(AttributeID.COMPANY, objectDto.DynamicFields, tdmsObject);
-
-            SetDynamicValue(AttributeID.COMMENT, objectDto.DynamicFields, tdmsObject);
-        }
-
-        private void SetDynamicValueObject(string type, IEnumerable<DynamicFieldExternalDto> fields, TDMSObject tdmsObject)
-        {
-            var guid = fields?.FirstOrDefault(x => x.ExternalID == type)?.Value;
-            if (guid == null)
-                return;
-
-            var valueObject = tdms.GetObjectByGUID(guid);
-            if (tdmsObject != null && tdmsObject.Attributes.Index[type] != -1)
-                tdmsObject.Attributes[type].Value = valueObject;
-        }
-
-        private void SetDynamicValue(string type, IEnumerable<DynamicFieldExternalDto> fields, TDMSObject tdmsObject)
-        {
-            var value = fields?.FirstOrDefault(x => x.ExternalID == type)?.Value;
-            if (value == null)
-                return;
-
-            if (tdmsObject.Attributes.Index[type] != -1)
-                tdmsObject.Attributes[type].Value = value;
         }
     }
 }
