@@ -71,7 +71,12 @@ namespace MRS.DocumentManagement.Connection.LementPro
         // Do we need this?
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            var status = new ConnectionStatusDto();
+            status.Status = updatedInfo != null
+                ? RemoteConnectionStatus.OK
+                : RemoteConnectionStatus.NeedReconnect;
+
+            return Task.FromResult(status);
         }
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)

@@ -34,8 +34,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                         info.AuthFieldValues.Add(AUTH_FIELD_KEY_TOKEN, tokenNew);
                     }
 
-                    var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
-                    manager = new YandexManager(new YandexDiskController(token));
+                    InitiateManager(info);
 
                     return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
                 }
@@ -106,12 +105,31 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
+            await InitiateManagerForSynchronization(info);
             return YandexConnectionContext.CreateContext(manager);
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
+            await InitiateManagerForSynchronization(info);
             return new CommonConnectionStorage(manager);
+        }
+
+        private async Task InitiateManagerForSynchronization(ConnectionInfoExternalDto info)
+        {
+            if (info.AuthFieldValues == null || !info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
+            {
+                await Connect(info);
+                return;
+            }
+
+            InitiateManager(info);
+        }
+
+        private void InitiateManager(ConnectionInfoExternalDto info)
+        {
+            var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
+            manager = new YandexManager(new YandexDiskController(token));
         }
     }
 }

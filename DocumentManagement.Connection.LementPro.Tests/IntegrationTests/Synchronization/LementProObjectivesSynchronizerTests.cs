@@ -189,6 +189,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
             await Task.Delay(3000);
             added.Items = added.Items.Where(i => i.FileName != itemToRemoveName).ToList();
             var result = await synchronizer.Update(added);
+            result = await synchronizer.Update(added);
 
             Assert.IsNotNull(result?.Title);
             Assert.AreEqual(objective.Items.Count - 1, result.Items.Count);

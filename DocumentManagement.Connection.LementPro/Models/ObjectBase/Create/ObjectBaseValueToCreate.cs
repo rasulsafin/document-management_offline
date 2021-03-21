@@ -36,6 +36,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "startDate")]
         public string StartDate { get; set; }
 
+        [DataMember(Name = "endDate")]
+        public string EndDate { get; set; }
+
         [DataMember(Name = "isExpired")]
         public bool? IsExpired { get; set; }
 
