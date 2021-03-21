@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using MRS.DocumentManagement.Connection.LementPro.Models;
+using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
@@ -18,7 +20,24 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             };
 
             if (DateTime.TryParse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedLastModified))
-                dto.UpdatedAt = parsedLastModified;
+                dto.UpdatedAt = parsedLastModified.ToUniversalTime();
+
+            if (model.Values.Files != null)
+            {
+                var items = new List<ItemExternalDto>();
+                foreach (var file in model.Values.Files)
+                {
+                    items.Add(new ItemExternalDto
+                    {
+                        ExternalID = file.ID.ToString(),
+                        FileName = file.FileName,
+                        FullPath = file.FileName,
+                        ItemType = ItemTypeHelper.GetTypeByName(file.FileName),
+                    });
+                }
+
+                dto.Items = items;
+            }
 
             return dto;
         }
