@@ -46,15 +46,11 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
         {
-            var authorizationResult = (await authenticator.SignInAsync(connectionInfo)).authStatus;
-            if (authorizationResult.Status != RemoteConnectionStatus.OK)
-                return false;
-
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
-            foreach (var id in itemExternalDto)
+            foreach (var item in itemExternalDto)
             {
-                var file = await itemsService.GetAsync(projectId, id.ExternalID);
+                var file = await itemsService.GetAsync(projectId, item.ExternalID);
 
                 var storage = file.version.Relationships.Storage?.Data
                    .ToObject<StorageObject,
@@ -64,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     continue;
 
                 var (bucketKey, hashedName) = storage.ParseStorageId();
-                await objectsService.GetAsync(bucketKey, hashedName, file.item.Attributes.DisplayName);
+                await objectsService.GetAsync(bucketKey, hashedName, item.FullPath);
             }
 
             return true;

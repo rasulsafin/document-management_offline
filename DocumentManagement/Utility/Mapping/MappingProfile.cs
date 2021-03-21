@@ -136,7 +136,7 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<Objective, ObjectiveExternalDto>()
                .ForMember(x => x.ProjectExternalID, o => o.MapFrom<ObjectiveProjectIDResolver>())
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())
-               .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items.Select(x => x.Item)))
+               .ForMember(x => x.Items, o => o.MapFrom(ex => ex.Items == null ? null : ex.Items.Select(x => x.Item)))
                .ForMember(x => x.BimElements, o => o.MapFrom(ex => ex.BimElements.Select(x => x.BimElement)))
                .ForMember(x => x.AuthorExternalID, с => с.MapFrom(d => d.Author.ExternalID));
 

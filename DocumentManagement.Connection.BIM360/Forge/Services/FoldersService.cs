@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -32,16 +33,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Item>> GetItemsAsync(string projectId, string folderId)
-        {
-            var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedGet(),
-                    Resources.GetProjectsFoldersContentsMethod,
-                    projectId,
-                    folderId,
-                    ITEM_TYPE);
-
-            return response[DATA_PROPERTY]?.ToObject<List<Item>>();
-        }
+            => await PaginationHelper.GetItemsByPages<Item>(
+                connection,
+                Resources.GetProjectsFoldersContentsMethod,
+                projectId,
+                folderId,
+                ITEM_TYPE);
 
         public async Task<List<(Version version, Item item)>> SearchAsync(
                 string projectId,

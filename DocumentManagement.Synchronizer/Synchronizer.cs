@@ -48,7 +48,8 @@ namespace MRS.DocumentManagement.Synchronization
                             context,
                             project.Map(await context.ProjectsSynchronizer.Get(ids)),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            x => x.ExternalID == null || ids.Contains(x.ExternalID)));
+                            x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                            date: date));
                     unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
                        .Select(x => x.Object.ID)
                        .ToArray();
@@ -80,7 +81,8 @@ namespace MRS.DocumentManagement.Synchronization
                              && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
-                             && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID)));
+                             && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                            date: date));
                 }
                 catch (Exception e)
                 {

@@ -18,9 +18,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         where TDB : class, ISynchronizable<TDB>, new()
     {
         protected readonly IMapper mapper;
+        private readonly bool needSaveOnEachTuple = false;
 
-        protected ASynchronizationStrategy(IMapper mapper)
-            => this.mapper = mapper;
+        protected ASynchronizationStrategy(IMapper mapper, bool needSaveOnEachTuple = true)
+        {
+            this.mapper = mapper;
+            this.needSaveOnEachTuple = needSaveOnEachTuple;
+        }
 
         public async Task<List<SynchronizingResult>> Synchronize(SynchronizingData data,
             IConnectionContext connectionContext,
@@ -28,6 +32,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             Expression<Func<TDB, bool>> filter = null,
             Func<TDB, bool> filter2 = null,
             object parent = null,
+            DateTime date = default,
             IProgress<double> progress = null)
         {
             progress?.Report(0.0);
@@ -37,8 +42,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             if (filter != null)
                 list = list.Where(filter);
-
-            var func = filter?.Compile() ?? (x => true);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 Order(list),
@@ -74,6 +77,14 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
+                }
+
+                if (needSaveOnEachTuple)
+                {
+                    if (date == default)
+                        await data.Context.SaveChangesAsync();
+                    else
+                        await data.Context.SynchronizationSaveAsync(date);
                 }
 
                 progress?.Report(++i / (double)tuples.Count);

@@ -100,12 +100,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private async Task<ProjectExternalDto> GetFullProject(Project project)
         {
             var dto = project.ToDto();
-            var root = project.Relationships.RootFolder.Data;
-            var dataMemberName =
-                typeof(Version.VersionAttributes).GetDataMemberName(nameof(Version.VersionAttributes.Hidden));
-            var filter = new[] { new Filter(dataMemberName, false.ToString().ToLower()) };
-            var items = await context.FoldersService.SearchAsync(project.ID, root.ID, filter);
-            dto.Items = items.Select(x => x.item.ToDto()).ToList();
+            if (!context.DefaultFolders.TryGetValue(project.ID, out var folder))
+                return dto;
+            var items = await context.FoldersService.GetItemsAsync(project.ID, folder.ID);
+            dto.Items = items.Select(x => x.ToDto()).ToList();
             return dto;
         }
     }

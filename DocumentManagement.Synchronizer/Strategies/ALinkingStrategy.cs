@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             LinkingFunc link,
             LinkingFunc update,
             LinkingFunc unlink)
-            : base(mapper)
+            : base(mapper, false)
         {
             this.link = link;
             this.update = update;

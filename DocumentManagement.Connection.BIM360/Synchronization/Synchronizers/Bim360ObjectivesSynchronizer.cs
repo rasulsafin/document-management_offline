@@ -63,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, hubId, projectId, created, containerId);
-                parsedToDto.Items = added?.Select(i => i.ToDto())?.ToList();
+                parsedToDto.Items = added?.Select(i => i.ToDto()).ToList();
             }
 
             return parsedToDto;
@@ -108,10 +108,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
             var types = await context.IssuesService.GetIssueTypesAsync(containerId);
 
-            return updatedIssue.ToExternalDto(
+            var parsedToDto = updatedIssue.ToExternalDto(
                 context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
                    .Key,
                 types.First(x => x.ID == updatedIssue.Attributes.NgIssueTypeID).Title);
+
+            if (obj.Items?.Any() ?? false)
+            {
+                var added = await AddItems(obj.Items, hubId, projectId, issueFromRemote, containerId);
+                parsedToDto.Items = added?.Select(i => i.ToDto()).ToList();
+            }
+
+            return parsedToDto;
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)

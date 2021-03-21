@@ -19,7 +19,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<Issue>> GetIssuesAsync(
             string containerID,
             IEnumerable<Filter> filters = null)
-            => await GetItemsByPages<Issue>(
+            => await PaginationHelper.GetItemsByPages<Issue>(
+                connection,
                 ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
                 containerID);
 
@@ -79,36 +80,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
-            => await GetItemsByPages<Attachment>(Resources.GetIssuesAttachmentMethod, containerID, issueID);
+            => await PaginationHelper.GetItemsByPages<Attachment>(
+                connection,
+                Resources.GetIssuesAttachmentMethod,
+                containerID,
+                issueID);
 
         public Task<object> GetMeAsync()
         {
             throw new NotImplementedException();
-        }
-
-        private async Task<List<T>> GetItemsByPages<T>(string command, params object[] arguments)
-        {
-            var result = new List<T>();
-            var all = false;
-            var length = arguments.Length;
-            Array.Resize(ref arguments, length + 2);
-            arguments[length++] = ITEMS_ON_PAGE;
-
-            for (int i = 0; !all; i++)
-            {
-                arguments[length] = i;
-                var response = await connection.SendAsync(
-                        ForgeSettings.AuthorizedGet(),
-                        command,
-                        arguments);
-                var data = response[DATA_PROPERTY]?.ToObject<List<T>>();
-                if (data != null)
-                    result.AddRange(data);
-                var meta = response[META_PROPERTY]?.ToObject<Meta>();
-                all = meta == null || meta.Page.Limit * ((meta.Page.Offset / ITEMS_ON_PAGE) + 1) >= meta.RecordCount;
-            }
-
-            return result;
         }
     }
 }

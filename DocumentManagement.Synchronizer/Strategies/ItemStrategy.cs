@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -50,13 +51,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             var path = tuple.Remote.RelativePath;
             (int project, int objective) = GetParents(true);
             Expression<Func<Item, bool>> predicate =
-                x => (x.Objectives.Any(oi => oi.ObjectiveID == objective) || x.ProjectID == project) &&
+                x => ((x.Objectives != null &&
+                            x.Objectives.Any(oi => oi.ObjectiveID == objective || oi.Objective.ProjectID == project)) ||
+                        x.ProjectID == project) &&
                     (x.ExternalID == external || x.RelativePath == path);
-            tuple.Local = await data.Context.Items.FirstOrDefaultAsync(predicate);
+            var compiledPredicate = predicate.Compile();
+            tuple.Local = data.Context.Items.Local.FirstOrDefault(compiledPredicate) ??
+                await data.Context.Items.FirstOrDefaultAsync(predicate);
             (project, objective) = GetParents(false);
-            tuple.Synchronized = await data.Context.Items.FirstOrDefaultAsync(predicate);
-            if (tuple.DetermineAction() == SynchronizingAction.Merge)
-                tuple.Remote.RelativePath = tuple.Local.RelativePath;
+            tuple.Synchronized = data.Context.Items.Local.FirstOrDefault(compiledPredicate) ??
+                await data.Context.Items.FirstOrDefaultAsync(predicate);
+
             return await base.AddToLocal(tuple, data, connectionContext, parent);
         }
 
@@ -74,6 +79,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             object parent)
         {
+            tuple.Remote.Objectives ??= new List<ObjectiveItem>();
+            if (parent is SynchronizingTuple<Objective> objectiveTuple)
+                tuple.Remote.Objectives.Add(new ObjectiveItem { Objective = objectiveTuple.Remote });
             await NothingAction(tuple, data, connectionContext, parent);
             return null;
         }

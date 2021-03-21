@@ -7,7 +7,6 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
