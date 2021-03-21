@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             if (obj.Items?.Any() ?? false)
             {
-                var added = await AddItems(obj.Items, hubId, projectId, created.ID, containerId);
+                var added = await AddItems(obj.Items, hubId, projectId, created, containerId);
                 parsedToDto.Items = added?.Select(i => i.ToDto())?.ToList();
             }
 
@@ -208,7 +208,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             ICollection<ItemExternalDto> items,
             string hubId,
             string projectId,
-            string issueId,
+            Issue issue,
             string containerId)
         {
             if (!context.DefaultFolders.TryGetValue(projectId, out var folder))
@@ -216,6 +216,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var resultItems = new List<Item>();
             var existingItems = await folderSyncHelper.GetFolderItemsAsync(projectId, folder.ID);
+            var attachment = await context.IssuesService.GetAttachmentsAsync(containerId, issue.ID);
 
             foreach (var item in items)
             {
@@ -223,14 +224,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 var itemWithSameNameExists = existingItems.FirstOrDefault(i => i.Attributes.DisplayName.Equals(item.FileName, StringComparison.InvariantCultureIgnoreCase));
                 if (itemWithSameNameExists != null)
                 {
-                    resultItems.Add(itemWithSameNameExists);
+                    if (attachment.Any(x => x.Attributes.Name == item.FileName))
+                    {
+                        resultItems.Add(itemWithSameNameExists);
+                        continue;
+                    }
+
+                    var attached = await AttachItem(itemWithSameNameExists, issue.ID, containerId);
+                    if (attached)
+                        resultItems.Add(itemWithSameNameExists);
                     continue;
                 }
 
                 if (string.IsNullOrWhiteSpace(item.ExternalID))
                 {
                     var posted = await itemsSyncHelper.PostItem(item, folder, projectId);
-                    var attached = await AttachItem(posted, issueId, containerId);
+                    await Task.Delay(5000);
+                    var attached = await AttachItem(posted, issue.ID, containerId);
                     if (attached)
                         resultItems.Add(posted);
                 }
