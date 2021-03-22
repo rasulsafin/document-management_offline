@@ -9,8 +9,24 @@ namespace MRS.DocumentManagement.Connection.Utils
     public static class ItemTypeHelper
     {
         // TODO: improve this.
-        private static readonly IReadOnlyCollection<string> BIM_EXTENSIONS = new[] { ".ifc" };
-        private static readonly IReadOnlyCollection<string> MEDIA_EXTENSIONS = new[] { ".jpg", ".mp4" };
+        private static readonly IReadOnlyCollection<string> BIM_EXTENSIONS = new[]
+        {
+            ".ifc",
+            ".ifczip",
+            ".ifcxml",
+            ".nwc",
+            ".nwd",
+            ".nwf",
+            ".fbx",
+            ".stl",
+            ".rvt",
+            ".stp",
+            ".step",
+            ".dwg",
+            ".obj",
+        };
+
+        private static readonly IReadOnlyCollection<string> MEDIA_EXTENSIONS = new[] { ".jpg", ".mp4", ".png" };
 
         public static ItemType GetTypeByName(string fileName)
         {
