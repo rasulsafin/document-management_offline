@@ -21,15 +21,8 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase
 
         public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
         {
-            var project = await cloudManager.Pull<ProjectExternalDto>(projectId);
-            if (project == default)
-                return false;
-
             foreach (var item in itemExternalDto)
             {
-                if (!project.Items.Any(i => i.ExternalID == item.ExternalID))
-                    continue;
-
                 var downloadResult = await cloudManager.PullFile(item.ExternalID, item.FullPath);
                 if (!downloadResult)
                     return false;

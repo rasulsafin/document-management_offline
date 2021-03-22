@@ -42,6 +42,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "startDate")]
         public string StartDate { get; set; }
 
+        [DataMember(Name = "endDate")]
+        public string EndDate { get; set; }
+
         [DataMember(Name = "isResolution")]
         public bool? IsResolution { get; set; }
 

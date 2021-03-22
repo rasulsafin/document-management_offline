@@ -21,6 +21,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public static readonly string CLIENT_ID = "CLIENT_ID";
         public static readonly string CLIENT_SECRET = "CLIENT_SECRET";
         public static readonly string APPLICATION_NAME = "APPLICATION_NAME";
+        public static readonly string USER_AUTH_FIELD_NAME = "user";
 
         public static readonly string[] SCOPES = { DriveService.Scope.Drive };
         private static readonly string REQUEST_FIELDS = "nextPageToken, files(id, name, size, mimeType, modifiedTime, createdTime)";
@@ -48,7 +49,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
                     clientSecrets: clientSecrets,
                     scopes: SCOPES,
-                    user: "user",
+                    user: USER_AUTH_FIELD_NAME,
                     taskCancellationToken: cancellationTokenSource.Token,
                     dataStore: dataStore);
 
