@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 AuthFieldNames = new List<string>
                 {
                     // Token stored as 'user' by sdk. See DataStore.StoreAsync
-                    "user",
+                    GoogleDriveController.USER_AUTH_FIELD_NAME,
                 },
                 AppProperties = new Dictionary<string, string>
                 {
@@ -85,6 +85,15 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.AuthFieldValues = connectionInfo.AuthFieldValues;
+            var objectiveType = "GoogleDriveIssue";
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+            };
+
+            if (string.IsNullOrWhiteSpace(info.UserExternalID))
+                info.UserExternalID = Guid.NewGuid().ToString();
+
             return Task.FromResult(info);
         }
 

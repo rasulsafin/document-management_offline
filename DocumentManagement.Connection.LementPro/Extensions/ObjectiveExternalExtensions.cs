@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
+namespace MRS.DocumentManagement.Connection.LementPro
 {
     internal static class ObjectiveExternalExtensions
     {
@@ -82,8 +82,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 ExternalID = model.ID.ToString(),
             };
 
-            if (model.Values.Managers.ID != null)
-                resultDto.AuthorExternalID = model.Values.Managers.ID.ToString();
+            //if (model.Values.Managers.ID != null)
+            //    resultDto.AuthorExternalID = model.Values.Managers.ID.ToString();
 
             if (model.Values.StartDate != null)
                 resultDto.CreationDate = DateTime.Parse(model.Values.StartDate, CultureInfo.InvariantCulture);

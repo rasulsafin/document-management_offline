@@ -53,6 +53,15 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
 
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
+            var objectiveType = "YandexDiskIssue";
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+            };
+
+            if (string.IsNullOrWhiteSpace(info.UserExternalID))
+                info.UserExternalID = Guid.NewGuid().ToString();
+
             return Task.FromResult(info);
         }
 

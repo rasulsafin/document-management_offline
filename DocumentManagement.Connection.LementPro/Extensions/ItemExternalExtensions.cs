@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
+namespace MRS.DocumentManagement.Connection.LementPro
 {
     internal static class ItemExternalExtensions
     {
