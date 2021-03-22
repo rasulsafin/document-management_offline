@@ -46,6 +46,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.EnumerationTypes = GetEnumerationTypes();
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto
+                {
+                   ExternalId = Constants.ISSUE_TYPE,
+                   Name = "Issue",
+                },
+            };
             info.ConnectionType.ObjectiveTypes.First().DefaultDynamicFields = new List<DynamicFieldExternalDto>
             {
                 new DynamicFieldExternalDto
@@ -78,14 +86,6 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
                     { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
                     { "RETURN_URL", "http://localhost:8000/oauth/" },
-                },
-                ObjectiveTypes = new List<ObjectiveTypeExternalDto>
-                {
-                    new ObjectiveTypeExternalDto
-                    {
-                        ExternalId = Constants.ISSUE_TYPE,
-                        Name = "Issue",
-                    },
                 },
             };
 

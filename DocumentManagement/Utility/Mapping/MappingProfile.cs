@@ -176,14 +176,17 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeAppPropertiesResolver>());
             CreateMap<ConnectionTypeExternalDto, ConnectionType>()
              .ForMember(d => d.AuthFieldNames, o => o.MapFrom(s => s.AuthFieldNames.Select(name => new AuthFieldName() { Name = name })))
-             .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeDtoAppPropertiesResolver>());
+             .ForMember(d => d.AppProperties, o => o.MapFrom<ConnectionTypeDtoAppPropertiesResolver>())
+             .ForMember(d => d.EnumerationTypes, o => o.Ignore())
+             .ForMember(d => d.ObjectiveTypes, o => o.Ignore());
 
             CreateMap<ObjectiveType, ObjectiveTypeExternalDto>();
-            CreateMap<ObjectiveTypeExternalDto, ObjectiveType>();
-              // .ForMember(d => d.ID, o => o.Ignore());
+            CreateMap<ObjectiveTypeExternalDto, ObjectiveType>()
+               .ForMember(d => d.ID, o => o.Ignore());
 
             CreateMap<EnumerationType, EnumerationTypeExternalDto>();
-            CreateMap<EnumerationTypeExternalDto, EnumerationType>();
+            CreateMap<EnumerationTypeExternalDto, EnumerationType>()
+                .ForMember(d => d.ID, o => o.Ignore());
 
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();

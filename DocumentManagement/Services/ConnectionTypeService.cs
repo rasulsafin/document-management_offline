@@ -83,19 +83,14 @@ namespace MRS.DocumentManagement.Services
                     if (update)
                     {
                         var properties = type.AppProperties.ToDictionary(x => x.Key, x => x.ID);
-                        var objectivesTypes = type.ObjectiveTypes.ToDictionary(x => x.ExternalId, x => x.ID);
                         var authFieldNames = type.AuthFieldNames.ToDictionary(x => x.Name, x => x.ID);
 
                         type = mapper.Map(typeDto, type);
 
                         foreach (var property in type.AppProperties)
-                            property.ID = properties.TryGetValue(property.Key, out var value) ? value : 0;
-
-                        foreach (var objectiveType in type.ObjectiveTypes)
                         {
-                            objectiveType.ID = objectivesTypes.TryGetValue(objectiveType.ExternalId, out var value)
-                                ? value
-                                : 0;
+                            property.ID = properties.TryGetValue(property.Key, out var value) ? value : 0;
+                            property.ConnectionTypeID = type.ID;
                         }
 
                         foreach (var authFieldName in type.AuthFieldNames)
@@ -103,6 +98,7 @@ namespace MRS.DocumentManagement.Services
                             authFieldName.ID = authFieldNames.TryGetValue(authFieldName.Name, out var value)
                                 ? value
                                 : 0;
+                            authFieldName.ConnectionTypeID = type.ID;
                         }
 
                         context.ConnectionTypes.Update(type);
