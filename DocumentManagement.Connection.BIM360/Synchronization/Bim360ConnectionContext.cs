@@ -80,7 +80,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
                     if (!DefaultFolders.ContainsKey(p.ID))
                     {
-                        var folder = await foldersSyncHelper.GetDefaultFolderAsync(hub.ID, p.ID);
+                        var folder = await foldersSyncHelper.GetDefaultFolderAsync(
+                            hub.ID,
+                            p.ID,
+                            folder1 => folder1.Attributes.DisplayName == "Project Files");
                         DefaultFolders.Add(p.ID, folder);
                     }
                 }

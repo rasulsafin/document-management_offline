@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
             {
                 ExternalID = item.ID,
                 FileName = item.Attributes.DisplayName,
-                ItemType = ItemTypeHelper.GetTypeByName(item.Attributes.Name),
+                ItemType = ItemTypeHelper.GetTypeByName(item.Attributes.DisplayName),
                 UpdatedAt = item.Attributes.LastModifiedTime ?? default,
             };
     }
