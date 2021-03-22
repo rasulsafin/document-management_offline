@@ -27,11 +27,16 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         public string BimRef { get; set; }
 
         /// <summary>
-        /// ??? Response contains the field.
-        /// During creating this field should contain user id (web form uses logged in user id).
+        /// Custom creator field.
         /// </summary>
         [DataMember(Name = "i60099")]
-        public string I60099 { get; set; }
+        public dynamic I60099 { get; set; }
+
+        /// <summary>
+        /// Custom Bim elements text field.
+        /// </summary>
+        [DataMember(Name = "i66444")]
+        public string I66444 { get; set; }
 
         [DataMember(Name = "startDate")]
         public string StartDate { get; set; }

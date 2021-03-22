@@ -4,6 +4,7 @@ using System.Globalization;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro
@@ -24,6 +25,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 IsExpired = IsExpired(objective.Status),
                 Project = objective.ProjectExternalID,
                 EndDate = objective.DueDate.ToString(DATE_FORMAT),
+                I66444 = GetBimElements(objective),
             };
 
             var model = new ObjectBaseToCreate { Values = modelValue };
@@ -46,6 +48,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 IsExpired = IsExpired(objective.Status),
                 LastModifiedDate = objective.UpdatedAt.ToString(DATE_FORMAT),
                 EndDate = objective.DueDate.ToString(DATE_FORMAT),
+                I66444 = GetBimElements(objective),
             };
 
             if (int.TryParse(objective.ProjectExternalID, out var parsedProjectId))
@@ -80,6 +83,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 Status = ParseStatus(model),
                 ProjectExternalID = model.Values.Project?.ID?.ToString() ?? DEFAULT_PROJECT_STUB.ExternalID.ToString(),
                 ExternalID = model.ID.ToString(),
+                BimElements = GetBimElements(model.Values.I66444),
             };
 
             //if (model.Values.Managers.ID != null)
@@ -129,5 +133,16 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 false => ObjectiveStatus.InProgress,
             };
         }
+
+        private static ICollection<BimElementExternalDto> GetBimElements(string customField)
+            => string.IsNullOrWhiteSpace(customField)
+                ? ArraySegment<BimElementExternalDto>.Empty
+                : JsonConvert.DeserializeObject<ICollection<BimElementExternalDto>>(
+                    customField);
+
+        private static string GetBimElements(ObjectiveExternalDto objectiveExternalDto)
+            => objectiveExternalDto.BimElements == null
+                ? null
+                : JsonConvert.SerializeObject(objectiveExternalDto.BimElements);
     }
 }

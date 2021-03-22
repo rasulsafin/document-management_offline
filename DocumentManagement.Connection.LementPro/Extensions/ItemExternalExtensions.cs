@@ -30,7 +30,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
             };
         }
 
-        internal static ItemExternalDto ToItemExternalDto(this File model, ItemExternalDto uploadedDto)
+        internal static ItemExternalDto ToItemExternalDto(this File model, ItemExternalDto uploadedDto = null)
         {
             if (model == null)
                 return null;
@@ -48,6 +48,16 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
             uploadedDto.ExternalID = externalId;
             return uploadedDto;
+        }
+
+        internal static ICollection<ItemExternalDto> ToDtoItems(this List<File> files)
+        {
+            var dtoItems = new List<ItemExternalDto>();
+
+            foreach (var file in files)
+                dtoItems.Add(file.ToItemExternalDto());
+
+            return dtoItems;
         }
 
         internal static ICollection<ItemExternalDto> ToDtoItems(this List<File> files, ICollection<ItemExternalDto> updatingItems)

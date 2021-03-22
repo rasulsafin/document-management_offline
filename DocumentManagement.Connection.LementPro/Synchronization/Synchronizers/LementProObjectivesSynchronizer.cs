@@ -126,7 +126,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                     // It is necessary to get full info about issue to get last updated info
                     var fullInfoTask = await tasksService.GetTaskAsync(task.ID.Value);
                     var objective = fullInfoTask.ToObjectiveExternalDto();
-                    objective.Items = GetIssueFiles(task, files);
+                    objective.Items = GetIssueFiles(fullInfoTask, files);
                     objectives.Add(objective);
                 }
             }
@@ -140,7 +140,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             if (bimFile != null)
                 files.Add(bimFile);
 
-            // TODO implement adding non-BIM files after implementing functionality for them
+            if (issue.Values.Files != null)
+                files.AddRange(issue.Values.Files.ToDtoItems());
+
             return files;
         }
     }
