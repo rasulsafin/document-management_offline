@@ -119,6 +119,7 @@ namespace MRS.DocumentManagement.Synchronization
                .Select(x => x.ExternalID)
                .ToListAsync();
             var localRemoved = await set
+               .Where(x => x.ExternalID != null)
                .GroupBy(x => x.ExternalID)
                .Where(x => x.Count() < 2)
                .Select(x => x.Key)
