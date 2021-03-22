@@ -79,10 +79,15 @@ namespace MRS.DocumentManagement.Connection.LementPro
         // Do we need this?
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            var status = new ConnectionStatusDto();
-            status.Status = updatedInfo != null
+            var authChecker = new AuthenticationService(info);
+            var isCorrect = authChecker.IsAuthorisationAccessValid();
+
+            var status = new ConnectionStatusDto
+            {
+                Status = isCorrect
                 ? RemoteConnectionStatus.OK
-                : RemoteConnectionStatus.NeedReconnect;
+                : RemoteConnectionStatus.NeedReconnect,
+            };
 
             return Task.FromResult(status);
         }

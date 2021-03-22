@@ -20,6 +20,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             this.requestUtility.AuthenticationService = this;
         }
 
+        /// <summary>
+        /// ctor used only to check the connection info.
+        /// </summary>
+        /// <param name="connectionInfo">Connection info to check.</param>
+        internal AuthenticationService(ConnectionInfoExternalDto connectionInfo)
+            => connectionInfoDto = connectionInfo;
+
         internal string AccessToken
         {
             get => GetValueOrDefault(connectionInfoDto.AuthFieldValues, AUTH_NAME_TOKEN);
@@ -68,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             await SignInAsync(connectionInfoDto);
         }
 
-        protected bool IsAuthorisationAccessValid()
+        internal bool IsAuthorisationAccessValid()
         {
             if (string.IsNullOrWhiteSpace(AccessToken))
                 return false;

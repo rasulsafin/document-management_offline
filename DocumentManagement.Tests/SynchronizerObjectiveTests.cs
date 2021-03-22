@@ -95,6 +95,11 @@ namespace MRS.DocumentManagement.Tests
             services.AddTransient(x => new ObjectiveProjectIDResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(Fixture.Context));
             services.AddTransient(x => new ObjectiveObjectiveTypeResolver(Fixture.Context));
+            services.AddTransient(x => new ObjectiveExternalDtoAuthorIdResolver(Fixture.Context));
+            services.AddTransient(x => new ObjectiveExternalDtoAuthorResolver(Fixture.Context));
+            services.AddTransient(x => new ItemFileNameResolver());
+            services.AddTransient(x => new ItemFullPathResolver(Fixture.Context));
+            services.AddTransient(x => new ItemExternalDtoRelativePathResolver());
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();

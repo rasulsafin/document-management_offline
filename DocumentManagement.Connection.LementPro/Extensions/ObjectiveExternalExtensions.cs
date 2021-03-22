@@ -96,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 resultDto.DueDate = DateTime.Parse(model.Values.EndDate, CultureInfo.InvariantCulture);
 
             if (model.Values.LastModifiedDate != null)
-                resultDto.UpdatedAt = DateTime.Parse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture).ToUniversalTime();
+                resultDto.UpdatedAt = DateTime.Parse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture);
 
             if (model.Values.Files != null)
             {

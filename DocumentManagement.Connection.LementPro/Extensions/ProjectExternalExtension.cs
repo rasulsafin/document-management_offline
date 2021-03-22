@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
             };
 
             if (DateTime.TryParse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsedLastModified))
-                dto.UpdatedAt = parsedLastModified.ToUniversalTime();
+                dto.UpdatedAt = parsedLastModified;
 
             if (model.Values.Files != null)
             {
