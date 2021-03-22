@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms.Mappers
@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             if (bimElements == null)
                 return string.Empty;
 
-            return string.Join(SPLITTER, bimElements.Select(b => b.GlobalID));
+            return JsonConvert.SerializeObject(bimElements);
         }
 
         private string SetStatus(ObjectiveStatus status) => status switch
@@ -100,17 +100,10 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
 
         private ICollection<BimElementExternalDto> GetBimElemenents(TDMSObject tdmsObject)
         {
-            var list = new List<BimElementExternalDto>();
-            var links = tdmsObject.Attributes[AttributeID.GUID].Value.ToString().Split(SPLITTER, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string link in links)
-            {
-                list.Add(new BimElementExternalDto()
-                {
-                    GlobalID = link,
-                });
-            }
+            var links = tdmsObject.Attributes[AttributeID.GUID].Value.ToString();
+            var list = JsonConvert.DeserializeObject<List<BimElementExternalDto>>(links);
 
-            return list;
+            return list ?? new List<BimElementExternalDto>();
         }
 
         private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
