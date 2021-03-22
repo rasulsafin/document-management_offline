@@ -74,6 +74,9 @@ namespace MRS.DocumentManagement.Connection
             return result;
         }
 
+        internal void SetHref(string href)
+            => Href = href;
+
         private static string GetValueElement(XmlElement element)
         {
             return Uri.UnescapeDataString(element.InnerText);

@@ -137,7 +137,7 @@ namespace MRS.DocumentManagement.Connection
                 if (created == null)
                     return null;
 
-                return path;
+                return created.Href;
             }
             catch (Exception)
             {

@@ -328,14 +328,21 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     }
                 }
 
-                using (WebResponse response = await request.GetResponseAsync())
+                using WebResponse response = await request.GetResponseAsync();
+                if (response is HttpWebResponse httpResponse)
                 {
-                    if (response is HttpWebResponse httpResponse)
+                    if (httpResponse.StatusCode == HttpStatusCode.Created)
                     {
-                        if (httpResponse.StatusCode == HttpStatusCode.Created) return new YandexDiskElement();
-                        if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage) return null;
-                        if (httpResponse.StatusCode == HttpStatusCode.Continue) return null;
+                        var element = new YandexDiskElement();
+                        element.SetHref(diskName);
+                        return element;
                     }
+
+                    if (httpResponse.StatusCode == HttpStatusCode.InsufficientStorage)
+                        return null;
+
+                    if (httpResponse.StatusCode == HttpStatusCode.Continue)
+                        return null;
                 }
             }
             catch (Exception ex)
