@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         {
             await CheckCashedElements();
             return objectives
-                .Where(o => o.UpdatedAt <= date)
+                .Where(o => o.UpdatedAt >= date)
                 .Select(o => o.ExternalID).ToList();
         }
 

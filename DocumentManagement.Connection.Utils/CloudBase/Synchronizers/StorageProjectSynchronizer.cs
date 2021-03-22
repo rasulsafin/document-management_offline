@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
             await CheckCashedElements();
-            return projects.Where(p => p.UpdatedAt <= date).Select(p => p.ExternalID).ToList();
+            return projects.Where(p => p.UpdatedAt >= date).Select(p => p.ExternalID).ToList();
         }
 
         public async Task<ProjectExternalDto> Remove(ProjectExternalDto project)
