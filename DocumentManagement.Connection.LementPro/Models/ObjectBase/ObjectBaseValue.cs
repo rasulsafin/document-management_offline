@@ -66,6 +66,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Models
         [DataMember(Name = "i66444")]
         public string I66444 { get; set; }
 
+        /// <summary>
+        /// Custom AuthorExternalId text field.
+        /// </summary>
+        [DataMember(Name = "i66474")]
+        public string I66474 { get; set; }
+
         [DataMember(Name = "linkedDocuments")]
         public dynamic LinkedDocuments { get; set; }
 

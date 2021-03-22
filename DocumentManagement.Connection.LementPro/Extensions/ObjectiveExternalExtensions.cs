@@ -26,6 +26,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 Project = objective.ProjectExternalID,
                 EndDate = objective.DueDate.ToString(DATE_FORMAT),
                 I66444 = GetBimElements(objective),
+                I66474 = GetAuthorExternalId(objective),
             };
 
             var model = new ObjectBaseToCreate { Values = modelValue };
@@ -49,6 +50,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 LastModifiedDate = objective.UpdatedAt.ToString(DATE_FORMAT),
                 EndDate = objective.DueDate.ToString(DATE_FORMAT),
                 I66444 = GetBimElements(objective),
+                I66474 = GetAuthorExternalId(objective),
             };
 
             if (int.TryParse(objective.ProjectExternalID, out var parsedProjectId))
@@ -84,10 +86,8 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 ProjectExternalID = model.Values.Project?.ID?.ToString() ?? DEFAULT_PROJECT_STUB.ExternalID.ToString(),
                 ExternalID = model.ID.ToString(),
                 BimElements = GetBimElements(model.Values.I66444),
+                AuthorExternalID = GetAuthorExternalId(model.Values.I66474),
             };
-
-            //if (model.Values.Managers.ID != null)
-            //    resultDto.AuthorExternalID = model.Values.Managers.ID.ToString();
 
             if (model.Values.StartDate != null)
                 resultDto.CreationDate = DateTime.Parse(model.Values.StartDate, CultureInfo.InvariantCulture);
@@ -144,5 +144,15 @@ namespace MRS.DocumentManagement.Connection.LementPro
             => objectiveExternalDto.BimElements == null
                 ? null
                 : JsonConvert.SerializeObject(objectiveExternalDto.BimElements);
+
+        private static string GetAuthorExternalId(string customField)
+            => string.IsNullOrWhiteSpace(customField)
+                ? null
+                : JsonConvert.DeserializeObject<string>(customField);
+
+        private static string GetAuthorExternalId(ObjectiveExternalDto objectiveExternalDto)
+            => objectiveExternalDto.AuthorExternalID == null
+                ? null
+                : JsonConvert.SerializeObject(objectiveExternalDto.AuthorExternalID);
     }
 }
