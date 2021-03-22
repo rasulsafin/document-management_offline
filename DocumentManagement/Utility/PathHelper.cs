@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Utility
         public static string GetValidDirectoryName(string name)
         {
             foreach (char c in INVALID_PATH_CHARS)
-                name = name.Replace(c.ToString(), "~");
+                name = name.Replace(c, '~');
             return name;
         }
 
