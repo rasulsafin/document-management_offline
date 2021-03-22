@@ -76,6 +76,7 @@ namespace MRS.DocumentManagement.Services
                     var type = await context.ConnectionTypes
                        .Include(x => x.AppProperties)
                        .Include(x => x.ObjectiveTypes)
+                       .Include(x => x.AuthFieldNames)
                        .FirstOrDefaultAsync(x => x.Name == typeDto.Name);
                     var update = type != null;
 
@@ -83,6 +84,7 @@ namespace MRS.DocumentManagement.Services
                     {
                         var properties = type.AppProperties.ToDictionary(x => x.Key, x => x.ID);
                         var objectivesTypes = type.ObjectiveTypes.ToDictionary(x => x.ExternalId, x => x.ID);
+                        var authFieldNames = type.AuthFieldNames.ToDictionary(x => x.Name, x => x.ID);
 
                         type = mapper.Map(typeDto, type);
 
@@ -92,6 +94,13 @@ namespace MRS.DocumentManagement.Services
                         foreach (var objectiveType in type.ObjectiveTypes)
                         {
                             objectiveType.ID = objectivesTypes.TryGetValue(objectiveType.ExternalId, out var value)
+                                ? value
+                                : 0;
+                        }
+
+                        foreach (var authFieldName in type.AuthFieldNames)
+                        {
+                            authFieldName.ID = authFieldNames.TryGetValue(authFieldName.Name, out var value)
                                 ? value
                                 : 0;
                         }
