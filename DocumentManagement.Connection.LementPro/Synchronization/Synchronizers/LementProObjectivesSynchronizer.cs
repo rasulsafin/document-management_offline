@@ -43,9 +43,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             var task = await tasksService.GetTaskAsync(createResult.ID.Value);
             var parsedToDto = task.ToObjectiveExternalDto();
             if (isItemsAdding)
-                parsedToDto.Items = task.Values.Files.ToDtoItems(obj.Items);
+                parsedToDto.Items = await FindAttachedItems(task, obj.Items);
 
-            parsedToDto.Items = await FindAttachedItems(task, obj.Items);
             return parsedToDto;
         }
 
@@ -106,8 +105,11 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                     resultItems.Add(bim.ToItemExternalDto());
             }
 
-            var attachedFiles = task.Values.Files.ToDtoItems(items);
-            resultItems.AddRange(attachedFiles);
+            if (task.Values.Files != null)
+            {
+                var attachedFiles = task.Values.Files.ToDtoItems(items);
+                resultItems.AddRange(attachedFiles);
+            }
 
             return resultItems;
         }

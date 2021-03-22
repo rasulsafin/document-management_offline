@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             var parsedToDto = created.ToProjectExternalDto();
 
             if (isItemsAdding)
-                parsedToDto.Items = created.Values.Files.ToDtoItems(project.Items);
+                parsedToDto.Items = created.Values.Files?.ToDtoItems(project.Items);
 
             return parsedToDto;
         }
