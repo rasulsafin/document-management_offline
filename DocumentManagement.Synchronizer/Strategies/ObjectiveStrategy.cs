@@ -58,9 +58,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             => base.Include(
                 set.Include(x => x.Items)
                    .Include(x => x.ParentObjective)
+                        .ThenInclude(x => x.SynchronizationMate)
                    .Include(x => x.Author)
                    .Include(x => x.BimElements)
-                   .ThenInclude(x => x.BimElement));
+                        .ThenInclude(x => x.BimElement));
 
         protected override IEnumerable<Objective> Order(IEnumerable<Objective> objectives)
             => objectives.OrderByParent(x => x.ParentObjective);
