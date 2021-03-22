@@ -46,11 +46,42 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = "First type OPEN issue",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
+                ProjectExternalID = "402014",
             };
 
             var result = await synchronizer.Add(objective);
 
             Assert.IsNotNull(result?.ExternalID);
+        }
+
+        [TestMethod]
+        public async Task Add_ObjectiveWithBimElement_AddedSuccessfully()
+        {
+            var objective = new ObjectiveExternalDto
+            {
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = "40179" },
+                CreationDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(2),
+                Title = "First type OPEN issue with BIM ref",
+                Description = "ASAP: everything wrong! redo!!!",
+                Status = ObjectiveStatus.Open,
+                ProjectExternalID = "402014",
+                BimElements = new List<BimElementExternalDto>
+                {
+                    new BimElementExternalDto
+                    {
+                        ElementName = "Element1",
+                        ParentName = "BimElementParent",
+                        GlobalID = "BimElementGUID",
+                    },
+                },
+            };
+
+            var result = await synchronizer.Add(objective);
+
+            Assert.IsNotNull(result?.ExternalID);
+            Assert.IsNotNull(result.BimElements);
+            Assert.IsTrue(result.BimElements.Any());
         }
 
         [TestMethod]
@@ -64,6 +95,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = "First type OPEN issue with FILES",
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
+                ProjectExternalID = "402014",
                 Items = new List<ItemExternalDto>
                 {
                     new ItemExternalDto
@@ -161,7 +193,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Description = "ASAP: everything wrong! redo!!!",
                 Status = ObjectiveStatus.Open,
                 Items = new List<ItemExternalDto>
-                {   new ItemExternalDto
+                {
+                    new ItemExternalDto
                     {
                         FileName = itemToRemoveName,
                         FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),

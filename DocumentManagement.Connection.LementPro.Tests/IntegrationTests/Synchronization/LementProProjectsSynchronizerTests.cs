@@ -44,13 +44,33 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         }
 
         [TestMethod]
-        public async Task Add_ProjectWithEmptyId_AddedSuccessfully()
+        public async Task Add_ProjectWithFiles_AddedSuccessfully()
         {
             var creationDateTime = DateTime.Now;
             var project = new ProjectExternalDto
             {
                 Title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}",
                 UpdatedAt = creationDateTime,
+                Items = new List<ItemExternalDto>
+                {   new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_BIM_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),
+                        ItemType = ItemType.Bim,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_PNG_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_PNG_FILE_PATH),
+                        ItemType = ItemType.Media,
+                    },
+                    new ItemExternalDto
+                    {
+                        FileName = Path.GetFileName(TEST_TXT_FILE_PATH),
+                        FullPath = Path.GetFullPath(TEST_TXT_FILE_PATH),
+                        ItemType = ItemType.File,
+                    },
+                },
             };
 
             var result = await synchronizer.Add(project);
