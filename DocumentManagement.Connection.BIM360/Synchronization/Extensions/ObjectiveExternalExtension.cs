@@ -89,10 +89,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
         }
 
         private static ICollection<BimElementExternalDto> GetBimElements(Issue issue)
-            => string.IsNullOrWhiteSpace(issue.Attributes.LocationDescription)
-                ? ArraySegment<BimElementExternalDto>.Empty
-                : JsonConvert.DeserializeObject<ICollection<BimElementExternalDto>>(
-                    issue.Attributes.LocationDescription);
+        {
+            try
+            {
+                return string.IsNullOrWhiteSpace(issue.Attributes.LocationDescription)
+                    ? ArraySegment<BimElementExternalDto>.Empty
+                    : JsonConvert.DeserializeObject<ICollection<BimElementExternalDto>>(
+                        issue.Attributes.LocationDescription);
+            }
+            catch
+            {
+                return ArraySegment<BimElementExternalDto>.Empty;
+            }
+        }
 
         private static string GetBimElements(ObjectiveExternalDto objectiveExternalDto)
             => objectiveExternalDto.BimElements == null
