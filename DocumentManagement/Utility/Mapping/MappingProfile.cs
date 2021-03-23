@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)
                                                                     .Where(x => x.ItemType == (int)ItemType.Media
-                                                                                && !x.RelativePath.EndsWith("*.mp4"))))
+                                                                                && !x.RelativePath.EndsWith(".mp4"))))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
         }
 
