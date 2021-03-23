@@ -93,7 +93,8 @@ namespace MRS.DocumentManagement.Connection.LementPro
                 resultDto.CreationDate = DateTime.Parse(model.Values.StartDate, CultureInfo.InvariantCulture);
 
             if (model.Values.EndDate != null)
-                resultDto.DueDate = DateTime.Parse(model.Values.EndDate, CultureInfo.InvariantCulture);
+                // Due date stored at LementPro as UTC time
+                resultDto.DueDate = DateTime.Parse(model.Values.EndDate, CultureInfo.InvariantCulture).AddHours(3);
 
             if (model.Values.LastModifiedDate != null)
                 resultDto.UpdatedAt = DateTime.Parse(model.Values.LastModifiedDate, CultureInfo.InvariantCulture);
