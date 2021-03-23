@@ -21,15 +21,16 @@ namespace MRS.DocumentManagement.Utility
             => Path.GetFileName(path);
 
         public static string GetFullPath(string projectName, string fileName)
-            => Path.GetFullPath(Path.Combine(Database, GetValidDirectoryName(projectName), fileName.TrimStart('/', '\\')));
+            => Combine(Database, GetValidDirectoryName(projectName), fileName.TrimStart('/', '\\'));
 
         public static string GetRelativePath(string fileName, ItemType type)
         {
-            return type switch
+            var relativePath = type switch
             {
                 ItemType.Media => Path.Combine(MEDIA_DIRECTORY_NAME, fileName),
                 _ => Path.Combine(string.Empty, fileName),
             };
+            return '\\' + relativePath;
         }
 
         public static string GetValidDirectoryName(string name)

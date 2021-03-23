@@ -53,6 +53,9 @@ namespace MRS.DocumentManagement.Tests
 
             IServiceCollection services = new ServiceCollection();
             services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
+            services.AddTransient(x => new ItemFullPathResolver(Fixture.Context));
+            services.AddTransient(x => new ItemFileNameResolver());
+            services.AddTransient(x => new ItemExternalDtoRelativePathResolver());
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();

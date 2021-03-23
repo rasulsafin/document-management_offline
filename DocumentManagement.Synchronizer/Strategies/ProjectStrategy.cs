@@ -53,7 +53,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Add Project To Remote");
 
-                return await base.AddToRemote(tuple, data, connectionContext, parent);
+                var result = await base.AddToRemote(tuple, data, connectionContext, parent);
+                UpdateChildrenAfterSynchronization(tuple);
+                return result;
             }
             catch (Exception e)
             {
@@ -112,7 +114,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
                 AddUser(tuple, data);
 
-                return await base.Merge(tuple, data, connectionContext, parent);
+                var result = await base.Merge(tuple, data, connectionContext, parent);
+                UpdateChildrenAfterSynchronization(tuple);
+                return result;
             }
             catch (Exception e)
             {
@@ -184,6 +188,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 null,
                 tuple);
         }
+
+        private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
+            => ItemStrategy.UpdateExternalIDs(
+                (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
+                    tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
+                tuple.Remote.Items ?? ArraySegment<Item>.Empty);
 
         private void AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
         {

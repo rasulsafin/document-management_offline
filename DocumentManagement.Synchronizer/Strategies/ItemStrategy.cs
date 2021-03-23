@@ -25,7 +25,85 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
         }
 
-        protected override async Task<SynchronizingResult> AddToLocal(SynchronizingTuple<Item> tuple, SynchronizingData data, IConnectionContext connectionContext, object parent)
+        public static void UpdateExternalIDs(IEnumerable<Item> local, ICollection<Item> remote)
+        {
+            foreach (var item in local.Where(x => string.IsNullOrWhiteSpace(x.ExternalID)))
+                item.ExternalID = remote.FirstOrDefault(x => x.RelativePath == item.RelativePath)?.ExternalID;
+        }
+
+        protected override async Task<SynchronizingResult> AddToLocal(
+            SynchronizingTuple<Item> tuple,
+            SynchronizingData data,
+            IConnectionContext connectionContext,
+            object parent)
+        {
+            await FindAndAttachExists(tuple, data, parent, tuple.Remote.RelativePath);
+            LinkParent(tuple, parent);
+            return await base.AddToLocal(tuple, data, connectionContext, parent);
+        }
+
+        protected override async Task<SynchronizingResult> AddToRemote(
+            SynchronizingTuple<Item> tuple,
+            SynchronizingData data,
+            IConnectionContext connectionContext,
+            object parent)
+        {
+            await FindAndAttachExists(tuple, data, parent, tuple.Local.RelativePath);
+            LinkParent(tuple, parent);
+            return await base.AddToRemote(tuple, data, connectionContext, parent);
+        }
+
+        protected override DbSet<Item> GetDBSet(DMContext context)
+            => context.Items;
+
+        protected override IIncludableQueryable<Item, Item> Include(IQueryable<Item> set)
+            => base.Include(
+                set.Include(x => x.Objectives)
+                   .Include(x => x.Project));
+
+        protected override async Task<SynchronizingResult> Merge(
+            SynchronizingTuple<Item> tuple,
+            SynchronizingData data,
+            IConnectionContext connectionContext,
+            object parent)
+        {
+            if (string.IsNullOrWhiteSpace(tuple.Local.ExternalID))
+                tuple.Local.ExternalID = tuple.ExternalID;
+            if (string.IsNullOrWhiteSpace(tuple.Synchronized.ExternalID))
+                tuple.Synchronized.ExternalID = tuple.ExternalID;
+
+            LinkParent(tuple, parent);
+            await NothingAction(tuple, data, connectionContext, parent);
+            return null;
+        }
+
+        protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)
+            => base.IsEntitiesEquals(element, tuple) ||
+                element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
+
+        private static void LinkParent(SynchronizingTuple<Item> tuple, object parent)
+        {
+            tuple.Remote ??= new Item();
+            tuple.Remote.Objectives ??= new List<ObjectiveItem>();
+
+            switch (parent)
+            {
+                case SynchronizingTuple<Objective> objectiveTuple
+                    when tuple.Remote.Objectives.All(x => x.Objective != objectiveTuple.Remote):
+                    tuple.Remote.Objectives.Add(new ObjectiveItem { Objective = objectiveTuple.Remote });
+                    break;
+                case SynchronizingTuple<Project> projectTuple
+                    when tuple.Remote.ProjectID == null && tuple.Remote.Project == null:
+                    tuple.Remote.Project = projectTuple.Synchronized ?? projectTuple.Local;
+                    break;
+            }
+        }
+
+        private static async Task FindAndAttachExists(
+            SynchronizingTuple<Item> tuple,
+            SynchronizingData data,
+            object parent,
+            string path)
         {
             (int project, int objective) GetParents(bool local)
             {
@@ -48,46 +126,41 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
 
             var external = tuple.ExternalID;
-            var path = tuple.Remote.RelativePath;
-            (int project, int objective) = GetParents(true);
+            int project = 0;
+            int objective = 0;
+
             Expression<Func<Item, bool>> predicate =
                 x => ((x.Objectives != null &&
                             x.Objectives.Any(oi => oi.ObjectiveID == objective || oi.Objective.ProjectID == project)) ||
                         x.ProjectID == project) &&
-                    (x.ExternalID == external || x.RelativePath == path);
-            var compiledPredicate = predicate.Compile();
-            tuple.Local = data.Context.Items.Local.FirstOrDefault(compiledPredicate) ??
-                await data.Context.Items.FirstOrDefaultAsync(predicate);
-            (project, objective) = GetParents(false);
-            tuple.Synchronized = data.Context.Items.Local.FirstOrDefault(compiledPredicate) ??
-                await data.Context.Items.FirstOrDefaultAsync(predicate);
+                    ((x.ExternalID != null && x.ExternalID == external) || x.RelativePath == path);
 
-            return await base.AddToLocal(tuple, data, connectionContext, parent);
+            if ((tuple.Local?.ID ?? 0) == 0)
+            {
+                (project, objective) = GetParents(true);
+                tuple.Local = await data.Context.Items.FirstOrDefaultAsync(predicate);
+                tuple.LocalChanged = true;
+            }
+
+            if ((tuple.Synchronized?.ID ?? 0) == 0)
+            {
+                (project, objective) = GetParents(false);
+                tuple.Synchronized = await data.Context.Items.FirstOrDefaultAsync(predicate);
+                tuple.SynchronizedChanged = true;
+            }
+
+            var synced = tuple.Synchronized;
+
+            if (synced != null && tuple.Remote == null)
+            {
+                tuple.Remote = new Item
+                {
+                    ExternalID = synced.ExternalID,
+                    ItemType = synced.ItemType,
+                    RelativePath = synced.RelativePath,
+                };
+                tuple.RemoteChanged = true;
+            }
         }
-
-        protected override DbSet<Item> GetDBSet(DMContext context)
-            => context.Items;
-
-        protected override IIncludableQueryable<Item, Item> Include(IQueryable<Item> set)
-            => base.Include(
-                set.Include(x => x.Objectives)
-                   .Include(x => x.Project));
-
-        protected override async Task<SynchronizingResult> Merge(
-            SynchronizingTuple<Item> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent)
-        {
-            tuple.Remote.Objectives ??= new List<ObjectiveItem>();
-            if (parent is SynchronizingTuple<Objective> objectiveTuple)
-                tuple.Remote.Objectives.Add(new ObjectiveItem { Objective = objectiveTuple.Remote });
-            await NothingAction(tuple, data, connectionContext, parent);
-            return null;
-        }
-
-        protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)
-            => base.IsEntitiesEquals(element, tuple) ||
-                 element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
     }
 }

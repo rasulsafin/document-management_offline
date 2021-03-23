@@ -86,7 +86,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Add Objective To Remote");
 
-                return await base.AddToRemote(tuple, data, connectionContext, parent);
+                var result = await base.AddToRemote(tuple, data, connectionContext, parent);
+                UpdateChildrenAfterSynchronization(tuple);
+                return result;
             }
             catch (Exception e)
             {
@@ -149,7 +151,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Merge Objective");
 
-                return await base.Merge(tuple, data, connectionContext, parent);
+                var result = await base.Merge(tuple, data, connectionContext, parent);
+                UpdateChildrenAfterSynchronization(tuple);
+                return result;
             }
             catch (Exception e)
             {
@@ -209,12 +213,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingData data,
             IConnectionContext connectionContext)
         {
-            var id1 = tuple.Local?.ID ?? 0;
-            var id2 = tuple.Synchronized?.ID ?? 0;
+            var id1 = tuple.Local?.ID ?? 0; // 1
+            var id2 = tuple.Synchronized?.ID ?? 0; // 0
             var itemsResult = await itemStrategy.Synchronize(
                 data,
                 connectionContext,
-                tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(),
+                tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(), // new list
                 item
                     => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
                     (item.SynchronizationMate != null &&
@@ -238,21 +242,26 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
             objective.Items ??= new List<ObjectiveItem>();
-            objective.Items.Add(new ObjectiveItem
-            {
-                Item = item,
-                ObjectiveID = objective.ID,
-            });
-            if (entityType == EntityType.Remote)
-            {
-                item.Objectives ??= new List<ObjectiveItem>() { new ObjectiveItem
-                    {
+            objective.Items.Add(
+                new ObjectiveItem
+                {
                     Item = item,
                     ObjectiveID = objective.ID,
-                    Objective = objective,
+                });
+
+            if (entityType == EntityType.Remote)
+            {
+                item.Objectives ??= new List<ObjectiveItem>
+                {
+                    new ObjectiveItem
+                    {
+                        Item = item,
+                        ObjectiveID = objective.ID,
+                        Objective = objective,
                     },
                 };
             }
+
             return Task.CompletedTask;
         }
 
@@ -300,6 +309,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             objective.DynamicFields ??= new List<DynamicField>();
             objective.DynamicFields.Add(field);
             return Task.CompletedTask;
+        }
+
+        private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
+        {
+            ItemStrategy.UpdateExternalIDs(
+                (tuple.Local.Items ?? ArraySegment<ObjectiveItem>.Empty)
+               .Concat(tuple.Synchronized.Items ?? ArraySegment<ObjectiveItem>.Empty)
+               .Select(x => x.Item),
+                (tuple.Remote.Items ?? ArraySegment<ObjectiveItem>.Empty).Select(x => x.Item).ToArray());
         }
 
         private void MergeBimElements(SynchronizingTuple<Objective> tuple)

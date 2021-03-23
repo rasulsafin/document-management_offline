@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Utility
 
         public string Resolve(Item source, ItemExternalDto destination, string destMember, ResolutionContext context)
         {
-            var projectID = source.ProjectID ?? source.Objectives.First().Objective.ProjectID;
+            var projectID = source.Project?.ID ?? source.ProjectID ?? source.Objectives.First().Objective.ProjectID;
             var project = dbContext.Projects
                 .Where(x => x.ID == projectID)
                 .FirstOrDefault();
