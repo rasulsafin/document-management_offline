@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Synchronization;
@@ -106,7 +107,9 @@ namespace MRS.DocumentManagement.Connection.LementPro
             using var taskService = new TasksService(requestUtility, new CommonRequestsUtility(requestUtility));
             var typesModels = await taskService.GetTasksTypesAsync();
             var types = new List<ObjectiveTypeExternalDto>();
-            typesModels.ForEach(t => types.Add(t.ToObjectiveTypeExternal()));
+            var defaultType = typesModels.FirstOrDefault();
+            if (defaultType != default)
+                types.Add(defaultType.ToObjectiveTypeExternal());
 
             return types;
         }
