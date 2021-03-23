@@ -11,17 +11,14 @@ namespace MRS.DocumentManagement.Utility
         private readonly DMContext dbContext;
 
         public ItemFullPathResolver(DMContext dbContext)
-        {
-            this.dbContext = dbContext;
-        }
+            => this.dbContext = dbContext;
 
         public string Resolve(Item source, ItemExternalDto destination, string destMember, ResolutionContext context)
         {
-            var projectID = source.Project?.ID ?? source.ProjectID ?? source.Objectives.First().Objective.ProjectID;
-            var project = dbContext.Projects
-                .Where(x => x.ID == projectID)
-                .FirstOrDefault();
-            return PathHelper.GetFullPath(project.Title, source.RelativePath);
+            var projectID = source.Project?.ID ??
+                source.ProjectID ?? source.Objectives?.FirstOrDefault()?.Objective?.ProjectID ?? 0;
+            var project = dbContext.Projects.FirstOrDefault(x => x.ID == projectID);
+            return project == null ? null : PathHelper.GetFullPath(project.Title, source.RelativePath);
         }
     }
 }
