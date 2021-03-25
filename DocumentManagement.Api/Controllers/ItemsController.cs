@@ -58,11 +58,11 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch
             {
-                return new BadRequestResult();
+                return BadRequest();
             }
 
             // Unity already handles this bool result
-            return new OkObjectResult(result);
+            return Ok(result);
         }
 
         [HttpPost]
@@ -76,11 +76,11 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch
             {
-                return new BadRequestResult();
+                return BadRequest();
             }
 
             // Unity already handles this bool result
-            return new OkObjectResult(result);
+            return Ok(result);
         }
     }
 }
