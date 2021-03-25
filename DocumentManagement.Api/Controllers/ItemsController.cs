@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -50,16 +51,36 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("{userID}")]
         public async Task<IActionResult> DownloadItems([FromRoute] int userID, [FromBody] IEnumerable<ID<ItemDto>> data)
         {
-            var result = await service.DownloadItems(new ID<UserDto>(userID), data);
-            return result ? (IActionResult)Ok() : BadRequest();
+            bool result;
+            try
+            {
+                result = await service.DownloadItems(new ID<UserDto>(userID), data);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+            // Unity already handles this bool result
+            return Ok(result);
         }
 
         [HttpPost]
         [Route("delete")]
         public async Task<IActionResult> DeleteItems([FromBody] IEnumerable<ID<ItemDto>> data)
         {
-            var result = await service.DeleteItems(data);
-            return result ? (IActionResult)Ok() : BadRequest();
+            bool result;
+            try
+            {
+                result = await service.DeleteItems(data);
+            }
+            catch
+            {
+                return BadRequest();
+            }
+
+            // Unity already handles this bool result
+            return Ok(result);
         }
     }
 }
