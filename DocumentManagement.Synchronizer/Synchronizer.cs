@@ -17,9 +17,12 @@ namespace MRS.DocumentManagement.Synchronization
         public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
-                ConnectionInfoExternalDto info)
+                ConnectionInfoExternalDto info,
+                IProgress<double> progress)
         {
             var results = new List<SynchronizingResult>();
+            var projectProgress = new Progress<double>(v => { progress.Report(v / 2); });
+            var objectiveProgress = new Progress<double>(v => { progress.Report((v + 1) / 2); });
 
             try
             {
@@ -49,7 +52,8 @@ namespace MRS.DocumentManagement.Synchronization
                             project.Map(await context.ProjectsSynchronizer.Get(ids)),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            date: date));
+                            date: date,
+                            progress: projectProgress));
                     unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
                        .Select(x => x.Object.ID)
                        .ToArray();
@@ -62,6 +66,7 @@ namespace MRS.DocumentManagement.Synchronization
                 catch (Exception e)
                 {
                     results.Add(new SynchronizingResult { Exception = e });
+                    progress?.Report(1.0);
                     return results;
                 }
 
@@ -82,11 +87,12 @@ namespace MRS.DocumentManagement.Synchronization
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
                              && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            date: date));
+                            progress: objectiveProgress));
                 }
                 catch (Exception e)
                 {
                     results.Add(new SynchronizingResult { Exception = e });
+                    progress?.Report(1.0);
                     return results;
                 }
 
@@ -103,6 +109,7 @@ namespace MRS.DocumentManagement.Synchronization
             catch (Exception e)
             {
                 results.Add(new SynchronizingResult { Exception = e });
+                progress?.Report(1.0);
                 return results;
             }
 

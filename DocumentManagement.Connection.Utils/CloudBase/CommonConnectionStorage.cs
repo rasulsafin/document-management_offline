@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase
             throw new NotImplementedException();
         }
 
-        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto, IProgress<double> progress)
         {
             foreach (var item in itemExternalDto)
             {

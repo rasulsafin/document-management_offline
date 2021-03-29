@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Status of the connection.</returns>
-        Task<ConnectionStatusDto> Connect(ID<UserDto> userID);
+        Task<string> Connect(ID<UserDto> userID);
 
         /// <summary>
         /// Gets current stutus of user's connetion.
@@ -51,19 +51,5 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="userID">User's ID.</param>
         /// <returns>Result of the synchronization.</returns>
         Task<string> Synchronize(ID<UserDto> userID);
-
-        /// <summary>
-        /// Gets status of synchronization.
-        /// </summary>
-        /// <param name="synchronizationID">Synchronization's id.</param>
-        /// <returns>True if synchronization is completed.</returns>
-        Task<bool> IsSynchronizationComplete(string synchronizationID);
-
-        /// <summary>
-        /// Gets synchronization result.
-        /// </summary>
-        /// <param name="synchronizationID">Synchronization's id.</param>
-        /// <returns>True if synchronization is completed without errors.</returns>
-        Task<bool> GetSynchronizationResult(string synchronizationID);
     }
 }

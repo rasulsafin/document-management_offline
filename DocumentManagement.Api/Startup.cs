@@ -106,6 +106,7 @@ namespace MRS.DocumentManagement.Api
 
             services.AddScoped<ItemHelper>();
             services.AddScoped<DynamicFieldHelper>();
+            services.AddScoped<ConnectionHelper>();
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
@@ -116,6 +117,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
+            services.AddSingleton<RequestProcessing>();
             services.AddSingleton<CryptographyHelper>();
         }
 

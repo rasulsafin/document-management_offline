@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -15,7 +16,7 @@ namespace MRS.DocumentManagement.Interface
         /// <param name="projectId">Id of the project to download from.</param>
         /// <param name="itemExternalDto">Items to download.</param>
         /// <returns>Download result.</returns>
-        Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto);
+        Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto, IProgress<double> progress);
 
         /// <summary>
         /// Deletes files from remote storage.

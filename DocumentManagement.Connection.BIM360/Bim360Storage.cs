@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
                 connection);
         }
 
-        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto, IProgress<double> progress)
         {
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
