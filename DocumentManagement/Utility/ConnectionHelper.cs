@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -176,7 +177,7 @@ namespace MRS.DocumentManagement.Utility
             await context.SaveChangesAsync();
         }
 
-        public async Task<IResult> ConnectToRemote(int userID, IProgress<double> progress)
+        public async Task<IResult> ConnectToRemote(int userID, IProgress<double> progress, CancellationToken token)
         {
             User user = await context.Users
                             .Include(x => x.ConnectionInfo)
@@ -186,6 +187,8 @@ namespace MRS.DocumentManagement.Utility
                 progress?.Report(1.0);
                 return new Result<ConnectionStatusDto>(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", });
             }
+
+            token.ThrowIfCancellationRequested();
 
             // Get connection info from user
             var connectionInfo = await GetConnectionInfoFromDb(user);
@@ -198,10 +201,10 @@ namespace MRS.DocumentManagement.Utility
             var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
             var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
-            // TODO: Long task
             // Connect to Remote
             var status = new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK };
-;
+            token.ThrowIfCancellationRequested();
+
             try
             {
                 status = await connection.Connect(connectionInfoExternalDto);
@@ -220,8 +223,12 @@ namespace MRS.DocumentManagement.Utility
             context.Update(connectionInfo);
             await context.SaveChangesAsync();
 
+            token.ThrowIfCancellationRequested();
+
             // Update types stored in connection info
             await UpdateEnumerationObjects(connectionInfo, connectionInfoExternalDto);
+
+            token.ThrowIfCancellationRequested();
 
             // Update objective types stored in connection type
             foreach (var externalType in connectionInfoExternalDto.ConnectionType.ObjectiveTypes)
@@ -243,6 +250,8 @@ namespace MRS.DocumentManagement.Utility
             await context.SaveChangesAsync();
 
             progress?.Report(1.0);
+
+            token.ThrowIfCancellationRequested();
 
             return new Result<ConnectionStatusDto>(status);
         }

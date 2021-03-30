@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -152,7 +153,9 @@ namespace MRS.DocumentManagement.Tests
                     User = await Fixture.Context.Users.FirstAsync(),
                 },
                 Connection.Object,
-                new ConnectionInfoExternalDto());
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
             var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
             var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
             return (local, synchronized, result);

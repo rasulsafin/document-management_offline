@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -34,16 +35,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
                     throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Local");
 
-                return await base.AddToLocal(tuple, data, connectionContext, parent);
+                return await base.AddToLocal(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -60,19 +62,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
                 tuple.Merge();
                 tuple.Remote.ExternalID = tuple.Local.ExternalID;
 
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
                     throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Remote");
 
-                return await base.AddToRemote(tuple, data, connectionContext, parent);
+                return await base.AddToRemote(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -89,16 +92,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
                     throw new Exception("Exception created while Synchronizing children in Merge Dynamic Field");
 
-                return await base.Merge(tuple, data, connectionContext, parent);
+                return await base.Merge(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -115,16 +119,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
                     throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Local");
 
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -141,16 +146,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
                     throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Remote");
 
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -170,7 +176,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<DynamicField> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             if (HasChildren(tuple.Local) || HasChildren(tuple.Remote) || HasChildren(tuple.Synchronized))
             {
@@ -182,6 +189,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     data,
                     connectionContext,
                     tuple.Remote?.ChildrenDynamicFields?.ToList() ?? new List<DynamicField>(),
+                    token,
                     field => field.ParentFieldID == id1 || field.ParentFieldID == id2 ||
                         (field.SynchronizationMate != null &&
                             (field.SynchronizationMate.ParentFieldID == id1 ||

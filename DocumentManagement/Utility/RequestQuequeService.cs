@@ -1,22 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class RequestProcessing
+    public class RequestQuequeService : IRequestQuequeService
     {
-        public static readonly Dictionary<string, (Task<IResult> task, double progress)> QUEQUE 
-            = new Dictionary<string, (Task<IResult> task, double progress)>();
+        public static readonly Dictionary<string, (Task<IResult> task, double progress, CancellationTokenSource src)> QUEQUE
+            = new Dictionary<string, (Task<IResult> task, double progress, CancellationTokenSource src)>();
 
-        public double GetProgress(string id)
+        public Task<double> GetProgress(string id)
         {
             if (QUEQUE.TryGetValue(id, out var job))
             {
                 var result = job.progress;
-                return result;
+                return Task.FromResult(result);
+            }
+
+            throw new ArgumentException($"The job {id} doesn't exist");
+        }
+
+        public Task Cancel(string id)
+        {
+            if (QUEQUE.TryGetValue(id, out var job))
+            {
+                job.src.Cancel();
+                QUEQUE.Remove(id);
+                return Task.CompletedTask;
             }
 
             throw new ArgumentException($"The job {id} doesn't exist");
@@ -39,11 +52,11 @@ namespace MRS.DocumentManagement.Utility
             throw new ArgumentException($"The job {id} doesn't exist");
         }
 
-        public void SetProgress(double value, string id)
+        internal void SetProgress(double value, string id)
         {
             if (QUEQUE.TryGetValue(id, out var job))
             {
-                QUEQUE[id] = (job.task, value);
+                QUEQUE[id] = (job.task, value, job.src);
                 return;
             }
 

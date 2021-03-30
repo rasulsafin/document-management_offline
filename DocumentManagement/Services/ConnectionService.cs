@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -23,10 +24,10 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
         private readonly IServiceScopeFactory  serviceScopeFactory;
-        private readonly RequestProcessing processing;
+        private readonly RequestQuequeService processing;
         private readonly ConnectionHelper helper;
 
-        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, RequestProcessing processing, ConnectionHelper helper)
+        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, RequestQuequeService processing, ConnectionHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -59,14 +60,17 @@ namespace MRS.DocumentManagement.Services
             var scopedhelper = new ConnectionHelper(scopedContext, scopedMapper);
 
             Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
-
+            var src = new CancellationTokenSource();
             var task = Task.Factory.StartNew(
                 async () =>
                 {
                     try
                     {
-                        var res = await scopedhelper.ConnectToRemote((int)userID, progress);
+                        var res = await scopedhelper.ConnectToRemote((int)userID, progress, src.Token);
                         return res;
+                    } catch (OperationCanceledException ex)
+                    {
+                        return new Result<Exception>(ex);
                     }
                     finally
                     {
@@ -74,7 +78,7 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestProcessing.QUEQUE.Add(id, (task.Unwrap(), 0));
+            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
 
             return await Task.FromResult(id);
         }
@@ -140,13 +144,13 @@ namespace MRS.DocumentManagement.Services
 
             var id = Guid.NewGuid().ToString();
             Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
-
+            var src = new CancellationTokenSource();
             var task = Task.Factory.StartNew(
                 async () =>
                 {
                     try
                     {
-                        var synchronizationResult = await synchronizer.Synchronize(data, connection, info, progress);
+                        var synchronizationResult = await synchronizer.Synchronize(data, connection, info, progress, src.Token);
                         return (IResult)new Result<ICollection<SynchronizingResult>>(synchronizationResult);
                     }
                     finally
@@ -155,7 +159,7 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestProcessing.QUEQUE.Add(id, (task.Unwrap(), 0));
+            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
 
             return id;
         }

@@ -1,4 +1,7 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
@@ -44,12 +47,16 @@ namespace MRS.DocumentManagement.Connection.Bim360
                 connection);
         }
 
-        public async Task<bool> DownloadFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDto, IProgress<double> progress)
+        public async Task<bool> DownloadFiles(string projectId,
+            IEnumerable<ItemExternalDto> itemExternalDto,
+            IProgress<double> progress,
+            CancellationToken cancelToken)
         {
             connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
-
+            int i = 0;
             foreach (var item in itemExternalDto)
             {
+                cancelToken.ThrowIfCancellationRequested();
                 var file = await itemsService.GetAsync(projectId, item.ExternalID);
 
                 var storage = file.version.Relationships.Storage?.Data
@@ -61,6 +68,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 var (bucketKey, hashedName) = storage.ParseStorageId();
                 await objectsService.GetAsync(bucketKey, hashedName, item.FullPath);
+                progress?.Report(++i / (double)itemExternalDto.Count());
             }
 
             return true;

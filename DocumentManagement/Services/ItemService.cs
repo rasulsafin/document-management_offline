@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -18,9 +19,9 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly RequestProcessing processing;
+        private readonly RequestQuequeService processing;
 
-        public ItemService(DMContext context, IMapper mapper, RequestProcessing processing)
+        public ItemService(DMContext context, IMapper mapper, RequestQuequeService processing)
         {
             this.context = context;
             this.mapper = mapper;
@@ -62,15 +63,16 @@ namespace MRS.DocumentManagement.Services
             var id = Guid.NewGuid().ToString();
             Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
             var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+            var src = new CancellationTokenSource();
 
             var task = Task.Factory.StartNew(
                 async () =>
                 {
-                        var result = await storage.DownloadFiles(project.ExternalID, data, progress);
+                        var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
                         return (IResult)new Result<bool>(result);
                 },
                 TaskCreationOptions.LongRunning);
-            RequestProcessing.QUEQUE.Add(id, (task.Unwrap(), 0));
+            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
 
             return id;
         }

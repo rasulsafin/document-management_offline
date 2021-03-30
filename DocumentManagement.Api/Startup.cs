@@ -117,7 +117,7 @@ namespace MRS.DocumentManagement.Api
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
-            services.AddSingleton<RequestProcessing>();
+            services.AddSingleton<RequestQuequeService>();
             services.AddSingleton<CryptographyHelper>();
         }
 
