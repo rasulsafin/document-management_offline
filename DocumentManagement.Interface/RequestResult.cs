@@ -1,12 +1,26 @@
 ﻿using System;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Interface
 {
     public class RequestResult
     {
-        public RequestResult(object value) => Value = value;
+        public RequestResult(object value)
+            : this(value, null)
+        {
+        }
 
-        public RequestResult(Exception exception) => Exception = exception;
+        public RequestResult(Exception exception)
+            : this(null, exception)
+        {
+        }
+
+        [JsonConstructor]
+        public RequestResult(object value, Exception exception)
+        {
+            Value = value;
+            Exception = exception;
+        }
 
         public object Value { get; private set; }
 

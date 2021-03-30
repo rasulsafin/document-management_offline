@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Services
                         return new RequestResult(result);
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
 
             return new RequestID(id);
         }

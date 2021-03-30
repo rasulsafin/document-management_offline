@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
 
             return await Task.FromResult(new RequestID(id));
         }
@@ -160,7 +160,7 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
 
             return new RequestID(id);
         }

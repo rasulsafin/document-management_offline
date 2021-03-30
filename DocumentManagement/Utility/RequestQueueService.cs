@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
@@ -9,14 +8,14 @@ namespace MRS.DocumentManagement.Utility
 {
     public class RequestQueueService : IRequestQueueService
     {
-        public static readonly Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)> QUEUE
-            = new Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)>();
+        public static readonly Dictionary<string, Request> QUEUE
+            = new Dictionary<string, Request>();
 
         public Task<double> GetProgress(string id)
         {
             if (QUEUE.TryGetValue(id, out var job))
             {
-                var result = job.progress;
+                var result = job.Progress;
                 return Task.FromResult(result);
             }
 
@@ -27,7 +26,7 @@ namespace MRS.DocumentManagement.Utility
         {
             if (QUEUE.TryGetValue(id, out var job))
             {
-                job.src.Cancel();
+                job.Src.Cancel();
                 QUEUE.Remove(id);
                 return Task.CompletedTask;
             }
@@ -39,14 +38,17 @@ namespace MRS.DocumentManagement.Utility
         {
             if (QUEUE.TryGetValue(id, out var job))
             {
-                if (job.task.IsCompleted)
+                if (job.Task.IsCompleted)
                 {
-                    var result = job.task.Result;
+                    var result = job.Task.Result;
                     QUEUE.Remove(id);
                     return Task.FromResult(result);
                 }
                 else
-                { return null; }
+                {
+                    // TODO: throw exception
+                    return null;
+                }
             }
 
             throw new ArgumentException($"The job {id} doesn't exist");
@@ -56,11 +58,9 @@ namespace MRS.DocumentManagement.Utility
         {
             if (QUEUE.TryGetValue(id, out var job))
             {
-                QUEUE[id] = (job.task, value, job.src);
+                job.Progress = value;
                 return;
             }
-
-           // throw new ArgumentException($"The job {id} doesn't exist");
         }
     }
 }
