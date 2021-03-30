@@ -15,11 +15,12 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpGet]
         [Route("{id}")]
-        public IActionResult GetProgress([FromRoute] string id)
+        public async Task<IActionResult> GetProgress([FromRoute] string id)
         {
             try
             {
-                return Ok(service.GetProgress(id));
+                var progress = await service.GetProgress(id);
+                return Ok(progress);
             }
             catch (ArgumentException)
             {

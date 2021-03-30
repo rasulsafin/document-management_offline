@@ -68,9 +68,10 @@ namespace MRS.DocumentManagement.Services
                     {
                         var res = await scopedhelper.ConnectToRemote((int)userID, progress, src.Token);
                         return res;
-                    } catch (OperationCanceledException ex)
+                    }
+                    catch (OperationCanceledException ex)
                     {
-                        return new Result<Exception>(ex);
+                        return new RequestResult(ex);
                     }
                     finally
                     {
@@ -151,7 +152,7 @@ namespace MRS.DocumentManagement.Services
                     try
                     {
                         var synchronizationResult = await synchronizer.Synchronize(data, connection, info, progress, src.Token);
-                        return (IResult)new Result<ICollection<SynchronizingResult>>(synchronizationResult);
+                        return new RequestResult(synchronizationResult.Count == 0);
                     }
                     finally
                     {

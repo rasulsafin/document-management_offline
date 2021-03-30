@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="id">Id of the task.</param>
         /// <returns>Result of the complete task.</returns>
-        Task<IResult> GetResult(string id);
+        Task<RequestResult> GetResult(string id);
 
         /// <summary>
         /// Cancels task.

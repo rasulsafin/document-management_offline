@@ -69,7 +69,7 @@ namespace MRS.DocumentManagement.Services
                 async () =>
                 {
                         var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
-                        return (IResult)new Result<bool>(result);
+                        return new RequestResult(result);
                 },
                 TaskCreationOptions.LongRunning);
             RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));

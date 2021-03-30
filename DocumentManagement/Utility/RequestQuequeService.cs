@@ -9,8 +9,8 @@ namespace MRS.DocumentManagement.Utility
 {
     public class RequestQuequeService : IRequestQuequeService
     {
-        public static readonly Dictionary<string, (Task<IResult> task, double progress, CancellationTokenSource src)> QUEQUE
-            = new Dictionary<string, (Task<IResult> task, double progress, CancellationTokenSource src)>();
+        public static readonly Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)> QUEQUE
+            = new Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)>();
 
         public Task<double> GetProgress(string id)
         {
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Utility
             throw new ArgumentException($"The job {id} doesn't exist");
         }
 
-        public Task<IResult> GetResult(string id)
+        public Task<RequestResult> GetResult(string id)
         {
             if (QUEQUE.TryGetValue(id, out var job))
             {
@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Utility
                 return;
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+           // throw new ArgumentException($"The job {id} doesn't exist");
         }
     }
 }

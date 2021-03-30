@@ -177,7 +177,7 @@ namespace MRS.DocumentManagement.Utility
             await context.SaveChangesAsync();
         }
 
-        public async Task<IResult> ConnectToRemote(int userID, IProgress<double> progress, CancellationToken token)
+        public async Task<RequestResult> ConnectToRemote(int userID, IProgress<double> progress, CancellationToken token)
         {
             User user = await context.Users
                             .Include(x => x.ConnectionInfo)
@@ -185,7 +185,7 @@ namespace MRS.DocumentManagement.Utility
             if (user == null)
             {
                 progress?.Report(1.0);
-                return new Result<ConnectionStatusDto>(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", });
+                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", });
             }
 
             token.ThrowIfCancellationRequested();
@@ -195,7 +195,7 @@ namespace MRS.DocumentManagement.Utility
             if (connectionInfo == null)
             {
                 progress?.Report(1.0);
-                return new Result<ConnectionStatusDto>(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", });
+                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", });
             }
 
             var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
@@ -211,7 +211,7 @@ namespace MRS.DocumentManagement.Utility
             } catch (Exception e)
             {
                 progress?.Report(1.0);
-                return new Result<ConnectionStatusDto>( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
+                return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }
 
             // Update connection info
@@ -253,7 +253,7 @@ namespace MRS.DocumentManagement.Utility
 
             token.ThrowIfCancellationRequested();
 
-            return new Result<ConnectionStatusDto>(status);
+            return new RequestResult(status);
         }
     }
 }
