@@ -5,7 +5,7 @@ namespace MRS.DocumentManagement.Interface.Services
     /// <summary>
     /// Service for queuing long tasks.
     /// </summary>
-    public interface IRequestQuequeService
+    public interface IRequestQueueService
     {
         /// <summary>
         /// Gets progress from 0 to 1 indicating of Task completion status.

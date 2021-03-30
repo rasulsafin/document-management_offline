@@ -24,10 +24,10 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
         private readonly IServiceScopeFactory  serviceScopeFactory;
-        private readonly RequestQuequeService processing;
+        private readonly RequestQueueService processing;
         private readonly ConnectionHelper helper;
 
-        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, RequestQuequeService processing, ConnectionHelper helper)
+        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, RequestQueueService processing, ConnectionHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Services
             return mapper.Map<ID<ConnectionInfoDto>>(connectionInfo.ID);
         }
 
-        public async Task<string> Connect(ID<UserDto> userID)
+        public async Task<RequestID> Connect(ID<UserDto> userID)
         {
             var id = Guid.NewGuid().ToString();
             var scope = serviceScopeFactory.CreateScope();
@@ -79,9 +79,9 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
 
-            return await Task.FromResult(id);
+            return await Task.FromResult(new RequestID(id));
         }
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)
@@ -112,7 +112,7 @@ namespace MRS.DocumentManagement.Services
             return list;
         }
 
-        public async Task<string> Synchronize(ID<UserDto> userID)
+        public async Task<RequestID> Synchronize(ID<UserDto> userID)
         {
             var iUserID = (int)userID;
             var user = await context.Users
@@ -126,7 +126,7 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.AuthFieldValues)
                 .FirstOrDefaultAsync(x => x.ID == iUserID);
             if (user == null)
-                return null;
+                throw new ArgumentNullException();
 
             var scope = serviceScopeFactory.CreateScope();
             var scopedContext = scope.ServiceProvider.GetRequiredService<DMContext>();
@@ -160,9 +160,9 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
 
-            return id;
+            return new RequestID(id);
         }
     }
 }

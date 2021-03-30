@@ -7,11 +7,11 @@ namespace MRS.DocumentManagement.Api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
-    public class RequestQuequeController : Controller
+    public class RequestQueueController : Controller
     {
-        private readonly RequestQuequeService service;
+        private readonly RequestQueueService service;
 
-        public RequestQuequeController(RequestQuequeService service) => this.service = service;
+        public RequestQueueController(RequestQueueService service) => this.service = service;
 
         [HttpGet]
         [Route("{id}")]

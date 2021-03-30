@@ -18,7 +18,6 @@ namespace MRS.DocumentManagement.Tests
     [TestClass]
     public class ItemServiceTests
     {
-
         private static SharedDatabaseFixture Fixture { get; set; }
 
         private static DMContext Context => Fixture.Context;
@@ -74,7 +73,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ItemService(Fixture.Context, mapper, new RequestQuequeService());
+            service = new ItemService(Fixture.Context, mapper, new RequestQueueService());
         }
 
         [TestCleanup]

@@ -19,9 +19,9 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly RequestQuequeService processing;
+        private readonly RequestQueueService processing;
 
-        public ItemService(DMContext context, IMapper mapper, RequestQuequeService processing)
+        public ItemService(DMContext context, IMapper mapper, RequestQueueService processing)
         {
             this.context = context;
             this.mapper = mapper;
@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Services
             throw new NotImplementedException();
         }
 
-        public async Task<string> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
+        public async Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
             var ids = itemIds.Select(x => (int)x).ToArray();
             var dbItems = await context.Items
@@ -72,9 +72,9 @@ namespace MRS.DocumentManagement.Services
                         return new RequestResult(result);
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQuequeService.QUEQUE.Add(id, (task.Unwrap(), 0, src));
+            RequestQueueService.QUEUE.Add(id, (task.Unwrap(), 0, src));
 
-            return id;
+            return new RequestID(id);
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)

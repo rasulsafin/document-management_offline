@@ -7,14 +7,14 @@ using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class RequestQuequeService : IRequestQuequeService
+    public class RequestQueueService : IRequestQueueService
     {
-        public static readonly Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)> QUEQUE
+        public static readonly Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)> QUEUE
             = new Dictionary<string, (Task<RequestResult> task, double progress, CancellationTokenSource src)>();
 
         public Task<double> GetProgress(string id)
         {
-            if (QUEQUE.TryGetValue(id, out var job))
+            if (QUEUE.TryGetValue(id, out var job))
             {
                 var result = job.progress;
                 return Task.FromResult(result);
@@ -25,10 +25,10 @@ namespace MRS.DocumentManagement.Utility
 
         public Task Cancel(string id)
         {
-            if (QUEQUE.TryGetValue(id, out var job))
+            if (QUEUE.TryGetValue(id, out var job))
             {
                 job.src.Cancel();
-                QUEQUE.Remove(id);
+                QUEUE.Remove(id);
                 return Task.CompletedTask;
             }
 
@@ -37,12 +37,12 @@ namespace MRS.DocumentManagement.Utility
 
         public Task<RequestResult> GetResult(string id)
         {
-            if (QUEQUE.TryGetValue(id, out var job))
+            if (QUEUE.TryGetValue(id, out var job))
             {
                 if (job.task.IsCompleted)
                 {
                     var result = job.task.Result;
-                    QUEQUE.Remove(id);
+                    QUEUE.Remove(id);
                     return Task.FromResult(result);
                 }
                 else
@@ -54,9 +54,9 @@ namespace MRS.DocumentManagement.Utility
 
         internal void SetProgress(double value, string id)
         {
-            if (QUEQUE.TryGetValue(id, out var job))
+            if (QUEUE.TryGetValue(id, out var job))
             {
-                QUEQUE[id] = (job.task, value, job.src);
+                QUEUE[id] = (job.task, value, job.src);
                 return;
             }
 
