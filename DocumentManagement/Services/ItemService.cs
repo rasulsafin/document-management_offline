@@ -7,8 +7,10 @@ using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -16,11 +18,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly IFactory<Type, IConnection> connectionFactory;
 
-        public ItemService(DMContext context, IMapper mapper)
+        public ItemService(DMContext context, IMapper mapper, IFactory<Type, IConnection> connectionFactory)
         {
             this.context = context;
             this.mapper = mapper;
+            this.connectionFactory = connectionFactory;
         }
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
@@ -51,7 +55,8 @@ namespace MRS.DocumentManagement.Services
                 .ThenInclude(x => x.AuthFieldValues)
                 .FirstOrDefaultAsync(x => x.ID == (int)userID);
 
-            var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
+            var connection =
+                connectionFactory.Create(ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var storage = await connection.GetStorage(info);
 

@@ -5,14 +5,16 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -25,13 +27,28 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
         private readonly IServiceScopeFactory  serviceScopeFactory;
+        private readonly ILogger<ConnectionService> logger;
+        private readonly IFactory<Type, IConnection> connectionFactory;
+        private readonly IFactory<IServiceScope, Type, IConnection> connectionScopedFactory;
+        private readonly IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory;
 
-        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory)
+        public ConnectionService(
+            DMContext context,
+            IMapper mapper,
+            IServiceScopeFactory serviceScopeFactory,
+            ILogger<ConnectionService> logger,
+            IFactory<Type, IConnection> connectionFactory,
+            IFactory<IServiceScope, Type, IConnection> connectionScopedFactory,
+            IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory)
         {
             this.context = context;
             this.mapper = mapper;
             this.serviceScopeFactory = serviceScopeFactory;
             synchronizer = new Synchronizer();
+            this.logger = logger;
+            this.connectionFactory = connectionFactory;
+            this.connectionScopedFactory = connectionScopedFactory;
+            this.synchronizationDataFactory = synchronizationDataFactory;
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -59,11 +76,21 @@ namespace MRS.DocumentManagement.Services
             if (connectionInfo == null)
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", };
 
-            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
+            var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
             var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
+            ConnectionStatusDto status;
+
             // Connect to Remote
-            var status = await connection.Connect(connectionInfoExternalDto);
+            try
+            {
+                status = await connection.Connect(connectionInfoExternalDto);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't connect with info {@ConnectionInfo}", connectionInfo);
+                return null;
+            }
 
             // Update connection info
             connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
@@ -109,7 +136,8 @@ namespace MRS.DocumentManagement.Services
             var connectionInfo = await GetConnectionInfoFromDb((int)userID);
             if (connectionInfo == null)
                 return null;
-            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
+
+            var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
 
             return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
         }
@@ -144,18 +172,15 @@ namespace MRS.DocumentManagement.Services
             var id = Guid.NewGuid().ToString();
 
             var scope = serviceScopeFactory.CreateScope();
-            var scopedContext = scope.ServiceProvider.GetRequiredService<DMContext>();
+            var data = synchronizationDataFactory.Create(scope);
 
-            var data = new SynchronizingData
-            {
-                Context = scopedContext,
-                Mapper = scope.ServiceProvider.GetRequiredService<IMapper>(),
-                User = user,
-                ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
-                ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
-            };
+            data.User = user;
+            data.ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID);
+            data.ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID);
 
-            var connection = ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType);
+            var connection = connectionScopedFactory.Create(
+                scope,
+                ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
 
             var task = Task.Factory.StartNew(

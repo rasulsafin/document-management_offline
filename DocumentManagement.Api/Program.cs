@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -13,24 +14,26 @@ namespace MRS.DocumentManagement.Api
         {
             var mutexName = "Global\\DocumentManagement.Api." + GetAssemblyGuid();
 
-            using (var singleAppMutex = new Mutex(true, mutexName, out bool isNew))
-            {
-                if (!isNew)
-                {
-                    Console.WriteLine("DocumentManagement.Api service instance is already running, exiting.");
-                    return;
-                }
+            using var singleAppMutex = new Mutex(true, mutexName, out bool isNew);
 
-                CreateHostBuilder(args).Build().Run();
+            if (!isNew)
+            {
+                Console.WriteLine("DocumentManagement.Api service instance is already running, exiting.");
+                return;
             }
+
+            CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
+        public static IHostBuilder CreateHostBuilder(string[] args)
+            => Host.CreateDefaultBuilder(args)
+               .UseSerilog(
+                    (context, services, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
+               .ConfigureWebHostDefaults(
+                    webBuilder =>
+                    {
+                        webBuilder.UseStartup<Startup>();
+                    });
 
         private static string GetAssemblyGuid()
         {
