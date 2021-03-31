@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Connection.YandexDisk;
@@ -116,7 +117,7 @@ namespace MRS.DocumentManagement.Connection
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = "Controller null" };
             try
             {
-                var list = await controller.GetListAsync(PathManager.GetAppDir());
+                var list = await controller.GetListAsync(PathManager.GetRootDirectory());
                 if (list != null)
                     return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good" };
             }
@@ -131,8 +132,8 @@ namespace MRS.DocumentManagement.Connection
         {
             try
             {
-                await CheckDir(remoteDirName);
-                string path = PathManager.GetDir(remoteDirName);
+                await CheckDirectory(remoteDirName);
+                string path = PathManager.GetNestedDirectory(remoteDirName);
                 var created = await controller.LoadFileAsync(path, fullPath);
                 if (created == null)
                     return null;
@@ -186,35 +187,53 @@ namespace MRS.DocumentManagement.Connection
         private async Task Initialize()
         {
             IEnumerable<CloudElement> list = await controller.GetListAsync();
-            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APP_DIRECTORY))
-                await controller.CreateDirAsync("/", PathManager.APP_DIRECTORY);
+            if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.APPLICATION_ROOT_DIRECTORY_NAME))
+                await controller.CreateDirAsync("/", PathManager.APPLICATION_ROOT_DIRECTORY_NAME);
 
-            list = await controller.GetListAsync(PathManager.GetAppDir());
+            list = await controller.GetListAsync(PathManager.GetRootDirectory());
             if (!list.Any(x => x.IsDirectory && x.DisplayName == PathManager.TABLE_DIRECTORY))
                 await controller.CreateDirAsync("/", PathManager.GetTablesDir());
 
             isInit = true;
         }
 
-        private async Task<bool> CheckDir(string dirName)
+        private async Task<bool> CheckDirectory(string directoryName)
         {
-            bool res = directories.Any(x => x == dirName);
-            if (res)
+            var foldersInPath = directoryName.Split('/');
+            var folderToCheck = new StringBuilder();
+            foreach (var pathPart in foldersInPath)
+            {
+                folderToCheck.Append('/').Append(pathPart);
+                var createResult = await CreateDirectoryIfNecessary(folderToCheck.ToString().Trim('/'));
+                if (!createResult)
+                    return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> CreateDirectoryIfNecessary(string directoryName)
+        {
+            bool directoryExists = directories.Any(x => x == directoryName);
+            if (directoryExists)
                 return true;
 
-            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetAppDir());
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetRootDirectory());
             foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                     directories.Add(element.DisplayName);
-                if (element.DisplayName == dirName)
-                    res = true;
+                if (element.DisplayName == directoryName)
+                    directoryExists = true;
             }
 
-            if (!res)
-                await controller.CreateDirAsync(PathManager.GetAppDir(), dirName);
+            if (!directoryExists)
+            {
+                var createdFolder = await controller.CreateDirAsync(PathManager.GetRootDirectory(), directoryName);
+                return createdFolder != null;
+            }
 
-            return res;
+            return directoryExists;
         }
     }
 }

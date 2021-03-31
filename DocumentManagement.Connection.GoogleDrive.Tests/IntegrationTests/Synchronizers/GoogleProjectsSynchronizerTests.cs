@@ -133,7 +133,7 @@ namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synch
                 Assert.Fail();
             await Task.Delay(1000);
 
-            var result = await synchronizer.GetUpdatedIDs(creationTime);
+            var result = await synchronizer.GetUpdatedIDs(creationTime.AddDays(-2));
 
             Assert.IsTrue(result.Any(o => o == added.ExternalID));
         }
