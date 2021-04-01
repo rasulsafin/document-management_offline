@@ -91,18 +91,6 @@ namespace MRS.DocumentManagement.Connection.Tdms
             throw new NotImplementedException();
         }
 
-        public ConnectionTypeExternalDto GetConnectionType()
-        {
-            var type = new ConnectionTypeExternalDto
-            {
-                Name = "tdms",
-                AuthFieldNames = new List<string>() { Auth.LOGIN, Auth.PASSWORD, Auth.SERVER, Auth.DATABASE },
-                AppProperties = new Dictionary<string, string>(),
-            };
-
-            return type;
-        }
-
         public void Quit() => tdms.Quit();
 
         private ICollection<ObjectiveTypeExternalDto> GetObjectiveTypes()

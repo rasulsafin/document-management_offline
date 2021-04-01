@@ -6,11 +6,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Utility
 {
@@ -18,11 +20,19 @@ namespace MRS.DocumentManagement.Utility
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly IFactory<Type, IConnection> connectionFactory;
+        private readonly ILogger<ConnectionHelper> logger;
 
-        public ConnectionHelper(DMContext context, IMapper mapper)
+        public ConnectionHelper(
+            DMContext context,
+            IMapper mapper,
+            IFactory<Type, IConnection> connectionFactory,
+            ILogger<ConnectionHelper> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.connectionFactory = connectionFactory;
+            this.logger = logger;
         }
 
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
@@ -198,7 +208,7 @@ namespace MRS.DocumentManagement.Utility
                 return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Подключение не найдено! (connectionInfo == null)", });
             }
 
-            var connection = ConnectionCreator.GetConnection(connectionInfo.ConnectionType);
+            var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
             var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
 
             // Connect to Remote
@@ -208,8 +218,10 @@ namespace MRS.DocumentManagement.Utility
             try
             {
                 status = await connection.Connect(connectionInfoExternalDto);
-            } catch (Exception e)
+            }
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't connect with info {@ConnectionInfo}", connectionInfo);
                 progress?.Report(1.0);
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }

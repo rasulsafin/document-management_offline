@@ -16,19 +16,26 @@ namespace MRS.DocumentManagement.Connection.Bim360
     public class Bim360Connection : IConnection, IDisposable
     {
         private readonly AuthenticationService authenticationService;
+        private readonly Bim360Storage storage;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
 
-        public Bim360Connection()
+        public Bim360Connection(
+            ForgeConnection connection,
+            Authenticator authenticator,
+            AuthenticationService authenticationService,
+            Bim360Storage storage)
         {
-            connection = new ForgeConnection();
-            authenticationService = new AuthenticationService(connection);
-            authenticator = new Authenticator(authenticationService);
+            this.connection = connection;
+            this.authenticator = authenticator;
+            this.authenticationService = authenticationService;
+            this.storage = storage;
         }
 
         public void Dispose()
         {
             connection.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
@@ -70,33 +77,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return info;
         }
 
-        public ConnectionTypeExternalDto GetConnectionType()
-        {
-            var type = new ConnectionTypeExternalDto
-            {
-                Name = "BIM360",
-                AuthFieldNames = new List<string>
-                {
-                    "token",
-                    "refreshtoken",
-                    "end",
-                },
-                AppProperties = new Dictionary<string, string>
-                {
-                    { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
-                    { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
-                    { "RETURN_URL", "http://localhost:8000/oauth/" },
-                },
-            };
-
-            return type;
-        }
-
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => await Bim360ConnectionContext.CreateContext(info);
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
-            => Task.FromResult<IConnectionStorage>(Bim360Storage.Create(info));
+        {
+            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
+            return Task.FromResult<IConnectionStorage>(storage);
+        }
 
         private ICollection<EnumerationTypeExternalDto> GetEnumerationTypes()
             => new List<EnumerationTypeExternalDto> { Constants.STANDARD_NG_TYPES.Value };

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -19,14 +20,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
 
         private readonly AuthenticationService service;
+        private readonly ILogger<Authenticator> logger;
         private HttpListener httpListener;
         private DateTime sentTime;
 
         // Is created as scoped as this service
         private ConnectionInfoExternalDto connectionInfoDto;
 
-        public Authenticator(AuthenticationService service)
-            => this.service = service;
+        public Authenticator(AuthenticationService service, ILogger<Authenticator> logger)
+        {
+            this.service = service;
+            this.logger = logger;
+        }
 
         internal delegate void NewBearerDelegate(Token bearer);
 
@@ -160,8 +165,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                 var bearer = await service.RefreshTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, AccessRefreshToken);
                 SaveData(bearer);
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't refresh connection");
             }
         }
 
@@ -178,6 +184,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                         return;
                     httpListener = new HttpListener();
                     httpListener.Prefixes.Add(AppCallBackUrl/*.Replace("localhost", "+") + "/"*/);
+                    logger.LogInformation("Open browser");
                     httpListener.Start();
                     getting = httpListener.GetContextAsync();
                 }

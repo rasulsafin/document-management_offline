@@ -17,34 +17,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
     public class Bim360Storage : IConnectionStorage
     {
         private readonly ObjectsService objectsService;
-        private readonly ConnectionInfoExternalDto connectionInfo;
         private readonly ItemsService itemsService;
-        private readonly Authenticator authenticator;
-        private readonly ForgeConnection connection;
 
-        private Bim360Storage(
+        public Bim360Storage(
             ObjectsService objectsService,
-            ConnectionInfoExternalDto connectionInfoExternalDto,
-            ItemsService itemsService,
-            Authenticator authenticator,
-            ForgeConnection forgeConnection)
+            ItemsService itemsService)
         {
             this.objectsService = objectsService;
-            connectionInfo = connectionInfoExternalDto;
             this.itemsService = itemsService;
-            this.authenticator = authenticator;
-            connection = forgeConnection;
-        }
-
-        public static Bim360Storage Create(ConnectionInfoExternalDto connectionInfoExternalDto)
-        {
-            var connection = new ForgeConnection();
-            return new Bim360Storage(
-                new ObjectsService(connection),
-                connectionInfoExternalDto,
-                new ItemsService(connection),
-                new Authenticator(new AuthenticationService(connection)),
-                connection);
         }
 
         public async Task<bool> DownloadFiles(string projectId,
@@ -52,7 +32,6 @@ namespace MRS.DocumentManagement.Connection.Bim360
             IProgress<double> progress,
             CancellationToken cancelToken)
         {
-            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
             int i = 0;
             foreach (var item in itemExternalDto)
             {

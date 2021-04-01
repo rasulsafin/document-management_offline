@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -14,11 +15,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<ObjectiveService> logger;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper)
+        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveService> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
@@ -35,6 +38,7 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
                 throw new InvalidDataException("Can't add new objective type", ex.InnerException);
             }
         }
@@ -77,6 +81,7 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't remove objective type with key {ID}", id);
                 throw new InvalidDataException($"Can't remove objective type with key {id}", ex.InnerException);
             }
         }
