@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -70,7 +71,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -82,11 +84,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
 
                 MergeBimElements(tuple);
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Add Objective To Remote");
 
-                var result = await base.AddToRemote(tuple, data, connectionContext, parent);
+                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 return result;
             }
@@ -105,7 +107,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -117,11 +120,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                    .FirstOrDefaultAsync(x => x.SynchronizationMateID == id);
 
                 MergeBimElements(tuple);
-                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent);
+                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Add Objective To Local");
 
@@ -142,16 +145,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
                 MergeBimElements(tuple);
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext);
+                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Merge Objective");
 
-                var result = await base.Merge(tuple, data, connectionContext, parent);
+                var result = await base.Merge(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 return result;
             }
@@ -170,11 +174,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -191,11 +196,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -211,7 +217,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         private async Task<List<SynchronizingResult>> SynchronizeChildren(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext)
+            IConnectionContext connectionContext,
+            CancellationToken token)
         {
             var id1 = tuple.Local?.ID ?? 0; // 1
             var id2 = tuple.Synchronized?.ID ?? 0; // 0
@@ -219,6 +226,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 data,
                 connectionContext,
                 tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(), // new list
+                token, 
                 item
                     => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
                     (item.SynchronizationMate != null &&
@@ -229,6 +237,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 data,
                 connectionContext,
                 tuple.Remote?.DynamicFields?.ToList() ?? new List<DynamicField>(),
+                token,
                 field => field.ObjectiveID == id1 || field.ObjectiveID == id2 ||
                     (field.SynchronizationMate != null &&
                         (field.SynchronizationMate.ObjectiveID == id1 || field.SynchronizationMate.ObjectiveID == id2)),

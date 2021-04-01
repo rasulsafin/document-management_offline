@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -1330,7 +1331,9 @@ namespace MRS.DocumentManagement.Tests
             var synchronizationResult = await synchronizer.Synchronize(
                 data,
                 Connection.Object,
-                new ConnectionInfoExternalDto());
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
             return synchronizationResult;
         }
 

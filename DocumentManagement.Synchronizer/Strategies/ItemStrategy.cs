@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -35,22 +36,24 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             await FindAndAttachExists(tuple, data, parent, tuple.Remote.RelativePath);
             LinkParent(tuple, parent);
-            return await base.AddToLocal(tuple, data, connectionContext, parent);
+            return await base.AddToLocal(tuple, data, connectionContext, parent, token);
         }
 
         protected override async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             await FindAndAttachExists(tuple, data, parent, tuple.Local.RelativePath);
             LinkParent(tuple, parent);
-            return await base.AddToRemote(tuple, data, connectionContext, parent);
+            return await base.AddToRemote(tuple, data, connectionContext, parent, token);
         }
 
         protected override DbSet<Item> GetDBSet(DMContext context)
@@ -65,7 +68,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             if (string.IsNullOrWhiteSpace(tuple.Local.ExternalID))
                 tuple.Local.ExternalID = tuple.ExternalID;
