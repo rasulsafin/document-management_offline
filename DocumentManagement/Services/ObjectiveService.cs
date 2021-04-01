@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -138,7 +138,7 @@ namespace MRS.DocumentManagement.Services
                 objectives.Add(objectiveToReport);
             }
 
-            var reportDir = Path.Combine(path, "Отчеты");
+            var reportDir = Path.Combine(path, "Reports");
             if (!Directory.Exists(reportDir))
                 Directory.CreateDirectory(reportDir);
 
