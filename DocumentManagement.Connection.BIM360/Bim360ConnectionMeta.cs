@@ -5,9 +5,9 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360ConnectionInformator : IConnectionInfo
+    public class Bim360ConnectionMeta : IConnectionMeta
     {
-        public ConnectionTypeExternalDto GetConnectionType()
+        public ConnectionTypeExternalDto GetConnectionTypeInfo()
         {
             var type = new ConnectionTypeExternalDto
             {
@@ -29,7 +29,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return type;
         }
 
-        public Type GetTypeOfConnection()
+        public Type GetIConnectionType()
             => typeof(Bim360Connection);
     }
 }

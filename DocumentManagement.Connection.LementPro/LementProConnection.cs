@@ -53,24 +53,6 @@ namespace MRS.DocumentManagement.Connection.LementPro
             return updatedInfo;
         }
 
-        public ConnectionTypeExternalDto GetConnectionType()
-        {
-            var type = new ConnectionTypeExternalDto
-            {
-                Name = "LementPro",
-                AuthFieldNames = new List<string>
-                {
-                    AUTH_NAME_LOGIN,
-                    AUTH_NAME_PASSWORD,
-                    AUTH_NAME_TOKEN,
-                    AUTH_NAME_END,
-                },
-                AppProperties = new Dictionary<string, string>(),
-            };
-
-            return type;
-        }
-
         // Do we need this?
         public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {

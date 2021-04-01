@@ -49,18 +49,18 @@ namespace MRS.DocumentManagement.Connection
             var list = new List<ConnectionTypeExternalDto>();
             var listOfTypes = ASSEMBLIES_COLLECTION.Value
                         .SelectMany(x => x.GetTypes())
-                        .Where(x => typeof(IConnectionInfo).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
+                        .Where(x => typeof(IConnectionMeta).IsAssignableFrom(x) && !x.IsInterface && !x.IsAbstract);
 
             foreach (Type type in listOfTypes)
             {
                 var connection = Activator.CreateInstance(type);
-                var method = type.GetMethod(nameof(IConnectionInfo.GetConnectionType));
+                var method = type.GetMethod(nameof(IConnectionMeta.GetConnectionTypeInfo));
                 var result = method?.Invoke(connection, null) as ConnectionTypeExternalDto;
 
                 if (result == null)
                     continue;
 
-                method = type.GetMethod(nameof(IConnectionInfo.GetTypeOfConnection));
+                method = type.GetMethod(nameof(IConnectionMeta.GetConnectionTypeInfo));
 
                 list.Add(result);
                 connections.Add(result.Name, method?.Invoke(connection, null) as Type);

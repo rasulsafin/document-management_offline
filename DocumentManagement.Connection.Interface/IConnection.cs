@@ -1,8 +1,4 @@
-using System;
-using System.ComponentModel.Design;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Interface
