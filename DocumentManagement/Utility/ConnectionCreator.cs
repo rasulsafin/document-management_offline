@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Connection
                 if (result == null)
                     continue;
 
-                method = type.GetMethod(nameof(IConnectionMeta.GetConnectionTypeInfo));
+                method = type.GetMethod(nameof(IConnectionMeta.GetIConnectionType));
 
                 list.Add(result);
                 connections.Add(result.Name, method?.Invoke(connection, null) as Type);

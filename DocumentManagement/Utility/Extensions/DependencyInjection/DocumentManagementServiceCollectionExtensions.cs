@@ -42,18 +42,18 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static IServiceCollection AddFactories(this IServiceCollection services)
         {
+            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
+            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
+
             services.AddScoped<Func<IServiceScope, Type, IConnection>>(
                 x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
-            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
-            services.AddScoped<Func<IServiceScope, DMContext>>(
-                x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<DMContext>());
-            services.AddScoped<Func<IServiceScope, IMapper>>(
-                x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<IMapper>());
-
-            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
             services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
+
             services.AddScoped<IFactory<IServiceScope, SynchronizingData>, SynchronizationDataFactory>();
             services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
+
+            services.AddScopedFactory<DMContext>();
+            services.AddScopedFactory<IMapper>();
             return services;
         }
 
@@ -90,6 +90,14 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ItemFileNameResolver>();
             services.AddTransient<ItemFullPathResolver>();
             services.AddTransient<ItemExternalDtoRelativePathResolver>();
+            return services;
+        }
+
+        private static IServiceCollection AddScopedFactory<TResult>(this IServiceCollection services)
+        {
+            services.AddScoped<Func<IServiceScope, TResult>>(
+                x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<TResult>());
+            services.AddScoped<IFactory<IServiceScope, TResult>, Factory<IServiceScope, TResult>>();
             return services;
         }
     }

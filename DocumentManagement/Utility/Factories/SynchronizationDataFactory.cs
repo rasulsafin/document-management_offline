@@ -1,4 +1,3 @@
-using System;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Database;
@@ -8,22 +7,22 @@ namespace MRS.DocumentManagement.Utility.Factories
 {
     public class SynchronizationDataFactory : IFactory<IServiceScope, SynchronizingData>
     {
-        private readonly Func<IServiceScope, IMapper> getMapper;
-        private readonly Func<IServiceScope, DMContext> getContext;
+        private readonly IFactory<IServiceScope, IMapper> mapperFactory;
+        private readonly IFactory<IServiceScope, DMContext> contextFactory;
 
         public SynchronizationDataFactory(
-            Func<IServiceScope, IMapper> getMapper,
-            Func<IServiceScope, DMContext> getContext)
+            IFactory<IServiceScope, IMapper> mapperFactory,
+            IFactory<IServiceScope, DMContext> contextFactory)
         {
-            this.getMapper = getMapper;
-            this.getContext = getContext;
+            this.mapperFactory = mapperFactory;
+            this.contextFactory = contextFactory;
         }
 
         public SynchronizingData Create(IServiceScope scope)
             => new SynchronizingData
             {
-                Context = getContext(scope),
-                Mapper = getMapper(scope),
+                Context = contextFactory.Create(scope),
+                Mapper = mapperFactory.Create(scope),
             };
     }
 }
