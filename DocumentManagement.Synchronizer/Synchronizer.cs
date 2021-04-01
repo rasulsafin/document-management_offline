@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
@@ -17,9 +18,13 @@ namespace MRS.DocumentManagement.Synchronization
         public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
-                ConnectionInfoExternalDto info)
+                ConnectionInfoExternalDto info,
+                IProgress<double> progress,
+                CancellationToken token)
         {
             var results = new List<SynchronizingResult>();
+            var projectProgress = new Progress<double>(v => { progress.Report(v / 2); });
+            var objectiveProgress = new Progress<double>(v => { progress.Report((v + 1) / 2); });
 
             try
             {
@@ -47,9 +52,11 @@ namespace MRS.DocumentManagement.Synchronization
                             data,
                             context,
                             project.Map(await context.ProjectsSynchronizer.Get(ids)),
+                            token,
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            date: date));
+                            date: date,
+                            progress: projectProgress));
                     unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
                        .Select(x => x.Object.ID)
                        .ToArray();
@@ -59,11 +66,18 @@ namespace MRS.DocumentManagement.Synchronization
 
                     await data.Context.SynchronizationSaveAsync(date);
                 }
+                catch (OperationCanceledException)
+                {
+                    return results;
+                }
                 catch (Exception e)
                 {
                     results.Add(new SynchronizingResult { Exception = e });
+                    progress?.Report(1.0);
                     return results;
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 try
                 {
@@ -76,19 +90,27 @@ namespace MRS.DocumentManagement.Synchronization
                             data,
                             context,
                             objective.Map(await context.ObjectivesSynchronizer.Get(ids)),
+                            token,
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
                              && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
                              && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            date: date));
+                            progress: objectiveProgress));
+                }
+                catch (OperationCanceledException)
+                {
+                    return results;
                 }
                 catch (Exception e)
                 {
                     results.Add(new SynchronizingResult { Exception = e });
+                    progress?.Report(1.0);
                     return results;
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 await data.Context.Synchronizations.AddAsync(
                     new Database.Models.Synchronization
@@ -100,9 +122,14 @@ namespace MRS.DocumentManagement.Synchronization
                 await SynchronizationFinalizer.Finalize(data);
                 await data.Context.SynchronizationSaveAsync(date);
             }
+            catch (OperationCanceledException)
+            {
+                return results;
+            }
             catch (Exception e)
             {
                 results.Add(new SynchronizingResult { Exception = e });
+                progress?.Report(1.0);
                 return results;
             }
 

@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Adds new ConnectionInfo and links it to User.
         /// </summary>
         /// <param name="connectionInfo">ConnectionInfo to create.</param>
-        /// <returns>True if ConnectionInfo was succesfuly created.</returns>
+        /// <returns>True if ConnectionInfo was successfully created.</returns>
         Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto connectionInfo);
 
         /// <summary>
@@ -27,11 +27,11 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Connects user to Remote connection(e.g. YandexDisk, TDMS, BIM360), using user's ConnectionInfo.
         /// </summary>
         /// <param name="userID">User's ID.</param>
-        /// <returns>Status of the connection.</returns>
-        Task<ConnectionStatusDto> Connect(ID<UserDto> userID);
+        /// <returns>Id of the created long request.</returns>
+        Task<RequestID> Connect(ID<UserDto> userID);
 
         /// <summary>
-        /// Gets current stutus of user's connetion.
+        /// Gets current status of user's connection.
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Status of the connection.</returns>
@@ -49,21 +49,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Synchronize user's data.
         /// </summary>
         /// <param name="userID">User's ID.</param>
-        /// <returns>Result of the synchronization.</returns>
-        Task<string> Synchronize(ID<UserDto> userID);
-
-        /// <summary>
-        /// Gets status of synchronization.
-        /// </summary>
-        /// <param name="synchronizationID">Synchronization's id.</param>
-        /// <returns>True if synchronization is completed.</returns>
-        Task<bool> IsSynchronizationComplete(string synchronizationID);
-
-        /// <summary>
-        /// Gets synchronization result.
-        /// </summary>
-        /// <param name="synchronizationID">Synchronization's id.</param>
-        /// <returns>True if synchronization is completed without errors.</returns>
-        Task<bool> GetSynchronizationResult(string synchronizationID);
+        /// <returns>Id of the created long request.</returns>
+        Task<RequestID> Synchronize(ID<UserDto> userID);
     }
 }
