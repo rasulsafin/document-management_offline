@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
@@ -9,9 +9,9 @@ namespace MRS.DocumentManagement.Api.Controllers
     [ApiController]
     public class RequestQueueController : Controller
     {
-        private readonly RequestQueueService service;
+        private readonly IRequestQueueService service;
 
-        public RequestQueueController(RequestQueueService service) => this.service = service;
+        public RequestQueueController(IRequestQueueService service) => this.service = service;
 
         [HttpGet]
         [Route("{id}")]

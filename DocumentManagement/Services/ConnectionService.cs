@@ -24,15 +24,15 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
         private readonly IServiceScopeFactory  serviceScopeFactory;
-        private readonly RequestQueueService processing;
+        private readonly IRequestService requestQueue;
         private readonly ConnectionHelper helper;
 
-        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, RequestQueueService processing, ConnectionHelper helper)
+        public ConnectionService(DMContext context, IMapper mapper, IServiceScopeFactory serviceScopeFactory, IRequestService requestQueue, ConnectionHelper helper)
         {
             this.context = context;
             this.mapper = mapper;
             this.serviceScopeFactory = serviceScopeFactory;
-            this.processing = processing;
+            this.requestQueue = requestQueue;
             this.helper = helper;
             synchronizer = new Synchronizer();
         }
@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Services
             var scopedMapper = scope.ServiceProvider.GetRequiredService<IMapper>();
             var scopedhelper = new ConnectionHelper(scopedContext, scopedMapper);
 
-            Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
+            Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
             var src = new CancellationTokenSource();
             var task = Task.Factory.StartNew(
                 async () =>
@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
+            requestQueue.AddRequest(id, task.Unwrap(), src);
 
             return await Task.FromResult(new RequestID(id));
         }
@@ -144,7 +144,7 @@ namespace MRS.DocumentManagement.Services
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
 
             var id = Guid.NewGuid().ToString();
-            Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
+            Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
             var src = new CancellationTokenSource();
             var task = Task.Factory.StartNew(
                 async () =>
@@ -160,7 +160,8 @@ namespace MRS.DocumentManagement.Services
                     }
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
+
+            requestQueue.AddRequest(id, task.Unwrap(), src);
 
             return new RequestID(id);
         }

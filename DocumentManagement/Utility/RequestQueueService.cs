@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
 
 namespace MRS.DocumentManagement.Utility
 {
-    public class RequestQueueService : IRequestQueueService
+    public class RequestQueueService : IRequestQueueService, IRequestService
     {
-        public static readonly Dictionary<string, Request> QUEUE
+        private static readonly Dictionary<string, Request> QUEUE
             = new Dictionary<string, Request>();
 
         public Task<double> GetProgress(string id)
@@ -54,7 +55,10 @@ namespace MRS.DocumentManagement.Utility
             throw new ArgumentException($"The job {id} doesn't exist");
         }
 
-        internal void SetProgress(double value, string id)
+        public void AddRequest(string id, Task<RequestResult> task, CancellationTokenSource src)
+            => QUEUE.Add(id, new Request(task, src));
+
+        public void SetProgress(double value, string id)
         {
             if (QUEUE.TryGetValue(id, out var job))
             {

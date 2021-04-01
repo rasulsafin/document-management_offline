@@ -19,13 +19,13 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly RequestQueueService processing;
+        private readonly IRequestService requestQueue;
 
-        public ItemService(DMContext context, IMapper mapper, RequestQueueService processing)
+        public ItemService(DMContext context, IMapper mapper, IRequestService requestQueue)
         {
             this.context = context;
             this.mapper = mapper;
-            this.processing = processing;
+            this.requestQueue = requestQueue;
         }
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
@@ -61,7 +61,7 @@ namespace MRS.DocumentManagement.Services
             var storage = await connection.GetStorage(info);
 
             var id = Guid.NewGuid().ToString();
-            Progress<double> progress = new Progress<double>(v => { processing.SetProgress(v, id); });
+            Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
             var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
             var src = new CancellationTokenSource();
 
@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Services
                         return new RequestResult(result);
                 },
                 TaskCreationOptions.LongRunning);
-            RequestQueueService.QUEUE.Add(id, new Request(task.Unwrap(), src));
+            requestQueue.AddRequest(id, task.Unwrap(), src);
 
             return new RequestID(id);
         }

@@ -3,7 +3,7 @@
 namespace MRS.DocumentManagement.Interface.Services
 {
     /// <summary>
-    /// Service for queuing long tasks.
+    /// Service for managing long tasks on client side.
     /// </summary>
     public interface IRequestQueueService
     {
