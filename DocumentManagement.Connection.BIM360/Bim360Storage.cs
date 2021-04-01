@@ -32,7 +32,6 @@ namespace MRS.DocumentManagement.Connection.Bim360
             IProgress<double> progress,
             CancellationToken cancelToken)
         {
-            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
             int i = 0;
             foreach (var item in itemExternalDto)
             {

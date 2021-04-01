@@ -79,22 +79,6 @@ namespace MRS.DocumentManagement.Api
 
             services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
             services.AddDocumentManagement();
-            services.AddScoped<ItemHelper>();
-            services.AddScoped<DynamicFieldHelper>();
-            services.AddScoped<ConnectionHelper>();
-
-            services.AddScoped<IAuthorizationService, AuthorizationService>();
-            services.AddScoped<IConnectionService, ConnectionService>();
-            services.AddScoped<IItemService, ItemService>();
-            services.AddScoped<IObjectiveService, ObjectiveService>();
-            services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
-            services.AddScoped<IProjectService, ProjectService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
-
-            services.AddSingleton<IRequestService, RequestQueueService>();
-            services.AddSingleton<IRequestQueueService, RequestQueueService>();
-            services.AddSingleton<CryptographyHelper>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)

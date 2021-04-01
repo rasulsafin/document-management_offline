@@ -20,6 +20,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<ItemHelper>();
             services.AddScoped<DynamicFieldHelper>();
+            services.AddScoped<ConnectionHelper>();
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
@@ -30,6 +31,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
 
+            services.AddSingleton<IRequestService, RequestQueueService>();
+            services.AddSingleton<IRequestQueueService, RequestQueueService>();
             services.AddSingleton<CryptographyHelper>();
 
             services.AddFactories();
@@ -41,14 +44,16 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddScoped<Func<IServiceScope, Type, IConnection>>(
                 x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
+            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
             services.AddScoped<Func<IServiceScope, DMContext>>(
                 x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<DMContext>());
             services.AddScoped<Func<IServiceScope, IMapper>>(
                 x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<IMapper>());
 
-            services.AddScoped<IFactory<Type, IConnection>, ConnectionFactory>();
-            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, ConnectionFactory>();
+            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
+            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
             services.AddScoped<IFactory<IServiceScope, SynchronizingData>, SynchronizationDataFactory>();
+            services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
             return services;
         }
 

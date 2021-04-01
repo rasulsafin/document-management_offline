@@ -15,6 +15,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
@@ -24,22 +25,26 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly Synchronizer synchronizer;
-        private readonly IServiceScopeFactory  serviceScopeFactory;
+        private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<ConnectionService> logger;
         private readonly IFactory<Type, IConnection> connectionFactory;
         private readonly IFactory<IServiceScope, Type, IConnection> connectionScopedFactory;
         private readonly IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory;
+        private readonly IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory;
         private readonly IRequestService requestQueue;
         private readonly ConnectionHelper helper;
 
         public ConnectionService(
             DMContext context,
             IMapper mapper,
+            IRequestService requestQueue,
+            ConnectionHelper helper,
             IServiceScopeFactory serviceScopeFactory,
             ILogger<ConnectionService> logger,
             IFactory<Type, IConnection> connectionFactory,
             IFactory<IServiceScope, Type, IConnection> connectionScopedFactory,
-            IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory)
+            IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory,
+            IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory)
         {
             this.context = context;
             this.mapper = mapper;
@@ -51,6 +56,7 @@ namespace MRS.DocumentManagement.Services
             this.connectionFactory = connectionFactory;
             this.connectionScopedFactory = connectionScopedFactory;
             this.synchronizationDataFactory = synchronizationDataFactory;
+            this.connectionHelperFactory = connectionHelperFactory;
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -60,6 +66,7 @@ namespace MRS.DocumentManagement.Services
             var user = await context.Users.FindAsync((int)data.UserID);
             if (user == null)
                 return ID<ConnectionInfoDto>.InvalidID;
+
             user.ConnectionInfo = connectionInfo;
 
             await context.SaveChangesAsync();
@@ -71,9 +78,7 @@ namespace MRS.DocumentManagement.Services
         {
             var id = Guid.NewGuid().ToString();
             var scope = serviceScopeFactory.CreateScope();
-            var scopedContext = scope.ServiceProvider.GetRequiredService<DMContext>();
-            var scopedMapper = scope.ServiceProvider.GetRequiredService<IMapper>();
-            var scopedhelper = new ConnectionHelper(scopedContext, scopedMapper);
+            var scopedHelper = connectionHelperFactory.Create(scope);
 
             Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
             var src = new CancellationTokenSource();
@@ -82,7 +87,7 @@ namespace MRS.DocumentManagement.Services
                 {
                     try
                     {
-                        var res = await scopedhelper.ConnectToRemote((int)userID, progress, src.Token);
+                        var res = await scopedHelper.ConnectToRemote((int)userID, progress, src.Token);
                         return res;
                     }
                     catch (OperationCanceledException ex)
@@ -133,15 +138,15 @@ namespace MRS.DocumentManagement.Services
         {
             var iUserID = (int)userID;
             var user = await context.Users
-                .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                        .ThenInclude(x => x.AppProperties)
-                .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                        .ThenInclude(x => x.AuthFieldNames)
-                .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.AuthFieldValues)
-                .FirstOrDefaultAsync(x => x.ID == iUserID);
+               .Include(x => x.ConnectionInfo)
+               .ThenInclude(x => x.ConnectionType)
+               .ThenInclude(x => x.AppProperties)
+               .Include(x => x.ConnectionInfo)
+               .ThenInclude(x => x.ConnectionType)
+               .ThenInclude(x => x.AuthFieldNames)
+               .Include(x => x.ConnectionInfo)
+               .ThenInclude(x => x.AuthFieldValues)
+               .FirstOrDefaultAsync(x => x.ID == iUserID);
             if (user == null)
                 throw new ArgumentNullException();
 
