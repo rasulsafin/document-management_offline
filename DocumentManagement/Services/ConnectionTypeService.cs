@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
@@ -16,24 +17,27 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<ConnectionTypeService> logger;
 
-        public ConnectionTypeService(DMContext context, IMapper mapper)
+        public ConnectionTypeService(DMContext context, IMapper mapper, ILogger<ConnectionTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         public async Task<ID<ConnectionTypeDto>> Add(string typeName)
         {
             try
             {
-                var connectionType = new Database.Models.ConnectionType { Name = typeName };
-                context.ConnectionTypes.Add(connectionType);
+                var connectionType = new ConnectionType { Name = typeName };
+                await context.ConnectionTypes.AddAsync(connectionType);
                 await context.SaveChangesAsync();
                 return (ID<ConnectionTypeDto>)connectionType.ID;
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
                 throw new InvalidDataException("Can't add new objective type", ex.InnerException);
             }
         }
@@ -116,8 +120,9 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Something went wrong with presented ConnectionTypes");
                 throw new InvalidDataException(
-                    $"Something went wrong with presented ConnectionTypes",
+                    "Something went wrong with presented ConnectionTypes",
                     ex.InnerException);
             }
         }
@@ -136,6 +141,7 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't remove connection type with key {ID}", id);
                 throw new InvalidDataException($"Can't remove connection type with key {id}", ex.InnerException);
             }
         }
