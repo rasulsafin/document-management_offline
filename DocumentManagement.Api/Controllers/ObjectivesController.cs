@@ -73,7 +73,9 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         [HttpPost]
         [Route("report")]
-        public async Task<IActionResult> GenerateReport([FromBody] IEnumerable<ID<ObjectiveDto>> data,
+        public async Task<IActionResult> GenerateReport(
+            [FromBody]
+            IEnumerable<ID<ObjectiveDto>> data,
             [FromQuery]
             [Required(ErrorMessage = "ValidationError_PathIsRequired")]
             string path,
@@ -81,7 +83,8 @@ namespace MRS.DocumentManagement.Api.Controllers
             [CheckValidID]
             int userID,
             [FromQuery]
-            [Required(ErrorMessage = "ValidationError_ProjectNameIsRequired")] string projectName)
+            [Required(ErrorMessage = "ValidationError_ProjectNameIsRequired")]
+            string projectName)
         {
             try
             {
@@ -90,7 +93,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch (System.Exception ex)
             {
-                return CreateProblemResult(this, 500, localizer[SharedLocalization.FAILED_TO_CREATE_REPORT], ex.Message);
+                return CreateProblemResult(this, 500, localizer["FailedToCreateReport"], ex.Message);
             }
         }
     }

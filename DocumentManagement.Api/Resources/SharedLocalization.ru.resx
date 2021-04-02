@@ -120,13 +120,43 @@
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Недействительный ID</value>
   </data>
+  <data name="CheckValidUserID_Missing" xml:space="preserve">
+    <value>Не удалось найти пользователя</value>
+  </data>
+  <data name="CheckValidUserToCreate_AlredyExists" xml:space="preserve">
+    <value>Логин уже используется другим пользователем</value>
+  </data>
+  <data name="CheckValidUserToCreate_DefaultErrorMessage" xml:space="preserve">
+    <value>Логин и пароль не могут быть пустыми</value>
+  </data>
   <data name="FailedToCreateReport" xml:space="preserve">
     <value>Не удалось создать отчет</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>Ошибка сервера</value>
+  </data>
+  <data name="ServerError_Add" xml:space="preserve">
+    <value>Не удалось добавить данные в таблицу</value>
+  </data>
+  <data name="ServerError_Delete" xml:space="preserve">
+    <value>Не удалось удалить данные из таблицы</value>
+  </data>
+  <data name="ServerError_Get" xml:space="preserve">
+    <value>Не удалось получить данные с сервера</value>
+  </data>
+  <data name="ServerError_Put" xml:space="preserve">
+    <value>Не удалось обновить данные</value>
+  </data>
+  <data name="ValidationError_PasswordIsRequired" xml:space="preserve">
+    <value>Пaроль не должен быть пустым</value>
   </data>
   <data name="ValidationError_PathIsRequired" xml:space="preserve">
     <value>Путь не должен быть пустым</value>
   </data>
   <data name="ValidationError_ProjectNameIsRequired" xml:space="preserve">
     <value>Требуется название проекта</value>
+  </data>
+  <data name="WrongPassword" xml:space="preserve">
+    <value>Неправильный пароль</value>
   </data>
 </root>

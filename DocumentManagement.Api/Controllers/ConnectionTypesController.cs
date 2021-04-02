@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Interface;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -33,87 +33,130 @@ namespace MRS.DocumentManagement.Services
             this.logger = logger;
         }
 
-        private async Task<User> GetUserChecked(ID<UserDto> userID)
-        {
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
-            if (user == null)
-                throw new ArgumentException($"User with key {userID} not found");
-            return user;
-        }
-
-        public virtual async Task<ID<UserDto>> Add(UserToCreateDto data)
+        public virtual async Task<ID<UserDto>> Add(UserToCreateDto user)
         {
             try
             {
-                cryptographyHelper.CreatePasswordHash(data.Password, out byte[] passHash, out byte[] passSalt);
-                var user = mapper.Map<User>(data);
-                user.PasswordHash = passHash;
-                user.PasswordSalt = passSalt;
-                // context.Users.
-                await context.Users.AddAsync(user);
+                var userFromDb = await Find(user.Login);
+                if (userFromDb != null)
+                    throw new InvalidDataException("This login is already being used");
+
+                var newUser = mapper.Map<User>(user);
+                cryptographyHelper.CreatePasswordHash(user.Password, out byte[] passHash, out byte[] passSalt);
+                newUser.PasswordHash = passHash;
+                newUser.PasswordSalt = passSalt;
+                await context.Users.AddAsync(newUser);
                 await context.SaveChangesAsync();
 
-                var userID = new ID<UserDto>(user.ID);
+                var userID = new ID<UserDto>(newUser.ID);
                 return userID;
             }
             catch (DbUpdateException ex)
             {
-                throw new InvalidDataException("Can't add new user", ex.InnerException);
+                logger.LogError(ex, "Can't add user {@User}", user);
+                throw;
             }
         }
 
         public virtual async Task<bool> Delete(ID<UserDto> userID)
         {
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
-            if (user == null)
-                return false;
-
-            context.Users.Remove(user);
-            await context.SaveChangesAsync();
-
-            var orphanRoles = await context.Roles
-                .Include(x => x.Users)
-                .Where(x => !x.Users.Any())
-                .ToListAsync();
-            if (orphanRoles.Any())
+            try
             {
-                context.Roles.RemoveRange(orphanRoles);
-                await context.SaveChangesAsync();
-            }
+                var user = await GetUserChecked(userID);
 
-            return true;
+                context.Users.Remove(user);
+                await context.SaveChangesAsync();
+
+                var orphanRoles = await context.Roles
+                    .Include(x => x.Users)
+                    .Where(x => !x.Users.Any())
+                    .ToListAsync();
+                if (orphanRoles.Any())
+                {
+                    context.Roles.RemoveRange(orphanRoles);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't delete user {UserID}", userID);
+                throw;
+            }
         }
 
         public async Task<bool> Exists(ID<UserDto> userID)
         {
-            return await context.Users.AnyAsync(x => x.ID == (int)userID);
+            try
+            {
+                return await context.Users.AnyAsync(x => x.ID == (int)userID);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get user {UserID}", userID);
+                throw;
+            }
         }
 
         public async Task<bool> Exists(string login)
         {
-            login = login.Trim();
-            return await context.Users.AnyAsync(x => x.Login == login);
+            try
+            {
+                login = login?.Trim();
+                return await context.Users.AnyAsync(x => x.Login == login);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get user {Login}", login);
+                throw;
+            }
         }
 
         public async Task<UserDto> Find(ID<UserDto> userID)
         {
-            var dbUser = await context.Users.FindAsync((int)userID);
-            return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
+            try
+            {
+                var dbUser = await GetUserChecked(userID);
+                return mapper.Map<UserDto>(dbUser);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get user {UserID}", userID);
+                throw;
+            }
         }
 
         public async Task<UserDto> Find(string login)
         {
-            login = login.Trim();
-            var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
-            return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
+            try
+            {
+                login = login?.Trim();
+                var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
+                if (dbUser == null)
+                    throw new ArgumentNullException($"User with login {login} was not found");
+
+                return mapper.Map<UserDto>(dbUser);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get user {Login}", login);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
-            var dbUsers = await context.Users.ToListAsync();
-            return dbUsers.Select(x => mapper.Map<UserDto>(x)).ToList();
+            try
+            {
+                var dbUsers = await context.Users.ToListAsync();
+                return dbUsers.Select(x => mapper.Map<UserDto>(x)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of users");
+                throw;
+            }
         }
 
         public virtual async Task<bool> Update(UserDto user)
@@ -129,7 +172,7 @@ namespace MRS.DocumentManagement.Services
             catch (Exception e)
             {
                 logger.LogError(e, "Can't update user {@User}", user);
-                return false;
+                throw;
             }
         }
 
@@ -147,7 +190,7 @@ namespace MRS.DocumentManagement.Services
             catch (Exception e)
             {
                 logger.LogError(e, "Can't update password of user {UserID}", userID);
-                return false;
+                throw;
             }
         }
 
@@ -156,13 +199,27 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var user = await GetUserChecked(userID);
-                return cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
+                var result = cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
+
+                if (!result)
+                    throw new InvalidDataException("Wrong password!");
+
+                return true;
             }
             catch (Exception e)
             {
                 logger.LogError(e, "Can't verify password of user {UserID}", userID);
-                return false;
+                throw;
             }
+        }
+
+        private async Task<User> GetUserChecked(ID<UserDto> userID)
+        {
+            var id = (int)userID;
+            var user = await context.Users.FindAsync(id);
+            if (user == null)
+                throw new ArgumentNullException($"User with key {userID} was not found");
+            return user;
         }
     }
 }

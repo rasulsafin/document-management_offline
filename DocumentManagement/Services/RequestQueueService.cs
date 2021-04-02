@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 
-namespace MRS.DocumentManagement.Utility
+namespace MRS.DocumentManagement.Services
 {
     public class RequestQueueService : IRequestQueueService, IRequestService
     {
