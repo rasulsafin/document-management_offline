@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Localization;
 
 namespace MRS.DocumentManagement.Api.Validators
@@ -20,9 +21,9 @@ namespace MRS.DocumentManagement.Api.Validators
                     return defaultErrorMessage;
 
                 var thisTypeName = GetType().Name;
-                var splitIndex = thisTypeName.LastIndexOf("Attribute");
+                var splitIndex = thisTypeName.LastIndexOf("Attribute", StringComparison.Ordinal);
                 var name = thisTypeName.Substring(0, splitIndex);
-                defaultErrorMessage = name + "_DefaultErrorMessage";
+                defaultErrorMessage = $"{name}_DefaultErrorMessage";
                 return defaultErrorMessage;
             }
         }
@@ -30,6 +31,8 @@ namespace MRS.DocumentManagement.Api.Validators
         protected ValidationResult GetLocalizedErrorResult(ValidationContext context)
         {
             var localizer = (IStringLocalizer)context.GetService(typeof(IStringLocalizer<SharedLocalization>));
+            if (localizer == null)
+                return new ValidationResult(null);
 
             bool resourceNameSet = !string.IsNullOrEmpty(ErrorMessageResourceName);
             bool errorMessageSet = !string.IsNullOrEmpty(ErrorMessage);

@@ -12,7 +12,7 @@ namespace DocumentManagement.Api.Controllers
     [ApiController]
     public class ObjectiveTypesController : ControllerBase
     {
-        private IObjectiveTypeService service;
+        private readonly IObjectiveTypeService service;
 
         public ObjectiveTypesController(IObjectiveTypeService objectiveTypeService) => service = objectiveTypeService;
 

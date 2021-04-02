@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -30,6 +31,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
+            logger.LogTrace("AddRole started with userID = {UserID}, role = {Role}", userID, role);
             var user = await context.Users.FindAsync((int)userID);
             if (user == null)
                 throw new ArgumentException($"User with key {userID} not found");
@@ -39,14 +41,19 @@ namespace MRS.DocumentManagement.Services
                     return false;
 
                 var storedRole = await context.Roles.FirstOrDefaultAsync(x => x.Name == role);
+
+                logger.LogDebug("Find stored role {@StoredRole}", storedRole);
+
                 if (storedRole == null)
                 {
                     storedRole = new Database.Models.Role() { Name = role };
                     await context.Roles.AddAsync(storedRole);
                     await context.SaveChangesAsync();
                 }
+
                 var userRoleLink = new Database.Models.UserRole() { RoleID = storedRole.ID, UserID = user.ID };
-                context.UserRoles.Add(userRoleLink);
+                logger.LogDebug("Created user <-> role link: {@UserRoleLink}", userRoleLink);
+                await context.UserRoles.AddAsync(userRoleLink);
                 await context.SaveChangesAsync();
                 return true;
             }
@@ -59,12 +66,13 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<IEnumerable<string>> GetAllRoles()
         {
-            var dbRoles = await context.Roles.ToListAsync();
-            return dbRoles.Select(x => x.Name).ToList();
+            logger.LogTrace("GetAllRoles started");
+            return await context.Roles.Select(x => x.Name).ToListAsync();
         }
 
         public virtual async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
         {
+            logger.LogTrace("GetUserRoles started with userID: {UserID}", userID);
             var id = (int)userID;
             return await context.Users
                 .Where(x => x.ID == id)
@@ -75,6 +83,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
+            logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role} ", userID, role);
             var id = (int)userID;
             return await context.UserRoles
                 .Where(x => x.UserID == id)
@@ -84,6 +93,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
+            logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role} ", userID, role);
             var iuserID = (int)userID;
             var user = await context.Users.FindAsync(iuserID);
             if (user == null)
@@ -93,6 +103,7 @@ namespace MRS.DocumentManagement.Services
                 .Where(x => x.Role.Name == role)
                 .Where(x => x.UserID == iuserID)
                 .ToListAsync();
+            logger.LogDebug("Found links: {@Links}", links);
             if (!links.Any())
                 return false;
             context.UserRoles.RemoveRange(links);
@@ -102,6 +113,8 @@ namespace MRS.DocumentManagement.Services
                 .Include(x => x.Users)
                 .Where(x => !x.Users.Any())
                 .ToListAsync();
+            logger.LogDebug("Found orphanRoles: {@OrphanRoles}", orphanRoles);
+
             if (orphanRoles.Any())
             {
                 context.Roles.RemoveRange(orphanRoles);
@@ -113,17 +126,24 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ValidatedUserDto> Login(string username, string password)
         {
-            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+            logger.LogTrace("Login started for {UserName}", username);
+            var dbUser = await context.Users
+               .FirstOrDefaultAsync(u => string.Equals(u.Login, username, StringComparison.OrdinalIgnoreCase));
+            logger.LogDebug("Found user: {@DbUser}", dbUser);
             if (dbUser == null)
                 return null;
 
             if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
+            {
+                logger.LogInformation("Password is incorrect");
                 return null;
+            }
 
             var dtoUser = mapper.Map<UserDto>(dbUser);
 
             if (dbUser.Roles != null && dbUser.Roles.Count > 0)
                 dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
+            logger.LogDebug("User DTO: {@DtoUser}", dtoUser);
 
             return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
         }

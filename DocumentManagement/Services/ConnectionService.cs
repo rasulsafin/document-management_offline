@@ -61,14 +61,16 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
         {
+            logger.LogTrace("Add started with data = {@Data}", data);
             var connectionInfo = mapper.Map<ConnectionInfo>(data);
-            context.ConnectionInfos.Add(connectionInfo);
+            logger.LogTrace("Mapped connection info = {@ConnectionInfo}", connectionInfo);
+            await context.ConnectionInfos.AddAsync(connectionInfo);
             var user = await context.Users.FindAsync((int)data.UserID);
+            logger.LogDebug("User found: {@User}", user);
             if (user == null)
                 return ID<ConnectionInfoDto>.InvalidID;
 
             user.ConnectionInfo = connectionInfo;
-
             await context.SaveChangesAsync();
 
             return mapper.Map<ID<ConnectionInfoDto>>(connectionInfo.ID);
@@ -76,6 +78,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<RequestID> Connect(ID<UserDto> userID)
         {
+            logger.LogInformation("Connect started with userID = {UserID}", userID);
             var id = Guid.NewGuid().ToString();
             var scope = serviceScopeFactory.CreateScope();
             var scopedHelper = connectionHelperFactory.Create(scope);
@@ -87,11 +90,14 @@ namespace MRS.DocumentManagement.Services
                 {
                     try
                     {
+                        logger.LogTrace("Connection task started ({ID})", id);
                         var res = await scopedHelper.ConnectToRemote((int)userID, progress, src.Token);
+                        logger.LogInformation("Connection end with {@Res}", res);
                         return res;
                     }
                     catch (OperationCanceledException ex)
                     {
+                        logger.LogInformation("Connection canceled");
                         return new RequestResult(ex);
                     }
                     finally
@@ -107,35 +113,44 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)
         {
+            logger.LogTrace("Get started with userID = {UserID}", userID);
             var connectionInfoFromDb = await helper.GetConnectionInfoFromDb((int)userID);
+            logger.LogTrace("Connection Info from DB: {@ConnectionInfoFromDb}", connectionInfoFromDb);
             return mapper.Map<ConnectionInfoDto>(connectionInfoFromDb);
         }
 
         public async Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID)
         {
+            logger.LogTrace("GetRemoteConnectionStatus started with userID = {UserID}", userID);
             var connectionInfo = await helper.GetConnectionInfoFromDb((int)userID);
+            logger.LogTrace("Connection Info from DB: {@ConnectionInfo}", connectionInfo);
             if (connectionInfo == null)
                 return null;
 
             var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
-
             return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
         }
 
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)
         {
+            logger.LogTrace(
+                "GetEnumerationVariants started with userID = {UserID}, enumerationTypeID = {EnumerationTypeID}",
+                userID,
+                enumerationTypeID);
             var connectionInfo = await helper.GetConnectionInfoFromDb((int)userID);
+            logger.LogTrace("Connection Info from DB: {@ConnectionInfo}", connectionInfo);
             if (connectionInfo == null)
                 return null;
             var list = connectionInfo.EnumerationValues
                 .Where(x => x.EnumerationValue.EnumerationTypeID == (int)enumerationTypeID)?
                 .Select(x => mapper.Map<EnumerationValueDto>(x.EnumerationValue));
-
+            logger.LogDebug("Enumeration values (id = {EnumerationTypeID}): {@List}", enumerationTypeID, list);
             return list;
         }
 
         public async Task<RequestID> Synchronize(ID<UserDto> userID)
         {
+            logger.LogInformation("Synchronize started for user: {UserID}", userID);
             var iUserID = (int)userID;
             var user = await context.Users
                .Include(x => x.ConnectionInfo)
@@ -161,6 +176,7 @@ namespace MRS.DocumentManagement.Services
                 scope,
                 ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
+            logger.LogTrace("Mapped info {@Info}", info);
 
             var id = Guid.NewGuid().ToString();
             Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
@@ -170,7 +186,11 @@ namespace MRS.DocumentManagement.Services
                 {
                     try
                     {
+                        logger.LogTrace("Synchronization task started ({ID})", id);
                         var synchronizationResult = await synchronizer.Synchronize(data, connection, info, progress, src.Token);
+                        logger.LogDebug(
+                            "Synchronization ends with result: {@SynchronizationResult}",
+                            synchronizationResult);
                         return new RequestResult(synchronizationResult.Count == 0);
                     }
                     finally
