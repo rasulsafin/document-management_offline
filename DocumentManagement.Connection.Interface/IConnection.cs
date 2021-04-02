@@ -1,6 +1,4 @@
-using System;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Interface
@@ -33,23 +31,17 @@ namespace MRS.DocumentManagement.Interface
         Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info);
 
         /// <summary>
-        /// Get the information about the current Connection.
-        /// </summary>
-        /// <returns>Filed ConnectionTypeDto.</returns>
-        ConnectionTypeExternalDto GetConnectionType();
-
-        /// <summary>
         /// Get the context for working with this connection.
         /// </summary>
         /// <param name="info">ConnectionInfoDto to fill in.</param>
-        /// <returns>All data.</returns>
+        /// <returns>The context from the connection for a synchronization.</returns>
         Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info);
 
         /// <summary>
         /// Get the wrapper for working with this connection's storage.
         /// </summary>
         /// <param name="info">ConnectionInfoDto to fill in.</param>
-        /// <returns>All data.</returns>
+        /// <returns>The storage for working with files.</returns>
         Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info);
     }
 }

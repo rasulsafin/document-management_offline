@@ -165,7 +165,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         #endregion
         #region Create Directory
-        public async Task<CloudElement> CreateDirAsync(string idParent, string nameDir)
+        public async Task<CloudElement> CreateDirectoryAsync(string idParent, string nameDir)
         {
             var fileDrive = new Google.Apis.Drive.v3.Data.File
             {

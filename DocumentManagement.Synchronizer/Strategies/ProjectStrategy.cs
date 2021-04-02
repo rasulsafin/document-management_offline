@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -43,17 +44,18 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
                 tuple.Merge();
                 AddUser(tuple, data);
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Add Project To Remote");
 
-                var result = await base.AddToRemote(tuple, data, connectionContext, parent);
+                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 return result;
             }
@@ -72,18 +74,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
                 tuple.Merge();
                 AddUser(tuple, data);
 
-                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent);
+                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Add Project To Local");
 
@@ -104,17 +107,18 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext);
+                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
                 if (resultAfterItemSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing Items in Merge Project");
 
                 AddUser(tuple, data);
 
-                var result = await base.Merge(tuple, data, connectionContext, parent);
+                var result = await base.Merge(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 return result;
             }
@@ -133,11 +137,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent);
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -154,11 +159,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent);
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
             {
@@ -174,7 +180,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         private async Task<List<SynchronizingResult>> SynchronizeItems(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext)
+            IConnectionContext connectionContext,
+            CancellationToken token)
         {
             var id1 = tuple.Local?.ID ?? 0;
             var id2 = tuple.Synchronized?.ID ?? 0;
@@ -182,6 +189,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 data,
                 connectionContext,
                 tuple.Remote?.Items?.ToList() ?? new List<Item>(),
+                token,
                 item => item.ProjectID == id1 || item.ProjectID == id2 ||
                     (item.SynchronizationMate != null &&
                         (item.SynchronizationMate.ProjectID == id1 || item.SynchronizationMate.ProjectID == id2)),

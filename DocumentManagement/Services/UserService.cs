@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
@@ -18,17 +19,21 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly CryptographyHelper cryptographyHelper;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(DMContext context,
-             IMapper mapper,
-             CryptographyHelper helper)
+        public UserService(
+            DMContext context,
+            IMapper mapper,
+            CryptographyHelper helper,
+            ILogger<UserService> logger)
         {
             this.context = context;
             this.mapper = mapper;
             cryptographyHelper = helper;
+            this.logger = logger;
         }
 
-        private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
+        private async Task<User> GetUserChecked(ID<UserDto> userID)
         {
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -46,7 +51,7 @@ namespace MRS.DocumentManagement.Services
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
                 // context.Users.
-                context.Users.Add(user);
+                await context.Users.AddAsync(user);
                 await context.SaveChangesAsync();
 
                 var userID = new ID<UserDto>(user.ID);
@@ -121,8 +126,9 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't update user {@User}", user);
                 return false;
             }
         }
@@ -138,8 +144,9 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't update password of user {UserID}", userID);
                 return false;
             }
         }
@@ -151,8 +158,9 @@ namespace MRS.DocumentManagement.Services
                 var user = await GetUserChecked(userID);
                 return cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't verify password of user {UserID}", userID);
                 return false;
             }
         }

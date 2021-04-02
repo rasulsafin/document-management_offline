@@ -1,6 +1,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -44,7 +45,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -68,7 +70,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -92,7 +95,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -120,7 +124,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
@@ -145,7 +150,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {

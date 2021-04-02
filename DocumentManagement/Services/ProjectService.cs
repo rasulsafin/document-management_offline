@@ -101,8 +101,7 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
             if (project == null)
                 return false;
-            if (project.Users == null)
-                project.Users = new List<UserProject>();
+            project.Users ??= new List<UserProject>();
             foreach (var user in users)
             {
                 if (!project.Users.Any(x => x.ProjectID == project.ID && x.UserID == (int)user))
@@ -194,8 +193,8 @@ namespace MRS.DocumentManagement.Services
         {
             var item = await context.Items
                .Include(x => x.Objectives)
-               .Where(x => x.ID == (int)itemID)
-               .Where(x => x.ProjectID == (int)projectID)
+               .Where(x => x.ID == itemID)
+               .Where(x => x.ProjectID == projectID)
                .FirstOrDefaultAsync();
             if (item == null)
                 return false;
