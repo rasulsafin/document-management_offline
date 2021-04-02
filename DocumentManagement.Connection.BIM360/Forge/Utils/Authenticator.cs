@@ -124,7 +124,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public void Dispose()
         {
-            httpListener.Close();
+            httpListener?.Close();
             GC.SuppressFinalize(this);
         }
 
