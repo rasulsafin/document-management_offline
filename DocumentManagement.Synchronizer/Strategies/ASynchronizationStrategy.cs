@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         public async Task<List<SynchronizingResult>> Synchronize(SynchronizingData data,
             IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
+            CancellationToken token,
             Expression<Func<TDB, bool>> filter = null,
             Func<TDB, bool> filter2 = null,
             object parent = null,
@@ -53,6 +55,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             foreach (var tuple in tuples)
             {
+                token.ThrowIfCancellationRequested();
+
                 var action = tuple.DetermineAction();
 
                 switch (action)
@@ -61,19 +65,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         await NothingAction(tuple, data, connectionContext, parent);
                         break;
                     case SynchronizingAction.Merge:
-                        results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent, token));
                         break;
                     case SynchronizingAction.AddToLocal:
-                        results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent, token));
                         break;
                     case SynchronizingAction.AddToRemote:
-                        results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent, token));
                         break;
                     case SynchronizingAction.RemoveFromLocal:
-                        results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent, token));
                         break;
                     case SynchronizingAction.RemoveFromRemote:
-                        results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent));
+                        results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent, token));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
@@ -129,14 +133,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
                 UpdateDB(GetDBSet(data.Context), tuple);
 
                 return null;
+            }            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -153,12 +163,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 UpdateDB(GetDBSet(data.Context), tuple);
                 return Task.FromResult<SynchronizingResult>(null);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -175,13 +192,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
                 UpdateDB(GetDBSet(data.Context), tuple);
                 return null;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -199,12 +223,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 RemoveFromDB(tuple, data);
                 return Task.FromResult<SynchronizingResult>(null);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {
@@ -221,14 +252,21 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent)
+            object parent,
+            CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 var project = mapper.Map<TDto>(tuple.Remote);
                 await GetSynchronizer(connectionContext).Remove(project);
                 RemoveFromDB(tuple, data);
                 return null;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
             }
             catch (Exception e)
             {

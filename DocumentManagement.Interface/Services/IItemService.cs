@@ -42,8 +42,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-        Task<bool> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
+        /// <returns>Id of the created long request.</returns>
+        Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
 
         /// <summary>
         /// Delete items from remote connection.

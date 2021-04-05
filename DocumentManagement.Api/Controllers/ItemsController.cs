@@ -51,18 +51,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("{userID}")]
         public async Task<IActionResult> DownloadItems([FromRoute] int userID, [FromBody] IEnumerable<ID<ItemDto>> data)
         {
-            bool result;
             try
             {
-                result = await service.DownloadItems(new ID<UserDto>(userID), data);
+                var result = await service.DownloadItems(new ID<UserDto>(userID), data);
+                return Ok(result);
             }
             catch
             {
                 return BadRequest();
             }
-
-            // Unity already handles this bool result
-            return Ok(result);
         }
 
         [HttpPost]

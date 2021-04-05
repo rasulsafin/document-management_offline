@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -17,12 +18,14 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly CryptographyHelper cryptographyHelper;
+        private readonly ILogger<AuthorizationService> logger;
 
-        public AuthorizationService(DMContext context, IMapper mapper, CryptographyHelper helper)
+        public AuthorizationService(DMContext context, IMapper mapper, CryptographyHelper helper, ILogger<AuthorizationService> logger)
         {
             this.context = context;
             this.mapper = mapper;
             cryptographyHelper = helper;
+            this.logger = logger;
         }
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
@@ -49,6 +52,7 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't assign role {Role} to user {UserID}", role, userID);
                 throw new InvalidDataException($"Can't assign role {role} to user {userID}", ex.InnerException);
             }
         }
