@@ -120,6 +120,9 @@
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
   </data>
+  <data name="CheckValidProjectID_Missing" xml:space="preserve">
+    <value>Could not find requested project</value>
+  </data>
   <data name="CheckValidTaskId_Missing" xml:space="preserve">
     <value>Could not find requested task</value>
   </data>

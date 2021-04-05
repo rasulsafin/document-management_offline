@@ -147,6 +147,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         ///     }
         /// </remarks>
         /// <param name="user">UserDto object.</param>
+        /// <returns>True, if updated successfully.</returns>
         /// <response code="200">User was updated successfully.</response>
         /// <response code="404">Could not find user to update.</response>
         /// <response code="400">Some of user's data is null.</response>

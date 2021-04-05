@@ -12,7 +12,6 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility.Factories;
-using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Services
 {

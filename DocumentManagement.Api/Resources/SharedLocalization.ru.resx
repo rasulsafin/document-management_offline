@@ -123,6 +123,9 @@
   <data name="CheckValidJobId_Missing" xml:space="preserve">
     <value>Не удалось найти запрашиваемую задачу</value>
   </data>
+  <data name="CheckValidProjectID_Missing" xml:space="preserve">
+    <value>Не удалось найти проект</value>
+  </data>
   <data name="CheckValidUserID_Missing" xml:space="preserve">
     <value>Не удалось найти пользователя</value>
   </data>
