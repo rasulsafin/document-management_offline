@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +11,7 @@ using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
+    /// TODO: Set rules for login and password (min-max length, permitted symbols etc)
     /// <summary>
     /// Controller for managing User entities.
     /// </summary>
@@ -69,7 +69,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <returns>Id of the created user.</returns>
         /// <response code="201">Returns created user id.</response>
         /// <response code="500">Something went wrong while creating new user.</response>
-        /// <response code="400">User with the same login already exists.</response>
+        /// <response code="400">User with the same login already exists OR one/multiple of required values is/are empty.</response>
         [HttpPost]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -77,7 +77,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Add(
             [FromBody]
-            [CheckValidUserToCreate]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Add")]
             UserToCreateDto data)
         {
             try
@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var userId = await service.Add(data);
                 return Created(string.Empty, userId);
             }
-            catch (InvalidDataException ex)
+            catch (ArgumentException ex)
             {
                 return CreateProblemResult(this, 400, localizer["CheckValidUserToCreate_AlredyExists"], ex.Message);
             }
@@ -101,16 +101,19 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="userID">Id of the user to be deleted.</param>
         /// <returns>True if user is deleted.</returns>
         /// <response code="200">User was deleted successfully.</response>
+        /// <response code="400">Invalid id.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while deleting user.</response>
         [HttpDelete]
         [Route("{userID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Delete(
             [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             [CheckValidID]
             int userID)
         {
@@ -146,13 +149,18 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="user">UserDto object.</param>
         /// <response code="200">User was updated successfully.</response>
         /// <response code="404">Could not find user to update.</response>
+        /// <response code="400">Some of user's data is null.</response>
         /// <response code="500">Something went wrong while updating user.</response>
         [HttpPut]
         [Produces("application/json")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Update([FromBody] UserDto user)
+        public async Task<IActionResult> Update(
+            [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
+            UserDto user)
         {
             try
             {
@@ -175,8 +183,8 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="userID">User's id.</param>
         /// <param name="password">Password to verify.</param>
         /// <returns>True if password verified.</returns>
-        /// <response code="200">Password verified.</response>
-        /// <response code="400">Password was not verified.</response>
+        /// <response code="200">Password was verified.</response>
+        /// <response code="400">Wrong password.</response>
         /// <response code="404">Could not find user to verify password.</response>
         /// <response code="500">Something went wrong while verifying.</response>
         [HttpPost]
@@ -188,6 +196,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Route("{userID}/password")]
         public async Task<IActionResult> VerifyPassword(
             [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             [CheckValidID]
             int userID,
             [FromBody]
@@ -199,13 +208,13 @@ namespace MRS.DocumentManagement.Api.Controllers
                  await service.VerifyPassword(new ID<UserDto>(userID), password);
                  return Ok(true);
             }
-            catch (InvalidDataException ex)
-            {
-                return CreateProblemResult(this, 400, localizer["WrongPassword"], ex.Message);
-            }
             catch (ArgumentNullException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                return CreateProblemResult(this, 400, localizer["WrongPassword"], ex.Message);
             }
             catch (Exception ex)
             {
@@ -220,16 +229,19 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="newPass">New password.</param>
         /// <returns>True if password updated.</returns>
         /// <response code="200">Password updated.</response>
+        /// <response code="400">Something is null.</response>
         /// <response code="404">Could not find user to update password.</response>
         /// <response code="500">Something went wrong while updating.</response>
         [HttpPut]
         [Route("{userID}/password")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdatePassword(
             [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             [CheckValidID]
             int userID,
             [FromBody]
@@ -257,16 +269,19 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="userID">User's id.</param>
         /// <returns>Found user.</returns>
         /// <response code="200">User found.</response>
+        /// <response code="400">Invalid id.</response>
         /// <response code="404">Could not find user.</response>
         /// <response code="500">Something went wrong while retrieving the user.</response>
         [HttpGet]
         [Route("{userID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Find(
             [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             [CheckValidID]
             int userID)
         {
@@ -291,15 +306,20 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="login">User's login.</param>
         /// <returns>Found user.</returns>
         /// <response code="200">User found.</response>
+        /// <response code="400">Invalid login.</response>
         /// <response code="404">Could not find user.</response>
         /// <response code="500">Something went wrong while retrieving the user.</response>
         [HttpGet]
         [Produces("application/json")]
         [Route("find")]
         [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Find([FromQuery] string login)
+        public async Task<IActionResult> Find(
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_LoginIsRequired")]
+            string login)
         {
             try
             {
@@ -322,13 +342,16 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="userID">User's id.</param>
         /// <returns>True if user exists, false otherwise.</returns>
         /// <response code="200">User exists.</response>
+        /// <response code="400">If id is invalid.</response>
         /// <response code="500">Something went wrong while checking the user.</response>
         [HttpGet]
         [Route("exists/{userID}")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Exists(
             [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             [CheckValidID]
             int userID)
         {
@@ -349,12 +372,17 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="login">User's login.</param>
         /// <returns>True if user exists, false otherwise.</returns>
         /// <response code="200">User exists.</response>
+        /// <response code="400">Invalid login.</response>
         /// <response code="500">Something went wrong while checking the user.</response>
         [HttpGet]
         [Route("exists")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Exists([FromQuery] string login)
+        public async Task<IActionResult> Exists(
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_LoginIsRequired")]
+            string login)
         {
             try
             {

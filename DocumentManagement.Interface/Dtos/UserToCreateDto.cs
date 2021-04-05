@@ -1,16 +1,22 @@
-﻿namespace MRS.DocumentManagement.Interface.Dtos
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MRS.DocumentManagement.Interface.Dtos
 {
     public struct UserToCreateDto
     {
-        public string Login { get; }
-        public string Password { get; }
-        public string Name { get; }
-
         public UserToCreateDto(string login, string password, string name)
         {
             Login = login?.Trim();
             Password = password?.Trim();
             Name = name?.Trim();
         }
+
+        [Required(ErrorMessage = "ValidationError_LoginIsRequired")]
+        public string Login { get; }
+
+        [Required(ErrorMessage = "ValidationError_PasswordIsRequired")]
+        public string Password { get; }
+
+        public string Name { get; }
     }
 }

@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Services
                 return Task.FromResult(result);
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public Task Cancel(string id)
@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Services
                 return Task.CompletedTask;
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public Task<RequestResult> GetResult(string id)
@@ -48,12 +48,11 @@ namespace MRS.DocumentManagement.Services
                 }
                 else
                 {
-                    // TODO: throw exception
-                    return null;
+                    throw new InvalidOperationException($"The job {id} is not finished yet");
                 }
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public void AddRequest(string id, Task<RequestResult> task, CancellationTokenSource src)

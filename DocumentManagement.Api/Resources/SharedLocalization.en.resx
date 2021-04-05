@@ -120,17 +120,20 @@
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
   </data>
+  <data name="CheckValidTaskId_Missing" xml:space="preserve">
+    <value>Could not find requested task</value>
+  </data>
   <data name="CheckValidUserID_Missing" xml:space="preserve">
     <value>Could not find requested user</value>
   </data>
   <data name="CheckValidUserToCreate_AlredyExists" xml:space="preserve">
     <value>This login is already being used</value>
   </data>
-  <data name="CheckValidUserToCreate_DefaultErrorMessage" xml:space="preserve">
-    <value>Login and password should not be empty</value>
-  </data>
   <data name="FailedToCreateReport" xml:space="preserve">
     <value>Failed to create report</value>
+  </data>
+  <data name="JobIsUnfinished" xml:space="preserve">
+    <value>Requested job is not finished yet</value>
   </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error</value>
@@ -146,6 +149,21 @@
   </data>
   <data name="ServerError_Put" xml:space="preserve">
     <value>Failed to update data</value>
+  </data>
+  <data name="ValidationError_IdIsRequired" xml:space="preserve">
+    <value>Id should not be empty</value>
+  </data>
+  <data name="ValidationError_JobIdRequired" xml:space="preserve">
+    <value>Task id should not be empty</value>
+  </data>
+  <data name="ValidationError_LoginIsRequired" xml:space="preserve">
+    <value>Login should not be empty</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Add" xml:space="preserve">
+    <value>Could not add empty objects</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Put" xml:space="preserve">
+    <value>Could not update empty objects</value>
   </data>
   <data name="ValidationError_PasswordIsRequired" xml:space="preserve">
     <value>Password should not be empty</value>

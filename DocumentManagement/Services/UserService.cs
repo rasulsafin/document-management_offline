@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -39,7 +38,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var userFromDb = await Find(user.Login);
                 if (userFromDb != null)
-                    throw new InvalidDataException("This login is already being used");
+                    throw new ArgumentException("This login is already being used");
 
                 var newUser = mapper.Map<User>(user);
                 cryptographyHelper.CreatePasswordHash(user.Password, out byte[] passHash, out byte[] passSalt);
@@ -51,7 +50,7 @@ namespace MRS.DocumentManagement.Services
                 var userID = new ID<UserDto>(newUser.ID);
                 return userID;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add user {@User}", user);
                 throw;
@@ -202,7 +201,7 @@ namespace MRS.DocumentManagement.Services
                 var result = cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
 
                 if (!result)
-                    throw new InvalidDataException("Wrong password!");
+                    throw new ArgumentException("Wrong password!");
 
                 return true;
             }
