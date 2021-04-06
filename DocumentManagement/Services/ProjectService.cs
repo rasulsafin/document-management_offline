@@ -19,12 +19,12 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly ItemHelper itemHelper;
-        private readonly ILogger<UserService> logger;
+        private readonly ILogger<ProjectService> logger;
 
         public ProjectService(DMContext context,
             IMapper mapper,
             ItemHelper itemHelper,
-            ILogger<UserService> logger)
+            ILogger<ProjectService> logger)
         {
             this.context = context;
             this.mapper = mapper;

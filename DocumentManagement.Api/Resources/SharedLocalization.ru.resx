@@ -129,6 +129,9 @@
   <data name="CheckValidJobId_Missing" xml:space="preserve">
     <value>Не удалось найти запрашиваемую задачу</value>
   </data>
+  <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
+    <value>Не удалось найти задачу</value>
+  </data>
   <data name="CheckValidObjectiveTypeID_Missing" xml:space="preserve">
     <value>Не удалось найти тип задачи</value>
   </data>
@@ -179,6 +182,9 @@
   </data>
   <data name="ValidationError_LoginIsRequired" xml:space="preserve">
     <value>Логин не должен быть пустым</value>
+  </data>
+  <data name="ValidationError_ObjectiveNameIsRequired" xml:space="preserve">
+    <value>Имя задачи не должно быть пустым</value>
   </data>
   <data name="ValidationError_ObjectiveTypeNameIsRequired" xml:space="preserve">
     <value>Имя типа не должно быть пустым</value>

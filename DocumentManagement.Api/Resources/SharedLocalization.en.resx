@@ -126,6 +126,9 @@
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
   </data>
+  <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
+    <value>Could not find requested objective</value>
+  </data>
   <data name="CheckValidObjectiveTypeID_Missing" xml:space="preserve">
     <value>Could not find requested objective type</value>
   </data>
@@ -179,6 +182,9 @@
   </data>
   <data name="ValidationError_LoginIsRequired" xml:space="preserve">
     <value>Login should not be empty</value>
+  </data>
+  <data name="ValidationError_ObjectiveNameIsRequired" xml:space="preserve">
+    <value>Objective name should not be empty</value>
   </data>
   <data name="ValidationError_ObjectiveTypeNameIsRequired" xml:space="preserve">
     <value>Objective type name should not be null</value>

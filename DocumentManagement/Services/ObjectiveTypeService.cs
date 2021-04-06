@@ -16,9 +16,12 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<ObjectiveService> logger;
+        private readonly ILogger<ObjectiveTypeService> logger;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveService> logger)
+        public ObjectiveTypeService(
+            DMContext context,
+            IMapper mapper,
+            ILogger<ObjectiveTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
