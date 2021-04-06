@@ -78,6 +78,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<BimElementDto, BimElement>();
 
             CreateMap<ObjectiveTypeDto, ObjectiveType>();
+            CreateMap<string, ObjectiveType>()
+                .ForMember(d => d.Name, o => o.MapFrom(s => s));
 
             CreateMap<UserToCreateDto, User>();
 

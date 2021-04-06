@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// Get projects linked to the specific user.
         /// </summary>
         /// <param name="userID">User's id.</param>
-        /// <returns>List of projects.</returns>
+        /// <returns>Collection of projects.</returns>
         /// <response code="200">List of user's project.</response>
         /// <response code="400">Invalid id.</response>
         /// <response code="404">If user was not found.</response>
@@ -246,7 +246,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// Get list of users that have access to this project.
         /// </summary>
         /// <param name="projectID">Project's id.</param>
-        /// <returns>List of users.</returns>
+        /// <returns>Collection of users.</returns>
         /// <response code="200">List of users with access to that project.</response>
         /// <response code="400">Invalid id.</response>
         /// <response code="404">If project was not found.</response>

@@ -117,8 +117,17 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
+    <value>Could not find requested connection type</value>
+  </data>
+  <data name="CheckValidConnetionTypeToCreate_AlredyExists" xml:space="preserve">
+    <value>This name is alredy being used by different conention type</value>
+  </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
+  </data>
+  <data name="CheckValidObjectiveTypeID_Missing" xml:space="preserve">
+    <value>Could not find requested objective type</value>
   </data>
   <data name="CheckValidProjectID_Missing" xml:space="preserve">
     <value>Could not find requested project</value>
@@ -161,6 +170,9 @@
   </data>
   <data name="ValidationError_LoginIsRequired" xml:space="preserve">
     <value>Login should not be empty</value>
+  </data>
+  <data name="ValidationError_ObjectiveTypeNameIsRequired" xml:space="preserve">
+    <value>Objective type name should not be null</value>
   </data>
   <data name="ValidationError_ObjectRequired_Add" xml:space="preserve">
     <value>Could not add empty objects</value>
