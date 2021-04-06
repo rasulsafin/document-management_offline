@@ -5,12 +5,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
@@ -19,15 +21,22 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly IFactory<Type, IConnection> connectionFactory;
+        private readonly IFactory<IServiceScope, Type, IConnection> connectionFactory;
         private readonly IRequestService requestQueue;
+        private readonly IServiceScopeFactory scopeFactory;
 
-        public ItemService(DMContext context, IMapper mapper, IFactory<Type, IConnection> connectionFactory)
+        public ItemService(
+            DMContext context,
+            IMapper mapper,
+            IFactory<IServiceScope, Type, IConnection> connectionFactory,
+            IRequestService requestQueue,
+            IServiceScopeFactory scopeFactory)
         {
             this.context = context;
             this.mapper = mapper;
             this.connectionFactory = connectionFactory;
             this.requestQueue = requestQueue;
+            this.scopeFactory = scopeFactory;
         }
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
@@ -58,8 +67,9 @@ namespace MRS.DocumentManagement.Services
                 .ThenInclude(x => x.AuthFieldValues)
                 .FirstOrDefaultAsync(x => x.ID == (int)userID);
 
+            var scope = scopeFactory.CreateScope();
             var connection =
-                connectionFactory.Create(ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
+                connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             var storage = await connection.GetStorage(info);
 
@@ -71,8 +81,15 @@ namespace MRS.DocumentManagement.Services
             var task = Task.Factory.StartNew(
                 async () =>
                 {
+                    try
+                    {
                         var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
                         return new RequestResult(result);
+                    }
+                    finally
+                    {
+                        scope.Dispose();
+                    }
                 },
                 TaskCreationOptions.LongRunning);
             requestQueue.AddRequest(id, task.Unwrap(), src);

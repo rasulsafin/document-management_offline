@@ -73,6 +73,7 @@ namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchr
             var result = await synchronizer.Add(project);
 
             Assert.IsNotNull(result?.ExternalID);
+            Assert.IsTrue(result.Items.Any());
             Assert.IsFalse(result.Items.Any(i => string.IsNullOrWhiteSpace(i.ExternalID)));
         }
 
