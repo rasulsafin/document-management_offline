@@ -141,6 +141,12 @@
   <data name="CheckValidUserToCreate_AlredyExists" xml:space="preserve">
     <value>Логин уже используется другим пользователем</value>
   </data>
+  <data name="CouldnotConnect" xml:space="preserve">
+    <value>Не удалось подключиться</value>
+  </data>
+  <data name="CouldnotSynchronize" xml:space="preserve">
+    <value>Синхронизация не удалась</value>
+  </data>
   <data name="FailedToCreateReport" xml:space="preserve">
     <value>Не удалось создать отчет</value>
   </data>
@@ -161,6 +167,9 @@
   </data>
   <data name="ServerError_Put" xml:space="preserve">
     <value>Не удалось обновить данные</value>
+  </data>
+  <data name="SomethingIsMissing" xml:space="preserve">
+    <value>Не удалось найти объект</value>
   </data>
   <data name="ValidationError_IdIsRequired" xml:space="preserve">
     <value>Ключ не может быть пустым</value>

@@ -38,6 +38,9 @@ namespace MRS.DocumentManagement.Utility
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
             User user = await FindUserFromDb(userID);
+            if (user == null)
+                throw new ArgumentNullException($"User with key {userID} was not found");
+
             return await GetConnectionInfoFromDb(user);
         }
 
