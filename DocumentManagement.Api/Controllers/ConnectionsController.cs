@@ -55,12 +55,13 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <response code="500">Something went wrong while creating ConnectionInfo.</response>
         [HttpPost]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(ObjectiveTypeDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ObjectiveTypeDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Add(
             [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Add")]
             ConnectionInfoToCreateDto connectionInfo)
         {
             try
@@ -90,7 +91,11 @@ namespace MRS.DocumentManagement.Api.Controllers
         [Produces("application/json")]
         [ProducesResponseType(typeof(RequestID), StatusCodes.Status202Accepted)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Connect([FromRoute] int userID)
+        public async Task<IActionResult> Connect(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID)
         {
             try
             {

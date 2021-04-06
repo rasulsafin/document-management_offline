@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotDownload" xml:space="preserve">
+    <value>Не удалось загрузить файлы</value>
+  </data>
   <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
     <value>Не удалось найти тип подключения</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Недействительный ID</value>
+  </data>
+  <data name="CheckValidItemID_Missing" xml:space="preserve">
+    <value>Не удалось найти файл</value>
   </data>
   <data name="CheckValidJobId_Missing" xml:space="preserve">
     <value>Не удалось найти запрашиваемую задачу</value>
@@ -156,6 +162,9 @@
   <data name="JobIsUnfinished" xml:space="preserve">
     <value>Задача еще не завершена</value>
   </data>
+  <data name="MethodIsNotImplemented" xml:space="preserve">
+    <value>Отсутсутствует реализация метода</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Ошибка сервера</value>
   </data>
@@ -173,6 +182,12 @@
   </data>
   <data name="SomethingIsMissing" xml:space="preserve">
     <value>Не удалось найти объект</value>
+  </data>
+  <data name="UserHasNoRoleAlready" xml:space="preserve">
+    <value>У пользователя уже нет данной роли</value>
+  </data>
+  <data name="UserHasRoleAlready" xml:space="preserve">
+    <value>Пользователю уже присвоена данная роль</value>
   </data>
   <data name="ValidationError_IdIsRequired" xml:space="preserve">
     <value>Ключ не может быть пустым</value>

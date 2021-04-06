@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CannotDownload" xml:space="preserve">
+    <value>Could not download files</value>
+  </data>
   <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
     <value>Could not find requested connection type</value>
   </data>
@@ -125,6 +128,9 @@
   </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
+  </data>
+  <data name="CheckValidItemID_Missing" xml:space="preserve">
+    <value>Could not find requested item</value>
   </data>
   <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
     <value>Could not find requested objective</value>
@@ -156,6 +162,9 @@
   <data name="JobIsUnfinished" xml:space="preserve">
     <value>Requested job is not finished yet</value>
   </data>
+  <data name="MethodIsNotImplemented" xml:space="preserve">
+    <value>Method is not implemented</value>
+  </data>
   <data name="ServerError" xml:space="preserve">
     <value>Server error</value>
   </data>
@@ -173,6 +182,12 @@
   </data>
   <data name="SomethingIsMissing" xml:space="preserve">
     <value>Object could not be found</value>
+  </data>
+  <data name="UserHasNoRoleAlready" xml:space="preserve">
+    <value>User does not have this role already</value>
+  </data>
+  <data name="UserHasRoleAlready" xml:space="preserve">
+    <value>User already has this role</value>
   </data>
   <data name="ValidationError_IdIsRequired" xml:space="preserve">
     <value>Id should not be empty</value>
