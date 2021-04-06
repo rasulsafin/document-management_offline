@@ -139,8 +139,7 @@ namespace MRS.DocumentManagement.Services
             }
 
             var reportDir = Path.Combine(path, "Reports");
-            if (!Directory.Exists(reportDir))
-                Directory.CreateDirectory(reportDir);
+            Directory.CreateDirectory(reportDir);
 
             path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
             var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
