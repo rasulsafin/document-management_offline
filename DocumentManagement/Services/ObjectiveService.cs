@@ -234,7 +234,7 @@ namespace MRS.DocumentManagement.Services
                 }
             }
 
-            objective.Items = new List<ObjectiveItem>();
+            objective.Items ??= new List<ObjectiveItem>();
             var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
             var itemsToUnlink = objectiveItems.Where(o => (!objData.Items?.Any(i => (int)i.ID == o.ItemID)) ?? true);
 
