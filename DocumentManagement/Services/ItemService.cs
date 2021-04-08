@@ -131,7 +131,7 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
-                var dbProject = await context.Objectives.FindAsync((int)projectID);
+                var dbProject = await context.Projects.FindAsync((int)projectID);
                 if (dbProject == null)
                     throw new ArgumentNullException($"Project with id {projectID} was not found");
 

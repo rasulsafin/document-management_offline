@@ -1,3 +1,4 @@
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -12,8 +13,9 @@ namespace MRS.DocumentManagement.Interface
         /// Connect to remote DM.
         /// </summary>
         /// <param name="info">Information about the connection.</param>
+        /// <param name="token">Token to cancel connection.</param>
         /// <returns>Result success and additional result data.</returns>
-        Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info);
+        Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token);
 
         /// <summary>
         /// Current status of the connection.

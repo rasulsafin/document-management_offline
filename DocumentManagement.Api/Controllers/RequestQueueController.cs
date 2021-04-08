@@ -94,7 +94,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// Cancel requested long running job and delete it from the queue.
         /// </summary>
         /// <param name="id">Id of the job.</param>
-        /// <returns>Nothing.</returns>
+        /// <returns>True if canceled successfully.</returns>
         /// <response code="200">Returns if job was canceled successfully.</response>
         /// <response code="404">If job with that id is not found.</response>
         /// <response code="500">If something went terribly wrong on the server side.</response>
@@ -108,7 +108,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             try
             {
                 service.Cancel(id);
-                return Ok();
+                return Ok(true);
             }
             catch (ArgumentException ex)
             {

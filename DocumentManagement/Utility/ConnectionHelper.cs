@@ -219,11 +219,11 @@ namespace MRS.DocumentManagement.Utility
 
             try
             {
-                status = await connection.Connect(connectionInfoExternalDto);
+                status = await connection.Connect(connectionInfoExternalDto, token);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Can't connect with info {@ConnectionInfo}", connectionInfo);
+                logger.LogError(e, "Can't connect with info {@ConnectionInfoId}", connectionInfo.ID);
                 progress?.Report(1.0);
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }

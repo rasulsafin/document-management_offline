@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-using System.IO;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -244,7 +243,6 @@ namespace MRS.DocumentManagement.Api.Controllers
         public async Task<IActionResult> Login(
             [FromQuery]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
-            [CheckValidID]
             string username,
             [FromBody]
             [Required(ErrorMessage = "ValidationError_PasswordIsRequired")]
