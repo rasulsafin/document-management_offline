@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -138,7 +138,10 @@ namespace MRS.DocumentManagement.Services
                 objectives.Add(objectiveToReport);
             }
 
-            path = Path.Combine(path, $"Отчет {reportID}.docx");
+            var reportDir = Path.Combine(path, "Reports");
+            Directory.CreateDirectory(reportDir);
+
+            path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
             var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
 
             ReportCreator reportCreator = new ReportCreator();
