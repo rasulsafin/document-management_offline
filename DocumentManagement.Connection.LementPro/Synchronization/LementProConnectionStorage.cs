@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             projectsService.Dispose();
         }
 
-        public Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
+        public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
             throw new NotImplementedException();
         }

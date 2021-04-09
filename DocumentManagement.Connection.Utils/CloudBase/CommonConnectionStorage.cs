@@ -15,22 +15,29 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase
         public CommonConnectionStorage(ICloudManager cloudManager)
             =>  this.cloudManager = cloudManager;
 
-        public Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
-            throw new NotImplementedException();
+            var deletionResult = true;
+            foreach (var item in itemExternalDtos)
+            {
+                if (!string.IsNullOrWhiteSpace(item?.ExternalID))
+                    deletionResult = await cloudManager.DeleteFile(item.ExternalID) && deletionResult;
+            }
+
+            return deletionResult;
         }
 
         public async Task<bool> DownloadFiles(string projectId,
-            IEnumerable<ItemExternalDto> itemExternalDto,
+            IEnumerable<ItemExternalDto> itemExternalDtos,
             IProgress<double> progress,
             CancellationToken token)
         {
             int i = 0;
-            foreach (var item in itemExternalDto)
+            foreach (var item in itemExternalDtos)
             {
                 token.ThrowIfCancellationRequested();
                 var downloadResult = await cloudManager.PullFile(item.ExternalID, item.FullPath);
-                progress?.Report(++i / (double)itemExternalDto.Count());
+                progress?.Report(++i / (double)itemExternalDtos.Count());
                 if (!downloadResult)
                 {
                     progress?.Report(1.0);
