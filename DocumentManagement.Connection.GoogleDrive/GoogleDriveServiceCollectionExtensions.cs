@@ -4,7 +4,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class GoogleDriveServiceCollectionExtensions
     {
-        public static IServiceCollection AddYandexDisk(this IServiceCollection services)
+        public static IServiceCollection AddGoogleDrive(this IServiceCollection services)
         {
             services.AddScoped<GoogleConnection>();
             return services;

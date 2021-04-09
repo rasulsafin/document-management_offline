@@ -4,7 +4,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class LementProServiceCollectionExtensions
     {
-        public static IServiceCollection AddYandexDisk(this IServiceCollection services)
+        public static IServiceCollection AddLementPro(this IServiceCollection services)
         {
             services.AddScoped<LementProConnection>();
             return services;
