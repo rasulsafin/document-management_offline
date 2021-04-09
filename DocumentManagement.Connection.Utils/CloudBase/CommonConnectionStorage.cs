@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -17,9 +18,13 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase
 
         public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
+            var projectFiles = ItemsSyncHelper.GetProjectItems(projectId, cloudManager);
             var deletionResult = true;
             foreach (var item in itemExternalDtos)
             {
+                if (!(await projectFiles).Any(f => f.ExternalID.Equals(item.ExternalID)))
+                    return false;
+
                 if (!string.IsNullOrWhiteSpace(item?.ExternalID))
                     deletionResult = await cloudManager.DeleteFile(item.ExternalID) && deletionResult;
             }

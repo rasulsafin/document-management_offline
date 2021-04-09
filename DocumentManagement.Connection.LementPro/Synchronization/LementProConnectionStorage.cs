@@ -22,9 +22,36 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             projectsService.Dispose();
         }
 
-        public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
-            throw new NotImplementedException();
+            if (!int.TryParse(projectId, out var parsedId))
+                return false;
+
+            var remoteProject = await projectsService.GetProjectAsync(parsedId);
+            var projectFiles = remoteProject.Values.Files;
+            var projectDto = remoteProject.ToProjectExternalDto();
+
+            try
+            {
+                foreach (var item in itemExternalDtos)
+                {
+                    if (!projectDto.Items.Any(f => f.ExternalID.Equals(item.ExternalID)))
+                        return false;
+
+                    var correspondingItem = projectDto.Items.First(i => i.ExternalID != item.ExternalID);
+                    projectDto.Items.Remove(correspondingItem);
+                }
+
+                var modelToUpdate = projectDto.ToModelToUpdate(remoteProject);
+                modelToUpdate.RemovedFileIds = projectDto.Items.Select(i => int.Parse(i.ExternalID)).ToList();
+                await projectsService.UpdateProjectAsync(modelToUpdate);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public async Task<bool> DownloadFiles(string projectId,
