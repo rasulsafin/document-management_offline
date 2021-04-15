@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Api.Validators
         {
             var localizer = (IStringLocalizer)context.GetService(typeof(IStringLocalizer<SharedLocalization>));
             if (localizer == null)
-                return new ValidationResult(null);
+                return new ValidationResult(DefaultErrorMessage);
 
             bool resourceNameSet = !string.IsNullOrEmpty(ErrorMessageResourceName);
             bool errorMessageSet = !string.IsNullOrEmpty(ErrorMessage);
