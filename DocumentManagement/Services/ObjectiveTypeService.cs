@@ -15,9 +15,9 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<ObjectiveService> logger;
+        private readonly ILogger<ObjectiveTypeService> logger;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveService> logger)
+        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -26,13 +26,14 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
+            logger.LogTrace("Add started with typeName: {TypeName}", typeName);
             try
             {
                 var objType = new Database.Models.ObjectiveType
                 {
                     Name = typeName,
                 };
-                context.ObjectiveTypes.Add(objType);
+                await context.ObjectiveTypes.AddAsync(objType);
                 await context.SaveChangesAsync();
                 return (ID<ObjectiveTypeDto>)objType.ID;
             }
@@ -45,34 +46,42 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
+            logger.LogTrace("Find started with id: {ID}", id);
             var dbObjective = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
                 .FirstOrDefaultAsync(x => x.ID == (int)id);
+            logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
+            logger.LogTrace("Find started with typename: {Typename}", typename);
             var dbObjective = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
                 .FirstOrDefaultAsync(x => x.Name == typename);
+            logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
             return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
         }
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
+            logger.LogTrace("GetObjectiveTypes started with connection type id: {ID}", id);
             var db = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
                 .Where(x => x.ConnectionTypeID == Check((int)id))
                 .ToListAsync();
+            logger.LogDebug("Found objective types: {@ObjectiveTypes}", db);
             return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
         {
+            logger.LogTrace("Remove started with id: {ID}", id);
             try
             {
                 var type = await context.ObjectiveTypes.FindAsync((int)id);
+                logger.LogDebug("Found objective type: {@ObjectiveType}", type);
                 if (type == null)
                     return false;
                 context.ObjectiveTypes.Remove(type);
