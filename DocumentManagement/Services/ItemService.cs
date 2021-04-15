@@ -37,6 +37,7 @@ namespace MRS.DocumentManagement.Services
             this.connectionFactory = connectionFactory;
             this.logger = logger;
             this.requestQueue = requestQueue;
+            logger.LogTrace("ItemService created");
         }
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)

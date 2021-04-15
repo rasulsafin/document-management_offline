@@ -27,6 +27,7 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
             cryptographyHelper = helper;
             this.logger = logger;
+            logger.LogTrace("AuthorizationService created");
         }
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)

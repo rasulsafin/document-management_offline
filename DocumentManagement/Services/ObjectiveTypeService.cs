@@ -22,6 +22,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
+            logger.LogTrace("ObjectiveTypeService created");
         }
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)

@@ -57,6 +57,7 @@ namespace MRS.DocumentManagement.Services
             this.connectionScopedFactory = connectionScopedFactory;
             this.synchronizationDataFactory = synchronizationDataFactory;
             this.connectionHelperFactory = connectionHelperFactory;
+            logger.LogTrace("ConnectionService created");
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -103,6 +104,7 @@ namespace MRS.DocumentManagement.Services
                     finally
                     {
                         scope.Dispose();
+                        logger.LogTrace("Scope for Connect disposed");
                     }
                 },
                 TaskCreationOptions.LongRunning);
@@ -196,6 +198,7 @@ namespace MRS.DocumentManagement.Services
                     finally
                     {
                         scope.Dispose();
+                        logger.LogTrace("Scope for Synchronize disposed");
                     }
                 },
                 TaskCreationOptions.LongRunning);

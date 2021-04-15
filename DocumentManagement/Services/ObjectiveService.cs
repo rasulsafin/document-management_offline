@@ -36,6 +36,7 @@ namespace MRS.DocumentManagement.Services
             this.itemHelper = itemHelper;
             this.dynamicFieldHelper = dynamicFieldHelper;
             this.logger = logger;
+            logger.LogTrace("ObjectiveService created");
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)

@@ -24,6 +24,7 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
+            logger.LogTrace("ConnectionTypeService created");
         }
 
         public async Task<ID<ConnectionTypeDto>> Add(string typeName)
