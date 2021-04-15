@@ -9,6 +9,8 @@ using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
+using MRS.DocumentManagement.Utility.Mapping.Converters;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

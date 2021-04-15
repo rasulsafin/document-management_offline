@@ -84,7 +84,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
-            logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role} ", userID, role);
+            logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role}", userID, role);
             var id = (int)userID;
             return await context.UserRoles
                 .Where(x => x.UserID == id)
@@ -94,7 +94,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
-            logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role} ", userID, role);
+            logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role}", userID, role);
             var iuserID = (int)userID;
             var user = await context.Users.FindAsync(iuserID);
             if (user == null)
