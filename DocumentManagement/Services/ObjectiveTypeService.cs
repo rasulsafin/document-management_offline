@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
@@ -27,6 +28,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ObjectiveTypeDto>> Add(string typeName)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with typeName: {TypeName}", typeName);
             try
             {
@@ -47,6 +49,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with id: {ID}", id);
             var dbObjective = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
@@ -57,6 +60,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with typename: {Typename}", typename);
             var dbObjective = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
@@ -67,6 +71,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectiveTypes started with connection type id: {ID}", id);
             var db = await context.ObjectiveTypes
                 .Include(x => x.DefaultDynamicFields)
@@ -78,6 +83,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with id: {ID}", id);
             try
             {

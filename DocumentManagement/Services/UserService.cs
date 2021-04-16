@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
@@ -36,6 +37,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<User> GetUserChecked(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetUserChecked started with userID: {UserID}", userID);
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -47,6 +49,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<ID<UserDto>> Add(UserToCreateDto data)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with data: {@Data}", data);
             try
             {
@@ -71,6 +74,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> Delete(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Delete started with userID: {@UserID}", userID);
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -98,12 +102,14 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Exists(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Exists started with userID: {UserID}", userID);
             return await context.Users.AnyAsync(x => x.ID == (int)userID);
         }
 
         public async Task<bool> Exists(string login)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Exists started with login: {Login}", login);
             login = login.Trim();
             return await context.Users.AnyAsync(x => x.Login == login);
@@ -111,6 +117,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<UserDto> Find(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started userID: {UserID}", userID);
             var dbUser = await context.Users.FindAsync((int)userID);
             logger.LogDebug("Found user: {@User}", dbUser);
@@ -119,6 +126,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<UserDto> Find(string login)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with login: {Login}", login);
             login = login.Trim();
             var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
@@ -128,6 +136,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetAllUsers started");
             var dbUsers = await context.Users.ToListAsync();
             logger.LogDebug("Found users: {@Users}", dbUsers);
@@ -136,6 +145,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> Update(UserDto user)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with user: {@User}", user);
             try
             {
@@ -155,6 +165,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> UpdatePassword(ID<UserDto> userID, string newPass)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("UpdatePassword started with userID: {@UserID}", userID);
             try
             {
@@ -175,6 +186,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> VerifyPassword(ID<UserDto> userID, string password)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("VerifyPassword started with userID: {@UserID}", userID);
             try
             {

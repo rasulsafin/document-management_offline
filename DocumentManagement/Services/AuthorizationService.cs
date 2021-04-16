@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
@@ -32,6 +33,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("AddRole started with userID = {UserID}, role = {Role}", userID, role);
             var user = await context.Users.FindAsync((int)userID);
             if (user == null)
@@ -67,12 +69,14 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<IEnumerable<string>> GetAllRoles()
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetAllRoles started");
             return await context.Roles.Select(x => x.Name).ToListAsync();
         }
 
         public virtual async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetUserRoles started with userID: {UserID}", userID);
             var id = (int)userID;
             return await context.Users
@@ -84,6 +88,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role}", userID, role);
             var id = (int)userID;
             return await context.UserRoles
@@ -94,6 +99,7 @@ namespace MRS.DocumentManagement.Services
 
         public virtual async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role}", userID, role);
             var iuserID = (int)userID;
             var user = await context.Users.FindAsync(iuserID);
@@ -127,6 +133,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ValidatedUserDto> Login(string username, string password)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Login started for {UserName}", username);
             var dbUser = await context.Users
                .FirstOrDefaultAsync(u => string.Equals(u.Login, username, StringComparison.OrdinalIgnoreCase));

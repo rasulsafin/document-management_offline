@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
@@ -31,6 +32,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ProjectToListDto> Add(ProjectToCreateDto projectToCreate)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with projectToCreate: {@ProjectToCreate}", projectToCreate);
             var ownerID = (int)projectToCreate.AuthorID;
 
@@ -68,6 +70,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ProjectDto> Find(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with projectID: {@ProjectID}", projectID);
             var dbProject = await context.Projects.FindAsync((int)projectID);
             logger.LogDebug("Found project: {@DBProject}", dbProject);
@@ -78,6 +81,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetAllProjects()
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetAllProjects started");
             var dbProjects = await context.Projects.Unsynchronized().ToListAsync();
             logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
@@ -86,6 +90,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetUserProjects started with userID: {@UserID}", userID);
             var iUserID = (int)userID;
             var dbProjects = await context.Users
@@ -103,6 +108,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetUsers started with projectID: {@ProjectID}", projectID);
             var usersDb = await context.UserProjects
                 .Where(x => x.ProjectID == (int)projectID)
@@ -114,6 +120,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("LinkToUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             var project = await context.Projects.Include(x => x.Users)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
@@ -140,6 +147,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with projectID: {@ProjectID}", projectID);
             var project = await context.Projects.FindAsync((int)projectID);
             logger.LogDebug("Found project: {@Project}", project);
@@ -152,6 +160,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("UnlinkFromUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             var project = await context.Projects.Include(x => x.Users)
                 .FirstOrDefaultAsync(x => x.ID == (int)projectID);
@@ -174,6 +183,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ProjectDto project)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with project: {@Project}", project);
             var projectID = project.ID;
             var projectFromDb = await context.Projects
@@ -207,6 +217,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Project project)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("LinkItem started with project: {@Project} and item: {@Item}", project, item);
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project.GetType(), project.ID);
             logger.LogDebug("Found item: {@DBItem}", dbItem);
@@ -220,6 +231,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<bool> UnlinkItem(int itemID, int projectID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("UnlinkItem started for project {@ProjectID} with itemID: {@ItemID}", projectID, itemID);
             var item = await context.Items
                .Include(x => x.Objectives)

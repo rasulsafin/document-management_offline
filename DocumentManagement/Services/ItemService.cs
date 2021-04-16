@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
@@ -42,6 +43,7 @@ namespace MRS.DocumentManagement.Services
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("DeleteItems started with itemIds: {@ItemIds}", itemIds);
 
             // TODO: Delete Items from Remote Connection
@@ -50,6 +52,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("DownloadItems started for user {@UserID} with itemIds: {@ItemIds}", userID, itemIds);
             var ids = itemIds.Select(x => (int)x).ToArray();
             var dbItems = await context.Items
@@ -99,6 +102,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with itemID: {@ItemID}", itemID);
             var dbItem = await context.Items.FindAsync((int)itemID);
             logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
@@ -118,6 +122,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetItems started with objectiveID: {@ObjectiveID}", objectiveID);
             var dbItems = await context.ObjectiveItems
                 .Where(x => x.ObjectiveID == (int)objectiveID)
@@ -129,6 +134,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ItemDto item)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with item: {@Item}", item);
             var dbItem = await context.Items.FindAsync((int)item.ID);
             logger.LogDebug("Found dbItem: {@DbItem}", dbItem);

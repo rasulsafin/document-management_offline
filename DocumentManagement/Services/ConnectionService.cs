@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -62,6 +63,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with data = {@Data}", data);
             var connectionInfo = mapper.Map<ConnectionInfo>(data);
             logger.LogTrace("Mapped connection info = {@ConnectionInfo}", connectionInfo);
@@ -79,6 +81,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<RequestID> Connect(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogInformation("Connect started with userID = {UserID}", userID);
             var id = Guid.NewGuid().ToString();
             var scope = serviceScopeFactory.CreateScope();
@@ -115,6 +118,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionInfoDto> Get(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Get started with userID = {UserID}", userID);
             var connectionInfoFromDb = await helper.GetConnectionInfoFromDb((int)userID);
             logger.LogTrace("Connection Info from DB: {@ConnectionInfoFromDb}", connectionInfoFromDb);
@@ -123,6 +127,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetRemoteConnectionStatus started with userID = {UserID}", userID);
             var connectionInfo = await helper.GetConnectionInfoFromDb((int)userID);
             logger.LogTrace("Connection Info from DB: {@ConnectionInfo}", connectionInfo);
@@ -135,6 +140,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace(
                 "GetEnumerationVariants started with userID = {UserID}, enumerationTypeID = {EnumerationTypeID}",
                 userID,
@@ -152,6 +158,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<RequestID> Synchronize(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogInformation("Synchronize started for user: {UserID}", userID);
             var iUserID = (int)userID;
             var user = await context.Users

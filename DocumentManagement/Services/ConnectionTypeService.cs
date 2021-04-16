@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
@@ -29,6 +30,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ID<ConnectionTypeDto>> Add(string typeName)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with typeName = {@TypeName}", typeName);
             try
             {
@@ -46,6 +48,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionTypeDto> Find(ID<ConnectionTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with id = {ID}", id);
             var dbConnectionType = await context.ConnectionTypes
                 .Include(x => x.AppProperties)
@@ -57,6 +60,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionTypeDto> Find(string name)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with name = {Name}", name);
             var dbConnectionType = await context.ConnectionTypes
                 .Include(x => x.AppProperties)
@@ -68,6 +72,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes()
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetAllConnectionTypes started");
             var dbList = await context.ConnectionTypes
                 .Include(x => x.AppProperties)
@@ -79,6 +84,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> RegisterAll()
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("RegisterAll started");
             var listOfTypes = ConnectionCreator.GetAllConnectionTypes();
             logger.LogDebug("Creator returns: {@ListOfTypes}", listOfTypes);
@@ -143,6 +149,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with id = {ID}", id);
             try
             {

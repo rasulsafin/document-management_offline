@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
@@ -41,6 +42,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with data: {@Data}", data);
             var objective = mapper.Map<Objective>(data);
             logger.LogTrace("Mapped data: {@Objective}", objective);
@@ -92,6 +94,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Add started with objectiveID: {@ObjectiveID}", objectiveID);
             var dbObjective = await Get(objectiveID);
             logger.LogDebug("Found: {@DBObjective}", dbObjective);
@@ -114,6 +117,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogInformation(
                 "GenerateReport started for user {UserId} with path = {Path}, projectName = {ProjectName} objectiveIds: {@ObjectiveIDs}",
                 userID,
@@ -175,6 +179,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             var dbProject = await context.Projects.Unsynchronized()
                 .Include(x => x.Objectives)
@@ -196,6 +201,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
             var objective = await context.Objectives.FindAsync((int)objectiveID);
             logger.LogDebug("Found objective: {@Objective}", objective);
@@ -208,6 +214,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ObjectiveDto objData)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with objData: {@ObjData}", objData);
             var objective = await Get(objData.ID);
 
@@ -298,6 +305,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Objective objective)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("LinkItem started for objective {ID} with item: {@Item}", objective.ID, item);
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
             logger.LogDebug("CheckItemToLink returned {@DBItem}", dbItem);
@@ -312,6 +320,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("UnlinkItem started for objective {ID} with item: {ItemID}", objectiveID, itemID);
             var link = await context.ObjectiveItems
                 .Where(x => x.ItemID == itemID)
@@ -328,6 +337,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<Objective> Get(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Get started for objective {ID}", objectiveID);
             var dbObjective = await context.Objectives
                .Include(x => x.Project)
