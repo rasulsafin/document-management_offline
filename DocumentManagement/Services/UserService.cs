@@ -99,7 +99,10 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<UserDto> Find(ID<UserDto> userID)
         {
-            var dbUser = await context.Users.FindAsync((int)userID);
+            var dbUser = await context.Users
+                .Include(x => x.ConnectionInfo)
+                    .ThenInclude(c => c.ConnectionType)
+                .FirstOrDefaultAsync(x => x.ID == (int)userID);
             return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
         }
 
