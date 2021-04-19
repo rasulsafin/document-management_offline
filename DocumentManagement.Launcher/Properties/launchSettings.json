@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "DocumentManagement.Launcher": {
+      "commandName": "Project"
+    },
+    "Launcher": {
+      "commandName": "Executable"
+    }
+  }
+}
