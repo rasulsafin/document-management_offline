@@ -21,6 +21,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string Name { get; }
 
+        public string ConnectionName { get; set; }
+
         public RoleDto Role { get; set; }
     }
 }

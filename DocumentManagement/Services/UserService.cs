@@ -116,7 +116,14 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
-                var dbUser = await GetUserChecked(userID);
+                var dbUser = await context.Users
+                    .Include(x => x.ConnectionInfo)
+                        .ThenInclude(c => c.ConnectionType)
+                    .FirstOrDefaultAsync(x => x.ID == (int)userID);
+
+                if (dbUser == null)
+                    throw new ArgumentNullException($"User with key {userID} was not found");
+
                 return mapper.Map<UserDto>(dbUser);
             }
             catch (Exception e)

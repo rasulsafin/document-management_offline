@@ -150,7 +150,9 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
-                var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+                var dbUser = await context.Users.Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                    .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
                 if (dbUser == null)
                     throw new ArgumentNullException($"User with name {username} not found");
 
