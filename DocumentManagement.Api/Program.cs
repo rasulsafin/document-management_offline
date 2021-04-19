@@ -29,10 +29,8 @@ namespace MRS.DocumentManagement.Api
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
                .UseSerilog(
-                    (context, services, configuration) =>
-                    {
-                        configuration.DestructureByIgnoringSensitive().ReadFrom.Configuration(context.Configuration);
-                    })
+                    (context, services, configuration) => configuration.DestructureByIgnoringSensitive()
+                       .ReadFrom.Configuration(context.Configuration))
                .ConfigureWebHostDefaults(
                     webBuilder =>
                     {
