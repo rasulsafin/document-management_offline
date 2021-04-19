@@ -135,8 +135,9 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Login started for {UserName}", username);
-            var dbUser = await context.Users
-               .FirstOrDefaultAsync(u => string.Equals(u.Login, username, StringComparison.OrdinalIgnoreCase));
+            var dbUser = await context.Users.Include(x => x.ConnectionInfo)
+               .ThenInclude(x => x.ConnectionType)
+               .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
             logger.LogDebug("Found user: {@DbUser}", dbUser);
             if (dbUser == null)
                 return null;
@@ -147,7 +148,7 @@ namespace MRS.DocumentManagement.Services
                 return null;
             }
 
-            var dtoUser = mapper.Map<UserDto>(dbUser);
+            UserDto dtoUser = mapper.Map<UserDto>(dbUser);
 
             if (dbUser.Roles != null && dbUser.Roles.Count > 0)
                 dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };

@@ -18,7 +18,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
             this.tdms = tdms;
         }
 
-        public async Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
             throw new NotImplementedException();
         }

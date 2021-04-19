@@ -12,6 +12,10 @@ namespace MRS.DocumentManagement.Connection.Tdms
     {
         private static TDMSApplication tdms;
 
+        public TdmsConnection()
+        {
+        }
+
         public Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             tdms = new TDMSApplication();

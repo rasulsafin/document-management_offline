@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -11,10 +12,6 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 {
     public class GoogleDriveManager : ICloudManager
     {
-        public static readonly string APP_DIR = "BRIO MRS";
-        public static readonly string TABLE_DIR = "Tables";
-        public static readonly string REC_FILE = "{0}.json";
-
         private GoogleDriveController controller;
         private bool checkDirApp;
         private Dictionary<string, string> tables = new Dictionary<string, string>();
@@ -25,15 +22,15 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             controller = driveController;
         }
 
-        public string DirAppHref { get; private set; }
+        public string RootDirectoryHref { get; private set; }
 
-        public string DirTableHref { get; private set; }
+        public string TableFolderHref { get; private set; }
 
         public async Task<ConnectionStatusDto> GetStatusAsync()
         {
             try
             {
-                var list = await controller.GetListAsync(DirAppHref);
+                var list = await controller.GetListAsync(RootDirectoryHref);
                 if (list != null)
                 {
                     return new ConnectionStatusDto()
@@ -64,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 var tableHref = await GetTableHref<T>();
-                string name = string.Format(REC_FILE, id);
+                string name = string.Format(PathManager.RECORDED_FILE_FORMAT, id);
                 string json = JsonConvert.SerializeObject(@object);
                 return await controller.SetContentAsync(json, tableHref, name);
             }
@@ -80,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 var tableHref = await GetTableHref<T>();
-                string nameWithExtension = string.Format(REC_FILE, name);
+                string nameWithExtension = string.Format(PathManager.RECORDED_FILE_FORMAT, name);
                 string json = await controller.GetContentAsync(tableHref, nameWithExtension);
                 T @object = JsonConvert.DeserializeObject<T>(json);
                 return @object;
@@ -95,7 +92,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public async Task<bool> Delete<T>(string id)
         {
             var tableHref = await GetTableHref<T>();
-            string name = string.Format(REC_FILE, id);
+            string name = string.Format(PathManager.RECORDED_FILE_FORMAT, id);
             var list = await controller.GetListAsync(tableHref);
             var record = list.FirstOrDefault(x => x.DisplayName == name);
             if (record != null)
@@ -112,7 +109,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             try
             {
                 var tableHref = await GetTableHref<T>();
-                var elements = await GetRemoteDirectoryFiles(tableHref);
+                var elements = await GetRemoteDirectoryFilesByKey(tableHref);
                 foreach (var item in elements)
                     resultCollection.Add(await Pull<T>(Path.GetFileNameWithoutExtension(item.DisplayName)));
             }
@@ -123,9 +120,9 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return resultCollection;
         }
 
-        public async Task<string> PushFile(string remoteDirName, string fullPath)
+        public async Task<string> PushFile(string remoteDirectoryName, string fullPath)
         {
-            string dirHref = await GetDirHref(remoteDirName);
+            string dirHref = await GetDirectoryHref(remoteDirectoryName);
             var res = await controller.LoadFileAsync(dirHref, fullPath);
             return res.Href;
         }
@@ -140,7 +137,20 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return await controller.DownloadFileAsync(href, fileName);
         }
 
-        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryHref = "/")
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        {
+            try
+            {
+                var directoryHref = await GetDirectoryHref(directoryPath);
+                return await controller.GetListAsync(directoryHref);
+            }
+            catch (FileNotFoundException)
+            {
+                return Enumerable.Empty<CloudElement>();
+            }
+        }
+
+        private async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFilesByKey(string directoryHref = "/")
         {
             try
             {
@@ -152,41 +162,50 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             }
         }
 
-        private async Task<string> GetDirHref(string dirName)
+        private async Task<string> GetDirectoryHref(string directoryName)
         {
-            await CheckDirApp();
-            var res = directories.ContainsKey(dirName);
-            if (!res)
+            await CheckApplicationFolders();
+            var foldersInPath = directoryName.Split('/', StringSplitOptions.RemoveEmptyEntries);
+            string directoryHref = RootDirectoryHref;
+            foreach (var pathPart in foldersInPath.Where(f => !f.Equals(PathManager.APPLICATION_ROOT_DIRECTORY_NAME)))
+                directoryHref = await CreateDirectoryIfNecessary(pathPart, directoryHref);
+
+            return directoryHref;
+        }
+
+        private async Task<string> CreateDirectoryIfNecessary(string directoryPath, string parentHref)
+        {
+            var folderExists = directories.ContainsKey(directoryPath);
+            if (!folderExists)
             {
-                directories.Clear();
-                var list = await controller.GetListAsync(DirAppHref);
+                var list = await controller.GetListAsync(parentHref);
                 foreach (CloudElement element in list)
                 {
                     if (element.IsDirectory)
                         directories.Add(element.DisplayName, element.Href);
-                    if (element.DisplayName == dirName)
-                        res = true;
+                    if (element.DisplayName == directoryPath)
+                        folderExists = true;
                 }
 
-                if (!res)
+                if (!folderExists)
                 {
-                    var dir = await controller.CreateDirAsync(DirAppHref, dirName);
-                    directories.Add(dir.DisplayName, dir.Href);
+                    var createdDirectory = await controller.CreateDirectoryAsync(parentHref, directoryPath);
+                    directories.Add(createdDirectory.DisplayName, createdDirectory.Href);
                 }
             }
 
-            return directories[dirName];
+            return directories[directoryPath];
         }
 
         private async Task<string> GetTableHref<T>()
         {
-            await CheckDirApp();
+            await CheckApplicationFolders();
             string tableName = typeof(T).Name;
             var res = tables.ContainsKey(tableName);
             if (!res)
             {
                 tables.Clear();
-                var list = await controller.GetListAsync(DirTableHref);
+                var list = await controller.GetListAsync(TableFolderHref);
                 foreach (CloudElement element in list)
                 {
                     if (element.IsDirectory)
@@ -197,7 +216,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
                 if (!res)
                 {
-                    var dir = await controller.CreateDirAsync(DirTableHref, tableName);
+                    var dir = await controller.CreateDirectoryAsync(TableFolderHref, tableName);
                     tables.Add(dir.DisplayName, dir.Href);
                 }
             }
@@ -205,25 +224,27 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return tables[tableName];
         }
 
-        private async Task CheckDirApp()
+        private async Task CheckApplicationFolders()
         {
-            if (!string.IsNullOrWhiteSpace(DirAppHref)) return;
+            if (!string.IsNullOrWhiteSpace(RootDirectoryHref))
+                return;
+
             IEnumerable<CloudElement> list = await controller.GetListAsync();
-            var dirApp = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == APP_DIR);
+            var dirApp = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == PathManager.APPLICATION_ROOT_DIRECTORY_NAME);
             if (dirApp == null)
             {
-                dirApp = await controller.CreateDirAsync(string.Empty, APP_DIR);
+                dirApp = await controller.CreateDirectoryAsync(string.Empty, PathManager.APPLICATION_ROOT_DIRECTORY_NAME);
             }
 
-            DirAppHref = dirApp.Href;
-            list = await controller.GetListAsync(DirAppHref);
-            var dirTable = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == TABLE_DIR);
+            RootDirectoryHref = dirApp.Href;
+            list = await controller.GetListAsync(RootDirectoryHref);
+            var dirTable = list.FirstOrDefault(x => x.IsDirectory && x.DisplayName == PathManager.TABLE_DIRECTORY);
             if (dirTable == null)
             {
-                dirTable = await controller.CreateDirAsync(DirAppHref, TABLE_DIR);
+                dirTable = await controller.CreateDirectoryAsync(RootDirectoryHref, PathManager.TABLE_DIRECTORY);
             }
 
-            DirTableHref = dirTable.Href;
+            TableFolderHref = dirTable.Href;
         }
     }
 }

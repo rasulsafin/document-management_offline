@@ -119,7 +119,10 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started userID: {UserID}", userID);
-            var dbUser = await context.Users.FindAsync((int)userID);
+            var dbUser = await context.Users
+               .Include(x => x.ConnectionInfo)
+                    .ThenInclude(c => c.ConnectionType)
+               .FirstOrDefaultAsync(x => x.ID == (int)userID);
             logger.LogDebug("Found user: {@User}", dbUser);
             return dbUser != null ? mapper.Map<UserDto>(dbUser) : null;
         }

@@ -20,7 +20,8 @@ namespace MRS.DocumentManagement.Utility.Mapping
         {
             CreateObjectiveMapToDto();
 
-            CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>()
+                .ForMember(d => d.ConnectionName, o => o.MapFrom(s => GetName(s)));
 
             CreateMap<Project, ProjectDto>();
             CreateMap<Project, ProjectToListDto>();
@@ -193,5 +194,12 @@ namespace MRS.DocumentManagement.Utility.Mapping
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();
         }
+
+        private string GetName(User s)
+        {
+            var name = s.ConnectionInfo?.ConnectionType?.Name;
+            return name;
+        }
+
     }
 }

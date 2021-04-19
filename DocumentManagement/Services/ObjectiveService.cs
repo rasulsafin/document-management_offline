@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -164,7 +164,10 @@ namespace MRS.DocumentManagement.Services
             }
 
             logger.LogDebug("Objectives for report: {@Objectives}", objectives);
-            path = Path.Combine(path, $"Отчет {reportID}.docx");
+            var reportDir = Path.Combine(path, "Reports");
+            Directory.CreateDirectory(reportDir);
+
+            path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
             var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
             logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
@@ -281,7 +284,7 @@ namespace MRS.DocumentManagement.Services
                 }
             }
 
-            objective.Items = new List<ObjectiveItem>();
+            objective.Items ??= new List<ObjectiveItem>();
             var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
             var itemsToUnlink = objectiveItems.Where(o => (!objData.Items?.Any(i => (int)i.ID == o.ItemID)) ?? true);
             logger.LogDebug(

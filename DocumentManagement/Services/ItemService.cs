@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
@@ -22,22 +23,25 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly IFactory<Type, IConnection> connectionFactory;
         private readonly ILogger<ItemService> logger;
+        private readonly IFactory<IServiceScope, Type, IConnection> connectionFactory;
         private readonly IRequestService requestQueue;
+        private readonly IServiceScopeFactory scopeFactory;
 
         public ItemService(
             DMContext context,
             IMapper mapper,
-            IFactory<Type, IConnection> connectionFactory,
-            ILogger<ItemService> logger,
-            IRequestService requestQueue)
+            IFactory<IServiceScope, Type, IConnection> connectionFactory,
+            IRequestService requestQueue,
+            IServiceScopeFactory scopeFactory,
+            ILogger<ItemService> logger)
         {
             this.context = context;
             this.mapper = mapper;
             this.connectionFactory = connectionFactory;
             this.logger = logger;
             this.requestQueue = requestQueue;
+            this.scopeFactory = scopeFactory;
             logger.LogTrace("ItemService created");
         }
 
@@ -76,8 +80,9 @@ namespace MRS.DocumentManagement.Services
                 .FirstOrDefaultAsync(x => x.ID == (int)userID);
             logger.LogDebug("Found user: {@User}", user);
 
+            var scope = scopeFactory.CreateScope();
             var connection =
-                connectionFactory.Create(ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
+                connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
             var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
             logger.LogTrace("Mapped info: {@Info}", info);
             var storage = await connection.GetStorage(info);
@@ -90,9 +95,16 @@ namespace MRS.DocumentManagement.Services
             var task = Task.Factory.StartNew(
                 async () =>
                 {
-                    logger.LogTrace("DownloadItems task started ({ID})", id);
-                    var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
-                    return new RequestResult(result);
+                    try
+                    {
+                        logger.LogTrace("DownloadItems task started ({ID})", id);
+                        var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
+                        return new RequestResult(result);
+                    }
+                    finally
+                    {
+                        scope.Dispose();
+                    }
                 },
                 TaskCreationOptions.LongRunning);
             requestQueue.AddRequest(id, task.Unwrap(), src);
