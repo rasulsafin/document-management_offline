@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentManagement.Launcher"
         mc:Ignorable="d"
-        Title="MainWindow" Height="250" Width="500">
+        Title="Документооборот статус" Height="250" Width="300">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition></ColumnDefinition>
@@ -16,9 +16,7 @@
             <RowDefinition/>
         </Grid.RowDefinitions>
         <WrapPanel Grid.Row="0" Grid.Column="0">
-            <Button Content="Запустить приложение" Click="StartDmapi"/>
-            <Button Content="Остановить приложение" Click="KillDmapi"/>
-
+            <!--TODO: Отображение статуса документа оборота статистики и тд-->
         </WrapPanel>
     </Grid>
 </Window>

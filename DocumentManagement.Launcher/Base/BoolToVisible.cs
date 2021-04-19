@@ -5,7 +5,7 @@ using System.Windows.Data;
 
 namespace DocumentManagement.Launcher.Base
 {
-    public class BoolToVisuble : IValueConverter
+    public class BoolToVisible : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {

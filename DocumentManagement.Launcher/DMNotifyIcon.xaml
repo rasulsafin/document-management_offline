@@ -2,39 +2,51 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:notify="http://www.hardcodet.net/taskbar"
                     xmlns:local="clr-namespace:DocumentManagement.Launcher"
+                    xmlns:base="clr-namespace:DocumentManagement.Launcher.Base"
                     >
+    <base:BoolToVisible x:Key="BoolToVisible"/>
 
-    <ContextMenu x:Shared="false" x:Key="SysTrayMenu">
-        <MenuItem Header="Отрыть окно" Command="{Binding ShowWindowCommand}" >
-            <MenuItem.Style>
-                <Style>
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsShowWindow}" Value="True">
-                            <Setter Property="MenuItem.IsEnabled" Value="False"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsShowWindow}" Value="False">
-                            <Setter Property="MenuItem.IsEnabled" Value="True"/>
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </MenuItem.Style>            
-        </MenuItem>
 
-        <MenuItem Header="Закрыть окно" Command="{Binding HideWindowCommand}" >
+    <ContextMenu x:Shared="true" x:Key="SysTrayMenu">
+        <MenuItem>
             <MenuItem.Style>
-                <Style>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Setter Property="IsHitTestVisible" Value="False"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsShowWindow}" Value="True">
-                            <Setter Property="MenuItem.IsEnabled" Value="True"/>
+                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
+                            <Setter Property="Header" Value="Документооборот запущен"/>
+                            <Setter Property="Foreground" Value="Black"/>
+                            <Setter Property="Background" Value="White"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding IsShowWindow}" Value="False">
-                            <Setter Property="MenuItem.IsEnabled" Value="False"/>
+                        <DataTrigger Binding="{Binding IsRunDm}" Value="False">
+                            <Setter Property="Header" Value="Документооборот остановлен"/>
+                            <Setter Property="Foreground" Value="Red"/>
+                            <Setter Property="Background" Value="Gray"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </MenuItem.Style>
-
         </MenuItem>
+
+        <MenuItem Command="{Binding VisibleConsoleCommand}">
+            <MenuItem.Style>
+                <Style TargetType="{x:Type MenuItem}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
+                            <Setter Property="Header" Value="Показать/скрыть консоль"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsRunDm}" Value="False">
+                            <Setter Property="Header" Value="Запустить документооборот"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </MenuItem.Style>
+            
+        </MenuItem>
+
+        <MenuItem Header="Отрыть Swagger" Command="{Binding OpenSwaggerCommand}" 
+                  Visibility="{Binding IsRunDm, Converter={StaticResource BoolToVisible}}" />
+
         <Separator />
         <MenuItem Header="Закрыть 'DM BRIO MRS'" Command="{Binding ExitApplicationCommand}" />
     </ContextMenu>
