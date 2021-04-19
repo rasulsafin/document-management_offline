@@ -7,6 +7,7 @@
         public ID<UserDto> ID { get; }
         public string Login { get; }
         public string Name { get; }
+        public string ConnectionName { get; set; }
         public RoleDto Role { get; set; }
 
         public UserDto(ID<UserDto> id, string login, string name)

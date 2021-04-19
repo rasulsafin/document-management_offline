@@ -113,14 +113,16 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ValidatedUserDto> Login(string username, string password)
         {
-            var dbUser = await context.Users.FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+            var dbUser = await context.Users.Include(x => x.ConnectionInfo)
+                .ThenInclude(x => x.ConnectionType)
+                .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
             if (dbUser == null)
                 return null;
 
             if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
                 return null;
 
-            var dtoUser = mapper.Map<UserDto>(dbUser);
+            UserDto dtoUser = mapper.Map<UserDto>(dbUser);
 
             if (dbUser.Roles != null && dbUser.Roles.Count > 0)
                 dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
