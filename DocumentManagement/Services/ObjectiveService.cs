@@ -166,6 +166,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogDebug("Objectives for report: {@Objectives}", objectives);
             path = Path.Combine(path, $"Отчет {reportID}.docx");
             var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+            logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
             ReportCreator reportCreator = new ReportCreator();
             reportCreator.CreateReport(xmlDoc, path);
