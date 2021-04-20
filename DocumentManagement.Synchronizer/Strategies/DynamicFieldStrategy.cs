@@ -20,16 +20,16 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
     internal class DynamicFieldStrategy<TLinker> : ALinkingStrategy<DynamicField, DynamicFieldExternalDto>
         where TLinker : ILinker<DynamicField>
     {
-        private readonly DynamicFieldStrategy<DynamicFieldDynamicFieldLinker> substrategy;
+        private readonly Func<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>> getSubstrategy;
 
         public DynamicFieldStrategy(
             DMContext context,
             IMapper mapper,
             TLinker linker,
-            DynamicFieldStrategy<DynamicFieldDynamicFieldLinker> substrategy)
+            Func<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>> getSubstrategy)
             : base(context, mapper, linker)
         {
-            this.substrategy = substrategy;
+            this.getSubstrategy = getSubstrategy;
         }
 
         protected override IIncludableQueryable<DynamicField, DynamicField> Include(IQueryable<DynamicField> set)
@@ -193,7 +193,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 tuple.Merge();
                 var id1 = tuple.Local?.ID ?? 0;
                 var id2 = tuple.Synchronized?.ID ?? 0;
-                var results = await substrategy.Synchronize(
+                var results = await getSubstrategy().Synchronize(
                     data,
                     connectionContext,
                     tuple.Remote?.ChildrenDynamicFields?.ToList() ?? new List<DynamicField>(),
