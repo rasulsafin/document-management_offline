@@ -55,74 +55,46 @@ namespace MRS.DocumentManagement.Synchronization
                        .LastOrDefaultAsync())?.Date ??
                     DateTime.MinValue;
                 var context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
-                int[] unsyncProjectsIDs;
-                string[] unsyncProjectsExternalIDs;
 
-                try
-                {
-                    var ids = await GetUpdatedIDs(
-                        lastSynchronization,
-                        dbContext.Projects,
-                        context.ProjectsSynchronizer);
-                    results.AddRange(
-                        await projectStrategy.Synchronize(
-                            data,
-                            context,
-                            projectStrategy.Map(await context.ProjectsSynchronizer.Get(ids)),
-                            token,
-                            x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            progress: projectProgress));
-                    unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
-                       .Select(x => x.Object.ID)
-                       .ToArray();
-                    unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
-                       .Select(x => x.Object.ExternalID)
-                       .ToArray();
-                }
-                catch (OperationCanceledException)
-                {
-                    return results;
-                }
-                catch (Exception e)
-                {
-                    results.Add(new SynchronizingResult { Exception = e });
-                    progress?.Report(1.0);
-                    return results;
-                }
+                var ids = await GetUpdatedIDs(
+                    lastSynchronization,
+                    dbContext.Projects,
+                    context.ProjectsSynchronizer);
+                results.AddRange(
+                    await projectStrategy.Synchronize(
+                        data,
+                        context,
+                        projectStrategy.Map(await context.ProjectsSynchronizer.Get(ids)),
+                        token,
+                        x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                        x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                        progress: projectProgress));
+                var unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
+                   .Select(x => x.Object.ID)
+                   .ToArray();
+                var unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
+                   .Select(x => x.Object.ExternalID)
+                   .ToArray();
 
                 token.ThrowIfCancellationRequested();
 
-                try
-                {
-                    var ids = await GetUpdatedIDs(
-                        lastSynchronization,
-                        dbContext.Objectives,
-                        context.ObjectivesSynchronizer);
-                    results.AddRange(
-                        await objectiveStrategy.Synchronize(
-                            data,
-                            context,
-                            objectiveStrategy.Map(await context.ObjectivesSynchronizer.Get(ids)),
-                            token,
-                            x => (x.ExternalID == null || ids.Contains(x.ExternalID))
-                             && !unsyncProjectsIDs.Contains(x.ProjectID)
-                             && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            x => (x.ExternalID == null || ids.Contains(x.ExternalID))
-                             && !unsyncProjectsIDs.Contains(x.ProjectID)
-                             && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            progress: objectiveProgress));
-                }
-                catch (OperationCanceledException)
-                {
-                    return results;
-                }
-                catch (Exception e)
-                {
-                    results.Add(new SynchronizingResult { Exception = e });
-                    progress?.Report(1.0);
-                    return results;
-                }
+                ids = await GetUpdatedIDs(
+                    lastSynchronization,
+                    dbContext.Objectives,
+                    context.ObjectivesSynchronizer);
+                results.AddRange(
+                    await objectiveStrategy.Synchronize(
+                        data,
+                        context,
+                        objectiveStrategy.Map(await context.ObjectivesSynchronizer.Get(ids)),
+                        token,
+                        x => (x.ExternalID == null || ids.Contains(x.ExternalID))
+                         && !unsyncProjectsIDs.Contains(x.ProjectID)
+                         && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                        x => (x.ExternalID == null || ids.Contains(x.ExternalID))
+                         && !unsyncProjectsIDs.Contains(x.ProjectID)
+                         && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                        progress: objectiveProgress));
 
                 token.ThrowIfCancellationRequested();
 
