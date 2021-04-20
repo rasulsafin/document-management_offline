@@ -3,18 +3,37 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Synchronization.Strategies;
 using MRS.DocumentManagement.Synchronization.Utils;
 
 namespace MRS.DocumentManagement.Synchronization
 {
     public class Synchronizer
     {
+        private readonly DMContext dbContext;
+        private readonly IMapper mapper;
+        private readonly ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy;
+        private readonly ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy;
+
+        public Synchronizer(
+            DMContext dbContext,
+            IMapper mapper,
+            ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy,
+            ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy)
+        {
+            this.dbContext = dbContext;
+            this.mapper = mapper;
+            this.projectStrategy = projectStrategy;
+            this.objectiveStrategy = objectiveStrategy;
+        }
+
         public async Task<ICollection<SynchronizingResult>> Synchronize(
                 SynchronizingData data,
                 IConnection connection,
@@ -28,16 +47,14 @@ namespace MRS.DocumentManagement.Synchronization
 
             try
             {
-                var date = DateTime.UtcNow;
+                data.Date = DateTime.UtcNow;
                 var userID = data.User.ID;
                 var lastSynchronization =
-                    (await data.Context.Synchronizations.Where(x => x.UserID == userID)
+                    (await dbContext.Synchronizations.Where(x => x.UserID == userID)
                        .OrderBy(x => x.Date)
                        .LastOrDefaultAsync())?.Date ??
                     DateTime.MinValue;
-                var context = await connection.GetContext(data.Mapper.Map<ConnectionInfoExternalDto>(info));
-                var project = new ProjectStrategy(data.Mapper);
-                var objective = new ObjectiveStrategy(data.Mapper);
+                var context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
                 int[] unsyncProjectsIDs;
                 string[] unsyncProjectsExternalIDs;
 
@@ -45,17 +62,16 @@ namespace MRS.DocumentManagement.Synchronization
                 {
                     var ids = await GetUpdatedIDs(
                         lastSynchronization,
-                        data.Context.Projects,
+                        dbContext.Projects,
                         context.ProjectsSynchronizer);
                     results.AddRange(
-                        await project.Synchronize(
+                        await projectStrategy.Synchronize(
                             data,
                             context,
-                            project.Map(await context.ProjectsSynchronizer.Get(ids)),
+                            projectStrategy.Map(await context.ProjectsSynchronizer.Get(ids)),
                             token,
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            date: date,
                             progress: projectProgress));
                     unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
                        .Select(x => x.Object.ID)
@@ -63,8 +79,6 @@ namespace MRS.DocumentManagement.Synchronization
                     unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
                        .Select(x => x.Object.ExternalID)
                        .ToArray();
-
-                    await data.Context.SynchronizationSaveAsync(date);
                 }
                 catch (OperationCanceledException)
                 {
@@ -83,13 +97,13 @@ namespace MRS.DocumentManagement.Synchronization
                 {
                     var ids = await GetUpdatedIDs(
                         lastSynchronization,
-                        data.Context.Objectives,
+                        dbContext.Objectives,
                         context.ObjectivesSynchronizer);
                     results.AddRange(
-                        await objective.Synchronize(
+                        await objectiveStrategy.Synchronize(
                             data,
                             context,
-                            objective.Map(await context.ObjectivesSynchronizer.Get(ids)),
+                            objectiveStrategy.Map(await context.ObjectivesSynchronizer.Get(ids)),
                             token,
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID))
                              && !unsyncProjectsIDs.Contains(x.ProjectID)
@@ -112,15 +126,15 @@ namespace MRS.DocumentManagement.Synchronization
 
                 token.ThrowIfCancellationRequested();
 
-                await data.Context.Synchronizations.AddAsync(
+                await dbContext.Synchronizations.AddAsync(
                     new Database.Models.Synchronization
                     {
-                        Date = date,
+                        Date = data.Date,
                         UserID = data.User.ID,
                     });
-                await data.Context.SynchronizationSaveAsync(date);
-                await SynchronizationFinalizer.Finalize(data);
-                await data.Context.SynchronizationSaveAsync(date);
+                await dbContext.SynchronizationSaveAsync(data.Date);
+                await SynchronizationFinalizer.Finalize(dbContext);
+                await dbContext.SynchronizationSaveAsync(data.Date);
             }
             catch (OperationCanceledException)
             {

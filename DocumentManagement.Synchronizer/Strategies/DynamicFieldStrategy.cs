@@ -11,16 +11,25 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Synchronization.Utils;
+using MRS.DocumentManagement.Synchronization.Utils.Linkers;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
-    internal class DynamicFieldStrategy : ALinkingStrategy<DynamicField, DynamicFieldExternalDto>
+    internal class DynamicFieldStrategy<TLinker> : ALinkingStrategy<DynamicField, DynamicFieldExternalDto>
+        where TLinker : ILinker<DynamicField>
     {
-        public DynamicFieldStrategy(IMapper mapper, LinkingFunc link, LinkingFunc update, LinkingFunc unlink)
-            : base(mapper, link, update, unlink)
+        private readonly DynamicFieldStrategy<DynamicFieldDynamicFieldLinker> substrategy;
+
+        public DynamicFieldStrategy(
+            DMContext context,
+            IMapper mapper,
+            TLinker linker,
+            DynamicFieldStrategy<DynamicFieldDynamicFieldLinker> substrategy)
+            : base(context, mapper, linker)
         {
+            this.substrategy = substrategy;
         }
 
         protected override IIncludableQueryable<DynamicField, DynamicField> Include(IQueryable<DynamicField> set)
@@ -182,10 +191,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             if (HasChildren(tuple.Local) || HasChildren(tuple.Remote) || HasChildren(tuple.Synchronized))
             {
                 tuple.Merge();
-                var subStrategy = new DynamicFieldStrategy(mapper, Link, Update, Unlink);
                 var id1 = tuple.Local?.ID ?? 0;
                 var id2 = tuple.Synchronized?.ID ?? 0;
-                var results = await subStrategy.Synchronize(
+                var results = await substrategy.Synchronize(
                     data,
                     connectionContext,
                     tuple.Remote?.ChildrenDynamicFields?.ToList() ?? new List<DynamicField>(),
@@ -205,36 +213,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private bool HasChildren(DynamicField field)
             => (field?.ChildrenDynamicFields?.Count ?? 0) != 0;
-
-        private Task Unlink(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            var p =  LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
-            field.ParentField = null;
-
-            if (entityType == EntityType.Remote)
-                p.ChildrenDynamicFields.Remove(field);
-            else if (field.ParentFieldID == null)
-                context.DynamicFields.Remove(field);
-            else
-                context.DynamicFields.Update(field);
-            return Task.CompletedTask;
-        }
-
-        private Task Update(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
-            if (entityType != EntityType.Remote)
-                context.DynamicFields.Update(field);
-            return Task.CompletedTask;
-        }
-
-        private Task Link(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            var p = LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
-            p.ChildrenDynamicFields ??= new List<DynamicField>();
-            p.ChildrenDynamicFields.Add(field);
-            return Task.CompletedTask;
-        }
 
         private void SynchronizeChanges(ISynchronizationChanges parentTuple, ISynchronizationChanges childTuple)
         {

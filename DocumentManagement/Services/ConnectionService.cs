@@ -24,13 +24,12 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly Synchronizer synchronizer;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<ConnectionService> logger;
         private readonly IFactory<Type, IConnection> connectionFactory;
         private readonly IFactory<IServiceScope, Type, IConnection> connectionScopedFactory;
-        private readonly IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory;
         private readonly IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory;
+        private readonly IFactory<IServiceScope, Synchronizer> synchronizerFactory;
         private readonly IRequestService requestQueue;
         private readonly ConnectionHelper helper;
 
@@ -43,20 +42,19 @@ namespace MRS.DocumentManagement.Services
             ILogger<ConnectionService> logger,
             IFactory<Type, IConnection> connectionFactory,
             IFactory<IServiceScope, Type, IConnection> connectionScopedFactory,
-            IFactory<IServiceScope, SynchronizingData> synchronizationDataFactory,
-            IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory)
+            IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory,
+            IFactory<IServiceScope, Synchronizer> synchronizerFactory)
         {
             this.context = context;
             this.mapper = mapper;
             this.serviceScopeFactory = serviceScopeFactory;
             this.requestQueue = requestQueue;
             this.helper = helper;
-            synchronizer = new Synchronizer();
             this.logger = logger;
             this.connectionFactory = connectionFactory;
             this.connectionScopedFactory = connectionScopedFactory;
-            this.synchronizationDataFactory = synchronizationDataFactory;
             this.connectionHelperFactory = connectionHelperFactory;
+            this.synchronizerFactory = synchronizerFactory;
         }
 
         public async Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto data)
@@ -151,11 +149,14 @@ namespace MRS.DocumentManagement.Services
                 throw new ArgumentNullException();
 
             var scope = serviceScopeFactory.CreateScope();
-            var data = synchronizationDataFactory.Create(scope);
+            var synchronizer = synchronizerFactory.Create(scope);
 
-            data.User = user;
-            data.ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID);
-            data.ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID);
+            var data = new SynchronizingData
+            {
+                User = user,
+                ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
+                ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
+            };
 
             var connection = connectionScopedFactory.Create(
                 scope,
