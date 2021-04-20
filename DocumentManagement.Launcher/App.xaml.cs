@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using Hardcodet.Wpf.TaskbarNotification;
 
 namespace DocumentManagement.Launcher
@@ -21,6 +22,8 @@ namespace DocumentManagement.Launcher
         protected override void OnExit(ExitEventArgs e)
         {
             notifyIcon.Dispose(); // the icon would clean up automatically, but this is cleaner
+            if (notifyIcon.DataContext is IDisposable disposable)
+                disposable.Dispose();
             base.OnExit(e);
         }
     }

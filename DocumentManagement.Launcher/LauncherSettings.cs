@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Controls;
 using System.Xml.Serialization;
-using DocumentManagement.Launcher.Base;
 using DocumentManagement.Launcher.Dialogs;
 
 namespace DocumentManagement.Launcher
@@ -14,7 +9,7 @@ namespace DocumentManagement.Launcher
     [Serializable]
     public class LauncherSettings
     {
-        private static readonly string PATH = "Setting.xml";
+        public static readonly string PATH = "Setting.xml";
         private static LauncherSettings instance;
 
         public static LauncherSettings Instance
@@ -22,17 +17,19 @@ namespace DocumentManagement.Launcher
             get
             {
                 if (instance == null)
-                    instance = Load(PATH);
+                    Reload();
 
                 return instance;
             }
         }
 
+        public static void Reload() => instance = Load(PATH);
+
         public bool VisibleConsole { get; set; } = false;
 
         public string SwaggerPath { get; set; } = @"http://localhost:5000/index.html";
 
-        public string DMApiPath { get; set; } = @"W:\temp\DM\DocumentManagement.Api.exe";
+        public string DMApiPath { get; set; } = @"W:/temp/DM/DocumentManagement.Api.exe";
 
         public void Save() => Save(PATH, this);
 
@@ -40,7 +37,7 @@ namespace DocumentManagement.Launcher
         {
             XmlSerializer formatter = new XmlSerializer(typeof(LauncherSettings));
 
-            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+            using (FileStream fs = new FileStream(path, FileMode.Truncate))
             {
                 formatter.Serialize(fs, setting);
             }
@@ -48,19 +45,33 @@ namespace DocumentManagement.Launcher
 
         private static LauncherSettings Load(string path)
         {
-            if (!File.Exists(path))
+            LauncherSettings settings = null;
+            if (File.Exists(path))
             {
-                var newSettings = new LauncherSettings();
-                Save(path, newSettings);
-                return newSettings;
+                try
+                {
+                    XmlSerializer formatter = new XmlSerializer(typeof(LauncherSettings));
+                    using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
+                    {
+                        settings = (LauncherSettings)formatter.Deserialize(fs);
+                        return settings;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke(() => WinBox.ShowMessage($"Ошибка чтения файла!\n {ex.Message}"));
+                }
+            }
+            else
+            {
+                settings = new LauncherSettings();
+                Save(path, settings);
             }
 
-            XmlSerializer formatter = new XmlSerializer(typeof(LauncherSettings));
-            using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
-            {
-                LauncherSettings setting = (LauncherSettings)formatter.Deserialize(fs);
-                return setting;
-            }
+            if (settings == null) settings = new LauncherSettings();
+
+            return settings;
         }
+
     }
 }
