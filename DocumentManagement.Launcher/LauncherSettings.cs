@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows;
 using System.Xml.Serialization;
@@ -23,13 +24,15 @@ namespace DocumentManagement.Launcher
             }
         }
 
-        public static void Reload() => instance = Load(PATH);
-
         public bool VisibleConsole { get; set; } = false;
 
         public string SwaggerPath { get; set; } = @"http://localhost:5000/index.html";
 
         public string DMApiPath { get; set; } = @"W:/temp/DM/DocumentManagement.Api.exe";
+
+        public List<string> StartArguments { get; set; }
+
+        public static void Reload() => instance = Load(PATH);
 
         public void Save() => Save(PATH, this);
 
@@ -72,6 +75,5 @@ namespace DocumentManagement.Launcher
 
             return settings;
         }
-
     }
 }
