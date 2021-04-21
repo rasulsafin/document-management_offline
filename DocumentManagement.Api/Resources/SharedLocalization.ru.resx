@@ -123,7 +123,7 @@
   <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
     <value>Не удалось найти тип подключения</value>
   </data>
-  <data name="CheckValidConnetionTypeToCreate_AlredyExists" xml:space="preserve">
+  <data name="CheckValidConnectionTypeToCreate_AlreadyExists" xml:space="preserve">
     <value>Имя уже используется другим типом подключения</value>
   </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
@@ -147,13 +147,13 @@
   <data name="CheckValidUserID_Missing" xml:space="preserve">
     <value>Не удалось найти пользователя</value>
   </data>
-  <data name="CheckValidUserToCreate_AlredyExists" xml:space="preserve">
+  <data name="CheckValidUserToCreate_AlreadyExists" xml:space="preserve">
     <value>Логин уже используется другим пользователем</value>
   </data>
-  <data name="CouldnotConnect" xml:space="preserve">
+  <data name="CouldNotConnect" xml:space="preserve">
     <value>Не удалось подключиться</value>
   </data>
-  <data name="CouldnotSynchronize" xml:space="preserve">
+  <data name="CouldNotSynchronize" xml:space="preserve">
     <value>Синхронизация не удалась</value>
   </data>
   <data name="FailedToCreateReport" xml:space="preserve">

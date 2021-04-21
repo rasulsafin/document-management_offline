@@ -37,13 +37,13 @@ namespace MRS.DocumentManagement.Api.Controllers
         ///
         ///         POST /Connections
         ///         {
-        ///             "connectionTypeID": { "id" : 16},
-        ///             "userID": { "id" : 101},
+        ///             "connectionTypeID": { "id" : 1},
+        ///             "userID": { "id" : 1},
         ///             "authFieldValues": {
-        ///                 "database": "kosmos",
-        ///                 "server": "192.168.100.6\\sqlkosmos",
-        ///                 "password": "123",
-        ///                 "login": "gureva"
+        ///                 "database": "databaseName",
+        ///                 "server": "1.1.1.1\\serverName",
+        ///                 "password": "passwordValue",
+        ///                 "login": "loginValue"
         ///                 }
         ///         }
         /// </remarks>
@@ -104,7 +104,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch (Exception ex)
             {
-                return CreateProblemResult(this, 500, localizer["CannotConnect"], ex.Message);
+                return CreateProblemResult(this, 500, localizer["CouldNotConnect"], ex.Message);
             }
         }
 
@@ -257,7 +257,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch (Exception ex)
             {
-                return CreateProblemResult(this, 500, localizer["CouldnotSynchronize"], ex.Message);
+                return CreateProblemResult(this, 500, localizer["CouldNotSynchronize"], ex.Message);
             }
         }
     }

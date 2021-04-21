@@ -62,7 +62,7 @@ namespace DocumentManagement.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                return CreateProblemResult(this, 400, localizer["CheckValidConnetionTypeToCreate_AlredyExists"], ex.Message);
+                return CreateProblemResult(this, 400, localizer["CheckValidConnectionTypeToCreate_AlreadyExists"], ex.Message);
             }
             catch (Exception ex)
             {

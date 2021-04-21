@@ -87,7 +87,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch (ArgumentException ex)
             {
-                return CreateProblemResult(this, 400, localizer["CheckValidUserToCreate_AlredyExists"], ex.Message);
+                return CreateProblemResult(this, 400, localizer["CheckValidUserToCreate_AlreadyExists"], ex.Message);
             }
             catch (Exception ex)
             {
