@@ -19,6 +19,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
     public class Bim360ObjectivesSynchronizerTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
+        private static readonly string PROJECT_ID = "b.08616ce0-2cf7-43c3-a69e-b831e0870824";
+        private static readonly  string NG_ISSUE_TYPE_ID = "3cbbb419-62ac-476f-a115-fd57defd0ac7";
+
         private static ISynchronizer<ObjectiveExternalDto> synchronizer;
 
         [ClassInitialize]
@@ -62,27 +65,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         [TestMethod]
         public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully()
         {
-            var objective = new ObjectiveExternalDto
-            {
-                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
-                ParentObjectiveExternalID = string.Empty,
-                AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
-                UpdatedAt = DateTime.Now,
-                CreationDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue",
-                Description = "ASAP: everything wrong! redo!!!",
-                Status = ObjectiveStatus.Open,
-                DynamicFields = new List<DynamicFieldExternalDto>
-                {
-                    new DynamicFieldExternalDto
-                    {
-                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
-                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
-                    },
-                },
-            };
+            var objective = CreateDto();
 
             var result = await synchronizer.Add(objective);
 
@@ -92,33 +75,13 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         [TestMethod]
         public async Task Add_ObjectiveWithEmptyIdWithItems_AddedSuccessfully()
         {
-            var objective = new ObjectiveExternalDto
+            var objective = CreateDto();
+            objective.Items = new List<ItemExternalDto>
             {
-                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
-                ParentObjectiveExternalID = string.Empty,
-                AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
-                UpdatedAt = DateTime.Now,
-                CreationDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue",
-                Description = "ASAP: everything wrong! redo!!!",
-                Status = ObjectiveStatus.Open,
-                DynamicFields = new List<DynamicFieldExternalDto>
+                new ItemExternalDto
                 {
-                    new DynamicFieldExternalDto
-                    {
-                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
-                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
-                    },
-                },
-                Items = new List<ItemExternalDto>
-                {
-                    new ItemExternalDto
-                    {
-                        FileName = Path.GetFileName(TEST_FILE_PATH),
-                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
-                    },
+                    FileName = Path.GetFileName(TEST_FILE_PATH),
+                    FullPath = Path.GetFullPath(TEST_FILE_PATH),
                 },
             };
 
@@ -131,27 +94,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         public async Task Remove_JustAddedObjective_RemovedSuccessfully()
         {
             // Add
-            var objective = new ObjectiveExternalDto
-            {
-                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
-                ParentObjectiveExternalID = string.Empty,
-                AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
-                UpdatedAt = DateTime.Now,
-                CreationDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue",
-                Description = "ASAP: everything wrong! redo!!!",
-                Status = ObjectiveStatus.Open,
-                DynamicFields = new List<DynamicFieldExternalDto>
-                {
-                    new DynamicFieldExternalDto
-                    {
-                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
-                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
-                    },
-                },
-            };
+            var objective = CreateDto();
             var added = await synchronizer.Add(objective);
             if (added?.ExternalID == null)
                 Assert.Fail("Objective adding failed. There is nothing to remove.");
@@ -167,30 +110,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         [TestMethod]
         public async Task Update_JustAddedObjective_UpdatedSuccessfully()
         {
-            var title = "First type OPEN issue";
-
             // Add
-            var objective = new ObjectiveExternalDto
-            {
-                ProjectExternalID = "b.e0f02bdd-4355-4ab0-80bd-cecc3e6e9716",
-                ParentObjectiveExternalID = string.Empty,
-                AuthorExternalID = "author_external_id",
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = "64868b1e-4431-48b3-8e54-5c287d227210" },
-                UpdatedAt = DateTime.Now,
-                CreationDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(2),
-                Title = title,
-                Description = "ASAP: everything wrong! redo!!!",
-                Status = ObjectiveStatus.Open,
-                DynamicFields = new List<DynamicFieldExternalDto>
-                {
-                    new DynamicFieldExternalDto
-                    {
-                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
-                        Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
-                    },
-                },
-            };
+            var objective = CreateDto();
+            var title = objective.Title;
             var added = await synchronizer.Add(objective);
             if (added?.ExternalID == null)
                 Assert.Fail("Objective adding failed. There is nothing to update.");
@@ -202,5 +124,29 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             Assert.IsNotNull(result?.Title);
             Assert.AreEqual(newTitle, result.Title);
         }
+
+        private ObjectiveExternalDto CreateDto()
+            => new ObjectiveExternalDto
+            {
+                ProjectExternalID = PROJECT_ID,
+                ParentObjectiveExternalID = string.Empty,
+                AuthorExternalID = "author_external_id",
+                UpdatedAt = DateTime.Now,
+                CreationDate = DateTime.Now,
+                DueDate = DateTime.Now.AddDays(2),
+                Title = "First type OPEN issue",
+                Description = "ASAP: everything wrong! redo!!!",
+                Status = ObjectiveStatus.Open,
+                DynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    new DynamicFieldExternalDto
+                    {
+                        ExternalID =
+                            typeof(Issue.IssueAttributes).GetDataMemberName(
+                                nameof(Issue.IssueAttributes.NgIssueTypeID)),
+                        Value = NG_ISSUE_TYPE_ID,
+                    },
+                },
+            };
     }
 }
