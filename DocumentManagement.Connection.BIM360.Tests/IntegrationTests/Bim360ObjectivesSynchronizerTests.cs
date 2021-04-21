@@ -2,10 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
@@ -14,12 +19,11 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
     public class Bim360ObjectivesSynchronizerTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
-        private static Bim360ObjectivesSynchronizer synchronizer;
+        private static ISynchronizer<ObjectiveExternalDto> synchronizer;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
         {
-            var lastSyncDate = DateTime.MinValue;
             var connectionInfo = new ConnectionInfoExternalDto
             {
                 ConnectionType = new ConnectionTypeExternalDto
@@ -40,8 +44,19 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 },
             };
 
-            var context = await Bim360ConnectionContext.CreateContext(connectionInfo);
-            synchronizer = new Bim360ObjectivesSynchronizer(context);
+            var services = new ServiceCollection();
+            services.AddBim360();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            var serviceProvider = services.BuildServiceProvider();
+
+            var connection = serviceProvider.GetService<Bim360Connection>();
+            if (connection == null)
+                throw new Exception();
+
+            await connection.Connect(connectionInfo);
+
+            var context = await connection.GetContext(connectionInfo);
+            synchronizer = context.ObjectivesSynchronizer;
         }
 
         [TestMethod]
@@ -63,7 +78,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 {
                     new DynamicFieldExternalDto
                     {
-                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
                         Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
                     },
                 },
@@ -93,7 +108,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 {
                     new DynamicFieldExternalDto
                     {
-                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
                         Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
                     },
                 },
@@ -132,7 +147,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 {
                     new DynamicFieldExternalDto
                     {
-                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
                         Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
                     },
                 },
@@ -146,7 +161,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             var result = await synchronizer.Remove(added);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(ObjectiveStatus.Ready, result.Status);
+            Assert.AreEqual(ObjectiveStatus.Undefined, result.Status);
         }
 
         [TestMethod]
@@ -171,7 +186,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 {
                     new DynamicFieldExternalDto
                     {
-                        Name = nameof(Issue.Attributes.NgIssueSubtypeID),
+                        ExternalID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
                         Value = "1a1439dc-a221-4c78-a461-22e4e19f6b39",
                     },
                 },
