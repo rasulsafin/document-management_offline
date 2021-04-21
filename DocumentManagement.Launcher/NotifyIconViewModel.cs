@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Launcher
     public class NotifyIconViewModel : ObservableObject, IDisposable
     {
         #region field
-        private bool isRunDm;
+        private bool isDMRunning;
         private Process dmProcess;
         private bool isConsoleVisible = false;
         #endregion
@@ -19,21 +19,21 @@ namespace MRS.DocumentManagement.Launcher
         #region constructor
         public NotifyIconViewModel()
         {
-            VisibleConsoleCommand = new RelayCommand(VisibleConsole);
+            this.VisibleConsoleCommand = new RelayCommand(this.VisibleConsole);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
-            StartDmConsoleCommand = new RelayCommand(StartDocumentMenagermentProcess);
+            StartDmConsoleCommand = new RelayCommand(StartDocumentMenagement);
             OpenSettingsCommand = new RelayCommand(OpenSettings);
-            StartDocumentMenagermentProcess();
+            StartDocumentMenagement();
         }
 
         #endregion
 
         #region binding
-        public bool IsRunDm
+        public bool IsDMRunning
         {
-            get => isRunDm;
-            set => SetProperty(ref isRunDm, value);
+            get => isDMRunning;
+            set => SetProperty(ref isDMRunning, value);
         }
 
         public bool IsConsoleVisible
@@ -58,33 +58,38 @@ namespace MRS.DocumentManagement.Launcher
         {
             if (dmProcess != null)
             {
-                dmProcess?.Kill();
-                dmProcess?.WaitForExit();
-                dmProcess?.Dispose();
+                dmProcess.Kill();
+                dmProcess.WaitForExit();
+                dmProcess.Dispose();
             }
         }
 
         #region private method
+        private static void Hide(IntPtr win) => SafeNativeMethods.ShowWindow(win, 0);
+
+        private static void Show(IntPtr win) => SafeNativeMethods.ShowWindow(win, 1);
+
         private void OpenSettings()
         {
             var notepad = Process.Start("notepad", LauncherSettings.PATH);
             notepad.EnableRaisingEvents = true;
-            notepad.Exited += (s, o) => LauncherSettings.Reload();
+            notepad.Exited += (s, o) => LauncherSettings.Load();
         }
 
-        private void OpenSwagger() => OpenUrl(LauncherSettings.Instance.SwaggerPath);
+        private void OpenSwagger() => OpenUrl(LauncherSettings.SwaggerPath);
 
-        private void DmProcessDisposed(object sender, EventArgs e) => IsRunDm = false;
+        private void DmProcessDisposed(object sender, EventArgs e) => IsDMRunning = false;
 
-        private void StartDocumentMenagermentProcess()
+        private void StartDocumentMenagement()
         {
             dmProcess = Process.GetProcessesByName("DocumentManagement.Api").FirstOrDefault();
             if (dmProcess != null)
             {
                 dmProcess.Kill();
+                dmProcess.WaitForExit();
             }
 
-            string path = LauncherSettings.Instance.DMApiPath;
+            string path = LauncherSettings.DMExecutablePath;
             if (!File.Exists(path))
             {
                 MessageBox.Show($"Файл не найден!\n{path}");
@@ -98,63 +103,49 @@ namespace MRS.DocumentManagement.Launcher
             dmProcess.StartInfo.CreateNoWindow = false;
             dmProcess.StartInfo.UseShellExecute = false;
             dmProcess.StartInfo.WorkingDirectory = executableDir;
-            dmProcess.StartInfo.Arguments = string.Join(" ", LauncherSettings.Instance.StartArguments);
+            dmProcess.StartInfo.Arguments = string.Join(" ", Environment.GetCommandLineArgs());
             dmProcess.EnableRaisingEvents = true;
             dmProcess.Exited += DmProcessDisposed;
-            IsRunDm = true;
+            IsDMRunning = true;
             dmProcess.Start();
 
             // Waiting for the console window to open
             while (dmProcess.MainWindowHandle == IntPtr.Zero)
-            { 
+            {
             }
 
             if (!IsConsoleVisible)
-                WindowOperation.Hide(dmProcess.MainWindowHandle);
+                Hide(dmProcess.MainWindowHandle);
         }
 
         private void VisibleConsole()
         {
             if (dmProcess == null)
-                StartDocumentMenagermentProcess();
+                StartDocumentMenagement();
             IsConsoleVisible = !IsConsoleVisible;
             if (IsConsoleVisible)
-                WindowOperation.Show(dmProcess.MainWindowHandle);
+                Show(dmProcess.MainWindowHandle);
             else
-                WindowOperation.Hide(dmProcess.MainWindowHandle);
+                Hide(dmProcess.MainWindowHandle);
         }
 
-        private void ExitApplication()
-        {
-            Application.Current.Shutdown();
-        }
+        private void ExitApplication() => Application.Current.Shutdown();
 
         private void OpenUrl(string url)
         {
-            try
+            // hack because of this: https://github.com/dotnet/corefx/issues/10361
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Process.Start(url);
+                url = url.Replace("&", "^&");
+                Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
             }
-            catch
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                // hack because of this: https://github.com/dotnet/corefx/issues/10361
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    url = url.Replace("&", "^&");
-                    Process.Start(new ProcessStartInfo("cmd", $"/c start {url}") { CreateNoWindow = true });
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                {
-                    Process.Start("xdg-open", url);
-                }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Process.Start("open", url);
-                }
-                else
-                {
-                    throw;
-                }
+                Process.Start("xdg-open", url);
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                Process.Start("open", url);
             }
         }
         #endregion

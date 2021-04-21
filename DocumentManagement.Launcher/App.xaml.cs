@@ -8,10 +8,12 @@ namespace MRS.DocumentManagement.Launcher
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
-    public partial class App : Application
+    public partial class App : Application, IDisposable
     {
         private TaskbarIcon notifyIcon;
         private Mutex mutex;
+
+        public void Dispose() => mutex?.Dispose();
 
         protected override void OnStartup(StartupEventArgs e)
         {
@@ -32,7 +34,7 @@ namespace MRS.DocumentManagement.Launcher
 
         protected override void OnExit(ExitEventArgs e)
         {
-            mutex.Dispose();
+            mutex?.Dispose();
             if (notifyIcon != null)
             {
                 notifyIcon.Dispose(); // the icon would clean up automatically, but this is cleaner

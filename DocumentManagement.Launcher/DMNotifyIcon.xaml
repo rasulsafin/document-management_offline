@@ -14,12 +14,12 @@
                 <Style TargetType="{x:Type MenuItem}">
                     <Setter Property="IsHitTestVisible" Value="False"/>
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
+                        <DataTrigger Binding="{Binding IsDMRunning}" Value="True">
                             <Setter Property="Header" Value="Документооборот запущен"/>
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="Background" Value="Green"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="False">
+                        <DataTrigger Binding="{Binding IsDMRunning}" Value="False">
                             <Setter Property="Header" Value="Документооборот остановлен"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="Background" Value="Red"/>
@@ -33,10 +33,10 @@
             <MenuItem.Style>
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="False">
+                        <DataTrigger Binding="{Binding IsDMRunning}" Value="False">
                             <Setter Property="Visibility" Value="Visible"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
+                        <DataTrigger Binding="{Binding IsDMRunning}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -44,18 +44,15 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="Показать/скрыть консоль" Command="{Binding VisibleConsoleCommand}">
+        <MenuItem Command="{Binding VisibleConsoleCommand}" Visibility="{Binding IsDMRunning, Converter={StaticResource BoolToVisible}}">
             <MenuItem.Style>
                 <Style TargetType="{x:Type MenuItem}">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>                        
+                        <DataTrigger Binding="{Binding IsConsoleVisible}" Value="True">
+                            <Setter Property="Header" Value="Cкрыть консоль"/>
                         </DataTrigger>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="False">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                        </DataTrigger>
-                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
-                            <Setter Property="Visibility" Value="Visible"/>
+                        <DataTrigger Binding="{Binding IsConsoleVisible}" Value="False">
+                            <Setter Property="Header" Value="Показать консоль"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
@@ -63,12 +60,12 @@
         </MenuItem>
 
         <MenuItem Header="Открыть Swagger" Command="{Binding OpenSwaggerCommand}" 
-                  Visibility="{Binding IsRunDm, Converter={StaticResource BoolToVisible}}" />
+                  Visibility="{Binding IsDMRunning, Converter={StaticResource BoolToVisible}}" />
 
         <MenuItem Header="Открыть файл настроек" Command="{Binding OpenSettingsCommand}" />
 
         <Separator />
-        <MenuItem Header="Закрыть 'DM BRIO MRS'" Command="{Binding ExitApplicationCommand}" />
+        <MenuItem Header="Выход" ToolTip="Остановить документооборот и закрыть приложение" Command="{Binding ExitApplicationCommand}" />
     </ContextMenu>
 
     <notify:TaskbarIcon x:Key="NotifyIcon"

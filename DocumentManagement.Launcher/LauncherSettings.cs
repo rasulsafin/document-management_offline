@@ -1,83 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
 using System.Windows;
 using System.Xml.Serialization;
 
 namespace MRS.DocumentManagement.Launcher
 {
     [Serializable]
-    public class LauncherSettings
+    public static class LauncherSettings
     {
-        public static readonly string PATH = "Setting.xml";
-        private static LauncherSettings instance;
+        public static readonly string PATH = "Setting.json";
 
-        public static LauncherSettings Instance
+        public static string SwaggerPath { get; set; } = @"http://localhost:5000/index.html";
+
+        public static string DMExecutablePath { get; set; } = @"W:/temp/DM/DocumentManagement.Api.exe";
+
+        public static void Load()
         {
-            get
-            {
-                if (instance == null)
-                    Reload();
-
-                return instance;
-            }
-        }
-
-        public string SwaggerPath { get; set; } = @"http://localhost:5000/index.html";
-
-        public string DMApiPath { get; set; } = @"W:/temp/DM/DocumentManagement.Api.exe";
-
-        public List<string> StartArguments { get; set; }
-
-        public static void Reload()
-        {
-            instance = Load(PATH);
-        }
-
-        public void Save() => Save(PATH, this);
-
-        private static void Save(string path, LauncherSettings setting)
-        {
-            FileMode mode = FileMode.Truncate;
-            if (!File.Exists(path))
-                mode = FileMode.OpenOrCreate;
-
-            XmlSerializer formatter = new XmlSerializer(typeof(LauncherSettings));
-
-            using (FileStream fs = new FileStream(path, mode))
-            {
-                formatter.Serialize(fs, setting);
-            }
-        }
-
-        private static LauncherSettings Load(string path)
-        {
-            LauncherSettings settings = null;
-            if (File.Exists(path))
+            LauncherSettingsDto data = null;
+            if (File.Exists(PATH))
             {
                 try
                 {
-                    XmlSerializer formatter = new XmlSerializer(typeof(LauncherSettings));
-                    using (FileStream fs = new FileStream(path, FileMode.OpenOrCreate))
-                    {
-                        settings = (LauncherSettings)formatter.Deserialize(fs);
-                        return settings;
-                    }
+                    string json = File.ReadAllText(PATH);
+                    data = JsonSerializer.Deserialize<LauncherSettingsDto>(json);
                 }
                 catch (Exception ex)
                 {
-                    Application.Current.Dispatcher.Invoke(() => WinBox.ShowMessage($"Ошибка чтения файла!\n {ex.Message}"));
+                    Application.Current.Dispatcher.Invoke(() => MessageBox.Show($"Ошибка чтения файла!\n {ex.Message}"));
                 }
             }
             else
             {
-                settings = new LauncherSettings();
-                Save(path, settings);
+                data = new LauncherSettingsDto();
+                Save();
             }
 
-            if (settings == null) settings = new LauncherSettings();
+            SwaggerPath = data.SwaggerPath;
+            DMExecutablePath = data.DMExecutablePath;
+        }
 
-            return settings;
+        public static void Save()
+        {
+            LauncherSettingsDto data = new LauncherSettingsDto
+            {
+                SwaggerPath = SwaggerPath,
+                DMExecutablePath = DMExecutablePath,
+            };
+
+            var options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+            };
+
+            string json = JsonSerializer.Serialize(data, options);
+            File.WriteAllText(PATH, json);
+        }
+
+        public class LauncherSettingsDto
+        {
+            public string SwaggerPath { get; set; }
+
+            public string DMExecutablePath { get; set; }
         }
     }
 }
