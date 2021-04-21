@@ -4,14 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -73,7 +77,12 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ItemService(Fixture.Context, mapper, new RequestQueueService());
+            service = new ItemService(
+                Fixture.Context,
+                mapper,
+                Mock.Of<IFactory<IServiceScope, Type, IConnection>>(),
+                Mock.Of<IRequestService>(),
+                Mock.Of<IServiceScopeFactory>());
         }
 
         [TestCleanup]

@@ -23,6 +23,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         private static readonly  string NG_ISSUE_TYPE_ID = "3cbbb419-62ac-476f-a115-fd57defd0ac7";
 
         private static ISynchronizer<ObjectiveExternalDto> synchronizer;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
@@ -50,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             var services = new ServiceCollection();
             services.AddBim360();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            var serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
 
             var connection = serviceProvider.GetService<Bim360Connection>();
             if (connection == null)
@@ -61,6 +62,10 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             var context = await connection.GetContext(connectionInfo);
             synchronizer = context.ObjectivesSynchronizer;
         }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Models;
@@ -52,14 +53,18 @@ namespace MRS.DocumentManagement.Tests
                     {
                         new UserRole { UserID = users[0].ID, RoleID = roles[0].ID },
                         new UserRole { UserID = users[1].ID, RoleID = roles[0].ID },
-                        new UserRole { UserID = users[2].ID, RoleID = roles[1].ID }
+                        new UserRole { UserID = users[2].ID, RoleID = roles[1].ID },
                     };
                     context.UserRoles.AddRange(userRoles);
                     context.SaveChanges();
                 }
             });
 
-            service = new AuthorizationService(Fixture.Context, mapper, new CryptographyHelper());
+            service = new AuthorizationService(
+                Fixture.Context,
+                mapper,
+                new CryptographyHelper(),
+                Mock.Of<ILogger<AuthorizationService>>());
         }
 
         [TestCleanup]
@@ -253,7 +258,11 @@ namespace MRS.DocumentManagement.Tests
             var userPassSalt = user.PasswordSalt;
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
             mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(password, userPassHash, userPassSalt)).Returns(true);
-            var mockedService = new AuthorizationService(Fixture.Context, mapper, mockedCryptographyHelper.Object);
+            var mockedService = new AuthorizationService(
+                Fixture.Context,
+                mapper,
+                mockedCryptographyHelper.Object,
+                Mock.Of<ILogger<AuthorizationService>>());
 
             var result = await mockedService.Login(username, password);
 
@@ -284,7 +293,11 @@ namespace MRS.DocumentManagement.Tests
             var userPassSalt = user.PasswordSalt;
             var mockedCryptographyHelper = new Mock<CryptographyHelper>();
             mockedCryptographyHelper.Setup(m => m.VerifyPasswordHash(password, userPassHash, userPassSalt)).Returns(false);
-            var mockedService = new AuthorizationService(Fixture.Context, mapper, mockedCryptographyHelper.Object);
+            var mockedService = new AuthorizationService(
+                Fixture.Context,
+                mapper,
+                mockedCryptographyHelper.Object,
+                Mock.Of<ILogger<AuthorizationService>>());
 
             var result = await mockedService.Login(username, password);
 

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Interface;
@@ -42,7 +43,7 @@ namespace MRS.DocumentManagement.Tests
                 context.ObjectiveTypes.AddRange(types);
                 context.SaveChanges();
             });
-            service = new ObjectiveTypeService(Fixture.Context, mapper);
+            service = new ObjectiveTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ObjectiveService>>());
         }
 
         [TestCleanup]

@@ -258,7 +258,7 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Objective objective)
         {
-            var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
+            var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective);
             if (dbItem == null)
                 return;
             objective.Items.Add(new ObjectiveItem

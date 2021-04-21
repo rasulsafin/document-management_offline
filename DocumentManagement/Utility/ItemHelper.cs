@@ -12,14 +12,14 @@ namespace MRS.DocumentManagement.Utility
 {
     public class ItemHelper
     {
-        public async Task<Item> CheckItemToLink(DMContext context, IMapper mapper, ItemDto item, Type itemParentType, int parentId)
+        public async Task<Item> CheckItemToLink<TParent>(DMContext context, IMapper mapper, ItemDto item, TParent parent)
         {
             var dbItem = await context.Items.Unsynchronized()
                                       .FirstOrDefaultAsync(i => i.ID == (int)item.ID) ??
                          await context.Items.Unsynchronized()
                                       .FirstOrDefaultAsync(i => i.RelativePath == item.RelativePath);
 
-            if (await ShouldCreateNewItem(dbItem, itemParentType, parentId, context))
+            if (await ShouldCreateNewItem(dbItem, parent, context))
             {
                 dbItem = mapper.Map<Item>(item);
                 await context.Items.AddAsync(dbItem);
@@ -29,38 +29,36 @@ namespace MRS.DocumentManagement.Utility
 
             bool alreadyLinked = false;
 
-            switch (itemParentType)
+            switch (parent)
             {
-                case var _ when itemParentType == typeof(Objective):
+                case Objective objective:
+                    var id = (int)item.ID;
+                    var parentID = objective.ID;
                     alreadyLinked = await context.ObjectiveItems
-                        .AnyAsync(i => i.ItemID == (int)item.ID && i.ObjectiveID == parentId);
+                       .AnyAsync(i => i.ItemID == id && i.ObjectiveID == parentID);
                     break;
-                case var _ when itemParentType == typeof(Project):
-                    alreadyLinked = dbItem.ProjectID == parentId;
+                case Project project:
+                    alreadyLinked = dbItem.ProjectID == project.ID;
                     break;
             }
 
             return alreadyLinked ? null : dbItem;
         }
 
-        private async Task<bool> ShouldCreateNewItem(Item dbItem, Type itemParentType, int parentId, DMContext context)
+        private async Task<bool> ShouldCreateNewItem<TParent>(Item dbItem, TParent parent, DMContext context)
         {
             // Check if item exists
             if (dbItem == null)
                 return true;
 
             int projectID = -1;
-            switch (itemParentType)
+            switch (parent)
             {
-                case var _ when itemParentType == typeof(Objective):
-
-                    var objective = await context.Objectives.FirstOrDefaultAsync(x => x.ID == parentId);
+                case Objective objective:
                     projectID = objective.ProjectID;
                     break;
-
-                case var _ when itemParentType == typeof(Project):
-
-                    projectID = parentId;
+                case Project project:
+                    projectID = project.ID;
                     break;
             }
 

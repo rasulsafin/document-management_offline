@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Interface;
@@ -48,7 +49,7 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ConnectionTypeService(Fixture.Context, mapper);
+            service = new ConnectionTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ConnectionTypeService>>());
         }
 
         [TestCleanup]

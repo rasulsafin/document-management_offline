@@ -26,6 +26,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static IssuesService issuesService;
         private static string issuesContainer;
         private static ForgeConnection connection;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
@@ -33,7 +34,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var services = new ServiceCollection();
             services.AddBim360();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            var serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
+
             connection = serviceProvider.GetService<ForgeConnection>();
             var authenticator = serviceProvider.GetService<Authenticator>();
             var hubsService = serviceProvider.GetService<HubsService>();
@@ -87,6 +89,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             issuesContainer = project.Relationships.IssuesContainer.Data.ID;
         }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task GetIssues_HaveAccessToIssueContainer_ReturnsIssuesList()

@@ -35,6 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
         private readonly Random random = new Random();
         private readonly string testFileName = Path.GetFileName(TEST_FILE_PATH);
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
@@ -42,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var services = new ServiceCollection();
             services.AddBim360();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            var serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
             connection = serviceProvider.GetService<ForgeConnection>();
             authenticator = serviceProvider.GetService<Authenticator>();
             hubsService = serviceProvider.GetService<HubsService>();
@@ -72,6 +73,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 },
             };
         }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
 
         /// <summary>
         /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
