@@ -4,26 +4,26 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
-using DocumentManagement.Launcher.Base;
-using DocumentManagement.Launcher.Dialogs;
+using MRS.DocumentManagement.Launcher.Base;
 
-namespace DocumentManagement.Launcher
+namespace MRS.DocumentManagement.Launcher
 {
-    public class NotifyIconViewModel : BaseViewModel, IDisposable
+    public class NotifyIconViewModel : ObservableObject, IDisposable
     {
         #region field
         private bool isRunDm;
         private Process dmProcess;
+        private bool isConsoleVisible = false;
         #endregion
 
         #region constructor
         public NotifyIconViewModel()
         {
-            VisibleConsoleCommand = new HCommand(VisibleConsole);
-            ExitApplicationCommand = new HCommand(ExitApplication);
-            OpenSwaggerCommand = new HCommand(OpenSwagger);
-            StartDmConsoleCommand = new HCommand(StartDocumentMenagermentProcess);
-            OpenSettingsCommand = new HCommand(OpenSettings);
+            VisibleConsoleCommand = new RelayCommand(VisibleConsole);
+            ExitApplicationCommand = new RelayCommand(ExitApplication);
+            OpenSwaggerCommand = new RelayCommand(OpenSwagger);
+            StartDmConsoleCommand = new RelayCommand(StartDocumentMenagermentProcess);
+            OpenSettingsCommand = new RelayCommand(OpenSettings);
             StartDocumentMenagermentProcess();
         }
 
@@ -33,32 +33,25 @@ namespace DocumentManagement.Launcher
         public bool IsRunDm
         {
             get => isRunDm;
-            set
-            {
-                isRunDm = value;
-                OnPropertyChanged();
-            }
+            set => SetProperty(ref isRunDm, value);
         }
 
-        public HCommand ExitApplicationCommand { get; }
-
-        public HCommand VisibleConsoleCommand { get; }
-
-        public HCommand OpenSwaggerCommand { get; }
-
-        public HCommand StartDmConsoleCommand { get; }
-
-        public HCommand OpenSettingsCommand { get; }
-
-        public bool IsVisibleConsole
+        public bool IsConsoleVisible
         {
-            get => LauncherSettings.Instance.VisibleConsole;
-            set
-            {
-                LauncherSettings.Instance.VisibleConsole = value;
-                LauncherSettings.Instance.Save();
-            }
+            get => isConsoleVisible;
+            set => SetProperty(ref isConsoleVisible, value);
         }
+
+        public RelayCommand ExitApplicationCommand { get; }
+
+        public RelayCommand VisibleConsoleCommand { get; }
+
+        public RelayCommand OpenSwaggerCommand { get; }
+
+        public RelayCommand StartDmConsoleCommand { get; }
+
+        public RelayCommand OpenSettingsCommand { get; }
+
         #endregion
 
         public void Dispose()
@@ -72,7 +65,6 @@ namespace DocumentManagement.Launcher
         }
 
         #region private method
-
         private void OpenSettings()
         {
             var notepad = Process.Start("notepad", LauncherSettings.PATH);
@@ -95,7 +87,7 @@ namespace DocumentManagement.Launcher
             string path = LauncherSettings.Instance.DMApiPath;
             if (!File.Exists(path))
             {
-                WinBox.ShowMessage($"Файл не найден!\n{path}");
+                MessageBox.Show($"Файл не найден!\n{path}");
                 return;
             }
 
@@ -109,10 +101,15 @@ namespace DocumentManagement.Launcher
             dmProcess.StartInfo.Arguments = string.Join(" ", LauncherSettings.Instance.StartArguments);
             dmProcess.EnableRaisingEvents = true;
             dmProcess.Exited += DmProcessDisposed;
-            dmProcess.Disposed += DmProcessDisposed;
             IsRunDm = true;
             dmProcess.Start();
-            if (!IsVisibleConsole)
+
+            // Waiting for the console window to open
+            while (dmProcess.MainWindowHandle == IntPtr.Zero)
+            { 
+            }
+
+            if (!IsConsoleVisible)
                 WindowOperation.Hide(dmProcess.MainWindowHandle);
         }
 
@@ -120,8 +117,8 @@ namespace DocumentManagement.Launcher
         {
             if (dmProcess == null)
                 StartDocumentMenagermentProcess();
-            IsVisibleConsole = !IsVisibleConsole;
-            if (IsVisibleConsole)
+            IsConsoleVisible = !IsConsoleVisible;
+            if (IsConsoleVisible)
                 WindowOperation.Show(dmProcess.MainWindowHandle);
             else
                 WindowOperation.Hide(dmProcess.MainWindowHandle);

@@ -4,7 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <StartupObject>DocumentManagement.Launcher.App</StartupObject>
+    <StartupObject>MRS.DocumentManagement.Launcher.App</StartupObject>
+    <RootNamespace>MRS.DocumentManagement.Launcher</RootNamespace>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

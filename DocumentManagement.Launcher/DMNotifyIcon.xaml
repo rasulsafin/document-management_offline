@@ -1,10 +1,11 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:notify="http://www.hardcodet.net/taskbar"
-                    xmlns:local="clr-namespace:DocumentManagement.Launcher"
-                    xmlns:base="clr-namespace:DocumentManagement.Launcher.Base"
+                    xmlns:local="clr-namespace:MRS.DocumentManagement.Launcher"
+                    xmlns:base="clr-namespace:MRS.DocumentManagement.Launcher.Base"
+                    xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
                     >
-    <base:BoolToVisible x:Key="BoolToVisible"/>
+    <controls:BooleanToVisibilityConverter x:Key="BoolToVisible"/>
 
 
     <ContextMenu x:Shared="true" x:Key="SysTrayMenu">
@@ -53,15 +54,18 @@
                         <DataTrigger Binding="{Binding IsRunDm}" Value="False">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
+                        <DataTrigger Binding="{Binding IsRunDm}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="Отрыть Swagger" Command="{Binding OpenSwaggerCommand}" 
+        <MenuItem Header="Открыть Swagger" Command="{Binding OpenSwaggerCommand}" 
                   Visibility="{Binding IsRunDm, Converter={StaticResource BoolToVisible}}" />
 
-        <MenuItem Header="Отрыть файл настроек" Command="{Binding OpenSettingsCommand}" />
+        <MenuItem Header="Открыть файл настроек" Command="{Binding OpenSettingsCommand}" />
 
         <Separator />
         <MenuItem Header="Закрыть 'DM BRIO MRS'" Command="{Binding ExitApplicationCommand}" />
@@ -70,7 +74,7 @@
     <notify:TaskbarIcon x:Key="NotifyIcon"
                     IconSource="/logo64.ico"
                     ToolTipText="Документооборот BRIO MRS"
-                    DoubleClickCommand="{Binding ShowWindowCommand}"
+                    DoubleClickCommand="{Binding VisibleConsoleCommand}"
                     ContextMenu="{StaticResource SysTrayMenu}">
         <notify:TaskbarIcon.DataContext>
             <local:NotifyIconViewModel />

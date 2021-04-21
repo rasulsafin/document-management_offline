@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace DocumentManagement.Launcher
+namespace MRS.DocumentManagement.Launcher
 {
 
     public static class WindowOperation

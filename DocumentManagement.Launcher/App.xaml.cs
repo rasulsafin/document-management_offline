@@ -3,7 +3,7 @@ using System.Threading;
 using System.Windows;
 using Hardcodet.Wpf.TaskbarNotification;
 
-namespace DocumentManagement.Launcher
+namespace MRS.DocumentManagement.Launcher
 {
     /// <summary>
     /// Interaction logic for App.xaml
@@ -11,13 +11,13 @@ namespace DocumentManagement.Launcher
     public partial class App : Application
     {
         private TaskbarIcon notifyIcon;
-        private Mutex _mutex;
+        private Mutex mutex;
 
         protected override void OnStartup(StartupEventArgs e)
         {
             bool createdNew;
-            string mutName = "DocumentManagement.Launcher";
-            _mutex = new System.Threading.Mutex(true, mutName, out createdNew);
+            string mutName = "MRS.DocumentManagement.Launcher";
+            mutex = new System.Threading.Mutex(true, mutName, out createdNew);
             if (!createdNew)
             {
                 Shutdown();
@@ -32,6 +32,7 @@ namespace DocumentManagement.Launcher
 
         protected override void OnExit(ExitEventArgs e)
         {
+            mutex.Dispose();
             if (notifyIcon != null)
             {
                 notifyIcon.Dispose(); // the icon would clean up automatically, but this is cleaner

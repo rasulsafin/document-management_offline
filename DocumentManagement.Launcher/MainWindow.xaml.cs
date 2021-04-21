@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using System.Windows;
-using DocumentManagement.Launcher.Dialogs;
 
-namespace DocumentManagement.Launcher
+namespace MRS.DocumentManagement.Launcher
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "DocumentManagement.Launcher": {
+    "MRS.DocumentManagement.Launcher": {
       "commandName": "Project"
     },
     "Launcher": {
