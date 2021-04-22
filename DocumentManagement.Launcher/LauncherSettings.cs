@@ -1,24 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Windows;
-using System.Xml.Serialization;
 
 namespace MRS.DocumentManagement.Launcher
 {
-    [Serializable]
     public static class LauncherSettings
     {
-        public static readonly string PATH = "Setting.json";
+        public static readonly string PATH = "launcher_settings.json";
 
         public static string SwaggerPath { get; set; } = @"http://localhost:5000/index.html";
 
-        public static string DMExecutablePath { get; set; } = @"W:/temp/DM/DocumentManagement.Api.exe";
+        public static string DMExecutablePath { get; set; } = @"DocumentManagement.Api.exe";
 
         public static void Load()
         {
             LauncherSettingsDto data = null;
+
             if (File.Exists(PATH))
             {
                 try
@@ -29,9 +28,11 @@ namespace MRS.DocumentManagement.Launcher
                 catch (Exception ex)
                 {
                     Application.Current.Dispatcher.Invoke(() => MessageBox.Show($"Ошибка чтения файла!\n {ex.Message}"));
+                    return;
                 }
             }
-            else
+
+            if (data == null)
             {
                 data = new LauncherSettingsDto();
                 Save();
@@ -52,13 +53,14 @@ namespace MRS.DocumentManagement.Launcher
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
+                Encoder = JavaScriptEncoder.Default,
             };
 
             string json = JsonSerializer.Serialize(data, options);
             File.WriteAllText(PATH, json);
         }
 
-        public class LauncherSettingsDto
+        private class LauncherSettingsDto
         {
             public string SwaggerPath { get; set; }
 

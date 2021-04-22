@@ -7,21 +7,12 @@ namespace MRS.DocumentManagement.Launcher.Base
     {
         private Action method;
 
-        public RelayCommand(Action method)
-        {
-            this.method = method;
-        }
+        public RelayCommand(Action method) => this.method = method;
 
         public event EventHandler CanExecuteChanged;
 
-        public bool CanExecute(object parameter)
-        {
-            return method != null;
-        }
+        public bool CanExecute(object parameter) => method != null;
 
-        public void Execute(object parameter)
-        {
-                method.Invoke();
-        }
+        public void Execute(object parameter) => method.Invoke();
     }
 }

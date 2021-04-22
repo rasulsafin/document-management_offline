@@ -44,7 +44,7 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Command="{Binding VisibleConsoleCommand}" Visibility="{Binding IsDMRunning, Converter={StaticResource BoolToVisible}}">
+        <MenuItem Command="{Binding ToggleConsoleCommand}" Visibility="{Binding IsDMRunning, Converter={StaticResource BoolToVisible}}">
             <MenuItem.Style>
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>                        
@@ -71,7 +71,7 @@
     <notify:TaskbarIcon x:Key="NotifyIcon"
                     IconSource="/logo64.ico"
                     ToolTipText="Документооборот BRIO MRS"
-                    DoubleClickCommand="{Binding VisibleConsoleCommand}"
+                    DoubleClickCommand="{Binding ToggleConsoleCommand}"
                     ContextMenu="{StaticResource SysTrayMenu}">
         <notify:TaskbarIcon.DataContext>
             <local:NotifyIconViewModel />

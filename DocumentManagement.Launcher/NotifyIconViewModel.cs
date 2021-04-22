@@ -14,17 +14,18 @@ namespace MRS.DocumentManagement.Launcher
         private bool isDMRunning;
         private Process dmProcess;
         private bool isConsoleVisible = false;
+        private Process notepadProcess;
         #endregion
 
         #region constructor
         public NotifyIconViewModel()
         {
-            this.VisibleConsoleCommand = new RelayCommand(this.VisibleConsole);
+            ToggleConsoleCommand = new RelayCommand(ToggleConsoleVisibility);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
-            StartDmConsoleCommand = new RelayCommand(StartDocumentMenagement);
+            StartDmConsoleCommand = new RelayCommand(StartDocumentManagement);
             OpenSettingsCommand = new RelayCommand(OpenSettings);
-            StartDocumentMenagement();
+            StartDocumentManagement();
         }
 
         #endregion
@@ -44,7 +45,7 @@ namespace MRS.DocumentManagement.Launcher
 
         public RelayCommand ExitApplicationCommand { get; }
 
-        public RelayCommand VisibleConsoleCommand { get; }
+        public RelayCommand ToggleConsoleCommand { get; }
 
         public RelayCommand OpenSwaggerCommand { get; }
 
@@ -71,16 +72,31 @@ namespace MRS.DocumentManagement.Launcher
 
         private void OpenSettings()
         {
-            var notepad = Process.Start("notepad", LauncherSettings.PATH);
-            notepad.EnableRaisingEvents = true;
-            notepad.Exited += (s, o) => LauncherSettings.Load();
+            if (notepadProcess == null)
+            {
+                notepadProcess = Process.Start("notepad", LauncherSettings.PATH);
+                notepadProcess.EnableRaisingEvents = true;
+                notepadProcess.Exited += OnNotepadClosed;
+            }
+            else
+            {
+                Show(notepadProcess.MainWindowHandle);
+            }
+        }
+
+        private void OnNotepadClosed(object sender, EventArgs e)
+        {
+            LauncherSettings.Load();
+            notepadProcess.Exited -= OnNotepadClosed;
+            notepadProcess.Dispose();
+            notepadProcess = null;
         }
 
         private void OpenSwagger() => OpenUrl(LauncherSettings.SwaggerPath);
 
         private void DmProcessDisposed(object sender, EventArgs e) => IsDMRunning = false;
 
-        private void StartDocumentMenagement()
+        private void StartDocumentManagement()
         {
             dmProcess = Process.GetProcessesByName("DocumentManagement.Api").FirstOrDefault();
             if (dmProcess != null)
@@ -89,6 +105,7 @@ namespace MRS.DocumentManagement.Launcher
                 dmProcess.WaitForExit();
             }
 
+            LauncherSettings.Load();
             string path = LauncherSettings.DMExecutablePath;
             if (!File.Exists(path))
             {
@@ -118,10 +135,15 @@ namespace MRS.DocumentManagement.Launcher
                 Hide(dmProcess.MainWindowHandle);
         }
 
-        private void VisibleConsole()
+        private void ToggleConsoleVisibility()
         {
             if (dmProcess == null)
-                StartDocumentMenagement();
+            {
+                MessageBox.Show($"Необходимо указать путь к 'DocumentManagement.Api.exe'!");
+                OpenSettings();
+                return;
+            }
+
             IsConsoleVisible = !IsConsoleVisible;
             if (IsConsoleVisible)
                 Show(dmProcess.MainWindowHandle);
