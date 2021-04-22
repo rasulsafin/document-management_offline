@@ -29,7 +29,9 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         public HttpRequestUtility(HttpConnection connector)
             => this.connector = connector;
 
-        internal AuthenticationService AuthenticationService { get; set; }
+        public string Token { get; set; }
+
+        public Func<Task> EnsureAccessValidAsync { get; set; }
 
         public void Dispose()
             => connector.Dispose();
@@ -58,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected internal async Task<JToken> GetResponseAsync<TData>(string url, TData data = default, HttpMethod requestType = null)
         {
-            await AuthenticationService?.EnsureAccessValidAsync();
+            await EnsureAccessValidAsync();
             var response = await GetHttpResponseAsync(url, data, requestType);
             var content = await response.Content.ReadAsStringAsync();
             return JToken.Parse(content);
@@ -66,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected internal async Task<JToken> GetResponseWithoutDataAsync(string url, HttpMethod requestType = null)
         {
-            await AuthenticationService?.EnsureAccessValidAsync();
+            await EnsureAccessValidAsync();
             var response = await GetHttpResponseAsync(url, data: (object)null, requestType);
             var content = await response.Content.ReadAsStringAsync();
             return JToken.Parse(content);
@@ -157,7 +159,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             var request = connector.CreateRequest(
                 requestType,
                 fullUrl,
-                authData: (STANDARD_AUTHENTICATION_SCHEME, AuthenticationService.AccessToken));
+                authData: (STANDARD_AUTHENTICATION_SCHEME, Token));
 
             return request;
         }
