@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="CannotDownload" xml:space="preserve">
-    <value>Could not download files</value>
-  </data>
   <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
     <value>Could not find requested connection type</value>
   </data>
@@ -132,6 +129,9 @@
   <data name="CheckValidItemID_Missing" xml:space="preserve">
     <value>Could not find requested item</value>
   </data>
+  <data name="CheckValidJobId_Missing" xml:space="preserve">
+    <value>Could not find requested job</value>
+  </data>
   <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
     <value>Could not find requested objective</value>
   </data>
@@ -141,9 +141,6 @@
   <data name="CheckValidProjectID_Missing" xml:space="preserve">
     <value>Could not find requested project</value>
   </data>
-  <data name="CheckValidTaskId_Missing" xml:space="preserve">
-    <value>Could not find requested task</value>
-  </data>
   <data name="CheckValidUserID_Missing" xml:space="preserve">
     <value>Could not find requested user</value>
   </data>
@@ -152,6 +149,9 @@
   </data>
   <data name="CouldNotConnect" xml:space="preserve">
     <value>Could not connect</value>
+  </data>
+  <data name="CouldNotDownload" xml:space="preserve">
+    <value>Could not download files</value>
   </data>
   <data name="CouldNotSynchronize" xml:space="preserve">
     <value>Could not synchronize</value>

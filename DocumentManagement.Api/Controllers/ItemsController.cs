@@ -204,7 +204,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             }
             catch (Exception ex)
             {
-                return CreateProblemResult(this, 500, localizer["CannotDownload"], ex.Message);
+                return CreateProblemResult(this, 500, localizer["CouldNotDownload"], ex.Message);
             }
         }
 
