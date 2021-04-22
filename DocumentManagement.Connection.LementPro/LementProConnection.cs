@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Synchronization;
@@ -35,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
             GC.SuppressFinalize(this);
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             var authorizationResult = await authenticationService.SignInAsync(info);
             updatedInfo = authorizationResult.updatedInfo;
@@ -45,7 +46,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             if (updatedInfo == null)
-                await Connect(info);
+                await Connect(info, default);
 
             updatedInfo.ConnectionType.ObjectiveTypes = await GetTypesAsync();
             updatedInfo.UserExternalID = updatedInfo.AuthFieldValues[AUTH_NAME_LOGIN];
@@ -80,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            await Connect(info);
+            await Connect(info, default);
             return new LementProConnectionStorage(requestUtility);
         }
 

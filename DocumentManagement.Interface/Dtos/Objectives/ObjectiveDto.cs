@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Interface.Dtos
 {
     public class ObjectiveDto
     {
+        [Required(ErrorMessage = "ValidationError_IdIsRequired")]
         public ID<ObjectiveDto> ID { get; set; }
 
         public ID<ProjectDto> ProjectID { get; set; }
@@ -20,6 +22,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public DateTime DueDate { get; set; }
 
+        [Required(ErrorMessage = "ValidationError_ObjectiveNameIsRequired")]
         public string Title { get; set; }
 
         public string Description { get; set; }

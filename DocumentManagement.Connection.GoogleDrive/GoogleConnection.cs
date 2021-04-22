@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
 using MRS.DocumentManagement.Connection.Utils.CloudBase;
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         {
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             try
             {
@@ -42,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             // TODO: fix this.
-            return await Connect(info);
+            return await Connect(info, default);
         }
 
         public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
@@ -78,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
-            var connectResult = await Connect(info);
+            var connectResult = await Connect(info, default);
             if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
                 return null;
 
@@ -87,7 +88,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            await Connect(info);
+            await Connect(info, default);
             return new CommonConnectionStorage(manager);
         }
     }

@@ -117,16 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
+    <value>Could not find requested connection type</value>
+  </data>
+  <data name="CheckValidConnectionTypeToCreate_AlreadyExists" xml:space="preserve">
+    <value>This name is already being used by different conention type</value>
+  </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Invalid ID</value>
   </data>
+  <data name="CheckValidItemID_Missing" xml:space="preserve">
+    <value>Could not find requested item</value>
+  </data>
+  <data name="CheckValidJobId_Missing" xml:space="preserve">
+    <value>Could not find requested job</value>
+  </data>
+  <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
+    <value>Could not find requested objective</value>
+  </data>
+  <data name="CheckValidObjectiveTypeID_Missing" xml:space="preserve">
+    <value>Could not find requested objective type</value>
+  </data>
+  <data name="CheckValidProjectID_Missing" xml:space="preserve">
+    <value>Could not find requested project</value>
+  </data>
+  <data name="CheckValidUserID_Missing" xml:space="preserve">
+    <value>Could not find requested user</value>
+  </data>
+  <data name="CheckValidUserToCreate_AlreadyExists" xml:space="preserve">
+    <value>This login is already being used</value>
+  </data>
+  <data name="CouldNotConnect" xml:space="preserve">
+    <value>Could not connect</value>
+  </data>
+  <data name="CouldNotDownload" xml:space="preserve">
+    <value>Could not download files</value>
+  </data>
+  <data name="CouldNotSynchronize" xml:space="preserve">
+    <value>Could not synchronize</value>
+  </data>
   <data name="FailedToCreateReport" xml:space="preserve">
     <value>Failed to create report</value>
+  </data>
+  <data name="JobIsUnfinished" xml:space="preserve">
+    <value>Requested job is not finished yet</value>
+  </data>
+  <data name="MethodIsNotImplemented" xml:space="preserve">
+    <value>Method is not implemented</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>Server error</value>
+  </data>
+  <data name="ServerError_Add" xml:space="preserve">
+    <value>Failed to add data to the table</value>
+  </data>
+  <data name="ServerError_Delete" xml:space="preserve">
+    <value>Failed to delete data from the table</value>
+  </data>
+  <data name="ServerError_Get" xml:space="preserve">
+    <value>Failed to retrieve information from the server</value>
+  </data>
+  <data name="ServerError_Put" xml:space="preserve">
+    <value>Failed to update data</value>
+  </data>
+  <data name="SomethingIsMissing" xml:space="preserve">
+    <value>Object could not be found</value>
+  </data>
+  <data name="UserHasNoRoleAlready" xml:space="preserve">
+    <value>User does not have this role already</value>
+  </data>
+  <data name="UserHasRoleAlready" xml:space="preserve">
+    <value>User already has this role</value>
+  </data>
+  <data name="ValidationError_IdIsRequired" xml:space="preserve">
+    <value>Id should not be empty</value>
+  </data>
+  <data name="ValidationError_JobIdRequired" xml:space="preserve">
+    <value>Task id should not be empty</value>
+  </data>
+  <data name="ValidationError_LoginIsRequired" xml:space="preserve">
+    <value>Login should not be empty</value>
+  </data>
+  <data name="ValidationError_ObjectiveNameIsRequired" xml:space="preserve">
+    <value>Objective name should not be empty</value>
+  </data>
+  <data name="ValidationError_ObjectiveTypeNameIsRequired" xml:space="preserve">
+    <value>Objective type name should not be null</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Add" xml:space="preserve">
+    <value>Could not add empty objects</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Put" xml:space="preserve">
+    <value>Could not update empty objects</value>
+  </data>
+  <data name="ValidationError_PasswordIsRequired" xml:space="preserve">
+    <value>Password should not be empty</value>
   </data>
   <data name="ValidationError_PathIsRequired" xml:space="preserve">
     <value>Path should not be empty</value>
   </data>
   <data name="ValidationError_ProjectNameIsRequired" xml:space="preserve">
     <value>Project name is required</value>
+  </data>
+  <data name="WrongPassword" xml:space="preserve">
+    <value>Wrong password</value>
   </data>
 </root>
