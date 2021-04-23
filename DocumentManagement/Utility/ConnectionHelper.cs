@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -41,6 +40,9 @@ namespace MRS.DocumentManagement.Utility
             logger.LogTrace("GetConnectionInfoFromDb started with userID: {@UserID}", userID);
             User user = await FindUserFromDb(userID);
             logger.LogDebug("Found user: {@User}", user);
+            if (user == null)
+                throw new ArgumentNullException($"User with key {userID} was not found");
+
             return await GetConnectionInfoFromDb(user);
         }
 
@@ -261,7 +263,7 @@ namespace MRS.DocumentManagement.Utility
             try
             {
                 logger.LogInformation("External connection started");
-                status = await connection.Connect(connectionInfoExternalDto);
+                status = await connection.Connect(connectionInfoExternalDto, token);
                 logger.LogInformation("External connection finished");
             }
             catch (Exception e)

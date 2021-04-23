@@ -8,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -22,7 +21,11 @@ namespace MRS.DocumentManagement.Services
         private readonly CryptographyHelper cryptographyHelper;
         private readonly ILogger<AuthorizationService> logger;
 
-        public AuthorizationService(DMContext context, IMapper mapper, CryptographyHelper helper, ILogger<AuthorizationService> logger)
+        public AuthorizationService(
+            DMContext context,
+            IMapper mapper,
+            CryptographyHelper helper,
+            ILogger<AuthorizationService> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -31,17 +34,17 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("AuthorizationService created");
         }
 
-        public virtual async Task<bool> AddRole(ID<UserDto> userID, string role)
+        public async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("AddRole started with userID = {UserID}, role = {Role}", userID, role);
-            var user = await context.Users.FindAsync((int)userID);
-            if (user == null)
-                throw new ArgumentException($"User with key {userID} not found");
+
             try
             {
+                var id = await CheckUser(userID);
+
                 if (await IsInRole(userID, role))
-                    return false;
+                    throw new ArgumentException($"User with key {userID} already has role {role}");
 
                 var storedRole = await context.Roles.FirstOrDefaultAsync(x => x.Name == role);
 
@@ -54,107 +57,159 @@ namespace MRS.DocumentManagement.Services
                     await context.SaveChangesAsync();
                 }
 
-                var userRoleLink = new Database.Models.UserRole() { RoleID = storedRole.ID, UserID = user.ID };
+                var userRoleLink = new Database.Models.UserRole() { RoleID = storedRole.ID, UserID = id };
                 logger.LogDebug("Created user <-> role link: {@UserRoleLink}", userRoleLink);
                 await context.UserRoles.AddAsync(userRoleLink);
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't assign role {Role} to user {UserID}", role, userID);
-                throw new InvalidDataException($"Can't assign role {role} to user {userID}", ex.InnerException);
+                throw;
             }
         }
 
-        public virtual async Task<IEnumerable<string>> GetAllRoles()
+        public async Task<IEnumerable<string>> GetAllRoles()
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetAllRoles started");
-            return await context.Roles.Select(x => x.Name).ToListAsync();
+
+            try
+            {
+                return await context.Roles.Select(x => x.Name).ToListAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of roles");
+                throw;
+            }
         }
 
-        public virtual async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
+        public async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetUserRoles started with userID: {UserID}", userID);
-            var id = (int)userID;
-            return await context.Users
-                .Where(x => x.ID == id)
-                .SelectMany(x => x.Roles)
-                .Select(x => x.Role.Name)
-                .ToListAsync();
+
+            try
+            {
+                var id = await CheckUser(userID);
+
+                return await context.Users
+                    .Where(x => x.ID == id)
+                    .SelectMany(x => x.Roles)
+                    .Select(x => x.Role.Name)
+                    .ToListAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of user's {UserID} roles", userID);
+                throw;
+            }
         }
 
-        public virtual async Task<bool> IsInRole(ID<UserDto> userID, string role)
+        public async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role}", userID, role);
-            var id = (int)userID;
-            return await context.UserRoles
-                .Where(x => x.UserID == id)
-                .Select(x => x.Role)
-                .AnyAsync(x => x.Name == role);
+
+            try
+            {
+                var id = await CheckUser(userID);
+
+                return await context.UserRoles
+                    .Where(x => x.UserID == id)
+                    .Select(x => x.Role)
+                    .AnyAsync(x => x.Name == role);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get result of user {UserID} is in role {Role} or not", userID, role);
+                throw;
+            }
         }
 
-        public virtual async Task<bool> RemoveRole(ID<UserDto> userID, string role)
+        public async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role}", userID, role);
-            var iuserID = (int)userID;
-            var user = await context.Users.FindAsync(iuserID);
-            if (user == null)
-                return false;
 
-            var links = await context.UserRoles
-                .Where(x => x.Role.Name == role)
-                .Where(x => x.UserID == iuserID)
-                .ToListAsync();
-            logger.LogDebug("Found links: {@Links}", links);
-            if (!links.Any())
-                return false;
-            context.UserRoles.RemoveRange(links);
-            await context.SaveChangesAsync();
-
-            var orphanRoles = await context.Roles
-                .Include(x => x.Users)
-                .Where(x => !x.Users.Any())
-                .ToListAsync();
-            logger.LogDebug("Found orphanRoles: {@OrphanRoles}", orphanRoles);
-
-            if (orphanRoles.Any())
+            try
             {
-                context.Roles.RemoveRange(orphanRoles);
-                await context.SaveChangesAsync();
-            }
+                var id = await CheckUser(userID);
 
-            return true;
+                var links = await context.UserRoles
+                    .Where(x => x.Role.Name == role)
+                    .Where(x => x.UserID == id)
+                    .ToListAsync();
+                logger.LogDebug("Found links: {@Links}", links);
+                if (!links.Any())
+                    throw new ArgumentException($"User with key {userID} do not have role {role}");
+
+                context.UserRoles.RemoveRange(links);
+                await context.SaveChangesAsync();
+
+                var orphanRoles = await context.Roles
+                    .Include(x => x.Users)
+                    .Where(x => !x.Users.Any())
+                    .ToListAsync();
+                logger.LogDebug("Found orphanRoles: {@OrphanRoles}", orphanRoles);
+
+                if (orphanRoles.Any())
+                {
+                    context.Roles.RemoveRange(orphanRoles);
+                    await context.SaveChangesAsync();
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't remove role {Role} from user {UserID}", role, userID);
+                throw;
+            }
         }
 
         public async Task<ValidatedUserDto> Login(string username, string password)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Login started for {UserName}", username);
-            var dbUser = await context.Users.Include(x => x.ConnectionInfo)
-               .ThenInclude(x => x.ConnectionType)
-               .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
-            logger.LogDebug("Found user: {@DbUser}", dbUser);
-            if (dbUser == null)
-                return null;
 
-            if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
+            try
             {
-                logger.LogInformation("Password is incorrect");
-                return null;
+                var dbUser = await context.Users.Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                    .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+                logger.LogDebug("Found user: {@DbUser}", dbUser);
+                if (dbUser == null)
+                    throw new ArgumentNullException($"User with name {username} not found");
+
+                if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
+                    throw new ArgumentException($"Wrong password!");
+
+                var dtoUser = mapper.Map<UserDto>(dbUser);
+
+                if (dbUser.Roles != null && dbUser.Roles.Count > 0)
+                    dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
+                logger.LogDebug("User DTO: {@DtoUser}", dtoUser);
+
+                return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
             }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't login with username {Username}", username);
+                throw;
+            }
+        }
 
-            UserDto dtoUser = mapper.Map<UserDto>(dbUser);
+        private async Task<int> CheckUser(ID<UserDto> userID)
+        {
+            var id = (int)userID;
+            var user = await context.Users.FindAsync(id);
+            if (user == null)
+                throw new ArgumentNullException($"User with key {userID} not found");
 
-            if (dbUser.Roles != null && dbUser.Roles.Count > 0)
-                dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
-            logger.LogDebug("User DTO: {@DtoUser}", dtoUser);
-
-            return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
+            return id;
         }
     }
 }

@@ -14,7 +14,6 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
@@ -23,10 +22,10 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<ItemService> logger;
         private readonly IFactory<IServiceScope, Type, IConnection> connectionFactory;
         private readonly IRequestService requestQueue;
         private readonly IServiceScopeFactory scopeFactory;
+        private readonly ILogger<ItemService> logger;
 
         public ItemService(
             DMContext context,
@@ -39,9 +38,9 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
             this.mapper = mapper;
             this.connectionFactory = connectionFactory;
-            this.logger = logger;
             this.requestQueue = requestQueue;
             this.scopeFactory = scopeFactory;
+            this.logger = logger;
             logger.LogTrace("ItemService created");
         }
 
@@ -58,109 +57,159 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("DownloadItems started for user {@UserID} with itemIds: {@ItemIds}", userID, itemIds);
-            var ids = itemIds.Select(x => (int)x).ToArray();
-            var dbItems = await context.Items
-                .Where(x => ids.Contains(x.ID))
-                .ToListAsync();
-            logger.LogDebug("Found items: {@DBItems}", dbItems);
-            var project = await context.Projects
-                .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
-                .FirstOrDefaultAsync();
-            logger.LogDebug("Found project: {@Project}", project);
+            try
+            {
+                var ids = itemIds.Select(x => (int)x).ToArray();
+                var dbItems = await context.Items
+                    .Where(x => ids.Contains(x.ID))
+                    .ToListAsync();
+                logger.LogDebug("Found items: {@DBItems}", dbItems);
+                var project = await context.Projects
+                    .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
+                    .FirstOrDefaultAsync();
+                logger.LogDebug("Found project: {@Project}", project);
 
-            var user = await context.Users
-                .Include(x => x.ConnectionInfo)
-                .ThenInclude(x => x.ConnectionType)
-                .ThenInclude(x => x.AppProperties)
-                .Include(x => x.ConnectionInfo)
-                .ThenInclude(x => x.ConnectionType)
-                .ThenInclude(x => x.AuthFieldNames)
-                .Include(x => x.ConnectionInfo)
-                .ThenInclude(x => x.AuthFieldValues)
-                .FirstOrDefaultAsync(x => x.ID == (int)userID);
-            logger.LogDebug("Found user: {@User}", user);
+                var user = await context.Users
+                    .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                    .ThenInclude(x => x.AppProperties)
+                    .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.ConnectionType)
+                    .ThenInclude(x => x.AuthFieldNames)
+                    .Include(x => x.ConnectionInfo)
+                    .ThenInclude(x => x.AuthFieldValues)
+                    .FirstOrDefaultAsync(x => x.ID == (int)userID);
+                logger.LogDebug("Found user: {@User}", user);
 
-            var scope = scopeFactory.CreateScope();
-            var connection =
-                connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
-            var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
-            logger.LogTrace("Mapped info: {@Info}", info);
-            var storage = await connection.GetStorage(info);
+                if (user == null)
+                    throw new ArgumentNullException($"User with key {userID} was not found");
 
-            var id = Guid.NewGuid().ToString();
-            Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
-            var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
-            var src = new CancellationTokenSource();
+                var scope = scopeFactory.CreateScope();
+                var connection =
+                    connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
+                var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
+                logger.LogTrace("Mapped info: {@Info}", info);
+                var storage = await connection.GetStorage(info);
 
-            var task = Task.Factory.StartNew(
-                async () =>
-                {
-                    try
+                var id = Guid.NewGuid().ToString();
+                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
+                var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+                var src = new CancellationTokenSource();
+
+                var task = Task.Factory.StartNew(
+                    async () =>
                     {
-                        logger.LogTrace("DownloadItems task started ({ID})", id);
-                        var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
-                        return new RequestResult(result);
-                    }
-                    finally
-                    {
-                        scope.Dispose();
-                    }
-                },
-                TaskCreationOptions.LongRunning);
-            requestQueue.AddRequest(id, task.Unwrap(), src);
+                        try
+                        {
+                            logger.LogTrace("DownloadItems task started ({ID})", id);
+                            var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
+                            return new RequestResult(result);
+                        }
+                        finally
+                        {
+                            scope.Dispose();
+                        }
+                    },
+                    TaskCreationOptions.LongRunning);
+                requestQueue.AddRequest(id, task.Unwrap(), src);
 
-            return new RequestID(id);
+                return new RequestID(id);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't download items {@ItemIds} with user key {UserID}", itemIds, userID);
+                throw;
+            }
         }
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with itemID: {@ItemID}", itemID);
-            var dbItem = await context.Items.FindAsync((int)itemID);
-            logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
-            return dbItem == null ? null : MapItemFromDB(dbItem);
+            try
+            {
+                var dbItem = await context.Items.FindAsync((int)itemID);
+                logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
+                if (dbItem == null)
+                    throw new ArgumentNullException($"Item with id {itemID} was not found");
+                return mapper.Map<ItemDto>(dbItem);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get item with key {ItemID}", itemID);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
             logger.LogTrace("GetItems started with projectID: {@ProjectID}", projectID);
-            var dbItems = (await context.Projects
-                   .Include(x => x.Items)
-                   .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
-             ?? Enumerable.Empty<Item>();
-            logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
-            return dbItems.Select(MapItemFromDB).ToList();
+            try
+            {
+                var dbProject = await context.Projects.FindAsync((int)projectID);
+                if (dbProject == null)
+                    throw new ArgumentNullException($"Project with id {projectID} was not found");
+
+                var dbItems = (await context.Projects
+                       .Include(x => x.Items)
+                       .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
+                 ?? Enumerable.Empty<Item>();
+                logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
+                return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't find items by project key {@ProjectID}", projectID);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetItems started with objectiveID: {@ObjectiveID}", objectiveID);
-            var dbItems = await context.ObjectiveItems
-                .Where(x => x.ObjectiveID == (int)objectiveID)
-                .Select(x => x.Item)
-                .ToListAsync();
-            logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
-            return dbItems.Select(MapItemFromDB).ToList();
+            try
+            {
+                var dbObjective = await context.Objectives.FindAsync((int)objectiveID);
+                if (dbObjective == null)
+                    throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
+
+                var dbItems = await context.ObjectiveItems
+                    .Where(x => x.ObjectiveID == (int)objectiveID)
+                    .Select(x => x.Item)
+                    .ToListAsync();
+                logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
+                return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't find items by objective key {@ObjectiveID}", objectiveID);
+                throw;
+            }
         }
 
         public async Task<bool> Update(ItemDto item)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with item: {@Item}", item);
-            var dbItem = await context.Items.FindAsync((int)item.ID);
-            logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
-            if (dbItem == null)
-                return false;
+            try
+            {
+                var dbItem = await context.Items.FindAsync((int)item.ID);
+                logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
+                if (dbItem == null)
+                    throw new ArgumentNullException($"Item {item} was not found");
 
-            dbItem.ItemType = (int)item.ItemType;
-            dbItem.RelativePath = item.RelativePath;
-            context.Items.Update(dbItem);
-            await context.SaveChangesAsync();
-            return true;
+                dbItem.ItemType = (int)item.ItemType;
+                dbItem.RelativePath = item.RelativePath;
+                context.Items.Update(dbItem);
+                await context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't update item {@Item}", item);
+                throw;
+            }
         }
-
-        private ItemDto MapItemFromDB(Item dbItem)
-            => mapper.Map<ItemDto>(dbItem);
     }
 }

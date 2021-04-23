@@ -20,6 +20,8 @@ namespace MRS.DocumentManagement.Api
 {
     public class Startup
     {
+        private static readonly string SWAGGER_DOCUMENT_ID = "document-management";
+
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
@@ -64,11 +66,11 @@ namespace MRS.DocumentManagement.Api
             services.AddSwaggerGen(c =>
             {
                 var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                c.SwaggerDoc("v1", new OpenApiInfo
+                c.SwaggerDoc(SWAGGER_DOCUMENT_ID, new OpenApiInfo
                 {
                     Version = assemblyName.Version?.ToString(),
                     Title = assemblyName.Name,
-                    Description = "DM API details",
+                    Description = "Documentation for DocumentManagement.API",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -85,10 +87,11 @@ namespace MRS.DocumentManagement.Api
         {
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+                c.SwaggerEndpoint($"/swagger/{SWAGGER_DOCUMENT_ID}/swagger.json", "DocumentManagement.API");
                 c.RoutePrefix = string.Empty;
             });
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -6,7 +7,7 @@ using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -18,7 +19,10 @@ namespace MRS.DocumentManagement.Services
         private readonly IMapper mapper;
         private readonly ILogger<ObjectiveTypeService> logger;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveTypeService> logger)
+        public ObjectiveTypeService(
+            DMContext context,
+            IMapper mapper,
+            ILogger<ObjectiveTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -32,18 +36,16 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Add started with typeName: {TypeName}", typeName);
             try
             {
-                var objType = new Database.Models.ObjectiveType
-                {
-                    Name = typeName,
-                };
+                // TODO: Unique type for name+external id pair
+                var objType = mapper.Map<ObjectiveType>(typeName);
                 await context.ObjectiveTypes.AddAsync(objType);
                 await context.SaveChangesAsync();
                 return (ID<ObjectiveTypeDto>)objType.ID;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
-                throw new InvalidDataException("Can't add new objective type", ex.InnerException);
+                throw;
             }
         }
 
@@ -51,34 +53,77 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with id: {ID}", id);
-            var dbObjective = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .FirstOrDefaultAsync(x => x.ID == (int)id);
-            logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
-            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
+
+            try
+            {
+                var dbObjective = await context.ObjectiveTypes
+                   .Include(x => x.DefaultDynamicFields)
+                   .FirstOrDefaultAsync(x => x.ID == (int)id);
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
+                if (dbObjective == null)
+                    throw new ArgumentNullException($"ObjectiveType with key {id} was not found");
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ObjectiveType {Id}", id);
+                throw;
+            }
         }
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Find started with typename: {Typename}", typename);
-            var dbObjective = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .FirstOrDefaultAsync(x => x.Name == typename);
-            logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
-            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
+
+            try
+            {
+                var dbObjective = await context.ObjectiveTypes
+                   .Include(x => x.DefaultDynamicFields)
+                   .FirstOrDefaultAsync(x => x.Name == typename);
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
+
+                if (dbObjective == null)
+                    throw new ArgumentNullException($"ObjectiveType with name {typename} was not found");
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ObjectiveType {Typename}", typename);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectiveTypes started with connection type id: {ID}", id);
-            var db = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .Where(x => x.ConnectionTypeID == Check((int)id))
-                .ToListAsync();
-            logger.LogDebug("Found objective types: {@ObjectiveTypes}", db);
-            return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+
+            try
+            {
+                int? connectionTypeId = (int)id == -1 ? (int?)null : (int)id;
+
+                if (connectionTypeId != null)
+                {
+                    var connectionType = await context.ConnectionTypes.FindAsync((int)connectionTypeId);
+                    if (connectionType == null)
+                        throw new ArgumentNullException($"ConnectionType with id {id} was not found");
+                }
+
+                var db = await context.ObjectiveTypes
+                   .Include(x => x.DefaultDynamicFields)
+                   .Where(x => x.ConnectionTypeID == connectionTypeId)
+                   .ToListAsync();
+                logger.LogDebug("Found objective types: {@ObjectiveTypes}", db);
+                return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of objective type from connection type {Id}", id);
+                throw;
+            }
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
@@ -90,18 +135,17 @@ namespace MRS.DocumentManagement.Services
                 var type = await context.ObjectiveTypes.FindAsync((int)id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", type);
                 if (type == null)
-                    return false;
+                    throw new ArgumentNullException($"ObjectiveType with id {id} was not found");
+
                 context.ObjectiveTypes.Remove(type);
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove objective type with key {ID}", id);
-                throw new InvalidDataException($"Can't remove objective type with key {id}", ex.InnerException);
+                throw;
             }
         }
-
-        private int? Check(int id) => id == -1 ? (int?)null : id;
     }
 }
