@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -15,9 +16,12 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<ObjectiveService> logger;
+        private readonly ILogger<ObjectiveTypeService> logger;
 
-        public ObjectiveTypeService(DMContext context, IMapper mapper, ILogger<ObjectiveService> logger)
+        public ObjectiveTypeService(
+            DMContext context,
+            IMapper mapper,
+            ILogger<ObjectiveTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -28,44 +32,83 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
-                var objType = new Database.Models.ObjectiveType
-                {
-                    Name = typeName,
-                };
+                // TODO: Unique type for name+external id pair
+                var objType = mapper.Map<ObjectiveType>(typeName);
                 context.ObjectiveTypes.Add(objType);
                 await context.SaveChangesAsync();
                 return (ID<ObjectiveTypeDto>)objType.ID;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
-                throw new InvalidDataException("Can't add new objective type", ex.InnerException);
+                throw;
             }
         }
 
         public async Task<ObjectiveTypeDto> Find(ID<ObjectiveTypeDto> id)
         {
-            var dbObjective = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .FirstOrDefaultAsync(x => x.ID == (int)id);
-            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
+            try
+            {
+                var dbObjective = await context.ObjectiveTypes
+                    .Include(x => x.DefaultDynamicFields)
+                    .FirstOrDefaultAsync(x => x.ID == (int)id);
+
+                if (dbObjective == null)
+                    throw new ArgumentNullException($"ObjectiveType with key {id} was not found");
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ObjectiveType {Id}", id);
+                throw;
+            }
         }
 
         public async Task<ObjectiveTypeDto> Find(string typename)
         {
-            var dbObjective = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .FirstOrDefaultAsync(x => x.Name == typename);
-            return dbObjective == null ? null : mapper.Map<ObjectiveTypeDto>(dbObjective);
+            try
+            {
+                var dbObjective = await context.ObjectiveTypes
+                    .Include(x => x.DefaultDynamicFields)
+                    .FirstOrDefaultAsync(x => x.Name == typename);
+
+                if (dbObjective == null)
+                    throw new ArgumentNullException($"ObjectiveType with name {typename} was not found");
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ObjectiveType {Typename}", typename);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
         {
-            var db = await context.ObjectiveTypes
-                .Include(x => x.DefaultDynamicFields)
-                .Where(x => x.ConnectionTypeID == Check((int)id))
-                .ToListAsync();
-            return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+            try
+            {
+                int? connectionTypeId = (int)id == -1 ? (int?)null : (int)id;
+
+                if (connectionTypeId != null)
+                {
+                    var connectionType = await context.ConnectionTypes.FindAsync((int)connectionTypeId);
+                    if (connectionType == null)
+                        throw new ArgumentNullException($"ConnectionType with id {id} was not found");
+                }
+
+                var db = await context.ObjectiveTypes
+                    .Include(x => x.DefaultDynamicFields)
+                    .Where(x => x.ConnectionTypeID == connectionTypeId)
+                    .ToListAsync();
+                return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of objective type from connection type {Id}", id);
+                throw;
+            }
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
@@ -74,18 +117,17 @@ namespace MRS.DocumentManagement.Services
             {
                 var type = await context.ObjectiveTypes.FindAsync((int)id);
                 if (type == null)
-                    return false;
+                    throw new ArgumentNullException($"ObjectiveType with id {id} was not found");
+
                 context.ObjectiveTypes.Remove(type);
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove objective type with key {ID}", id);
-                throw new InvalidDataException($"Can't remove objective type with key {id}", ex.InnerException);
+                throw;
             }
         }
-
-        private int? Check(int id) => id == -1 ? (int?)null : id;
     }
 }

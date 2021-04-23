@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -38,6 +37,9 @@ namespace MRS.DocumentManagement.Utility
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
             User user = await FindUserFromDb(userID);
+            if (user == null)
+                throw new ArgumentNullException($"User with key {userID} was not found");
+
             return await GetConnectionInfoFromDb(user);
         }
 
@@ -217,11 +219,11 @@ namespace MRS.DocumentManagement.Utility
 
             try
             {
-                status = await connection.Connect(connectionInfoExternalDto);
+                status = await connection.Connect(connectionInfoExternalDto, token);
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Can't connect with info {@ConnectionInfo}", connectionInfo);
+                logger.LogError(e, "Can't connect with info {@ConnectionInfoId}", connectionInfo.ID);
                 progress?.Report(1.0);
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }

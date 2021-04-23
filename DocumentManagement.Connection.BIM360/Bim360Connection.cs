@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
@@ -41,9 +42,9 @@ namespace MRS.DocumentManagement.Connection.Bim360
             GC.SuppressFinalize(this);
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
-            var authorizationResult = await authenticator.SignInAsync(info);
+            var authorizationResult = await authenticator.SignInAsync(info, token);
             return authorizationResult.authStatus;
         }
 
