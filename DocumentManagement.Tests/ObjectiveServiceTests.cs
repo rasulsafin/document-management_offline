@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Extensions;
@@ -12,6 +13,8 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -79,12 +82,21 @@ namespace MRS.DocumentManagement.Tests
             });
 
             IServiceCollection services = new ServiceCollection();
-            services.AddTransient<DynamicFieldModelToDtoValueResolver>(x => new DynamicFieldModelToDtoValueResolver(Fixture.Context, mapper));
+            services.AddTransient(
+                x => new DynamicFieldModelToDtoValueResolver(
+                    Fixture.Context,
+                    mapper,
+                    Mock.Of<ILogger<DynamicFieldModelToDtoValueResolver>>()));
             services.AddAutoMapper(typeof(MappingProfile));
             IServiceProvider serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
 
-            service = new ObjectiveService(Fixture.Context, mapper, new ItemHelper(), new DynamicFieldHelper(Fixture.Context, mapper));
+            service = new ObjectiveService(
+                Fixture.Context,
+                mapper,
+                new ItemHelper(Mock.Of<ILogger<ItemHelper>>()),
+                new DynamicFieldHelper(Fixture.Context, mapper, Mock.Of<ILogger<DynamicFieldHelper>>()),
+                Mock.Of<ILogger<ObjectiveService>>());
         }
 
         [TestCleanup]

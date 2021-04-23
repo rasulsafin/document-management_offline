@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -29,7 +30,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
             };
 
             // Authorize
-            var signInTask = connection.Connect(connectionInfo);
+            var signInTask = connection.Connect(connectionInfo, CancellationToken.None);
             signInTask.Wait();
             if (signInTask.Result.Status != RemoteConnectionStatus.OK)
             {

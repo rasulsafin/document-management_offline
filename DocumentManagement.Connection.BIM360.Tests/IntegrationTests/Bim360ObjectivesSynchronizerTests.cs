@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -57,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             if (connection == null)
                 throw new Exception();
 
-            await connection.Connect(connectionInfo);
+            await connection.Connect(connectionInfo, CancellationToken.None);
 
             var context = await connection.GetContext(connectionInfo);
             synchronizer = context.ObjectivesSynchronizer;

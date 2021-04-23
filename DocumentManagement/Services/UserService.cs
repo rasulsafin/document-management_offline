@@ -7,10 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -136,11 +138,8 @@ namespace MRS.DocumentManagement.Services
                 var dbUser = await context.Users
                     .Include(x => x.ConnectionInfo)
                         .ThenInclude(c => c.ConnectionType)
-                    .FirstOrDefaultAsync(x => x.ID == (int)userID);
+                    .FindOrThrowAsync(x => x.ID == (int)userID, (int)userID);
                 logger.LogDebug("Found user: {@User}", dbUser);
-
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
 
                 return mapper.Map<UserDto>(dbUser);
             }

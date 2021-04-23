@@ -10,6 +10,7 @@ using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -202,13 +203,6 @@ namespace MRS.DocumentManagement.Services
         }
 
         private async Task<int> CheckUser(ID<UserDto> userID)
-        {
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
-            if (user == null)
-                throw new ArgumentNullException($"User with key {userID} not found");
-
-            return id;
-        }
+            => (await context.Users.FindOrThrowAsync((int)userID)).ID;
     }
 }

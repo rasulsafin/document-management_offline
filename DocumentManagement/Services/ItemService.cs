@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -82,7 +83,7 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found user: {@User}", user);
 
                 if (user == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
+                    throw new NotFoundException<UserDto>(userID);
 
                 var scope = scopeFactory.CreateScope();
                 var connection =

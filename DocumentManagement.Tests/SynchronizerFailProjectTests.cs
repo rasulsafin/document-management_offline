@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Extensions;
@@ -13,7 +14,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -21,7 +22,6 @@ namespace MRS.DocumentManagement.Tests
     public class SynchronizerFailProjectTests
     {
         private static Synchronizer synchronizer;
-        private static IMapper mapper;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
@@ -36,12 +36,13 @@ namespace MRS.DocumentManagement.Tests
         [ClassInitialize]
         public static void ClassSetup(TestContext unused)
         {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            mapper = mapperConfig.CreateMapper();
-            synchronizer = new Synchronizer();
+            var services = new ServiceCollection();
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            var serviceProvider = services.BuildServiceProvider();
+            synchronizer = serviceProvider.GetService<Synchronizer>();
         }
 
         [TestInitialize]
@@ -147,11 +148,7 @@ namespace MRS.DocumentManagement.Tests
         private static async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
         {
             var result = await synchronizer.Synchronize(
-                new SynchronizingData
-                {
-                    Context = Fixture.Context,
-                    User = await Fixture.Context.Users.FirstAsync(),
-                },
+                new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() },
                 Connection.Object,
                 new ConnectionInfoExternalDto(),
                 new Progress<double>(),

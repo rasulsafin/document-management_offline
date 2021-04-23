@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -10,6 +11,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -43,7 +45,7 @@ namespace MRS.DocumentManagement.Tests
                 context.ObjectiveTypes.AddRange(types);
                 context.SaveChanges();
             });
-            service = new ObjectiveTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ObjectiveService>>());
+            service = new ObjectiveTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ObjectiveTypeService>>());
         }
 
         [TestCleanup]

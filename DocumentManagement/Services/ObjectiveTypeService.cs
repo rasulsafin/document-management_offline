@@ -58,10 +58,8 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .FirstOrDefaultAsync(x => x.ID == (int)id);
+                   .firstOr(x => x.ID == (int)id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
-                if (dbObjective == null)
-                    throw new ArgumentNullException($"ObjectiveType with key {id} was not found");
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }

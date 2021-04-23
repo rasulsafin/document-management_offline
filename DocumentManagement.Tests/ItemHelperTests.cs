@@ -2,12 +2,15 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -23,7 +26,7 @@ namespace MRS.DocumentManagement.Tests
         [TestInitialize]
         public void Setup()
         {
-            helper = new ItemHelper();
+            helper = new ItemHelper(Mock.Of<ILogger<ItemHelper>>());
             comparer = new ItemComparer();
             var mapperConfig = new MapperConfiguration(mc => mc.AddProfile(new MappingProfile()));
             mapper = mapperConfig.CreateMapper();

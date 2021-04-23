@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Extensions;
@@ -16,6 +17,7 @@ using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -52,15 +54,13 @@ namespace MRS.DocumentManagement.Tests
                     context.SaveChanges();
                 });
 
-            IServiceCollection services = new ServiceCollection();
-            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
-            services.AddTransient(x => new ItemFullPathResolver(Fixture.Context));
-            services.AddTransient(x => new ItemFileNameResolver());
-            services.AddTransient(x => new ItemExternalDtoRelativePathResolver());
+            var services = new ServiceCollection();
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
             services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            mapper = serviceProvider.GetService<IMapper>();
-            synchronizer = new Synchronizer();
+            var serviceProvider = services.BuildServiceProvider();
+            synchronizer = serviceProvider.GetService<Synchronizer>();
 
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
@@ -472,6 +472,27 @@ namespace MRS.DocumentManagement.Tests
             Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
         }
 
+        private static async
+            Task<(Project local, Project synchronized, ICollection<SynchronizingResult> synchronizationResult)>
+            GetProjectsAfterSynchronize(bool ignoreObjectives = false)
+        {
+            var data = new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() };
+
+            if (ignoreObjectives)
+                data.ObjectivesFilter = x => false;
+
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
+            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
+            return (local, synchronized, synchronizationResult);
+        }
+
         private void CheckProjects(Project a, Project b, bool checkIDs = true)
         {
             Assert.AreEqual(a.Title, b.Title);
@@ -501,32 +522,6 @@ namespace MRS.DocumentManagement.Tests
 
         private void CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall call, Times times = default)
             => SynchronizerTestsHelper.CheckSynchronizerCalls(ProjectSynchronizer, call, times);
-
-        private static async
-            Task<(Project local, Project synchronized, ICollection<SynchronizingResult> synchronizationResult)>
-            GetProjectsAfterSynchronize(bool ignoreObjectives = false)
-        {
-            var data = new SynchronizingData
-            {
-                Context = Fixture.Context,
-                User = await Fixture.Context.Users.FirstAsync(),
-                Mapper = mapper,
-            };
-
-            if (ignoreObjectives)
-                data.ObjectivesFilter = x => false;
-
-            var synchronizationResult = await synchronizer.Synchronize(
-                data,
-                Connection.Object,
-                new ConnectionInfoExternalDto(),
-                new Progress<double>(),
-                new CancellationTokenSource().Token);
-
-            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
-            return (local, synchronized, synchronizationResult);
-        }
 
         private void MockRemoteProjects(IReadOnlyCollection<ProjectExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(ProjectSynchronizer, array, x => x.ExternalID);
