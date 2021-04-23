@@ -4,14 +4,12 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Api;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
-namespace DocumentManagement.Api.Controllers
+namespace MRS.DocumentManagement.Api.Controllers
 {
     /// <summary>
     /// Controller for managing Objective Types.
