@@ -27,6 +27,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		CHANGELOG.md = CHANGELOG.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive", "DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
