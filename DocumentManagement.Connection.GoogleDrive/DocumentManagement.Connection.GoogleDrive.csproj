@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>MRS.DocumentManagement.Connection.GoogleDrive</RootNamespace>
+    <Authors>Brio MRS</Authors>
+    <Product>Brio MRS Connection</Product>
+    <Company>Brio MRS©</Company>
   </PropertyGroup>
 
   <ItemGroup>
