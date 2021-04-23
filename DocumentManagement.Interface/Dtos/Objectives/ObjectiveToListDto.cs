@@ -13,5 +13,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public ObjectiveTypeDto ObjectiveType { get; set; }
 
         public IEnumerable<BimElementDto> BimElements { get; set; }
+
+        public LocationDto Location { get; set; }
     }
 }

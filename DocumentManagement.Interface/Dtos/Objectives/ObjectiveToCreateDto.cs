@@ -25,6 +25,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ObjectiveStatus Status { get; set; }
 
+        public LocationDto Location { get; set; }
+
         [Required(ErrorMessage = "ValidationError_IdIsRequired")]
         public ID<ObjectiveTypeDto> ObjectiveTypeID { get; set; }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
@@ -7,6 +8,8 @@ namespace MRS.DocumentManagement.Utility
 {
     public class MappingProfile : Profile
     {
+        private static readonly char SEPARATOR = ';';
+
         public MappingProfile()
         {
             CreateMapToDto();
@@ -48,6 +51,10 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.ID, o => o.MapFrom(s => new ID<DynamicFieldDto>()))
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
                 .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
+
+            CreateMap<Location, LocationDto>()
+                .ForMember(d => d.Position, o => o.MapFrom(s => Array.ConvertAll(s.Position.Split(SEPARATOR, StringSplitOptions.RemoveEmptyEntries), float.Parse)))
+                .ForMember(d => d.CameraPosition, o => o.MapFrom(s => Array.ConvertAll(s.CameraPosition.Split(SEPARATOR, StringSplitOptions.RemoveEmptyEntries), float.Parse)));
         }
 
         private void CreateObjectiveMapToDto()
@@ -107,6 +114,10 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<DynamicFieldDto, DynamicFieldInfo>()
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
+
+            CreateMap<LocationDto, Location>()
+                .ForMember(d => d.Position, o => o.MapFrom(s => string.Join(SEPARATOR, s.Position)))
+                .ForMember(d => d.CameraPosition, o => o.MapFrom(s => string.Join(SEPARATOR, s.CameraPosition)));
         }
 
         private void CreateObjectiveMapToModel()

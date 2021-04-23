@@ -53,7 +53,7 @@ namespace MRS.DocumentManagement.Utility
                              TextElement(objective.CreationDate.ToShortDateString())),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Позиция: ", true),
-                             TextElement(DEFAULT)),
+                             TextElement(objective.Location.Position.ToString())),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Объект модели: ", true),
                              TextElement(bimElementsText)),

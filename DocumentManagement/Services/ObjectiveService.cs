@@ -337,6 +337,7 @@ namespace MRS.DocumentManagement.Services
                .Include(x => x.Project)
                .Include(x => x.Author)
                .Include(x => x.ObjectiveType)
+               .Include(x => x.Location)
                .Include(x => x.DynamicFields)
                     .ThenInclude(x => x.ChildrenDynamicFields)
                .Include(x => x.Items)
