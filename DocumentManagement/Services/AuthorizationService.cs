@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -29,10 +30,14 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
             cryptographyHelper = helper;
             this.logger = logger;
+            logger.LogTrace("AuthorizationService created");
         }
 
         public async Task<bool> AddRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("AddRole started with userID = {UserID}, role = {Role}", userID, role);
+
             try
             {
                 var id = await CheckUser(userID);
@@ -41,6 +46,9 @@ namespace MRS.DocumentManagement.Services
                     throw new ArgumentException($"User with key {userID} already has role {role}");
 
                 var storedRole = await context.Roles.FirstOrDefaultAsync(x => x.Name == role);
+
+                logger.LogDebug("Find stored role {@StoredRole}", storedRole);
+
                 if (storedRole == null)
                 {
                     storedRole = new Database.Models.Role() { Name = role };
@@ -49,7 +57,8 @@ namespace MRS.DocumentManagement.Services
                 }
 
                 var userRoleLink = new Database.Models.UserRole() { RoleID = storedRole.ID, UserID = id };
-                context.UserRoles.Add(userRoleLink);
+                logger.LogDebug("Created user <-> role link: {@UserRoleLink}", userRoleLink);
+                await context.UserRoles.AddAsync(userRoleLink);
                 await context.SaveChangesAsync();
                 return true;
             }
@@ -62,10 +71,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<string>> GetAllRoles()
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetAllRoles started");
+
             try
             {
-                var dbRoles = await context.Roles.ToListAsync();
-                return dbRoles.Select(x => x.Name).ToList();
+                return await context.Roles.Select(x => x.Name).ToListAsync();
             }
             catch (Exception e)
             {
@@ -76,6 +87,9 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<string>> GetUserRoles(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetUserRoles started with userID: {UserID}", userID);
+
             try
             {
                 var id = await CheckUser(userID);
@@ -95,6 +109,9 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> IsInRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("IsInRole started with userID = {UserID}, role = {Role}", userID, role);
+
             try
             {
                 var id = await CheckUser(userID);
@@ -113,6 +130,9 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> RemoveRole(ID<UserDto> userID, string role)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("RemoveRole started with userID = {UserID}, role = {Role}", userID, role);
+
             try
             {
                 var id = await CheckUser(userID);
@@ -121,6 +141,7 @@ namespace MRS.DocumentManagement.Services
                     .Where(x => x.Role.Name == role)
                     .Where(x => x.UserID == id)
                     .ToListAsync();
+                logger.LogDebug("Found links: {@Links}", links);
                 if (!links.Any())
                     throw new ArgumentException($"User with key {userID} do not have role {role}");
 
@@ -131,6 +152,8 @@ namespace MRS.DocumentManagement.Services
                     .Include(x => x.Users)
                     .Where(x => !x.Users.Any())
                     .ToListAsync();
+                logger.LogDebug("Found orphanRoles: {@OrphanRoles}", orphanRoles);
+
                 if (orphanRoles.Any())
                 {
                     context.Roles.RemoveRange(orphanRoles);
@@ -148,11 +171,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ValidatedUserDto> Login(string username, string password)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Login started for {UserName}", username);
+
             try
             {
                 var dbUser = await context.Users.Include(x => x.ConnectionInfo)
                     .ThenInclude(x => x.ConnectionType)
                     .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+                logger.LogDebug("Found user: {@DbUser}", dbUser);
                 if (dbUser == null)
                     throw new ArgumentNullException($"User with name {username} not found");
 
@@ -163,6 +190,7 @@ namespace MRS.DocumentManagement.Services
 
                 if (dbUser.Roles != null && dbUser.Roles.Count > 0)
                     dtoUser.Role = new RoleDto { Name = dbUser.Roles.First().Role.Name, User = dtoUser };
+                logger.LogDebug("User DTO: {@DtoUser}", dtoUser);
 
                 return new ValidatedUserDto { User = dtoUser, IsValidationSuccessful = true };
             }

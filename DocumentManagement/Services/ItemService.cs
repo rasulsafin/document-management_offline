@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -40,26 +41,33 @@ namespace MRS.DocumentManagement.Services
             this.requestQueue = requestQueue;
             this.scopeFactory = scopeFactory;
             this.logger = logger;
+            logger.LogTrace("ItemService created");
         }
 
         public Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("DeleteItems started with itemIds: {@ItemIds}", itemIds);
+
             // TODO: Delete Items from Remote Connection
             throw new NotImplementedException();
         }
 
         public async Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("DownloadItems started for user {@UserID} with itemIds: {@ItemIds}", userID, itemIds);
             try
             {
                 var ids = itemIds.Select(x => (int)x).ToArray();
                 var dbItems = await context.Items
                     .Where(x => ids.Contains(x.ID))
                     .ToListAsync();
-                var mapped = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+                logger.LogDebug("Found items: {@DBItems}", dbItems);
                 var project = await context.Projects
                     .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
                     .FirstOrDefaultAsync();
+                logger.LogDebug("Found project: {@Project}", project);
 
                 var user = await context.Users
                     .Include(x => x.ConnectionInfo)
@@ -71,6 +79,7 @@ namespace MRS.DocumentManagement.Services
                     .Include(x => x.ConnectionInfo)
                     .ThenInclude(x => x.AuthFieldValues)
                     .FirstOrDefaultAsync(x => x.ID == (int)userID);
+                logger.LogDebug("Found user: {@User}", user);
 
                 if (user == null)
                     throw new ArgumentNullException($"User with key {userID} was not found");
@@ -79,6 +88,7 @@ namespace MRS.DocumentManagement.Services
                 var connection =
                     connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
                 var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
+                logger.LogTrace("Mapped info: {@Info}", info);
                 var storage = await connection.GetStorage(info);
 
                 var id = Guid.NewGuid().ToString();
@@ -91,6 +101,7 @@ namespace MRS.DocumentManagement.Services
                     {
                         try
                         {
+                            logger.LogTrace("DownloadItems task started ({ID})", id);
                             var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
                             return new RequestResult(result);
                         }
@@ -113,9 +124,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ItemDto> Find(ID<ItemDto> itemID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Find started with itemID: {@ItemID}", itemID);
             try
             {
                 var dbItem = await context.Items.FindAsync((int)itemID);
+                logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
                 if (dbItem == null)
                     throw new ArgumentNullException($"Item with id {itemID} was not found");
                 return mapper.Map<ItemDto>(dbItem);
@@ -129,6 +143,7 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID)
         {
+            logger.LogTrace("GetItems started with projectID: {@ProjectID}", projectID);
             try
             {
                 var dbProject = await context.Projects.FindAsync((int)projectID);
@@ -139,6 +154,7 @@ namespace MRS.DocumentManagement.Services
                        .Include(x => x.Items)
                        .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
                  ?? Enumerable.Empty<Item>();
+                logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
                 return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
             }
             catch (Exception e)
@@ -150,6 +166,8 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetItems started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
                 var dbObjective = await context.Objectives.FindAsync((int)objectiveID);
@@ -160,6 +178,7 @@ namespace MRS.DocumentManagement.Services
                     .Where(x => x.ObjectiveID == (int)objectiveID)
                     .Select(x => x.Item)
                     .ToListAsync();
+                logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
                 return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
             }
             catch (Exception e)
@@ -171,9 +190,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ItemDto item)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Update started with item: {@Item}", item);
             try
             {
                 var dbItem = await context.Items.FindAsync((int)item.ID);
+                logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
                 if (dbItem == null)
                     throw new ArgumentNullException($"Item {item} was not found");
 
