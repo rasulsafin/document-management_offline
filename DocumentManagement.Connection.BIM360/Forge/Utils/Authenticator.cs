@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
@@ -128,22 +129,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             GC.SuppressFinalize(this);
         }
 
-        public async Task CheckAccessAsync(bool mustUpdate = false)
+        public async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
         {
             sentTime = DateTime.UtcNow;
             if (!IsLogged || mustUpdate)
             {
                 //if (string.IsNullOrEmpty(AccessToken))
-                    await ThreeLeggedAsync();
+                    await ThreeLeggedAsync(token);
                 //else
                 //    await RefreshConnectionAsync();
             }
         }
 
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto connectionInfo)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto connectionInfo, CancellationToken token = default)
         {
             connectionInfoDto = connectionInfo;
-            await CheckAccessAsync(true);
+            await CheckAccessAsync(token, true);
 
             // TODO Add filling connection status depending on 'status' field
             var result = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
@@ -153,7 +154,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public void Cancel()
         {
-            httpListener?.Abort();
+            httpListener.Abort();
             httpListener = null;
         }
 
@@ -171,10 +172,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             }
         }
 
-        internal async Task ThreeLeggedAsync()
+        internal async Task ThreeLeggedAsync(CancellationToken token)
         {
             try
             {
+                token.ThrowIfCancellationRequested();
+
                 if (!await WebFeatures.RemoteUrlExistsAsync(Resources.AutodeskUrl))
                     throw new Exception("Failed to ping the server");
                 Task<HttpListenerContext> getting = null;
@@ -186,17 +189,32 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                     httpListener.Prefixes.Add(AppCallBackUrl/*.Replace("localhost", "+") + "/"*/);
                     logger.LogInformation("Open browser");
                     httpListener.Start();
+                    token.ThrowIfCancellationRequested();
                     getting = httpListener.GetContextAsync();
                 }
+
+                token.ThrowIfCancellationRequested();
 
                 var oAuthUri = service.GetAuthorizationUri(AppClientId, AppCallBackUrl);
                 Process.Start(new ProcessStartInfo(oAuthUri) { UseShellExecute = true });
 
+                token.ThrowIfCancellationRequested();
+
                 if (getting != null)
                 {
-                    await getting;
+                    while (!getting.IsCompleted)
+                    {
+                        await Task.Delay(1000, token);
+                        token.ThrowIfCancellationRequested();
+                    }
+
                     await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                Cancel();
+                throw;
             }
             catch (Exception)
             {

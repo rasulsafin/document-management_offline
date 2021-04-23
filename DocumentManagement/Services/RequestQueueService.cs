@@ -4,8 +4,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility;
 
-namespace MRS.DocumentManagement.Utility
+namespace MRS.DocumentManagement.Services
 {
     public class RequestQueueService : IRequestQueueService, IRequestService
     {
@@ -20,7 +21,7 @@ namespace MRS.DocumentManagement.Utility
                 return Task.FromResult(result);
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public Task Cancel(string id)
@@ -32,7 +33,7 @@ namespace MRS.DocumentManagement.Utility
                 return Task.CompletedTask;
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public Task<RequestResult> GetResult(string id)
@@ -47,12 +48,11 @@ namespace MRS.DocumentManagement.Utility
                 }
                 else
                 {
-                    // TODO: throw exception
-                    return null;
+                    throw new InvalidOperationException($"The job {id} is not finished yet");
                 }
             }
 
-            throw new ArgumentException($"The job {id} doesn't exist");
+            throw new ArgumentNullException($"The job {id} doesn't exist");
         }
 
         public void AddRequest(string id, Task<RequestResult> task, CancellationTokenSource src)

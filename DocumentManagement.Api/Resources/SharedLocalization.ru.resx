@@ -117,16 +117,109 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="CheckValidConnectionTypeID_Missing" xml:space="preserve">
+    <value>Не удалось найти тип подключения</value>
+  </data>
+  <data name="CheckValidConnectionTypeToCreate_AlreadyExists" xml:space="preserve">
+    <value>Имя уже используется другим типом подключения</value>
+  </data>
   <data name="CheckValidID_DefaultErrorMessage" xml:space="preserve">
     <value>Недействительный ID</value>
   </data>
+  <data name="CheckValidItemID_Missing" xml:space="preserve">
+    <value>Не удалось найти файл</value>
+  </data>
+  <data name="CheckValidJobId_Missing" xml:space="preserve">
+    <value>Не удалось найти запрашиваемую задачу</value>
+  </data>
+  <data name="CheckValidObjectiveID_Missing" xml:space="preserve">
+    <value>Не удалось найти задачу</value>
+  </data>
+  <data name="CheckValidObjectiveTypeID_Missing" xml:space="preserve">
+    <value>Не удалось найти тип задачи</value>
+  </data>
+  <data name="CheckValidProjectID_Missing" xml:space="preserve">
+    <value>Не удалось найти проект</value>
+  </data>
+  <data name="CheckValidUserID_Missing" xml:space="preserve">
+    <value>Не удалось найти пользователя</value>
+  </data>
+  <data name="CheckValidUserToCreate_AlreadyExists" xml:space="preserve">
+    <value>Логин уже используется другим пользователем</value>
+  </data>
+  <data name="CouldNotConnect" xml:space="preserve">
+    <value>Не удалось подключиться</value>
+  </data>
+  <data name="CouldNotDownload" xml:space="preserve">
+    <value>Не удалось загрузить файлы</value>
+  </data>
+  <data name="CouldNotSynchronize" xml:space="preserve">
+    <value>Синхронизация не удалась</value>
+  </data>
   <data name="FailedToCreateReport" xml:space="preserve">
     <value>Не удалось создать отчет</value>
+  </data>
+  <data name="JobIsUnfinished" xml:space="preserve">
+    <value>Задача еще не завершена</value>
+  </data>
+  <data name="MethodIsNotImplemented" xml:space="preserve">
+    <value>Отсутсутствует реализация метода</value>
+  </data>
+  <data name="ServerError" xml:space="preserve">
+    <value>Ошибка сервера</value>
+  </data>
+  <data name="ServerError_Add" xml:space="preserve">
+    <value>Не удалось добавить данные в таблицу</value>
+  </data>
+  <data name="ServerError_Delete" xml:space="preserve">
+    <value>Не удалось удалить данные из таблицы</value>
+  </data>
+  <data name="ServerError_Get" xml:space="preserve">
+    <value>Не удалось получить данные с сервера</value>
+  </data>
+  <data name="ServerError_Put" xml:space="preserve">
+    <value>Не удалось обновить данные</value>
+  </data>
+  <data name="SomethingIsMissing" xml:space="preserve">
+    <value>Не удалось найти объект</value>
+  </data>
+  <data name="UserHasNoRoleAlready" xml:space="preserve">
+    <value>У пользователя уже нет данной роли</value>
+  </data>
+  <data name="UserHasRoleAlready" xml:space="preserve">
+    <value>Пользователю уже присвоена данная роль</value>
+  </data>
+  <data name="ValidationError_IdIsRequired" xml:space="preserve">
+    <value>Ключ не может быть пустым</value>
+  </data>
+  <data name="ValidationError_JobIdRequired" xml:space="preserve">
+    <value>Идентификатор задачи не может быть пустым</value>
+  </data>
+  <data name="ValidationError_LoginIsRequired" xml:space="preserve">
+    <value>Логин не должен быть пустым</value>
+  </data>
+  <data name="ValidationError_ObjectiveNameIsRequired" xml:space="preserve">
+    <value>Имя задачи не должно быть пустым</value>
+  </data>
+  <data name="ValidationError_ObjectiveTypeNameIsRequired" xml:space="preserve">
+    <value>Имя типа не должно быть пустым</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Add" xml:space="preserve">
+    <value>Нельзя добавлять пустые объекты</value>
+  </data>
+  <data name="ValidationError_ObjectRequired_Put" xml:space="preserve">
+    <value>Нельзя обновлять пустые объекты</value>
+  </data>
+  <data name="ValidationError_PasswordIsRequired" xml:space="preserve">
+    <value>Пaроль не должен быть пустым</value>
   </data>
   <data name="ValidationError_PathIsRequired" xml:space="preserve">
     <value>Путь не должен быть пустым</value>
   </data>
   <data name="ValidationError_ProjectNameIsRequired" xml:space="preserve">
-    <value>Требуется название проекта</value>
+    <value>Название проекта не должно быть пустым</value>
+  </data>
+  <data name="WrongPassword" xml:space="preserve">
+    <value>Неправильный пароль</value>
   </data>
 </root>
