@@ -17,7 +17,10 @@ namespace MRS.DocumentManagement.Services
         private readonly ILogger<RequestQueueService> logger;
 
         public RequestQueueService(ILogger<RequestQueueService> logger)
-            => this.logger = logger;
+        {
+            this.logger = logger;
+            logger.LogTrace("RequestQueueService created");
+        }
 
         public Task<double> GetProgress(string id)
         {

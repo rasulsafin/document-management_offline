@@ -202,6 +202,5 @@ namespace MRS.DocumentManagement.Utility.Mapping
             var name = s.ConnectionInfo?.ConnectionType?.Name;
             return name;
         }
-
     }
 }

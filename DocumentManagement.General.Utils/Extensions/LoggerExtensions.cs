@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
-namespace DocumentManagement.General.Utils.Extensions
+namespace MRS.DocumentManagement.General.Utils.Extensions
 {
     public static class LoggerExtensions
     {

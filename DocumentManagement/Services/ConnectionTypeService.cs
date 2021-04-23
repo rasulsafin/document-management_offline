@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -109,7 +109,7 @@ namespace MRS.DocumentManagement.Services
                     .Include(x => x.AppProperties)
                     .Include(x => x.AuthFieldNames)
                     .ToListAsync();
-            logger.LogDebug("Found connection types : {@DBList}", dbList);
+                logger.LogDebug("Found connection types : {@DBList}", dbList);
                 return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
             }
             catch (Exception e)

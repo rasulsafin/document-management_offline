@@ -65,6 +65,7 @@ namespace MRS.DocumentManagement.Utility
                 dbItem,
                 itemParentType,
                 parentId);
+
             // Check if item exists
             if (dbItem == null)
                 return true;

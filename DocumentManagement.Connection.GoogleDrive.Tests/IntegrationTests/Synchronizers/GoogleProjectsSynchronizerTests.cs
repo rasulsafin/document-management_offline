@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Connection.GoogleDrive;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
+namespace MRS.DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class GoogleProjectsSynchronizerTests

@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
-using DocumentManagement.General.Utils.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -139,9 +139,9 @@ namespace MRS.DocumentManagement.Services
                    .Unsynchronized()
                    .ToListAsync();
 
-            logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
+                logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
                 var userProjects = dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
-            logger.LogDebug("Mapped projects: {@UserProjects}", userProjects);
+                logger.LogDebug("Mapped projects: {@UserProjects}", userProjects);
                 return userProjects;
             }
             catch (Exception e)
