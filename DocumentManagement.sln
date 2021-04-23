@@ -27,6 +27,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
+		CHANGELOG.md = CHANGELOG.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive", "DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
@@ -63,6 +64,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk.Tests", "DocumentManagement.Connection.YandexDisk.Tests\DocumentManagement.Connection.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive.Tests", "DocumentManagement.Connection.GoogleDrive.Tests\DocumentManagement.Connection.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{E28CAD4D-55E4-4BBB-98C2-EB919C69407D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.General.Utils", "DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj", "{B7C9A573-FADD-488C-BBA3-B24AE3787C52}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Launcher", "DocumentManagement.Launcher\DocumentManagement.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
@@ -152,6 +157,10 @@ Global
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -175,6 +184,9 @@ Global
 		{B0800032-F53B-4CC8-A07F-45829DCB5C48} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
 		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{F5838427-97CC-44DA-8075-49A8C7480065} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
+		{96C11611-4EE7-46CD-96AC-C07FBD1B85AC} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
+		{B7C9A573-FADD-488C-BBA3-B24AE3787C52} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}

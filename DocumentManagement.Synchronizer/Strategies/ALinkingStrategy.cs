@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
@@ -15,23 +16,14 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
     internal abstract class ALinkingStrategy<TDB, TDto> : ASynchronizationStrategy<TDB, TDto>
         where TDB : class, ISynchronizable<TDB>, new()
     {
-        private readonly LinkingFunc link;
-        private readonly LinkingFunc update;
-        private readonly LinkingFunc unlink;
+        private readonly ILinker<TDB> linker;
 
         protected ALinkingStrategy(
+            DMContext context,
             IMapper mapper,
-            LinkingFunc link,
-            LinkingFunc update,
-            LinkingFunc unlink)
-            : base(mapper, false)
-        {
-            this.link = link;
-            this.update = update;
-            this.unlink = unlink;
-        }
-
-        public delegate Task LinkingFunc(DMContext context, TDB item, object parent, EntityType entityType);
+            ILinker<TDB> linker)
+            : base(context, mapper, false)
+            => this.linker = linker;
 
         protected abstract override DbSet<TDB> GetDBSet(DMContext context);
 
@@ -51,8 +43,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
-                await link(data.Context, tuple.Local, parent, EntityType.Local);
-                await link(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                await linker.Link(context, tuple.Local, parent, EntityType.Local);
+                await linker.Link(context, tuple.Synchronized, parent, EntityType.Synchronized);
                 return null;
             }
             catch (Exception e)
@@ -76,8 +68,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 tuple.Merge();
-                await link(data.Context, tuple.Remote, parent, EntityType.Remote);
-                await link(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                await linker.Link(context, tuple.Remote, parent, EntityType.Remote);
+                await linker.Link(context, tuple.Synchronized, parent, EntityType.Synchronized);
                 return null;
             }
             catch (Exception e)
@@ -102,11 +94,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 if (tuple.LocalChanged)
-                    await update(data.Context, tuple.Local, parent, EntityType.Local);
+                    await linker.Update(context, tuple.Local, parent, EntityType.Local);
                 if (tuple.SynchronizedChanged)
-                    await update(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                    await linker.Update(context, tuple.Synchronized, parent, EntityType.Synchronized);
                 if (tuple.RemoteChanged)
-                    await update(data.Context, tuple.Remote, parent, EntityType.Remote);
+                    await linker.Update(context, tuple.Remote, parent, EntityType.Remote);
                 return null;
             }
             catch (Exception e)
@@ -130,9 +122,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 if (tuple.Remote != null)
-                    await unlink(data.Context, tuple.Remote, parent, EntityType.Remote);
+                    await linker.Unlink(context, tuple.Remote, parent, EntityType.Remote);
                 if (tuple.Synchronized != null)
-                    await unlink(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                    await linker.Unlink(context, tuple.Synchronized, parent, EntityType.Synchronized);
                 return null;
             }
             catch (Exception e)
@@ -156,9 +148,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             try
             {
                 if (tuple.Local != null)
-                    await unlink(data.Context, tuple.Local, parent, EntityType.Local);
+                    await linker.Unlink(context, tuple.Local, parent, EntityType.Local);
                 if (tuple.Synchronized != null)
-                    await unlink(data.Context, tuple.Synchronized, parent, EntityType.Synchronized);
+                    await linker.Unlink(context, tuple.Synchronized, parent, EntityType.Synchronized);
                 return null;
             }
             catch (Exception e)

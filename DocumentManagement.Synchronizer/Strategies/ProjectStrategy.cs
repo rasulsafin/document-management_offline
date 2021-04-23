@@ -13,17 +13,17 @@ using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Synchronization.Utils;
+using MRS.DocumentManagement.Synchronization.Utils.Linkers;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
     {
-        private readonly ItemStrategy itemStrategy;
+        private readonly ItemStrategy<ProjectItemLinker> itemStrategy;
 
-        public ProjectStrategy(IMapper mapper)
-            : base(mapper)
-            => itemStrategy = new ItemStrategy(mapper, Link, Unlink);
+        public ProjectStrategy(DMContext context, IMapper mapper, ItemStrategy<ProjectItemLinker> itemStrategy)
+            : base(context, mapper)
+            => this.itemStrategy = itemStrategy;
 
         protected override DbSet<Project> GetDBSet(DMContext context)
             => context.Projects;
@@ -124,7 +124,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -198,7 +198,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         }
 
         private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
-            => ItemStrategy.UpdateExternalIDs(
+            => ItemStrategy<ProjectItemLinker>.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
                     tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
                 tuple.Remote.Items ?? ArraySegment<Item>.Empty);
@@ -222,28 +222,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             AddUserLocal(tuple.Local);
             AddUserLocal(tuple.Synchronized);
-        }
-
-        private Task Link(DMContext context, Item item, object parent, EntityType entityType)
-        {
-            var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
-            project.Items ??= new List<Item>();
-            project.Items.Add(item);
-            return Task.CompletedTask;
-        }
-
-        private Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
-        {
-            var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
-            item.ProjectID = null;
-
-            if (entityType == EntityType.Remote)
-                project.Items.Remove(item);
-            else if (item.Objectives?.Count == 0)
-                context.Items.Remove(item);
-            else
-                context.Items.Update(item);
-            return Task.CompletedTask;
         }
     }
 }

@@ -6,9 +6,12 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
+using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
+using MRS.DocumentManagement.Utility.Mapping.Converters;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -36,6 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<CryptographyHelper>();
 
             services.AddFactories();
+            services.AddSynchronizer();
             services.AddExternal();
             return services;
         }
@@ -49,11 +53,11 @@ namespace Microsoft.Extensions.DependencyInjection
                 x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
             services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
 
-            services.AddScoped<IFactory<IServiceScope, SynchronizingData>, SynchronizationDataFactory>();
             services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
 
             services.AddScopedFactory<DMContext>();
             services.AddScopedFactory<IMapper>();
+            services.AddScopedFactory<Synchronizer>();
             return services;
         }
 

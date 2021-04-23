@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
 using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.YandexDisk.Tests.TestsToInitialize
+namespace MRS.DocumentManagement.Connection.YandexDisk.Tests.TestsToInitialize
 {
     /// <summary>
     /// Uncomment and run this tests to initialize standard project to test at the remote DM.
