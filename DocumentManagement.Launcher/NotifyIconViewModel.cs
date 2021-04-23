@@ -15,11 +15,15 @@ namespace MRS.DocumentManagement.Launcher
         private Process dmProcess;
         private bool isConsoleVisible = false;
         private Process notepadProcess;
+        private bool isSwaggerVisuble;
+        private bool isSettingsFileVisuble;
         #endregion
 
         #region constructor
         public NotifyIconViewModel()
         {
+            IsSwaggerVisuble = App.Develop;
+            IsSettingsFileVisuble = App.Develop;
             ToggleConsoleCommand = new RelayCommand(ToggleConsoleVisibility);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
@@ -41,6 +45,18 @@ namespace MRS.DocumentManagement.Launcher
         {
             get => isConsoleVisible;
             set => SetProperty(ref isConsoleVisible, value);
+        }
+
+        public bool IsSwaggerVisuble
+        {
+            get => isSwaggerVisuble;
+            set => SetProperty(ref isSwaggerVisuble, value);
+        }
+
+        public bool IsSettingsFileVisuble
+        {
+            get => isSettingsFileVisuble;
+            set => SetProperty(ref isSettingsFileVisuble, value);
         }
 
         public RelayCommand ExitApplicationCommand { get; }
@@ -109,7 +125,7 @@ namespace MRS.DocumentManagement.Launcher
             string path = LauncherSettings.DMExecutablePath;
             if (!File.Exists(path))
             {
-                MessageBox.Show($"Файл не найден!\n{path}");
+                MessageBox.Show(string.Format(Properties.Resources.MessageFormat_File_not_found, path));
                 return;
             }
 
@@ -139,7 +155,7 @@ namespace MRS.DocumentManagement.Launcher
         {
             if (dmProcess == null)
             {
-                MessageBox.Show($"Необходимо указать путь к 'DocumentManagement.Api.exe'!");
+                MessageBox.Show(Properties.Resources.Message_Path_not_found);
                 OpenSettings();
                 return;
             }

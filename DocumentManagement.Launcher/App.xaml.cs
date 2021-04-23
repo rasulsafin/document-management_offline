@@ -10,13 +10,30 @@ namespace MRS.DocumentManagement.Launcher
     /// </summary>
     public partial class App : Application, IDisposable
     {
+        private const string DEVELOP = "--develop";
+        private const string LOCALIZATE = "language=";
         private TaskbarIcon notifyIcon;
         private Mutex mutex;
+
+        public static bool Develop { get; private set; } = false;
 
         public void Dispose() => mutex?.Dispose();
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            foreach (var arg in e.Args)
+            {
+                if (arg.ToLower() == DEVELOP)
+                {
+                    Develop = true;
+                }
+                else if (arg.ToLower().StartsWith(LOCALIZATE))
+                {
+                    var culture = arg.Replace(LOCALIZATE, string.Empty);
+                    Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(culture);
+                }
+            }
+
             bool createdNew;
             string mutName = "MRS.DocumentManagement.Launcher";
             mutex = new System.Threading.Mutex(true, mutName, out createdNew);

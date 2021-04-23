@@ -3,8 +3,17 @@
     "MRS.DocumentManagement.Launcher": {
       "commandName": "Project"
     },
-    "Launcher": {
-      "commandName": "Executable"
+    "Debug Launcher": {
+      "commandName": "Project",
+      "commandLineArgs": "--develop"
+    },
+    "Debug Launcher eng": {
+      "commandName": "Project",
+      "commandLineArgs": "--develop language=en"
+    },
+    "Debug Launcher rus": {
+      "commandName": "Project",
+      "commandLineArgs": "--develop language=ru-RU"
     }
   }
 }

@@ -3,6 +3,7 @@
                     xmlns:notify="http://www.hardcodet.net/taskbar"
                     xmlns:local="clr-namespace:MRS.DocumentManagement.Launcher"
                     xmlns:base="clr-namespace:MRS.DocumentManagement.Launcher.Base"
+                    xmlns:res="clr-namespace:MRS.DocumentManagement.Launcher.Properties"
                     xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
                     >
     <controls:BooleanToVisibilityConverter x:Key="BoolToVisible"/>
@@ -15,12 +16,12 @@
                     <Setter Property="IsHitTestVisible" Value="False"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsDMRunning}" Value="True">
-                            <Setter Property="Header" Value="Документооборот запущен"/>
+                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_DMStarted}"/>
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="Background" Value="Green"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsDMRunning}" Value="False">
-                            <Setter Property="Header" Value="Документооборот остановлен"/>
+                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_DMStopped}"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="Background" Value="Red"/>
                         </DataTrigger>
@@ -29,7 +30,7 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="Запустить документооборот" Command="{Binding StartDmConsoleCommand}">
+        <MenuItem Header="{x:Static  res:Resources.Label_StartDM}" Command="{Binding StartDmConsoleCommand}">
             <MenuItem.Style>
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>
@@ -49,28 +50,30 @@
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>                        
                         <DataTrigger Binding="{Binding IsConsoleVisible}" Value="True">
-                            <Setter Property="Header" Value="Cкрыть консоль"/>
+                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_HideConsole}"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsConsoleVisible}" Value="False">
-                            <Setter Property="Header" Value="Показать консоль"/>
+                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_ShowConsole}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="Открыть Swagger" Command="{Binding OpenSwaggerCommand}" 
-                  Visibility="{Binding IsDMRunning, Converter={StaticResource BoolToVisible}}" />
+        <MenuItem Header="{x:Static  res:Resources.Label_ShowSwagger}" Command="{Binding OpenSwaggerCommand}" 
+                  Visibility="{Binding IsSwaggerVisuble, Converter={StaticResource BoolToVisible}}" />
 
-        <MenuItem Header="Открыть файл настроек" Command="{Binding OpenSettingsCommand}" />
+        <MenuItem Header="{x:Static  res:Resources.Label_ShowSettings}" Command="{Binding OpenSettingsCommand}" 
+                  Visibility="{Binding IsSettingsFileVisuble, Converter={StaticResource BoolToVisible}}" />
 
         <Separator />
-        <MenuItem Header="Выход" ToolTip="Остановить документооборот и закрыть приложение" Command="{Binding ExitApplicationCommand}" />
+        <MenuItem Header="{x:Static  res:Resources.Label_Exit}" 
+                  ToolTip="{x:Static  res:Resources.Tooltip_StopDmAndExit}" Command="{Binding ExitApplicationCommand}" />
     </ContextMenu>
 
     <notify:TaskbarIcon x:Key="NotifyIcon"
                     IconSource="/logo64.ico"
-                    ToolTipText="Документооборот BRIO MRS"
+                    ToolTipText="{x:Static  res:Resources.Tooltip_Dm_Brio_Mrs}"
                     DoubleClickCommand="{Binding ToggleConsoleCommand}"
                     ContextMenu="{StaticResource SysTrayMenu}">
         <notify:TaskbarIcon.DataContext>
