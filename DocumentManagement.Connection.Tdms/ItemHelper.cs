@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
@@ -8,12 +9,27 @@ namespace MRS.DocumentManagement.Connection.Tdms
 {
     internal class ItemHelper
     {
-        private static readonly IReadOnlyDictionary<string, ItemTypeDto> FILE_TYPES = new Dictionary<string, ItemTypeDto>
+        private static readonly IReadOnlyDictionary<string, ItemType> FILE_TYPES = new Dictionary<string, ItemType>
         {
-            { FileTypeID.IFC, ItemTypeDto.Bim },
-            { FileTypeID.CAD, ItemTypeDto.Bim },
-            { FileTypeID.PICTURE, ItemTypeDto.Media },
-            { FileTypeID.VIDEO, ItemTypeDto.Media },
+            { FileTypeID.IFC, ItemType.Bim },
+            { FileTypeID.CAD, ItemType.Bim },
+            { FileTypeID.PICTURE, ItemType.Media },
+            { FileTypeID.VIDEO, ItemType.Media },
+        };
+
+        private static readonly Dictionary<string, string> TDMS_FILE_TYPES = new Dictionary<string, string>
+        {
+           { ".ifc", FileTypeID.IFC },
+           { ".ifczip", FileTypeID.IFC },
+           { ".pdf", FileTypeID.PDF },
+           { ".png", FileTypeID.PICTURE },
+           { ".jpg", FileTypeID.PICTURE },
+           { ".jpeg", FileTypeID.PICTURE },
+           { ".xml", FileTypeID.XLS },
+           { ".txt", FileTypeID.TEXT },
+           { ".doc", FileTypeID.WORD },
+           { ".docx", FileTypeID.WORD },
+           { ".mp4", FileTypeID.VIDEO },
         };
 
         internal void SetItems(TDMSObject tdmsObject, IEnumerable<ItemExternalDto> items)
@@ -21,11 +37,11 @@ namespace MRS.DocumentManagement.Connection.Tdms
             if (items == null)
                 return;
 
-            var checkedfiles = items.Where(d => System.IO.File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.Name));
+            var checkedfiles = items.Where(d => File.Exists(d.FullPath) && !tdmsObject.Files.Has(d.FileName));
             foreach (var file in checkedfiles)
-                tdmsObject.Files.Create(FileTypeID.ANY, file.FullPath);
+                tdmsObject.Files.Create(SetItemType(file.FullPath), file.FullPath);
 
-            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => items.FirstOrDefault(item => item.Name == s.FileName) == default);
+            var deletedFiles = tdmsObject.Files.Cast<TDMSFile>().Where(s => items.FirstOrDefault(item => item.FileName == s.FileName) == default);
             foreach (var file in deletedFiles)
                 tdmsObject.Files.Remove(file);
 
@@ -37,21 +53,24 @@ namespace MRS.DocumentManagement.Connection.Tdms
         internal ICollection<ItemExternalDto> GetItems(TDMSObject tdmsObject)
             => tdmsObject.Files?.Cast<TDMSFile>()?.Select(x => ToDto(x)).ToList();
 
-        private ItemTypeDto GetItemType(string fileDefName)
+        private string SetItemType(string filePath)
         {
-           var result = FILE_TYPES.TryGetValue(fileDefName, out ItemTypeDto typeDto);
-           if (!result)
-                return ItemTypeDto.File;
+            TDMS_FILE_TYPES.TryGetValue(Path.GetExtension(filePath), out string type);
+            return type != default ? type : FileTypeID.ANY;
+        }
 
-           return typeDto;
+        private ItemType GetItemType(string fileDefName)
+        {
+           var result = FILE_TYPES.TryGetValue(fileDefName, out ItemType typeDto);
+           return !result ? ItemType.File : typeDto;
         }
 
         private ItemExternalDto ToDto(TDMSFile tdmsObject)
         {
             var itemDto = new ItemExternalDto()
             {
-                Name = tdmsObject.FileName,
-                ExternalItemId = tdmsObject.Handle,
+                FileName = tdmsObject.FileName,
+                ExternalID = tdmsObject.Handle,
                 ItemType = GetItemType(tdmsObject.FileDefName),
             };
 

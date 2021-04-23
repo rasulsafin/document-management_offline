@@ -34,27 +34,29 @@ namespace MRS.DocumentManagement.Utility
 
         private XElement GenerateXElement(ObjectiveToReportDto objective)
         {
+            var itemsElements = (objective.Items == null || !objective.Items.Any())
+                ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
+                : objective.Items.Select(GenerateXElement);
+
+            var bimElementsText = (objective.BimElements == null || !objective.BimElements.Any())
+                ? DEFAULT
+                : string.Join(", ", objective.BimElements.Select(x => x.ElementName));
+
             var result = new XElement(ROW,
-                new XElement(CELL,
-#pragma warning disable SA1118 // Parameter should not span multiple lines
-                    (objective.Items == null || objective.Items?.Count() < 1) ?
-                        new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) } :
-                        objective.Items.Select(GenerateXElement)),
-#pragma warning restore SA1118 // Parameter should not span multiple lines
+                new XElement(CELL, itemsElements),
                 new XElement(CELL,
                     new XElement(HORIZONTAL_ELEMENT,
                             TextElement("ID: ", true),
                             TextElement($"{objective.ID}")),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Время: ", true),
-                             TextElement(objective.CreationDate.ToShortTimeString())),
+                             TextElement(objective.CreationDate.ToShortDateString())),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Позиция: ", true),
                              TextElement(DEFAULT)),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Объект модели: ", true),
-                             TextElement((objective.BimElements == null || objective.BimElements?.Count() < 1) ?
-                                          DEFAULT : string.Join(", ", objective.BimElements))),
+                             TextElement(bimElementsText)),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Пользователь: ", true),
                              TextElement(objective.Author)),
@@ -75,9 +77,9 @@ namespace MRS.DocumentManagement.Utility
         }
 
         private XElement GenerateXElement(ItemDto file)
-            => PICTURES_EXTENSIONS.Contains(Path.GetExtension(file.Name).ToLower())
+            => PICTURES_EXTENSIONS.Contains(Path.GetExtension(file.RelativePath).ToLower())
                     ? new XElement(HORIZONTAL_ELEMENT,
-                            new XElement(IMAGE, file.Name))
+                            new XElement(IMAGE, file.RelativePath))
                     : null;
     }
 }

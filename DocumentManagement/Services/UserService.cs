@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
 
 namespace MRS.DocumentManagement.Services
@@ -19,20 +19,21 @@ namespace MRS.DocumentManagement.Services
         private readonly DMContext context;
         private readonly IMapper mapper;
         private readonly CryptographyHelper cryptographyHelper;
-        private readonly ISyncService synchronizator;
+        private readonly ILogger<UserService> logger;
 
-        public UserService(DMContext context,
-             IMapper mapper,
-             ISyncService synchronizator,
-             CryptographyHelper helper)
+        public UserService(
+            DMContext context,
+            IMapper mapper,
+            CryptographyHelper helper,
+            ILogger<UserService> logger)
         {
             this.context = context;
             this.mapper = mapper;
-            this.synchronizator = synchronizator;
             cryptographyHelper = helper;
+            this.logger = logger;
         }
 
-        private async Task<Database.Models.User> GetUserChecked(ID<UserDto> userID)
+        private async Task<User> GetUserChecked(ID<UserDto> userID)
         {
             var id = (int)userID;
             var user = await context.Users.FindAsync(id);
@@ -50,11 +51,10 @@ namespace MRS.DocumentManagement.Services
                 user.PasswordHash = passHash;
                 user.PasswordSalt = passSalt;
                 // context.Users.
-                context.Users.Add(user);
+                await context.Users.AddAsync(user);
                 await context.SaveChangesAsync();
 
                 var userID = new ID<UserDto>(user.ID);
-                synchronizator.Update(NameTypeRevision.Users, user.ID);
                 return userID;
             }
             catch (DbUpdateException ex)
@@ -83,7 +83,6 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
             }
 
-            synchronizator.Update(NameTypeRevision.Users, user.ID, TypeChange.Delete);
             return true;
         }
 
@@ -125,11 +124,11 @@ namespace MRS.DocumentManagement.Services
                 storedUser.Login = user.Login;
                 storedUser.Name = user.Name;
                 await context.SaveChangesAsync();
-                synchronizator.Update(NameTypeRevision.Users, storedUser.ID);
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't update user {@User}", user);
                 return false;
             }
         }
@@ -145,8 +144,9 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't update password of user {UserID}", userID);
                 return false;
             }
         }
@@ -158,8 +158,9 @@ namespace MRS.DocumentManagement.Services
                 var user = await GetUserChecked(userID);
                 return cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't verify password of user {UserID}", userID);
                 return false;
             }
         }

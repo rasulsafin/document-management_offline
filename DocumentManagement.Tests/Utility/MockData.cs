@@ -248,41 +248,41 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             new Item
             {
-                ExternalItemId = FILE_ITEM.ExternalItemId,
+                ExternalID = FILE_ITEM.ExternalID,
                 ItemType = FILE_ITEM.ItemType,
-                Name = FILE_ITEM.Name,
+                RelativePath = FILE_ITEM.RelativePath,
             },
             new Item
             {
-                ExternalItemId = BIM_ITEM.ExternalItemId,
+                ExternalID = BIM_ITEM.ExternalID,
                 ItemType = BIM_ITEM.ItemType,
-                Name = BIM_ITEM.Name,
+                RelativePath = BIM_ITEM.RelativePath,
             },
             new Item
             {
-                ExternalItemId = MEDIA_ITEM.ExternalItemId,
+                ExternalID = MEDIA_ITEM.ExternalID,
                 ItemType = MEDIA_ITEM.ItemType,
-                Name = MEDIA_ITEM.Name,
+                RelativePath = MEDIA_ITEM.RelativePath,
             },
         };
 
         private static readonly Item FILE_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
-            Name = "File element",
+            RelativePath = "File element",
         };
         private static readonly Item BIM_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
-            Name = "Bim element",
+            RelativePath = "Bim element",
         };
         private static readonly Item MEDIA_ITEM = new Item
         {
-            ExternalItemId = $"ExternalItemId{Guid.NewGuid()}",
+            ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
-            Name = "Media element",
+            RelativePath = "Media element",
         };
         #endregion
 
@@ -298,22 +298,41 @@ namespace MRS.DocumentManagement.Tests.Utility
         #endregion
 
         #region DYNAMIC_FIELDS_TO_CREATE_DTO
-        public static List<DynamicFieldToCreateDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldToCreateDto>
+        public static List<DynamicFieldDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldDto>
         {
-            new DynamicFieldToCreateDto(
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Key,
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Type,
-                DYNAMIC_FIELD_TO_CREATE_DROPDOWN.Value),
-            new DynamicFieldToCreateDto(
-                DYNAMIC_FIELD_TO_CREATE_DATE.Key,
-                DYNAMIC_FIELD_TO_CREATE_DATE.Type,
-                DYNAMIC_FIELD_TO_CREATE_DATE.Value),
+            new DynamicFieldDto()
+            {
+                Name = DYNAMIC_FIELD_TO_CREATE_STRING.Name,
+                Value = DYNAMIC_FIELD_TO_CREATE_STRING.Value,
+                Type = DYNAMIC_FIELD_TO_CREATE_STRING.Type,
+            },
+            new DynamicFieldDto()
+            {
+                Name = DYNAMIC_FIELD_TO_CREATE_DATE.Name,
+                Value = DYNAMIC_FIELD_TO_CREATE_DATE.Value,
+                Type = DYNAMIC_FIELD_TO_CREATE_DATE.Type,
+            },
         };
 
-        private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DROPDOWN =
-            new DynamicFieldToCreateDto("dropdown1", "dropdown", "1,2,3");
-        private static readonly DynamicFieldToCreateDto DYNAMIC_FIELD_TO_CREATE_DATE =
-            new DynamicFieldToCreateDto("datetime2", "datetime", DateTime.Now.ToString(CultureInfo.InvariantCulture));
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_DATE =
+            new DynamicFieldDto() { Name = "datetime", Value = DateTime.Now, Type = DynamicFieldType.DATE, };
+
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_STRING =
+            new DynamicFieldDto() { Name = "string", Value = "value", Type = DynamicFieldType.STRING, };
+
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_BOOL =
+            new DynamicFieldDto() { Name = "bool", Value = true, Type = DynamicFieldType.BOOL, };
+
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_FLOAT =
+            new DynamicFieldDto() { Name = "float", Value = 3.14f, Type = DynamicFieldType.FLOAT, };
+
+        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_INT =
+            new DynamicFieldDto() { Name = "int", Value = 1, Type = DynamicFieldType.INTEGER, };
+
+        // private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_OBJECT =
+        //    new DynamicFieldDto { Name = "object", Value = new List<IDynamicFieldDto>() { DYNAMIC_FIELD_TO_CREATE_DATE, DYNAMIC_FIELD_TO_CREATE_INT } };
+
+        // TODO: Enum and Object Dynamic Fields 
         #endregion
 
         #region DYNAMIC_FIELDS
@@ -321,22 +340,26 @@ namespace MRS.DocumentManagement.Tests.Utility
         {
             new DynamicField
             {
-                Key = DYNAMIC_FIELD_DROPDOWN.Key,
-                Type = DYNAMIC_FIELD_DROPDOWN.Type,
-                Value = DYNAMIC_FIELD_DROPDOWN.Value,
+                Name = DYNAMIC_FIELD_STRING.Name,
+                Type = DYNAMIC_FIELD_STRING.Type,
+                Value = DYNAMIC_FIELD_STRING.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
             new DynamicField
             {
-                Key = DYNAMIC_FIELD_DATE.Key,
+                Name = DYNAMIC_FIELD_DATE.Name,
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
+                ChildrenDynamicFields = new List<DynamicField>(),
             },
         };
 
-        private static readonly DynamicField DYNAMIC_FIELD_DROPDOWN =
-            new DynamicField { Key = "dropdown1", Type = "dropdown", Value = "1,2,3" };
+        private static readonly DynamicField DYNAMIC_FIELD_STRING =
+            new DynamicField { Name = "string", Type = DynamicFieldType.STRING.ToString(), Value = "value" };
+
         private static readonly DynamicField DYNAMIC_FIELD_DATE =
-            new DynamicField { Key = "datetime2", Type = "datetime", Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
+            new DynamicField { Name = "datetime", Type = DynamicFieldType.DATE.ToString(), Value = DateTime.Now.ToString(CultureInfo.InvariantCulture) };
+
         #endregion
 
         public static ConnectionInfo TDMSConnectionInfo => new ConnectionInfo()

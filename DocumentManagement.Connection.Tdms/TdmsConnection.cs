@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -7,24 +8,28 @@ using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms
 {
-    public class TdmsConnection : IConnection
+    public class TdmsConnection : IConnection, IDisposable
     {
-        internal static TDMSApplication TDMS;
+        private static TDMSApplication tdms;
 
-        public Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public TdmsConnection()
         {
-            TDMS = new TDMSApplication();
+        }
 
-            if (TDMS.IsLoggedIn)
+        public Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        {
+            tdms = new TDMSApplication();
+
+            if (tdms.IsLoggedIn)
             {
-                if (TDMS.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
+                if (tdms.CurrentUser.Login == info.AuthFieldValues[Auth.LOGIN])
                 {
                     return GetStatus(info);
                 }
                 else
                 {
-                    TDMS.Quit();
-                    TDMS = new TDMSApplication();
+                    tdms.Quit();
+                    tdms = new TDMSApplication();
                 }
             }
 
@@ -35,13 +40,13 @@ namespace MRS.DocumentManagement.Connection.Tdms
                 var server = info.AuthFieldValues[Auth.SERVER];
                 var db = info.AuthFieldValues[Auth.DATABASE];
 
-                TDMS.Login(login, password, db, server);
+                tdms.Login(login, password, db, server);
             }
             catch (Exception e)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = e.Message,
                 });
             }
@@ -49,93 +54,125 @@ namespace MRS.DocumentManagement.Connection.Tdms
             return GetStatus(info);
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.EnumerationTypes = GetEnumerationTypes();
             info.ConnectionType.ObjectiveTypes = GetObjectiveTypes();
+            info.UserExternalID = tdms.CurrentUser.SysName;
 
             return Task.FromResult(info);
         }
 
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            if (TDMS == null)
+            if (tdms == null)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.NeedReconnect,
+                    Status = RemoteConnectionStatus.NeedReconnect,
                     Message = "NeedReconnect",
                 });
             }
 
-            if (TDMS.IsLoggedIn == true)
+            if (tdms.IsLoggedIn == true)
             {
                 return Task.FromResult(new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.OK,
+                    Status = RemoteConnectionStatus.OK,
                     Message = "Ok",
                 });
             }
 
             return Task.FromResult(new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.Error,
+                Status = RemoteConnectionStatus.Error,
                 Message = "Error",
             });
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             throw new NotImplementedException();
         }
 
-        public ConnectionTypeDto GetConnectionType()
-        {
-            var type = new ConnectionTypeDto
-            {
-                Name = "tdms",
-                AuthFieldNames = new List<string>() { Auth.LOGIN, Auth.PASSWORD, Auth.SERVER, Auth.DATABASE },
-                AppProperties = new Dictionary<string, string>(),
-            };
+        public void Quit() => tdms.Quit();
 
-            return type;
-        }
-
-        public void Quit()
+        private ICollection<ObjectiveTypeExternalDto> GetObjectiveTypes()
         {
-            TDMS.Quit();
-        }
-
-        private ICollection<ObjectiveTypeDto> GetObjectiveTypes()
-        {
-            return new List<ObjectiveTypeDto>()
+            return new List<ObjectiveTypeExternalDto>()
                 {
-                    new ObjectiveTypeDto() { Name = TDMS.ObjectDefs[ObjectTypeID.DEFECT].Description },
-                    new ObjectiveTypeDto() { Name = TDMS.ObjectDefs[ObjectTypeID.WORK].Description },
+                    new ObjectiveTypeExternalDto()
+                    {
+                        Name = tdms.ObjectDefs[ObjectTypeID.DEFECT].Description,
+                        ExternalId = ObjectTypeID.DEFECT,
+                        DefaultDynamicFields = GetDefectDefaultDynamicFields(),
+                    },
+                    new ObjectiveTypeExternalDto() { Name = tdms.ObjectDefs[ObjectTypeID.WORK].Description, ExternalId = ObjectTypeID.WORK },
                 };
         }
 
-        private ICollection<EnumerationTypeDto> GetEnumerationTypes()
+        private ICollection<DynamicFieldExternalDto> GetDefectDefaultDynamicFields()
         {
-            var list = new List<EnumerationTypeDto>();
+            var list = new List<DynamicFieldExternalDto>();
+
+            var definitions = tdms.ObjectDefs;
+            string defaultCompanyValue = GetEnumerationTypes()
+                        .Where(x => x.ExternalID == ObjectTypeID.COMPANY)
+                        .FirstOrDefault().EnumerationValues
+                        .FirstOrDefault()?.ExternalID;
+
+            var defectDef = definitions.Cast<TDMSObjectDef>().FirstOrDefault(x => x.SysName == ObjectTypeID.DEFECT);
+            list.AddIsNotNull(ConstructDynamicFieldDto(
+                defectDef,
+                AttributeID.BUILDER,
+                DynamicFieldType.ENUM,
+                defaultCompanyValue));
+            list.AddIsNotNull(ConstructDynamicFieldDto(
+                defectDef,
+                AttributeID.COMPANY,
+                DynamicFieldType.ENUM,
+                defaultCompanyValue));
+
+            return list;
+        }
+
+        private DynamicFieldExternalDto ConstructDynamicFieldDto(TDMSObjectDef objectDef, string attributeId, DynamicFieldType type, string defaultValue)
+        {
+            var attributeDef = objectDef.AttributeDefs.Cast<TDMSAttributeDef>().FirstOrDefault(a => a.SysName == attributeId);
+            if (attributeDef == null)
+                return null;
+
+            return new DynamicFieldExternalDto()
+            {
+                ExternalID = attributeDef.SysName,
+                Name = attributeDef.Description,
+                Type = type,
+                Value = defaultValue,
+            };
+        }
+
+        private ICollection<EnumerationTypeExternalDto> GetEnumerationTypes()
+        {
+            var list = new List<EnumerationTypeExternalDto>();
             try
             {
-                var tdmsType = TDMS.ObjectDefs[ObjectTypeID.COMPANY];
-                var enumerationType = new EnumerationTypeDto()
+                /// Companies
+                var tdmsType = tdms.ObjectDefs[ObjectTypeID.COMPANY];
+                var enumerationType = new EnumerationTypeExternalDto()
                 {
-                    ExternalId = tdmsType.SysName,
+                    ExternalID = ObjectTypeID.COMPANY,
                     Name = tdmsType.Description,
-                    EnumerationValues = new List<EnumerationValueDto>(),
+                    EnumerationValues = new List<EnumerationValueExternalDto>(),
                 };
 
-                var queryCom = TDMS.CreateQuery();
+                var queryCom = tdms.CreateQuery();
                 queryCom.AddCondition(TDMSQueryConditionType.tdmQueryConditionObjectDef, ObjectTypeID.COMPANY);
 
                 foreach (TDMSObject contractor in queryCom.Objects)
                 {
-                    enumerationType.EnumerationValues.Add(new EnumerationValueDto()
+                    enumerationType.EnumerationValues.Add(new EnumerationValueExternalDto()
                     {
-                        ExternalId = contractor.GUID,
+                        ExternalID = contractor.GUID,
                         Value = contractor.Description,
                     });
                 }
@@ -147,6 +184,18 @@ namespace MRS.DocumentManagement.Connection.Tdms
             }
 
             return list;
+        }
+
+        public void Dispose() => tdms.Quit();
+
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            return new TdmsConnectionContext(tdms);
+        }
+
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            return new TdmsStorage(tdms);
         }
     }
 }

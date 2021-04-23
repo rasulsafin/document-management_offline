@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        public async Task<string> GetYandexDiskToken(Interface.Dtos.ConnectionInfoDto info)
+        public async Task<string> GetYandexDiskToken(Interface.Dtos.ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             var clientId = connect.AppProperties[KEY_CLIENT_ID];

@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>MRS.DocumentManagement.Interface</RootNamespace>
+    <Authors>Brio MRS</Authors>
+    <Product>Brio MRS</Product>
+    <PackageIcon></PackageIcon>
+    <Company>Brio MRS©</Company>
+  </PropertyGroup>
+
+</Project>

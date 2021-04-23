@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
@@ -16,24 +17,27 @@ namespace MRS.DocumentManagement.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<ConnectionTypeService> logger;
 
-        public ConnectionTypeService(DMContext context, IMapper mapper)
+        public ConnectionTypeService(DMContext context, IMapper mapper, ILogger<ConnectionTypeService> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.logger = logger;
         }
 
         public async Task<ID<ConnectionTypeDto>> Add(string typeName)
         {
             try
             {
-                var connectionType = new Database.Models.ConnectionType { Name = typeName };
-                context.ConnectionTypes.Add(connectionType);
+                var connectionType = new ConnectionType { Name = typeName };
+                await context.ConnectionTypes.AddAsync(connectionType);
                 await context.SaveChangesAsync();
                 return (ID<ConnectionTypeDto>)connectionType.ID;
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
                 throw new InvalidDataException("Can't add new objective type", ex.InnerException);
             }
         }
@@ -73,37 +77,53 @@ namespace MRS.DocumentManagement.Services
             {
                 foreach (var typeDto in listOfTypes)
                 {
-                    var type = mapper.Map<ConnectionType>(typeDto);
-                    var typeFromDb = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == typeDto.Name);
+                    var type = await context.ConnectionTypes
+                       .Include(x => x.AppProperties)
+                       .Include(x => x.ObjectiveTypes)
+                       .Include(x => x.AuthFieldNames)
+                       .FirstOrDefaultAsync(x => x.Name == typeDto.Name);
+                    var update = type != null;
 
-                    // TODO: Update if exists?
-                    if (typeFromDb != null)
-                        continue;
-
-                    await context.ConnectionTypes.AddAsync(type);
-                    await context.SaveChangesAsync();
-
-                    foreach (var property in type.AppProperties)
+                    if (update)
                     {
-                        property.ConnectionType = type;
+                        var properties = type.AppProperties.ToDictionary(x => x.Key, x => x.ID);
+                        var authFieldNames = type.AuthFieldNames.ToDictionary(x => x.Name, x => x.ID);
 
-                        var propFromDb = await context.AppProperties.FirstOrDefaultAsync(x => x.Key == property.Key && x.ConnectionTypeID == type.ID);
+                        type = mapper.Map(typeDto, type);
 
-                        // TODO: Update if exists?
-                        if (propFromDb != null)
-                            continue;
+                        foreach (var property in type.AppProperties)
+                        {
+                            property.ID = properties.TryGetValue(property.Key, out var value) ? value : 0;
+                            property.ConnectionTypeID = type.ID;
+                        }
 
-                        await context.AppProperties.AddAsync(property);
-                        await context.SaveChangesAsync();
+                        foreach (var authFieldName in type.AuthFieldNames)
+                        {
+                            authFieldName.ID = authFieldNames.TryGetValue(authFieldName.Name, out var value)
+                                ? value
+                                : 0;
+                            authFieldName.ConnectionTypeID = type.ID;
+                        }
+
+                        context.ConnectionTypes.Update(type);
                     }
+                    else
+                    {
+                        type = mapper.Map<ConnectionType>(typeDto);
+                        await context.ConnectionTypes.AddAsync(type);
+                    }
+
+                    await context.SaveChangesAsync();
                 }
 
-                await context.SaveChangesAsync();
                 return true;
             }
             catch (DbUpdateException ex)
             {
-                throw new InvalidDataException($"Something went wrong with presented ConnectionTypes", ex.InnerException);
+                logger.LogError(ex, "Something went wrong with presented ConnectionTypes");
+                throw new InvalidDataException(
+                    "Something went wrong with presented ConnectionTypes",
+                    ex.InnerException);
             }
         }
 
@@ -121,6 +141,7 @@ namespace MRS.DocumentManagement.Services
             }
             catch (DbUpdateException ex)
             {
+                logger.LogError(ex, "Can't remove connection type with key {ID}", id);
                 throw new InvalidDataException($"Can't remove connection type with key {id}", ex.InnerException);
             }
         }

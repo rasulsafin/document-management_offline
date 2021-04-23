@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
+using MRS.DocumentManagement.Connection.Utils.CloudBase;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -9,59 +11,41 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     public class GoogleConnection : IConnection
     {
         private const string NAME_CONNECT = "Google Drive";
-        private ConnectionInfoDto connectionInfo;
-        private GoogleDriveManager manager;
+        private ConnectionInfoExternalDto connectionInfo;
+        private static GoogleDriveManager manager;
 
         public GoogleConnection()
         {
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             try
             {
+                connectionInfo = info;
                 GoogleDriveController driveController = new GoogleDriveController();
-                await driveController.InitializationAsync(info);
+                await driveController.InitializationAsync(connectionInfo);
                 manager = new GoogleDriveManager(driveController);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
         }
 
-        public ConnectionTypeDto GetConnectionType()
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            var type = new ConnectionTypeDto
-            {
-                Name = NAME_CONNECT,
-                AuthFieldNames = new List<string>
-                {
-                    "token",
-                },
-                AppProperties = new Dictionary<string, string>
-                {
-                    { GoogleDriveController.APPLICATION_NAME, "BRIO MRS" },
-                    { GoogleDriveController.CLIENT_ID, "1827523568-ha5m7ddtvckjqfrmvkpbhdsl478rdkfm.apps.googleusercontent.com" },
-                    { GoogleDriveController.CLIENT_SECRET, "fA-2MtecetmXLuGKXROXrCzt" },
-                },
-            };
-
-            return type;
-        }
-
-        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
-        {
+            // TODO: fix this.
             return await Connect(info);
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             if (connect.Name == NAME_CONNECT)
@@ -77,10 +61,34 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
             return Task.FromResult(false);
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.AuthFieldValues = connectionInfo.AuthFieldValues;
+            var objectiveType = "GoogleDriveIssue";
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+            };
+
+            if (string.IsNullOrWhiteSpace(info.UserExternalID))
+                info.UserExternalID = Guid.NewGuid().ToString();
+
             return Task.FromResult(info);
+        }
+
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        {
+            var connectResult = await Connect(info);
+            if (connectResult.Status != RemoteConnectionStatus.OK || manager == null)
+                return null;
+
+            return GoogleDriveConnectionContext.CreateContext(manager);
+        }
+
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            await Connect(info);
+            return new CommonConnectionStorage(manager);
         }
     }
 }

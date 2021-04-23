@@ -14,7 +14,7 @@ namespace DocumentManagement.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AppProperty", b =>
                 {
@@ -183,14 +183,31 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Key")
+                    b.Property<string>("ExternalID")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ObjectiveID")
+                    b.Property<bool>("IsSynchronized")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("ObjectiveID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ParentFieldID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SynchronizationMateID")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Type")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
 
                     b.Property<string>("Value")
                         .HasColumnType("TEXT");
@@ -198,6 +215,11 @@ namespace DocumentManagement.Database.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("ObjectiveID");
+
+                    b.HasIndex("ParentFieldID");
+
+                    b.HasIndex("SynchronizationMateID")
+                        .IsUnique();
 
                     b.ToTable("DynamicFields");
                 });
@@ -252,16 +274,35 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ExternalItemId")
+                    b.Property<string>("ExternalID")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSynchronized")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ItemType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Name")
+                    b.Property<int?>("ProjectID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("RelativePath")
                         .HasColumnType("TEXT");
 
+                    b.Property<int?>("SynchronizationMateID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
+
                     b.HasKey("ID");
+
+                    b.HasIndex("ProjectID");
+
+                    b.HasIndex("SynchronizationMateID")
+                        .IsUnique();
 
                     b.ToTable("Items");
                 });
@@ -284,6 +325,12 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("ExternalID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSynchronized")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ObjectiveTypeID")
                         .HasColumnType("INTEGER");
 
@@ -296,8 +343,16 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("SynchronizationMateID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
 
                     b.HasKey("ID");
 
@@ -308,6 +363,9 @@ namespace DocumentManagement.Database.Migrations
                     b.HasIndex("ParentObjectiveID");
 
                     b.HasIndex("ProjectID");
+
+                    b.HasIndex("SynchronizationMateID")
+                        .IsUnique();
 
                     b.ToTable("Objectives");
                 });
@@ -336,12 +394,18 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<int?>("ConnectionTypeID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ExternalId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
 
                     b.HasIndex("ConnectionTypeID");
+
+                    b.HasIndex("ExternalId")
+                        .IsUnique();
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -355,27 +419,29 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("ExternalID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsSynchronized")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("SynchronizationMateID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Title")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue(new DateTime(2021, 2, 20, 13, 42, 42, 954, DateTimeKind.Utc));
+
                     b.HasKey("ID");
 
+                    b.HasIndex("SynchronizationMateID")
+                        .IsUnique();
+
                     b.ToTable("Projects");
-                });
-
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ProjectItem", b =>
-                {
-                    b.Property<int>("ItemID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("ProjectID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("ItemID", "ProjectID");
-
-                    b.HasIndex("ProjectID");
-
-                    b.ToTable("ProjectItems");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ReportCount", b =>
@@ -410,6 +476,25 @@ namespace DocumentManagement.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("Roles");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Synchronization", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("UserID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("UserID");
+
+                    b.ToTable("Synchronizations");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.User", b =>
@@ -584,10 +669,23 @@ namespace DocumentManagement.Database.Migrations
                     b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
                         .WithMany("DynamicFields")
                         .HasForeignKey("ObjectiveID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.DynamicField", "ParentField")
+                        .WithMany("ChildrenDynamicFields")
+                        .HasForeignKey("ParentFieldID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.DynamicField", "SynchronizationMate")
+                        .WithOne()
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.DynamicField", "SynchronizationMateID")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Objective");
+
+                    b.Navigation("ParentField");
+
+                    b.Navigation("SynchronizationMate");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>
@@ -609,6 +707,23 @@ namespace DocumentManagement.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("EnumerationType");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Item", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Project", "Project")
+                        .WithMany("Items")
+                        .HasForeignKey("ProjectID")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "SynchronizationMate")
+                        .WithOne()
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.Item", "SynchronizationMateID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Project");
+
+                    b.Navigation("SynchronizationMate");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>
@@ -635,6 +750,11 @@ namespace DocumentManagement.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "SynchronizationMate")
+                        .WithOne()
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.Objective", "SynchronizationMateID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Author");
 
                     b.Navigation("ObjectiveType");
@@ -642,6 +762,8 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("ParentObjective");
 
                     b.Navigation("Project");
+
+                    b.Navigation("SynchronizationMate");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ObjectiveItem", b =>
@@ -673,23 +795,25 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("ConnectionType");
                 });
 
-            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ProjectItem", b =>
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Project", b =>
                 {
-                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
-                        .WithMany("Projects")
-                        .HasForeignKey("ItemID")
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Project", "SynchronizationMate")
+                        .WithOne()
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.Project", "SynchronizationMateID")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("SynchronizationMate");
+                });
+
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Synchronization", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MRS.DocumentManagement.Database.Models.Project", "Project")
-                        .WithMany("Items")
-                        .HasForeignKey("ProjectID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("Project");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.User", b =>
@@ -769,6 +893,11 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("ObjectiveTypes");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
+                {
+                    b.Navigation("ChildrenDynamicFields");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.EnumerationType", b =>
                 {
                     b.Navigation("ConnectionInfos");
@@ -784,8 +913,6 @@ namespace DocumentManagement.Database.Migrations
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Item", b =>
                 {
                     b.Navigation("Objectives");
-
-                    b.Navigation("Projects");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>

@@ -8,10 +8,14 @@ namespace MRS.DocumentManagement.Database.Models
 
         public string Name { get; set; }
 
+        public string ExternalId { get; set; }
+
         public int? ConnectionTypeID { get; set; }
 
         public ConnectionType ConnectionType { get; set; }
 
         public ICollection<Objective> Objectives { get; set; }
+
+        public ICollection<DynamicFieldInfo> DefaultDynamicFields { get; set; }
     }
 }

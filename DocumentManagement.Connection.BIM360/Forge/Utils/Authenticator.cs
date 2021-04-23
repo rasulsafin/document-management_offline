@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -19,14 +20,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
 
         private readonly AuthenticationService service;
+        private readonly ILogger<Authenticator> logger;
         private HttpListener httpListener;
         private DateTime sentTime;
 
         // Is created as scoped as this service
-        private ConnectionInfoDto connectionInfoDto;
+        private ConnectionInfoExternalDto connectionInfoDto;
 
-        public Authenticator(AuthenticationService service)
-            => this.service = service;
+        public Authenticator(AuthenticationService service, ILogger<Authenticator> logger)
+        {
+            this.service = service;
+            this.logger = logger;
+        }
 
         internal delegate void NewBearerDelegate(Token bearer);
 
@@ -119,7 +124,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public void Dispose()
         {
-            httpListener.Close();
+            httpListener?.Close();
             GC.SuppressFinalize(this);
         }
 
@@ -128,20 +133,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             sentTime = DateTime.UtcNow;
             if (!IsLogged || mustUpdate)
             {
-                if (string.IsNullOrEmpty(AccessToken))
+                //if (string.IsNullOrEmpty(AccessToken))
                     await ThreeLeggedAsync();
-                else
-                    await RefreshConnectionAsync();
+                //else
+                //    await RefreshConnectionAsync();
             }
         }
 
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoDto updatedInfo)> SignInAsync(ConnectionInfoDto connectionInfo)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto connectionInfo)
         {
             connectionInfoDto = connectionInfo;
             await CheckAccessAsync(true);
 
             // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto { Status = RemoteConnectionStatusDto.OK };
+            var result = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
             return (result, connectionInfo);
         }
@@ -160,8 +165,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                 var bearer = await service.RefreshTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, AccessRefreshToken);
                 SaveData(bearer);
             }
-            catch
+            catch (Exception e)
             {
+                logger.LogError(e, "Can't refresh connection");
             }
         }
 
@@ -178,6 +184,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                         return;
                     httpListener = new HttpListener();
                     httpListener.Prefixes.Add(AppCallBackUrl/*.Replace("localhost", "+") + "/"*/);
+                    logger.LogInformation("Open browser");
                     httpListener.Start();
                     getting = httpListener.GetContextAsync();
                 }
@@ -255,13 +262,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             SaveData(bearer);
         }
 
-        private void SetAuthValue(ConnectionInfoDto info, string key, string value)
+        private void SetAuthValue(ConnectionInfoExternalDto info, string key, string value)
         {
             info.AuthFieldValues ??= new Dictionary<string, string>();
             SetDictionaryValue(info.AuthFieldValues, key, value);
         }
 
-        private void SetAppProperty(ConnectionInfoDto info, string key, string value)
+        private void SetAppProperty(ConnectionInfoExternalDto info, string key, string value)
         {
             info.ConnectionType.AppProperties ??= new Dictionary<string, string>();
             SetDictionaryValue(info.ConnectionType.AppProperties, key, value);

@@ -16,8 +16,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public IssuesService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Issue>> GetIssuesAsync(string containerID)
-            => await GetItemsByPages<Issue>(Resources.GetIssuesMethod, containerID);
+        public async Task<List<Issue>> GetIssuesAsync(
+            string containerID,
+            IEnumerable<Filter> filters = null)
+            => await PaginationHelper.GetItemsByPages<Issue>(
+                connection,
+                ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
+                containerID);
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
         {
@@ -41,11 +46,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             // TODO: check required fields from user.
             if (string.IsNullOrEmpty(issue.Attributes.Title))
-                throw new Exception($"{nameof(Issue.IssueAttributes.Title)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.Title)} is empty");
             if (string.IsNullOrEmpty(issue.Attributes.NgIssueTypeID))
-                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueTypeID)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.NgIssueTypeID)} is empty");
             if (string.IsNullOrEmpty(issue.Attributes.NgIssueSubtypeID))
-                throw new Exception($"{nameof(Issue.IssueAttributes.NgIssueSubtypeID)} is empty");
+                throw new ArgumentException($"{nameof(Issue.IssueAttributes.NgIssueSubtypeID)} is empty");
 
             var response = await connection.SendAsync(
                     ForgeSettings.AuthorizedPost(issue),
@@ -67,44 +72,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<Issue> GetIssueAsync(string containerID, string issueID)
         {
             var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedGet(),
-                    Resources.GetIssueMethod,
-                    containerID,
-                    issueID);
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetIssueMethod,
+                containerID,
+                issueID);
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
         public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
-            => await GetItemsByPages<Attachment>(Resources.GetIssuesAttachmentMethod, containerID, issueID);
+            => await PaginationHelper.GetItemsByPages<Attachment>(
+                connection,
+                Resources.GetIssuesAttachmentMethod,
+                containerID,
+                issueID);
 
         public Task<object> GetMeAsync()
         {
             throw new NotImplementedException();
-        }
-
-        private async Task<List<T>> GetItemsByPages<T>(string command, params object[] arguments)
-        {
-            var result = new List<T>();
-            var all = false;
-            var length = arguments.Length;
-            Array.Resize(ref arguments, length + 2);
-            arguments[length++] = ITEMS_ON_PAGE;
-
-            for (int i = 0; !all; i++)
-            {
-                arguments[length] = i;
-                var response = await connection.SendAsync(
-                        ForgeSettings.AuthorizedGet(),
-                        command,
-                        arguments);
-                var data = response[DATA_PROPERTY]?.ToObject<List<T>>();
-                if (data != null)
-                    result.AddRange(data);
-                var meta = response[META_PROPERTY]?.ToObject<Meta>();
-                all = meta == null || meta.Page.Limit * ((meta.Page.Offset / ITEMS_ON_PAGE) + 1) >= meta.RecordCount;
-            }
-
-            return result;
         }
     }
 }

@@ -53,6 +53,12 @@ namespace MRS.DocumentManagement.Api.Controllers
             return ValidateFoundObject(result);
         }
 
-            // TODO: Syncronization!
+        [HttpGet]
+        [Route("synchronization/{userID}")]
+        public async Task<IActionResult> Synchronize([FromRoute] int userID)
+        {
+            var result = await service.Synchronize(new ID<UserDto>(userID));
+            return Ok(result);
+        }
     }
 }

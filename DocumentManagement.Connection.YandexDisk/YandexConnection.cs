@@ -1,6 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Utils.CloudBase;
+using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -10,62 +12,75 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
     {
         private const string AUTH_FIELD_KEY_TOKEN = "token";
         private const string NAME_CONNECTION = "Yandex Disk";
-        private YandexManager manager;
+        private static YandexManager manager;
 
-        public YandexConnection() { }
+        public YandexConnection()
+        {
+        }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
         {
             try
             {
                 if (await IsAuthDataCorrect(info))
                 {
-
                     YandexDiskAuth auth = new YandexDiskAuth();
+                    if (info.AuthFieldValues == null)
+                        info.AuthFieldValues = new Dictionary<string, string>();
+
                     if (!info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
                     {
                         var tokenNew = await auth.GetYandexDiskToken(info);
                         info.AuthFieldValues.Add(AUTH_FIELD_KEY_TOKEN, tokenNew);
                     }
 
-                    var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
-                    manager = new YandexManager(new YandexDiskController(token));
+                    InitiateManager(info);
 
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.OK, Message = "Good", };
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
                 }
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatusDto.Error, Message = "Data app not correct", };
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Data app not correct", };
             }
             catch (Exception ex)
             {
                 return new ConnectionStatusDto()
                 {
-                    Status = RemoteConnectionStatusDto.Error,
+                    Status = RemoteConnectionStatus.Error,
                     Message = ex.Message,
                 };
             }
         }
 
-        public Task<ConnectionInfoDto> UpdateConnectionInfo(ConnectionInfoDto info)
+        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
+            var objectiveType = "YandexDiskIssue";
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+            };
+
+            if (string.IsNullOrWhiteSpace(info.UserExternalID))
+                info.UserExternalID = Guid.NewGuid().ToString();
+
             return Task.FromResult(info);
         }
 
-        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             if (manager != null)
             {
+                // TODO: make it the proper way.
                 return await manager.GetStatusAsync();
             }
 
             return new ConnectionStatusDto()
             {
-                Status = RemoteConnectionStatusDto.NeedReconnect,
+                Status = RemoteConnectionStatus.NeedReconnect,
                 Message = "Manager null",
             };
         }
 
-        public Task<bool> IsAuthDataCorrect(ConnectionInfoDto info)
+        public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             if (connect.Name == NAME_CONNECTION)
@@ -80,26 +95,33 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
             return Task.FromResult(false);
         }
 
-        public ConnectionTypeDto GetConnectionType()
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
-            var type = new ConnectionTypeDto
-            {
-                Name = NAME_CONNECTION,
-                AuthFieldNames = new List<string>() { "token" },
-                AppProperties = new Dictionary<string, string>
-                {
-                    { YandexDiskAuth.KEY_CLIENT_ID, "b1a5acbc911b4b31bc68673169f57051" },
-                    { YandexDiskAuth.KEY_CLIENT_SECRET, "b4890ed3aa4e4a4e9e207467cd4a0f2c" },
-                    { YandexDiskAuth.KEY_RETURN_URL, @"http://localhost:8000/oauth/" },
-                },
-                ObjectiveTypes = new List<ObjectiveTypeDto>()
-                {
-                    new ObjectiveTypeDto() { Name = "YandexDisk_Issue" },
-                },
-            };
-
-            return type;
+            await InitiateManagerForSynchronization(info);
+            return YandexConnectionContext.CreateContext(manager);
         }
 
+        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        {
+            await InitiateManagerForSynchronization(info);
+            return new CommonConnectionStorage(manager);
+        }
+
+        private async Task InitiateManagerForSynchronization(ConnectionInfoExternalDto info)
+        {
+            if (info.AuthFieldValues == null || !info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
+            {
+                await Connect(info);
+                return;
+            }
+
+            InitiateManager(info);
+        }
+
+        private void InitiateManager(ConnectionInfoExternalDto info)
+        {
+            var token = info.AuthFieldValues[AUTH_FIELD_KEY_TOKEN];
+            manager = new YandexManager(new YandexDiskController(token));
+        }
     }
 }

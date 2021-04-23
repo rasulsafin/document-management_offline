@@ -232,6 +232,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/items/{1}.
+        /// </summary>
+        internal static string GetProjectsItemMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsItemMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects.
         /// </summary>
         internal static string GetProjectsOfHubMethod {
@@ -246,6 +255,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string GetTopFoldersMethod {
             get {
                 return ResourceManager.GetString("GetTopFoldersMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /userprofile/v1/users/@me.
+        /// </summary>
+        internal static string GetUsersMeMethod {
+            get {
+                return ResourceManager.GetString("GetUsersMeMethod", resourceCulture);
             }
         }
         

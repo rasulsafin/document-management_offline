@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Connection.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using MRS.DocumentManagement.Connection.Utils;
 
 namespace MRS.DocumentManagement.Connection
 {
@@ -53,7 +53,7 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:href":
-                           // result.Href = GetValueElement(element);
+                            result.Href = GetValueElement(element);
                             break;
                         case "d:propstat":
                             GetPropStatus(result, element);
@@ -63,7 +63,6 @@ namespace MRS.DocumentManagement.Connection
                             break;
                         default:
                             throw new XmlException($"GetElement: Неизвестный тег [{element.Name}]");
-                            break;
                     }
                 }
                 else
@@ -74,6 +73,9 @@ namespace MRS.DocumentManagement.Connection
 
             return result;
         }
+
+        internal void SetHref(string href)
+            => Href = href;
 
         private static string GetValueElement(XmlElement element)
         {
@@ -89,14 +91,13 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:status":
-                           // result.Status = GetValueElement(element);
+                            result.Status = GetValueElement(element);
                             break;
                         case "d:prop":
                             GetProp(result, element);
                             break;
                         default:
                             throw new XmlException($"GetPropStatus: Неизвестный тег [{element.Name}]");
-                            break;
                     }
                 }
                 else
@@ -118,7 +119,7 @@ namespace MRS.DocumentManagement.Connection
                             result.CreationDate = GetDateElement(element);
                             break;
                         case "d:displayname":
-                           // result.DisplayName = GetValueElement(element);
+                            result.DisplayName = GetValueElement(element);
                             break;
                         case "d:getcontentlength":
                             result.ContentLength = GetUlongElement(element);
@@ -130,7 +131,7 @@ namespace MRS.DocumentManagement.Connection
                             GetResourceType(result, element);
                             break;
                         case "d:getcontenttype":
-                           // result.ContentType = GetValueElement(element);
+                            result.ContentType = GetValueElement(element);
                             break;
                         case "mulca_file_url":
                             result.MulcaFileUrl = GetValueElement(element);
@@ -139,14 +140,13 @@ namespace MRS.DocumentManagement.Connection
                             result.ETag = GetValueElement(element);
                             break;
                         case "file_url":
-                           // result.FileUrl = GetValueElement(element);
+                            result.FileUrl = GetValueElement(element);
                             break;
                         case "mulca_digest_url":
                             result.MulcaDigestUrl = GetValueElement(element);
                             break;
                         default:
                             throw new XmlException($"GetProp: Неизвестный тег [{element.Name}]");
-                            break;
                     }
                 }
                 else
@@ -187,16 +187,15 @@ namespace MRS.DocumentManagement.Connection
                     switch (element.Name)
                     {
                         case "d:collection":
-                           // result.IsDirectory = true;
+                            result.IsDirectory = true;
                             break;
                         default:
                             throw new XmlException($"GetResourcetype: Неизвестный тег [{element.Name}]");
-                            break;
                     }
                 }
                 else if (node is XmlText text)
                 {
-                    //result.ResourceType = text.Value;
+                    result.ResourceType = text.Value;
                 }
                 else
                 {

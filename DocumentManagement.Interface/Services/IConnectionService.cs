@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Adds new ConnectionInfo and links it to User.
         /// </summary>
         /// <param name="connectionInfo">ConnectionInfo to create.</param>
-        /// <returns>True if ConnectionInfo was succesfuly created.</returns>
+        /// <returns>True if ConnectionInfo was successfully created.</returns>
         Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto connectionInfo);
 
         /// <summary>
@@ -27,11 +27,11 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Connects user to Remote connection(e.g. YandexDisk, TDMS, BIM360), using user's ConnectionInfo.
         /// </summary>
         /// <param name="userID">User's ID.</param>
-        /// <returns>Status of the connection.</returns>
-        Task<ConnectionStatusDto> Connect(ID<UserDto> userID);
+        /// <returns>Id of the created long request.</returns>
+        Task<RequestID> Connect(ID<UserDto> userID);
 
         /// <summary>
-        /// Gets current stutus of user's connetion.
+        /// Gets current status of user's connection.
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Status of the connection.</returns>
@@ -45,25 +45,11 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
         Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID);
 
-        #region TODO
-
-        // TODO: Syncronization!
-        // Task<bool> StartSyncronization(ID<UserDto> userID);
-        // Task<bool> StopSyncronization(ID<UserDto> userID);
-        // Task<?> GetProgressSyncronization(ConnectionInfoDto info);
-        //
-        // OR
-        //
-        // Task<bool> Sync(System.IProgress<SyncData.ProgressSync> prog, System.Threading.CancellationToken token);
-
-        // TODO: In case user can have several connections?
-        // Task<ConnectionInfoDto> GetCurrentConnection(ID<UserDto> userId);
-
-        // TODO: If we need different method than connect?
-        // Task<bool> Reconnect(ConnectionInfoToCreateDto connectionInfo);
-
-        // TODO: Update connectionInfo from user's request?
-        // Task<bool> Update(ConnectionInfoDto connectionInfo);
-        #endregion
+        /// <summary>
+        /// Synchronize user's data.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <returns>Id of the created long request.</returns>
+        Task<RequestID> Synchronize(ID<UserDto> userID);
     }
 }

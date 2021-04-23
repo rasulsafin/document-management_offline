@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using TDMS;
 
 namespace MRS.DocumentManagement.Connection.Tdms.Mappers
@@ -10,6 +10,12 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
     public class DefectMapper : IModelMapper<ObjectiveExternalDto, TDMSObject>
     {
         private static readonly string SPLITTER = ";";
+        private readonly TDMSApplication tdms;
+
+        public DefectMapper(TDMSApplication tdms)
+        {
+            this.tdms = tdms;
+        }
 
         public ObjectiveExternalDto ToDto(TDMSObject tdmsObject)
         {
@@ -21,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.AuthorExternalID = tdmsObject.CreateUser.SysName;
             objectiveDto.ObjectiveType = new ObjectiveTypeExternalDto()
             {
-                Name = ObjectTypeID.DEFECT,
+                ExternalId = ObjectTypeID.DEFECT,
             };
             objectiveDto.CreationDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.START_DATE].Value);
             objectiveDto.DueDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.DUE_DATE].Value);
@@ -34,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.Title = tdmsObject.Attributes[AttributeID.NORM_DOC].Value.ToString();
             objectiveDto.Description = tdmsObject.Attributes[AttributeID.DESCRIPTION].Value.ToString();
             objectiveDto.Status = GetStatus(tdmsObject.StatusName);
-            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>(); // TODO: DynamicField
+            objectiveDto.DynamicFields = GetDynamicFields(tdmsObject);
 
             return objectiveDto;
         }
@@ -57,16 +63,13 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 model.Attributes[AttributeID.GUID].Value = SetBimElements(objectDto.BimElements);
             }
 
-            var parent = TdmsConnection.TDMS.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
+            var parent = tdms.GetObjectByGUID(objectDto.ParentObjectiveExternalID);
 
             model.Attributes[AttributeID.OBJECT_LINK].Value = parent.Attributes[AttributeID.OBJECT_LINK];
             model.Attributes[AttributeID.JOB_LINK].Value = parent;
             model.Attributes[AttributeID.PARENT].Value = parent;
 
             model.Attributes[AttributeID.NUMBER].Value = parent.Objects.ObjectsByDef(ObjectTypeID.DEFECT).Count;
-
-            // TODO: DynamicField
-            // model.Attributes[AttributeID.BUILDER].Value = ;
 
             return model;
         }
@@ -76,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             if (bimElements == null)
                 return string.Empty;
 
-            return string.Join(SPLITTER, bimElements.Select(b => b.GlobalID));
+            return JsonConvert.SerializeObject(bimElements);
         }
 
         private string SetStatus(ObjectiveStatus status) => status switch
@@ -87,27 +90,49 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         };
 
         private ObjectiveStatus GetStatus(string statusTDMS)
-          =>  statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Ready :
+          => statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Ready :
               statusTDMS == StatusID.DEFECT_INPROGRESS ? ObjectiveStatus.InProgress :
               statusTDMS == StatusID.DEFECT_CREATED ? ObjectiveStatus.Open :
               ObjectiveStatus.Undefined;
 
         private TDMSUser GetUser(string id) =>
-            TdmsConnection.TDMS.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
+            tdms.Users.Cast<TDMSUser>().FirstOrDefault(u => u.SysName == id);
 
         private ICollection<BimElementExternalDto> GetBimElemenents(TDMSObject tdmsObject)
         {
-            var list = new List<BimElementExternalDto>();
-            var links = tdmsObject.Attributes[AttributeID.GUID].Value.ToString().Split(SPLITTER, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string link in links)
-            {
-                list.Add(new BimElementExternalDto()
-                {
-                    GlobalID = link,
-                });
-            }
+            var links = tdmsObject.Attributes[AttributeID.GUID].Value.ToString();
+            var list = JsonConvert.DeserializeObject<List<BimElementExternalDto>>(links);
 
-            return list;
+            return list ?? new List<BimElementExternalDto>();
+        }
+
+        private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
+        {
+            var contractor = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.BUILDER].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.BUILDER].Description,
+                Type = DynamicFieldType.ENUM,
+                Value = tdmsObject.Attributes[AttributeID.BUILDER].Object?.GUID,
+            };
+
+            var company = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.COMPANY].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.COMPANY].Description,
+                Type = DynamicFieldType.ENUM,
+                Value = tdmsObject.Attributes[AttributeID.COMPANY].Object?.GUID,
+            };
+
+            var comment = new DynamicFieldExternalDto()
+            {
+                ExternalID = tdmsObject.Attributes[AttributeID.COMMENT].AttributeDefName,
+                Name = tdmsObject.Attributes[AttributeID.COMMENT].Description,
+                Type = DynamicFieldType.STRING,
+                Value = tdmsObject.Attributes[AttributeID.COMMENT].Value?.ToString(),
+            };
+
+            return new List<DynamicFieldExternalDto>() { comment, contractor, company };
         }
     }
 }

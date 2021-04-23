@@ -4,7 +4,8 @@ namespace MRS.DocumentManagement.Tests
 {
     internal class UserComparer : AbstractModelComparer<UserDto>
     {
-        public UserComparer(bool ignoreIDs) : base(ignoreIDs)
+        public UserComparer(bool ignoreIDs)
+            : base(ignoreIDs)
         {
         }
 

@@ -1,9 +1,11 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,11 +13,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
-//using MRS.DocumentManagement.Connection.Synchronizer;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Synchronizer;
 using MRS.DocumentManagement.Utility;
+using Serilog;
 
 namespace MRS.DocumentManagement.Api
 {
@@ -29,6 +28,13 @@ namespace MRS.DocumentManagement.Api
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
             services.AddDbContext<Database.DMContext>(options => options.UseSqlite(connection));
+
+            services.AddLocalization(options => options.ResourcesPath = "Resources");
+            services.AddMvc()
+                    .AddDataAnnotationsLocalization(options =>
+                    {
+                        options.DataAnnotationLocalizerProvider = (type, factory) => factory.Create(typeof(SharedLocalization));
+                    });
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -46,11 +52,6 @@ namespace MRS.DocumentManagement.Api
                     };
                 });
 
-            // Mapping
-            services.AddTransient<ConnectionTypeAppPropertiesResolver>();
-            services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
-            services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
-            services.AddTransient<ConnectionInfoDtoAuthFieldValuesResolver>();
             services.AddAutoMapper(cfg => cfg.AddProfile<MappingProfile>());
 
             services.AddControllers().AddNewtonsoftJson(opt =>
@@ -62,33 +63,22 @@ namespace MRS.DocumentManagement.Api
 
             services.AddSwaggerGen(c =>
             {
+                var assemblyName = Assembly.GetExecutingAssembly().GetName();
                 c.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "0.8.1",
-                    Title = "BRIO DM",
+                    Version = assemblyName.Version?.ToString(),
+                    Title = assemblyName.Name,
                     Description = "DM API details",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlFile = $"{assemblyName.Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
 
-            services.AddScoped<ItemHelper>();
-
-            services.AddScoped<ISyncService, SyncService>();
-            services.AddScoped<IAuthorizationService, AuthorizationService>();
-            services.AddScoped<IConnectionService, ConnectionService>();
-            services.AddScoped<IItemService, ItemService>();
-            services.AddScoped<IObjectiveService, ObjectiveService>();
-            services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
-            services.AddScoped<IProjectService, ProjectService>();
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
-
-            services.AddSingleton<CryptographyHelper>();
-            services.AddSingleton<SyncManager>();
+            services.AddLogging(loggingBuilder => loggingBuilder.AddSerilog(dispose: true));
+            services.AddDocumentManagement();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -101,8 +91,22 @@ namespace MRS.DocumentManagement.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
                 c.RoutePrefix = string.Empty;
             });
+
             app.UseRouting();
             app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            var supportedCultures = new[]
+            {
+                new CultureInfo("ru-RU"),
+                new CultureInfo("en-US"),
+            };
+
+            app.UseRequestLocalization(options =>
+            {
+                options.SupportedCultures = supportedCultures;
+                options.SupportedUICultures = supportedCultures;
+                options.DefaultRequestCulture = new RequestCulture("en-US");
+            });
 
             // TODO: uncomment and add Authenticate attribute to all controllers when roles are ready
             // app.UseAuthentication();

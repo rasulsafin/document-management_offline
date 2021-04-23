@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.AuthorExternalID = tdmsObject.CreateUser.SysName;
             objectiveDto.ObjectiveType = new ObjectiveTypeExternalDto()
             {
-                Name = ObjectTypeID.WORK,
+                ExternalId = ObjectTypeID.WORK,
             };
             objectiveDto.CreationDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.START_DATE].Value);
             objectiveDto.DueDate = Convert.ToDateTime(tdmsObject.Attributes[AttributeID.DUE_DATE].Value);
@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
             objectiveDto.Title = tdmsObject.Attributes[AttributeID.WORK_NAME].Value.ToString();
             objectiveDto.Description = tdmsObject.Description;
             objectiveDto.Status = GetStatus(tdmsObject.StatusName);
-            objectiveDto.DynamicFields = new List<DynamicFieldExternalDto>(); // TODO: Dynamic fields as Volumes and Operations
+            objectiveDto.DynamicFields = GetDynamicFields(tdmsObject);
             objectiveDto.BimElements = GetBimElemenents(tdmsObject);
 
             return objectiveDto;
@@ -48,6 +48,8 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
                 list.Add(new BimElementExternalDto()
                 {
                     GlobalID = link.Attributes[AttributeID.ENTITY_GLOBAL_ID].Value.ToString(),
+                    ParentName = link.Uplinks[0]?.Attributes[AttributeID.FILE_NAME]?.Value.ToString(),
+                    ElementName = link.Attributes[AttributeID.ENTITY_NAME]?.Value.ToString(),
                 });
             }
 
@@ -57,18 +59,33 @@ namespace MRS.DocumentManagement.Connection.Tdms.Mappers
         private ObjectiveStatus GetStatus(string statusTDMS)
             => statusTDMS == StatusID.WORK_COMPLETED ? ObjectiveStatus.Ready :
                 statusTDMS == StatusID.WORK_IN_PROGRESS ? ObjectiveStatus.InProgress :
-                statusTDMS == StatusID.WORK_LATE        ? ObjectiveStatus.Late :
-                statusTDMS == StatusID.WORK_OPEN        ? ObjectiveStatus.Open :
+                statusTDMS == StatusID.WORK_LATE ? ObjectiveStatus.Late :
+                statusTDMS == StatusID.WORK_OPEN ? ObjectiveStatus.Open :
                 ObjectiveStatus.Undefined;
 
         private string SetStatus(ObjectiveStatus status)
             => status switch
+            {
+                ObjectiveStatus.Ready => StatusID.WORK_COMPLETED,
+                ObjectiveStatus.InProgress => StatusID.WORK_IN_PROGRESS,
+                ObjectiveStatus.Late => StatusID.WORK_LATE,
+                ObjectiveStatus.Open => StatusID.WORK_OPEN,
+                _ => StatusID.WORK_OPEN,
+            };
+
+        private ICollection<DynamicFieldExternalDto> GetDynamicFields(TDMSObject tdmsObject)
         {
-            ObjectiveStatus.Ready => StatusID.WORK_COMPLETED,
-            ObjectiveStatus.InProgress => StatusID.WORK_IN_PROGRESS,
-            ObjectiveStatus.Late => StatusID.WORK_LATE,
-            ObjectiveStatus.Open => StatusID.WORK_OPEN,
-            _ => StatusID.WORK_OPEN,
-        };
+            //// TODO: Dynamic fields
+            //// - Volumes (DF):
+            ////    - Volume (float)
+            ////    - Price (float)
+            ////    - Ammount (float)
+            ////    - Status (bool)
+            //// - Operations (DF):
+            ////    - name (string),
+            ////    - status (bool)
+
+            return new List<DynamicFieldExternalDto>() { };
+        }
     }
 }
