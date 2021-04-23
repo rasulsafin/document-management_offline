@@ -1,6 +1,6 @@
 namespace MRS.DocumentManagement.Synchronization.Models
 {
-    public enum SynchronizingAction
+    internal enum SynchronizingAction
     {
         Nothing,
         Merge,
