@@ -53,7 +53,6 @@ namespace MRS.DocumentManagement.Launcher
             var options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                Encoder = JavaScriptEncoder.Default,
             };
 
             string json = JsonSerializer.Serialize(data, options);

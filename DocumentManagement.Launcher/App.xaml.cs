@@ -10,12 +10,12 @@ namespace MRS.DocumentManagement.Launcher
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private const string DEVELOP = "--develop";
-        private const string LOCALIZATE = "language=";
+        private const string DEVELOP = "develop";
+        private const string LANGUAGE = "language=";
         private TaskbarIcon notifyIcon;
         private Mutex mutex;
 
-        public static bool Develop { get; private set; } = false;
+        public static bool IsDevelopMode { get; private set; } = false;
 
         public void Dispose() => mutex?.Dispose();
 
@@ -25,11 +25,11 @@ namespace MRS.DocumentManagement.Launcher
             {
                 if (arg.ToLower() == DEVELOP)
                 {
-                    Develop = true;
+                    IsDevelopMode = true;
                 }
-                else if (arg.ToLower().StartsWith(LOCALIZATE))
+                else if (arg.ToLower().StartsWith(LANGUAGE))
                 {
-                    var culture = arg.Replace(LOCALIZATE, string.Empty);
+                    var culture = arg.Replace(LANGUAGE, string.Empty);
                     Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(culture);
                 }
             }

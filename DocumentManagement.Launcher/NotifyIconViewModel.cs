@@ -15,15 +15,15 @@ namespace MRS.DocumentManagement.Launcher
         private Process dmProcess;
         private bool isConsoleVisible = false;
         private Process notepadProcess;
-        private bool isSwaggerVisuble;
-        private bool isSettingsFileVisuble;
+        private bool isSwaggerVisible;
+        private bool isSettingsFileVisible;
         #endregion
 
         #region constructor
         public NotifyIconViewModel()
         {
-            IsSwaggerVisuble = App.Develop;
-            IsSettingsFileVisuble = App.Develop;
+            IsSwaggerVisible = App.IsDevelopMode;
+            IsSettingsFileVisible = App.IsDevelopMode;
             ToggleConsoleCommand = new RelayCommand(ToggleConsoleVisibility);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
@@ -47,16 +47,16 @@ namespace MRS.DocumentManagement.Launcher
             set => SetProperty(ref isConsoleVisible, value);
         }
 
-        public bool IsSwaggerVisuble
+        public bool IsSwaggerVisible
         {
-            get => isSwaggerVisuble;
-            set => SetProperty(ref isSwaggerVisuble, value);
+            get => isSwaggerVisible;
+            set => SetProperty(ref isSwaggerVisible, value);
         }
 
-        public bool IsSettingsFileVisuble
+        public bool IsSettingsFileVisible
         {
-            get => isSettingsFileVisuble;
-            set => SetProperty(ref isSettingsFileVisuble, value);
+            get => isSettingsFileVisible;
+            set => SetProperty(ref isSettingsFileVisible, value);
         }
 
         public RelayCommand ExitApplicationCommand { get; }
