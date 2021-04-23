@@ -10,42 +10,42 @@ namespace MRS.DocumentManagement.Interface.Services
     public interface IObjectiveService
     {
         /// <summary>
-        /// Gets new objective and writes in to database.
+        /// Get new objective and write in to database.
         /// </summary>
         /// <param name="data">Data for new objective.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <returns>Added objective.</returns>
         Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data);
 
         /// <summary>
-        /// Deletes objetives from database by its id.
+        /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <returns>True id objective was deleted.</returns>
         Task<bool> Remove(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
-        /// Updates existing objective.
+        /// Update existing objective.
         /// </summary>
         /// <param name="objectiveData">Objective to  update.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <returns>True if updated successfully.</returns>
         Task<bool> Update(ObjectiveDto objectiveData);
 
         /// <summary>
-        /// Finds and returns objective by id if exists. Returns null otherwise.
+        /// Find and return objective by id if exists.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <returns>Found objective.</returns>
         Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
-        /// Returns list of objectives, linked to specific project.
+        /// Return list of objectives, linked to specific project.
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
-        /// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
+        /// <returns>Collection of objectives.</returns>
         Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID);
 
         /// <summary>
-        /// Generates report about selected objectives.
+        /// Generate report about selected objectives.
         /// </summary>
         /// <param name="objectives">List of objective id's.</param>
         /// <param name="path">Path to report storage.</param>
@@ -53,12 +53,5 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="projectName">Name of the project.</param>
         /// <returns>Object representing the result of report creation process.</returns>
         Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
-
-        ///// <summary>
-        ///// Gets list of dynamic fields owned by objective.
-        ///// </summary>
-        ///// <param name="objectiveID">Objective's ID.</param>
-        ///// <returns></returns>
-        //Task<ICollection<IDynamicFieldDto>> GetRequiredDynamicFields(ID<ObjectiveDto> objectiveID);
     }
 }

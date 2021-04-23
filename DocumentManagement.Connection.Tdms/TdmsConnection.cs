@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -12,11 +13,7 @@ namespace MRS.DocumentManagement.Connection.Tdms
     {
         private static TDMSApplication tdms;
 
-        public TdmsConnection()
-        {
-        }
-
-        public Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        public Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             tdms = new TDMSApplication();
 

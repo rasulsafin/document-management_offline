@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -30,6 +30,11 @@ namespace MRS.DocumentManagement.Services
         {
             try
             {
+                var type = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == typeName);
+
+                if (type != null)
+                    throw new ArgumentException("This type name is already being used");
+
                 var connectionType = new ConnectionType { Name = typeName };
                 await context.ConnectionTypes.AddAsync(connectionType);
                 await context.SaveChangesAsync();
@@ -38,43 +43,74 @@ namespace MRS.DocumentManagement.Services
             catch (DbUpdateException ex)
             {
                 logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
-                throw new InvalidDataException("Can't add new objective type", ex.InnerException);
+                throw;
             }
         }
 
         public async Task<ConnectionTypeDto> Find(ID<ConnectionTypeDto> id)
         {
-            var dbConnectionType = await context.ConnectionTypes
-                .Include(x => x.AppProperties)
-                .Include(x => x.AuthFieldNames)
-                .FirstOrDefaultAsync(x => x.ID == (int)id);
-            return dbConnectionType == null ? null : mapper.Map<ConnectionTypeDto>(dbConnectionType);
+            try
+            {
+                var dbConnectionType = await context.ConnectionTypes
+                    .Include(x => x.AppProperties)
+                    .Include(x => x.AuthFieldNames)
+                    .FirstOrDefaultAsync(x => x.ID == (int)id);
+                if (dbConnectionType == null)
+                    throw new ArgumentNullException($"ConnectionType with key {id} was not found");
+
+                return mapper.Map<ConnectionTypeDto>(dbConnectionType);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ConnectionType {Id}", id);
+                throw;
+            }
         }
 
         public async Task<ConnectionTypeDto> Find(string name)
         {
-            var dbConnectionType = await context.ConnectionTypes
-                .Include(x => x.AppProperties)
-                .Include(x => x.AuthFieldNames)
-                .FirstOrDefaultAsync(t => t.Name == name);
-            return dbConnectionType == null ? null : mapper.Map<ConnectionTypeDto>(dbConnectionType);
+            try
+            {
+                var dbConnectionType = await context.ConnectionTypes
+                    .Include(x => x.AppProperties)
+                    .Include(x => x.AuthFieldNames)
+                    .FirstOrDefaultAsync(t => t.Name == name);
+
+                if (dbConnectionType == null)
+                    throw new ArgumentNullException($"ConnectionType with name {name} was not found");
+
+                return mapper.Map<ConnectionTypeDto>(dbConnectionType);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get ConnectionType {Name}", name);
+                throw;
+            }
         }
 
         public async Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes()
         {
-            var dbList = await context.ConnectionTypes
-                .Include(x => x.AppProperties)
-                .Include(x => x.AuthFieldNames)
-                .ToListAsync();
-            return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
+            try
+            {
+                var dbList = await context.ConnectionTypes
+                    .Include(x => x.AppProperties)
+                    .Include(x => x.AuthFieldNames)
+                    .ToListAsync();
+                return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "Can't get list of all registered connection types");
+                throw;
+            }
         }
 
         public async Task<bool> RegisterAll()
         {
-            var listOfTypes = ConnectionCreator.GetAllConnectionTypes();
-
             try
             {
+                var listOfTypes = ConnectionCreator.GetAllConnectionTypes();
+
                 foreach (var typeDto in listOfTypes)
                 {
                     var type = await context.ConnectionTypes
@@ -118,12 +154,10 @@ namespace MRS.DocumentManagement.Services
 
                 return true;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Something went wrong with presented ConnectionTypes");
-                throw new InvalidDataException(
-                    "Something went wrong with presented ConnectionTypes",
-                    ex.InnerException);
+                throw;
             }
         }
 
@@ -133,16 +167,16 @@ namespace MRS.DocumentManagement.Services
             {
                 var type = await context.ConnectionTypes.FindAsync((int)id);
                 if (type == null)
-                    return false;
+                    throw new ArgumentNullException($"ConnectionType with key {id} was not found");
 
                 context.ConnectionTypes.Remove(type);
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove connection type with key {ID}", id);
-                throw new InvalidDataException($"Can't remove connection type with key {id}", ex.InnerException);
+                throw;
             }
         }
     }
