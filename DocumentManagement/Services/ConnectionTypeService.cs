@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 
@@ -24,13 +25,17 @@ namespace MRS.DocumentManagement.Services
             this.context = context;
             this.mapper = mapper;
             this.logger = logger;
+            logger.LogTrace("ConnectionTypeService created");
         }
 
         public async Task<ID<ConnectionTypeDto>> Add(string typeName)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Add started with typeName = {@TypeName}", typeName);
             try
             {
                 var type = await context.ConnectionTypes.FirstOrDefaultAsync(x => x.Name == typeName);
+                logger.LogDebug("Found type: {@ConnectionType}", type);
 
                 if (type != null)
                     throw new ArgumentException("This type name is already being used");
@@ -49,12 +54,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionTypeDto> Find(ID<ConnectionTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Find started with id = {ID}", id);
             try
             {
                 var dbConnectionType = await context.ConnectionTypes
                     .Include(x => x.AppProperties)
                     .Include(x => x.AuthFieldNames)
                     .FirstOrDefaultAsync(x => x.ID == (int)id);
+                logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
                 if (dbConnectionType == null)
                     throw new ArgumentNullException($"ConnectionType with key {id} was not found");
 
@@ -69,12 +77,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ConnectionTypeDto> Find(string name)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Find started with name = {Name}", name);
             try
             {
                 var dbConnectionType = await context.ConnectionTypes
                     .Include(x => x.AppProperties)
                     .Include(x => x.AuthFieldNames)
                     .FirstOrDefaultAsync(t => t.Name == name);
+                logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
 
                 if (dbConnectionType == null)
                     throw new ArgumentNullException($"ConnectionType with name {name} was not found");
@@ -90,12 +101,15 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ConnectionTypeDto>> GetAllConnectionTypes()
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetAllConnectionTypes started");
             try
             {
                 var dbList = await context.ConnectionTypes
                     .Include(x => x.AppProperties)
                     .Include(x => x.AuthFieldNames)
                     .ToListAsync();
+                logger.LogDebug("Found connection types : {@DBList}", dbList);
                 return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
             }
             catch (Exception e)
@@ -107,17 +121,22 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> RegisterAll()
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("RegisterAll started");
             try
             {
                 var listOfTypes = ConnectionCreator.GetAllConnectionTypes();
+                logger.LogDebug("Creator returns: {@ListOfTypes}", listOfTypes);
 
                 foreach (var typeDto in listOfTypes)
                 {
+                    logger.LogTrace("Registration for {Name}", typeDto.Name);
                     var type = await context.ConnectionTypes
                        .Include(x => x.AppProperties)
                        .Include(x => x.ObjectiveTypes)
                        .Include(x => x.AuthFieldNames)
                        .FirstOrDefaultAsync(x => x.Name == typeDto.Name);
+                    logger.LogDebug("Found connection type: {@Type}", type);
                     var update = type != null;
 
                     if (update)
@@ -141,11 +160,13 @@ namespace MRS.DocumentManagement.Services
                             authFieldName.ConnectionTypeID = type.ID;
                         }
 
+                        logger.LogDebug("Updating info for connection type: {@Type}", type);
                         context.ConnectionTypes.Update(type);
                     }
                     else
                     {
                         type = mapper.Map<ConnectionType>(typeDto);
+                        logger.LogDebug("Adding info for connection type: {@Type}", type);
                         await context.ConnectionTypes.AddAsync(type);
                     }
 
@@ -163,9 +184,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ConnectionTypeDto> id)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Remove started with id = {ID}", id);
             try
             {
                 var type = await context.ConnectionTypes.FindAsync((int)id);
+                logger.LogDebug("Found type: {@Type}", type);
                 if (type == null)
                     throw new ArgumentNullException($"ConnectionType with key {id} was not found");
 

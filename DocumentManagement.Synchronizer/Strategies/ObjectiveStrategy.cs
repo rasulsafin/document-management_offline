@@ -14,19 +14,24 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Synchronization.Utils;
+using MRS.DocumentManagement.Synchronization.Utils.Linkers;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
     internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
-        private readonly ItemStrategy itemStrategy;
-        private readonly DynamicFieldStrategy dynamicFieldStrategy;
+        private readonly ItemStrategy<ObjectiveItemLinker> itemStrategy;
+        private readonly DynamicFieldStrategy<ObjectiveDynamicFieldLinker> dynamicFieldStrategy;
 
-        public ObjectiveStrategy(IMapper mapper)
-            : base(mapper)
+        public ObjectiveStrategy(
+            DMContext context,
+            IMapper mapper,
+            ItemStrategy<ObjectiveItemLinker> itemStrategy,
+            DynamicFieldStrategy<ObjectiveDynamicFieldLinker> dynamicFieldStrategy)
+            : base(context, mapper)
         {
-            itemStrategy = new ItemStrategy(mapper, LinkItem, UnlinkItem);
-            dynamicFieldStrategy = new DynamicFieldStrategy(mapper, LinkDynamicField, UpdateDynamicField, UnlinkDynamicField);
+            this.itemStrategy = itemStrategy;
+            this.dynamicFieldStrategy = dynamicFieldStrategy;
         }
 
         public override IReadOnlyCollection<Objective> Map(IReadOnlyCollection<ObjectiveExternalDto> externalDtos)
@@ -78,7 +83,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 CreateObjectiveParentLink(data, tuple);
-                var project = await data.Context.Projects.Include(x => x.SynchronizationMate)
+                var project = await context.Projects.Include(x => x.SynchronizationMate)
                    .FirstOrDefaultAsync(x => x.ID == tuple.Local.ProjectID);
                 tuple.Synchronized.ProjectID = project?.SynchronizationMateID ?? 0;
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
@@ -116,7 +121,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 CreateObjectiveParentLink(data, tuple);
                 tuple.Synchronized.ProjectID = tuple.Remote.ProjectID;
                 var id = tuple.Synchronized.ProjectID;
-                tuple.Local.Project = await data.Context.Projects
+                tuple.Local.Project = await context.Projects
                    .FirstOrDefaultAsync(x => x.SynchronizationMateID == id);
 
                 MergeBimElements(tuple);
@@ -226,7 +231,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 data,
                 connectionContext,
                 tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(), // new list
-                token, 
+                token,
                 item
                     => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
                     (item.SynchronizationMate != null &&
@@ -247,82 +252,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return itemsResult.Concat(fieldResult).ToList();
         }
 
-        private Task LinkItem(DMContext context, Item item, object parent, EntityType entityType)
-        {
-            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
-            objective.Items ??= new List<ObjectiveItem>();
-            objective.Items.Add(
-                new ObjectiveItem
-                {
-                    Item = item,
-                    ObjectiveID = objective.ID,
-                });
-
-            if (entityType == EntityType.Remote)
-            {
-                item.Objectives ??= new List<ObjectiveItem>
-                {
-                    new ObjectiveItem
-                    {
-                        Item = item,
-                        ObjectiveID = objective.ID,
-                        Objective = objective,
-                    },
-                };
-            }
-
-            return Task.CompletedTask;
-        }
-
-        private Task UnlinkItem(DMContext context, Item item, object parent, EntityType entityType)
-        {
-            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
-
-            if (entityType == EntityType.Remote)
-            {
-                objective.Items.Remove(objective.Items.First(x => Equals(x.Item, item)));
-                return Task.CompletedTask;
-            }
-
-            item.Objectives.Remove(item.Objectives.First(x => Equals(x.Objective, objective)));
-            if (item.Project == null && item.Objectives?.Count == 0)
-                context.Items.Remove(item);
-            return Task.CompletedTask;
-        }
-
-        private Task UnlinkDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            var objective =  LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
-            field.Objective = null;
-
-            if (entityType == EntityType.Remote)
-                objective.DynamicFields.Remove(field);
-            else if (field.ParentFieldID == null)
-                context.DynamicFields.Remove(field);
-            else
-                context.DynamicFields.Update(field);
-            return Task.CompletedTask;
-        }
-
-        private Task UpdateDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
-            if (entityType != EntityType.Remote)
-                context.DynamicFields.Update(field);
-            return Task.CompletedTask;
-        }
-
-        private Task LinkDynamicField(DMContext context, DynamicField field, object parent, EntityType entityType)
-        {
-            var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
-            objective.DynamicFields ??= new List<DynamicField>();
-            objective.DynamicFields.Add(field);
-            return Task.CompletedTask;
-        }
-
         private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
         {
-            ItemStrategy.UpdateExternalIDs(
+            ItemStrategy<ObjectiveItemLinker>.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Concat(tuple.Synchronized.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Select(x => x.Item),
@@ -359,7 +291,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
             else if (tuple.Remote.ParentObjective != null)
             {
-                var allObjectives = data.Context.Objectives.Local.Concat(data.Context.Objectives).ToList();
+                var allObjectives = context.Objectives.Local.Concat(context.Objectives).ToList();
 
                 // ReSharper disable once PossibleMultipleEnumeration
                 tuple.Synchronized.ParentObjective = allObjectives

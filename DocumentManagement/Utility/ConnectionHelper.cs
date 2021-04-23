@@ -32,11 +32,14 @@ namespace MRS.DocumentManagement.Utility
             this.mapper = mapper;
             this.connectionFactory = connectionFactory;
             this.logger = logger;
+            logger.LogTrace("ConnectionHelper created");
         }
 
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
+            logger.LogTrace("GetConnectionInfoFromDb started with userID: {@UserID}", userID);
             User user = await FindUserFromDb(userID);
+            logger.LogDebug("Found user: {@User}", user);
             if (user == null)
                 throw new ArgumentNullException($"User with key {userID} was not found");
 
@@ -45,6 +48,7 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task<User> FindUserFromDb(int userID)
         {
+            logger.LogTrace("FindUserFromDb started with userID: {@UserID}", userID);
             return await context.Users
                             .Include(x => x.ConnectionInfo)
                             .FirstOrDefaultAsync(x => x.ID == userID);
@@ -52,6 +56,7 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(User user)
         {
+            logger.LogTrace("GetConnectionInfoFromDb started with user: {@User}", user);
             if (user == null)
                 return null;
 
@@ -69,13 +74,19 @@ namespace MRS.DocumentManagement.Utility
                     .ThenInclude(x => x.EnumerationValue)
                 .Include(x => x.AuthFieldValues)
                 .FirstOrDefaultAsync(x => x.ID == user.ConnectionInfoID);
+            logger.LogDebug("Found info: {@Info}", info);
 
             return info;
         }
 
         internal async Task<EnumerationType> LinkEnumerationTypes(EnumerationTypeExternalDto enumType, ConnectionInfo connectionInfo)
         {
+            logger.LogTrace(
+                "LinkEnumerationTypes started with enumType: {@EnumerationType} & connectionInfo: {@ConnectionInfo})",
+                enumType,
+                connectionInfo);
             var enumTypeDb = await CheckEnumerationTypeToLink(enumType, (int)connectionInfo.ID);
+            logger.LogDebug("Found type: {@EnumerationType}", enumTypeDb);
             if (enumTypeDb != null)
             {
                 connectionInfo.EnumerationTypes.Add(new ConnectionInfoEnumerationType
@@ -92,7 +103,13 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task LinkEnumerationValues(EnumerationValueExternalDto enumVal, EnumerationType type, ConnectionInfo connectionInfo)
         {
+            logger.LogTrace(
+                "LinkEnumerationValues started with enumVal: {@EnumerationValue}), type: {@EnumerationType} & {@ConnectionInfo}",
+                enumVal,
+                type,
+                connectionInfo);
             var enumValueDb = await CheckEnumerationValueToLink(enumVal, type, (int)connectionInfo.ID);
+            logger.LogDebug("Found value: {@EnumerationValue}", enumValueDb);
             if (enumValueDb == null)
                 return;
 
@@ -107,22 +124,30 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task<EnumerationType> CheckEnumerationTypeToLink(EnumerationTypeExternalDto enumTypeDto, int connectionInfoID)
         {
+            logger.LogTrace(
+                "CheckEnumerationTypeToLink started with type: {@EnumerationType} & connectionInfoID: {@ConnectionInfoID}",
+                enumTypeDto,
+                connectionInfoID);
             var enumTypeDb = await context.EnumerationTypes
                     .FirstOrDefaultAsync(i => i.ExternalId == enumTypeDto.ExternalID);
+            logger.LogDebug("Found type: {@EnumerationType}", enumTypeDb);
 
             if (enumTypeDb == null)
             {
                 enumTypeDb = mapper.Map<EnumerationType>(enumTypeDto);
+                logger.LogDebug("Mapped type: {@EnumerationType}", enumTypeDb);
                 var connectionType = context.ConnectionInfos.Include(x => x.ConnectionType).FirstOrDefault(x => x.ID == connectionInfoID).ConnectionType;
+                logger.LogDebug("Found type: {@ConnectionType}", connectionType);
                 enumTypeDb.ConnectionType = connectionType;
 
-                context.EnumerationTypes.Add(enumTypeDb);
+                await context.EnumerationTypes.AddAsync(enumTypeDb);
                 await context.SaveChangesAsync();
                 return enumTypeDb;
             }
 
             bool alreadyLinked = await context.ConnectionInfoEnumerationTypes
                         .AnyAsync(i => i.EnumerationTypeID == enumTypeDb.ID && i.ConnectionInfoID == connectionInfoID);
+            logger.LogDebug("Enumeration type is already linked: {IsLinked}", alreadyLinked);
 
             if (alreadyLinked)
                 return null;
@@ -132,20 +157,28 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task<EnumerationValue> CheckEnumerationValueToLink(EnumerationValueExternalDto enumValueDto, EnumerationType type, int connectionInfoID)
         {
+            logger.LogTrace(
+                "CheckEnumerationValueToLink started with enumValueDto: {@User}, type: {@EnumerationType}, connectionInfoID {@ConnectionInfoID}",
+                enumValueDto,
+                type,
+                connectionInfoID);
             var enumValueDb = await context.EnumerationValues
                     .FirstOrDefaultAsync(i => i.ExternalId == enumValueDto.ExternalID);
+            logger.LogDebug("Found value: {@EnumerationValue}", enumValueDb);
 
             if (enumValueDb == null)
             {
                 enumValueDb = mapper.Map<EnumerationValue>(enumValueDto);
+                logger.LogDebug("Mapped value: {@EnumerationValue}", enumValueDb);
                 enumValueDb.EnumerationType = type;
-                context.EnumerationValues.Add(enumValueDb);
+                await context.EnumerationValues.AddAsync(enumValueDb);
                 await context.SaveChangesAsync();
                 return enumValueDb;
             }
 
             bool alreadyLinked = await context.ConnectionInfoEnumerationValues
                         .AnyAsync(i => i.EnumerationValueID == enumValueDb.ID && i.ConnectionInfoID == connectionInfoID);
+            logger.LogDebug("Enumeration value is already linked: {IsLinked}", alreadyLinked);
 
             if (alreadyLinked)
                 return null;
@@ -155,12 +188,18 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task UpdateEnumerationObjects(ConnectionInfo connectionInfo, ConnectionInfoExternalDto connectionInfoExternalDto)
         {
+            logger.LogTrace(
+                "UpdateEnumerationObjects started with connectionInfo: {@ConnectionInfo}, connectionInfoExternalDto: {@UpdatedConnectionInfo}",
+                connectionInfo,
+                connectionInfoExternalDto);
+
             // Update types stored in connection info
             var newTypes = connectionInfoExternalDto.EnumerationTypes ?? Enumerable.Empty<EnumerationTypeExternalDto>();
             var currentEnumerationTypes = connectionInfo.EnumerationTypes.ToList();
             var typesToRemove = currentEnumerationTypes?
                 .Where(x => newTypes.All(t => t.ExternalID != x.EnumerationType.ExternalId))
                 .ToList();
+            logger.LogDebug("Types to remove: {@Links}", typesToRemove);
             context.ConnectionInfoEnumerationTypes.RemoveRange(typesToRemove);
 
             // Update values stored in connection info
@@ -191,9 +230,11 @@ namespace MRS.DocumentManagement.Utility
 
         public async Task<RequestResult> ConnectToRemote(int userID, IProgress<double> progress, CancellationToken token)
         {
+            logger.LogTrace("ConnectToRemote started with userID: {@UserID}", userID);
             User user = await context.Users
                             .Include(x => x.ConnectionInfo)
                             .FirstOrDefaultAsync(x => x.ID == userID);
+            logger.LogDebug("Found user: {@User}", user);
             if (user == null)
             {
                 progress?.Report(1.0);
@@ -204,6 +245,7 @@ namespace MRS.DocumentManagement.Utility
 
             // Get connection info from user
             var connectionInfo = await GetConnectionInfoFromDb(user);
+            logger.LogDebug("Found connectionInfo: {@ConnectionInfo}", connectionInfo);
             if (connectionInfo == null)
             {
                 progress?.Report(1.0);
@@ -212,6 +254,7 @@ namespace MRS.DocumentManagement.Utility
 
             var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
             var connectionInfoExternalDto = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
+            logger.LogDebug("Mapped connectionInfoExternalDto: {@ConnectionInfo}", connectionInfoExternalDto);
 
             // Connect to Remote
             var status = new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK };
@@ -219,11 +262,13 @@ namespace MRS.DocumentManagement.Utility
 
             try
             {
+                logger.LogInformation("External connection started");
                 status = await connection.Connect(connectionInfoExternalDto, token);
+                logger.LogInformation("External connection finished");
             }
             catch (Exception e)
             {
-                logger.LogError(e, "Can't connect with info {@ConnectionInfoId}", connectionInfo.ID);
+                logger.LogError(e, "Can't connect with info {@ConnectionInfo}", connectionInfo);
                 progress?.Report(1.0);
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }

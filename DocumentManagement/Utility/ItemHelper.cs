@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
@@ -12,16 +13,25 @@ namespace MRS.DocumentManagement.Utility
 {
     public class ItemHelper
     {
+        private readonly ILogger<ItemHelper> logger;
+
+        public ItemHelper(ILogger<ItemHelper> logger)
+            => this.logger = logger;
+
         public async Task<Item> CheckItemToLink<TParent>(DMContext context, IMapper mapper, ItemDto item, TParent parent)
         {
+            logger.LogTrace("CheckItemToLink started with item: {@Item}, parent: {@Parent}", item, parent);
             var dbItem = await context.Items.Unsynchronized()
                                       .FirstOrDefaultAsync(i => i.ID == (int)item.ID) ??
                          await context.Items.Unsynchronized()
                                       .FirstOrDefaultAsync(i => i.RelativePath == item.RelativePath);
+            logger.LogDebug("Found item: {@Item}", dbItem);
 
             if (await ShouldCreateNewItem(dbItem, parent, context))
             {
+                logger.LogDebug("Should create new item");
                 dbItem = mapper.Map<Item>(item);
+                logger.LogDebug("Mapped item: {@Item}", dbItem);
                 await context.Items.AddAsync(dbItem);
                 await context.SaveChangesAsync();
                 return dbItem;
@@ -42,11 +52,14 @@ namespace MRS.DocumentManagement.Utility
                     break;
             }
 
+            logger.LogDebug("Already linked: {IsLinked}", alreadyLinked);
             return alreadyLinked ? null : dbItem;
         }
 
         private async Task<bool> ShouldCreateNewItem<TParent>(Item dbItem, TParent parent, DMContext context)
         {
+            logger.LogTrace("ShouldCreateNewItem started with item: {@Item}, parent: {@Parent}", dbItem, parent);
+
             // Check if item exists
             if (dbItem == null)
                 return true;
@@ -65,6 +78,7 @@ namespace MRS.DocumentManagement.Utility
             var item = await context.Items
                 .Unsynchronized()
                 .FirstOrDefaultAsync(x => x.ProjectID == projectID && x.RelativePath == dbItem.RelativePath);
+            logger.LogDebug("Found item: {@Item}", item);
 
             // Check if same item exists (linked to same project)
             if (item != default)
@@ -74,6 +88,7 @@ namespace MRS.DocumentManagement.Utility
                 .Where(x => x.Objective.ProjectID == projectID)
                 .Select(x => x.Item)
                 .FirstOrDefaultAsync(x => x == dbItem);
+            logger.LogDebug("Found item: {@Item}", item);
 
             // Check if same item exists (linked to any objectives in same project)
             return item == default;
