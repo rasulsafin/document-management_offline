@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Connection.GoogleDrive;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.GoogleDrive.Tests.ProjectInitializer
+namespace MRS.DocumentManagement.Connection.GoogleDrive.Tests.ProjectInitializer
 {
     /// <summary>
     /// Uncomment and run this tests to initialize standard project to test at the remote DM.

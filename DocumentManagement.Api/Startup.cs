@@ -13,7 +13,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MRS.DocumentManagement.Api.Validators;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 using Serilog;
 
 namespace MRS.DocumentManagement.Api

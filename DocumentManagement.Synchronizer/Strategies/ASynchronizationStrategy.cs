@@ -10,19 +10,22 @@ using Microsoft.EntityFrameworkCore.Query;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Synchronization.Utils;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
-    internal abstract class ASynchronizationStrategy<TDB, TDto>
+    internal abstract class ASynchronizationStrategy<TDB, TDto> : ISynchronizationStrategy<TDB, TDto>
         where TDB : class, ISynchronizable<TDB>, new()
     {
         protected readonly IMapper mapper;
+        protected readonly DMContext context;
         private readonly bool needSaveOnEachTuple = false;
 
-        protected ASynchronizationStrategy(IMapper mapper, bool needSaveOnEachTuple = true)
+        protected ASynchronizationStrategy(DMContext context, IMapper mapper, bool needSaveOnEachTuple = true)
         {
+            this.context = context;
             this.mapper = mapper;
             this.needSaveOnEachTuple = needSaveOnEachTuple;
         }
@@ -31,23 +34,22 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
             CancellationToken token,
-            Expression<Func<TDB, bool>> filter = null,
-            Func<TDB, bool> filter2 = null,
+            Expression<Func<TDB, bool>> dbFilter = null,
+            Func<TDB, bool> remoteFilter = null,
             object parent = null,
-            DateTime date = default,
             IProgress<double> progress = null)
         {
             progress?.Report(0.0);
             var defaultFiler = GetDefaultFilter(data);
-            var list = Include(GetDBSet(data.Context))
+            var list = Include(GetDBSet(context))
                .Where(defaultFiler);
 
-            if (filter != null)
-                list = list.Where(filter);
+            if (dbFilter != null)
+                list = list.Where(dbFilter);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 Order(list),
-                Order(filter2 == null ? remoteCollection : remoteCollection.Where(filter2)),
+                Order(remoteFilter == null ? remoteCollection : remoteCollection.Where(remoteFilter)),
                 IsEntitiesEquals);
 
             var results = new List<SynchronizingResult>();
@@ -85,10 +87,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
                 if (needSaveOnEachTuple)
                 {
-                    if (date == default)
-                        await data.Context.SaveChangesAsync();
+                    if (data.Date == default)
+                        await context.SaveChangesAsync();
                     else
-                        await data.Context.SynchronizationSaveAsync(date);
+                        await context.SynchronizationSaveAsync(data.Date);
                 }
 
                 progress?.Report(++i / (double)tuples.Count);
@@ -141,16 +143,17 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 token.ThrowIfCancellationRequested();
 
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
-                UpdateDB(GetDBSet(data.Context), tuple);
+                UpdateDB(GetDBSet(context), tuple);
 
                 return null;
-            }            catch (OperationCanceledException)
+            }
+            catch (OperationCanceledException)
             {
                 throw;
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -170,7 +173,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 token.ThrowIfCancellationRequested();
 
-                UpdateDB(GetDBSet(data.Context), tuple);
+                UpdateDB(GetDBSet(context), tuple);
                 return Task.FromResult<SynchronizingResult>(null);
             }
             catch (OperationCanceledException)
@@ -200,7 +203,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 token.ThrowIfCancellationRequested();
 
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
-                UpdateDB(GetDBSet(data.Context), tuple);
+                UpdateDB(GetDBSet(context), tuple);
                 return null;
             }
             catch (OperationCanceledException)
@@ -282,9 +285,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         private void RemoveFromDB(SynchronizingTuple<TDB> tuple, SynchronizingData data)
         {
             if (tuple.Local != null)
-                GetDBSet(data.Context).Remove(tuple.Local);
+                GetDBSet(context).Remove(tuple.Local);
             if (tuple.Synchronized != null)
-                GetDBSet(data.Context).Remove(tuple.Synchronized);
+                GetDBSet(context).Remove(tuple.Synchronized);
         }
 
         private void UpdateDB(DbSet<TDB> set, SynchronizingTuple<TDB> tuple)

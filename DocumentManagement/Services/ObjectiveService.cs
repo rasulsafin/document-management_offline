@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -36,29 +37,37 @@ namespace MRS.DocumentManagement.Services
             this.itemHelper = itemHelper;
             this.dynamicFieldHelper = dynamicFieldHelper;
             this.logger = logger;
+            logger.LogTrace("ObjectiveService created");
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Add started with data: {@Data}", data);
             try
             {
                 var objective = mapper.Map<Objective>(data);
+                logger.LogTrace("Mapped data: {@Objective}", objective);
                 await context.Objectives.AddAsync(objective);
                 await context.SaveChangesAsync();
 
                 objective.ObjectiveType = await context.ObjectiveTypes.FindAsync(objective.ObjectiveTypeID);
+                logger.LogTrace("ObjectiveType: {@ObjectiveType}", objective.ObjectiveType);
 
                 objective.BimElements = new List<BimElementObjective>();
                 foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
                 {
+                    logger.LogTrace("Bim element: {@Bim}", bim);
                     var dbBim = await context.BimElements
                         .Where(x => x.ParentName == bim.ParentName)
                         .Where(x => x.GlobalID == bim.GlobalID)
                         .FirstOrDefaultAsync();
+                    logger.LogDebug("Found BIM element: {@DBBim}", dbBim);
+
                     if (dbBim == null)
                     {
                         dbBim = mapper.Map<BimElement>(bim);
-                        context.BimElements.Add(dbBim);
+                        await context.BimElements.AddAsync(dbBim);
                         await context.SaveChangesAsync();
                     }
 
@@ -93,9 +102,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Add started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
                 var dbObjective = await Get(objectiveID);
+                logger.LogDebug("Found: {@DBObjective}", dbObjective);
                 var objective = mapper.Map<ObjectiveDto>(dbObjective);
                 objective.DynamicFields = new List<DynamicFieldDto>();
 
@@ -106,6 +118,7 @@ namespace MRS.DocumentManagement.Services
                     objective.DynamicFields.Add(dynamicFieldDto);
                 }
 
+                logger.LogDebug("Created DTO: {@Objective}", objective);
                 return objective;
             }
             catch (Exception e)
@@ -117,6 +130,13 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogInformation(
+                "GenerateReport started for user {UserId} with path = {Path}, projectName = {ProjectName} objectiveIds: {@ObjectiveIDs}",
+                userID,
+                path,
+                projectName,
+                objectiveIds);
             try
             {
                 if (objectiveIds == null)
@@ -139,6 +159,7 @@ namespace MRS.DocumentManagement.Services
 
                 reportCount.Count = ++count;
                 reportCount.Date = date;
+                logger.LogDebug("Report Count updating: {@ReportCount}", reportCount);
                 await context.SaveChangesAsync();
 
                 string reportID = $"{date:yyyyMMdd}-{count}";
@@ -160,13 +181,16 @@ namespace MRS.DocumentManagement.Services
                     objectives.Add(objectiveToReport);
                 }
 
+                logger.LogDebug("Objectives for report: {@Objectives}", objectives);
                 var reportDir = Path.Combine(path, "Reports");
                 Directory.CreateDirectory(reportDir);
                 path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
                 var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+                logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
                 ReportCreator reportCreator = new ReportCreator();
                 reportCreator.CreateReport(xmlDoc, path);
+                logger.LogInformation("Report created ({Path})", path);
 
                 return new ObjectiveReportCreationResultDto()
                 {
@@ -182,6 +206,8 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             try
             {
                 var dbProject = await context.Projects.Unsynchronized()
@@ -193,6 +219,8 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.BimElements)
                     .ThenInclude(x => x.BimElement)
                     .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
 
                 if (dbProject == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
@@ -208,9 +236,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
                 var objective = await context.Objectives.FindAsync((int)objectiveID);
+                logger.LogDebug("Found objective: {@Objective}", objective);
                 if (objective == null)
                     throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
 
@@ -227,6 +258,8 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ObjectiveDto objData)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Update started with objData: {@ObjData}", objData);
             try
             {
                 var objective = await Get(objData.ID);
@@ -236,6 +269,10 @@ namespace MRS.DocumentManagement.Services
                 var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
                 var currentObjectiveFields = objective.DynamicFields.ToList();
                 var fieldsToRemove = currentObjectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
+                logger.LogDebug(
+                    "Objective's ({ID}) dynamic fields to remove: {@FieldsToRemove}",
+                    objData.ID,
+                    fieldsToRemove);
                 context.DynamicFields.RemoveRange(fieldsToRemove);
 
                 foreach (var field in newFields)
@@ -250,6 +287,10 @@ namespace MRS.DocumentManagement.Services
                         e.ParentName == x.BimElement.ParentName
                         && e.GlobalID == x.BimElement.GlobalID))
                     .ToList();
+                logger.LogDebug(
+                    "Objective's ({ID}) BIM elements links to remove: {@LinksToRemove}",
+                    objData.ID,
+                    linksToRemove);
                 context.BimElementObjectives.RemoveRange(linksToRemove);
 
                 // Rebuild objective's BimElements
@@ -258,6 +299,7 @@ namespace MRS.DocumentManagement.Services
                 {
                     // See if objective already had this bim element referenced
                     var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ParentName == bim.ParentName && x.BimElement.GlobalID == bim.GlobalID);
+                    logger.LogDebug("Found dbBim: {@DBBim}", dbBim);
                     if (dbBim != null)
                     {
                         objective.BimElements.Add(dbBim);
@@ -270,6 +312,7 @@ namespace MRS.DocumentManagement.Services
                         {
                             // Bim element does not exist at all - should be created
                             bimElement = mapper.Map<BimElement>(bim);
+                            logger.LogDebug("Adding BIM element: {@BimElement}", bimElement);
                             await context.BimElements.AddAsync(bimElement);
                             await context.SaveChangesAsync();
                         }
@@ -280,9 +323,13 @@ namespace MRS.DocumentManagement.Services
                     }
                 }
 
-            objective.Items ??= new List<ObjectiveItem>();
-            var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
-            var itemsToUnlink = objectiveItems.Where(o => (!objData.Items?.Any(i => (int)i.ID == o.ItemID)) ?? true);
+                objective.Items ??= new List<ObjectiveItem>();
+                var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
+                var itemsToUnlink = objectiveItems.Where(o => (!objData.Items?.Any(i => (int)i.ID == o.ItemID)) ?? true);
+                logger.LogDebug(
+                "Objective's ({ID}) item links to remove: {@ItemsToUnlink}",
+                objData.ID,
+                itemsToUnlink);
 
                 foreach (var item in objData.Items ?? Enumerable.Empty<ItemDto>())
                 {
@@ -307,7 +354,10 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Objective objective)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("LinkItem started for objective {ID} with item: {@Item}", objective.ID, item);
             var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective.GetType(), objective.ID);
+            logger.LogDebug("CheckItemToLink returned {@DBItem}", dbItem);
             if (dbItem == null)
                 return;
             objective.Items.Add(new ObjectiveItem
@@ -319,10 +369,13 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<bool> UnlinkItem(int itemID, int objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("UnlinkItem started for objective {ID} with item: {ItemID}", objectiveID, itemID);
             var link = await context.ObjectiveItems
                 .Where(x => x.ItemID == itemID)
                 .Where(x => x.ObjectiveID == objectiveID)
                 .FirstOrDefaultAsync();
+            logger.LogDebug("Found link {@Link}", link);
             if (link == null)
                 return false;
             context.ObjectiveItems.Remove(link);
@@ -333,6 +386,8 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<Objective> Get(ID<ObjectiveDto> objectiveID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Get started for objective {ID}", objectiveID);
             var dbObjective = await context.Objectives
                .Include(x => x.Project)
                .Include(x => x.Author)
@@ -346,6 +401,7 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.BimElement)
                .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
 
+            logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
             if (dbObjective == null)
                 throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
 

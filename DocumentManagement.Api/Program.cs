@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
+using MRS.DocumentManagement.Api.Extensions;
 using Serilog;
 
 namespace MRS.DocumentManagement.Api
@@ -28,7 +29,8 @@ namespace MRS.DocumentManagement.Api
         public static IHostBuilder CreateHostBuilder(string[] args)
             => Host.CreateDefaultBuilder(args)
                .UseSerilog(
-                    (context, services, configuration) => configuration.ReadFrom.Configuration(context.Configuration))
+                    (context, services, configuration) => configuration.DestructureByIgnoringSensitive()
+                       .ReadFrom.Configuration(context.Configuration))
                .ConfigureWebHostDefaults(
                     webBuilder =>
                     {

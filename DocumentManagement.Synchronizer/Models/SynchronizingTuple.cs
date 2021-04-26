@@ -1,4 +1,5 @@
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 
 namespace MRS.DocumentManagement.Synchronization.Models
 {

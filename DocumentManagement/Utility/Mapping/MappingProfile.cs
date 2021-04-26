@@ -3,8 +3,10 @@ using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Utility.Mapping.Converters;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
-namespace MRS.DocumentManagement.Utility
+namespace MRS.DocumentManagement.Utility.Mapping
 {
     public class MappingProfile : Profile
     {
@@ -211,6 +213,5 @@ namespace MRS.DocumentManagement.Utility
             var name = s.ConnectionInfo?.ConnectionType?.Name;
             return name;
         }
-
     }
 }

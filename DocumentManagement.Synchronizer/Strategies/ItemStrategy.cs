@@ -12,17 +12,16 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Strategies
 {
-    internal class ItemStrategy : ALinkingStrategy<Item, ItemExternalDto>
+    internal class ItemStrategy<TLinker> : ALinkingStrategy<Item, ItemExternalDto>
+        where TLinker : ILinker<Item>
     {
-        public ItemStrategy(
-            IMapper mapper,
-            LinkingFunc link,
-            LinkingFunc unlink)
-            : base(mapper, link, null, unlink)
+        public ItemStrategy(DMContext context, IMapper mapper, TLinker linker)
+            : base(context, mapper, linker)
         {
         }
 
@@ -103,7 +102,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
         }
 
-        private static async Task FindAndAttachExists(
+        private async Task FindAndAttachExists(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             object parent,
@@ -142,14 +141,14 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             if ((tuple.Local?.ID ?? 0) == 0)
             {
                 (project, objective) = GetParents(true);
-                tuple.Local = await data.Context.Items.FirstOrDefaultAsync(predicate);
+                tuple.Local = await context.Items.FirstOrDefaultAsync(predicate);
                 tuple.LocalChanged = true;
             }
 
             if ((tuple.Synchronized?.ID ?? 0) == 0)
             {
                 (project, objective) = GetParents(false);
-                tuple.Synchronized = await data.Context.Items.FirstOrDefaultAsync(predicate);
+                tuple.Synchronized = await context.Items.FirstOrDefaultAsync(predicate);
                 tuple.SynchronizedChanged = true;
             }
 
