@@ -8,5 +8,10 @@ namespace MRS.DocumentManagement.Exceptions
             : base($"{typeof(T).Name} with key {id} not found")
         {
         }
+
+        public NotFoundException(string propertyName, string propertyValue)
+            : base($"{typeof(T).Name} with {propertyName.ToLower()} {propertyValue} not found")
+        {
+        }
     }
 }

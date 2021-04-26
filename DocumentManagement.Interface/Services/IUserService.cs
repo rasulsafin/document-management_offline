@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="password">Password to verify.</param>
         /// <returns>True if password was verified successfully.</returns>
         /// <exception cref="InvalidDataException">Throws if password is wrong.</exception>
-        /// <exception cref="ArgumentNullException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
         Task<bool> VerifyPassword(ID<UserDto> userID, string password);
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>True if password was successfully updated.</returns>
         /// <param name="userID">User's ID.</param>
         /// <param name="newPass">New password.</param>
-        /// <exception cref="ArgumentNullException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
         Task<bool> UpdatePassword(ID<UserDto> userID, string newPass);
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Found User.</returns>
-        /// <exception cref="ArgumentNullException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
         Task<UserDto> Find(ID<UserDto> userID);
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="login">User's login.</param>
         /// <returns>Null if user with specified login was not found</returns>
-        /// <exception cref="ArgumentNullException">Throws if user with passed login does not exists.</exception>
+        /// <exception cref="ANotFoundException">Throws if user with passed login does not exists.</exception>
         Task<UserDto> Find(string login);
 
         /// <summary>

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -91,7 +92,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var foundType = await service.Find(new ID<ObjectiveTypeDto>(id));
                 return Ok(foundType);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }
@@ -127,7 +128,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var foundType = await service.Find(typename);
                 return Ok(foundType);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }
@@ -160,7 +161,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));
                 return Ok(allTypes);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidConnectionTypeID_Missing"], ex.Message);
             }
@@ -197,7 +198,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Remove(new ID<ObjectiveTypeDto>(id));
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }

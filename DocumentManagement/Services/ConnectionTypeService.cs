@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -59,12 +60,10 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbConnectionType = await context.ConnectionTypes
-                    .Include(x => x.AppProperties)
-                    .Include(x => x.AuthFieldNames)
-                    .FirstOrDefaultAsync(x => x.ID == (int)id);
+                   .Include(x => x.AppProperties)
+                   .Include(x => x.AuthFieldNames)
+                   .FindOrThrowAsync(nameof(ConnectionType.ID), (int)id);
                 logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
-                if (dbConnectionType == null)
-                    throw new ArgumentNullException($"ConnectionType with key {id} was not found");
 
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
             }
@@ -82,14 +81,10 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbConnectionType = await context.ConnectionTypes
-                    .Include(x => x.AppProperties)
-                    .Include(x => x.AuthFieldNames)
-                    .FirstOrDefaultAsync(t => t.Name == name);
+                   .Include(x => x.AppProperties)
+                   .Include(x => x.AuthFieldNames)
+                   .FindOrThrowAsync(nameof(ConnectionType.Name), name);
                 logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
-
-                if (dbConnectionType == null)
-                    throw new ArgumentNullException($"ConnectionType with name {name} was not found");
-
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
             }
             catch (Exception e)
@@ -188,11 +183,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Remove started with id = {ID}", id);
             try
             {
-                var type = await context.ConnectionTypes.FindAsync((int)id);
+                var type = await context.ConnectionTypes.FindOrThrowAsync((int)id);
                 logger.LogDebug("Found type: {@Type}", type);
-                if (type == null)
-                    throw new ArgumentNullException($"ConnectionType with key {id} was not found");
-
                 context.ConnectionTypes.Remove(type);
                 await context.SaveChangesAsync();
                 return true;

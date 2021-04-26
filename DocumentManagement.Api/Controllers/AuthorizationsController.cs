@@ -10,6 +10,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -88,7 +89,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var added = await service.AddRole(new ID<UserDto>(userID), role);
                 return Ok(added);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -132,7 +133,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.RemoveRole(new ID<UserDto>(userID), role);
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -173,7 +174,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var roles = await service.GetUserRoles(new ID<UserDto>(userID));
                 return Ok(roles);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -213,7 +214,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var isInRole = await service.IsInRole(new ID<UserDto>(userID), role);
                 return Ok(isInRole);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -269,7 +270,7 @@ namespace MRS.DocumentManagement.Api.Controllers
 
                 return Ok(result);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }

@@ -138,7 +138,7 @@ namespace MRS.DocumentManagement.Services
                 var dbUser = await context.Users
                     .Include(x => x.ConnectionInfo)
                         .ThenInclude(c => c.ConnectionType)
-                    .FindOrThrowAsync(x => x.ID == (int)userID, (int)userID);
+                    .FindOrThrowAsync(nameof(User.ID), (int)userID);
                 logger.LogDebug("Found user: {@User}", dbUser);
 
                 return mapper.Map<UserDto>(dbUser);
@@ -157,10 +157,8 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 login = login?.Trim();
-                var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
+                var dbUser = await context.Users.FindWithIgnoreCaseOrThrowAsync(nameof(User.Login), login);
                 logger.LogDebug("Found user: {@User}", dbUser);
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with login {login} was not found");
 
                 return mapper.Map<UserDto>(dbUser);
             }
@@ -254,11 +252,8 @@ namespace MRS.DocumentManagement.Services
         private async Task<User> GetUserChecked(ID<UserDto> userID)
         {
             logger.LogTrace("GetUserChecked started with userID: {UserID}", userID);
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
+            var user = await context.Users.FindOrThrowAsync((int)userID);
             logger.LogDebug("Found user: {@User}", user);
-            if (user == null)
-                throw new ArgumentNullException($"User with key {userID} was not found");
             return user;
         }
     }

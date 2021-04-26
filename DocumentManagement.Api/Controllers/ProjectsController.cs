@@ -197,7 +197,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Update(projectData);
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
@@ -234,7 +234,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var foundProject = await service.Find(new ID<ProjectDto>(projectID));
                 return Ok(foundProject);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
@@ -271,7 +271,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var users = await service.GetUsers(new ID<ProjectDto>(projectID));
                 return Ok(users);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
@@ -320,7 +320,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.LinkToUsers(new ID<ProjectDto>(projectID), users);
                 return Created(string.Empty, true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
@@ -369,7 +369,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.UnlinkFromUsers(new ID<ProjectDto>(projectID), users);
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }

@@ -10,6 +10,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -58,7 +59,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .firstOr(x => x.ID == (int)id);
+                   .FindOrThrowAsync(nameof(ObjectiveType.ID), id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
@@ -79,11 +80,8 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .FirstOrDefaultAsync(x => x.Name == typename);
+                   .FindOrThrowAsync(nameof(ObjectiveType.Name), typename);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
-
-                if (dbObjective == null)
-                    throw new ArgumentNullException($"ObjectiveType with name {typename} was not found");
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }
@@ -104,11 +102,7 @@ namespace MRS.DocumentManagement.Services
                 int? connectionTypeId = (int)id == -1 ? (int?)null : (int)id;
 
                 if (connectionTypeId != null)
-                {
-                    var connectionType = await context.ConnectionTypes.FindAsync((int)connectionTypeId);
-                    if (connectionType == null)
-                        throw new ArgumentNullException($"ConnectionType with id {id} was not found");
-                }
+                    await context.ConnectionTypes.FindOrThrowAsync((int)connectionTypeId);
 
                 var db = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
@@ -130,11 +124,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Remove started with id: {ID}", id);
             try
             {
-                var type = await context.ObjectiveTypes.FindAsync((int)id);
+                var type = await context.ObjectiveTypes.FindOrThrowAsync((int)id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", type);
-                if (type == null)
-                    throw new ArgumentNullException($"ObjectiveType with id {id} was not found");
-
                 context.ObjectiveTypes.Remove(type);
                 await context.SaveChangesAsync();
                 return true;

@@ -13,6 +13,7 @@ using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 using MRS.DocumentManagement.Utils.ReportCreator;
 
 namespace MRS.DocumentManagement.Services
@@ -211,19 +212,16 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbProject = await context.Projects.Unsynchronized()
-                    .Include(x => x.Objectives)
-                    .ThenInclude(x => x.DynamicFields)
-                    .Include(x => x.Objectives)
-                    .ThenInclude(x => x.ObjectiveType)
-                    .Include(x => x.Objectives)
-                    .ThenInclude(x => x.BimElements)
-                    .ThenInclude(x => x.BimElement)
-                    .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                   .Include(x => x.Objectives)
+                   .ThenInclude(x => x.DynamicFields)
+                   .Include(x => x.Objectives)
+                   .ThenInclude(x => x.ObjectiveType)
+                   .Include(x => x.Objectives)
+                   .ThenInclude(x => x.BimElements)
+                   .ThenInclude(x => x.BimElement)
+                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
-
-                if (dbProject == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
 
                 return dbProject.Objectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
             }
@@ -240,11 +238,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
-                var objective = await context.Objectives.FindAsync((int)objectiveID);
+                var objective = await context.Objectives.FindOrThrowAsync((int)objectiveID);
                 logger.LogDebug("Found objective: {@Objective}", objective);
-                if (objective == null)
-                    throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
-
                 context.Objectives.Remove(objective);
                 await context.SaveChangesAsync();
                 return true;
@@ -398,11 +393,9 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.Item)
                .Include(x => x.BimElements)
                     .ThenInclude(x => x.BimElement)
-               .FirstOrDefaultAsync(x => x.ID == (int)objectiveID);
+               .FindOrThrowAsync(nameof(Objective.ID), (int)objectiveID);
 
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
-            if (dbObjective == null)
-                throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
 
             return dbObjective;
         }

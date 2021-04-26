@@ -6,6 +6,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
@@ -178,11 +179,9 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbUser = await context.Users.Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+                   .ThenInclude(x => x.ConnectionType)
+                   .FindWithIgnoreCaseOrThrowAsync(nameof(User.Login), username);
                 logger.LogDebug("Found user: {@DbUser}", dbUser);
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with name {username} not found");
 
                 if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
                     throw new ArgumentException($"Wrong password!");
