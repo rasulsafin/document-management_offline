@@ -3,6 +3,9 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>MRS.DocumentManagement.Database</RootNamespace>
+    <Authors>Brio MRS</Authors>
+    <Product>Brio MRS</Product>
+    <Company>Brio MRS©</Company>
   </PropertyGroup>
 
   <ItemGroup>
