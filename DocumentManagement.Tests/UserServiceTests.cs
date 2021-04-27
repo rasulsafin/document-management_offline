@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
@@ -115,8 +117,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
-        public async Task Add_UserWithExistingLogin_RaisesInvalidDataException()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Add_UserWithExistingLogin_RaisesArgumentException()
         {
             var firstLogin = "login_Add_UserWithExistingLogin_ReturnsTheUser";
             var firstPassword = "password1_Add_UserWithExistingLogin_ReturnsTheUser";
@@ -126,15 +128,8 @@ namespace MRS.DocumentManagement.Tests
             var firstUser = new UserToCreateDto(firstLogin, firstPassword, firstName);
             var secondUser = new UserToCreateDto(firstLogin, secondPassword, secondName);
 
-            //try
-            //{
-                await service.Add(firstUser);
-                await service.Add(secondUser);
-            //}
-            //finally
-            //{
-            //    Fixture.Context.Users.Remove(Fixture.Context.Users.First(u => u.Login == firstLogin));
-            //}
+            await service.Add(firstUser);
+            await service.Add(secondUser);
 
             Assert.Fail();
         }
@@ -152,11 +147,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Delete_NotExistingUser_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task Delete_NotExistingUser_RaisesNotFoundException()
         {
-            var result = await service.Delete(ID<UserDto>.InvalidID);
+            await service.Delete(ID<UserDto>.InvalidID);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -171,11 +167,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task FindById_NotExistingUserId_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task FindById_NotExistingUserId_RaisesNotFoundException()
         {
-            var result = await service.Find(ID<UserDto>.InvalidID);
+            await service.Find(ID<UserDto>.InvalidID);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -190,13 +187,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task FindByLogin_NotExistingUserLogin_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task FindByLogin_NotExistingUserLogin_RaisesNotFoundException()
         {
             var notExistingLogin = $"notExistingLogin{Guid.NewGuid()}";
 
-            var result = await service.Find(notExistingLogin);
+            await service.Find(notExistingLogin);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -213,28 +211,30 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Update_ExistingUserAndIncorrectNewLogin_ReturnsFalse()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Update_ExistingUserAndIncorrectNewLogin_RaisesArgumentException()
         {
             var users = Fixture.Context.Users.ToList();
             if (users.Count < 2)
                 Assert.Fail("Incorrect number of initiated users");
             var userOne = users.First();
             var userTwo = users.First(u => u != userOne);
-            var updatingUser = new UserDto(new ID<UserDto>(userOne.ID), userTwo.Login, "");
+            var updatingUser = new UserDto(new ID<UserDto>(userOne.ID), userTwo.Login, string.Empty);
 
-            var result = await service.Update(updatingUser);
+            await service.Update(updatingUser);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
-        public async Task Update_NotExistingUser_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task Update_NotExistingUser_RaisesNotFoundException()
         {
-            var updatingUser = new UserDto(ID<UserDto>.InvalidID, "", "");
+            var updatingUser = new UserDto(ID<UserDto>.InvalidID, string.Empty, string.Empty);
 
-            var result = await service.Update(updatingUser);
+            await service.Update(updatingUser);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -264,7 +264,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task UpdatePassword_NotExistingUser_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task UpdatePassword_NotExistingUser_RaisesNotFoundException()
         {
             var newPass = "newPass";
             var passHash = new byte[8];
@@ -277,9 +278,9 @@ namespace MRS.DocumentManagement.Tests
                 mockedCryptographyHelper.Object,
                 Mock.Of<ILogger<UserService>>());
 
-            var result = await m_service.UpdatePassword(ID<UserDto>.InvalidID, newPass);
+            await m_service.UpdatePassword(ID<UserDto>.InvalidID, newPass);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -302,7 +303,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task VerifyPassword_ExistingUserAndIncorrectPass_ReturnsFalse()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task VerifyPassword_ExistingUserAndIncorrectPass_RaisesArgumentException()
         {
             var pass = "pass";
             var passHash = new byte[8];
@@ -317,19 +319,20 @@ namespace MRS.DocumentManagement.Tests
             var existingUser = await Fixture.Context.Users.FirstAsync();
             var existingUserId = existingUser.ID;
 
-            var result = await m_service.VerifyPassword(new ID<UserDto>(existingUserId), pass);
+            await m_service.VerifyPassword(new ID<UserDto>(existingUserId), pass);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
-        public async Task VerifyPassword_NotExistingUser_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task VerifyPassword_NotExistingUser_RaisesNotFoundException()
         {
             var pass = "pass";
 
-            var result = await service.VerifyPassword(ID<UserDto>.InvalidID, pass);
+            await service.VerifyPassword(ID<UserDto>.InvalidID, pass);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
     }
 }

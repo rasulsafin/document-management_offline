@@ -42,8 +42,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Add started with user: {@User}", user);
             try
             {
-                var userFromDb = await Find(user.Login);
-                if (userFromDb != null)
+                if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
                     throw new ArgumentException("This login is already being used");
 
                 var newUser = mapper.Map<User>(user);
@@ -190,8 +189,12 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with user: {@User}", user);
+
             try
             {
+                if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
+                    throw new ArgumentException("This login is already being used");
+
                 var storedUser = await GetUserChecked(user.ID);
                 logger.LogDebug("Found user: {@User}", storedUser);
                 storedUser.Login = user.Login;

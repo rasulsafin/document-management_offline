@@ -9,6 +9,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
@@ -23,6 +24,7 @@ namespace MRS.DocumentManagement.Tests
     {
         private static ObjectiveService service;
         private static IMapper mapper;
+        private ServiceProvider serviceProvider;
 
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -87,8 +89,11 @@ namespace MRS.DocumentManagement.Tests
                     Fixture.Context,
                     mapper,
                     Mock.Of<ILogger<DynamicFieldModelToDtoValueResolver>>()));
+            services.AddLogging();
+            services.AddMappingResolvers();
             services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
+            services.AddSingleton(x => Fixture.Context);
+            serviceProvider = services.BuildServiceProvider();
             mapper = serviceProvider.GetService<IMapper>();
 
             service = new ObjectiveService(
@@ -101,7 +106,10 @@ namespace MRS.DocumentManagement.Tests
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task Add_NewObjectiveToCreate_ReturnsObjectiveToList()
@@ -415,11 +423,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Find_NotExistingObjective_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<Objective>))]
+        public async Task Find_NotExistingObjective_RaisesNotFoundException()
         {
             var result = await service.Find(ID<ObjectiveDto>.InvalidID);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -435,13 +444,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task GetObjectives_NotExistingProject_ReturnsEmptyEnumerable()
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task GetObjectives_NotExistingProject_RaisesNotFoundException()
         {
             var dtoId = ID<ProjectDto>.InvalidID;
 
             var result = await service.GetObjectives(dtoId);
 
-            Assert.IsFalse(result.Any());
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -468,13 +478,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Remove_NotExistingObjective_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<Objective>))]
+        public async Task Remove_NotExistingObjective_RaisesNotFoundException()
         {
             var dtoId = ID<ObjectiveDto>.InvalidID;
 
-            var result = await service.Remove(dtoId);
+            await service.Remove(dtoId);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -832,15 +843,15 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Update_NotExistingObjective_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<Objective>))]
+        public async Task Update_NotExistingObjective_RaisesNotFoundException()
         {
             var notExistingObjective = new ObjectiveDto { ID = ID<ObjectiveDto>.InvalidID };
 
-            var result = await service.Update(notExistingObjective);
+            await service.Update(notExistingObjective);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
-
 
         private bool CompareDynamicFieldDtoToModel(DynamicFieldDto dto, DynamicField model)
         {

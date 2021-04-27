@@ -37,7 +37,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Add started with typeName: {TypeName}", typeName);
             try
             {
-                // TODO: Unique type for name+external id pair
+                if (context.ObjectiveTypes.Any(x => x.ConnectionTypeID == null && x.Name == typeName))
+                    throw new ArgumentException($"Objective type {typeName} already exists", typeName);
                 var objType = mapper.Map<ObjectiveType>(typeName);
                 await context.ObjectiveTypes.AddAsync(objType);
                 await context.SaveChangesAsync();
@@ -59,7 +60,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .FindOrThrowAsync(nameof(ObjectiveType.ID), id);
+                   .FindOrThrowAsync(nameof(ObjectiveType.ID), (int)id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);

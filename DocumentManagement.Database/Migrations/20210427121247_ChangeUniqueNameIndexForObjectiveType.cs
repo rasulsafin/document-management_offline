@@ -15,7 +15,7 @@ namespace DocumentManagement.Database.Migrations
                 table: "ObjectiveTypes",
                 columns: new[] { "Name", "ConnectionTypeID" },
                 unique: true);
-            
+
             migrationBuilder.Sql(
                 @"CREATE TRIGGER UniqueNameInsertChecker
     BEFORE INSERT

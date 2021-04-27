@@ -22,6 +22,7 @@ namespace MRS.DocumentManagement.Tests
     public class SynchronizerFailProjectTests
     {
         private static Synchronizer synchronizer;
+        private static ServiceProvider serviceProvider;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
@@ -32,18 +33,6 @@ namespace MRS.DocumentManagement.Tests
         private static Mock<IConnection> Connection { get; set; }
 
         private static Mock<IConnectionContext> Context { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext unused)
-        {
-            var services = new ServiceCollection();
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            var serviceProvider = services.BuildServiceProvider();
-            synchronizer = serviceProvider.GetService<Synchronizer>();
-        }
 
         [TestInitialize]
         public void Setup()
@@ -60,6 +49,15 @@ namespace MRS.DocumentManagement.Tests
                     context.SaveChanges();
                 });
 
+            var services = new ServiceCollection();
+            services.AddSingleton(Fixture.Context);
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            serviceProvider = services.BuildServiceProvider();
+            synchronizer = serviceProvider.GetService<Synchronizer>();
+
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
 
@@ -74,7 +72,10 @@ namespace MRS.DocumentManagement.Tests
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task SynchronizeFail_ProjectAddedLocal_ButContextFail_DoNothing()

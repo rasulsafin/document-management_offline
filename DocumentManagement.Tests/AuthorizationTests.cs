@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
@@ -19,13 +20,13 @@ namespace MRS.DocumentManagement.Tests
     [TestClass]
     public class AuthorizationTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
-
         private static AuthorizationService service;
         private static IMapper mapper;
 
+        private static SharedDatabaseFixture Fixture { get; set; }
+
         [ClassInitialize]
-        public static void ClassSetup(TestContext _)
+        public static void ClassSetup(TestContext unused)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -92,7 +93,6 @@ namespace MRS.DocumentManagement.Tests
         {
             var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count == 1);
             var userId = existingUser.ID;
-            var currentRole = existingUser.Roles.First().Role;
             var roleToAdd = $"newRole{Guid.NewGuid()}";
             var rolesCount = Fixture.Context.Roles.Count();
 
@@ -104,8 +104,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
-        public async Task AddRole_NotExistingUser_RaisesArgumentException()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task AddRole_NotExistingUser_RaisesNotFoundException()
         {
             var userId = ID<UserDto>.InvalidID;
             var role = "admin";
@@ -116,15 +116,16 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task AddRole_UserAlreadyInRole_ReturnsFalse()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task AddRole_UserAlreadyInRole_RaisesArgumentException()
         {
             var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count > 0);
             var usersId = new ID<UserDto>(existingUser.ID);
             var usersRole = existingUser.Roles.First().Role.Name;
 
-            var result = await service.AddRole(usersId, usersRole);
+            await service.AddRole(usersId, usersRole);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -155,11 +156,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task GetUserRoles_NotExistingUser_ReturnsEmptyEnumerable()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task GetUserRoles_NotExistingUser_RaisesNotFoundException()
         {
-            var result = await service.GetUserRoles(ID<UserDto>.InvalidID);
+            await service.GetUserRoles(ID<UserDto>.InvalidID);
 
-            Assert.IsFalse(result.Any());
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -186,13 +188,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task IsInRole_NotExistingUser_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task IsInRole_NotExistingUser_RaisesNotFoundException()
         {
             var role = Fixture.Context.Roles.First();
 
-            var result = await service.IsInRole(ID<UserDto>.InvalidID, role.Name);
+            await service.IsInRole(ID<UserDto>.InvalidID, role.Name);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -210,7 +213,7 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task RemoveRole_RoleWithExistingMultipleUser_ReturnsTrueAndDoenstRemoveRole()
+        public async Task RemoveRole_RoleWithExistingMultipleUser_ReturnsTrueAndDoesntRemoveRole()
         {
             var multipleUsersRole = Fixture.Context.UserRoles.First(r => r.Role.Users.Count > 1).Role;
             var user = multipleUsersRole.Users.First().User;
@@ -224,29 +227,27 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task RemoveRole_NotExistingUser_ReturnsFalseAndDoesntRemoveRole()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task RemoveRole_NotExistingUser_RaisesNotFoundException()
         {
             var role = Fixture.Context.Roles.First();
 
-            var result = await service.RemoveRole(ID<UserDto>.InvalidID, role.Name);
+            await service.RemoveRole(ID<UserDto>.InvalidID, role.Name);
 
-            Assert.IsFalse(result);
-            Assert.IsTrue(Fixture.Context.Roles.Contains(role));
-            Assert.IsTrue(Fixture.Context.UserRoles.Any(ur => ur.Role == role));
+            Assert.Fail();
         }
 
         [TestMethod]
-        public async Task RemoveRole_ExistingUserWithoutRole_ReturnsFalseAndDoesntRemoveRole()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task RemoveRole_ExistingUserWithoutRole_RaisesArgumentException()
         {
             var existingUser = Fixture.Context.Users.First(u => u.Roles.Count == 1);
             var userRole = existingUser.Roles.First().Role;
             var notUserRole = Fixture.Context.Roles.First(r => r != userRole);
 
-            var result = await service.RemoveRole(new ID<UserDto>(existingUser.ID), notUserRole.Name);
+            await service.RemoveRole(new ID<UserDto>(existingUser.ID), notUserRole.Name);
 
-            Assert.IsFalse(result);
-            Assert.IsTrue(Fixture.Context.Roles.Contains(notUserRole));
-            Assert.IsTrue(Fixture.Context.UserRoles.Any(ur => ur.Role == notUserRole));
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -274,18 +275,20 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Login_NotExistingUser_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task Login_NotExistingUser_RaisesNotFoundException()
         {
             var username = $"notExistingLogin{Guid.NewGuid()}";
             var password = "pass";
 
-            var result = await service.Login(username, password);
+            await service.Login(username, password);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
-        public async Task Login_ExistingUserWithInvalidPassword_ReturnsNull()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Login_ExistingUserWithInvalidPassword_RaisesArgumentException()
         {
             var user = Fixture.Context.Users.First(u => u.Roles.Any());
             var username = user.Login;
@@ -300,9 +303,9 @@ namespace MRS.DocumentManagement.Tests
                 mockedCryptographyHelper.Object,
                 Mock.Of<ILogger<AuthorizationService>>());
 
-            var result = await mockedService.Login(username, password);
+            await mockedService.Login(username, password);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
     }
 }

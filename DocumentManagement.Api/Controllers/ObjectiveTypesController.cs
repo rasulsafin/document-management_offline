@@ -42,7 +42,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="typeName">Name of the objective type.</param>
         /// <returns>Id of created objective type.</returns>
         /// <response code="201">Objective type was created.</response>
-        /// <response code="400">If type name is null.</response>
+        /// <response code="400">Invalid name.</response>
         /// <response code="500">Something went wrong while creating objective type.</response>
         [HttpPost]
         [Produces("application/json")]
@@ -58,6 +58,14 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 var typeId = await service.Add(typeName);
                 return Created(string.Empty, typeId);
+            }
+            catch (ArgumentException ex)
+            {
+                return CreateProblemResult(
+                    this,
+                    400,
+                    localizer["CheckValidObjectiveTypeNameToAdd_AlreadyExist"],
+                    ex.Message);
             }
             catch (Exception ex)
             {

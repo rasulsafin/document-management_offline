@@ -32,10 +32,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static VersionsService versionsService;
         private static Authenticator authenticator;
         private static ForgeConnection connection;
+        private static ServiceProvider serviceProvider;
 
         private readonly Random random = new Random();
         private readonly string testFileName = Path.GetFileName(TEST_FILE_PATH);
-        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)

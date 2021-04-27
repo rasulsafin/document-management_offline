@@ -25,6 +25,7 @@ namespace MRS.DocumentManagement.Tests
     {
         private static Synchronizer synchronizer;
         private static IMapper mapper;
+        private static ServiceProvider serviceProvider;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
@@ -57,6 +58,16 @@ namespace MRS.DocumentManagement.Tests
                     context.SaveChanges();
                 });
 
+            var services = new ServiceCollection();
+            services.AddSingleton(Fixture.Context);
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            serviceProvider = services.BuildServiceProvider();
+            synchronizer = serviceProvider.GetService<Synchronizer>();
+            mapper = serviceProvider.GetService<IMapper>();
+
             ResultObjectiveExternalDtos = new List<ObjectiveExternalDto>();
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
@@ -85,21 +96,15 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
 
-            var services = new ServiceCollection();
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            var serviceProvider = services.BuildServiceProvider();
-            synchronizer = serviceProvider.GetService<Synchronizer>();
-            mapper = serviceProvider.GetService<IMapper>();
-
             Project = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
         }
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task Synchronize_ObjectivesUnchanged_DoNothing()

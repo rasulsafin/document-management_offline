@@ -222,4 +222,7 @@
   <data name="WrongPassword" xml:space="preserve">
     <value>Wrong password</value>
   </data>
+  <data name="CheckValidObjectiveTypeNameToAdd_AlreadyExist" xml:space="preserve">
+    <value>The objective type with the same name already exists</value>
+  </data>
 </root>

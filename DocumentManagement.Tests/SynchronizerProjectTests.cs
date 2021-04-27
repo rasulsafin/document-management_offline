@@ -26,6 +26,7 @@ namespace MRS.DocumentManagement.Tests
     {
         private static Synchronizer synchronizer;
         private static IMapper mapper;
+        private static ServiceProvider serviceProvider;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
@@ -55,12 +56,14 @@ namespace MRS.DocumentManagement.Tests
                 });
 
             var services = new ServiceCollection();
+            services.AddSingleton(Fixture.Context);
             services.AddSynchronizer();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
             services.AddMappingResolvers();
             services.AddAutoMapper(typeof(MappingProfile));
-            var serviceProvider = services.BuildServiceProvider();
+            serviceProvider = services.BuildServiceProvider();
             synchronizer = serviceProvider.GetService<Synchronizer>();
+            mapper = serviceProvider.GetService<IMapper>();
 
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
@@ -86,7 +89,10 @@ namespace MRS.DocumentManagement.Tests
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task Synchronize_ProjectUnchanged_DoNothing()
