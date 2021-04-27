@@ -17,13 +17,13 @@ namespace MRS.DocumentManagement.Tests
     [TestClass]
     public class ObjectiveTypeServiceTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
-
         private static ObjectiveTypeService service;
         private static IMapper mapper;
 
+        private static SharedDatabaseFixture Fixture { get; set; }
+
         [ClassInitialize]
-        public static void ClassSetup(TestContext _)
+        public static void ClassSetup(TestContext unused)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {

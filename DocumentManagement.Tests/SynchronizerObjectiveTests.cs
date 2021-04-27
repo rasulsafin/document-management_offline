@@ -1298,7 +1298,7 @@ namespace MRS.DocumentManagement.Tests
             return (objectiveLocal, objectiveSynchronized, objectiveRemote);
         }
 
-        private static async
+        private async
             Task<(Objective local, Objective synchronized, ICollection<SynchronizingResult> synchronizationResult)>
             GetObjectivesAfterSynchronize(bool ignoreProjects = false)
         {
@@ -1308,7 +1308,7 @@ namespace MRS.DocumentManagement.Tests
             return (local, synchronized, synchronizationResult);
         }
 
-        private static async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
+        private async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
         {
             var data = new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() };
 

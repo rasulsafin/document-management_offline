@@ -4,7 +4,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal class DelegateComparer<T> : IEqualityComparer<T> where T : class
+    internal class DelegateComparer<T> : IEqualityComparer<T>
+        where T : class
     {
         private readonly Func<T, T, bool> comparer;
         private readonly Func<T, int> hasher;
@@ -14,12 +15,12 @@ namespace MRS.DocumentManagement.Tests
             this.comparer = equalityComparer;
             this.hasher = hasher;
         }
-        
+
         public bool Equals([AllowNull] T x, [AllowNull] T y)
         {
             if ((x == null) != (y == null))
                 return false;
-            if (x == null && y == null)
+            if (x == null)
                 return true;
             return comparer(x, y);
         }

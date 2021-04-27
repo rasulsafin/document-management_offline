@@ -349,18 +349,18 @@ namespace MRS.DocumentManagement.Tests
             var dbItem = Fixture.Context.Items.Unsynchronized().First();
             var bimList = new List<BimElementDto>
             {
-                     new BimElementDto
-                    {
-                        GlobalID = existingBimElement.GlobalID,
-                        ElementName = existingBimElement.ElementName,
-                        ParentName = existingBimElement.ParentName,
-                    },
-                    new BimElementDto
-                    {
-                        GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
-                        ElementName = "Floor",
-                        ParentName = "Home",
-                    },
+                new BimElementDto
+                {
+                    GlobalID = existingBimElement.GlobalID,
+                    ElementName = existingBimElement.ElementName,
+                    ParentName = existingBimElement.ParentName,
+                },
+                new BimElementDto
+                {
+                    GlobalID = $"uniqueGlobalId{Guid.NewGuid()}",
+                    ElementName = "Floor",
+                    ParentName = "Home",
+                },
             };
             var items = new List<ItemDto>
             {
@@ -503,7 +503,7 @@ namespace MRS.DocumentManagement.Tests
             var newProject = Fixture.Context.Projects.Unsynchronized().First(p => p.ID != existingObjective.ProjectID);
             var changedObjective = new ObjectiveDto
             {
-                AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
+                AuthorID = new ID<UserDto>(existingObjective.AuthorID!.Value),
                 CreationDate = existingObjective.CreationDate,
                 DueDate = existingObjective.DueDate,
                 Description = newDescription,
@@ -566,7 +566,7 @@ namespace MRS.DocumentManagement.Tests
             dynamicFields.AddRange(existingDynamicFields);
             var changedObjective = new ObjectiveDto
             {
-                AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
+                AuthorID = new ID<UserDto>(existingObjective.AuthorID!.Value),
                 CreationDate = existingObjective.CreationDate,
                 DueDate = existingObjective.DueDate,
                 Description = newDescription,
@@ -627,7 +627,7 @@ namespace MRS.DocumentManagement.Tests
             var newBimElementsCount = changedBimElements.Count - 1;
             var changedObjective = new ObjectiveDto
             {
-                AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
+                AuthorID = new ID<UserDto>(existingObjective.AuthorID!.Value),
                 BimElements = changedBimElements,
                 CreationDate = existingObjective.CreationDate,
                 DueDate = existingObjective.DueDate,
@@ -695,7 +695,7 @@ namespace MRS.DocumentManagement.Tests
             items.AddRange(existingItems);
             var changedObjective = new ObjectiveDto
             {
-                AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
+                AuthorID = new ID<UserDto>(existingObjective.AuthorID!.Value),
                 CreationDate = existingObjective.CreationDate,
                 DueDate = existingObjective.DueDate,
                 Description = newDescription,
@@ -813,7 +813,7 @@ namespace MRS.DocumentManagement.Tests
 
             var changedObjective = new ObjectiveDto
             {
-                AuthorID = new ID<UserDto>(existingObjective.AuthorID.Value),
+                AuthorID = new ID<UserDto>(existingObjective.AuthorID!.Value),
                 BimElements = changedBimElements,
                 CreationDate = existingObjective.CreationDate,
                 DueDate = existingObjective.DueDate,

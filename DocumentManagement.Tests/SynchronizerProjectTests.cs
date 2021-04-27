@@ -16,7 +16,6 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests

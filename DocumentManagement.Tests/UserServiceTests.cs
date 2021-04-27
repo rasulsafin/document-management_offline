@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -9,7 +8,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Exceptions;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
@@ -21,13 +19,13 @@ namespace MRS.DocumentManagement.Tests
     [TestClass]
     public class UserServiceTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
-
         private static UserService service;
         private static IMapper mapper;
 
+        private static SharedDatabaseFixture Fixture { get; set; }
+
         [ClassInitialize]
-        public static void ClassSetup(TestContext _)
+        public static void ClassSetup(TestContext unused)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -143,7 +141,6 @@ namespace MRS.DocumentManagement.Tests
             var result = await service.Delete(new ID<UserDto>(existingUser.ID));
 
             Assert.IsTrue(result);
-            //Fixture.Context.Users.Add(existingUser);
         }
 
         [TestMethod]

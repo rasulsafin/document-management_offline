@@ -44,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
         [AssemblyCleanup]
         public static void AssemblyCleanup()
         {
-            //connection.Quit();
+            ////connection.Quit();
         }
     }
 }
