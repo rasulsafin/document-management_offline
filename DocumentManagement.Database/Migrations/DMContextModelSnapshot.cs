@@ -346,6 +346,9 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BimElementID")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("CameraPosition")
                         .HasColumnType("TEXT");
 

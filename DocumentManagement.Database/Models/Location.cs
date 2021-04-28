@@ -8,5 +8,7 @@
         public string Position { get; set; }
 
         public string CameraPosition { get; set; }
+
+        public string BimElementID { get; set; }
     }
 }

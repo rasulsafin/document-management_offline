@@ -20,6 +20,7 @@ namespace DocumentManagement.Database.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Position = table.Column<string>(type: "TEXT", nullable: true),
                     CameraPosition = table.Column<string>(type: "TEXT", nullable: true),
+                    BimElementID = table.Column<string>(type: "TEXT", nullable: true),
                 },
                 constraints: table =>
                 {

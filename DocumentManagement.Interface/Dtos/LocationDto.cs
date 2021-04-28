@@ -7,5 +7,7 @@
         public float[] Position { get; set; }
 
         public float[] CameraPosition { get; set; }
+
+        public string BimElementID { get; set; }
     }
 }

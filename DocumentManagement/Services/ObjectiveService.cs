@@ -212,12 +212,14 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbProject = await context.Projects.Unsynchronized()
                     .Include(x => x.Objectives)
-                    .ThenInclude(x => x.DynamicFields)
+                        .ThenInclude(x => x.DynamicFields)
                     .Include(x => x.Objectives)
-                    .ThenInclude(x => x.ObjectiveType)
+                        .ThenInclude(x => x.ObjectiveType)
                     .Include(x => x.Objectives)
-                    .ThenInclude(x => x.BimElements)
-                    .ThenInclude(x => x.BimElement)
+                        .ThenInclude(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Objectives)
+                        .ThenInclude(x => x.Location)
                     .FirstOrDefaultAsync(x => x.ID == (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
