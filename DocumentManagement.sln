@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
@@ -68,6 +68,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{E28CAD4D-55E4-4BBB-98C2-EB919C69407D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.General.Utils", "DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj", "{B7C9A573-FADD-488C-BBA3-B24AE3787C52}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Launcher", "DocumentManagement.Launcher\DocumentManagement.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -159,6 +161,10 @@ Global
 		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
