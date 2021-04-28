@@ -118,39 +118,39 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Label_DMStarted" xml:space="preserve">
-    <value>DocumentManagement started</value>
+    <value>Документооборот запущен</value>
   </data>
   <data name="Label_DMStopped" xml:space="preserve">
-    <value>DocumentManagement stopped</value>
+    <value>Документооборот остановлен</value>
   </data>
   <data name="Label_Exit" xml:space="preserve">
-    <value>Exit</value>
+    <value>Выход</value>
   </data>
   <data name="Label_HideConsole" xml:space="preserve">
-    <value>Hide the console</value>
+    <value>Cкрыть консоль</value>
   </data>
   <data name="Label_ShowConsole" xml:space="preserve">
-    <value>Show the console</value>
+    <value>Показать консоль</value>
   </data>
   <data name="Label_ShowSettings" xml:space="preserve">
-    <value>Open the settings file</value>
+    <value>Открыть файл настроек</value>
   </data>
   <data name="Label_ShowSwagger" xml:space="preserve">
-    <value>Open Swagger</value>
+    <value>Открыть Swagger</value>
   </data>
   <data name="Label_StartDM" xml:space="preserve">
-    <value>Start DocumentManagement</value>
+    <value>Запустить документооборот</value>
   </data>
   <data name="MessageFormat_File_not_found" xml:space="preserve">
-    <value>File not found!\n{0}</value>
+    <value>Файл не найден: {0}</value>
   </data>
   <data name="Message_Path_not_found" xml:space="preserve">
-    <value>You must specify the path to 'DocumentManagement.Api.exe'!</value>
+    <value>Необходимо указать путь к 'DocumentManagement.Api.exe'!</value>
   </data>
   <data name="Tooltip_Dm_Brio_Mrs" xml:space="preserve">
-    <value>DocumentManagement BRIO MRS</value>
+    <value>Документооборот BRIO MRS</value>
   </data>
   <data name="Tooltip_StopDmAndExit" xml:space="preserve">
-    <value>Stop document flow and close the application</value>
+    <value>Остановить документооборот и закрыть приложение</value>
   </data>
 </root>

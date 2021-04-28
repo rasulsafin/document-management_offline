@@ -6,60 +6,57 @@ using Hardcodet.Wpf.TaskbarNotification;
 namespace MRS.DocumentManagement.Launcher
 {
     /// <summary>
-    /// Interaction logic for App.xaml
+    /// Interaction logic for App.xaml.
     /// </summary>
     public partial class App : Application, IDisposable
     {
-        private const string DEVELOP = "develop";
-        private const string LANGUAGE = "language=";
         private TaskbarIcon notifyIcon;
-        private Mutex mutex;
+        private bool isDisposed;
 
-        public static bool IsDevelopMode { get; private set; } = false;
+        public static AppOptions Options { get; internal set; }
 
-        public void Dispose() => mutex?.Dispose();
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            foreach (var arg in e.Args)
-            {
-                if (arg.ToLower() == DEVELOP)
-                {
-                    IsDevelopMode = true;
-                }
-                else if (arg.ToLower().StartsWith(LANGUAGE))
-                {
-                    var culture = arg.Replace(LANGUAGE, string.Empty);
-                    Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(culture);
-                }
-            }
-
-            bool createdNew;
-            string mutName = "MRS.DocumentManagement.Launcher";
-            mutex = new System.Threading.Mutex(true, mutName, out createdNew);
-            if (!createdNew)
-            {
-                Shutdown();
-                return;
-            }
-
             base.OnStartup(e);
+
+            if (!string.IsNullOrEmpty(Options.LanguageTag))
+            {
+                try
+                {
+                    Thread.CurrentThread.CurrentUICulture = new System.Globalization.CultureInfo(Options.LanguageTag);
+                }
+                catch (System.Globalization.CultureNotFoundException)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Culture {Options.LanguageTag} is not found");
+                }
+            }
 
             // create the notifyicon (it's a resource declared in NotifyIconResources.xaml
             notifyIcon = (TaskbarIcon)FindResource("NotifyIcon");
         }
 
-        protected override void OnExit(ExitEventArgs e)
+        protected virtual void Dispose(bool disposing)
         {
-            mutex?.Dispose();
-            if (notifyIcon != null)
+            if (!isDisposed)
             {
-                notifyIcon.Dispose(); // the icon would clean up automatically, but this is cleaner
-                if (notifyIcon.DataContext is IDisposable disposable)
-                    disposable.Dispose();
-            }
+                if (disposing)
+                {
+                    if (notifyIcon != null)
+                    {
+                        notifyIcon.Dispose(); // the icon would clean up automatically, but this is cleaner
+                        if (notifyIcon.DataContext is IDisposable disposable)
+                            disposable.Dispose();
+                    }
+                }
 
-            base.OnExit(e);
+                isDisposed = true;
+            }
         }
     }
 }

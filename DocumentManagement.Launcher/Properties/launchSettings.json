@@ -1,19 +1,20 @@
 {
   "profiles": {
-    "DocumentManagement.Launcher": {
-      "commandName": "Project"
-    },
-    "Debug Launcher": {
+    "DocumentManagement.Launcher no args": {
       "commandName": "Project",
-      "commandLineArgs": "develop"
+      "commandLineArgs": ""
     },
-    "Debug Launcher rus": {
+    "DocumentManagement.Launcher dev": {
       "commandName": "Project",
-      "commandLineArgs": "develop language=ru-RU"
+      "commandLineArgs": "-d -e ..\\..\\..\\..\\DocumentManagement.Api\\bin\\Debug\\net5.0\\DocumentManagement.Api.exe"
     },
-    "Debug Launcher eng": {
+    "DocumentManagement.Launcher dev ru": {
       "commandName": "Project",
-      "commandLineArgs": "develop language=en"
+      "commandLineArgs": "-d -l ru-RU -e ..\\..\\..\\..\\DocumentManagement.Api\\bin\\Debug\\net5.0\\DocumentManagement.Api.exe"
+    },
+    "DocumentManagement.Launcher dev en": {
+      "commandName": "Project",
+      "commandLineArgs": "-d -l en -e ..\\..\\..\\..\\DocumentManagement.Api\\bin\\Debug\\net5.0\\DocumentManagement.Api.exe"
     }
   }
 }
