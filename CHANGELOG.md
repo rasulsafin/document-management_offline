@@ -6,6 +6,8 @@
 
 * Создание отчетов в отдельную папку; 
 * Обработка ошибок и их преобразование в соответствующие коды состояния;
+* Логирование сервисов;
+* Меню и статус документооборота в трее windows;
 
 ### Изменено:
 
@@ -17,7 +19,7 @@
 ### Безопасность:
 
 
-## 1.0.0 - xxxx-xx-xx
+## 1.0.0 - 2021-04-23
 
 ### Добавлено:
 
@@ -86,6 +88,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[1.0.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.0
 [0.8.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.1
 [0.8.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.0
 [0.7.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.7.0

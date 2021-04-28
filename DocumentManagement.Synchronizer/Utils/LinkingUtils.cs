@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Utils

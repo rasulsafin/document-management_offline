@@ -1,22 +1,22 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Database;
 
 namespace MRS.DocumentManagement.Synchronization.Utils
 {
     internal static class SynchronizationFinalizer
     {
-        public static async Task Finalize(SynchronizingData data)
-            => await RemoveUnusedBimElements(data);
+        public static async Task Finalize(DMContext context)
+            => await RemoveUnusedBimElements(context);
 
-        private static async Task RemoveUnusedBimElements(SynchronizingData data)
+        private static async Task RemoveUnusedBimElements(DMContext context)
         {
-            var list = await data.Context.BimElements
+            var list = await context.BimElements
                .Include(x => x.Objectives)
                .Where(x => !x.Objectives.Any())
                .ToListAsync();
-            data.Context.BimElements.RemoveRange(list);
+            context.BimElements.RemoveRange(list);
         }
     }
 }

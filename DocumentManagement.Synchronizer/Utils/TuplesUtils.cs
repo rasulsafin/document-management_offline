@@ -6,7 +6,7 @@ using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Utils
 {
-    public static class TuplesUtils
+    internal static class TuplesUtils
     {
         internal static List<SynchronizingTuple<T>> CreateSynchronizingTuples<T>(
                 IEnumerable<T> dbList,

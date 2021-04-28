@@ -3,6 +3,10 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>MRS.DocumentManagement.Utils</RootNamespace>
+    <Authors>Brio MRS</Authors>
+    <Company>Brio MRS©</Company>
+    <Product>Brio MRS Utils</Product>
+    <PackageIcon></PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>

@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
@@ -30,13 +31,18 @@ namespace MRS.DocumentManagement.Services
             this.mapper = mapper;
             this.itemHelper = itemHelper;
             this.logger = logger;
+            logger.LogTrace("ProjectService created");
         }
 
         public async Task<ProjectToListDto> Add(ProjectToCreateDto projectToCreate)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Add started with projectToCreate: {@ProjectToCreate}", projectToCreate);
+
             try
             {
                 var projectToDb = mapper.Map<Project>(projectToCreate);
+                logger.LogDebug("Mapped project: {@ProjectToDb}", projectToDb);
                 await context.Projects.AddAsync(projectToDb);
                 await context.SaveChangesAsync();
 
@@ -47,7 +53,9 @@ namespace MRS.DocumentManagement.Services
                 }
 
                 var ownerID = (int)projectToCreate.AuthorID;
-                var user = context.Users.Find(ownerID);
+                var user = await context.Users.FindAsync(ownerID);
+                logger.LogDebug("Found user: {@User}", user);
+
                 if (user != null)
                 {
                     // TODO: Link project to user only with the unique name + externalId;
@@ -63,8 +71,10 @@ namespace MRS.DocumentManagement.Services
 
                 context.Update(projectToDb);
                 await context.SaveChangesAsync();
+                var res = mapper.Map<ProjectToListDto>(projectToDb);
+                logger.LogDebug("Adding result: {@Result}", res);
 
-                return mapper.Map<ProjectToListDto>(projectToDb);
+                return res;
             }
             catch (Exception ex)
             {
@@ -75,11 +85,14 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<ProjectDto> Find(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Find started with projectID: {@ProjectID}", projectID);
             try
             {
                 var dbProject = await context.Projects.Unsynchronized()
                     .Include(i => i.Items)
                     .FirstOrDefaultAsync(p => p.ID == (int)projectID);
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
                 if (dbProject == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
                 return mapper.Map<ProjectDto>(dbProject);
@@ -93,9 +106,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetAllProjects()
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetAllProjects started");
             try
             {
                 var dbProjects = await context.Projects.Unsynchronized().ToListAsync();
+                logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
                 return dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
             }
             catch (Exception e)
@@ -107,6 +123,8 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetUserProjects started with userID: {@UserID}", userID);
             try
             {
                 var userFromDb = await context.FindAsync<User>((int)userID);
@@ -121,7 +139,9 @@ namespace MRS.DocumentManagement.Services
                    .Unsynchronized()
                    .ToListAsync();
 
+                logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
                 var userProjects = dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
+                logger.LogDebug("Mapped projects: {@UserProjects}", userProjects);
                 return userProjects;
             }
             catch (Exception e)
@@ -133,6 +153,8 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetUsers started with projectID: {@ProjectID}", projectID);
             try
             {
                 var dbProject = await context.FindAsync<Project>((int)projectID);
@@ -143,6 +165,7 @@ namespace MRS.DocumentManagement.Services
                     .Where(x => x.ProjectID == dbProject.ID)
                     .Select(x => x.User)
                     .ToListAsync();
+                logger.LogDebug("Found users: {@UsersDb}", usersDb);
                 return usersDb.Select(x => mapper.Map<UserDto>(x)).ToList();
             }
             catch (Exception e)
@@ -154,10 +177,13 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("LinkToUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
                 var project = await context.Projects.Include(x => x.Users)
                     .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                logger.LogDebug("Found project: {@Project}", project);
                 if (project == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
 
@@ -187,9 +213,12 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Remove(ID<ProjectDto> projectID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Remove started with projectID: {@ProjectID}", projectID);
             try
             {
                 var project = await context.Projects.FindAsync((int)projectID);
+                logger.LogDebug("Found project: {@Project}", project);
                 if (project == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
 
@@ -206,10 +235,13 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("UnlinkFromUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
                 var project = await context.Projects.Include(x => x.Users)
                     .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                logger.LogDebug("Found project: {@Project}", project);
                 if (project == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
 
@@ -235,16 +267,20 @@ namespace MRS.DocumentManagement.Services
 
         public async Task<bool> Update(ProjectDto project)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Update started with project: {@Project}", project);
             try
             {
                 var projectID = project.ID;
                 var projectFromDb = await context.Projects
                    .Include(x => x.Items)
                    .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                logger.LogDebug("Found project: {@ProjectFromDB}", projectFromDb);
                 if (projectFromDb == null)
                     throw new ArgumentNullException($"Project with key {projectID} was not found");
 
                 projectFromDb = mapper.Map(project, projectFromDb);
+                logger.LogDebug("Mapped project: {@ProjectFromDB}", projectFromDb);
 
                 var projectItems = projectFromDb.Items;
                 projectFromDb.Items = new List<Item>();
@@ -273,9 +309,12 @@ namespace MRS.DocumentManagement.Services
 
         private async Task LinkItem(ItemDto item, Project project)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("LinkItem started with project: {@Project} and item: {@Item}", project, item);
             try
             {
                 var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project.GetType(), project.ID);
+                logger.LogDebug("Found item: {@DBItem}", dbItem);
                 if (dbItem == null)
                     return;
 
@@ -292,6 +331,9 @@ namespace MRS.DocumentManagement.Services
 
         private async Task<bool> UnlinkItem(int itemID, int projectID)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("UnlinkItem started for project {@ProjectID} with itemID: {@ItemID}", projectID, itemID);
+
             try
             {
                 var item = await context.Items
@@ -299,11 +341,15 @@ namespace MRS.DocumentManagement.Services
                    .Where(x => x.ID == itemID)
                    .Where(x => x.ProjectID == projectID)
                    .FirstOrDefaultAsync();
+                logger.LogDebug("Found item: {@Item}", item);
                 if (item == null)
                     return false;
 
                 if (item.Objectives.Count == 0)
+                {
                     context.Items.Remove(item);
+                    logger.LogDebug("{@ItemID} removed", itemID);
+                }
 
                 await context.SaveChangesAsync();
                 return true;

@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -13,18 +14,23 @@ namespace MRS.DocumentManagement.Utility
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
+        private readonly ILogger<DynamicFieldHelper> logger;
 
-        public DynamicFieldHelper(DMContext context, IMapper mapper)
+        public DynamicFieldHelper(DMContext context, IMapper mapper, ILogger<DynamicFieldHelper> logger)
         {
             this.context = context;
             this.mapper = mapper;
+            this.logger = logger;
+            logger.LogTrace("DynamicFieldHelper created");
         }
 
         internal async Task<DynamicFieldDto> BuildObjectDynamicField(DynamicField dynamicField)
         {
+            logger.LogTrace("BuildObjectDynamicField started with dynamicField: {@DynamicField}", dynamicField);
             if (dynamicField.Type == DynamicFieldType.OBJECT.ToString())
             {
                 DynamicFieldDto objDynamicField = mapper.Map<DynamicFieldDto>(dynamicField);
+                logger.LogDebug("Mapped dynamic field: {@DynamicField}", objDynamicField);
 
                 var children = context.DynamicFields.Where(x => x.ParentFieldID == dynamicField.ID);
 
@@ -45,7 +51,13 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int parentID = -1)
         {
+            logger.LogTrace(
+                "AddDynamicFields started with field: {@DynamicField}, objectiveID: {ObjectiveID}, parentID: {ParentID}",
+                field,
+                objectiveID,
+                parentID);
             var dynamicField = mapper.Map<DynamicField>(field);
+            logger.LogDebug("Mapped dynamic field: {@DynamicField}", dynamicField);
 
             if (parentID != -1)
                 dynamicField.ParentFieldID = parentID;
@@ -68,7 +80,13 @@ namespace MRS.DocumentManagement.Utility
 
         internal async Task UpdateDynamicField(DynamicFieldDto field, int objectiveID, int parentID = -1)
         {
+            logger.LogTrace(
+                "UpdateDynamicField started with field: {@DynamicField}, objectiveID: {ObjectiveID}, parentID: {ParentID}",
+                field,
+                objectiveID,
+                parentID);
             var dbField = await context.DynamicFields.FindAsync((int)field.ID);
+            logger.LogDebug("Found dynamic field: {@DynamicField}", dbField);
             if (dbField == null)
             {
                 await AddDynamicFields(field, objectiveID, parentID);
@@ -92,6 +110,7 @@ namespace MRS.DocumentManagement.Utility
 
         private string GetValue(DynamicFieldDto field)
         {
+            logger.LogTrace("GetValue started with field: {@DynamicField}", field);
             return field.Type switch
             {
                 DynamicFieldType.STRING

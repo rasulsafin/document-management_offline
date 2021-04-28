@@ -1,0 +1,19 @@
+{
+  "profiles": {
+    "DocumentManagement.Launcher": {
+      "commandName": "Project"
+    },
+    "Debug Launcher": {
+      "commandName": "Project",
+      "commandLineArgs": "develop"
+    },
+    "Debug Launcher rus": {
+      "commandName": "Project",
+      "commandLineArgs": "develop language=ru-RU"
+    },
+    "Debug Launcher eng": {
+      "commandName": "Project",
+      "commandLineArgs": "develop language=en"
+    }
+  }
+}
