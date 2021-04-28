@@ -19,26 +19,23 @@ namespace MRS.DocumentManagement.Connection.LementPro
     public class LementProConnection : IConnection, IDisposable
     {
         private readonly ILogger<LementProConnection> logger;
-        private readonly HttpConnection connector;
         private readonly AuthenticationService authenticationService;
         private readonly HttpRequestUtility requestUtility;
-        private readonly Factory<LementProConnectionContext> contextFactory;
-        private readonly Factory<LementProConnectionStorage> storageFactory;
+        private readonly IFactory<LementProConnectionContext> contextFactory;
+        private readonly IFactory<LementProConnectionStorage> storageFactory;
         private readonly TasksService tasksService;
 
         private ConnectionInfoExternalDto updatedInfo;
 
         public LementProConnection(
             ILogger<LementProConnection> logger,
-            HttpConnection connector,
             AuthenticationService authenticationService,
             HttpRequestUtility requestUtility,
-            Factory<LementProConnectionContext> contextFactory,
-            Factory<LementProConnectionStorage> storageFactory,
+            IFactory<LementProConnectionContext> contextFactory,
+            IFactory<LementProConnectionStorage> storageFactory,
             TasksService tasksService)
         {
             this.logger = logger;
-            this.connector = connector;
             this.authenticationService = authenticationService;
             this.requestUtility = requestUtility;
             this.contextFactory = contextFactory;
@@ -49,7 +46,6 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         public void Dispose()
         {
-            connector.Dispose();
             authenticationService.Dispose();
             requestUtility.Dispose();
             GC.SuppressFinalize(this);

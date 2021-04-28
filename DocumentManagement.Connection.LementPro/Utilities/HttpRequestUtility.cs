@@ -26,8 +26,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         private HttpConnection connector;
 
-        public HttpRequestUtility(HttpConnection connector)
-            => this.connector = connector;
+        public HttpRequestUtility()
+            => this.connector = new HttpConnection();
 
         public string Token { get; set; }
 

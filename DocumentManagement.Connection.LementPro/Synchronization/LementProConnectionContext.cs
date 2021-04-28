@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Connection.LementPro.Synchronization.Factories;
+﻿using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -7,12 +7,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
     // TODO: capture remote state and work with it.
     public class LementProConnectionContext : AConnectionContext
     {
-        private readonly ProjectSynchronizerFactory projectSynchronizerFactory;
-        private readonly ObjectiveSynchronizerFactory objectiveSynchronizerFactory;
+        private readonly IFactory<LementProConnectionContext, LementProProjectsSynchronizer> projectSynchronizerFactory;
+        private readonly IFactory<
+            LementProConnectionContext,
+            LementProObjectivesSynchronizer> objectiveSynchronizerFactory;
 
         public LementProConnectionContext(
-            ProjectSynchronizerFactory projectSynchronizerFactory,
-            ObjectiveSynchronizerFactory objectiveSynchronizerFactory)
+            IFactory<LementProConnectionContext, LementProProjectsSynchronizer> projectSynchronizerFactory,
+            IFactory<LementProConnectionContext, LementProObjectivesSynchronizer> objectiveSynchronizerFactory)
         {
             this.projectSynchronizerFactory = projectSynchronizerFactory;
             this.objectiveSynchronizerFactory = objectiveSynchronizerFactory;
