@@ -17,19 +17,16 @@ namespace MRS.DocumentManagement.Launcher
         private bool isConsoleVisible = false;
         private Process notepadProcess;
         private bool isSwaggerVisible;
-        private bool isSettingsFileVisible;
         #endregion
 
         #region constructor
         public NotifyIconViewModel()
         {
             IsSwaggerVisible = App.IsDevelopMode;
-            IsSettingsFileVisible = App.IsDevelopMode;
             ToggleConsoleCommand = new RelayCommand(ToggleConsoleVisibility);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
             StartDmConsoleCommand = new RelayCommand(StartDocumentManagement);
-            OpenSettingsCommand = new RelayCommand(OpenSettings);
             StartDocumentManagement();
         }
 
@@ -54,12 +51,6 @@ namespace MRS.DocumentManagement.Launcher
             set => SetProperty(ref isSwaggerVisible, value);
         }
 
-        public bool IsSettingsFileVisible
-        {
-            get => isSettingsFileVisible;
-            set => SetProperty(ref isSettingsFileVisible, value);
-        }
-
         public RelayCommand ExitApplicationCommand { get; }
 
         public RelayCommand ToggleConsoleCommand { get; }
@@ -67,8 +58,6 @@ namespace MRS.DocumentManagement.Launcher
         public RelayCommand OpenSwaggerCommand { get; }
 
         public RelayCommand StartDmConsoleCommand { get; }
-
-        public RelayCommand OpenSettingsCommand { get; }
 
         #endregion
 
@@ -86,21 +75,6 @@ namespace MRS.DocumentManagement.Launcher
         private static void Hide(IntPtr win) => SafeNativeMethods.ShowWindow(win, 0);
 
         private static void Show(IntPtr win) => SafeNativeMethods.ShowWindow(win, 1);
-
-        private void OpenSettings()
-        {
-            if (notepadProcess == null)
-            {
-                var path = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
-                notepadProcess = Process.Start("notepad", path);
-                notepadProcess.EnableRaisingEvents = true;
-                notepadProcess.Exited += OnNotepadClosed;
-            }
-            else
-            {
-                Show(notepadProcess.MainWindowHandle);
-            }
-        }
 
         private void OnNotepadClosed(object sender, EventArgs e)
         {
@@ -156,7 +130,6 @@ namespace MRS.DocumentManagement.Launcher
             if (dmProcess == null)
             {
                 MessageBox.Show(Properties.Resources.Message_Path_not_found);
-                OpenSettings();
                 return;
             }
 

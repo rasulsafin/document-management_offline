@@ -62,10 +62,6 @@
 
         <MenuItem Header="{x:Static  res:Resources.Label_ShowSwagger}" Command="{Binding OpenSwaggerCommand}" 
                   Visibility="{Binding IsSwaggerVisible, Converter={StaticResource BoolToVisible}}" />
-
-        <MenuItem Header="{x:Static  res:Resources.Label_ShowSettings}" Command="{Binding OpenSettingsCommand}" 
-                  Visibility="{Binding IsSettingsFileVisible, Converter={StaticResource BoolToVisible}}" />
-
         <Separator />
         <MenuItem Header="{x:Static  res:Resources.Label_Exit}" 
                   ToolTip="{x:Static  res:Resources.Tooltip_StopDmAndExit}" Command="{Binding ExitApplicationCommand}" />

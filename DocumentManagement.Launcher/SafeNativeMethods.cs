@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.InteropServices;
-using System.Security;
 
 namespace MRS.DocumentManagement.Launcher
 {
