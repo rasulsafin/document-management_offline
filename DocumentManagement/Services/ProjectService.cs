@@ -42,6 +42,8 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
+                if (string.IsNullOrWhiteSpace(projectToCreate.Title))
+                    throw new ArgumentException("Title of the project is empty", nameof(projectToCreate));
                 var projectToDb = mapper.Map<Project>(projectToCreate);
                 logger.LogDebug("Mapped project: {@ProjectToDb}", projectToDb);
                 await context.Projects.AddAsync(projectToDb);
@@ -174,19 +176,24 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("LinkToUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
+                var ids = users.Select(x => (int)x).ToArray();
+
+                foreach (var user in ids)
+                    await context.FindOrThrowAsync<User>(user);
+
                 var project = await context.Projects.Include(x => x.Users)
                    .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
 
                 project.Users ??= new List<UserProject>();
-                foreach (var user in users)
+                foreach (var user in ids)
                 {
                     if (!project.Users.Any(x => x.ProjectID == project.ID && x.UserID == (int)user))
                     {
                         project.Users.Add(new UserProject
                         {
                             ProjectID = project.ID,
-                            UserID = (int)user,
+                            UserID = user,
                         });
                     }
                 }
@@ -227,13 +234,18 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("UnlinkFromUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
+                var ids = users.Select(x => (int)x).ToArray();
+
+                foreach (var user in ids)
+                    await context.FindOrThrowAsync<User>(user);
+
                 var project = await context.Projects.Include(x => x.Users)
                    .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
 
-                foreach (var user in users)
+                foreach (var user in ids)
                 {
-                    var link = project.Users.FirstOrDefault(x => x.UserID == (int)user);
+                    var link = project.Users.FirstOrDefault(x => x.UserID == user);
                     if (link != null)
                     {
                         project.Users.Remove(link);
@@ -257,10 +269,12 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Update started with project: {@Project}", project);
             try
             {
+                if (string.IsNullOrWhiteSpace(project.Title))
+                    throw new ArgumentException("Title of the project is empty", nameof(project));
                 var projectID = project.ID;
                 var projectFromDb = await context.Projects
                    .Include(x => x.Items)
-                   .FindOrThrowAsync(nameof(Project.ID), projectID);
+                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
                 logger.LogDebug("Found project: {@ProjectFromDB}", projectFromDb);
                 projectFromDb = mapper.Map(project, projectFromDb);
                 logger.LogDebug("Mapped project: {@ProjectFromDB}", projectFromDb);

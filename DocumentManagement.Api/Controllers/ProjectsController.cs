@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Exceptions;
@@ -113,6 +114,14 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var projectToReturn = await service.Add(project);
                 return Created(string.Empty, projectToReturn);
             }
+            catch (ArgumentException ex)
+            {
+                return CreateProblemResult(
+                    this,
+                    400,
+                    localizer["CheckValidProjectTitleToAdd_TitleRequired"],
+                    ex.Message);
+            }
             catch (Exception ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
@@ -196,6 +205,14 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 await service.Update(projectData);
                 return Ok(true);
+            }
+            catch (ArgumentException ex)
+            {
+                return CreateProblemResult(
+                    this,
+                    400,
+                    localizer["CheckValidProjectTitleToAdd_TitleRequired"],
+                    ex.Message);
             }
             catch (ANotFoundException ex)
             {
@@ -297,7 +314,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="users">List of user's ids connect project to.</param>
         /// <returns>True if linked successfully.</returns>
         /// <response code="201">Link created. Return true.</response>
-        /// <response code="400">Invalid id.</response>
+        /// <response code="400">Invalid ids.</response>
         /// <response code="404">If project was not found.</response>
         /// <response code="500">Something went wrong while linking project to users.</response>
         [HttpPost]
@@ -320,7 +337,11 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.LinkToUsers(new ID<ProjectDto>(projectID), users);
                 return Created(string.Empty, true);
             }
-            catch (ANotFoundException ex)
+            catch (NotFoundException<User> ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (NotFoundException<Project> ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
@@ -346,7 +367,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="users">List of user's ids unlink project from.</param>
         /// <returns>True if unlinked successfully.</returns>
         /// <response code="200">Unlinked.</response>
-        /// <response code="400">Invalid id.</response>
+        /// <response code="400">Invalid ids.</response>
         /// <response code="404">If project was not found.</response>
         /// <response code="500">Something went wrong while unlinking project from users.</response>
         [HttpPost]
@@ -369,7 +390,11 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.UnlinkFromUsers(new ID<ProjectDto>(projectID), users);
                 return Ok(true);
             }
-            catch (ANotFoundException ex)
+            catch (NotFoundException<User> ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (NotFoundException<Project> ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
