@@ -1,28 +1,24 @@
 ﻿using System;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using MRS.DocumentManagement.Launcher.Base;
+using MRS.DocumentManagement.Launcher.Resources;
 
 namespace MRS.DocumentManagement.Launcher
 {
     public class NotifyIconViewModel : ObservableObject, IDisposable
     {
-        #region field
         private bool isDMRunning;
         private Process dmProcess;
         private bool isConsoleVisible = false;
-        private Process notepadProcess;
         private bool isSwaggerVisible;
-        #endregion
 
-        #region constructor
         public NotifyIconViewModel()
         {
-            IsSwaggerVisible = App.IsDevelopMode;
+            IsSwaggerVisible = App.Options.DevMode;
             ToggleConsoleCommand = new RelayCommand(ToggleConsoleVisibility);
             ExitApplicationCommand = new RelayCommand(ExitApplication);
             OpenSwaggerCommand = new RelayCommand(OpenSwagger);
@@ -30,9 +26,6 @@ namespace MRS.DocumentManagement.Launcher
             StartDocumentManagement();
         }
 
-        #endregion
-
-        #region binding
         public bool IsDMRunning
         {
             get => isDMRunning;
@@ -59,8 +52,6 @@ namespace MRS.DocumentManagement.Launcher
 
         public RelayCommand StartDmConsoleCommand { get; }
 
-        #endregion
-
         public void Dispose()
         {
             if (dmProcess != null)
@@ -71,17 +62,9 @@ namespace MRS.DocumentManagement.Launcher
             }
         }
 
-        #region private method
         private static void Hide(IntPtr win) => SafeNativeMethods.ShowWindow(win, 0);
 
         private static void Show(IntPtr win) => SafeNativeMethods.ShowWindow(win, 1);
-
-        private void OnNotepadClosed(object sender, EventArgs e)
-        {
-            notepadProcess.Exited -= OnNotepadClosed;
-            notepadProcess.Dispose();
-            notepadProcess = null;
-        }
 
         private void OpenSwagger() => OpenUrl(Properties.Settings.Default.SwaggerPath);
 
@@ -96,10 +79,14 @@ namespace MRS.DocumentManagement.Launcher
                 dmProcess.WaitForExit();
             }
 
-            string path = Properties.Settings.Default.DMExecutablePath;
+            string path = App.Options.DMExecutable ?? Properties.Settings.Default.DMExecutablePath;
             if (!File.Exists(path))
             {
-                MessageBox.Show(string.Format(Properties.Resources.MessageFormat_File_not_found, path));
+                MessageBox.Show(
+                    string.Format(LocalizationResources.MessageFormat_File_not_found, path),
+                    string.Empty,
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
                 return;
             }
 
@@ -129,7 +116,7 @@ namespace MRS.DocumentManagement.Launcher
         {
             if (dmProcess == null)
             {
-                MessageBox.Show(Properties.Resources.Message_Path_not_found);
+                MessageBox.Show(LocalizationResources.Message_Path_not_found);
                 return;
             }
 
@@ -159,6 +146,5 @@ namespace MRS.DocumentManagement.Launcher
                 Process.Start("open", url);
             }
         }
-        #endregion
     }
 }

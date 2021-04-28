@@ -3,11 +3,10 @@
                     xmlns:notify="http://www.hardcodet.net/taskbar"
                     xmlns:local="clr-namespace:MRS.DocumentManagement.Launcher"
                     xmlns:base="clr-namespace:MRS.DocumentManagement.Launcher.Base"
-                    xmlns:res="clr-namespace:MRS.DocumentManagement.Launcher.Properties"
+                    xmlns:res="clr-namespace:MRS.DocumentManagement.Launcher.Resources"
                     xmlns:controls="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
                     >
     <controls:BooleanToVisibilityConverter x:Key="BoolToVisible"/>
-
 
     <ContextMenu x:Shared="true" x:Key="SysTrayMenu">
         <MenuItem>
@@ -16,12 +15,12 @@
                     <Setter Property="IsHitTestVisible" Value="False"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding IsDMRunning}" Value="True">
-                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_DMStarted}"/>
+                            <Setter Property="Header" Value="{x:Static res:LocalizationResources.Label_DMStarted}"/>
                             <Setter Property="Foreground" Value="Black"/>
                             <Setter Property="Background" Value="Green"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsDMRunning}" Value="False">
-                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_DMStopped}"/>
+                            <Setter Property="Header" Value="{x:Static res:LocalizationResources.Label_DMStopped}"/>
                             <Setter Property="Foreground" Value="White"/>
                             <Setter Property="Background" Value="Red"/>
                         </DataTrigger>
@@ -30,7 +29,7 @@
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="{x:Static  res:Resources.Label_StartDM}" Command="{Binding StartDmConsoleCommand}">
+        <MenuItem Header="{x:Static res:LocalizationResources.Label_StartDM}" Command="{Binding StartDmConsoleCommand}">
             <MenuItem.Style>
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>
@@ -50,26 +49,26 @@
                 <Style TargetType="{x:Type MenuItem}">
                     <Style.Triggers>                        
                         <DataTrigger Binding="{Binding IsConsoleVisible}" Value="True">
-                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_HideConsole}"/>
+                            <Setter Property="Header" Value="{x:Static res:LocalizationResources.Label_HideConsole}"/>
                         </DataTrigger>
                         <DataTrigger Binding="{Binding IsConsoleVisible}" Value="False">
-                            <Setter Property="Header" Value="{x:Static  res:Resources.Label_ShowConsole}"/>
+                            <Setter Property="Header" Value="{x:Static res:LocalizationResources.Label_ShowConsole}"/>
                         </DataTrigger>
                     </Style.Triggers>
                 </Style>
             </MenuItem.Style>
         </MenuItem>
 
-        <MenuItem Header="{x:Static  res:Resources.Label_ShowSwagger}" Command="{Binding OpenSwaggerCommand}" 
+        <MenuItem Header="{x:Static res:LocalizationResources.Label_ShowSwagger}" Command="{Binding OpenSwaggerCommand}" 
                   Visibility="{Binding IsSwaggerVisible, Converter={StaticResource BoolToVisible}}" />
         <Separator />
-        <MenuItem Header="{x:Static  res:Resources.Label_Exit}" 
-                  ToolTip="{x:Static  res:Resources.Tooltip_StopDmAndExit}" Command="{Binding ExitApplicationCommand}" />
+        <MenuItem Header="{x:Static res:LocalizationResources.Label_Exit}" 
+                  ToolTip="{x:Static res:LocalizationResources.Tooltip_StopDmAndExit}" Command="{Binding ExitApplicationCommand}" />
     </ContextMenu>
 
     <notify:TaskbarIcon x:Key="NotifyIcon"
-                    IconSource="/logo64.ico"
-                    ToolTipText="{x:Static  res:Resources.Tooltip_Dm_Brio_Mrs}"
+                    IconSource="Resources/logo64.ico"
+                    ToolTipText="{x:Static res:LocalizationResources.Tooltip_Dm_Brio_Mrs}"
                     DoubleClickCommand="{Binding ToggleConsoleCommand}"
                     ContextMenu="{StaticResource SysTrayMenu}">
         <notify:TaskbarIcon.DataContext>

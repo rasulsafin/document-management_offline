@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Launcher.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("W:\\temp\\DM\\DocumentManagement.Api.exe")]
+        [global::System.Configuration.DefaultSettingValueAttribute("DocumentManagement.Api.exe")]
         public string DMExecutablePath {
             get {
                 return ((string)(this["DMExecutablePath"]));

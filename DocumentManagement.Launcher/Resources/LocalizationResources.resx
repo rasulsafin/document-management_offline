@@ -142,7 +142,7 @@
     <value>Запустить документооборот</value>
   </data>
   <data name="MessageFormat_File_not_found" xml:space="preserve">
-    <value>Файл не найден!\n{0}</value>
+    <value>Файл не найден: {0}</value>
   </data>
   <data name="Message_Path_not_found" xml:space="preserve">
     <value>Необходимо указать путь к 'DocumentManagement.Api.exe'!</value>
