@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Utility.Factories
+namespace MRS.DocumentManagement.General.Utils.Factories
 {
     /// <summary>
     /// A factory for creating instances of T.

@@ -8,6 +8,8 @@ using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Synchronization;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Connection.Utils;
+using MRS.DocumentManagement.Connection.Utils.Extensions;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
@@ -20,15 +22,28 @@ namespace MRS.DocumentManagement.Connection.LementPro
         private readonly HttpConnection connector;
         private readonly AuthenticationService authenticationService;
         private readonly HttpRequestUtility requestUtility;
+        private readonly Factory<LementProConnectionContext> contextFactory;
+        private readonly Factory<LementProConnectionStorage> storageFactory;
+        private readonly TasksService tasksService;
 
         private ConnectionInfoExternalDto updatedInfo;
 
-        public LementProConnection(ILogger<LementProConnection> logger)
+        public LementProConnection(
+            ILogger<LementProConnection> logger,
+            HttpConnection connector,
+            AuthenticationService authenticationService,
+            HttpRequestUtility requestUtility,
+            Factory<LementProConnectionContext> contextFactory,
+            Factory<LementProConnectionStorage> storageFactory,
+            TasksService tasksService)
         {
             this.logger = logger;
-            connector = new HttpConnection();
-            requestUtility = new HttpRequestUtility(connector);
-            authenticationService = new AuthenticationService(requestUtility);
+            this.connector = connector;
+            this.authenticationService = authenticationService;
+            this.requestUtility = requestUtility;
+            this.contextFactory = contextFactory;
+            this.storageFactory = storageFactory;
+            this.tasksService = tasksService;
             logger.LogTrace("LementProConnection created");
         }
 
@@ -44,6 +59,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             logger.LogTrace("Connect started with info: {@ConnectionInfo}", info);
+            SetToken(info);
             var authorizationResult = await authenticationService.SignInAsync(info);
             logger.LogDebug("SignInAsync returned: {@AuthResult}", authorizationResult);
             logger.LogInformation("User {UserID} connection result: {@AuthStatus}", info.UserExternalID, authorizationResult.authStatus);
@@ -54,6 +70,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             logger.LogTrace("UpdateConnectionInfo started with info: {@ConnectionInfo}", info);
+            SetToken(info);
             if (updatedInfo == null)
                 await Connect(info, default);
 
@@ -67,6 +84,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
             logger.LogTrace("GetStatus started with info: {@ConnectionInfo}", info);
+            SetToken(info);
             var isCorrect = authenticationService.IsAuthorisationAccessValid(info);
             logger.LogDebug("Auth data correct: {@Result}", isCorrect);
 
@@ -80,24 +98,25 @@ namespace MRS.DocumentManagement.Connection.LementPro
             return Task.FromResult(status);
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
             logger.LogTrace("GetContext started with info: {@ConnectionInfo}", info);
-            return await LementProConnectionContext.CreateContext(info);
+            SetToken(info);
+            return Task.FromResult<IConnectionContext>(contextFactory.Create());
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
             logger.LogTrace("GetStorage started with info: {@ConnectionInfo}", info);
+            SetToken(info);
             await Connect(info, default);
-            return new LementProConnectionStorage(requestUtility);
+            return storageFactory.Create();
         }
 
         private async Task<ICollection<ObjectiveTypeExternalDto>> GetTypesAsync()
         {
             logger.LogTrace("GetTypesAsync started with info");
-            using var taskService = new TasksService(requestUtility, new CommonRequestsUtility(requestUtility));
-            var typesModels = await taskService.GetTasksTypesAsync();
+            var typesModels = await tasksService.GetTasksTypesAsync();
             logger.LogDebug("Found types: {@Types}", typesModels);
             var types = new List<ObjectiveTypeExternalDto>();
 
@@ -109,5 +128,8 @@ namespace MRS.DocumentManagement.Connection.LementPro
             logger.LogDebug("Mapped types: {@Types}", types);
             return types;
         }
+
+        private void SetToken(ConnectionInfoExternalDto info)
+            => requestUtility.Token = info.GetAuthValue(AUTH_NAME_TOKEN);
     }
 }

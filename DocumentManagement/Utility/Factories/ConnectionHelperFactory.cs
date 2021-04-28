@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 
 namespace MRS.DocumentManagement.Utility.Factories

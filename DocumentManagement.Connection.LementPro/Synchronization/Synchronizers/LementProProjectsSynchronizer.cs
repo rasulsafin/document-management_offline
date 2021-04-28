@@ -2,23 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 {
+    // TODO: use capture from context.
     public class LementProProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
         private readonly ProjectsService projectsService;
 
         private List<ProjectExternalDto> projects;
 
-        public LementProProjectsSynchronizer(LementProConnectionContext context)
-            => projectsService = context.ProjectsService;
+        public LementProProjectsSynchronizer(LementProConnectionContext context, ProjectsService projectsService)
+        {
+            this.projectsService = projectsService;
+        }
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {

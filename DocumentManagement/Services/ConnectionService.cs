@@ -11,13 +11,13 @@ using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Services
             this.connectionScopedFactory = connectionScopedFactory;
             this.connectionHelperFactory = connectionHelperFactory;
             this.synchronizerFactory = synchronizerFactory;
-            
+
             logger.LogTrace("ConnectionService created");
         }
 

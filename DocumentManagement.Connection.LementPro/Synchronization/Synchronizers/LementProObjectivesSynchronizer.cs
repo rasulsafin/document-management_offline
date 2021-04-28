@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 {
+    // TODO: use capture from context.
     public class LementProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
         private readonly TasksService tasksService;
@@ -16,10 +17,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 
         private List<ObjectiveExternalDto> objectives;
 
-        public LementProObjectivesSynchronizer(LementProConnectionContext context)
+        public LementProObjectivesSynchronizer(
+            LementProConnectionContext context,
+            TasksService tasksService,
+            BimsService bimsService)
         {
-            tasksService = context.TasksService;
-            bimsService = context.BimsService;
+            this.tasksService = tasksService;
+            this.bimsService = bimsService;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
