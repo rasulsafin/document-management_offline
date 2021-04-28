@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -90,7 +91,8 @@ namespace MRS.DocumentManagement.Launcher
         {
             if (notepadProcess == null)
             {
-                notepadProcess = Process.Start("notepad", LauncherSettings.PATH);
+                var path = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.PerUserRoamingAndLocal).FilePath;
+                notepadProcess = Process.Start("notepad", path);
                 notepadProcess.EnableRaisingEvents = true;
                 notepadProcess.Exited += OnNotepadClosed;
             }
@@ -102,13 +104,12 @@ namespace MRS.DocumentManagement.Launcher
 
         private void OnNotepadClosed(object sender, EventArgs e)
         {
-            LauncherSettings.Load();
             notepadProcess.Exited -= OnNotepadClosed;
             notepadProcess.Dispose();
             notepadProcess = null;
         }
 
-        private void OpenSwagger() => OpenUrl(LauncherSettings.SwaggerPath);
+        private void OpenSwagger() => OpenUrl(Properties.Settings.Default.SwaggerPath);
 
         private void DmProcessDisposed(object sender, EventArgs e) => IsDMRunning = false;
 
@@ -121,8 +122,7 @@ namespace MRS.DocumentManagement.Launcher
                 dmProcess.WaitForExit();
             }
 
-            LauncherSettings.Load();
-            string path = LauncherSettings.DMExecutablePath;
+            string path = Properties.Settings.Default.DMExecutablePath;
             if (!File.Exists(path))
             {
                 MessageBox.Show(string.Format(Properties.Resources.MessageFormat_File_not_found, path));

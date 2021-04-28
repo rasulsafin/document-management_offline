@@ -1,19 +1,19 @@
 {
   "profiles": {
-    "MRS.DocumentManagement.Launcher": {
+    "DocumentManagement.Launcher": {
       "commandName": "Project"
     },
     "Debug Launcher": {
       "commandName": "Project",
       "commandLineArgs": "develop"
     },
-    "Debug Launcher eng": {
-      "commandName": "Project",
-      "commandLineArgs": "develop language=en"
-    },
     "Debug Launcher rus": {
       "commandName": "Project",
       "commandLineArgs": "develop language=ru-RU"
+    },
+    "Debug Launcher eng": {
+      "commandName": "Project",
+      "commandLineArgs": "develop language=en"
     }
   }
 }
