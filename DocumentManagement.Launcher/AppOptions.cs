@@ -5,15 +5,16 @@ namespace MRS.DocumentManagement.Launcher
     public class AppOptions
     {
         public AppOptions()
-            : this(false, null, null)
+            : this(false, null, null, null)
         {
         }
 
-        public AppOptions(bool devMode, string dMExecutable, string languageTag)
+        public AppOptions(bool devMode, string dMExecutable, string languageTag, string passingArguments)
         {
             DevMode = devMode;
             DMExecutable = dMExecutable;
             LanguageTag = languageTag;
+            PassingArguments = passingArguments;
         }
 
         [Option('d', "develop", Default = false, HelpText = "Set development mode")]
@@ -24,5 +25,8 @@ namespace MRS.DocumentManagement.Launcher
 
         [Option('l', "language", HelpText = "UI language")]
         public string LanguageTag { get; }
+
+        [Option('p', "pass", HelpText = "Arguments to pass to DM service")]
+        public string PassingArguments { get; }
     }
 }

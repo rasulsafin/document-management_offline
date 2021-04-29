@@ -53,7 +53,7 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>LocalizationResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\LocalizationResources.ru-RU.resx">
+    <EmbeddedResource Update="Resources\LocalizationResources.ru.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
   </ItemGroup>
