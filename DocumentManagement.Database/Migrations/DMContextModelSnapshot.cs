@@ -349,11 +349,23 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<string>("BimElementID")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CameraPosition")
-                        .HasColumnType("TEXT");
+                    b.Property<float>("CameraPositionX")
+                        .HasColumnType("REAL");
 
-                    b.Property<string>("Position")
-                        .HasColumnType("TEXT");
+                    b.Property<float>("CameraPositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("CameraPositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
 
                     b.HasKey("ID");
 

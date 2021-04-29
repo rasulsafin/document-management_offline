@@ -18,9 +18,13 @@ namespace DocumentManagement.Database.Migrations
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Position = table.Column<string>(type: "TEXT", nullable: true),
-                    CameraPosition = table.Column<string>(type: "TEXT", nullable: true),
-                    BimElementID = table.Column<string>(type: "TEXT", nullable: true),
+                    PositionX = table.Column<float>(type: "REAL", nullable: false),
+                    PositionY = table.Column<float>(type: "REAL", nullable: false),
+                    PositionZ = table.Column<float>(type: "REAL", nullable: false),
+                    CameraPositionX = table.Column<float>(type: "REAL", nullable: false),
+                    CameraPositionY = table.Column<float>(type: "REAL", nullable: false),
+                    CameraPositionZ = table.Column<float>(type: "REAL", nullable: false),
+                    BimElementID = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {

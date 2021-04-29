@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    [Migration("20210428060038_AddLocation")]
+    [Migration("20210429053638_AddLocation")]
     partial class AddLocation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -351,11 +351,23 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<string>("BimElementID")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("CameraPosition")
-                        .HasColumnType("TEXT");
+                    b.Property<float>("CameraPositionX")
+                        .HasColumnType("REAL");
 
-                    b.Property<string>("Position")
-                        .HasColumnType("TEXT");
+                    b.Property<float>("CameraPositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("CameraPositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
 
                     b.HasKey("ID");
 
