@@ -16,7 +16,8 @@ namespace MRS.DocumentManagement.Launcher
             using var app = new MRS.DocumentManagement.Launcher.App();
             var options = new AppOptions();
 
-            Parser.Default.ParseArguments<AppOptions>(args)
+            new Parser(with => with.EnableDashDash = true)
+                .ParseArguments<AppOptions>(args)
                 .WithParsed(x => options = x);
 
             App.Options = options;

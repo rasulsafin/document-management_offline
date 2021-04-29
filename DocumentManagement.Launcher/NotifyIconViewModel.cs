@@ -80,7 +80,10 @@ namespace MRS.DocumentManagement.Launcher
             }
 
             string path = App.Options.DMExecutable ?? Properties.Settings.Default.DMExecutablePath;
-            if (!File.Exists(path))
+            var executablePath = Path.GetFullPath(path);
+            var executableDir = Path.GetDirectoryName(executablePath);
+
+            if (!File.Exists(executablePath))
             {
                 MessageBox.Show(
                     string.Format(LocalizationResources.MessageFormat_File_not_found, path),
@@ -90,18 +93,17 @@ namespace MRS.DocumentManagement.Launcher
                 return;
             }
 
-            var executableDir = Path.GetDirectoryName(path);
-
             dmProcess = new Process();
-            dmProcess.StartInfo.FileName = path;
+            dmProcess.StartInfo.FileName = executablePath;
             dmProcess.StartInfo.CreateNoWindow = false;
             dmProcess.StartInfo.UseShellExecute = false;
             dmProcess.StartInfo.WorkingDirectory = executableDir;
-            dmProcess.StartInfo.Arguments = string.Join(" ", Environment.GetCommandLineArgs());
+            dmProcess.StartInfo.Arguments = App.Options.PassingArguments ?? string.Empty;
             dmProcess.EnableRaisingEvents = true;
             dmProcess.Exited += DmProcessDisposed;
-            IsDMRunning = true;
             dmProcess.Start();
+
+            IsDMRunning = true;
 
             // Waiting for the console window to open
             while (dmProcess.MainWindowHandle == IntPtr.Zero)
