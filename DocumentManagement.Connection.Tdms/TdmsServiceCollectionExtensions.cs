@@ -6,7 +6,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddTdms(this IServiceCollection services)
         {
-            services.AddScoped<TdmsConnection>();
+            services.AddSingleton<TdmsConnection>();
             return services;
         }
     }
