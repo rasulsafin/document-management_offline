@@ -9,10 +9,10 @@ using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Services
 {
-    public class AuthenticationService : IDisposable
+    public class AuthenticationService
     {
         private readonly ILogger<AuthenticationService> logger;
-        private HttpRequestUtility requestUtility;
+        private readonly HttpRequestUtility requestUtility;
 
         public AuthenticationService(HttpRequestUtility requestUtility, ILogger<AuthenticationService> logger)
         {
@@ -21,11 +21,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             logger.LogTrace("AuthenticationService created");
         }
 
-        public void Dispose()
-            => requestUtility.Dispose();
-
         public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto info)
         {
+            logger.LogTrace("SignInAsync started with info: {@ConnectionInfo}", info);
+
             var login = info.AuthFieldValues[AUTH_NAME_LOGIN];
             var password = info.AuthFieldValues[AUTH_NAME_PASSWORD];
 
@@ -33,6 +32,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(expires))
             {
+                logger.LogError("Connection data is empty");
                 var errorStatus = new ConnectionStatusDto
                 {
                     Status = RemoteConnectionStatus.Error,
@@ -47,11 +47,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
             requestUtility.EnsureAccessValidAsync = () => EnsureAccessValidAsync(info);
             var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
+            logger.LogDebug("Result info: {@ConnectionInfo}", info);
             return (successStatus, info);
         }
 
         public async Task EnsureAccessValidAsync(ConnectionInfoExternalDto connectionInfo)
         {
+            logger.LogTrace("EnsureAccessValidAsync started with info: {@ConnectionInfo}", connectionInfo);
             if (IsAuthorisationAccessValid(connectionInfo))
                 return;
 
@@ -60,6 +62,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
 
         internal bool IsAuthorisationAccessValid(ConnectionInfoExternalDto connectionInfo)
         {
+            logger.LogTrace("IsAuthorisationAccessValid started with info: {@ConnectionInfo}", connectionInfo);
             if (string.IsNullOrWhiteSpace(connectionInfo.GetAuthValue(AUTH_NAME_TOKEN)))
                 return false;
 

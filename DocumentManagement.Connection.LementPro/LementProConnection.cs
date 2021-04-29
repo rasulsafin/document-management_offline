@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +6,6 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Synchronization;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
@@ -16,7 +14,7 @@ using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro
 {
-    public class LementProConnection : IConnection, IDisposable
+    public class LementProConnection : IConnection
     {
         private readonly ILogger<LementProConnection> logger;
         private readonly AuthenticationService authenticationService;
@@ -42,14 +40,6 @@ namespace MRS.DocumentManagement.Connection.LementPro
             this.storageFactory = storageFactory;
             this.tasksService = tasksService;
             logger.LogTrace("LementProConnection created");
-        }
-
-        public void Dispose()
-        {
-            authenticationService.Dispose();
-            requestUtility.Dispose();
-            GC.SuppressFinalize(this);
-            logger.LogTrace("LementProConnection disposed");
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -111,7 +101,7 @@ namespace MRS.DocumentManagement.Connection.LementPro
 
         private async Task<ICollection<ObjectiveTypeExternalDto>> GetTypesAsync()
         {
-            logger.LogTrace("GetTypesAsync started with info");
+            logger.LogTrace("GetTypesAsync started");
             var typesModels = await tasksService.GetTasksTypesAsync();
             logger.LogDebug("Found types: {@Types}", typesModels);
             var types = new List<ObjectiveTypeExternalDto>();
@@ -126,6 +116,10 @@ namespace MRS.DocumentManagement.Connection.LementPro
         }
 
         private void SetToken(ConnectionInfoExternalDto info)
-            => requestUtility.Token = info.GetAuthValue(AUTH_NAME_TOKEN);
+        {
+            logger.LogTrace("SetToken started with info: {@ConnectionInfo}", info);
+            requestUtility.Token = info.GetAuthValue(AUTH_NAME_TOKEN);
+            requestUtility.EnsureAccessValidAsync = () => authenticationService.EnsureAccessValidAsync(info);
+        }
     }
 }
