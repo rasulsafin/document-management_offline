@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Exceptions
         }
 
         public NotFoundException(string propertyName, string propertyValue)
-            : base($"{typeof(T).Name} with {propertyName.ToLower()} {propertyValue} not found")
+            : base($"{typeof(T).Name} with {propertyName?.ToLower()} {propertyValue} not found")
         {
         }
     }

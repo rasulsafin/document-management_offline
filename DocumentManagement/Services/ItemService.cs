@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.AuthFieldNames)
                     .Include(x => x.ConnectionInfo)
                     .ThenInclude(x => x.AuthFieldValues)
-                    .FindOrThrowAsync(nameof(User.ID), (int)userID);
+                    .FindOrThrowAsync(x => x.ID, (int)userID);
                 logger.LogDebug("Found user: {@User}", user);
 
                 var scope = scopeFactory.CreateScope();

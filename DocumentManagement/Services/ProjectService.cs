@@ -94,7 +94,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbProject = await context.Projects.Unsynchronized()
                     .Include(i => i.Items)
-                    .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
                 return mapper.Map<ProjectDto>(dbProject);
             }
@@ -182,7 +182,7 @@ namespace MRS.DocumentManagement.Services
                     await context.FindOrThrowAsync<User>(user);
 
                 var project = await context.Projects.Include(x => x.Users)
-                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
 
                 project.Users ??= new List<UserProject>();
@@ -240,7 +240,7 @@ namespace MRS.DocumentManagement.Services
                     await context.FindOrThrowAsync<User>(user);
 
                 var project = await context.Projects.Include(x => x.Users)
-                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
 
                 foreach (var user in ids)
@@ -274,7 +274,7 @@ namespace MRS.DocumentManagement.Services
                 var projectID = project.ID;
                 var projectFromDb = await context.Projects
                    .Include(x => x.Items)
-                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@ProjectFromDB}", projectFromDb);
                 projectFromDb = mapper.Map(project, projectFromDb);
                 logger.LogDebug("Mapped project: {@ProjectFromDB}", projectFromDb);

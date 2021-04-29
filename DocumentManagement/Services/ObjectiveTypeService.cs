@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .FindOrThrowAsync(nameof(ObjectiveType.ID), (int)id);
+                   .FindOrThrowAsync(x => x.ID, (int)id);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
@@ -81,7 +81,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
-                   .FindOrThrowAsync(nameof(ObjectiveType.Name), typename);
+                   .FindOrThrowAsync(x => x.Name, typename);
                 logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);

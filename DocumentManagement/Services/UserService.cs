@@ -137,7 +137,7 @@ namespace MRS.DocumentManagement.Services
                 var dbUser = await context.Users
                     .Include(x => x.ConnectionInfo)
                         .ThenInclude(c => c.ConnectionType)
-                    .FindOrThrowAsync(nameof(User.ID), (int)userID);
+                    .FindOrThrowAsync(x => x.ID, (int)userID);
                 logger.LogDebug("Found user: {@User}", dbUser);
 
                 return mapper.Map<UserDto>(dbUser);
@@ -156,7 +156,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 login = login?.Trim();
-                var dbUser = await context.Users.FindWithIgnoreCaseOrThrowAsync(nameof(User.Login), login);
+                var dbUser = await context.Users.FindWithIgnoreCaseOrThrowAsync(x => x.Login, login);
                 logger.LogDebug("Found user: {@User}", dbUser);
 
                 return mapper.Map<UserDto>(dbUser);

@@ -180,7 +180,7 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbUser = await context.Users.Include(x => x.ConnectionInfo)
                    .ThenInclude(x => x.ConnectionType)
-                   .FindWithIgnoreCaseOrThrowAsync(nameof(User.Login), username);
+                   .FindWithIgnoreCaseOrThrowAsync(x => x.Login, username);
                 logger.LogDebug("Found user: {@DbUser}", dbUser);
 
                 if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))

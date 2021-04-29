@@ -6,7 +6,9 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
+using AutoMapper.Internal;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using MRS.DocumentManagement.Exceptions;
 
 namespace MRS.DocumentManagement.Utility.Extensions
@@ -49,44 +51,55 @@ namespace MRS.DocumentManagement.Utility.Extensions
             throw new NotFoundException<TValue>(nameof(key), key.ToString());
         }
 
-        public static async Task<T> FindOrThrowAsync<T>(
+        public static async Task<T> FindOrThrowAsync<T, TProperty>(
             this IQueryable<T> set,
-            string propertyName,
-            object propertyValue,
+            Expression<Func<T, TProperty>> property,
+            TProperty propertyValue,
             CancellationToken cancellationToken = new CancellationToken())
             where T : class
-        {
-            var parameterExpression = Expression.Parameter(typeof(T));
-            var predicate = Expression.Lambda<Func<T, bool>>(
-                Expression.Equal(
-                    Expression.Property(parameterExpression, propertyName),
-                    Expression.Constant(propertyValue)),
-                parameterExpression);
-            var result = await set.FirstOrDefaultAsync(predicate, cancellationToken);
-            if (result == null)
-                throw new NotFoundException<T>(propertyName, propertyValue.ToString());
-
-            return result;
-        }
+            => await set.FindOrThrowAsync(property, propertyValue, e => e, cancellationToken);
 
         public static async Task<T> FindWithIgnoreCaseOrThrowAsync<T>(
             this IQueryable<T> set,
-            string propertyName,
+            Expression<Func<T, string>> property,
             string propertyValue,
             CancellationToken cancellationToken = new CancellationToken())
             where T : class
         {
-            var parameterExpression = Expression.Parameter(typeof(T));
             var method = typeof(string).GetMethod(nameof(string.ToLower), Array.Empty<Type>());
+            return await set.FindOrThrowAsync(
+                property,
+                propertyValue,
+                e => Expression.Call(e, method!),
+                cancellationToken);
+        }
+
+        private static async Task<T> FindOrThrowAsync<T, TProperty>(
+            this IQueryable<T> set,
+            Expression<Func<T, TProperty>> property,
+            TProperty propertyValue,
+            Func<Expression, Expression> createExpressionForModify,
+            CancellationToken cancellationToken = new CancellationToken())
+            where T : class
+        {
+            if (!(property.Body is MemberExpression body))
+            {
+                throw new ArgumentException(
+                    $"The lambda expression must return member of {typeof(T).Name}",
+                    nameof(property));
+            }
+
+            var parameterExpression = Expression.Parameter(typeof(T));
+            var propertyName = body.Member.Name;
 
             var predicate = Expression.Lambda<Func<T, bool>>(
                 Expression.Equal(
-                    Expression.Call(Expression.Property(parameterExpression, propertyName), method!),
-                    Expression.Call(Expression.Constant(propertyValue), method)),
+                    createExpressionForModify(Expression.Property(parameterExpression, propertyName)),
+                    createExpressionForModify(Expression.Constant(propertyValue))),
                 parameterExpression);
             var result = await set.FirstOrDefaultAsync(predicate, cancellationToken);
             if (result == null)
-                throw new NotFoundException<T>(propertyName, propertyValue);
+                throw new NotFoundException<T>(propertyName, propertyValue.ToString());
 
             return result;
         }

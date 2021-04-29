@@ -219,7 +219,7 @@ namespace MRS.DocumentManagement.Services
                    .Include(x => x.Objectives)
                    .ThenInclude(x => x.BimElements)
                    .ThenInclude(x => x.BimElement)
-                   .FindOrThrowAsync(nameof(Project.ID), (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
@@ -393,7 +393,7 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.Item)
                .Include(x => x.BimElements)
                     .ThenInclude(x => x.BimElement)
-               .FindOrThrowAsync(nameof(Objective.ID), (int)objectiveID);
+               .FindOrThrowAsync(x => x.ID, (int)objectiveID);
 
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
 

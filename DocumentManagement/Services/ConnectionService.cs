@@ -212,7 +212,7 @@ namespace MRS.DocumentManagement.Services
                    .ThenInclude(x => x.AuthFieldNames)
                    .Include(x => x.ConnectionInfo)
                    .ThenInclude(x => x.AuthFieldValues)
-                   .FindOrThrowAsync(nameof(User.ID), iUserID);
+                   .FindOrThrowAsync(x => x.ID, iUserID);
 
                 var scope = serviceScopeFactory.CreateScope();
                 var synchronizer = synchronizerFactory.Create(scope);

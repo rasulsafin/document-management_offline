@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Utility
             logger.LogTrace("GetConnectionInfoFromDb started with userID: {@UserID}", userID);
             User user = await context.Users
                .Include(x => x.ConnectionInfo)
-               .FindOrThrowAsync(nameof(User.ID),  userID);
+               .FindOrThrowAsync(x => x.ID, userID);
             logger.LogDebug("Found user: {@User}", user);
             return await GetConnectionInfoFromDb(user);
         }

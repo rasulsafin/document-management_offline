@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Services
                 var dbConnectionType = await context.ConnectionTypes
                    .Include(x => x.AppProperties)
                    .Include(x => x.AuthFieldNames)
-                   .FindOrThrowAsync(nameof(ConnectionType.ID), (int)id);
+                   .FindOrThrowAsync(x => x.ID, (int)id);
                 logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
 
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Services
                 var dbConnectionType = await context.ConnectionTypes
                    .Include(x => x.AppProperties)
                    .Include(x => x.AuthFieldNames)
-                   .FindOrThrowAsync(nameof(ConnectionType.Name), name);
+                   .FindOrThrowAsync(x => x.Name, name);
                 logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
             }
