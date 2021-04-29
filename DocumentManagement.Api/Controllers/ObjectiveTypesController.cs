@@ -64,7 +64,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 return CreateProblemResult(
                     this,
                     400,
-                    localizer["CheckValidObjectiveTypeNameToAdd_AlreadyExist"],
+                    localizer["CheckValidObjectiveTypeNameToAdd_AlreadyExists"],
                     ex.Message);
             }
             catch (Exception ex)

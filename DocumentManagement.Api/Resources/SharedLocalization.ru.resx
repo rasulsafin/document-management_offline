@@ -222,7 +222,7 @@
   <data name="WrongPassword" xml:space="preserve">
     <value>Неправильный пароль</value>
   </data>
-  <data name="CheckValidObjectiveTypeNameToAdd_AlreadyExist" xml:space="preserve">
+  <data name="CheckValidObjectiveTypeNameToAdd_AlreadyExists" xml:space="preserve">
     <value>Тип задач с таким именем уже существует</value>
   </data>
   <data name="CheckValidProjectTitleToAdd_TitleRequired" xml:space="preserve">
