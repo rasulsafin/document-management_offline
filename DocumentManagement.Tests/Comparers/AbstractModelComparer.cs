@@ -3,14 +3,15 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace MRS.DocumentManagement.Tests
 {
-    internal abstract class AbstractModelComparer<T> : IEqualityComparer<T> where T : class
+    internal abstract class AbstractModelComparer<T> : IEqualityComparer<T>
+        where T : class
     {
-        public bool IgnoreIDs { get; }
-
         public AbstractModelComparer(bool ignoreIDs = false)
         {
             IgnoreIDs = ignoreIDs;
         }
+
+        public bool IgnoreIDs { get; }
 
         public abstract bool NotNullEquals([DisallowNull] T x, [DisallowNull] T y);
 
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Tests
         {
             if ((x == null) != (y == null))
                 return false;
-            if (x == null && y == null)
+            if (x == null)
                 return true;
             return NotNullEquals(x, y);
         }

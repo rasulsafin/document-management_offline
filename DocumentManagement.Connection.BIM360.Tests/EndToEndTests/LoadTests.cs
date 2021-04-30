@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
@@ -20,9 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     public class LoadTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
-        private static readonly string TEST_PROJECT_NAME = "Sample Project";
 
-        private static AuthenticationService authService;
         private static HubsService hubsService;
         private static ProjectsService projectsService;
         private static ConnectionInfoExternalDto connectionInfo;
@@ -32,6 +32,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         private static VersionsService versionsService;
         private static Authenticator authenticator;
         private static ForgeConnection connection;
+        private static ServiceProvider serviceProvider;
 
         private readonly Random random = new Random();
         private readonly string testFileName = Path.GetFileName(TEST_FILE_PATH);
@@ -39,15 +40,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
-            connection = new ForgeConnection();
-            authService = new AuthenticationService(connection);
-            authenticator = new Authenticator(authService);
-            hubsService = new HubsService(connection);
-            projectsService = new ProjectsService(connection);
-            objectsService = new ObjectsService(connection);
-            itemsService = new ItemsService(connection);
-            foldersService = new FoldersService(connection);
-            versionsService = new VersionsService(connection);
+            var services = new ServiceCollection();
+            services.AddBim360();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+            connection = serviceProvider.GetService<ForgeConnection>();
+            authenticator = serviceProvider.GetService<Authenticator>();
+            hubsService = serviceProvider.GetService<HubsService>();
+            projectsService = serviceProvider.GetService<ProjectsService>();
+            objectsService = serviceProvider.GetService<ObjectsService>();
+            itemsService = serviceProvider.GetService<ItemsService>();
+            foldersService = serviceProvider.GetService<FoldersService>();
+            versionsService = serviceProvider.GetService<VersionsService>();
 
             connectionInfo = new ConnectionInfoExternalDto
             {
@@ -70,6 +74,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             };
         }
 
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
+
         /// <summary>
         /// Test based on https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/ step-by-step tutorial.
         /// </summary>
@@ -90,7 +98,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
-            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == TEST_PROJECT_NAME);
+            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == INTEGRATION_TEST_PROJECT);
             if (project == default)
                 Assert.Fail("Projects in hubs are empty");
 
@@ -213,7 +221,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             // STEP 2. Choose project
             var project = (await projectsService.GetProjectsAsync(hub.ID))
-                    .FirstOrDefault(x => x.Attributes.Name == TEST_PROJECT_NAME);
+                    .FirstOrDefault(x => x.Attributes.Name == INTEGRATION_TEST_PROJECT);
             if (project == default)
                 Assert.Fail("Testing project doesn't exist");
 
@@ -261,7 +269,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
 
             // STEP 2. Choose first project
             // TODO decide which project should be used for end-to-end tests
-            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == TEST_PROJECT_NAME);
+            var project = (await projectsService.GetProjectsAsync(hub.ID)).FirstOrDefault(p => p.Attributes.Name == INTEGRATION_TEST_PROJECT);
             if (project == default)
                 Assert.Fail("Projects in hubs are empty");
 

@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
@@ -18,6 +19,8 @@ using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
+using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -69,11 +72,8 @@ namespace MRS.DocumentManagement.Services
                 var connectionInfo = mapper.Map<ConnectionInfo>(data);
                 logger.LogTrace("Mapped connection info = {@ConnectionInfo}", connectionInfo);
                 await context.ConnectionInfos.AddAsync(connectionInfo);
-                var user = await context.Users.FindAsync((int)data.UserID);
+                var user = await context.Users.FindOrThrowAsync((int)data.UserID);
                 logger.LogDebug("User found: {@User}", user);
-                if (user == null)
-                    throw new ArgumentNullException($"User with key {data.UserID} was not found");
-
                 user.ConnectionInfo = connectionInfo;
                 await context.SaveChangesAsync();
 
@@ -157,7 +157,7 @@ namespace MRS.DocumentManagement.Services
                 var connectionInfo = await helper.GetConnectionInfoFromDb((int)userID);
                 logger.LogTrace("Connection Info from DB: {@ConnectionInfo}", connectionInfo);
                 if (connectionInfo == null)
-                    throw new ArgumentNullException($"ConnectionInfo with user's id {userID} was not found");
+                    throw new NotFoundException<ConnectionInfo>("user's id", userID.ToString());
 
                 var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
 
@@ -182,7 +182,7 @@ namespace MRS.DocumentManagement.Services
                 var connectionInfo = await helper.GetConnectionInfoFromDb((int)userID);
                 logger.LogTrace("Connection Info from DB: {@ConnectionInfo}", connectionInfo);
                 if (connectionInfo == null)
-                    throw new ArgumentNullException($"ConnectionInfo with user's id {userID} was not found");
+                    throw new NotFoundException<ConnectionInfo>("user's id", userID.ToString());
 
                 var list = connectionInfo.EnumerationValues
                     .Where(x => x.EnumerationValue.EnumerationTypeID == (int)enumerationTypeID)?
@@ -213,9 +213,7 @@ namespace MRS.DocumentManagement.Services
                    .ThenInclude(x => x.AuthFieldNames)
                    .Include(x => x.ConnectionInfo)
                    .ThenInclude(x => x.AuthFieldValues)
-                   .FirstOrDefaultAsync(x => x.ID == iUserID);
-                if (user == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
+                   .FindOrThrowAsync(x => x.ID, iUserID);
 
                 var scope = serviceScopeFactory.CreateScope();
                 var synchronizer = synchronizerFactory.Create(scope);

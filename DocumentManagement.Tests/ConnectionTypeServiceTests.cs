@@ -3,14 +3,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -19,21 +22,9 @@ namespace MRS.DocumentManagement.Tests
     {
         private static IConnectionTypeService service;
         private static IMapper mapper;
+        private static ServiceProvider serviceProvider;
 
         private static SharedDatabaseFixture Fixture { get; set; }
-
-        [ClassInitialize]
-        public static void ClassSetup(TestContext _)
-        {
-            IServiceCollection services = new ServiceCollection();
-
-            var mock = new Mock<CryptographyHelper>();
-            services.AddTransient<CryptographyHelper>(sp => mock.Object);
-
-            services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            mapper = serviceProvider.GetService<IMapper>();
-        }
 
         [TestInitialize]
         public void Setup()
@@ -48,12 +39,26 @@ namespace MRS.DocumentManagement.Tests
                 context.SaveChanges();
             });
 
-            service = new ConnectionTypeService(Fixture.Context, mapper);
+            IServiceCollection services = new ServiceCollection();
+
+            var mock = new Mock<CryptographyHelper>();
+            services.AddSingleton(Fixture.Context);
+            services.AddLogging();
+            services.AddMappingResolvers();
+            services.AddTransient(sp => mock.Object);
+            services.AddAutoMapper(typeof(MappingProfile));
+            serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
+
+            service = new ConnectionTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ConnectionTypeService>>());
         }
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task Add_NewType_ReturnsAddedTypeId()
@@ -68,8 +73,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
-        public async Task Add_ExistingType_RaisesInvalidDataException()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Add_ExistingType_RaisesArgumentException()
         {
             var existingType = Fixture.Context.ConnectionTypes.First();
 
@@ -89,7 +94,8 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task FindById_NotExistingType_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<ConnectionType>))]
+        public async Task FindById_NotExistingType_RaisesNotFoundException()
         {
             var result = await service.Find(ID<ConnectionTypeDto>.InvalidID);
 
@@ -107,13 +113,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task FindByName_NotExistingType_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<ConnectionType>))]
+        public async Task FindByName_NotExistingType_RaisesNotFoundException()
         {
             var notExistingTypeName = $"invalidName{Guid.NewGuid()}";
 
-            var result = await service.Find(notExistingTypeName);
+            await service.Find(notExistingTypeName);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -138,11 +145,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(NotFoundException<ConnectionType>))]
         public async Task Remove_NotExistingType_ReturnsFalse()
         {
-            var result = await service.Remove(ID<ConnectionTypeDto>.InvalidID);
+            await service.Remove(ID<ConnectionTypeDto>.InvalidID);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
     }
 }

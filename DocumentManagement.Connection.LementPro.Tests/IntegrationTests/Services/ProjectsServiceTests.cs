@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Models;
@@ -36,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 },
             };
 
-            var (_, _) = await authService.SignInAsync(connectionInfo);
+            await authService.SignInAsync(connectionInfo);
         }
 
         [ClassCleanup]

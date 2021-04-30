@@ -118,51 +118,39 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Label_DMStarted" xml:space="preserve">
-    <value>Документооборот запущен</value>
-    <comment>Документооборот запущен</comment>
+    <value>DocumentManagement started</value>
   </data>
   <data name="Label_DMStopped" xml:space="preserve">
-    <value>Документооборот остановлен</value>
-    <comment>Документооборот остановлен</comment>
+    <value>DocumentManagement stopped</value>
   </data>
   <data name="Label_Exit" xml:space="preserve">
-    <value>Выход</value>
-    <comment>Выход</comment>
+    <value>Exit</value>
   </data>
   <data name="Label_HideConsole" xml:space="preserve">
-    <value>Cкрыть консоль</value>
-    <comment>Cкрыть консоль</comment>
+    <value>Hide the console</value>
   </data>
   <data name="Label_ShowConsole" xml:space="preserve">
-    <value>Показать консоль</value>
-    <comment>Показать консоль</comment>
+    <value>Show the console</value>
   </data>
   <data name="Label_ShowSettings" xml:space="preserve">
-    <value>Открыть файл настроек</value>
-    <comment>Открыть файл настроек</comment>
+    <value>Open the settings file</value>
   </data>
   <data name="Label_ShowSwagger" xml:space="preserve">
-    <value>Открыть Swagger</value>
-    <comment>Открыть Swagger</comment>
+    <value>Open Swagger</value>
   </data>
   <data name="Label_StartDM" xml:space="preserve">
-    <value>Запустить документооборот</value>
-    <comment>Запустить документооборот</comment>
+    <value>Start DocumentManagement</value>
   </data>
   <data name="MessageFormat_File_not_found" xml:space="preserve">
-    <value>Файл не найден!\n{0}</value>
-    <comment>Файл не найден!\n{0}</comment>
+    <value>File not found: {0}</value>
   </data>
   <data name="Message_Path_not_found" xml:space="preserve">
-    <value>Необходимо указать путь к 'DocumentManagement.Api.exe'!</value>
-    <comment>Необходимо указать путь к 'DocumentManagement.Api.exe'!</comment>
+    <value>You must specify the path to 'DocumentManagement.Api.exe'!</value>
   </data>
   <data name="Tooltip_Dm_Brio_Mrs" xml:space="preserve">
-    <value>Документооборот BRIO MRS</value>
-    <comment>Документооборот BRIO MRS</comment>
+    <value>DocumentManagement BRIO MRS</value>
   </data>
   <data name="Tooltip_StopDmAndExit" xml:space="preserve">
-    <value>Остановить документооборот и закрыть приложение</value>
-    <comment>Остановить документооборот и закрыть приложение</comment>
+    <value>Stop document flow and close the application</value>
   </data>
 </root>

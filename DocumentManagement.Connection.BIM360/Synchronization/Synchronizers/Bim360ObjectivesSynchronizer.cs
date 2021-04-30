@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -21,21 +22,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly FoldersSyncHelper folderSyncHelper;
         private readonly ProjectsHelper projectsHelper;
         private readonly HubsHelper hubsHelper;
+        private readonly IssuesService issuesService;
+        private readonly ItemsService itemsService;
         private readonly Bim360ConnectionContext context;
         private readonly Dictionary<string, (Issue, ObjectiveExternalDto)> objectives =
             new Dictionary<string, (Issue, ObjectiveExternalDto)>();
 
-        public Bim360ObjectivesSynchronizer(Bim360ConnectionContext context)
+        public Bim360ObjectivesSynchronizer(
+            Bim360ConnectionContext context,
+            ItemsSyncHelper itemsSyncHelper,
+            FoldersSyncHelper folderSyncHelper,
+            ProjectsHelper projectsHelper,
+            HubsHelper hubsHelper,
+            IssuesService issuesService,
+            ItemsService itemsService)
         {
             this.context = context;
-            itemsSyncHelper = new ItemsSyncHelper(
-                context.ItemsService,
-                context.ProjectsService,
-                context.ObjectsService,
-                context.VersionsService);
-            folderSyncHelper = new FoldersSyncHelper(context.FoldersService, context.ProjectsService);
-            projectsHelper = new ProjectsHelper(context.ProjectsService);
-            hubsHelper = new HubsHelper(context.HubsService);
+            this.itemsSyncHelper = itemsSyncHelper;
+            this.folderSyncHelper = folderSyncHelper;
+            this.projectsHelper = projectsHelper;
+            this.hubsHelper = hubsHelper;
+            this.issuesService = issuesService;
+            this.itemsService = itemsService;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -45,14 +53,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
+            var types = await issuesService.GetIssueTypesAsync(containerId);
             var dynamicFieldID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
             var dynamicField = obj.DynamicFields.First(d => d.ExternalID == dynamicFieldID);
             var type = types.FirstOrDefault(x => x.Title == dynamicField.Value) ?? types[0];
             issue.Attributes.NgIssueTypeID = type.ID;
             issue.Attributes.NgIssueSubtypeID = type.Subtypes[0].ID;
 
-            var created = await context.IssuesService.PostIssueAsync(containerId, issue);
+            var created = await issuesService.PostIssueAsync(containerId, issue);
 
             var parsedToDto = created.ToExternalDto(
                 context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
@@ -76,18 +84,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            issue = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
+            issue = await issuesService.GetIssueAsync(containerId, issue.ID);
 
             if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
             {
                 issue.Attributes.Status = Status.Open;
-                issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+                issue = await issuesService.PatchIssueAsync(containerId, issue);
             }
 
             issue.Attributes.Status = Status.Void;
-            issue = await context.IssuesService.PatchIssueAsync(containerId, issue);
+            issue = await issuesService.PatchIssueAsync(containerId, issue);
 
-            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
+            var types = await issuesService.GetIssueTypesAsync(containerId);
             return issue.ToExternalDto(
                 context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
                    .Key,
@@ -101,12 +109,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (containerId == null)
                 return null;
 
-            var issueFromRemote = await context.IssuesService.GetIssueAsync(containerId, issue.ID);
+            var issueFromRemote = await issuesService.GetIssueAsync(containerId, issue.ID);
             issue.Attributes.PermittedAttributes = issueFromRemote.Attributes.PermittedAttributes;
             issue.Attributes.NgIssueTypeID = issueFromRemote.Attributes.NgIssueTypeID;
             issue.Attributes.NgIssueSubtypeID = issueFromRemote.Attributes.NgIssueSubtypeID;
-            var updatedIssue = await context.IssuesService.PatchIssueAsync(containerId, issue);
-            var types = await context.IssuesService.GetIssueTypesAsync(containerId);
+            var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
+            var types = await issuesService.GetIssueTypesAsync(containerId);
 
             var parsedToDto = updatedIssue.ToExternalDto(
                 context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
@@ -145,7 +153,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                         updatedFilter,
                         statusFilter,
                     };
-                var issues = await context.IssuesService.GetIssuesAsync(container, filters);
+                var issues = await issuesService.GetIssuesAsync(container, filters);
 
                 foreach (var issue in issues.Where(issue => !ids.Contains(issue.ID)))
                 {
@@ -178,7 +186,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                         try
                         {
-                            found = await context.IssuesService.GetIssueAsync(container, id);
+                            found = await issuesService.GetIssueAsync(container, id);
                         }
                         catch
                         {
@@ -201,14 +209,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             string projectID,
             string container)
         {
-            var types = await context.IssuesService.GetIssueTypesAsync(container);
+            var types = await issuesService.GetIssueTypesAsync(container);
             var dto = issue.ToExternalDto(projectID, types.First(x => x.ID == issue.Attributes.NgIssueTypeID).Title);
             dto.Items ??= new List<ItemExternalDto>();
 
-            var attachments = await context.IssuesService.GetAttachmentsAsync(container, issue.ID);
+            var attachments = await issuesService.GetAttachmentsAsync(container, issue.ID);
 
             foreach (var attachment in attachments)
-                dto.Items.Add((await context.ItemsService.GetAsync(projectID, attachment.Attributes.Urn)).item.ToDto());
+                dto.Items.Add((await itemsService.GetAsync(projectID, attachment.Attributes.Urn)).item.ToDto());
             return dto;
         }
 
@@ -224,7 +232,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var resultItems = new List<Item>();
             var existingItems = await folderSyncHelper.GetFolderItemsAsync(projectId, folder.ID);
-            var attachment = await context.IssuesService.GetAttachmentsAsync(containerId, issue.ID);
+            var attachment = await issuesService.GetAttachmentsAsync(containerId, issue.ID);
 
             foreach (var item in items)
             {
@@ -271,7 +279,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             try
             {
-                await context.IssuesService.PostIssuesAttachmentsAsync(containerId, attachment);
+                await issuesService.PostIssuesAttachmentsAsync(containerId, attachment);
             }
             catch
             {

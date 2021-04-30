@@ -52,7 +52,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}",
                 UpdatedAt = creationDateTime,
                 Items = new List<ItemExternalDto>
-                {   new ItemExternalDto
+                {
+                    new ItemExternalDto
                     {
                         FileName = Path.GetFileName(TEST_BIM_FILE_PATH),
                         FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),
@@ -116,7 +117,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = title,
                 UpdatedAt = creationDateTime,
                 Items = new List<ItemExternalDto>
-                {   new ItemExternalDto
+                {
+                    new ItemExternalDto
                     {
                         FileName = itemToRemoveName,
                         FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),

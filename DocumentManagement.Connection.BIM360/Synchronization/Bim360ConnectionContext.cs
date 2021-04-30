@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
@@ -16,10 +14,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext
     {
-        private FoldersSyncHelper foldersSyncHelper;
+        private readonly HubsService hubsService;
+        private readonly ProjectsService projectsService;
+        private readonly FoldersSyncHelper foldersSyncHelper;
 
-        private Bim360ConnectionContext()
+        // TODO: replace to an interface.
+        private readonly ProjectSynchronizerFactory projectSynchronizerFactory;
+        private readonly ObjectiveSynchronizerFactory objectiveSynchronizerFactory;
+
+        public Bim360ConnectionContext(
+            HubsService hubsService,
+            ProjectsService projectsService,
+            FoldersSyncHelper foldersSyncHelper,
+            ProjectSynchronizerFactory projectSynchronizerFactory,
+            ObjectiveSynchronizerFactory objectiveSynchronizerFactory)
         {
+            this.hubsService = hubsService;
+            this.projectsService = projectsService;
+            this.foldersSyncHelper = foldersSyncHelper;
+            this.projectSynchronizerFactory = projectSynchronizerFactory;
+            this.objectiveSynchronizerFactory = objectiveSynchronizerFactory;
         }
 
         internal List<Hub> Hubs { get; } = new List<Hub>();
@@ -29,39 +43,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
         internal Dictionary<string, Folder> DefaultFolders { get; } = new Dictionary<string, Folder>();
 
-        internal IssuesService IssuesService { get; private set; }
-
-        internal HubsService HubsService { get; private set; }
-
-        internal ProjectsService ProjectsService { get; private set; }
-
-        internal ItemsService ItemsService { get; private set; }
-
-        internal FoldersService FoldersService { get; private set; }
-
-        internal ObjectsService ObjectsService { get; private set; }
-
-        internal VersionsService VersionsService { get; private set; }
-
-        public static async Task<Bim360ConnectionContext> CreateContext(ConnectionInfoExternalDto connectionInfo)
-        {
-            var connection = new ForgeConnection();
-            var context = new Bim360ConnectionContext();
-            
-            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
-
-            context.IssuesService = new IssuesService(connection);
-            context.HubsService = new HubsService(connection);
-            context.ProjectsService = new ProjectsService(connection);
-            context.ItemsService = new ItemsService(connection);
-            context.FoldersService = new FoldersService(connection);
-            context.ObjectsService = new ObjectsService(connection);
-            context.VersionsService = new VersionsService(connection);
-            context.foldersSyncHelper = new FoldersSyncHelper(context.FoldersService, context.ProjectsService);
-
-            return context;
-        }
-
         internal async Task UpdateProjects(bool mustUpdate)
         {
             await UpdateHubs();
@@ -70,9 +51,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 
             foreach (var hub in Hubs)
             {
-                var projectsInHub = await ProjectsService.GetProjectsAsync(hub.ID);
+                var projectsInHub = await projectsService.GetProjectsAsync(hub.ID);
 
-                foreach (var p in projectsInHub)
+                foreach (var p in projectsInHub.Where(p => p.Attributes.Name != INTEGRATION_TEST_PROJECT))
                 {
                     if (Projects.ContainsKey(p.ID))
                         Projects.Remove(p.ID);
@@ -91,15 +72,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
-            => new Bim360ObjectivesSynchronizer(this);
+            => objectiveSynchronizerFactory.Create(this);
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()
-            => new Bim360ProjectsSynchronizer(this);
+            => projectSynchronizerFactory.Create(this);
 
         private async Task UpdateHubs()
         {
             if (Hubs.Count == 0)
-                Hubs.AddRange(await HubsService.GetHubsAsync());
+                Hubs.AddRange(await hubsService.GetHubsAsync());
         }
     }
 }

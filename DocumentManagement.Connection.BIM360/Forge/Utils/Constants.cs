@@ -22,6 +22,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string REFRESH_TOKEN_AUTH_NAME = "refreshtoken";
         public static readonly string END_AUTH_NAME = "end";
 
+        public static readonly string INTEGRATION_TEST_PROJECT = "Integration Test Project (Don't change)";
+
         internal static readonly string AUTHORIZATION_SCHEME = "Bearer";
         internal static readonly string DEFAULT_VERSION_ID = "1";
 

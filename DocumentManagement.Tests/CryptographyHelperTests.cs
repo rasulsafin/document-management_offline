@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Tests
         private static CryptographyHelper helper;
 
         [ClassInitialize]
-        public static void Setup(TestContext _)
+        public static void Setup(TestContext unused)
         {
             helper = new CryptographyHelper();
         }
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Tests
         public void VerifyPasswordHash_HashIsEmpty_ReturnsFalse()
         {
             var pass = "pass";
-            
+
             var result = helper.VerifyPasswordHash(pass, Array.Empty<byte>(), new byte[1]);
 
             Assert.IsFalse(result);

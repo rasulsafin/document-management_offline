@@ -44,30 +44,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        private static IServiceCollection AddFactories(this IServiceCollection services)
-        {
-            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
-            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
-
-            services.AddScoped<Func<IServiceScope, Type, IConnection>>(
-                x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
-            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
-
-            services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
-
-            services.AddScopedFactory<DMContext>();
-            services.AddScopedFactory<IMapper>();
-            services.AddScopedFactory<Synchronizer>();
-            return services;
-        }
-
-        private static IServiceCollection AddExternal(this IServiceCollection services)
-            => ConnectionCreator.GetDependencyInjectionMethods()
-               .Aggregate(
-                    services,
-                    (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
-
-        private static IServiceCollection AddMappingResolvers(this IServiceCollection services)
+        public static IServiceCollection AddMappingResolvers(this IServiceCollection services)
         {
             services.AddTransient<BimElementObjectiveTypeConverter>();
 
@@ -96,6 +73,29 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ItemExternalDtoRelativePathResolver>();
             return services;
         }
+
+        private static IServiceCollection AddFactories(this IServiceCollection services)
+        {
+            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
+            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
+
+            services.AddScoped<Func<IServiceScope, Type, IConnection>>(
+                x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
+            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
+
+            services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
+
+            services.AddScopedFactory<DMContext>();
+            services.AddScopedFactory<IMapper>();
+            services.AddScopedFactory<Synchronizer>();
+            return services;
+        }
+
+        private static IServiceCollection AddExternal(this IServiceCollection services)
+            => ConnectionCreator.GetDependencyInjectionMethods()
+               .Aggregate(
+                    services,
+                    (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
 
         private static IServiceCollection AddScopedFactory<TResult>(this IServiceCollection services)
         {

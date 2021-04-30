@@ -73,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public int? Identifier { get; set; }
 
             [DataMember(Name = "status")]
-            public Status Status { get; set; }
+            public Status Status { get; set; } = Status.Draft;
 
             [DataMember(Name = "assigned_to")]
             public string AssignedTo { get; set; }

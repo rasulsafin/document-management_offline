@@ -6,10 +6,12 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -177,11 +179,9 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbUser = await context.Users.Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .FirstOrDefaultAsync(u => u.Login.ToLower() == username.ToLower());
+                   .ThenInclude(x => x.ConnectionType)
+                   .FindWithIgnoreCaseOrThrowAsync(x => x.Login, username);
                 logger.LogDebug("Found user: {@DbUser}", dbUser);
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with name {username} not found");
 
                 if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
                     throw new ArgumentException($"Wrong password!");
@@ -202,13 +202,6 @@ namespace MRS.DocumentManagement.Services
         }
 
         private async Task<int> CheckUser(ID<UserDto> userID)
-        {
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
-            if (user == null)
-                throw new ArgumentNullException($"User with key {userID} not found");
-
-            return id;
-        }
+            => (await context.Users.FindOrThrowAsync((int)userID)).ID;
     }
 }

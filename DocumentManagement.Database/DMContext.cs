@@ -112,7 +112,12 @@ namespace MRS.DocumentManagement.Database
                 .IsUnique(true);
 
             modelBuilder.Entity<ObjectiveType>()
-                .HasIndex(x => x.Name)
+                .HasIndex(
+                    x => new
+                    {
+                        x.Name,
+                        x.ConnectionTypeID,
+                    })
                 .IsUnique(true);
             modelBuilder.Entity<ObjectiveType>()
                 .HasIndex(x => x.ExternalId)

@@ -5,7 +5,8 @@ namespace MRS.DocumentManagement.Tests
 {
     internal class ItemDtoComparer : AbstractModelComparer<ItemDto>
     {
-        public ItemDtoComparer(bool ignoreIDs = false) : base(ignoreIDs)
+        public ItemDtoComparer(bool ignoreIDs = false)
+            : base(ignoreIDs)
         {
         }
 

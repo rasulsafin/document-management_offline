@@ -14,7 +14,7 @@ namespace DocumentManagement.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.2");
+                .HasAnnotation("ProductVersion", "5.0.1");
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AppProperty", b =>
                 {
@@ -340,6 +340,38 @@ namespace DocumentManagement.Database.Migrations
                     b.ToTable("Items");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Location", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BimElementID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<float>("CameraPositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("CameraPositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("CameraPositionZ")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionX")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionY")
+                        .HasColumnType("REAL");
+
+                    b.Property<float>("PositionZ")
+                        .HasColumnType("REAL");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Location");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>
                 {
                     b.Property<int>("ID")
@@ -362,6 +394,9 @@ namespace DocumentManagement.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsSynchronized")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("LocationID")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ObjectiveTypeID")
@@ -390,6 +425,8 @@ namespace DocumentManagement.Database.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("AuthorID");
+
+                    b.HasIndex("LocationID");
 
                     b.HasIndex("ObjectiveTypeID");
 
@@ -440,7 +477,7 @@ namespace DocumentManagement.Database.Migrations
                     b.HasIndex("ExternalId")
                         .IsUnique();
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Name", "ConnectionTypeID")
                         .IsUnique();
 
                     b.ToTable("ObjectiveTypes");
@@ -786,6 +823,10 @@ namespace DocumentManagement.Database.Migrations
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationID");
+
                     b.HasOne("MRS.DocumentManagement.Database.Models.ObjectiveType", "ObjectiveType")
                         .WithMany("Objectives")
                         .HasForeignKey("ObjectiveTypeID")
@@ -809,6 +850,8 @@ namespace DocumentManagement.Database.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Author");
+
+                    b.Navigation("Location");
 
                     b.Navigation("ObjectiveType");
 

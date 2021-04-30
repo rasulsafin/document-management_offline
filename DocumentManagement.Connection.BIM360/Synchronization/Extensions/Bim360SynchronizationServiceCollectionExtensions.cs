@@ -1,4 +1,7 @@
+using System;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -6,9 +9,14 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBim360Synchronization(this IServiceCollection services)
         {
-            services.AddTransient<FoldersSyncHelper>();
-            services.AddTransient<HubsHelper>();
-            services.AddTransient<ItemsSyncHelper>();
+            services.AddScoped<Func<Bim360ConnectionContext>>(x => x.GetService<Bim360ConnectionContext>);
+            services.AddTransient<Bim360ConnectionContext>();
+            services.AddScoped<ObjectiveSynchronizerFactory>();
+            services.AddScoped<ProjectSynchronizerFactory>();
+            services.AddScoped<FoldersSyncHelper>();
+            services.AddScoped<HubsHelper>();
+            services.AddScoped<ItemsSyncHelper>();
+            services.AddScoped<ProjectsHelper>();
             return services;
         }
     }

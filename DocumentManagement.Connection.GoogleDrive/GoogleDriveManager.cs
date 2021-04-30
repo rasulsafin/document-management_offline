@@ -15,7 +15,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
         private GoogleDriveController controller;
         private bool checkDirApp;
         private Dictionary<string, string> tables = new Dictionary<string, string>();
-        private Dictionary<string, string> directories = new Dictionary<string, string>();
+        private Dictionary<(string parent, string name), string> directories = new Dictionary<(string parent, string name), string>();
 
         public GoogleDriveManager(GoogleDriveController driveController)
         {
@@ -175,14 +175,15 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         private async Task<string> CreateDirectoryIfNecessary(string directoryPath, string parentHref)
         {
-            var folderExists = directories.ContainsKey(directoryPath);
+            var folderExists = directories.ContainsKey((parentHref, directoryPath));
             if (!folderExists)
             {
                 var list = await controller.GetListAsync(parentHref);
-                foreach (CloudElement element in list)
+
+                foreach (CloudElement element in list.Where(
+                    x => x.IsDirectory && !directories.ContainsKey((parentHref, x.DisplayName))))
                 {
-                    if (element.IsDirectory)
-                        directories.Add(element.DisplayName, element.Href);
+                    directories.Add((parentHref, element.DisplayName), element.Href);
                     if (element.DisplayName == directoryPath)
                         folderExists = true;
                 }
@@ -190,11 +191,11 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 if (!folderExists)
                 {
                     var createdDirectory = await controller.CreateDirectoryAsync(parentHref, directoryPath);
-                    directories.Add(createdDirectory.DisplayName, createdDirectory.Href);
+                    directories.Add((parentHref, createdDirectory.DisplayName), createdDirectory.Href);
                 }
             }
 
-            return directories[directoryPath];
+            return directories[(parentHref, directoryPath)];
         }
 
         private async Task<string> GetTableHref<T>()
