@@ -29,6 +29,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public ObjectiveStatus Status { get; set; }
 
+        public LocationDto Location { get; set; }
+
         public ICollection<ItemDto> Items { get; set; }
 
         public ICollection<DynamicFieldDto> DynamicFields { get; set; }

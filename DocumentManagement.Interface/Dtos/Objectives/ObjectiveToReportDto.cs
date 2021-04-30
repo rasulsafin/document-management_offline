@@ -16,5 +16,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
         public IEnumerable<BimElementDto> BimElements { get; set; }
 
         public IEnumerable<ItemDto> Items { get; set; }
+
+        public LocationDto Location { get; set; }
     }
 }

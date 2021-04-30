@@ -212,14 +212,16 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var dbProject = await context.Projects.Unsynchronized()
-                   .Include(x => x.Objectives)
-                   .ThenInclude(x => x.DynamicFields)
-                   .Include(x => x.Objectives)
-                   .ThenInclude(x => x.ObjectiveType)
-                   .Include(x => x.Objectives)
-                   .ThenInclude(x => x.BimElements)
-                   .ThenInclude(x => x.BimElement)
-                   .FindOrThrowAsync(x => x.ID, (int)projectID);
+                    .Include(x => x.Objectives)
+                        .ThenInclude(x => x.DynamicFields)
+                    .Include(x => x.Objectives)
+                        .ThenInclude(x => x.ObjectiveType)
+                    .Include(x => x.Objectives)
+                        .ThenInclude(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Objectives)
+                        .ThenInclude(x => x.Location)
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
@@ -387,6 +389,7 @@ namespace MRS.DocumentManagement.Services
                .Include(x => x.Project)
                .Include(x => x.Author)
                .Include(x => x.ObjectiveType)
+               .Include(x => x.Location)
                .Include(x => x.DynamicFields)
                     .ThenInclude(x => x.ChildrenDynamicFields)
                .Include(x => x.Items)
