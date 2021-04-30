@@ -1,6 +1,6 @@
 using System;
 
-namespace MRS.DocumentManagement.Utility.Factories
+namespace MRS.DocumentManagement.General.Utils.Factories
 {
     public class Factory<TParameter, TResult> : IFactory<TParameter, TResult>
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using MRS.DocumentManagement.Interface;
@@ -10,26 +11,32 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 {
-    public class LementProConnectionStorage : IConnectionStorage, IDisposable
+    public class LementProConnectionStorage : IConnectionStorage
     {
         private readonly ProjectsService projectsService;
+        private readonly ILogger<LementProConnectionStorage> logger;
 
-        public LementProConnectionStorage(HttpRequestUtility requestUtility)
-            => projectsService = new ProjectsService(requestUtility, new CommonRequestsUtility(requestUtility));
-
-        public void Dispose()
+        public LementProConnectionStorage(ProjectsService projectsService, ILogger<LementProConnectionStorage> logger)
         {
-            projectsService.Dispose();
+            this.projectsService = projectsService;
+            this.logger = logger;
+            logger.LogTrace("LementProConnectionStorage created");
         }
 
         public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
+            logger.LogTrace(
+                "DeleteFiles started with projectId: {@ProjectID}, itemExternalDtos: {@Items}",
+                projectId,
+                itemExternalDtos);
             if (!int.TryParse(projectId, out var parsedId))
                 return false;
 
             var remoteProject = await projectsService.GetProjectAsync(parsedId);
+            logger.LogDebug("Received project: {@Project}", remoteProject);
             var projectFiles = remoteProject.Values.Files;
             var projectDto = remoteProject.ToProjectExternalDto();
+            logger.LogDebug("Mapped project: {@Project}", projectDto);
 
             try
             {
@@ -43,11 +50,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                 }
 
                 var modelToUpdate = projectDto.ToModelToUpdate(remoteProject);
+                logger.LogDebug("Mapped project: {@Project}", modelToUpdate);
                 modelToUpdate.RemovedFileIds = projectDto.Items.Select(i => int.Parse(i.ExternalID)).ToList();
                 await projectsService.UpdateProjectAsync(modelToUpdate);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                logger.LogError(ex, "Can't delete file");
                 return false;
             }
 
@@ -59,13 +68,16 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             IProgress<double> progress,
             CancellationToken token)
         {
+            logger.LogTrace("DownloadFiles started with projectId: {@ProjectID}, itemExternalDto: {@Item}", projectId, itemExternalDto);
             if (!int.TryParse(projectId, out var parsedId))
             {
+                logger.LogError("Invalid project ID: {@ProjectID}", projectId);
                 progress?.Report(1.0);
                 return false;
             }
 
             var projectFiles = (await projectsService.GetProjectAsync(parsedId)).Values.Files;
+            logger.LogDebug("Received files: {@Items}", projectFiles);
             if ((!projectFiles?.Any()) ?? true)
             {
                 progress?.Report(1.0);
@@ -75,6 +87,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
             try
             {
                 int i = 0;
+
                 foreach (var item in itemExternalDto)
                 {
                     token.ThrowIfCancellationRequested();
@@ -82,13 +95,25 @@ namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
                     if (correspondingModelFile == default)
                         continue;
 
-                    await projectsService.CommonRequests.DownloadFileAsync(correspondingModelFile.ID.Value, item.FullPath);
+                    await projectsService.CommonRequests.DownloadFileAsync(
+                        correspondingModelFile.ID.Value,
+                        item.FullPath);
 
                     progress?.Report(++i / (double)itemExternalDto.Count());
                 }
             }
-            catch
+            catch (OperationCanceledException)
             {
+                progress?.Report(1.0);
+                return false;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(
+                    ex,
+                    "Download failed with projectId: {@ProjectID}, itemExternalDto: {@Item}",
+                    projectId,
+                    itemExternalDto);
                 progress?.Report(1.0);
                 return false;
             }

@@ -94,6 +94,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         public static void ClassCleanup()
             => serviceProvider.Dispose();
 
+        [TestInitialize]
+        public async Task Setup()
+            => await Task.Delay(5000);
+
         [TestMethod]
         public async Task GetIssues_HaveAccessToIssueContainer_ReturnsIssuesList()
         {

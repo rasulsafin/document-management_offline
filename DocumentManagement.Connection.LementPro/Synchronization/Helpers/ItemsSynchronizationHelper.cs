@@ -7,7 +7,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
 {
-    internal class ItemsSynchronizationHelper
+    internal static class ItemsSynchronizationHelper
     {
         internal static async Task<IEnumerable<int>> UploadFilesAsync(ICollection<ItemExternalDto> items, CommonRequestsUtility utility)
         {

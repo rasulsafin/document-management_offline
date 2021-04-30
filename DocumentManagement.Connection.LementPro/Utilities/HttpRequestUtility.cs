@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
 using MRS.DocumentManagement.Connection.LementPro.Services;
@@ -21,18 +22,29 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
     /// </summary>
     public class HttpRequestUtility : IDisposable
     {
+        private readonly ILogger<HttpRequestUtility> logger;
         private readonly JsonSerializerSettings jsonSerializerSettings =
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
 
         private HttpConnection connector;
 
-        public HttpRequestUtility(HttpConnection connector)
-            => this.connector = connector;
+        public HttpRequestUtility(ILogger<HttpRequestUtility> logger)
+        {
+            this.logger = logger;
+            this.connector = new HttpConnection();
+            logger.LogTrace("HttpRequestUtility created");
+        }
 
-        internal AuthenticationService AuthenticationService { get; set; }
+        public string Token { get; set; }
+
+        public Func<Task> EnsureAccessValidAsync { get; set; }
 
         public void Dispose()
-            => connector.Dispose();
+        {
+            connector.Dispose();
+            GC.SuppressFinalize(this);
+            logger.LogTrace("HttpRequestUtility disposed");
+        }
 
         /// <summary>
         /// Connects to LementPro system and returns auth data.
@@ -42,6 +54,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
         /// <returns>Tuple containing token and date when it expires.</returns>
         protected internal async Task<(string token, string expires)> Connect(string login, string password)
         {
+            logger.LogTrace("Connect started with login: {@Login}", login);
             var authData = new AuthorizationData
             {
                 LoginName = login,
@@ -52,21 +65,29 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             var response = await GetHttpResponseAsync(Resources.MethodAuthenticationLogin, data: authData);
             var token = ParseCookieFromResponse(response, RESPONSE_COOKIES_AUTH_NAME);
             var expires = ParseCookieFromResponse(response, RESPONSE_COOKIES_EXPIRES_NAME);
+            logger.LogDebug("Token expires: {@Expires}", expires);
 
             return (token, expires);
         }
 
         protected internal async Task<JToken> GetResponseAsync<TData>(string url, TData data = default, HttpMethod requestType = null)
         {
-            await AuthenticationService?.EnsureAccessValidAsync();
+            logger.LogTrace(
+                "GetResponseAsync [{@HttpMethod}] started with data: {@Data}\r{@Url}\r",
+                requestType,
+                data,
+                url);
+            await EnsureAccessValidAsync();
             var response = await GetHttpResponseAsync(url, data, requestType);
             var content = await response.Content.ReadAsStringAsync();
+            logger.LogDebug("Received response: {@Response}", content);
             return JToken.Parse(content);
         }
 
         protected internal async Task<JToken> GetResponseWithoutDataAsync(string url, HttpMethod requestType = null)
         {
-            await AuthenticationService?.EnsureAccessValidAsync();
+            logger.LogTrace("GetResponseWithoutDataAsync [{@HttpMethod}] started\r{@Url}\r", requestType, url);
+            await EnsureAccessValidAsync();
             var response = await GetHttpResponseAsync(url, data: (object)null, requestType);
             var content = await response.Content.ReadAsStringAsync();
             return JToken.Parse(content);
@@ -76,23 +97,47 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             string url,
             TData data = default)
         {
+            logger.LogTrace(
+                "GetResponseStreamAsync started with data: {@Data}\r{@Url}\r",
+                data,
+                url);
             var response = await GetHttpResponseAsync(url, data, completionOption: HttpCompletionOption.ResponseHeadersRead);
             return await response.Content.ReadAsStreamAsync();
         }
 
         protected internal async Task<JToken> SendStreamAsync(string url, Stream stream, string fileName, string boundary, HttpMethod requestType = null)
         {
+            logger.LogTrace(
+                "SendStreamAsync [{@HttpMethod}] started with fileName: {Name}, boundary: {Boundary}\r{@Url}\r",
+                requestType,
+                fileName,
+                boundary,
+                url);
             using var request = InitializeRequest(url, requestType);
             var content = new MultipartFormDataContent();
             content.Add(new StreamContent(stream), boundary, fileName);
             request.Content = content;
             var response = await connector.SendRequestAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
+            logger.LogDebug("Received response: {@Response}", responseContent);
             return JToken.Parse(responseContent);
         }
 
-        protected internal async Task<JToken> SendStreamWithDataAsync(string url, Stream stream, string fileName, string boundary, Dictionary<string, string> data = default, HttpMethod requestType = null)
+        protected internal async Task<JToken> SendStreamWithDataAsync(
+            string url,
+            Stream stream,
+            string fileName,
+            string boundary,
+            Dictionary<string, string> data = default,
+            HttpMethod requestType = null)
         {
+            logger.LogTrace(
+                "SendStreamWithDataAsync [{@HttpMethod}] started with fileName: {Name}, boundary: {Boundary}, data:{@Data}\r{@Url}\r",
+                requestType,
+                fileName,
+                boundary,
+                data,
+                url);
             using var request = InitializeRequest(url, requestType);
             var content = new MultipartFormDataContent();
             content.Add(new StreamContent(stream), boundary, fileName);
@@ -106,6 +151,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             request.Content = content;
             var response = await connector.SendRequestAsync(request);
             var responseContent = await response.Content.ReadAsStringAsync();
+            logger.LogDebug("Received response: {@Response}", responseContent);
             return JToken.Parse(responseContent);
         }
 
@@ -114,6 +160,11 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
             HttpMethod requestType = null,
             HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
+            logger.LogTrace(
+                "GetHttpResponseAsync [{@HttpMethod}] started with data:{@Data}\r{@Url}\r",
+                requestType,
+                data,
+                url);
             using var request = InitializeRequest(url, requestType);
 
             if (data != null)
@@ -130,6 +181,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected string ParseCookieFromResponse(HttpResponseMessage response, string cookieName)
         {
+            logger.LogTrace("ParseCookieFromResponse started");
             if (response.Headers.TryGetValues("Set-Cookie", out var setCookie))
             {
                 var cookies = setCookie.FirstOrDefault()?.Split(RESPONSE_COOKIE_VALUES_SEPARATOR);
@@ -151,13 +203,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
 
         protected HttpRequestMessage InitializeRequest(string url, HttpMethod requestType = null)
         {
+            logger.LogTrace("InitializeRequest [{@HttpMethod}] started\r{@Url}\r", requestType, url);
             requestType ??= HttpMethod.Post;
             var fullUrl = $"{Resources.UrlServer}{url}";
 
             var request = connector.CreateRequest(
                 requestType,
                 fullUrl,
-                authData: (STANDARD_AUTHENTICATION_SCHEME, AuthenticationService.AccessToken));
+                authData: (STANDARD_AUTHENTICATION_SCHEME, Token));
 
             return request;
         }
