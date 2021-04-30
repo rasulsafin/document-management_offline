@@ -10,8 +10,6 @@ namespace MRS.DocumentManagement.Utility.Mapping
 {
     public class MappingProfile : Profile
     {
-        private static readonly char SEPARATOR = ';';
-
         public MappingProfile()
         {
             CreateMapToDto();

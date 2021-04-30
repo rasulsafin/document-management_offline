@@ -2,7 +2,7 @@
 {
     public class Location
     {
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int ID { get; set; }
 
         public float PositionX { get; set; }
