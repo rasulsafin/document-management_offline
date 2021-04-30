@@ -10,10 +10,12 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
+using MRS.DocumentManagement.Utility.Extensions;
 using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
@@ -78,11 +80,8 @@ namespace MRS.DocumentManagement.Services
                     .ThenInclude(x => x.AuthFieldNames)
                     .Include(x => x.ConnectionInfo)
                     .ThenInclude(x => x.AuthFieldValues)
-                    .FirstOrDefaultAsync(x => x.ID == (int)userID);
+                    .FindOrThrowAsync(x => x.ID, (int)userID);
                 logger.LogDebug("Found user: {@User}", user);
-
-                if (user == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
 
                 var scope = scopeFactory.CreateScope();
                 var connection =
@@ -128,10 +127,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Find started with itemID: {@ItemID}", itemID);
             try
             {
-                var dbItem = await context.Items.FindAsync((int)itemID);
+                var dbItem = await context.Items.FindOrThrowAsync((int)itemID);
                 logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
-                if (dbItem == null)
-                    throw new ArgumentNullException($"Item with id {itemID} was not found");
                 return mapper.Map<ItemDto>(dbItem);
             }
             catch (Exception e)
@@ -146,10 +143,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetItems started with projectID: {@ProjectID}", projectID);
             try
             {
-                var dbProject = await context.Projects.FindAsync((int)projectID);
-                if (dbProject == null)
-                    throw new ArgumentNullException($"Project with id {projectID} was not found");
-
+                await context.Projects.FindOrThrowAsync((int)projectID);
                 var dbItems = (await context.Projects
                        .Include(x => x.Items)
                        .FirstOrDefaultAsync(x => x.ID == (int)projectID))?.Items
@@ -170,10 +164,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetItems started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
-                var dbObjective = await context.Objectives.FindAsync((int)objectiveID);
-                if (dbObjective == null)
-                    throw new ArgumentNullException($"Objective with id {objectiveID} was not found");
-
+                await context.Objectives.FindOrThrowAsync((int)objectiveID);
                 var dbItems = await context.ObjectiveItems
                     .Where(x => x.ObjectiveID == (int)objectiveID)
                     .Select(x => x.Item)
@@ -194,10 +185,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Update started with item: {@Item}", item);
             try
             {
-                var dbItem = await context.Items.FindAsync((int)item.ID);
+                var dbItem = await context.Items.FindOrThrowAsync((int)item.ID);
                 logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
-                if (dbItem == null)
-                    throw new ArgumentNullException($"Item {item} was not found");
 
                 dbItem.ItemType = (int)item.ItemType;
                 dbItem.RelativePath = item.RelativePath;

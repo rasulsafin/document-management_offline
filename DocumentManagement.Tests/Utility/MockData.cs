@@ -12,36 +12,39 @@ namespace MRS.DocumentManagement.Tests.Utility
     public static class MockData
     {
         #region USERS
-        public static List<User> DEFAULT_USERS => new List<User> {
-            new User
+
+        public static List<User> DEFAULT_USERS
+            => new List<User>
             {
-                Login = PAULI_USER.Login,
-                Name = PAULI_USER.Name,
-                PasswordHash = PAULI_USER.PasswordHash,
-                PasswordSalt = PAULI_USER.PasswordSalt,
-            },
-            new User
-            {
-                Login = SCHREDINGER_USER.Login,
-                Name = SCHREDINGER_USER.Name,
-                PasswordHash = SCHREDINGER_USER.PasswordHash,
-                PasswordSalt = SCHREDINGER_USER.PasswordSalt,
-            },
-            new User
-            {
-                Login = HEISENBERG_USER.Login,
-                Name = HEISENBERG_USER.Name,
-                PasswordHash = HEISENBERG_USER.PasswordHash,
-                PasswordSalt = HEISENBERG_USER.PasswordSalt,
-            },
-            new User
-            {
-                Login = BOHR_USER.Login,
-                Name = BOHR_USER.Name,
-                PasswordHash = BOHR_USER.PasswordHash,
-                PasswordSalt = BOHR_USER.PasswordSalt,
-            },
-        };
+                new User
+                {
+                    Login = PAULI_USER.Login,
+                    Name = PAULI_USER.Name,
+                    PasswordHash = PAULI_USER.PasswordHash,
+                    PasswordSalt = PAULI_USER.PasswordSalt,
+                },
+                new User
+                {
+                    Login = SCHREDINGER_USER.Login,
+                    Name = SCHREDINGER_USER.Name,
+                    PasswordHash = SCHREDINGER_USER.PasswordHash,
+                    PasswordSalt = SCHREDINGER_USER.PasswordSalt,
+                },
+                new User
+                {
+                    Login = HEISENBERG_USER.Login,
+                    Name = HEISENBERG_USER.Name,
+                    PasswordHash = HEISENBERG_USER.PasswordHash,
+                    PasswordSalt = HEISENBERG_USER.PasswordSalt,
+                },
+                new User
+                {
+                    Login = BOHR_USER.Login,
+                    Name = BOHR_USER.Name,
+                    PasswordHash = BOHR_USER.PasswordHash,
+                    PasswordSalt = BOHR_USER.PasswordSalt,
+                },
+            };
 
         private static readonly User BOHR_USER = new User
         {
@@ -50,6 +53,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5],
         };
+
         private static readonly User HEISENBERG_USER = new User
         {
             Login = "IAmTheDangerous",
@@ -57,6 +61,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5],
         };
+
         private static readonly User SCHREDINGER_USER = new User
         {
             Login = "loveDogs1932",
@@ -64,6 +69,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             PasswordHash = new byte[10],
             PasswordSalt = new byte[5],
         };
+
         private static readonly User PAULI_USER = new User
         {
             Login = "principlesHater",
@@ -170,6 +176,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Description = "everything wrong! redo!!!",
             Status = ObjectiveStatus.Open,
         };
+
         private static readonly ObjectiveToCreateDto FIRST_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
             CreationDate = DateTime.Now,
@@ -178,6 +185,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Description = "ASAP: everything wrong! redo!!!",
             Status = ObjectiveStatus.InProgress,
         };
+
         private static readonly ObjectiveToCreateDto SECOND_TYPE_INPROGRESS_OBJECTIVE_TO_CREATE = new ObjectiveToCreateDto
         {
             CreationDate = DateTime.Now,
@@ -225,6 +233,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Description = "everything wrong! redo!!!",
             Status = (int)ObjectiveStatus.Open,
         };
+
         private static readonly Objective FIRST_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
             CreationDate = DateTime.Now,
@@ -233,6 +242,7 @@ namespace MRS.DocumentManagement.Tests.Utility
             Description = "ASAP: everything wrong! redo!!!",
             Status = (int)ObjectiveStatus.InProgress,
         };
+
         private static readonly Objective SECOND_TYPE_INPROGRESS_OBJECTIVE = new Objective
         {
             CreationDate = DateTime.Now,
@@ -272,12 +282,14 @@ namespace MRS.DocumentManagement.Tests.Utility
             ItemType = 0,
             RelativePath = "File element",
         };
+
         private static readonly Item BIM_ITEM = new Item
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
             RelativePath = "Bim element",
         };
+
         private static readonly Item MEDIA_ITEM = new Item
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",

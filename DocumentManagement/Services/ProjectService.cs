@@ -12,6 +12,7 @@ using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -41,6 +42,8 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
+                if (string.IsNullOrWhiteSpace(projectToCreate.Title))
+                    throw new ArgumentException("Title of the project is empty", nameof(projectToCreate));
                 var projectToDb = mapper.Map<Project>(projectToCreate);
                 logger.LogDebug("Mapped project: {@ProjectToDb}", projectToDb);
                 await context.Projects.AddAsync(projectToDb);
@@ -91,10 +94,8 @@ namespace MRS.DocumentManagement.Services
             {
                 var dbProject = await context.Projects.Unsynchronized()
                     .Include(i => i.Items)
-                    .FirstOrDefaultAsync(p => p.ID == (int)projectID);
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
-                if (dbProject == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
                 return mapper.Map<ProjectDto>(dbProject);
             }
             catch (Exception e)
@@ -127,10 +128,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetUserProjects started with userID: {@UserID}", userID);
             try
             {
-                var userFromDb = await context.FindAsync<User>((int)userID);
-                if (userFromDb == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
-
+                var userFromDb = await context.Users.FindOrThrowAsync((int)userID);
                 var iUserID = userFromDb.ID;
                 var dbProjects = await context.Users
                    .Where(x => x.ID == iUserID)
@@ -157,10 +155,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetUsers started with projectID: {@ProjectID}", projectID);
             try
             {
-                var dbProject = await context.FindAsync<Project>((int)projectID);
-                if (dbProject == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
-
+                var dbProject = await context.FindOrThrowAsync<Project>((int)projectID);
                 var usersDb = await context.UserProjects
                     .Where(x => x.ProjectID == dbProject.ID)
                     .Select(x => x.User)
@@ -181,21 +176,24 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("LinkToUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
+                var ids = users.Select(x => (int)x).ToArray();
+
+                foreach (var user in ids)
+                    await context.FindOrThrowAsync<User>(user);
+
                 var project = await context.Projects.Include(x => x.Users)
-                    .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
-                if (project == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
 
                 project.Users ??= new List<UserProject>();
-                foreach (var user in users)
+                foreach (var user in ids)
                 {
                     if (!project.Users.Any(x => x.ProjectID == project.ID && x.UserID == (int)user))
                     {
                         project.Users.Add(new UserProject
                         {
                             ProjectID = project.ID,
-                            UserID = (int)user,
+                            UserID = user,
                         });
                     }
                 }
@@ -217,11 +215,8 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Remove started with projectID: {@ProjectID}", projectID);
             try
             {
-                var project = await context.Projects.FindAsync((int)projectID);
+                var project = await context.Projects.FindOrThrowAsync((int)projectID);
                 logger.LogDebug("Found project: {@Project}", project);
-                if (project == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
-
                 context.Projects.Remove(project);
                 await context.SaveChangesAsync();
                 return true;
@@ -239,15 +234,18 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("UnlinkFromUsers started for project {@ProjectID} with users: {@Users}", projectID, users);
             try
             {
-                var project = await context.Projects.Include(x => x.Users)
-                    .FirstOrDefaultAsync(x => x.ID == (int)projectID);
-                logger.LogDebug("Found project: {@Project}", project);
-                if (project == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
+                var ids = users.Select(x => (int)x).ToArray();
 
-                foreach (var user in users)
+                foreach (var user in ids)
+                    await context.FindOrThrowAsync<User>(user);
+
+                var project = await context.Projects.Include(x => x.Users)
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
+                logger.LogDebug("Found project: {@Project}", project);
+
+                foreach (var user in ids)
                 {
-                    var link = project.Users.FirstOrDefault(x => x.UserID == (int)user);
+                    var link = project.Users.FirstOrDefault(x => x.UserID == user);
                     if (link != null)
                     {
                         project.Users.Remove(link);
@@ -271,14 +269,13 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Update started with project: {@Project}", project);
             try
             {
+                if (string.IsNullOrWhiteSpace(project.Title))
+                    throw new ArgumentException("Title of the project is empty", nameof(project));
                 var projectID = project.ID;
                 var projectFromDb = await context.Projects
                    .Include(x => x.Items)
-                   .FirstOrDefaultAsync(x => x.ID == (int)projectID);
+                   .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@ProjectFromDB}", projectFromDb);
-                if (projectFromDb == null)
-                    throw new ArgumentNullException($"Project with key {projectID} was not found");
-
                 projectFromDb = mapper.Map(project, projectFromDb);
                 logger.LogDebug("Mapped project: {@ProjectFromDB}", projectFromDb);
 
@@ -313,7 +310,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("LinkItem started with project: {@Project} and item: {@Item}", project, item);
             try
             {
-                var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project.GetType(), project.ID);
+                var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project);
                 logger.LogDebug("Found item: {@DBItem}", dbItem);
                 if (dbItem == null)
                     return;

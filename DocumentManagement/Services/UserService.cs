@@ -7,10 +7,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -40,8 +42,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Add started with user: {@User}", user);
             try
             {
-                var userFromDb = await Find(user.Login);
-                if (userFromDb != null)
+                if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
                     throw new ArgumentException("This login is already being used");
 
                 var newUser = mapper.Map<User>(user);
@@ -136,11 +137,8 @@ namespace MRS.DocumentManagement.Services
                 var dbUser = await context.Users
                     .Include(x => x.ConnectionInfo)
                         .ThenInclude(c => c.ConnectionType)
-                    .FirstOrDefaultAsync(x => x.ID == (int)userID);
+                    .FindOrThrowAsync(x => x.ID, (int)userID);
                 logger.LogDebug("Found user: {@User}", dbUser);
-
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with key {userID} was not found");
 
                 return mapper.Map<UserDto>(dbUser);
             }
@@ -158,10 +156,8 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 login = login?.Trim();
-                var dbUser = await context.Users.FirstOrDefaultAsync(x => x.Login == login);
+                var dbUser = await context.Users.FindWithIgnoreCaseOrThrowAsync(x => x.Login, login);
                 logger.LogDebug("Found user: {@User}", dbUser);
-                if (dbUser == null)
-                    throw new ArgumentNullException($"User with login {login} was not found");
 
                 return mapper.Map<UserDto>(dbUser);
             }
@@ -193,8 +189,12 @@ namespace MRS.DocumentManagement.Services
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Update started with user: {@User}", user);
+
             try
             {
+                if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
+                    throw new ArgumentException("This login is already being used");
+
                 var storedUser = await GetUserChecked(user.ID);
                 logger.LogDebug("Found user: {@User}", storedUser);
                 storedUser.Login = user.Login;
@@ -255,11 +255,8 @@ namespace MRS.DocumentManagement.Services
         private async Task<User> GetUserChecked(ID<UserDto> userID)
         {
             logger.LogTrace("GetUserChecked started with userID: {UserID}", userID);
-            var id = (int)userID;
-            var user = await context.Users.FindAsync(id);
+            var user = await context.Users.FindOrThrowAsync((int)userID);
             logger.LogDebug("Found user: {@User}", user);
-            if (user == null)
-                throw new ArgumentNullException($"User with key {userID} was not found");
             return user;
         }
     }

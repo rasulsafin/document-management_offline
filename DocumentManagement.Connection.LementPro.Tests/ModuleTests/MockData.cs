@@ -2879,6 +2879,5 @@
                     ""dontShowIfNull"": false
                   }
                 ]";
-
     }
 }

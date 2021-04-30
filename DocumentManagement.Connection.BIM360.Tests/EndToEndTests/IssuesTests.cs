@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
@@ -17,24 +19,31 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class IssuesTests
     {
-        private static readonly string TEST_PROJECT_NAME = "Sample Project";
-        private static readonly string TEST_ISSUE_ID = "da04f18d-b8e8-407b-983e-385f1a0520ea";
+        private static readonly string TEST_ISSUE_ID = "83188de8-8fce-4eba-8b02-8a0f4aca276f";
         private static readonly Random RANDOM = new Random();
 
         private static Project project;
         private static IssuesService issuesService;
         private static string issuesContainer;
         private static ForgeConnection connection;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static void Initialize(TestContext unused)
         {
-            connection = new ForgeConnection();
-            var authService = new AuthenticationService(connection);
-            var authenticator = new Authenticator(authService);
-            var hubsService = new HubsService(connection);
-            var projectsService = new ProjectsService(connection);
-            issuesService = new IssuesService(connection);
+            var services = new ServiceCollection();
+            services.AddBim360();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+
+            connection = serviceProvider.GetService<ForgeConnection>();
+            var authenticator = serviceProvider.GetService<Authenticator>();
+            var hubsService = serviceProvider.GetService<HubsService>();
+            var projectsService = serviceProvider.GetService<ProjectsService>();
+            issuesService = serviceProvider.GetService<IssuesService>();
+
+            if (authenticator == null || hubsService == null || connection == null || projectsService == null)
+                throw new Exception("Required services are null");
 
             var connectionInfo = new ConnectionInfoExternalDto
             {
@@ -74,12 +83,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             // STEP 2. Choose project
             var projectsTask = projectsService.GetProjectsAsync(hub.ID);
             projectsTask.Wait();
-            project = projectsTask.Result.FirstOrDefault(x => x.Attributes.Name == TEST_PROJECT_NAME);
+            project = projectsTask.Result.FirstOrDefault(x => x.Attributes.Name == INTEGRATION_TEST_PROJECT);
             if (project == default)
                 Assert.Fail("Testing project doesn't exist");
 
             issuesContainer = project.Relationships.IssuesContainer.Data.ID;
         }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task GetIssues_HaveAccessToIssueContainer_ReturnsIssuesList()

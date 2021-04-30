@@ -10,7 +10,8 @@ namespace MRS.DocumentManagement.Connection.Tdms.Tests
     [TestClass]
     public class ProjectsTest
     {
-        private static readonly string TEST_FILE_PATH = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Resources", "IntegrationTestFile.txt");
+        private static readonly string TEST_FILE_PATH = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Resources", "IntegrationTestFile.txt");
+
         // TODO: Find project and use its guid to test?
         private static readonly string PROJECT_GUID = "{3033B554-5652-482A-85F1-4915D04250AD}";
 

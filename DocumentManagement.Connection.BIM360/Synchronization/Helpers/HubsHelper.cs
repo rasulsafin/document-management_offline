@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
+namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers
 {
     public class HubsHelper
     {

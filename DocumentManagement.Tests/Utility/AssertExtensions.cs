@@ -44,7 +44,6 @@ namespace MRS.DocumentManagement.Tests.Utility
             // All the elements and counts matched.
         }
 
-
         /// <summary>
         /// Finds a mismatched element between the two collections. A mismatched
         /// element is one that appears a different number of times in the
@@ -62,19 +61,23 @@ namespace MRS.DocumentManagement.Tests.Utility
         /// <returns>
         /// true if a mismatched element was found; false otherwise.
         /// </returns>
-        private static bool FindMismatchedElement<T>(IEnumerable<T> expected, IEnumerable<T> actual, 
-            IEqualityComparer<T> comparer, out T mismatchedElement)
+        private static bool FindMismatchedElement<T>(
+            IEnumerable<T> expected,
+            IEnumerable<T> actual,
+            IEqualityComparer<T> comparer,
+            out T mismatchedElement)
         {
             var actualList = actual.ToList();
 
             foreach (var item in expected)
             {
                 var index = actualList.IndexOf(item, comparer);
+
                 if (index >= 0)
                 {
                     actualList.RemoveAt(index);
                 }
-                else 
+                else
                 {
                     mismatchedElement = item;
                     return true;
@@ -88,12 +91,15 @@ namespace MRS.DocumentManagement.Tests.Utility
         private static int IndexOf<T>(this IEnumerable<T> source, T element, IEqualityComparer<T> comparer)
         {
             int index = 0;
+
             foreach (var item in source)
             {
                 if (comparer.Equals(item, element))
                     return index;
+
                 index++;
             }
+
             return -1;
         }
     }

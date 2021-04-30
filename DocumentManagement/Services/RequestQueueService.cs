@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Extensions;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -25,49 +26,36 @@ namespace MRS.DocumentManagement.Services
         public Task<double> GetProgress(string id)
         {
             logger.LogTrace("GetProgress {@LongRequestID}", id);
-            if (QUEUE.TryGetValue(id, out var job))
-            {
-                var result = job.Progress;
-                return Task.FromResult(result);
-            }
-
-            throw new ArgumentNullException($"The job {id} doesn't exist");
+            return Task.FromResult(QUEUE.FindOrThrow(id).Progress);
         }
 
         public Task Cancel(string id)
         {
             logger.LogTrace("Cancel started for id = {@LongRequestID}", id);
-            if (QUEUE.TryGetValue(id, out var job))
-            {
-                job.Src.Cancel();
-                logger.LogInformation("Operation {@LongRequestID} canceled", id);
-                QUEUE.Remove(id);
-                return Task.CompletedTask;
-            }
-
-            throw new ArgumentNullException($"The job {id} doesn't exist");
+            var job = QUEUE.FindOrThrow(id);
+            job.Src.Cancel();
+            logger.LogInformation("Operation {@LongRequestID} canceled", id);
+            QUEUE.Remove(id);
+            return Task.CompletedTask;
         }
 
         public Task<RequestResult> GetResult(string id)
         {
             logger.LogTrace("GetResult started for id = {@LongRequestID}", id);
-            if (QUEUE.TryGetValue(id, out var job))
-            {
-                if (job.Task.IsCompleted)
-                {
-                    var result = job.Task.Result;
-                    logger.LogDebug("Result of the operation {@LongRequestID}: {@Result}", id, result);
-                    QUEUE.Remove(id);
-                    return Task.FromResult(result);
-                }
-                else
-                {
-                    logger.LogWarning("Trying to get result of the incomplete operation {@LongRequestID}", id);
-                    throw new InvalidOperationException($"The job {id} is not finished yet");
-                }
-            }
+            var job = QUEUE.FindOrThrow(id);
 
-            throw new ArgumentNullException($"The job {id} doesn't exist");
+            if (job.Task.IsCompleted)
+            {
+                var result = job.Task.Result;
+                logger.LogDebug("Result of the operation {@LongRequestID}: {@Result}", id, result);
+                QUEUE.Remove(id);
+                return Task.FromResult(result);
+            }
+            else
+            {
+                logger.LogWarning("Trying to get result of the incomplete operation {@LongRequestID}", id);
+                throw new InvalidOperationException($"The job {id} is not finished yet");
+            }
         }
 
         public void AddRequest(string id, Task<RequestResult> task, CancellationTokenSource src)

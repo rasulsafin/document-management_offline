@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -85,7 +86,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Remove(new ID<ObjectiveDto>(objectiveID));
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
@@ -120,7 +121,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Update(objectiveData);
                 return Ok(true);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
@@ -157,7 +158,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var foundObjective = await service.Find(new ID<ObjectiveDto>(objectiveID));
                 return Ok(foundObjective);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
@@ -194,7 +195,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID));
                 return Ok(objectives);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }

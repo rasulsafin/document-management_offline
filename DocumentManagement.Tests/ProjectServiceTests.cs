@@ -1,250 +1,377 @@
-﻿//using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using System.Linq;
-//using System.Threading.Tasks;
-//using MRS.DocumentManagement.Tests.Utility;
-//using MRS.DocumentManagement.Interface.Dtos;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Moq;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
+using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Services;
+using MRS.DocumentManagement.Tests.Utility;
+using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
-//namespace MRS.DocumentManagement.Tests
-//{
-//    [TestClass]
-//    public class ProjectServiceTests
-//    {
-//        public static SharedDatabaseFixture Fixture { get; private set; }
+namespace MRS.DocumentManagement.Tests
+{
+    [TestClass]
+    public class ProjectServiceTests : IDisposable
+    {
+        private static IMapper mapper;
+        private ProjectService service;
+        private SharedDatabaseFixture fixture;
 
-//        [ClassInitialize]
-//        public static void Setup(TestContext _)
-//        {
-//            Fixture = new SharedDatabaseFixture();
-//        }
+        [ClassInitialize]
+        public static void ClassSetup(TestContext unused)
+        {
+            var mapperConfig = new MapperConfiguration(
+                mc =>
+                {
+                    mc.AddProfile(new MappingProfile());
+                });
+            mapper = mapperConfig.CreateMapper();
+        }
 
-//        [ClassCleanup]
-//        public static void Cleanup()
-//        {
-//            Fixture.Dispose();
-//        }
+        [TestInitialize]
+        public void Setup()
+        {
+            fixture = new SharedDatabaseFixture(
+                context =>
+                {
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
 
-//        [TestMethod]
-//        public async Task Can_add_user_specific_projects()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-//                var currentUser = access.CurrentUser.ID;
-//                var user1 = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
-//                var user2 = await access.UserService.Add(new UserToCreateDto("ppshezdetsky", "123", "Pshek Pshezdetsky"));
+                    context.Projects.AddRange(MockData.DEFAULT_PROJECTS);
+                    context.Users.AddRange(MockData.DEFAULT_USERS);
+                    context.SaveChanges();
+                });
+            service = new ProjectService(
+                fixture.Context,
+                mapper,
+                new ItemHelper(Mock.Of<ILogger<ItemHelper>>()),
+                Mock.Of<ILogger<ProjectService>>());
+        }
 
-//                var projectService = access.ProjectService;
+        [TestCleanup]
+        public void Cleanup()
+            => Dispose();
 
-//                var commonProject = await projectService.AddToUser(currentUser, "Common project");
-//                var u1Project = await projectService.AddToUser(user1, "Project for user 1");
-//                var u2Project = await projectService.AddToUser(user2, "Project for user 2");
-//                var u12Project = await projectService.AddToUser(user1, "Project for users 1 and 2");
+        [TestMethod]
+        public async Task Add_CorrectInfo_AddsProject()
+        {
+            var project = new ProjectToCreateDto
+            {
+                Title = "project",
+                Items = new List<ItemDto>(),
+            };
 
-//                await projectService.LinkToUsers(commonProject, new[] { currentUser, user1, user2 });
-//                await projectService.LinkToUsers(u1Project, new[] { user1 });
-//                await projectService.LinkToUsers(u2Project, new[] { user2 });
-//                await projectService.LinkToUsers(u12Project, new[] { user2 });
+            var added = await service.Add(project);
 
-//                var currentUserProjects = await projectService.GetUserProjects(access.CurrentUser.ID);
-//                var user1Projects = await projectService.GetUserProjects(user1);
-//                var user2Projects = await projectService.GetUserProjects(user2);
+            Assert.IsNotNull(added);
+            Assert.IsNotNull(added.ID);
+        }
 
-//                var expectedProjects = new ProjectDto[]
-//                {
-//                    new ProjectDto { ID = commonProject, Title = "Common project" }
-//                };
-//                CollectionAssert.That.AreEquivalent(expectedProjects, currentUserProjects, new ProjectComparer());
+        [TestMethod]
+        public async Task Add_CorrectInfoWithOwner_AddsProjectToOwner()
+        {
+            var owner = fixture.Context.Users.Include(x => x.Projects).First();
+            var project = new ProjectToCreateDto
+            {
+                Title = "project",
+                AuthorID = new ID<UserDto>(owner.ID),
+                Items = new List<ItemDto>(),
+            };
 
-//                expectedProjects = new ProjectDto[]
-//                {
-//                    new ProjectDto { ID = commonProject, Title = "Common project" },
-//                    new ProjectDto { ID = u1Project, Title = "Project for user 1" },
-//                    new ProjectDto { ID = u12Project, Title = "Project for users 1 and 2" }
-//                };
-//                CollectionAssert.That.AreEquivalent(expectedProjects, user1Projects, new ProjectComparer());
+            var added = await service.Add(project);
 
-//                expectedProjects = new ProjectDto[]
-//                {
-//                    new ProjectDto { ID = commonProject, Title = "Common project" },
-//                    new ProjectDto { ID = u2Project, Title = "Project for user 2" },
-//                    new ProjectDto { ID = u12Project, Title = "Project for users 1 and 2" }
-//                };
-//                CollectionAssert.That.AreEquivalent(expectedProjects, user2Projects, new ProjectComparer());
-//            }
-//        }
+            Assert.IsNotNull(added);
+            Assert.IsNotNull(added.ID);
+            Assert.AreEqual(owner.Projects.Count, 1);
+        }
 
-//        [TestMethod]
-//        public async Task Can_query_project_users()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-//                var currentUserID = access.CurrentUser.ID;
-//                var user1ID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
-//                var user2ID = await access.UserService.Add(new UserToCreateDto("ppshezdetsky", "123", "Pshek Pshezdetsky"));
-//                var projectService = access.ProjectService;
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Add_InvalidTitle_RaisesArgumentException()
+        {
+            var project = new ProjectToCreateDto
+            {
+                Title = string.Empty,
+                Items = new List<ItemDto>(),
+            };
 
-//                var commonProject = await projectService.AddToUser(currentUserID, "Common project");
-//                var u1Project = await projectService.AddToUser(user1ID, "Project for user 1");
-//                var u2Project = await projectService.AddToUser(user2ID, "Project for user 2");
-//                var u12Project = await projectService.AddToUser(user1ID, "Project for users 1 and 2");
+            await service.Add(project);
 
-//                //do not add users to common project - project without owner should be visible to anyone
-//                await projectService.LinkToUsers(commonProject, new[] { user1ID, user2ID });
-//                await projectService.LinkToUsers(u12Project, new[] { user2ID });
+            Assert.Fail();
+        }
 
-//                var currentUser = access.CurrentUser;
-//                var user1 = await access.UserService.Find(user1ID);
-//                var user2 = await access.UserService.Find(user2ID);
+        [TestMethod]
+        public async Task Find_ProjectExists_ReturnsProject()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var id = new ID<ProjectDto>(project.ID);
 
-//                var commonUsers = await projectService.GetUsers(commonProject);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { currentUser, user1, user2 }, commonUsers, new UserComparer(ignoreIDs: false));
+            var projectFound = await service.Find(id);
 
-//                var project1Users = await projectService.GetUsers(u1Project);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { user1 }, project1Users, new UserComparer(ignoreIDs: false));
+            Assert.IsNotNull(projectFound);
+            Assert.AreEqual(project.ID, (int)projectFound.ID);
+        }
 
-//                var project2Users = await projectService.GetUsers(u2Project);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { user2 }, project2Users, new UserComparer(ignoreIDs: false));
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task Find_ProjectDoesntExist_RaisesNotFoundException()
+        {
+            var id = ID<ProjectDto>.InvalidID;
 
-//                var project12Users = await projectService.GetUsers(u12Project);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { user1, user2 }, project12Users, new UserComparer(ignoreIDs: false));
-//            }
-//        }
+            await service.Find(id);
 
-//        [TestMethod]
-//        public async Task Can_remove_project_users()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            Assert.Fail();
+        }
 
-//                var currentUserID = access.CurrentUser.ID;
-//                var user1ID = await access.UserService.Add(new UserToCreateDto("itaranov", "123", "Ivan Taranov"));
-                
-//                var projectService = access.ProjectService;
-                
-//                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
-//                var project2 = await projectService.AddToUser(user1ID, "Project 2");
-                
-//                var project12 = await projectService.AddToUser(currentUserID, "Project 1 and 2");
-//                await projectService.LinkToUsers(project12, new[] { user1ID });
+        [TestMethod]
+        public async Task GetAllProjects_ProjectsExist_ReturnsProjects()
+        {
+            var projectsFound = await service.GetAllProjects();
 
-//                var currentUser = access.CurrentUser;
-//                var user1 = await access.UserService.Find(user1ID);
+            Assert.IsNotNull(projectsFound);
 
-//                await projectService.UnlinkFromUsers(project1, new[] { currentUserID });
-//                await projectService.UnlinkFromUsers(project12, new[] { user1ID });
+            Assert.AreEqual(await fixture.Context.Projects.CountAsync(), projectsFound.Count());
+        }
 
-//                var project1Users = await projectService.GetUsers(project1);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { }, project1Users, new UserComparer(ignoreIDs: false));
+        [TestMethod]
+        public async Task GetUserProjects_UserExists_ReturnsProjects()
+        {
+            var user = fixture.Context.Users.Include(x => x.Projects).First();
+            var projects = await fixture.Context.Projects.ToListAsync();
+            user.Projects = projects.Select(x => new UserProject { Project = x }).ToList();
+            fixture.Context.Users.Update(user);
+            await fixture.Context.SaveChangesAsync();
+            var id = new ID<UserDto>(user.ID);
 
-//                var project2Users = await projectService.GetUsers(project2);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { user1 }, project2Users, new UserComparer(ignoreIDs: false));
+            var foundProjects = await service.GetUserProjects(id);
 
-//                var project12Users = await projectService.GetUsers(project12);
-//                CollectionAssert.That.AreEquivalent(new UserDto[] { currentUser }, project12Users, new UserComparer(ignoreIDs: false));
-//            }
-//        }
+            Assert.IsNotNull(foundProjects);
+            Assert.AreEqual(projects.Count, foundProjects.Count());
+        }
 
-//        [TestMethod]
-//        public async Task Can_query_projects()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task GetUserProjects_UserDoesntExist_RaisesNotFoundException()
+        {
+            var id = ID<UserDto>.InvalidID;
 
-//                var currentUserID = access.CurrentUser.ID;
-//                var projectService = access.ProjectService;
+            await service.GetUserProjects(id);
 
-//                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
-//                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
-//                var project3 = await projectService.AddToUser(currentUserID, "Project 3");
+            Assert.Fail();
+        }
 
-//                var p1 = await projectService.Find(project1);
-//                Assert.IsTrue(new ProjectComparer().Equals(p1, new ProjectDto() { ID = project1, Title = "Project 1" }));
+        [TestMethod]
+        public async Task GetUsers_ProjectExists_ReturnsUsers()
+        {
+            var users = await fixture.Context.Users.ToListAsync();
+            var project = await fixture.Context.Projects.FirstAsync();
+            project.Users = users.Select(x => new UserProject { User = x }).ToList();
+            fixture.Context.Projects.Update(project);
+            await fixture.Context.SaveChangesAsync();
+            var id = new ID<ProjectDto>(project.ID);
 
-//                await projectService.UnlinkFromUsers(project3, new[] { currentUserID });
+            var foundUsers = await service.GetUsers(id);
 
-//                var userProjects = await projectService.GetUserProjects(currentUserID);
-//                CollectionAssert.That.AreEquivalent(new ProjectDto[] { 
-//                    new ProjectDto(){ ID = project1, Title = "Project 1" },
-//                    new ProjectDto(){ ID = project2, Title = "Project 2" }
-//                }, userProjects, new ProjectComparer());
+            Assert.IsNotNull(foundUsers);
+            Assert.AreEqual(users.Count, foundUsers.Count());
+        }
 
-//                var allProjects = await projectService.GetAllProjects();
-//                CollectionAssert.That.AreEquivalent(new ProjectDto[] {
-//                    new ProjectDto(){ ID = project1, Title = "Project 1" },
-//                    new ProjectDto(){ ID = project2, Title = "Project 2" },
-//                    new ProjectDto(){ ID = project3, Title = "Project 3" }
-//                }, allProjects, new ProjectComparer());
-//            }
-//        }
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task GetUsers_ProjectDoesntExist_RaisesNotFoundException()
+        {
+            await service.GetUsers(ID<ProjectDto>.InvalidID);
 
-//        [TestMethod]
-//        public async Task Can_update_projects()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            Assert.Fail();
+        }
 
-//                var currentUserID = access.CurrentUser.ID;
-//                var projectService = access.ProjectService;
+        [TestMethod]
+        public async Task LinkToUsers_ProjectExistsUsersExist_LinksUsers()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var projectID = new ID<ProjectDto>(project.ID);
+            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
-//                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
-//                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
+            var result = await service.LinkToUsers(projectID, usersIDs);
 
-//                var expectedProjects = new ProjectDto[] 
-//                {
-//                    new ProjectDto() { ID = project1, Title = "New project 1" },
-//                    new ProjectDto() { ID = project2, Title = "New project 2" }
-//                };
-//                await projectService.Update(expectedProjects[0]);
-//                await projectService.Update(expectedProjects[1]);
+            Assert.IsTrue(result);
+            Assert.AreEqual(await fixture.Context.Users.CountAsync(), project.Users.Count);
+        }
 
-//                var userProjects = await projectService.GetUserProjects(currentUserID);
-//                CollectionAssert.That.AreEquivalent(expectedProjects, userProjects, new ProjectComparer());
-//            }
-//        }
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task LinkToUsers_ProjectDoesntExists_RaisesNotFoundException()
+        {
+            var projectID = ID<ProjectDto>.InvalidID;
+            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
-//        [TestMethod]
-//        public async Task Can_remove_projects()
-//        {
-//            using var transaction = Fixture.Connection.BeginTransaction();
-//            using (var context = Fixture.CreateContext(transaction))
-//            {
-//                var api = new DocumentManagementApi(context);
-//                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
+            await service.LinkToUsers(projectID, usersIDs);
 
-//                var currentUserID = access.CurrentUser.ID;
-//                var projectService = access.ProjectService;
+            Assert.Fail();
+        }
 
-//                var project1 = await projectService.AddToUser(currentUserID, "Project 1");
-//                var project2 = await projectService.AddToUser(currentUserID, "Project 2");
-//                var project3 = await projectService.AddToUser(currentUserID, "Project 3");
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task LinkToUsers_UserDoesntExists_RaisesNotFoundException()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var projectID = new ID<ProjectDto>(project.ID);
+            var usersIDs = fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
+               .AsEnumerable()
+               .Append(ID<UserDto>.InvalidID);
 
-//                var deleted = await projectService.Remove(project1);
-//                Assert.IsTrue(deleted);
+            await service.LinkToUsers(projectID, usersIDs);
 
-//                var userProjects = await projectService.GetUserProjects(currentUserID);
-//                CollectionAssert.That.AreEquivalent(new ProjectDto[] {
-//                    new ProjectDto(){ ID = project2, Title = "Project 2" },
-//                    new ProjectDto(){ ID = project3, Title = "Project 3" }
-//                }, userProjects, new ProjectComparer());
+            Assert.Fail();
+        }
 
-//                // Try to delete already deleted project
-//                deleted = await projectService.Remove(project1);
-//                Assert.IsFalse(deleted);
-//            }
-//        }
-//    }
-//}
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task LinkToUsers_UsersDoesntExists_RaisesNotFoundException()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var projectID = new ID<ProjectDto>(project.ID);
+            var usersIDs = new[] { ID<UserDto>.InvalidID, new ID<UserDto>(int.MaxValue) };
+
+            await service.LinkToUsers(projectID, usersIDs);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task Remove_ProjectExists_RemovesProject()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var projectsCount = await fixture.Context.Projects.CountAsync();
+            var id = new ID<ProjectDto>(project.ID);
+
+            var result = await service.Remove(id);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(projectsCount - 1, await fixture.Context.Projects.CountAsync());
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task Remove_ProjectDoesntExist_RaisesNotFoundException()
+        {
+            var id = ID<ProjectDto>.InvalidID;
+
+            await service.Remove(id);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task UnlinkFromUsers_ProjectExistsUsersExist_UnlinkLinksUsers()
+        {
+            var users = await fixture.Context.Users.ToListAsync();
+            var project = await fixture.Context.Projects.FirstAsync();
+            project.Users = users.Select(x => new UserProject { User = x }).ToList();
+            fixture.Context.Projects.Update(project);
+            await fixture.Context.SaveChangesAsync();
+
+            var projectID = new ID<ProjectDto>(project.ID);
+            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+
+            var result = await service.UnlinkFromUsers(projectID, usersIDs);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(0, project.Users.Count);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task UnlinkFromUsers_ProjectDoesntExists_RaisesNotFoundException()
+        {
+            var projectID = ID<ProjectDto>.InvalidID;
+            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+
+            await service.UnlinkFromUsers(projectID, usersIDs);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<User>))]
+        public async Task UnlinkFromUsers_UserDoesntExists_RaisesNotFoundException()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var projectID = new ID<ProjectDto>(project.ID);
+            var usersIDs = fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
+               .AsEnumerable()
+               .Append(ID<UserDto>.InvalidID);
+
+            await service.UnlinkFromUsers(projectID, usersIDs);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task Update_ProjectExistsTitleIsValid_UpdatesProject()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var id = new ID<ProjectDto>(project.ID);
+            var newTitle = "New title";
+            var projectDto = new ProjectDto
+            {
+                ID = id,
+                Items = new List<ItemDto>(),
+                Title = newTitle,
+            };
+
+            var result = await service.Update(projectDto);
+
+            Assert.IsTrue(result);
+            Assert.AreEqual(newTitle, project.Title);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Update_ProjectExistsTitleIsInvalid_RaisesArgumentException()
+        {
+            var project = await fixture.Context.Projects.FirstAsync();
+            var id = new ID<ProjectDto>(project.ID);
+            var projectDto = new ProjectDto
+            {
+                ID = id,
+                Items = new List<ItemDto>(),
+                Title = string.Empty,
+            };
+
+            await service.Update(projectDto);
+
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task Update_ProjectDoesntExist_RaisesNotFoundException()
+        {
+            var id = ID<ProjectDto>.InvalidID;
+            var project = new ProjectDto
+            {
+                ID = id,
+                Items = new List<ItemDto>(),
+                Title = "Title",
+            };
+
+            await service.Update(project);
+
+            Assert.Fail();
+        }
+
+        public void Dispose()
+        {
+            fixture.Dispose();
+            GC.SuppressFinalize(this);
+        }
+    }
+}

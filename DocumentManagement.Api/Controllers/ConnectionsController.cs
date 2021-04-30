@@ -7,6 +7,7 @@ using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -69,7 +70,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var connectionInfoId = await service.Add(connectionInfo);
                 return Created(string.Empty, connectionInfoId);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -135,7 +136,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var connectionInfoDto = await service.Get(new ID<UserDto>(userID));
                 return Ok(connectionInfoDto);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
@@ -172,7 +173,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var status = await service.GetRemoteConnectionStatus(new ID<UserDto>(userID));
                 return Ok(status);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
             }
@@ -214,7 +215,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var result = await service.GetEnumerationVariants(new ID<UserDto>(userID), new ID<EnumerationTypeDto>(enumerationTypeID));
                 return Ok(result);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
             }
@@ -251,7 +252,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var result = await service.Synchronize(new ID<UserDto>(userID));
                 return Accepted(result);
             }
-            catch (ArgumentNullException ex)
+            catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }

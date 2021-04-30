@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 },
             };
 
-            var (_, _) = await authService.SignInAsync(connectionInfo);
+            await authService.SignInAsync(connectionInfo);
         }
 
         [ClassCleanup]
@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 Type = 40179,
                 Name = $"Задача от {DateTime.Now}",
                 Description = $"Описание новой задачи {Guid.NewGuid()}",
-                //I60099 = "44212",
+                ////I60099 = "44212",
                 StartDate = DateTime.Now.ToString(dateFormat),
             };
 

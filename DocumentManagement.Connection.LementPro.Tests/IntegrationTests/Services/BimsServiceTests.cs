@@ -33,7 +33,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 },
             };
 
-            var (_, _) = await authService.SignInAsync(connectionInfo);
+            await authService.SignInAsync(connectionInfo);
         }
 
         [ClassCleanup]

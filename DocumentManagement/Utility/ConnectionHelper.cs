@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Utility.Extensions;
 using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Utility
@@ -38,20 +39,11 @@ namespace MRS.DocumentManagement.Utility
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(int userID)
         {
             logger.LogTrace("GetConnectionInfoFromDb started with userID: {@UserID}", userID);
-            User user = await FindUserFromDb(userID);
+            User user = await context.Users
+               .Include(x => x.ConnectionInfo)
+               .FindOrThrowAsync(x => x.ID, userID);
             logger.LogDebug("Found user: {@User}", user);
-            if (user == null)
-                throw new ArgumentNullException($"User with key {userID} was not found");
-
             return await GetConnectionInfoFromDb(user);
-        }
-
-        internal async Task<User> FindUserFromDb(int userID)
-        {
-            logger.LogTrace("FindUserFromDb started with userID: {@UserID}", userID);
-            return await context.Users
-                            .Include(x => x.ConnectionInfo)
-                            .FirstOrDefaultAsync(x => x.ID == userID);
         }
 
         internal async Task<ConnectionInfo> GetConnectionInfoFromDb(User user)
