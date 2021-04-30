@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
@@ -13,14 +13,21 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
     public class AuthenticationServiceTests
     {
         private static AuthenticationService service;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static void Init(TestContext unused)
-            => service = new AuthenticationService(new HttpRequestUtility(new HttpConnection()));
+        {
+            var services = new ServiceCollection();
+            services.AddLementPro();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+            service = serviceProvider.GetService<AuthenticationService>();
+        }
 
         [ClassCleanup]
         public static void ClassCleanup()
-            => service.Dispose();
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task SignInAsync_CorrectCredentials_SuccessfulSignIn()

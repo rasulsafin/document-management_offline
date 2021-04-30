@@ -1,41 +1,51 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
-using MRS.DocumentManagement.Connection.LementPro.Services;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Utilities
 {
     [TestClass]
-    public class CommonRequestsUtilityTests : CommonRequestsUtility
+    public class CommonRequestsUtilityTests
     {
         private static List<int> objectsIdsToDelete = new List<int>();
-        private static Mock<CommonRequestsUtilityTests> subject;
+        private static ServiceProvider serviceProvider;
+        private static CommonRequestsUtilityTester utility;
 
         [ClassInitialize]
         public static async Task Initialize(TestContext unused)
         {
-            var requestsUtility = new HttpRequestUtility(new HttpConnection());
-            var service = new AuthenticationService(requestsUtility);
+            var services = new ServiceCollection();
+            services.AddLementPro();
+            services.Remove(
+                new ServiceDescriptor(
+                    typeof(CommonRequestsUtility),
+                    typeof(CommonRequestsUtility),
+                    ServiceLifetime.Scoped));
+            services.AddScoped<CommonRequestsUtility, CommonRequestsUtilityTester>();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+            utility = (CommonRequestsUtilityTester)serviceProvider.GetService<CommonRequestsUtility>();
+            var connection = serviceProvider.GetService<LementProConnection>();
 
+            var login = "diismagilov";
+            var password = "DYZDFMwZ";
             var connectionInfo = new ConnectionInfoExternalDto
             {
                 AuthFieldValues = new Dictionary<string, string>
                 {
-                    { "login", "diismagilov" },
-                    { "password", "DYZDFMwZ" },
+                    { "login", login },
+                    { "password", password },
                 },
             };
 
-            var (_, updatedInfo) = await service.SignInAsync(connectionInfo);
-
-            subject = new Mock<CommonRequestsUtilityTests> { CallBase = true };
-            subject.Setup(p => p.RequestUtility).Returns(requestsUtility);
+            await connection!.Connect(connectionInfo, CancellationToken.None);
         }
 
         [ClassCleanup]
@@ -43,19 +53,21 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         {
             foreach (var id in objectsIdsToDelete)
             {
-                var deleteResult = await subject.Object.DeleteObjectAsync(id);
+                var deleteResult = await utility.DeleteObjectAsync(id);
                 if (!deleteResult.Any())
                 {
                     await Task.Delay(5000);
-                    await subject.Object.DeleteObjectAsync(id);
+                    await utility.DeleteObjectAsync(id);
                 }
             }
+
+            await serviceProvider.DisposeAsync();
         }
 
         [TestMethod]
         public async Task GetMenuCategories_WithCorrectCredentials_ReturnsTask()
         {
-            var result = await subject.Object.GetMenuCategoriesAsync();
+            var result = await utility.GetMenuCategoriesAsync();
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -67,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var categoryObject = "Task";
             var categoryId = 40164;
 
-            var result = await subject.Object.GetFoldersTreeAsync(categoryObject, categoryId);
+            var result = await utility.GetFoldersTreeAsync(categoryObject, categoryId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -79,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var objectType = "Task";
             var folderKey = "{\"id\":127472,\"subKeys\":[]}";
 
-            var result = await subject.Object.GetObjectsListFromFolderAsync(objectType, folderKey);
+            var result = await utility.GetObjectsListFromFolderAsync(objectType, folderKey);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -90,7 +102,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
         {
             var typeId = "40163";
 
-            var result = await subject.Object.GetTypesAttributesDefinitionAsync(typeId);
+            var result = await utility.GetTypesAttributesDefinitionAsync(typeId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -103,7 +115,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var filePath = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";
             var name = Path.GetFileName(filePath);
 
-            var result = await subject.Object.UploadFileAsync(bimTypeId, name, filePath);
+            var result = await utility.UploadFileAsync(bimTypeId, name, filePath);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSuccess.Value);
@@ -117,7 +129,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var filePath = "C:\\Users\\diismagilov\\Downloads\\00_Gladilova_AC_(IFC2x3)_05062020.ifc";
             var name = Path.GetFileName(filePath);
 
-            var result = await subject.Object.UploadFileAsync(bimTypeId, name, filePath);
+            var result = await utility.UploadFileAsync(bimTypeId, name, filePath);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.IsSuccess.Value);
@@ -130,7 +142,7 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var bimCategory = 40163;
             var bimTypeId = 40170;
 
-            var result = await subject.Object.GetDefaultTemplate(bimCategory, bimTypeId);
+            var result = await utility.GetDefaultTemplate(bimCategory, bimTypeId);
 
             Assert.IsNotNull(result);
         }
@@ -141,13 +153,13 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Uti
             var bimTypeId = 40170;
             var filePath = "C:\\Users\\diismagilov\\Downloads\\HelloWallIfc4.ifc";
             var name = Path.GetFileName(filePath);
-            var uploaded = await subject.Object.UploadFileAsync(bimTypeId, name, filePath);
+            var uploaded = await utility.UploadFileAsync(bimTypeId, name, filePath);
             var bimId = uploaded.ID.Value;
 
             // Wait for creating (5 sec is enough usually)
             await Task.Delay(5000);
 
-            var result = await subject.Object.DeleteObjectAsync(bimId);
+            var result = await utility.DeleteObjectAsync(bimId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
