@@ -2,13 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper.Internal;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Infrastructure;
 using MRS.DocumentManagement.Exceptions;
 
 namespace MRS.DocumentManagement.Utility.Extensions
@@ -82,7 +78,7 @@ namespace MRS.DocumentManagement.Utility.Extensions
             CancellationToken cancellationToken = new CancellationToken())
             where T : class
         {
-            if (!(property.Body is MemberExpression body))
+            if (!(property.Body is MemberExpression body) || !(body.Expression is ParameterExpression))
             {
                 throw new ArgumentException(
                     $"The lambda expression must return member of {typeof(T).Name}",
