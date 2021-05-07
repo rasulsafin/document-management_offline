@@ -42,6 +42,10 @@ namespace MRS.DocumentManagement.Utility
                 ? DEFAULT
                 : string.Join(", ", objective.BimElements.Select(x => x.ElementName));
 
+            var locationTextElement = (objective.Location == null || objective.Location?.Position == null)
+                ? DEFAULT
+                : string.Join("; ", objective.Location.Position);
+
             var result = new XElement(ROW,
                 new XElement(CELL, itemsElements),
                 new XElement(CELL,
@@ -53,7 +57,7 @@ namespace MRS.DocumentManagement.Utility
                              TextElement(objective.CreationDate.ToShortDateString())),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Позиция: ", true),
-                             TextElement(string.Join("; ", objective.Location.Position))),
+                             TextElement(locationTextElement)),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Объект модели: ", true),
                              TextElement(bimElementsText)),
