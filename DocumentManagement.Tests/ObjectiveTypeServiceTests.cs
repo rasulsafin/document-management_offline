@@ -2,26 +2,28 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Services;
 using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
     [TestClass]
     public class ObjectiveTypeServiceTests
     {
-        private static SharedDatabaseFixture Fixture { get; set; }
-
         private static ObjectiveTypeService service;
         private static IMapper mapper;
 
+        private static SharedDatabaseFixture Fixture { get; set; }
+
         [ClassInitialize]
-        public static void ClassSetup(TestContext _)
+        public static void ClassSetup(TestContext unused)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
@@ -42,7 +44,7 @@ namespace MRS.DocumentManagement.Tests
                 context.ObjectiveTypes.AddRange(types);
                 context.SaveChanges();
             });
-            service = new ObjectiveTypeService(Fixture.Context, mapper);
+            service = new ObjectiveTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ObjectiveTypeService>>());
         }
 
         [TestCleanup]
@@ -62,11 +64,11 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(InvalidDataException))]
-        public async Task Add_ExistingType_RaisesInvalidDataException()
+        [ExpectedException(typeof(ArgumentException))]
+        public async Task Add_ExistingType_RaisesArgumentException()
         {
             var existingType = Fixture.Context.ObjectiveTypes.First();
-            
+
             await service.Add(existingType.Name);
 
             Assert.Fail();
@@ -83,11 +85,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
+        [ExpectedException(typeof(NotFoundException<ObjectiveType>))]
         public async Task FindById_NotExistingType_ReturnsNull()
         {
-            var result = await service.Find(ID<ObjectiveTypeDto>.InvalidID);
+            await service.Find(ID<ObjectiveTypeDto>.InvalidID);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -101,13 +104,14 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task FindByName_NotExistingType_ReturnsNull()
+        [ExpectedException(typeof(NotFoundException<ObjectiveType>))]
+        public async Task FindByName_NotExistingType_RaisesNotFoundException()
         {
             var notExistingTypeName = $"invalidName{Guid.NewGuid()}";
 
-            var result = await service.Find(notExistingTypeName);
+            await service.Find(notExistingTypeName);
 
-            Assert.IsNull(result);
+            Assert.Fail();
         }
 
         [TestMethod]
@@ -132,109 +136,12 @@ namespace MRS.DocumentManagement.Tests
         }
 
         [TestMethod]
-        public async Task Remove_NotExistingType_ReturnsFalse()
+        [ExpectedException(typeof(NotFoundException<ObjectiveType>))]
+        public async Task Remove_NotExistingType_RaisesNotFoundException()
         {
             var result = await service.Remove(ID<ObjectiveTypeDto>.InvalidID);
 
-            Assert.IsFalse(result);
+            Assert.Fail();
         }
-
-
-
-        //        [TestMethod]
-        //        public async Task Can_add_new_objective_type()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
-        //                var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
-
-        //                Assert.IsTrue(taskTypeID.IsValid);
-        //                Assert.IsTrue(errorTypeID.IsValid);
-        //            }
-        //        }
-
-        //        [TestMethod]
-        //        [ExpectedException(typeof(InvalidDataException))]
-        //        public async Task Can_not_add_duplicate_objective_type()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var id1 = await access.ObjectiveTypeService.Add("Задание");
-        //                var id2 = await access.ObjectiveTypeService.Add("Задание");
-
-        //                Assert.Fail();
-        //            }
-        //        }
-
-        //        [TestMethod]
-        //        public async Task Can_query_objective_types()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
-        //                var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
-
-        //                var types = await access.ObjectiveTypeService.GetAllObjectiveTypes();
-        //                var expected = new ObjectiveTypeDto[] 
-        //                {
-        //                    new ObjectiveTypeDto(){ ID = taskTypeID, Name = "Задание" },
-        //                    new ObjectiveTypeDto(){ ID = errorTypeID, Name = "Нарушение" }
-        //                };
-        //                var comparer = new DelegateComparer<ObjectiveTypeDto>((x, y) => x.ID == y.ID && x.Name == y.Name);
-        //                CollectionAssert.That.AreEquivalent(expected, types, comparer);
-
-        //                var nonexsitent = await access.ObjectiveTypeService.Find(ID<ObjectiveTypeDto>.InvalidID);
-        //                Assert.IsNull(nonexsitent);
-
-        //                var item1 = await access.ObjectiveTypeService.Find(taskTypeID);
-        //                Assert.IsNotNull(item1);
-        //                Assert.IsTrue(comparer.Equals(expected[0], item1));
-
-        //                var item2 = await access.ObjectiveTypeService.Find("Нарушение");
-        //                Assert.IsNotNull(item2);
-        //                Assert.IsTrue(comparer.Equals(expected[1], item2));
-        //            }
-        //        }
-
-        //        [TestMethod]
-        //        public async Task Can_remove_objective_types()
-        //        {
-        //            using var transaction = Fixture.Connection.BeginTransaction();
-        //            using (var context = Fixture.CreateContext(transaction))
-        //            {
-        //                var api = new DocumentManagementApi(context);
-        //                var access = await api.Register(new UserToCreateDto("vpupkin", "123", "Vasily Pupkin"));
-
-        //                var taskTypeID = await access.ObjectiveTypeService.Add("Задание");
-        //                var errorTypeID = await access.ObjectiveTypeService.Add("Нарушение");
-
-        //                var isRemoved = await access.ObjectiveTypeService.Remove(taskTypeID);
-        //                Assert.IsTrue(isRemoved);
-
-        //                isRemoved = await access.ObjectiveTypeService.Remove(taskTypeID);
-        //                Assert.IsFalse(isRemoved);
-
-        //                var types = await access.ObjectiveTypeService.GetAllObjectiveTypes();
-        //                var expected = new ObjectiveTypeDto[]
-        //                {
-        //                    new ObjectiveTypeDto(){ ID = errorTypeID, Name = "Нарушение" }
-        //                };
-        //                var comparer = new DelegateComparer<ObjectiveTypeDto>((x, y) => x.ID == y.ID && x.Name == y.Name);
-        //                CollectionAssert.That.AreEquivalent(expected, types, comparer);
-        //            }
-        //        }
     }
 }

@@ -1,8 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
 
-namespace MRS.DocumentManagement.Utility
+namespace MRS.DocumentManagement.Interface.Services
 {
     /// <summary>
     /// Service for managing long tasks on server side.

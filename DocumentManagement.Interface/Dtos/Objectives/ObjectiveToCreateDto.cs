@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Interface.Dtos
@@ -8,6 +9,7 @@ namespace MRS.DocumentManagement.Interface.Dtos
     {
         public ID<UserDto>? AuthorID { get; set; }
 
+        [Required(ErrorMessage = "ValidationError_IdIsRequired")]
         public ID<ProjectDto> ProjectID { get; set; }
 
         public ID<ObjectiveDto>? ParentObjectiveID { get; set; }
@@ -16,12 +18,16 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public DateTime DueDate { get; set; }
 
+        [Required(ErrorMessage = "ValidationError_ObjectiveNameIsRequired")]
         public string Title { get; set; }
 
         public string Description { get; set; }
 
         public ObjectiveStatus Status { get; set; }
 
+        public LocationDto Location { get; set; }
+
+        [Required(ErrorMessage = "ValidationError_IdIsRequired")]
         public ID<ObjectiveTypeDto> ObjectiveTypeID { get; set; }
 
         public IEnumerable<ItemDto> Items { get; set; }

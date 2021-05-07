@@ -3,12 +3,15 @@ using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Synchronization.Models;
+using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Factories;
+using MRS.DocumentManagement.Utility.Mapping.Converters;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -36,34 +39,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<CryptographyHelper>();
 
             services.AddFactories();
+            services.AddSynchronizer();
             services.AddExternal();
             return services;
         }
 
-        private static IServiceCollection AddFactories(this IServiceCollection services)
-        {
-            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
-            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
-
-            services.AddScoped<Func<IServiceScope, Type, IConnection>>(
-                x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
-            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
-
-            services.AddScoped<IFactory<IServiceScope, SynchronizingData>, SynchronizationDataFactory>();
-            services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
-
-            services.AddScopedFactory<DMContext>();
-            services.AddScopedFactory<IMapper>();
-            return services;
-        }
-
-        private static IServiceCollection AddExternal(this IServiceCollection services)
-            => ConnectionCreator.GetDependencyInjectionMethods()
-               .Aggregate(
-                    services,
-                    (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
-
-        private static IServiceCollection AddMappingResolvers(this IServiceCollection services)
+        public static IServiceCollection AddMappingResolvers(this IServiceCollection services)
         {
             services.AddTransient<BimElementObjectiveTypeConverter>();
 
@@ -92,6 +73,29 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ItemExternalDtoRelativePathResolver>();
             return services;
         }
+
+        private static IServiceCollection AddFactories(this IServiceCollection services)
+        {
+            services.AddScoped<Func<Type, IConnection>>(x => type => (IConnection)x.GetRequiredService(type));
+            services.AddScoped<IFactory<Type, IConnection>, Factory<Type, IConnection>>();
+
+            services.AddScoped<Func<IServiceScope, Type, IConnection>>(
+                x => (scope, type) => (IConnection)(scope?.ServiceProvider ?? x).GetRequiredService(type));
+            services.AddScoped<IFactory<IServiceScope, Type, IConnection>, Factory<IServiceScope, Type, IConnection>>();
+
+            services.AddScoped<IFactory<IServiceScope, ConnectionHelper>, ConnectionHelperFactory>();
+
+            services.AddScopedFactory<DMContext>();
+            services.AddScopedFactory<IMapper>();
+            services.AddScopedFactory<Synchronizer>();
+            return services;
+        }
+
+        private static IServiceCollection AddExternal(this IServiceCollection services)
+            => ConnectionCreator.GetDependencyInjectionMethods()
+               .Aggregate(
+                    services,
+                    (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
 
         private static IServiceCollection AddScopedFactory<TResult>(this IServiceCollection services)
         {

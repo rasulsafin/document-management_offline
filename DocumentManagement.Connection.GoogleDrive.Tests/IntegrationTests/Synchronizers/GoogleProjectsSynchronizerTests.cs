@@ -4,11 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.GoogleDrive;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
+namespace MRS.DocumentManagement.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class GoogleProjectsSynchronizerTests

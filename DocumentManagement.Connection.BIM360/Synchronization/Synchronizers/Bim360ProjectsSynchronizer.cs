@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -14,16 +16,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly Bim360ConnectionContext context;
         private readonly ItemsSyncHelper itemsSyncHelper;
+        private readonly FoldersService foldersService;
         private readonly FoldersSyncHelper foldersSyncHelper;
 
-        public Bim360ProjectsSynchronizer(Bim360ConnectionContext context)
+        public Bim360ProjectsSynchronizer(
+            Bim360ConnectionContext context,
+            ItemsSyncHelper itemsSyncHelper,
+            FoldersService foldersService)
         {
             this.context = context;
-            itemsSyncHelper = new ItemsSyncHelper(
-                context.ItemsService,
-                context.ProjectsService,
-                context.ObjectsService,
-                context.VersionsService);
+            this.itemsSyncHelper = itemsSyncHelper;
+            this.foldersService = foldersService;
         }
 
         public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
@@ -99,7 +102,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var dto = project.ToDto();
             if (!context.DefaultFolders.TryGetValue(project.ID, out var folder))
                 return dto;
-            var items = await context.FoldersService.GetItemsAsync(project.ID, folder.ID);
+            var items = await foldersService.GetItemsAsync(project.ID, folder.ID);
             dto.Items = items.Select(x => x.ToDto()).ToList();
             return dto;
         }

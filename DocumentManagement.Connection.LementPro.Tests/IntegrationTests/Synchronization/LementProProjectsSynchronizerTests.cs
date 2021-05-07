@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Synchronization
@@ -15,11 +18,18 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
         private static readonly string TEST_BIM_FILE_PATH = "Resources/HelloWallIfc4TEST.ifc";
         private static readonly string TEST_PNG_FILE_PATH = "Resources/TestIcon.png";
         private static readonly string TEST_TXT_FILE_PATH = "Resources/IntegrationTestFile.txt";
-        private static LementProProjectsSynchronizer synchronizer;
+        private static ISynchronizer<ProjectExternalDto> synchronizer;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
         {
+            var services = new ServiceCollection();
+            services.AddLementPro();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+            var connection = serviceProvider.GetService<LementProConnection>();
+
             var login = "diismagilov";
             var password = "DYZDFMwZ";
             var connectionInfo = new ConnectionInfoExternalDto
@@ -31,9 +41,14 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 },
             };
 
-            var context = await LementProConnectionContext.CreateContext(connectionInfo);
-            synchronizer = new LementProProjectsSynchronizer(context);
+            await connection!.Connect(connectionInfo, CancellationToken.None);
+            var context = await connection.GetContext(connectionInfo);
+            synchronizer = context.ProjectsSynchronizer;
         }
+
+        [ClassCleanup]
+        public static void ClassCleanup()
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task GetUpdatedIDs_AtLeastOneProjectExists_RetrivedSuccessful()
@@ -52,7 +67,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = $"CreatedBySyncTest {creationDateTime.ToShortTimeString()}",
                 UpdatedAt = creationDateTime,
                 Items = new List<ItemExternalDto>
-                {   new ItemExternalDto
+                {
+                    new ItemExternalDto
                     {
                         FileName = Path.GetFileName(TEST_BIM_FILE_PATH),
                         FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),
@@ -116,7 +132,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Syn
                 Title = title,
                 UpdatedAt = creationDateTime,
                 Items = new List<ItemExternalDto>
-                {   new ItemExternalDto
+                {
+                    new ItemExternalDto
                     {
                         FileName = itemToRemoveName,
                         FullPath = Path.GetFullPath(TEST_BIM_FILE_PATH),

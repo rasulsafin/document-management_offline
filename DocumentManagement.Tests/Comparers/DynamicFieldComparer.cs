@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Tests
@@ -13,7 +12,7 @@ namespace MRS.DocumentManagement.Tests
 
         public override bool NotNullEquals([DisallowNull] DynamicFieldDto x, [DisallowNull] DynamicFieldDto y)
         {
-            var idMatched = IgnoreIDs ? true : x.ID == y.ID;
+            var idMatched = IgnoreIDs || x.ID == y.ID;
             var valueMatched = x.Value == y.Value && x.Value.GetType() == y.Value.GetType();
 
             return idMatched

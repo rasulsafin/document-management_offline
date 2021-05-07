@@ -1,83 +1,249 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Localization;
+using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
 namespace MRS.DocumentManagement.Api.Controllers
 {
+    /// <summary>
+    /// Controller for managing files/items.
+    /// </summary>
     [Route("[controller]")]
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private IItemService service;
+        private readonly IItemService service;
+        private readonly IStringLocalizer<SharedLocalization> localizer;
 
-        public ItemsController(IItemService itemService) => service = itemService;
-
-        [HttpPut]
-        public async Task<IActionResult> Update([FromBody] ItemDto item)
+        public ItemsController(IItemService service,
+            IStringLocalizer<SharedLocalization> localizer)
         {
-            var updated = await service.Update(item);
-            return ValidateFoundRelatedResult(updated);
+            this.service = service;
+            this.localizer = localizer;
         }
 
+        /// <summary>
+        /// Updates item.
+        /// </summary>
+        /// <param name="item">Data to update.</param>
+        /// <returns>True if updated.</returns>
+        /// <response code="200">Item was updated successfully.</response>
+        /// <response code="400">Some of item's data is null.</response>
+        /// <response code="404">Could not find item to update.</response>
+        /// <response code="500">Something went wrong while updating item.</response>
+        [HttpPut]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Update(
+            [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
+            ItemDto item)
+        {
+            try
+            {
+                await service.Update(item);
+                return Ok(true);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidItemID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Finds item in db.
+        /// </summary>
+        /// <param name="itemID">Id of item to find.</param>
+        /// <returns>Found item.</returns>
+        /// <response code="200">Item found.</response>
+        /// <response code="400">Invalid id.</response>
+        /// <response code="404">Could not find item.</response>
+        /// <response code="500">Something went wrong while retrieving the item.</response>
         [HttpGet]
         [Route("{itemID}")]
-        public async Task<IActionResult> Find([FromRoute] int itemID)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Find(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int itemID)
         {
-            var foundItem = await service.Find(new ID<ItemDto>(itemID));
-            return ValidateFoundObject(foundItem);
+            try
+            {
+                var foundItem = await service.Find(new ID<ItemDto>(itemID));
+                return Ok(foundItem);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidItemID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
         }
 
+        /// <summary>
+        /// Gets list of items that belongs to that project.
+        /// </summary>
+        /// <param name="projectID">Project's id.</param>
+        /// <returns>Collection of items.</returns>
+        /// <response code="200">Collection of items linked to project.</response>
+        /// <response code="400">Invalid project id.</response>
+        /// <response code="404">Could not find project to get items.</response>
+        /// <response code="500">Something went wrong while trying to get list of items.</response>
         [HttpGet]
         [Route("project/{projectID}")]
-        public async Task<IActionResult> GetProjectItems([FromRoute] int projectID)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ConnectionStatusDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetProjectItems(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int projectID)
         {
-            var items = await service.GetItems(new ID<ProjectDto>(projectID));
-            return ValidateCollection(items);
+            try
+            {
+                var items = await service.GetItems(new ID<ProjectDto>(projectID));
+                return Ok(items);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
         }
 
+        /// <summary>
+        /// Gets list of items that belongs to that objective.
+        /// </summary>
+        /// <param name="objectiveID">Objective's id.</param>
+        /// <returns>Collection of items.</returns>
+        /// <response code="200">Collection of items linked to objective.</response>
+        /// <response code="400">Invalid objective id.</response>
+        /// <response code="404">Could not find objective to get items.</response>
+        /// <response code="500">Something went wrong while trying to get list of items.</response>
         [HttpGet]
         [Route("objective/{objectiveID}")]
-        public async Task<IActionResult> GetObjectiveItems([FromRoute] int objectiveID)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ConnectionStatusDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectiveItems(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int objectiveID)
         {
-            var items = await service.GetItems(new ID<ObjectiveDto>(objectiveID));
-            return ValidateCollection(items);
+            try
+            {
+                var items = await service.GetItems(new ID<ObjectiveDto>(objectiveID));
+                return Ok(items);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
         }
 
+        /// <summary>
+        /// Download files from remote connection to local storage.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>Id of the created long request.</returns>
+        /// <response code="202">Request is accepted but can take a long time to proceed. Check with the /RequestQueue to get the result.</response>
+        /// <response code="500">Something went wrong while server tried to download files.</response>
         [HttpPost]
         [Route("{userID}")]
-        public async Task<IActionResult> DownloadItems([FromRoute] int userID, [FromBody] IEnumerable<ID<ItemDto>> data)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(RequestID), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> DownloadItems(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID,
+            [FromBody]
+            IEnumerable<ID<ItemDto>> itemIds)
         {
             try
             {
-                var result = await service.DownloadItems(new ID<UserDto>(userID), data);
-                return Ok(result);
+                var result = await service.DownloadItems(new ID<UserDto>(userID), itemIds);
+                return Accepted(result);
             }
-            catch
+            catch (Exception ex)
             {
-                return BadRequest();
+                return CreateProblemResult(this, 500, localizer["CouldNotDownload"], ex.Message);
             }
         }
 
+        /// <summary>
+        /// Delete items from remote connection.
+        /// </summary>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>True if deleted successfully.</returns>
+        /// <response code="200">Items were deleted successfully.</response>
+        /// <response code="400">Invalid data.</response>
+        /// <response code="404">One or more items were not found.</response>
+        /// <response code="500">Something went wrong while deleting items.</response>
+        /// <response code="501">Method is not implemented yet.</response>
         [HttpPost]
         [Route("delete")]
-        public async Task<IActionResult> DeleteItems([FromBody] IEnumerable<ID<ItemDto>> data)
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status501NotImplemented)]
+        public async Task<IActionResult> DeleteItems(
+            [FromBody]
+            IEnumerable<ID<ItemDto>> itemIds)
         {
-            bool result;
             try
             {
-                result = await service.DeleteItems(data);
+                await service.DeleteItems(itemIds);
+                return Ok(true);
             }
-            catch
+            catch (NotImplementedException ex)
             {
-                return BadRequest();
+                return CreateProblemResult(this, 501, localizer["MethodIsNotImplemented"], ex.Message);
             }
-
-            // Unity already handles this bool result
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
+            }
         }
     }
 }

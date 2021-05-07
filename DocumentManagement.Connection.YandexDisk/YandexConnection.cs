@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Utils.CloudBase;
 using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
@@ -18,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
         }
 
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             try
             {
@@ -111,7 +112,7 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
         {
             if (info.AuthFieldValues == null || !info.AuthFieldValues.ContainsKey(AUTH_FIELD_KEY_TOKEN))
             {
-                await Connect(info);
+                await Connect(info, default);
                 return;
             }
 

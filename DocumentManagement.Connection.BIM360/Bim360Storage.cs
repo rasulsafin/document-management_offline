@@ -53,7 +53,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return true;
         }
 
-        public Task<bool> DeleteFiles(IEnumerable<ItemExternalDto> itemExternalDto)
+        public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
             throw new System.NotImplementedException();
         }

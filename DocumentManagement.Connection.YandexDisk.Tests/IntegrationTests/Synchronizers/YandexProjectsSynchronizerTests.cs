@@ -5,10 +5,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Connection.YandexDisk;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
+namespace MRS.DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class YandexProjectsSynchronizerTests

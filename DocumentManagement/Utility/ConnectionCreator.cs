@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Serilog;
 
 namespace MRS.DocumentManagement.Connection
 {
@@ -31,7 +32,15 @@ namespace MRS.DocumentManagement.Connection
                         x.Namespace == typeof(IServiceCollection).Namespace)
                .SelectMany(
                     type => type.GetMethods(BindingFlags.Static | BindingFlags.Public)
-                       .Where(IsExtensionForIServiceCollection));
+                       .Where(IsExtensionFor<IServiceCollection>));
+
+        public static IEnumerable<MethodInfo> GetLoggerMethods()
+            => ASSEMBLIES_COLLECTION.Value
+               .SelectMany(x => x.GetTypes())
+               .Where(x => x.IsPublic && x.IsDefined(typeof(ExtensionAttribute)))
+               .SelectMany(
+                    type => type.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                       .Where(IsExtensionFor<LoggerConfiguration>));
 
         public static Type GetConnection(ConnectionType connectionType)
         {
@@ -69,15 +78,15 @@ namespace MRS.DocumentManagement.Connection
             return list;
         }
 
-        private static bool IsExtensionForIServiceCollection(MethodInfo x)
+        private static bool IsExtensionFor<T>(MethodInfo x)
         {
             if (!x.IsDefined(typeof(ExtensionAttribute)) ||
-                x.ReturnType != typeof(IServiceCollection))
+                x.ReturnType != typeof(T))
                 return false;
 
             var parameters = x.GetParameters();
             return parameters.Length == 1 &&
-                parameters[0].ParameterType == typeof(IServiceCollection);
+                parameters[0].ParameterType == typeof(T);
         }
     }
 }

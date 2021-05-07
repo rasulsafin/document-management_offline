@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Properties;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
@@ -9,45 +10,63 @@ using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Services
 {
-    public class ProjectsService : IDisposable
+    public class ProjectsService
     {
         private readonly HttpRequestUtility requestUtility;
+        private readonly ILogger<ProjectsService> logger;
 
-        public ProjectsService(HttpRequestUtility requestUtility, CommonRequestsUtility commonRequests)
+        public ProjectsService(
+            HttpRequestUtility requestUtility,
+            CommonRequestsUtility commonRequests,
+            ILogger<ProjectsService> logger)
         {
             this.requestUtility = requestUtility;
+            this.logger = logger;
             CommonRequests = commonRequests;
+            logger.LogTrace("ProjectService created");
         }
 
         public CommonRequestsUtility CommonRequests { get; private set; }
 
-        public void Dispose()
+        public async Task<IEnumerable<ObjectBase>> GetAllProjectsAsync()
         {
-            GC.SuppressFinalize(this);
+            logger.LogTrace("GetAllProjectsAsync started");
+            return await CommonRequests.RetrieveObjectsListAsync(OBJECTTYPE_PROJECT);
         }
 
-        public async Task<IEnumerable<ObjectBase>> GetAllProjectsAsync()
-            => await CommonRequests.RetriveObjectsListAsync(OBJECTTYPE_PROJECT);
-
         public async Task<ObjectBase> GetProjectAsync(int projectId)
-            => await CommonRequests.GetObjectAsync(projectId);
+        {
+            logger.LogTrace("GetProjectAsync started with projectId: {@ProjectID}", projectId);
+            return await CommonRequests.GetObjectAsync(projectId);
+        }
 
         public async Task<LementProType> GetDefaultProjectTypeAsync()
-            => (await CommonRequests.GetObjectsTypes(OBJECTTYPE_PROJECT)).FirstOrDefault();
+        {
+            logger.LogTrace("GetDefaultProjectTypeAsync started");
+            return (await CommonRequests.GetObjectsTypes(OBJECTTYPE_PROJECT)).FirstOrDefault();
+        }
 
         public async Task<ObjectBaseCreateResult> CreateProjectAsync(ObjectBaseToCreate projectToCreate)
-            => await CommonRequests.CreateObjectAsync(projectToCreate);
+        {
+            logger.LogTrace("CreateProjectAsync started with projectToCreate: {@Project}", projectToCreate);
+            return await CommonRequests.CreateObjectAsync(projectToCreate);
+        }
 
         public async Task<ObjectBase> UpdateProjectAsync(ObjectBaseToUpdate taskToUpdate)
         {
+            logger.LogTrace("UpdateProjectAsync started with taskToUpdate: {@Objective}", taskToUpdate);
             var response = await requestUtility.GetResponseAsync(Resources.MethodObjectEdit, taskToUpdate);
 
             // Response contains some metadata and object
             var updatedTask = response[RESPONSE_OBJECT_NAME].ToObject<ObjectBase>();
+            logger.LogDebug("Updated task: {@Objective}", updatedTask);
             return updatedTask;
         }
 
         public async Task<ObjectBase> DeleteProjectAsync(int projectId)
-            => await CommonRequests.ArchiveObjectAsync(projectId);
+        {
+            logger.LogTrace("DeleteProjectAsync started with projectId: {@ProjectID}", projectId);
+            return await CommonRequests.ArchiveObjectAsync(projectId);
+        }
     }
 }

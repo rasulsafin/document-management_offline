@@ -7,10 +7,12 @@
     <Company>Brio MRS©</Company>
     <Product>Brio MRS</Product>
     <PackageIcon></PackageIcon>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

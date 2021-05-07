@@ -5,7 +5,8 @@ namespace MRS.DocumentManagement.Tests
 {
     internal class ProjectComparer : AbstractModelComparer<ProjectDto>
     {
-        public ProjectComparer(bool ignoreIDs = false) : base(ignoreIDs)
+        public ProjectComparer(bool ignoreIDs = false)
+            : base(ignoreIDs)
         {
         }
 

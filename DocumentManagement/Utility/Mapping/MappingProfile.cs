@@ -1,9 +1,12 @@
+using System;
 using System.Linq;
 using AutoMapper;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Utility.Mapping.Converters;
+using MRS.DocumentManagement.Utility.Mapping.Resolvers;
 
-namespace MRS.DocumentManagement.Utility
+namespace MRS.DocumentManagement.Utility.Mapping
 {
     public class MappingProfile : Profile
     {
@@ -18,7 +21,8 @@ namespace MRS.DocumentManagement.Utility
         {
             CreateObjectiveMapToDto();
 
-            CreateMap<User, UserDto>();
+            CreateMap<User, UserDto>()
+                .ForMember(d => d.ConnectionName, o => o.MapFrom(s => GetName(s)));
 
             CreateMap<Project, ProjectDto>();
             CreateMap<Project, ProjectToListDto>();
@@ -47,6 +51,10 @@ namespace MRS.DocumentManagement.Utility
                 .ForMember(d => d.ID, o => o.MapFrom(s => new ID<DynamicFieldDto>()))
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldModelToDtoValueResolver>())
                 .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
+
+            CreateMap<Location, LocationDto>()
+                .ForMember(d => d.Position, o => o.MapFrom(s => new float[] { s.PositionX, s.PositionY, s.PositionZ }))
+                .ForMember(d => d.CameraPosition, o => o.MapFrom(s => new float[] { s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ }));
         }
 
         private void CreateObjectiveMapToDto()
@@ -78,6 +86,8 @@ namespace MRS.DocumentManagement.Utility
             CreateMap<BimElementDto, BimElement>();
 
             CreateMap<ObjectiveTypeDto, ObjectiveType>();
+            CreateMap<string, ObjectiveType>()
+                .ForMember(d => d.Name, o => o.MapFrom(s => s));
 
             CreateMap<UserToCreateDto, User>();
 
@@ -104,6 +114,14 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<DynamicFieldDto, DynamicFieldInfo>()
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
+
+            CreateMap<LocationDto, Location>()
+                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Position[0]))
+                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Position[1]))
+                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position[2]))
+                .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition[0]))
+                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition[1]))
+                .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition[2]));
         }
 
         private void CreateObjectiveMapToModel()
@@ -190,6 +208,12 @@ namespace MRS.DocumentManagement.Utility
 
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();
+        }
+
+        private string GetName(User s)
+        {
+            var name = s.ConnectionInfo?.ConnectionType?.Name;
+            return name;
         }
     }
 }

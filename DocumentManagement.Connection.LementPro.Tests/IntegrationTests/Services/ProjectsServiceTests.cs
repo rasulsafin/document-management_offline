@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.LementPro.Models;
 using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
@@ -16,14 +16,17 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
     public class ProjectsServiceTests
     {
         private static ProjectsService service;
+        private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
         public static async Task Init(TestContext unused)
         {
-            var requestUtility = new HttpRequestUtility(new HttpConnection());
-            var authService = new AuthenticationService(requestUtility);
-            var commonRequests = new CommonRequestsUtility(requestUtility);
-            service = new ProjectsService(requestUtility, commonRequests);
+            var services = new ServiceCollection();
+            services.AddLementPro();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            serviceProvider = services.BuildServiceProvider();
+            service = serviceProvider.GetService<ProjectsService>();
+            var connection = serviceProvider.GetService<LementProConnection>();
 
             var login = "diismagilov";
             var password = "DYZDFMwZ";
@@ -36,12 +39,12 @@ namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Ser
                 },
             };
 
-            var (_, _) = await authService.SignInAsync(connectionInfo);
+            await connection!.Connect(connectionInfo, CancellationToken.None);
         }
 
         [ClassCleanup]
         public static void ClassCleanup()
-            => service.Dispose();
+            => serviceProvider.Dispose();
 
         [TestMethod]
         public async Task GetAllProjectsAsync_ProjectsDefaultFolderNotEmpty_ReturnsProjectsList()

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using MRS.DocumentManagement.Database.Extensions;
@@ -15,7 +16,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility;
+using MRS.DocumentManagement.Utility.Mapping;
 
 namespace MRS.DocumentManagement.Tests
 {
@@ -24,6 +25,7 @@ namespace MRS.DocumentManagement.Tests
     {
         private static Synchronizer synchronizer;
         private static IMapper mapper;
+        private static ServiceProvider serviceProvider;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
@@ -56,6 +58,16 @@ namespace MRS.DocumentManagement.Tests
                     context.SaveChanges();
                 });
 
+            var services = new ServiceCollection();
+            services.AddSingleton(Fixture.Context);
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            serviceProvider = services.BuildServiceProvider();
+            synchronizer = serviceProvider.GetService<Synchronizer>();
+            mapper = serviceProvider.GetService<IMapper>();
+
             ResultObjectiveExternalDtos = new List<ObjectiveExternalDto>();
             Connection = new Mock<IConnection>();
             Context = new Mock<IConnectionContext>();
@@ -84,35 +96,15 @@ namespace MRS.DocumentManagement.Tests
             Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
             Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
 
-            IServiceCollection services = new ServiceCollection();
-            services.AddTransient(x => new ObjectiveExternalDtoProjectIdResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoObjectiveTypeIdResolver(Fixture.Context));
-            services.AddTransient(x => new BimElementObjectiveTypeConverter(Fixture.Context));
-            services.AddTransient(x => new DynamicFieldModelToExternalValueResolver(Fixture.Context));
-            services.AddTransient(x => new DynamicFieldExternalToModelValueResolver(Fixture.Context));
-            services.AddTransient(x => new ConnectionInfoAuthFieldValuesResolver(new CryptographyHelper()));
-            services.AddTransient(x => new ConnectionInfoDtoAuthFieldValuesResolver(new CryptographyHelper()));
-            services.AddTransient(x => new ObjectiveProjectIDResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoProjectResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveObjectiveTypeResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoAuthorIdResolver(Fixture.Context));
-            services.AddTransient(x => new ObjectiveExternalDtoAuthorResolver(Fixture.Context));
-            services.AddTransient(x => new ItemFileNameResolver());
-            services.AddTransient(x => new ItemFullPathResolver(Fixture.Context));
-            services.AddTransient(x => new ItemExternalDtoRelativePathResolver());
-            services.AddAutoMapper(typeof(MappingProfile));
-            IServiceProvider serviceProvider = services.BuildServiceProvider();
-            mapper = serviceProvider.GetService<IMapper>();
-
-            synchronizer = new Synchronizer();
-
             Project = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
         }
 
         [TestCleanup]
         public void Cleanup()
-            => Fixture.Dispose();
+        {
+            Fixture.Dispose();
+            serviceProvider.Dispose();
+        }
 
         [TestMethod]
         public async Task Synchronize_ObjectivesUnchanged_DoNothing()
@@ -1306,7 +1298,7 @@ namespace MRS.DocumentManagement.Tests
             return (objectiveLocal, objectiveSynchronized, objectiveRemote);
         }
 
-        private static async
+        private async
             Task<(Objective local, Objective synchronized, ICollection<SynchronizingResult> synchronizationResult)>
             GetObjectivesAfterSynchronize(bool ignoreProjects = false)
         {
@@ -1316,14 +1308,9 @@ namespace MRS.DocumentManagement.Tests
             return (local, synchronized, synchronizationResult);
         }
 
-        private static async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
+        private async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
         {
-            var data = new SynchronizingData
-            {
-                Context = Fixture.Context,
-                User = await Fixture.Context.Users.FirstAsync(),
-                Mapper = mapper,
-            };
+            var data = new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() };
 
             if (ignoreProjects)
                 data.ProjectsFilter = x => false;

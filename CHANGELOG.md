@@ -10,7 +10,27 @@
 ### Безопасность:
 
 
-## 1.0.0 - 2021-04-23
+## [1.0.1] - 2021-05-07
+
+### Добавлено:
+
+* Создание отчетов в отдельную папку; 
+* Обработка ошибок и их преобразование в соответствующие коды состояния;
+* Логирование сервисов;
+* Меню и статус документооборота в трее windows;
+* Местоположение задачи;
+* Логирование работы с Lement Pro.
+
+### Изменено:
+
+* Информация о подключении приходит вместе с данными пользователя.
+
+### Исправлено:
+
+* Работоспособность тестов.
+
+
+## [1.0.0] - 2021-04-23
 
 ### Добавлено:
 
@@ -31,7 +51,7 @@
 * Баг с потерей прикрепленных ранее файлов при изменении Objective.
 
 
-## 0.8.1 - 2021-03-10
+## [0.8.1] - 2021-03-10
 
 ### Добавлено:
 
@@ -79,6 +99,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1
 [1.0.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.0
 [0.8.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.1
 [0.8.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.0

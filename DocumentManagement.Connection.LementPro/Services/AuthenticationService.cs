@@ -1,57 +1,38 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.LementPro.Utilities;
+using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
 
 namespace MRS.DocumentManagement.Connection.LementPro.Services
 {
-    public class AuthenticationService : IDisposable
+    public class AuthenticationService
     {
-        private HttpRequestUtility requestUtility;
+        private readonly ILogger<AuthenticationService> logger;
+        private readonly HttpRequestUtility requestUtility;
 
-        // Is created as scoped as this service
-        private ConnectionInfoExternalDto connectionInfoDto;
-
-        public AuthenticationService(HttpRequestUtility requestUtility)
+        public AuthenticationService(HttpRequestUtility requestUtility, ILogger<AuthenticationService> logger)
         {
             this.requestUtility = requestUtility;
-            this.requestUtility.AuthenticationService = this;
+            this.logger = logger;
+            logger.LogTrace("AuthenticationService created");
         }
-
-        /// <summary>
-        /// ctor used only to check the connection info.
-        /// </summary>
-        /// <param name="connectionInfo">Connection info to check.</param>
-        internal AuthenticationService(ConnectionInfoExternalDto connectionInfo)
-            => connectionInfoDto = connectionInfo;
-
-        internal string AccessToken
-        {
-            get => GetValueOrDefault(connectionInfoDto.AuthFieldValues, AUTH_NAME_TOKEN);
-            set => SetAuthValue(connectionInfoDto, AUTH_NAME_TOKEN, value);
-        }
-
-        internal string AccessEnd
-        {
-            get => GetValueOrDefault(connectionInfoDto.AuthFieldValues, AUTH_NAME_END);
-            set => SetAuthValue(connectionInfoDto, AUTH_NAME_END, value);
-        }
-
-        public void Dispose()
-            => requestUtility.Dispose();
 
         public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto info)
         {
-            connectionInfoDto = info;
-            var login = connectionInfoDto.AuthFieldValues[AUTH_NAME_LOGIN];
-            var password = connectionInfoDto.AuthFieldValues[AUTH_NAME_PASSWORD];
+            logger.LogTrace("SignInAsync started with info: {@ConnectionInfo}", info);
+
+            var login = info.AuthFieldValues[AUTH_NAME_LOGIN];
+            var password = info.AuthFieldValues[AUTH_NAME_PASSWORD];
 
             var (token, expires) = await requestUtility.Connect(login, password);
 
             if (string.IsNullOrWhiteSpace(token) || string.IsNullOrWhiteSpace(expires))
             {
+                logger.LogError("Connection data is empty");
                 var errorStatus = new ConnectionStatusDto
                 {
                     Status = RemoteConnectionStatus.Error,
@@ -60,58 +41,38 @@ namespace MRS.DocumentManagement.Connection.LementPro.Services
                 return (errorStatus, null);
             }
 
-            AccessToken = token;
-            AccessEnd = expires;
+            info.SetAuthValue(AUTH_NAME_TOKEN, token);
+            info.SetAuthValue(AUTH_NAME_END, token);
+            requestUtility.Token = token;
+            requestUtility.EnsureAccessValidAsync = () => EnsureAccessValidAsync(info);
             var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
 
-            return (successStatus, connectionInfoDto);
+            logger.LogDebug("Result info: {@ConnectionInfo}", info);
+            return (successStatus, info);
         }
 
-        public async Task EnsureAccessValidAsync()
+        public async Task EnsureAccessValidAsync(ConnectionInfoExternalDto connectionInfo)
         {
-            if (IsAuthorisationAccessValid())
+            logger.LogTrace("EnsureAccessValidAsync started with info: {@ConnectionInfo}", connectionInfo);
+            if (IsAuthorisationAccessValid(connectionInfo))
                 return;
 
-            await SignInAsync(connectionInfoDto);
+            await SignInAsync(connectionInfo);
         }
 
-        internal bool IsAuthorisationAccessValid()
+        internal bool IsAuthorisationAccessValid(ConnectionInfoExternalDto connectionInfo)
         {
-            if (string.IsNullOrWhiteSpace(AccessToken))
+            logger.LogTrace("IsAuthorisationAccessValid started with info: {@ConnectionInfo}", connectionInfo);
+            if (string.IsNullOrWhiteSpace(connectionInfo.GetAuthValue(AUTH_NAME_TOKEN)))
                 return false;
 
-            if (!DateTime.TryParse(AccessEnd, out var parsedExpiresDate))
+            if (!DateTime.TryParse(connectionInfo.GetAuthValue(AUTH_NAME_END), out var parsedExpiresDate))
                 return false;
 
             if (parsedExpiresDate < DateTime.Now)
                 return false;
 
             return true;
-        }
-
-        protected void SetAuthValue(ConnectionInfoExternalDto info, string key, string value)
-        {
-            info.AuthFieldValues ??= new Dictionary<string, string>();
-            SetDictionaryValue(info.AuthFieldValues, key, value);
-        }
-
-        protected void SetDictionaryValue(IDictionary<string, string> dictionary, string key, string value)
-        {
-            if (dictionary.ContainsKey(key))
-            {
-                dictionary[key] = value;
-                return;
-            }
-
-            dictionary.Add(key, value);
-        }
-
-        protected string GetValueOrDefault(IDictionary<string, string> source, string key)
-        {
-            if (source != null && source.TryGetValue(key, out var value))
-                return value;
-
-            return default;
         }
     }
 }

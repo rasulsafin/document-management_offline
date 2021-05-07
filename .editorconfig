@@ -1,47 +1,47 @@
-# Удалите строку ниже, если вы хотите наследовать параметры .editorconfig из каталогов, расположенных выше в иерархии
+# РЈРґР°Р»РёС‚Рµ СЃС‚СЂРѕРєСѓ РЅРёР¶Рµ, РµСЃР»Рё РІС‹ С…РѕС‚РёС‚Рµ РЅР°СЃР»РµРґРѕРІР°С‚СЊ РїР°СЂР°РјРµС‚СЂС‹ .editorconfig РёР· РєР°С‚Р°Р»РѕРіРѕРІ, СЂР°СЃРїРѕР»РѕР¶РµРЅРЅС‹С… РІС‹С€Рµ РІ РёРµСЂР°СЂС…РёРё
 root = true
 
-# Файлы C#
+# Р¤Р°Р№Р»С‹ C#
 [*.cs]
 
-#### Основные параметры EditorConfig ####
+#### РћСЃРЅРѕРІРЅС‹Рµ РїР°СЂР°РјРµС‚СЂС‹ EditorConfig ####
 
-# Отступы и интервалы
+# РћС‚СЃС‚СѓРїС‹ Рё РёРЅС‚РµСЂРІР°Р»С‹
 indent_size = 4
 indent_style = space
 tab_width = 4
 
-# Предпочтения для новых строк
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РЅРѕРІС‹С… СЃС‚СЂРѕРє
 end_of_line = crlf
 insert_final_newline = false
 
-#### Рекомендации по написанию кода .NET ####
+#### Р РµРєРѕРјРµРЅРґР°С†РёРё РїРѕ РЅР°РїРёСЃР°РЅРёСЋ РєРѕРґР° .NET ####
 
-# Упорядочение Using
+# РЈРїРѕСЂСЏРґРѕС‡РµРЅРёРµ Using
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = false
 file_header_template = unset
 
-# Предпочтения для this. и Me.
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ this. Рё Me.
 dotnet_style_qualification_for_event = false:silent
 dotnet_style_qualification_for_field = false:silent
 dotnet_style_qualification_for_method = false:silent
 dotnet_style_qualification_for_property = false:silent
 
-# Параметры использования ключевых слов языка и типов BCL
+# РџР°СЂР°РјРµС‚СЂС‹ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёСЏ РєР»СЋС‡РµРІС‹С… СЃР»РѕРІ СЏР·С‹РєР° Рё С‚РёРїРѕРІ BCL
 dotnet_style_predefined_type_for_locals_parameters_members = true:silent
 dotnet_style_predefined_type_for_member_access = true:silent
 
-# Предпочтения для скобок
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ СЃРєРѕР±РѕРє
 dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
 dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
 dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
 
-# Предпочтения модификатора
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РјРѕРґРёС„РёРєР°С‚РѕСЂР°
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
 
-# Выражения уровень предпочтения
+# Р’С‹СЂР°Р¶РµРЅРёСЏ СѓСЂРѕРІРµРЅСЊ РїСЂРµРґРїРѕС‡С‚РµРЅРёСЏ
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_collection_initializer = true:suggestion
 dotnet_style_explicit_tuple_names = true:suggestion
@@ -58,23 +58,23 @@ dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggesti
 dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
 dotnet_style_prefer_simplified_interpolation = true:suggestion
 
-# Предпочтения для полей
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РїРѕР»РµР№
 dotnet_style_readonly_field = true:suggestion
 
-# Настройки параметров
+# РќР°СЃС‚СЂРѕР№РєРё РїР°СЂР°РјРµС‚СЂРѕРІ
 dotnet_code_quality_unused_parameters = all:suggestion
 
-# Параметры подавления
+# РџР°СЂР°РјРµС‚СЂС‹ РїРѕРґР°РІР»РµРЅРёСЏ
 dotnet_remove_unnecessary_suppression_exclusions = none
 
-#### Рекомендации по написанию кода C# ####
+#### Р РµРєРѕРјРµРЅРґР°С†РёРё РїРѕ РЅР°РїРёСЃР°РЅРёСЋ РєРѕРґР° C# ####
 
-# Предпочтения var
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ var
 csharp_style_var_elsewhere = false:silent
 csharp_style_var_for_built_in_types = false:silent
 csharp_style_var_when_type_is_apparent = false:silent
 
-# Члены, заданные выражениями
+# Р§Р»РµРЅС‹, Р·Р°РґР°РЅРЅС‹Рµ РІС‹СЂР°Р¶РµРЅРёСЏРјРё
 csharp_style_expression_bodied_accessors = true:silent
 csharp_style_expression_bodied_constructors = false:silent
 csharp_style_expression_bodied_indexers = true:silent
@@ -84,25 +84,25 @@ csharp_style_expression_bodied_methods = false:silent
 csharp_style_expression_bodied_operators = false:silent
 csharp_style_expression_bodied_properties = true:silent
 
-# Настройки соответствия шаблонов
+# РќР°СЃС‚СЂРѕР№РєРё СЃРѕРѕС‚РІРµС‚СЃС‚РІРёСЏ С€Р°Р±Р»РѕРЅРѕРІ
 csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
 csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
 csharp_style_prefer_not_pattern = true:suggestion
 csharp_style_prefer_pattern_matching = true:silent
 csharp_style_prefer_switch_expression = true:suggestion
 
-# Настройки проверки на null
+# РќР°СЃС‚СЂРѕР№РєРё РїСЂРѕРІРµСЂРєРё РЅР° null
 csharp_style_conditional_delegate_call = true:suggestion
 
-# Предпочтения модификатора
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РјРѕРґРёС„РёРєР°С‚РѕСЂР°
 csharp_prefer_static_local_function = true:suggestion
 csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:silent
 
-# Предпочтения для блоков кода
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ Р±Р»РѕРєРѕРІ РєРѕРґР°
 csharp_prefer_braces = true:silent
 csharp_prefer_simple_using_statement = true:suggestion
 
-# Выражения уровень предпочтения
+# Р’С‹СЂР°Р¶РµРЅРёСЏ СѓСЂРѕРІРµРЅСЊ РїСЂРµРґРїРѕС‡С‚РµРЅРёСЏ
 csharp_prefer_simple_default_expression = true:suggestion
 csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
@@ -113,12 +113,12 @@ csharp_style_throw_expression = true:suggestion
 csharp_style_unused_value_assignment_preference = discard_variable:suggestion
 csharp_style_unused_value_expression_statement_preference = discard_variable:silent
 
-# предпочтения для директивы using
+# РїСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РґРёСЂРµРєС‚РёРІС‹ using
 csharp_using_directive_placement = outside_namespace:silent
 
-#### Правила форматирования C# ####
+#### РџСЂР°РІРёР»Р° С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ C# ####
 
-# Предпочтения для новых строк
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РЅРѕРІС‹С… СЃС‚СЂРѕРє
 csharp_new_line_before_catch = true
 csharp_new_line_before_else = true
 csharp_new_line_before_finally = true
@@ -127,7 +127,7 @@ csharp_new_line_before_members_in_object_initializers = true
 csharp_new_line_before_open_brace = all
 csharp_new_line_between_query_expression_clauses = true
 
-# Предпочтения для отступов
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РѕС‚СЃС‚СѓРїРѕРІ
 csharp_indent_block_contents = true
 csharp_indent_braces = false
 csharp_indent_case_contents = true
@@ -135,7 +135,7 @@ csharp_indent_case_contents_when_block = true
 csharp_indent_labels = one_less_than_current
 csharp_indent_switch_labels = true
 
-# Предпочтения для интервалов
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РґР»СЏ РёРЅС‚РµСЂРІР°Р»РѕРІ
 csharp_space_after_cast = false
 csharp_space_after_colon_in_inheritance_clause = true
 csharp_space_after_comma = true
@@ -159,13 +159,13 @@ csharp_space_between_method_declaration_parameter_list_parentheses = false
 csharp_space_between_parentheses = false
 csharp_space_between_square_brackets = false
 
-# Предпочтения переноса
+# РџСЂРµРґРїРѕС‡С‚РµРЅРёСЏ РїРµСЂРµРЅРѕСЃР°
 csharp_preserve_single_line_blocks = true
 csharp_preserve_single_line_statements = true
 
-#### Стили именования ####
+#### РЎС‚РёР»Рё РёРјРµРЅРѕРІР°РЅРёСЏ ####
 
-# Правила именования
+# РџСЂР°РІРёР»Р° РёРјРµРЅРѕРІР°РЅРёСЏ
 
 dotnet_naming_rule.interface_should_be_begins_with_i.severity = suggestion
 dotnet_naming_rule.interface_should_be_begins_with_i.symbols = interface
@@ -191,7 +191,7 @@ dotnet_naming_rule.const_member_should_be_uppercase_underscored.severity = sugge
 dotnet_naming_rule.const_member_should_be_uppercase_underscored.symbols = const_member
 dotnet_naming_rule.const_member_should_be_uppercase_underscored.style = uppercase_underscored
 
-# Спецификации символов
+# РЎРїРµС†РёС„РёРєР°С†РёРё СЃРёРјРІРѕР»РѕРІ
 
 dotnet_naming_symbols.interface.applicable_kinds = interface
 dotnet_naming_symbols.interface.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
@@ -217,7 +217,7 @@ dotnet_naming_symbols.const_member.applicable_kinds = field, local
 dotnet_naming_symbols.const_member.applicable_accessibilities = *
 dotnet_naming_symbols.const_member.required_modifiers = const
 
-# Стили именования
+# РЎС‚РёР»Рё РёРјРµРЅРѕРІР°РЅРёСЏ
 
 dotnet_naming_style.pascal_case.required_prefix = 
 dotnet_naming_style.pascal_case.required_suffix = 

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
@@ -13,10 +14,11 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360Connection : IConnection, IDisposable
+    public class Bim360Connection : IConnection
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
+        private readonly Func<Bim360ConnectionContext> getContext;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
 
@@ -24,23 +26,19 @@ namespace MRS.DocumentManagement.Connection.Bim360
             ForgeConnection connection,
             Authenticator authenticator,
             AuthenticationService authenticationService,
-            Bim360Storage storage)
+            Bim360Storage storage,
+            Func<Bim360ConnectionContext> getContext)
         {
             this.connection = connection;
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
+            this.getContext = getContext;
         }
 
-        public void Dispose()
+        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
-            connection.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info)
-        {
-            var authorizationResult = await authenticator.SignInAsync(info);
+            var authorizationResult = await authenticator.SignInAsync(info, token);
             return authorizationResult.authStatus;
         }
 
@@ -78,7 +76,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
         }
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
-            => await Bim360ConnectionContext.CreateContext(info);
+        {
+            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
+            return getContext();
+        }
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
