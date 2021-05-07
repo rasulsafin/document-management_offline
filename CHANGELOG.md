@@ -10,7 +10,7 @@
 ### Безопасность:
 
 
-## [1.0.1] - xxxx-xx-xx
+## [1.0.1] - 2021-05-07
 
 ### Добавлено:
 
@@ -27,7 +27,7 @@
 
 ### Исправлено:
 
-* Работоспособность тестов;
+* Работоспособность тестов.
 
 
 ## [1.0.0] - 2021-04-23
@@ -99,6 +99,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1
 [1.0.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.0
 [0.8.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.1
 [0.8.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.0
