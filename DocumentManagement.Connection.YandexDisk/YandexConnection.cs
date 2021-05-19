@@ -36,11 +36,9 @@ namespace MRS.DocumentManagement.Connection.YandexDisk
                     }
 
                     InitiateManager(info);
-
-                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
                 }
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Data app not correct", };
+                return await GetStatus(info);
             }
             catch (Exception ex)
             {
