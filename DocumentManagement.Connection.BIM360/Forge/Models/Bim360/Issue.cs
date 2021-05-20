@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object AnsweredBy { get; set; }
 
             [DataMember(Name = "pushpin_attributes")]
-            public object PushpinAttributes { get; set; }
+            public PushpinAttributes PushpinAttributes { get; set; }
 
             [DataMember(Name = "owner")]
             public string Owner { get; set; }
@@ -174,6 +174,78 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 
             [DataMember(Name = "issue_type_obj")]
             public dynamic IssueTypeObj { get; set; }
+        }
+
+        [DataContract]
+        public class PushpinAttributes
+        {
+            [DataMember(Name = "type")]
+            public object Type { get; set; }
+
+            [DataMember(Name = "location")]
+            public Vector3 Location { get; set; }
+
+            [DataMember(Name = "object_id")]
+            public string ObjectID { get; set; }
+
+            [DataMember(Name = "viewer_state")]
+            public ViewerState ViewerState { get; set; }
+
+            [DataMember(Name = "created_at")]
+            public object CreatedAt { get; set; }
+
+            [DataMember(Name = "created_by")]
+            public object CreatedBy { get; set; }
+
+            [DataMember(Name = "created_doc_version")]
+            public object CreatedDocVersion { get; set; }
+
+            [DataMember(Name = "external_id")]
+            public object ExternalID { get; set; }
+
+            [DataMember(Name = "attributes_version")]
+            public object AttributesVertion { get; set; }
+        }
+
+        [DataContract]
+        public class ViewerState
+        {
+            [DataMember(Name = "seedURN")]
+            public string SeedURN { get; set; }
+
+            [DataMember(Name = "viewport")]
+            public object Viewport { get; set; }
+
+            [DataMember(Name = "cutplanes")]
+            public object Cutplanes { get; set; }
+
+            [DataMember(Name = "floorGuid")]
+            public object FloorGuid { get; set; }
+
+            [DataMember(Name = "objectSet")]
+            public object ObjectSet { get; set; }
+
+            [DataMember(Name = "globalOffset")]
+            public Vector3 GlobalOffset { get; set; }
+
+            [DataMember(Name = "renderOptions")]
+            public object RenderOptions { get; set; }
+
+            [DataMember(Name = "attributesVersion")]
+            public object AttributesVersion { get; set; }
+        }
+
+        [DataContract]
+        public class Vector3
+        {
+            [DataMember(Name = "x")]
+            public float X { get; set; }
+
+            [DataMember(Name = "y")]
+            public float Y { get; set; }
+
+            [DataMember(Name = "z")]
+            public float Z { get; set; }
         }
     }
 }

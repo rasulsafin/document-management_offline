@@ -11,6 +11,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
 {
     internal static class ObjectiveExternalExtension
     {
+        private const float FOOT = 3.2808f;
+
         internal static Issue ToIssue(this ObjectiveExternalDto objective)
         {
             return new Issue
@@ -26,6 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                     DueDate = objective.DueDate == default ? (DateTime?)null : objective.DueDate,
                     UpdatedAt = objective.UpdatedAt == default ? (DateTime?)null : objective.UpdatedAt,
                     LocationDescription = GetBimElements(objective),
+                    PushpinAttributes = GetPushpinAttributes(objective.Location),
                 },
             };
         }
@@ -45,6 +48,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                 Items = GetItems(issue),
                 BimElements = GetBimElements(issue),
             };
+
+            if (issue.Attributes.PushpinAttributes != null)
+                resultDto.Location = GetLocation(issue.Attributes.PushpinAttributes);
 
             if (issue.Attributes.CreatedAt.HasValue)
                 resultDto.CreationDate = issue.Attributes.CreatedAt.Value;
@@ -127,5 +133,40 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
                 Status.Answered => ObjectiveStatus.Ready,
                 _ => ObjectiveStatus.Undefined,
             };
+
+        private static Issue.PushpinAttributes GetPushpinAttributes(LocationExternalDto locationDto)
+        {
+            // Need to get offset value from somewhere?
+            var offset = new[] { 0f, 0f, 0f };
+
+            return new Issue.PushpinAttributes()
+            {
+                Type = "TwoDVectorPushpin",
+                ObjectID = locationDto.Guid,
+                Location = new Issue.Vector3()
+                {
+                    X = (locationDto.Location[0] * FOOT) - offset[0],
+                    Y = (locationDto.Location[1] * FOOT) - offset[1],
+                    Z = (locationDto.Location[2] * FOOT) - offset[2],
+                },
+            };
+        }
+
+        private static LocationExternalDto GetLocation(Issue.PushpinAttributes pushpinAttributes)
+        {
+            var location = pushpinAttributes.Location;
+            var offset = pushpinAttributes.ViewerState.GlobalOffset;
+
+            return new LocationExternalDto()
+            {
+                Guid = pushpinAttributes.ObjectID, //???
+                Location = new[]
+                {
+                    (location.X + offset.X) / FOOT,
+                    (location.Y + offset.Y) / FOOT,
+                    (location.Z + offset.Z) / FOOT,
+                },
+            };
+        }
     }
 }

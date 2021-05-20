@@ -208,6 +208,15 @@ namespace MRS.DocumentManagement.Utility.Mapping
 
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();
+
+            CreateMap<Location, LocationExternalDto>()
+                .ForMember(d => d.Location, o => o.MapFrom(s => new float[] { s.PositionX, s.PositionY, s.PositionZ }))
+                .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID)); // ???
+            CreateMap<LocationExternalDto, Location>()
+                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location[0]))
+                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location[1]))
+                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location[2]))
+                .ForMember(d => d.BimElementID, o => o.MapFrom(s => s.Guid)); // ???
         }
 
         private string GetName(User s)
