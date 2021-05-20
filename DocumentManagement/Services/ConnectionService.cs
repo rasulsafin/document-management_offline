@@ -161,7 +161,14 @@ namespace MRS.DocumentManagement.Services
 
                 var connection = connectionFactory.Create(ConnectionCreator.GetConnection(connectionInfo.ConnectionType));
 
-                return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
+                try
+                {
+                    return await connection.GetStatus(mapper.Map<ConnectionInfoExternalDto>(connectionInfo));
+                }
+                catch (Exception ex)
+                {
+                    return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = ex.Message };
+                }
             }
             catch (Exception ex)
             {

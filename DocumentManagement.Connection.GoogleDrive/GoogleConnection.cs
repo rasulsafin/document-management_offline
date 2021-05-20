@@ -12,8 +12,8 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
     public class GoogleConnection : IConnection
     {
         private const string NAME_CONNECT = "Google Drive";
-        private ConnectionInfoExternalDto connectionInfo;
         private static GoogleDriveManager manager;
+        private ConnectionInfoExternalDto connectionInfo;
 
         public GoogleConnection()
         {
@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
                 await driveController.InitializationAsync(connectionInfo);
                 manager = new GoogleDriveManager(driveController);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Good", };
+                return await GetStatus(info);
             }
             catch (Exception ex)
             {
@@ -42,8 +42,17 @@ namespace MRS.DocumentManagement.Connection.GoogleDrive
 
         public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            // TODO: fix this.
-            return await Connect(info, default);
+            if (manager != null)
+            {
+                // TODO: make it the proper way.
+                return await manager.GetStatusAsync();
+            }
+
+            return new ConnectionStatusDto()
+            {
+                Status = RemoteConnectionStatus.NeedReconnect,
+                Message = "Manager null",
+            };
         }
 
         public Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
