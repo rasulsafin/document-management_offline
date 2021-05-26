@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -139,16 +140,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             // Need to get offset value from somewhere?
             var offset = new[] { 0f, 0f, 0f };
 
-            return new Issue.PushpinAttributes()
+            return new Issue.PushpinAttributes
             {
                 Type = "TwoDVectorPushpin",
                 ObjectID = locationDto.Guid,
-                Location = new Issue.Vector3()
-                {
-                    X = (locationDto.Location[0] * FOOT) - offset[0],
-                    Y = (locationDto.Location[1] * FOOT) - offset[1],
-                    Z = (locationDto.Location[2] * FOOT) - offset[2],
-                },
+                Location = new Vector3(
+                    (locationDto.Location[0] * FOOT) - offset[0],
+                    (locationDto.Location[1] * FOOT) - offset[1],
+                    (locationDto.Location[2] * FOOT) - offset[2]),
             };
         }
 
@@ -157,14 +156,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Extensions
             var location = pushpinAttributes.Location;
             var offset = pushpinAttributes.ViewerState.GlobalOffset;
 
-            return new LocationExternalDto()
+            return new LocationExternalDto
             {
                 Guid = pushpinAttributes.ObjectID, //???
                 Location = new[]
                 {
-                    (location.X + offset.X) / FOOT,
-                    (location.Y + offset.Y) / FOOT,
-                    (location.Z + offset.Z) / FOOT,
+                    (location!.Value.X + offset!.Value.X) / FOOT,
+                    (location.Value.Y + offset.Value.Y) / FOOT,
+                    (location.Value.Z + offset.Value.Z) / FOOT,
                 },
             };
         }

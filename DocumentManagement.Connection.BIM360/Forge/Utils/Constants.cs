@@ -13,6 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ISSUE_TYPE = "quality_issues";
         public static readonly string ATTACHMENT_TYPE = "attachments";
         public static readonly string ATTACHMENT_URN_TYPE = "dm";
+        public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
 
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";

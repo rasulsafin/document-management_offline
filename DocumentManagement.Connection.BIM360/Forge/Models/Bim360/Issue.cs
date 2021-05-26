@@ -1,5 +1,8 @@
 using System;
+using System.Numerics;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
@@ -130,7 +133,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string[] PermittedActions { get; set; }
 
             [DataMember(Name = "sheet_metadata")]
-            public object SheetMetadata { get; set; }
+            public SheetMetadata SheetMetadata { get; set; }
 
             [DataMember(Name = "lbs_location")]
             public string LbsLocation { get; set; }
@@ -180,10 +183,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public class PushpinAttributes
         {
             [DataMember(Name = "type")]
-            public object Type { get; set; }
+            public object Type { get; set; } = Constants.PUSHPIN_TYPE;
 
             [DataMember(Name = "location")]
-            public Vector3 Location { get; set; }
+            [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
+            public Vector3? Location { get; set; }
 
             [DataMember(Name = "object_id")]
             public string ObjectID { get; set; }
@@ -204,7 +208,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object ExternalID { get; set; }
 
             [DataMember(Name = "attributes_version")]
-            public object AttributesVertion { get; set; }
+            public object AttributesVersion { get; set; }
         }
 
         [DataContract]
@@ -214,10 +218,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string SeedURN { get; set; }
 
             [DataMember(Name = "viewport")]
-            public object Viewport { get; set; }
+            public Viewport Viewport { get; set; }
 
             [DataMember(Name = "cutplanes")]
-            public object Cutplanes { get; set; }
+            public object CutPlanes { get; set; }
 
             [DataMember(Name = "floorGuid")]
             public object FloorGuid { get; set; }
@@ -226,7 +230,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object ObjectSet { get; set; }
 
             [DataMember(Name = "globalOffset")]
-            public Vector3 GlobalOffset { get; set; }
+            [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
+            public Vector3? GlobalOffset { get; set; }
 
             [DataMember(Name = "renderOptions")]
             public object RenderOptions { get; set; }
@@ -236,16 +241,58 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         }
 
         [DataContract]
-        public class Vector3
+        public class SheetMetadata
         {
-            [DataMember(Name = "x")]
-            public float X { get; set; }
+            [DataMember(Name = "is3D")]
+            public bool Is3D { get; set; } = true;
 
-            [DataMember(Name = "y")]
-            public float Y { get; set; }
+            [DataMember(Name = "sheetGuid")]
+            public string Guid { get; set; }
 
-            [DataMember(Name = "z")]
-            public float Z { get; set; }
+            [DataMember(Name = "sheetName")]
+            public string Name { get; set; }
+        }
+
+        [DataContract]
+        public class Viewport
+        {
+            [DataMember(Name = "up")]
+            [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
+            public Vector3? Up { get; set; }
+
+            [DataMember(Name = "eye")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? Eye { get; set; }
+
+            [DataMember(Name = "name")]
+            public string Name { get; set; }
+
+            [DataMember(Name = "target")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? Target { get; set; }
+
+            [DataMember(Name = "pivotPoint")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? PivotPoint { get; set; }
+
+            [DataMember(Name = "projection")]
+            public string Projection { get; set; }
+
+            [DataMember(Name = "aspectRatio")]
+            public float? AspectRatio { get; set; }
+
+            [DataMember(Name = "fieldOfView")]
+            public float? FieldOfView { get; set; }
+
+            [DataMember(Name = "worldUpVector")]
+            [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
+            public Vector3? WorldUpVector { get; set; }
+
+            [DataMember(Name = "isOrthographic")]
+            public bool? IsOrthographic { get; set; }
+
+            [DataMember(Name = "distanceToOrbit")]
+            public float? DistanceToOrbit { get; set; }
         }
     }
 }
