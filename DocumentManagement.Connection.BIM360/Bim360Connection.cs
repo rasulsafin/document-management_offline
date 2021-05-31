@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -18,22 +20,26 @@ namespace MRS.DocumentManagement.Connection.Bim360
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
-        private readonly Func<Bim360ConnectionContext> getContext;
+        private readonly IFactory<IServiceScope, Bim360ConnectionContext> contextFactory;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
+        private readonly Lazy<IServiceScope> contextScopeContainer;
 
         public Bim360Connection(
             ForgeConnection connection,
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
-            Func<Bim360ConnectionContext> getContext)
+            IServiceScopeFactory scopeFactory,
+            IFactory<IServiceScope, Bim360ConnectionContext> contextFactory)
         {
             this.connection = connection;
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
-            this.getContext = getContext;
+            this.contextFactory = contextFactory;
+
+            contextScopeContainer = new Lazy<IServiceScope>(scopeFactory.CreateScope);
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -75,10 +81,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return info;
         }
 
-        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
             connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
-            return getContext();
+            return Task.FromResult<IConnectionContext>(contextFactory.Create(contextScopeContainer.Value));
         }
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)

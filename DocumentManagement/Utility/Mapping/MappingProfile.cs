@@ -116,12 +116,12 @@ namespace MRS.DocumentManagement.Utility.Mapping
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
 
             CreateMap<LocationDto, Location>()
-                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Position[0]))
-                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Position[1]))
-                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position[2]))
-                .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition[0]))
-                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition[1]))
-                .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition[2]));
+               .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Position.x))
+               .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Position.y))
+               .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position.z))
+               .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
+               .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
+               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z));
         }
 
         private void CreateObjectiveMapToModel()
@@ -210,12 +210,15 @@ namespace MRS.DocumentManagement.Utility.Mapping
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();
 
             CreateMap<Location, LocationExternalDto>()
-                .ForMember(d => d.Location, o => o.MapFrom(s => new float[] { s.PositionX, s.PositionY, s.PositionZ }))
-                .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID)); // ???
+               .ForMember(
+                    d => d.Location,
+                    o => o.MapFrom(
+                        s => new Tuple<float, float, float>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID)); // ???
             CreateMap<LocationExternalDto, Location>()
-                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location[0]))
-                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location[1]))
-                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location[2]))
+                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location.x))
+                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location.y))
+                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location.z))
                 .ForMember(d => d.BimElementID, o => o.MapFrom(s => s.Guid)); // ???
         }
 

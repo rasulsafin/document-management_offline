@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Interface;
@@ -20,10 +20,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly FoldersSyncHelper folderSyncHelper;
-        private readonly ProjectsHelper projectsHelper;
-        private readonly HubsHelper hubsHelper;
         private readonly IssuesService issuesService;
         private readonly ItemsService itemsService;
+        private readonly ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync;
+        private readonly ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync;
+        private readonly ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync;
         private readonly Bim360ConnectionContext context;
         private readonly Dictionary<string, (Issue, ObjectiveExternalDto)> objectives =
             new Dictionary<string, (Issue, ObjectiveExternalDto)>();
@@ -32,45 +33,36 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             Bim360ConnectionContext context,
             ItemsSyncHelper itemsSyncHelper,
             FoldersSyncHelper folderSyncHelper,
-            ProjectsHelper projectsHelper,
-            HubsHelper hubsHelper,
             IssuesService issuesService,
-            ItemsService itemsService)
+            ItemsService itemsService,
+            ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync,
+            ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync,
+            ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync)
         {
             this.context = context;
             this.itemsSyncHelper = itemsSyncHelper;
             this.folderSyncHelper = folderSyncHelper;
-            this.projectsHelper = projectsHelper;
-            this.hubsHelper = hubsHelper;
             this.issuesService = issuesService;
             this.itemsService = itemsService;
+            this.convertToIssueAsync = convertToIssueAsync;
+            this.convertToDtoAsync = convertToDtoAsync;
+            this.convertTypeAsync = convertTypeAsync;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
-            var issue = obj.ToIssue();
-            var (containerId, hubId, projectId) = await GetContainerId(obj);
+            var issue = await convertToIssueAsync(obj);
+            var (containerId, projectId) = GetContainerId(obj);
             if (containerId == null)
                 return null;
 
-            var types = await issuesService.GetIssueTypesAsync(containerId);
-            var dynamicFieldID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == dynamicFieldID);
-            var type = types.FirstOrDefault(x => x.Title == dynamicField.Value) ?? types[0];
-            issue.Attributes.NgIssueTypeID = type.ID;
-            issue.Attributes.NgIssueSubtypeID = type.Subtypes[0].ID;
-
             var created = await issuesService.PostIssueAsync(containerId, issue);
-
-            var parsedToDto = created.ToExternalDto(
-                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-                   .Key,
-                types.First(x => x.ID == created.Attributes.NgIssueTypeID).Title);
-            parsedToDto.ProjectExternalID = projectId;
+            var types = await issuesService.GetIssueTypesAsync(containerId);
+            var parsedToDto = await ParseToDto(created, types, projectId);
 
             if (obj.Items?.Any() ?? false)
             {
-                var added = await AddItems(obj.Items, hubId, projectId, created, containerId);
+                var added = await AddItems(obj.Items, projectId, created, containerId);
                 parsedToDto.Items = added?.Select(i => i.ToDto()).ToList();
             }
 
@@ -79,12 +71,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            var issue = obj.ToIssue();
-            var (containerId, _, _) = await GetContainerId(obj);
+            var issue = await convertToIssueAsync(obj);
+            var (containerId, projectId) = GetContainerId(obj);
             if (containerId == null)
                 return null;
-
-            issue = await issuesService.GetIssueAsync(containerId, issue.ID);
 
             if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
             {
@@ -96,34 +86,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             issue = await issuesService.PatchIssueAsync(containerId, issue);
 
             var types = await issuesService.GetIssueTypesAsync(containerId);
-            return issue.ToExternalDto(
-                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-                   .Key,
-                types.First(x => x.ID == issue.Attributes.NgIssueTypeID).Title);
+            return await ParseToDto(issue, types, projectId);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            var issue = obj.ToIssue();
-            var (containerId, hubId, projectId) = await GetContainerId(obj);
+            var issue = await convertToIssueAsync(obj);
+            var (containerId, projectId) = GetContainerId(obj);
             if (containerId == null)
                 return null;
 
-            var issueFromRemote = await issuesService.GetIssueAsync(containerId, issue.ID);
-            issue.Attributes.PermittedAttributes = issueFromRemote.Attributes.PermittedAttributes;
-            issue.Attributes.NgIssueTypeID = issueFromRemote.Attributes.NgIssueTypeID;
-            issue.Attributes.NgIssueSubtypeID = issueFromRemote.Attributes.NgIssueSubtypeID;
             var updatedIssue = await issuesService.PatchIssueAsync(containerId, issue);
             var types = await issuesService.GetIssueTypesAsync(containerId);
 
-            var parsedToDto = updatedIssue.ToExternalDto(
-                context.Projects.FirstOrDefault(x => x.Value.Item1.Relationships.IssuesContainer.Data.ID == containerId)
-                   .Key,
-                types.First(x => x.ID == updatedIssue.Attributes.NgIssueTypeID).Title);
+            var parsedToDto = await ParseToDto(updatedIssue, types, projectId);
 
             if (obj.Items?.Any() ?? false)
             {
-                var added = await AddItems(obj.Items, hubId, projectId, issueFromRemote, containerId);
+                var added = await AddItems(obj.Items, projectId, updatedIssue, containerId);
                 parsedToDto.Items = added?.Select(i => i.ToDto()).ToList();
             }
 
@@ -136,9 +116,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await context.UpdateProjects(false);
             objectives.Clear();
 
-            foreach (var project in context.Projects)
+            foreach (var project in context.Snapshot.ProjectEnumerable)
             {
-                var container = project.Value.Item1.Relationships.IssuesContainer.Data.ID;
+                var container = project.Value.IssueContainer;
                 var statusKey = typeof(Issue.IssueAttributes)
                    .GetDataMemberName(nameof(Issue.IssueAttributes.Status));
                 var statusFilter = new Filter(
@@ -179,10 +159,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 }
                 else
                 {
-                    foreach (var project in context.Projects)
+                    foreach (var project in context.Snapshot.ProjectEnumerable)
                     {
                         Issue found = null;
-                        var container = project.Value.Item1.Relationships.IssuesContainer.Data.ID;
+                        var container = project.Value.IssueContainer;
 
                         try
                         {
@@ -204,13 +184,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             return result;
         }
 
+        private async Task<ObjectiveExternalDto> ParseToDto(Issue issue, IEnumerable<IssueType> types, string projectId)
+        {
+            var parsedToDto = await convertToDtoAsync(issue);
+            var typeField = await convertTypeAsync(types.First(x => x.ID == issue.Attributes.NgIssueTypeID));
+            parsedToDto.DynamicFields.Add(typeField);
+            parsedToDto.ProjectExternalID = projectId;
+            return parsedToDto;
+        }
+
         private async Task<ObjectiveExternalDto> GetFullObjectiveExternalDto(
             Issue issue,
             string projectID,
             string container)
         {
             var types = await issuesService.GetIssueTypesAsync(container);
-            var dto = issue.ToExternalDto(projectID, types.First(x => x.ID == issue.Attributes.NgIssueTypeID).Title);
+            var dto = await ParseToDto(issue, types, projectID);
             dto.Items ??= new List<ItemExternalDto>();
 
             var attachments = await issuesService.GetAttachmentsAsync(container, issue.ID);
@@ -222,13 +211,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         private async Task<IEnumerable<Item>> AddItems(
             ICollection<ItemExternalDto> items,
-            string hubId,
             string projectId,
             Issue issue,
             string containerId)
         {
-            if (!context.DefaultFolders.TryGetValue(projectId, out var folder))
-                return null;
+            var folder = context.Snapshot.ProjectEnumerable.First(x => x.Key == projectId).Value.ProjectFilesFolder;
 
             var resultItems = new List<Item>();
             var existingItems = await folderSyncHelper.GetFolderItemsAsync(projectId, folder.ID);
@@ -289,13 +276,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             return true;
         }
 
-        private async Task<(string containerId, string hubId, string projectId)> GetContainerId(ObjectiveExternalDto obj)
+        private (string containerId, string projectId) GetContainerId(ObjectiveExternalDto obj)
         {
-            var hub = await hubsHelper.GetDefaultHubAsync();
-            var project = await projectsHelper.GetProjectAsync(hub.ID, p => p.ID == obj.ProjectExternalID);
-            var containerId = project.Relationships?.IssuesContainer?.Data?.ID;
+            var project = context.Snapshot.Hubs.SelectMany(x => x.Value.Projects)
+               .First(x => x.Key == obj.ProjectExternalID);
+            var containerId = project.Value.IssueContainer;
 
-            return (containerId, hub.ID, project.ID);
+            return (containerId, project.Key);
         }
     }
 }

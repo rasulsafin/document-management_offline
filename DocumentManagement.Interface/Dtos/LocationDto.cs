@@ -4,10 +4,12 @@
     {
         public int ID { get; set; }
 
-        public float[] Position { get; set; }
+        public (float x, float y, float z) Position { get; set; }
 
-        public float[] CameraPosition { get; set; }
+        public (float x, float y, float z) CameraPosition { get; set; }
 
         public string BimElementID { get; set; }
+
+        public string ModelName { get; set; }
     }
 }

@@ -18,5 +18,7 @@
         public float CameraPositionZ { get; set; }
 
         public string BimElementID { get; set; }
+
+        public string ModelName { get; set; }
     }
 }

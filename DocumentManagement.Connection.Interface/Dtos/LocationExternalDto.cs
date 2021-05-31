@@ -2,8 +2,12 @@
 {
     public class LocationExternalDto
     {
-        public float[] Location { get; set; }
+        public (float x, float y, float z) Location { get; set; }
+
+        public (float x, float y, float z) CameraPosition { get; set; }
 
         public string Guid { get; set; }
+
+        public string ModelName { get; set; }
     }
 }
