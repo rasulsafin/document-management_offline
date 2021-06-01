@@ -6,11 +6,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 {
     public class IssueSnapshot : ASnapshotEntity<Issue>
     {
-        public IssueSnapshot(Issue entity)
+        public IssueSnapshot(Issue entity, ProjectSnapshot projectSnapshot)
             : base(entity)
         {
+            ProjectSnapshot = projectSnapshot;
         }
 
-        public List<Item> Type { get; set; }
+        public List<Item> Items { get; set; }
+
+        public ProjectSnapshot ProjectSnapshot { get; }
+
+        public override string ID => Entity.ID;
     }
 }

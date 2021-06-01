@@ -11,5 +11,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         }
 
         public Dictionary<string, ProjectSnapshot> Projects { get; set; }
+
+        public override string ID => Entity.ID;
     }
 }

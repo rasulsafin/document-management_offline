@@ -9,5 +9,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 
         public IEnumerable<KeyValuePair<string, ProjectSnapshot>> ProjectEnumerable
             => Hubs.SelectMany(x => x.Value.Projects);
+
+        public IEnumerable<KeyValuePair<string, IssueSnapshot>> IssueEnumerable
+            => Hubs.SelectMany(x => x.Value.Projects).SelectMany(x => x.Value.Issues);
     }
 }

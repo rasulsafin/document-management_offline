@@ -104,7 +104,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public override HttpRequestMessage CreateRequest(HttpMethod methodType, string uri, object[] arguments = null, (string scheme, string token) authData = default)
         {
-            var url = Resources.ForgeUrl + uri;
+            var url = Constants.FORGE_URL + uri;
             return base.CreateRequest(methodType, url, arguments, authData);
         }
     }

@@ -20,7 +20,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         public Dictionary<string, ItemSnapshot> Items { get; set; }
 
         public Folder ProjectFilesFolder { get; set; }
-        
+
+        public override string ID => Entity.ID;
+
         // TODO: update all properties.
     }
 }

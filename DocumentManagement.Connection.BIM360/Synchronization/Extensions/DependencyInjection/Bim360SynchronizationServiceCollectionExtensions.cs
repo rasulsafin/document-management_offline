@@ -3,6 +3,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -23,6 +24,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
             services.AddConverter<Status, ObjectiveStatus, StatusObjectiveStatusConverter>();
             services.AddConverter<ObjectiveStatus, Status, ObjectiveStatusStatusConverter>();
+            services.AddConverter<IssueType, DynamicFieldExternalDto, IssueTypeDynamicFieldConverter>();
+            services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
             return services;
         }
 

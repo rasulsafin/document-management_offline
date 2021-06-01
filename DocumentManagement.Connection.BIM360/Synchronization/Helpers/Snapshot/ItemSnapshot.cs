@@ -10,5 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         }
 
         public Version Version { get; set; }
+
+        public override string ID => Entity.ID;
     }
 }

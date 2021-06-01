@@ -6,6 +6,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public static class Constants
     {
+        public static readonly string FORGE_URL = "https://developer.api.autodesk.com";
+
         public static readonly string FOLDER_TYPE = "folders";
         public static readonly string ITEM_TYPE = "items";
         public static readonly string VERSION_TYPE = "versions";
