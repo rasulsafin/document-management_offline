@@ -44,6 +44,7 @@ namespace MRS.DocumentManagement.Synchronization
             var results = new List<SynchronizingResult>();
             var projectProgress = new Progress<double>(v => { progress.Report(v / 2); });
             var objectiveProgress = new Progress<double>(v => { progress.Report((v + 1) / 2); });
+            IConnectionContext context = null;
 
             try
             {
@@ -54,7 +55,7 @@ namespace MRS.DocumentManagement.Synchronization
                        .OrderBy(x => x.Date)
                        .LastOrDefaultAsync())?.Date ??
                     DateTime.MinValue;
-                var context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
+                context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
 
                 var ids = await GetUpdatedIDs(
                     lastSynchronization,
@@ -117,6 +118,11 @@ namespace MRS.DocumentManagement.Synchronization
                 results.Add(new SynchronizingResult { Exception = e });
                 progress?.Report(1.0);
                 return results;
+            }
+            finally
+            {
+                if (context is IDisposable disposable)
+                    disposable.Dispose();
             }
 
             return results;

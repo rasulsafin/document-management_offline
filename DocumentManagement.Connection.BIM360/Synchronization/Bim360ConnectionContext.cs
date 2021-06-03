@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
@@ -12,13 +14,15 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
 {
-    public class Bim360ConnectionContext : AConnectionContext
+    public class Bim360ConnectionContext : AConnectionContext, IDisposable
     {
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
         private readonly FoldersSyncHelper foldersSyncHelper;
         private readonly IFactory<Bim360ProjectsSynchronizer> projectSynchronizer;
         private readonly IFactory<Bim360ObjectivesSynchronizer> objectiveSynchronizer;
+
+        private bool isDisposed = false;
 
         public Bim360ConnectionContext(
             HubsService hubsService,
@@ -33,6 +37,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
             this.projectSynchronizer = projectSynchronizer;
             this.objectiveSynchronizer = objectiveSynchronizer;
         }
+
+        public void Dispose()
+        {
+            if (isDisposed)
+                return;
+
+            GC.SuppressFinalize(this);
+            isDisposed = true;
+            Scope.Dispose();
+        }
+
+        internal IServiceScope Scope { get; set; }
 
         internal Bim360Snapshot Snapshot { get; set; }
 

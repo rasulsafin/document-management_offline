@@ -8,6 +8,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -17,7 +18,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
-        private readonly Bim360ConnectionContext context;
+        private readonly IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext> contextFactory;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
 
@@ -26,13 +27,13 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
-            Bim360ConnectionContext context)
+            IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext> contextFactory)
         {
             this.connection = connection;
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
-            this.context = context;
+            this.contextFactory = contextFactory;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -75,10 +76,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         }
 
         public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
-        {
-            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
-            return Task.FromResult<IConnectionContext>(context);
-        }
+            => Task.FromResult<IConnectionContext>(contextFactory.Create(info));
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
