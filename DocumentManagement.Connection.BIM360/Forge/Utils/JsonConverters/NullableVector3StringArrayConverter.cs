@@ -16,6 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         protected override Vector3 ConvertTokenToVector3(JToken token)
         {
             var items = token.ToObject<string[]>();
+
             if (items == null || items.Length != 3)
             {
                 throw new NotSupportedException(

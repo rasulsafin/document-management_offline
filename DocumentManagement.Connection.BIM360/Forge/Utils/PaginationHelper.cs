@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     public static class PaginationHelper
     {

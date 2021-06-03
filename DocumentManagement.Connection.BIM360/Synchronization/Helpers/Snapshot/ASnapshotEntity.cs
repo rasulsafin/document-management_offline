@@ -2,7 +2,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 {
     public abstract class ASnapshotEntity<T>
     {
-        public ASnapshotEntity(T entity)
+        protected ASnapshotEntity(T entity)
             => Entity = entity;
 
         public T Entity { get; set; }

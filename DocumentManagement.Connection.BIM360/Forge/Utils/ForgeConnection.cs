@@ -7,20 +7,18 @@ using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
-    public class ForgeConnection : HttpConnection, IDisposable
+    public class ForgeConnection : HttpConnection
     {
         private const string MEDIA_TYPE_JSON = "text/json";
         private const string CONTENT_TYPE = "application/vnd.api+json";
 
         public ForgeConnection()
-            : base()
             => client.Timeout = TimeSpan.FromSeconds(30);
 
         public string Token { get; set; }

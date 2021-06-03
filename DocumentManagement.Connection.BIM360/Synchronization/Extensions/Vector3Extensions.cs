@@ -14,13 +14,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
         public static Vector3 ToVector(this (float x, float y, float z) tuple)
             => new Vector3(tuple.x, tuple.y, tuple.z);
 
-        public static Vector3 GetUpwardVector(this  Vector3 vector)
+        public static Vector3 GetUpwardVector(this Vector3 vector)
         {
             vector = Vector3.Normalize(vector);
             var cos = Vector3.Dot(vector, Vector3.UnitZ) / vector.Length() / Vector3.UnitZ.Length();
             var angle = (float)Math.Acos(cos);
             if (angle < EPSILON)
                 return -Vector3.UnitY;
+
             var up = ((float)(-1.0 / Math.Tan(angle)) * vector) + (Vector3.UnitZ / (float)Math.Sin(angle));
             return Vector3.Normalize(up);
         }

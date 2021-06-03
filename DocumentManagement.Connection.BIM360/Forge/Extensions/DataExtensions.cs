@@ -3,7 +3,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
 {

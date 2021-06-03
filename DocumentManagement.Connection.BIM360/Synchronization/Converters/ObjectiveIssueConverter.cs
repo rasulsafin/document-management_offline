@@ -82,7 +82,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return field?.Value;
         }
 
-        private static Issue.PushpinAttributes GetPushpinAttributes(LocationExternalDto locationDto, Vector3 offset = default)
+        private static Issue.PushpinAttributes GetPushpinAttributes(
+            LocationExternalDto locationDto,
+            Vector3 offset = default)
         {
             var target = locationDto.Location.ToVector().ToFeet().ToXZY();
             var eye = locationDto.CameraPosition.ToVector().ToFeet().ToXZY();
@@ -112,7 +114,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private async Task<IssueType> GetIssueType(ObjectiveExternalDto obj)
         {
             var types = await issuesService.GetIssueTypesAsync(GetContainerId(obj));
-            var dynamicFieldID = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
+            var dynamicFieldID =
+                typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
             var dynamicField = obj.DynamicFields.First(d => d.ExternalID == dynamicFieldID);
             var type = types.FirstOrDefault(x => x.Title == dynamicField.Value) ?? types[0];
             return type;
