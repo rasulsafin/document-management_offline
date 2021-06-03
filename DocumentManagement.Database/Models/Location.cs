@@ -1,5 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Database.Models
 {
+    [MergeContract]
     public class Location
     {
         [ForbidMerge]

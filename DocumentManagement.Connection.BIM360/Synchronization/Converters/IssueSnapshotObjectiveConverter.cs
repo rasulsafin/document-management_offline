@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             parsedToDto.Items ??= new List<ItemExternalDto>();
 
             foreach (var attachment in snapshot.Items)
-                parsedToDto.Items.Add(attachment.ToDto());
+                parsedToDto.Items.Add(attachment.Entity.ToDto());
             return parsedToDto;
         }
     }

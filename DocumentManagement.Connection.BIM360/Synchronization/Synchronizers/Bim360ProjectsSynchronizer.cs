@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -53,9 +52,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             }
 
             foreach (var dto in toRemove)
+            {
+                cashed.Value.Items.Remove(dto.Key);
                 await itemsSyncHelper.Remove(obj.ExternalID, dto.Value.Entity);
+            }
 
-            return await GetFullProject(cashed.Value.Entity);
+            return await GetFullProject(cashed.Value);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
@@ -73,17 +75,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                 var project = context.Snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value;
 
                 if (project != null)
-                    projects.Add(await GetFullProject(project.Entity));
+                {
+                    var folder = project.ProjectFilesFolder;
+                    var items = await foldersService.GetItemsAsync(project.ID, folder.ID);
+                    project.Items = new Dictionary<string, ItemSnapshot>();
+                    foreach (var item in items)
+                        project.Items.Add(item.ID, new ItemSnapshot(item));
+                    projects.Add(await GetFullProject(project));
+                }
             }
 
             return projects;
         }
 
-        private async Task<ProjectExternalDto> GetFullProject(Project project)
+        private async Task<ProjectExternalDto> GetFullProject(ProjectSnapshot project)
         {
-            var dto = project.ToDto();
-            var folder = context.Snapshot.ProjectEnumerable.First(x => x.Key == project.ID);
-            var items = await foldersService.GetItemsAsync(project.ID, folder.Key);
+            var dto = project.Entity.ToDto();
+            var folder = project.ProjectFilesFolder;
+            var items = await foldersService.GetItemsAsync(project.ID, folder.ID);
             dto.Items = items.Select(x => x.ToDto()).ToList();
             return dto;
         }

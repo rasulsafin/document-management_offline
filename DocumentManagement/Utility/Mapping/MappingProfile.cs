@@ -53,8 +53,15 @@ namespace MRS.DocumentManagement.Utility.Mapping
                 .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
 
             CreateMap<Location, LocationDto>()
-                .ForMember(d => d.Position, o => o.MapFrom(s => new float[] { s.PositionX, s.PositionY, s.PositionZ }))
-                .ForMember(d => d.CameraPosition, o => o.MapFrom(s => new float[] { s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ }));
+               .ForMember(
+                    d => d.Position,
+                    o => o.MapFrom(
+                        s => new Tuple<float, float, float>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
+               .ForMember(
+                    d => d.CameraPosition,
+                    o => o.MapFrom(
+                        s => new Tuple<float, float, float>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
+                           .ToValueTuple()));
         }
 
         private void CreateObjectiveMapToDto()
@@ -213,13 +220,21 @@ namespace MRS.DocumentManagement.Utility.Mapping
                .ForMember(
                     d => d.Location,
                     o => o.MapFrom(
-                        s => new Tuple<float, float, float>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
-               .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID)); // ???
+                        e => new Tuple<float, float, float>(e.PositionX, e.PositionY, e.PositionZ).ToValueTuple()))
+               .ForMember(
+                    d => d.CameraPosition,
+                    o => o.MapFrom(
+                        e => new Tuple<float, float, float>(e.CameraPositionX, e.CameraPositionY, e.CameraPositionZ)
+                           .ToValueTuple()))
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID));
             CreateMap<LocationExternalDto, Location>()
-                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location.x))
-                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location.y))
-                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location.z))
-                .ForMember(d => d.BimElementID, o => o.MapFrom(s => s.Guid)); // ???
+               .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location.x))
+               .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location.y))
+               .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location.z))
+               .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
+               .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
+               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
+               .ForMember(d => d.BimElementID, o => o.MapFrom(s => s.Guid));
         }
 
         private string GetName(User s)

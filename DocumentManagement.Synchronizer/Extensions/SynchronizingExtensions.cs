@@ -1,6 +1,8 @@
 using System;
+using System.Linq;
 using System.Reflection;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Extensions
@@ -34,6 +36,59 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
                         continue;
 
+                if (property.PropertyType.GetCustomAttribute(typeof(MergeContractAttribute)) != null &&
+                    (property.GetValue(tuple.Synchronized) != null || property.GetValue(tuple.Synchronized) != null ||
+                        property.GetValue(tuple.Remote) != null))
+                {
+                    var type = typeof(SynchronizingTuple<>)
+                       .MakeGenericType(property.PropertyType);
+                    dynamic subtuple = type
+                           .GetConstructor(
+                                new[]
+                                {
+                                    typeof(string),
+                                    property.PropertyType,
+                                    property.PropertyType,
+                                    property.PropertyType,
+                                }) !
+                       .Invoke(
+                            new[]
+                            {
+                                null,
+                                property.GetValue(tuple.Synchronized),
+                                property.GetValue(tuple.Local),
+                                property.GetValue(tuple.Remote),
+                            });
+
+                    var mergeMethodTypes = new[]
+                    {
+                        type,
+                        typeof(Func<EntityType, DateTime>),
+                    };
+
+                    var merge = typeof(SynchronizingExtensions).GetMethods().Last(x => x.Name == nameof(Merge)) !
+                       .MakeGenericMethod(property.PropertyType);
+
+                    var parameters = new[]
+                    {
+                        subtuple,
+                        (Func<EntityType, DateTime>)(x => x switch
+                        {
+                            EntityType.Local => tuple.Local.UpdatedAt,
+                            EntityType.Synchronized => tuple.Synchronized.UpdatedAt,
+                            EntityType.Remote => tuple.Remote.UpdatedAt,
+                            _ => throw new ArgumentOutOfRangeException(nameof(x), x, null)
+                        }),
+                    };
+
+                    merge!.Invoke(null, parameters);
+                    tuple.SynchronizeChanges(subtuple as ISynchronizationChanges);
+                    property.SetValue(tuple.Local, subtuple.Local);
+                    property.SetValue(tuple.Synchronized, subtuple.Synchronized);
+                    property.SetValue(tuple.Remote, subtuple.Remote);
+                    continue;
+                }
+
                 var synchronizedValue = property.GetValue(tuple.Synchronized);
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
@@ -41,6 +96,37 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
                 var localNotChanged = Equals(synchronizedValue, localValue);
                 var localMoreRelevant = tuple.Local.UpdatedAt > tuple.Remote.UpdatedAt;
+
+                var value = localSynchronizedAndNotChanged   ? localValue
+                        : localNotChanged                   ? remoteValue
+                        : localMoreRelevant                 ? localValue
+                        : remoteValue;
+
+                UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
+            }
+        }
+
+        public static void Merge<T>(this SynchronizingTuple<T> tuple, Func<EntityType, DateTime> getDate)
+            where T : new()
+        {
+            var properties = typeof(T).GetProperties();
+
+            tuple.Local ??= (T)Activator.CreateInstance(typeof(T));
+            tuple.Remote ??= (T)Activator.CreateInstance(typeof(T));
+            tuple.Synchronized ??= (T)Activator.CreateInstance(typeof(T));
+
+            foreach (var property in properties)
+            {
+                if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
+                        continue;
+
+                var synchronizedValue = property.GetValue(tuple.Synchronized);
+                var localValue = property.GetValue(tuple.Local);
+                var remoteValue = property.GetValue(tuple.Remote);
+
+                var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
+                var localNotChanged = Equals(synchronizedValue, localValue);
+                var localMoreRelevant = getDate(EntityType.Local) > getDate(EntityType.Remote);
 
                 var value = localSynchronizedAndNotChanged   ? localValue
                         : localNotChanged                   ? remoteValue
@@ -73,6 +159,13 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 TryGetValue(tuple.Synchronized, out var result3) ? result3 : null;
         }
 
+        public static void SynchronizeChanges(this ISynchronizationChanges parentTuple, ISynchronizationChanges childTuple)
+        {
+            parentTuple.LocalChanged |= childTuple.LocalChanged;
+            parentTuple.SynchronizedChanged |= childTuple.SynchronizedChanged;
+            parentTuple.RemoteChanged |= childTuple.RemoteChanged;
+        }
+
         private static void LinkEntities<T>(this SynchronizingTuple<T> tuple)
                 where T : class, ISynchronizable<T>, new()
         {
@@ -94,7 +187,6 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
             PropertyInfo property,
             (object local, object synhronzied, object remote) oldValues,
             object value)
-            where T : ISynchronizable<T>
         {
             UpdateValue(tuple.Local, property, oldValues.local, value, () => tuple.LocalChanged = true);
             UpdateValue(

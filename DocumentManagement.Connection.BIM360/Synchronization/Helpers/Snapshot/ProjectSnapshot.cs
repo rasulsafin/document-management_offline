@@ -22,7 +22,5 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         public Folder ProjectFilesFolder { get; set; }
 
         public override string ID => Entity.ID;
-
-        // TODO: update all properties.
     }
 }
