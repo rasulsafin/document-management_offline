@@ -21,11 +21,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);
 
-        public string Token { get; set; }
+        public string Token { internal get; set; }
 
         public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
         {
             var stringBuilder = new StringBuilder(uri);
+
             if (filters != null)
             {
                 if (stringBuilder[^1] != '&')
@@ -41,15 +42,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         }
 
         public async Task<Stream> GetResponseStreamAuthorizedAsync(
-                HttpMethod methodType,
-                string command,
-                params object[] arguments)
-            => await GetResponseStreamAuthorizedAsync(methodType, command, authData: (Constants.AUTHORIZATION_SCHEME, Token), arguments);
+            HttpMethod methodType,
+            string command,
+            params object[] arguments)
+            => await GetResponseStreamAuthorizedAsync(
+                methodType,
+                command,
+                authData: (Constants.AUTHORIZATION_SCHEME, Token),
+                arguments);
 
         public async Task<JObject> SendAsync(
-                ForgeSettings settings,
-                string command,
-                params object[] arguments)
+            ForgeSettings settings,
+            string command,
+            params object[] arguments)
         {
             using var request = CreateRequest(
                 settings.MethodType,
@@ -90,9 +95,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 }
 
                 var serializedData = JsonConvert.SerializeObject(data, jsonSerializerSettings);
-                request.Content = new StringContent(serializedData,
-                        Encoding.Default,
-                        MEDIA_TYPE_JSON);
+                request.Content = new StringContent(
+                    serializedData,
+                    Encoding.Default,
+                    MEDIA_TYPE_JSON);
 
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue(CONTENT_TYPE);
             }
@@ -100,7 +106,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             return await GetResponseAsync(request);
         }
 
-        public override HttpRequestMessage CreateRequest(HttpMethod methodType, string uri, object[] arguments = null, (string scheme, string token) authData = default)
+        public override HttpRequestMessage CreateRequest(
+            HttpMethod methodType,
+            string uri,
+            object[] arguments = null,
+            (string scheme, string token) authData = default)
         {
             var url = Constants.FORGE_URL + uri;
             return base.CreateRequest(methodType, url, arguments, authData);

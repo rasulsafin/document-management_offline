@@ -18,6 +18,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
+        private readonly TokenHelper tokenHelper;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
 
@@ -26,13 +27,15 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
-            IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory)
+            IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
+            TokenHelper tokenHelper)
         {
             this.connection = connection;
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
             this.contextFactory = contextFactory;
+            this.tokenHelper = tokenHelper;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -69,8 +72,9 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     Value = Constants.UNDEFINED_NG_TYPE.ExternalID,
                 },
             };
-            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
+            tokenHelper.SetToken(info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
             info.UserExternalID = (await authenticationService.GetMe()).UserId;
+            tokenHelper.SetUserID(info.UserExternalID);
             return info;
         }
 
@@ -79,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            connection.Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];
+            tokenHelper.SetInfo(info.UserExternalID, info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
             return Task.FromResult<IConnectionStorage>(storage);
         }
 

@@ -1,7 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
+using System.Globalization;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -10,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
+using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -27,15 +27,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         private DateTime sentTime;
 
         // Is created as scoped as this service
-        private ConnectionInfoExternalDto connectionInfoDto;
+        private ConnectionInfoExternalDto connectionInfo;
 
         public Authenticator(AuthenticationService service, ILogger<Authenticator> logger)
         {
             this.service = service;
             this.logger = logger;
         }
-
-        internal delegate void NewBearerDelegate(Token bearer);
 
         public enum ConnectionStatus
         {
@@ -45,84 +43,33 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             Error,
         }
 
-        public ConnectionStatus Status { get; private set; }
+        private ConnectionStatus Status { get; set; }
 
-        public bool IsLogged
-            => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd);
+        private bool IsLogged => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd, CultureInfo.InvariantCulture);
 
         private string AccessToken
         {
-            get
-            {
-                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(TOKEN_AUTH_NAME, out var value))
-                    return value;
-
-                return default;
-            }
-
-            set => SetAuthValue(connectionInfoDto, TOKEN_AUTH_NAME, value);
+            get => connectionInfo.GetAuthValue(TOKEN_AUTH_NAME);
+            set => connectionInfo.SetAuthValue(TOKEN_AUTH_NAME, value);
         }
 
         private string AccessRefreshToken
         {
-            get
-            {
-                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(REFRESH_TOKEN_AUTH_NAME, out var value))
-                    return value;
-
-                return default;
-            }
-
-            set => SetAuthValue(connectionInfoDto, REFRESH_TOKEN_AUTH_NAME, value);
+            get => connectionInfo.GetAuthValue(REFRESH_TOKEN_AUTH_NAME);
+            set => connectionInfo.SetAuthValue(REFRESH_TOKEN_AUTH_NAME, value);
         }
 
         private string AccessEnd
         {
-            get
-            {
-                if (connectionInfoDto.AuthFieldValues != null && connectionInfoDto.AuthFieldValues.TryGetValue(END_AUTH_NAME, out var value))
-                    return value;
-                return default;
-            }
-
-            set => SetAuthValue(connectionInfoDto, END_AUTH_NAME, value);
+            get => connectionInfo.GetAuthValue(END_AUTH_NAME);
+            set => connectionInfo.SetAuthValue(END_AUTH_NAME, value);
         }
 
-        private string AppClientId
-        {
-            get
-            {
-                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CLIENT_ID_NAME, out var value))
-                    return value;
-                return default;
-            }
+        private string AppClientId => connectionInfo.GetAppProperty(CLIENT_ID_NAME);
 
-            set => SetAppProperty(connectionInfoDto, CLIENT_ID_NAME, value);
-        }
+        private string AppClientSecret => connectionInfo.GetAppProperty(CLIENT_SECRET_NAME);
 
-        private string AppClientSecret
-        {
-            get
-            {
-                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CLIENT_SECRET_NAME, out var value))
-                    return value;
-                return default;
-            }
-
-            set => SetAppProperty(connectionInfoDto, CLIENT_SECRET_NAME, value);
-        }
-
-        private string AppCallBackUrl
-        {
-            get
-            {
-                if (connectionInfoDto.ConnectionType.AppProperties.TryGetValue(CALLBACK_URL_NAME, out var value))
-                    return value;
-                return default;
-            }
-
-            set => SetAppProperty(connectionInfoDto, CALLBACK_URL_NAME, value);
-        }
+        private string AppCallBackUrl => connectionInfo.GetAppProperty(CALLBACK_URL_NAME);
 
         public void Dispose()
         {
@@ -130,41 +77,64 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             GC.SuppressFinalize(this);
         }
 
-        public async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
+        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(
+            ConnectionInfoExternalDto connectionInfo,
+            CancellationToken token = default)
         {
-            sentTime = DateTime.UtcNow;
-            if (!IsLogged || mustUpdate)
-            {
-                //if (string.IsNullOrEmpty(AccessToken))
-                    await ThreeLeggedAsync(token);
-                //else
-                //    await RefreshConnectionAsync();
-            }
-        }
-
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(ConnectionInfoExternalDto connectionInfo, CancellationToken token = default)
-        {
-            connectionInfoDto = connectionInfo;
+            this.connectionInfo = connectionInfo;
             await CheckAccessAsync(token, true);
 
-            // TODO Add filling connection status depending on 'status' field
-            var result = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };
+            var result = new ConnectionStatusDto
+            {
+                Status = Status switch
+                {
+                    ConnectionStatus.Connected => RemoteConnectionStatus.OK,
+                    _ => RemoteConnectionStatus.Error
+                },
+            };
 
             return (result, connectionInfo);
         }
 
-        public void Cancel()
+        private void Cancel()
         {
             httpListener.Abort();
             httpListener = null;
         }
 
-        public async Task RefreshConnectionAsync()
+        private async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
+        {
+            sentTime = DateTime.UtcNow;
+
+            if (!IsLogged || mustUpdate)
+            {
+                if (string.IsNullOrEmpty(AccessToken))
+                {
+                    await SignInAsync(token);
+                }
+                else
+                {
+                    try
+                    {
+                        await RefreshConnectionAsync();
+                    }
+                    catch
+                    {
+                        await SignInAsync(token);
+                    }
+                }
+            }
+        }
+
+        private async Task RefreshConnectionAsync()
         {
             try
             {
                 Status = ConnectionStatus.Connecting;
-                var bearer = await service.RefreshTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, AccessRefreshToken);
+                var bearer = await service.RefreshTokenAsyncWithHttpInfo(
+                    AppClientId,
+                    AppClientSecret,
+                    AccessRefreshToken);
                 SaveData(bearer);
             }
             catch (Exception e)
@@ -173,7 +143,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             }
         }
 
-        internal async Task ThreeLeggedAsync(CancellationToken token)
+        private async Task SignInAsync(CancellationToken token)
         {
             try
             {
@@ -181,35 +151,39 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
                 if (!await WebFeatures.RemoteUrlExistsAsync(AUTODESK_WEBSITE))
                     throw new Exception("Failed to ping the server");
+
                 Task<HttpListenerContext> getting = null;
+
                 if (httpListener == null || !httpListener.IsListening)
-                {
-                    if (!HttpListener.IsSupported)
-                        return;
-                    httpListener = new HttpListener();
-                    httpListener.Prefixes.Add(AppCallBackUrl/*.Replace("localhost", "+") + "/"*/);
-                    logger.LogInformation("Open browser");
-                    httpListener.Start();
-                    token.ThrowIfCancellationRequested();
-                    getting = httpListener.GetContextAsync();
-                }
+                    getting = StartListening(token);
 
                 token.ThrowIfCancellationRequested();
-
-                var oAuthUri = service.GetAuthorizationUri(AppClientId, AppCallBackUrl);
-                Process.Start(new ProcessStartInfo(oAuthUri) { UseShellExecute = true });
+                OpenBrowser();
 
                 token.ThrowIfCancellationRequested();
 
                 if (getting != null)
                 {
-                    while (!getting.IsCompleted)
-                    {
-                        await Task.Delay(1000, token);
-                        token.ThrowIfCancellationRequested();
-                    }
+                    await Wait(getting, token);
 
-                    await ThreeLeggedWaitForCodeAsync(getting.Result, GotIt);
+                    try
+                    {
+                        var code = getting.Result.Request.QueryString[CODE_QUERY_KEY];
+                        await OpenResultPage(getting.Result);
+                        if (code == null)
+                            throw new Exception("Authentication failed");
+
+                        var authToken = await service.GetTokenAsyncWithHttpInfo(
+                            AppClientId,
+                            AppClientSecret,
+                            code,
+                            AppCallBackUrl);
+                        SaveData(authToken);
+                    }
+                    finally
+                    {
+                        httpListener.Stop();
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -224,84 +198,51 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             }
         }
 
-        internal async Task ThreeLeggedWaitForCodeAsync(HttpListenerContext context, NewBearerDelegate callback)
+        private void OpenBrowser()
         {
-            try
-            {
-                var code = context.Request.QueryString[CODE_QUERY_KEY];
-                var responseString = (string)Resources.ResourceManager.GetObject(SUCCESSFUL_AUTHENTICATION_PAGE);
-                var buffer = Encoding.UTF8.GetBytes(responseString ?? string.Empty);
-                var response = context.Response;
-                response.ContentType = RESPONSE_HTML_TYPE;
-                response.ContentLength64 = buffer.Length;
-                response.StatusCode = 200;
-                await response.OutputStream.WriteAsync(buffer.AsMemory());
-                response.OutputStream.Close();
+            var oAuthUri = service.GetAuthorizationUri(AppClientId, AppCallBackUrl);
+            Process.Start(new ProcessStartInfo(oAuthUri) { UseShellExecute = true });
+        }
 
-                if (!string.IsNullOrEmpty(code))
-                {
-                    var bearer =
-                            await service.GetTokenAsyncWithHttpInfo(AppClientId, AppClientSecret, code, AppCallBackUrl);
-                    callback?.Invoke(bearer);
-                }
-                else
-                {
-                    callback?.Invoke(null);
-                }
-            }
-            catch (Exception)
+        private Task<HttpListenerContext> StartListening(CancellationToken token)
+        {
+            if (!HttpListener.IsSupported)
+                throw new NotSupportedException("Not supported on this machine");
+
+            httpListener = new HttpListener();
+            httpListener.Prefixes.Add(AppCallBackUrl);
+            httpListener.Start();
+            token.ThrowIfCancellationRequested();
+            return httpListener.GetContextAsync();
+        }
+
+        private async Task Wait(IAsyncResult getting, CancellationToken token)
+        {
+            while (!getting.IsCompleted)
             {
-                callback?.Invoke(null);
-            }
-            finally
-            {
-                httpListener.Stop();
+                await Task.Delay(100, token);
+                token.ThrowIfCancellationRequested();
             }
         }
 
-        private string GetAuthOrDefault(IEnumerable<string> source, int index)
-            => index != -1 ? source.ElementAtOrDefault(index) : string.Empty;
+        private async Task OpenResultPage(HttpListenerContext context)
+        {
+            var responseString = (string)Resources.ResourceManager.GetObject(SUCCESSFUL_AUTHENTICATION_PAGE);
+            var buffer = Encoding.UTF8.GetBytes(responseString ?? string.Empty);
+            var response = context.Response;
+            response.ContentType = RESPONSE_HTML_TYPE;
+            response.ContentLength64 = buffer.Length;
+            response.StatusCode = 200;
+            await response.OutputStream.WriteAsync(buffer.AsMemory());
+            response.OutputStream.Close();
+        }
 
         private void SaveData(Token bearer)
         {
             AccessToken = bearer.AccessToken;
             AccessRefreshToken = bearer.RefreshToken;
-            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn ?? 0).ToString();
+            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn ?? 0).ToString(CultureInfo.InvariantCulture);
             Status = ConnectionStatus.Connected;
-        }
-
-        private void GotIt(Token bearer)
-        {
-            if (bearer == null)
-            {
-                Status = ConnectionStatus.Error;
-                throw new Exception("Sorry, Authentication failed");
-            }
-
-            SaveData(bearer);
-        }
-
-        private void SetAuthValue(ConnectionInfoExternalDto info, string key, string value)
-        {
-            info.AuthFieldValues ??= new Dictionary<string, string>();
-            SetDictionaryValue(info.AuthFieldValues, key, value);
-        }
-
-        private void SetAppProperty(ConnectionInfoExternalDto info, string key, string value)
-        {
-            info.ConnectionType.AppProperties ??= new Dictionary<string, string>();
-            SetDictionaryValue(info.ConnectionType.AppProperties, key, value);
-        }
-
-        private void SetDictionaryValue(IDictionary<string, string> dictionary, string key, string value)
-        {
-            if (dictionary.ContainsKey(key))
-            {
-                dictionary[key] = value;
-                return;
-            }
-
-            dictionary.Add(key, value);
         }
     }
 }

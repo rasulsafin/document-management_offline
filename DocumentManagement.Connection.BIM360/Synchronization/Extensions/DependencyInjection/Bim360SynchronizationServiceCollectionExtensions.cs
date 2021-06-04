@@ -1,7 +1,7 @@
 using System;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBim360Synchronization(this IServiceCollection services)
         {
-            services.AddScopedFactory<ForgeConnection>();
+            services.AddScopedFactory<TokenHelper>();
 
             services.AddContext();
 
