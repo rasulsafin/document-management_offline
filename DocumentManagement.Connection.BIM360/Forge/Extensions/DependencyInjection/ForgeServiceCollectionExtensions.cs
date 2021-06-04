@@ -19,7 +19,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<Authenticator>();
             services.AddScoped<ForgeConnection>();
-            services.AddScopedFactory<ForgeConnection>();
             return services;
         }
     }

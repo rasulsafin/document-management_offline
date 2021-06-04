@@ -1,16 +1,15 @@
-using System.Collections.Generic;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
-    public class HubSnapshot : ASnapshotEntity<Hub>
+    internal class ItemSnapshot : ASnapshotEntity<Item>
     {
-        public HubSnapshot(Hub entity)
+        public ItemSnapshot(Item entity)
             : base(entity)
         {
         }
 
-        public Dictionary<string, ProjectSnapshot> Projects { get; set; }
+        public Version Version { get; set; }
 
         public override string ID => Entity.ID;
     }

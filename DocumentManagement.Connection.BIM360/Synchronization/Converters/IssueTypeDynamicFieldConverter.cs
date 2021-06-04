@@ -7,7 +7,7 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
-    public class IssueTypeDynamicFieldConverter : IConverter<IssueType, DynamicFieldExternalDto>
+    internal class IssueTypeDynamicFieldConverter : IConverter<IssueType, DynamicFieldExternalDto>
     {
         public Task<DynamicFieldExternalDto> Convert(IssueType type)
         {

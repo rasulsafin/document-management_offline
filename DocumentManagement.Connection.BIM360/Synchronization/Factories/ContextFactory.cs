@@ -1,11 +1,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.General.Utils.Factories;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories
 {
-    public class ContextFactory : IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext>
+    internal class ContextFactory : IFactory<ConnectionInfoExternalDto, IConnectionContext>
     {
         private readonly IServiceScopeFactory scopeFactory;
         private readonly IFactory<IServiceScope, Bim360ConnectionContext> contextFactory;
@@ -21,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories
             this.forgeConnectionFactory = forgeConnectionFactory;
         }
 
-        public Bim360ConnectionContext Create(ConnectionInfoExternalDto info)
+        public IConnectionContext Create(ConnectionInfoExternalDto info)
         {
             var scope = scopeFactory.CreateScope();
             forgeConnectionFactory.Create(scope).Token = info.AuthFieldValues[Constants.TOKEN_AUTH_NAME];

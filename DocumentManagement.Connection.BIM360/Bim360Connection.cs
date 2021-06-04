@@ -7,7 +7,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -18,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
-        private readonly IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext> contextFactory;
+        private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly Authenticator authenticator;
         private readonly ForgeConnection connection;
 
@@ -27,7 +26,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
-            IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext> contextFactory)
+            IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory)
         {
             this.connection = connection;
             this.authenticator = authenticator;
@@ -76,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         }
 
         public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
-            => Task.FromResult<IConnectionContext>(contextFactory.Create(info));
+            => Task.FromResult(contextFactory.Create(info));
 
         public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {

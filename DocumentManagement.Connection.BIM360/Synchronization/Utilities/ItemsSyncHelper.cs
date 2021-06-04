@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers
+namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 {
     public class ItemsSyncHelper
     {

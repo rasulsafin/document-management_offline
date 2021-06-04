@@ -1,13 +1,15 @@
 using System;
 using MRS.DocumentManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
 using MRS.DocumentManagement.General.Utils.Factories;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -16,21 +18,30 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBim360Synchronization(this IServiceCollection services)
         {
-            services.AddScoped<Bim360ConnectionContext>();
-            services.AddScopedFactory<Bim360ConnectionContext>();
-            services.AddScoped<IFactory<ConnectionInfoExternalDto, Bim360ConnectionContext>, ContextFactory>();
+            services.AddScopedFactory<ForgeConnection>();
+
+            services.AddContext();
+
             services.AddSynchronizer<Bim360ObjectivesSynchronizer>();
             services.AddSynchronizer<Bim360ProjectsSynchronizer>();
-            services.AddScoped<FoldersSyncHelper>();
-            services.AddScoped<HubsHelper>();
+
             services.AddScoped<ItemsSyncHelper>();
-            services.AddScoped<ProjectsHelper>();
+            services.AddScoped<SnapshotFiller>();
+
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
             services.AddConverter<Status, ObjectiveStatus, StatusObjectiveStatusConverter>();
             services.AddConverter<ObjectiveStatus, Status, ObjectiveStatusStatusConverter>();
             services.AddConverter<IssueType, DynamicFieldExternalDto, IssueTypeDynamicFieldConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
+            return services;
+        }
+
+        private static IServiceCollection AddContext(this IServiceCollection services)
+        {
+            services.AddScoped<Bim360ConnectionContext>();
+            services.AddScopedFactory<Bim360ConnectionContext>();
+            services.AddScoped<IFactory<ConnectionInfoExternalDto, IConnectionContext>, ContextFactory>();
             return services;
         }
 

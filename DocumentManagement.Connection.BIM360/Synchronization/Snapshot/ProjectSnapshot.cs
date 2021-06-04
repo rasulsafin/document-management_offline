@@ -4,14 +4,14 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
-    public class ProjectSnapshot : ASnapshotEntity<Project>
+    internal class ProjectSnapshot : ASnapshotEntity<Project>
     {
         public ProjectSnapshot(Project entity)
             : base(entity)
         {
         }
 
-        public string IssueContainer { get; set; }
+        public string IssueContainer => Entity.Relationships.IssuesContainer.Data.ID;
 
         public Dictionary<string, IssueSnapshot> Issues { get; set; }
 

@@ -3,7 +3,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
-    public class IssueSnapshot : ASnapshotEntity<Issue>
+    internal class IssueSnapshot : ASnapshotEntity<Issue>
     {
         public IssueSnapshot(Issue entity, ProjectSnapshot projectSnapshot)
             : base(entity)

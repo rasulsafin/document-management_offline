@@ -9,7 +9,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
-    public class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
+    internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IssuesService issuesService;
         private readonly ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync;
