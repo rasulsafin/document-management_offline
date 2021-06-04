@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace MRS.DocumentManagement.Connection.MrsPro.Services
+{
+    public class Service
+    {
+        public Service(MrsProHttpConnection connection)
+        {
+            Connector = connection;
+        }
+
+        protected MrsProHttpConnection Connector { get; }
+    }
+}
