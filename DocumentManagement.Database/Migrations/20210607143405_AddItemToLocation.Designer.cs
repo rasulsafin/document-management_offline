@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DocumentManagement.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
-    [Migration("20210603071500_AddModelNameForLocation")]
-    partial class AddModelNameForLocation
+    [Migration("20210607143405_AddItemToLocation")]
+    partial class AddItemToLocation
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -348,9 +348,6 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("BimElementID")
-                        .HasColumnType("TEXT");
-
                     b.Property<float>("CameraPositionX")
                         .HasColumnType("REAL");
 
@@ -360,8 +357,14 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<float>("CameraPositionZ")
                         .HasColumnType("REAL");
 
-                    b.Property<string>("ModelName")
+                    b.Property<string>("Guid")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("ItemID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ObjectiveID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("PositionX")
                         .HasColumnType("REAL");
@@ -373,6 +376,11 @@ namespace DocumentManagement.Database.Migrations
                         .HasColumnType("REAL");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ItemID");
+
+                    b.HasIndex("ObjectiveID")
+                        .IsUnique();
 
                     b.ToTable("Location");
                 });
@@ -430,8 +438,6 @@ namespace DocumentManagement.Database.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("AuthorID");
-
-                    b.HasIndex("LocationID");
 
                     b.HasIndex("ObjectiveTypeID");
 
@@ -821,16 +827,31 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("SynchronizationMate");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Location", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
+                        .WithOne("Location")
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.Location", "ObjectiveID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Objective");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.User", "Author")
                         .WithMany("Objectives")
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("MRS.DocumentManagement.Database.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationID");
 
                     b.HasOne("MRS.DocumentManagement.Database.Models.ObjectiveType", "ObjectiveType")
                         .WithMany("Objectives")
@@ -855,8 +876,6 @@ namespace DocumentManagement.Database.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Author");
-
-                    b.Navigation("Location");
 
                     b.Navigation("ObjectiveType");
 
@@ -1030,6 +1049,8 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("DynamicFields");
 
                     b.Navigation("Items");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ObjectiveType", b =>

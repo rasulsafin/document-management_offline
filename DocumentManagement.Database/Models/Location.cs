@@ -25,5 +25,11 @@
 
         [ForbidMerge]
         public Item Item { get; set; }
+
+        [ForbidMerge]
+        public int ObjectiveID { get; set; }
+
+        [ForbidMerge]
+        public Objective Objective { get; set; }
     }
 }

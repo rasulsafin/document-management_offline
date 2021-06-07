@@ -36,6 +36,9 @@ namespace MRS.DocumentManagement.Database.Models
 
         public int ObjectiveTypeID { get; set; }
 
+        [ForbidMerge]
+        public int? LocationID { get; set; }
+
         public Location Location { get; set; }
 
         [ForbidMergeAttribute]
