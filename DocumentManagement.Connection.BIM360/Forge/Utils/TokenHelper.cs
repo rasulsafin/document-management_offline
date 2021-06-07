@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                     tokensContainer.Add(userID, newToken);
             }
 
-            connection.Token = newToken;
+            connection.GetToken = () => newToken;
         }
 
         public void SetUserID(string userID)
@@ -53,11 +53,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             this.userID = userID;
 
             if (!tokensContainer.ContainsKey(userID))
-                tokensContainer.Add(this.userID, connection.Token);
-            else if (!string.IsNullOrWhiteSpace(connection.Token))
-                tokensContainer[userID] = connection.Token;
+                tokensContainer.Add(this.userID, connection.GetToken());
+            else if (!string.IsNullOrWhiteSpace(connection.GetToken()))
+                tokensContainer[userID] = connection.GetToken();
             else
-                connection.Token = tokensContainer[userID];
+                connection.GetToken = () => tokensContainer[userID];
         }
 
         public void SetInfo(string newUserID, string newToken)

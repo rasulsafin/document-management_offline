@@ -78,13 +78,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var location = pushpinAttributes.Location ?? Vector3.Zero;
             var offset = pushpinAttributes.ViewerState?.GlobalOffset ?? Vector3.Zero;
             var eye = pushpinAttributes.ViewerState?.Viewport?.Eye ?? Vector3.Zero;
-            var name = issue.Attributes.SheetMetadata?.Name;
 
             return new LocationExternalDto
             {
                 Location = (location - offset).ToMeters().ToXZY().ToTuple(),
                 CameraPosition = eye.ToMeters().ToXZY().ToTuple(),
-                ModelName = name,
             };
         }
     }

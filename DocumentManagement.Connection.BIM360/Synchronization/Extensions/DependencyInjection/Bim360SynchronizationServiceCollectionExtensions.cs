@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddBim360Synchronization(this IServiceCollection services)
         {
             services.AddScopedFactory<TokenHelper>();
+            services.AddScopedFactory<Authenticator>();
 
             services.AddContext();
 

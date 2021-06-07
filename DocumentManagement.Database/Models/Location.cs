@@ -18,8 +18,12 @@
 
         public float CameraPositionZ { get; set; }
 
-        public string BimElementID { get; set; }
+        public string Guid { get; set; }
 
-        public string ModelName { get; set; }
+        [ForbidMerge]
+        public int ItemID { get; set; }
+
+        [ForbidMerge]
+        public Item Item { get; set; }
     }
 }

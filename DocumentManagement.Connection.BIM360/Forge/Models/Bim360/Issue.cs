@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object Tags { get; set; }
 
             [DataMember(Name = "target_urn")]
-            public object TargetUrn { get; set; }
+            public string TargetUrn { get; set; }
 
             [DataMember(Name = "snapshot_urn")]
             public object SnapshotUrn { get; set; }

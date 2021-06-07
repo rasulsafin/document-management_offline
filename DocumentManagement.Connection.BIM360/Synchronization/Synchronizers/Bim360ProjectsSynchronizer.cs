@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
@@ -16,15 +18,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly Bim360ConnectionContext context;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly SnapshotFiller filler;
+        private readonly Authenticator authenticator;
 
         public Bim360ProjectsSynchronizer(
             Bim360ConnectionContext context,
             ItemsSyncHelper itemsSyncHelper,
-            SnapshotFiller filler)
+            SnapshotFiller filler,
+            Authenticator authenticator)
         {
             this.context = context;
             this.itemsSyncHelper = itemsSyncHelper;
             this.filler = filler;
+            this.authenticator = authenticator;
         }
 
         public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
@@ -35,6 +40,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         public async Task<ProjectExternalDto> Update(ProjectExternalDto obj)
         {
+            await authenticator.CheckAccessAsync(CancellationToken.None);
+
             var cashed = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID);
             var toRemove = cashed.Value.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
                .ToArray();
@@ -60,19 +67,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
+            await authenticator.CheckAccessAsync(CancellationToken.None);
+
             await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             return context.Snapshot.ProjectEnumerable.Select(x => x.Key).ToList();
         }
 
-        public Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
+        public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            return Task.FromResult<IReadOnlyCollection<ProjectExternalDto>>(
-                (from id in ids
-                    select context.Snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
-                    into project
-                    where project != null
-                    select GetFullProject(project)).ToList());
+            await authenticator.CheckAccessAsync(CancellationToken.None);
+
+            return (from id in ids
+                select context.Snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
+                into project
+                where project != null
+                select GetFullProject(project)).ToList();
         }
 
         private ProjectExternalDto GetFullProject(ProjectSnapshot project)

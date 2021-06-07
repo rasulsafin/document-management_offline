@@ -68,7 +68,6 @@ namespace MRS.DocumentManagement.Connection.Utils
         {
             if (authData != default)
                 request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
-            await Task.Delay(100);
             var response = await client.SendAsync(request, completionOption);
             response.EnsureSuccessStatusCode();
             return response;

@@ -17,15 +17,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly Bim360ConnectionContext context;
         private readonly ConverterAsync<ObjectiveStatus, Status> statusConvert;
         private readonly IssuesService issuesService;
+        private readonly FoldersService foldersService;
 
         public ObjectiveIssueConverter(
             Bim360ConnectionContext context,
             ConverterAsync<ObjectiveStatus, Status> statusConvert,
-            IssuesService issuesService)
+            IssuesService issuesService,
+            FoldersService foldersService)
         {
             this.context = context;
             this.statusConvert = statusConvert;
             this.issuesService = issuesService;
+            this.foldersService = foldersService;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
@@ -63,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetBimElements(objective),
-                    PushpinAttributes = GetPushpinAttributes(objective.Location, Vector3.Zero),
+                    PushpinAttributes = GetPushpinAttributes(objective.Location),
                     NgIssueTypeID = type,
                     NgIssueSubtypeID = subtype,
                     PermittedAttributes = permittedAttributes,
@@ -82,19 +85,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return field?.Value;
         }
 
-        private static Issue.PushpinAttributes GetPushpinAttributes(
-            LocationExternalDto locationDto,
-            Vector3 offset = default)
+        private static Issue.PushpinAttributes GetPushpinAttributes(LocationExternalDto locationDto)
         {
             var target = locationDto.Location.ToVector().ToFeet().ToXZY();
             var eye = locationDto.CameraPosition.ToVector().ToFeet().ToXZY();
 
             return new Issue.PushpinAttributes
             {
-                Location = target - offset,
+                Location = target,
                 ViewerState = new Issue.ViewerState
                 {
-                    GlobalOffset = offset,
                     Viewport = new Issue.Viewport
                     {
                         AspectRatio = 50,

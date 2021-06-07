@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +9,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -20,17 +23,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
         private readonly Authenticator authenticator;
-        private readonly ForgeConnection connection;
 
         public Bim360Connection(
-            ForgeConnection connection,
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
             TokenHelper tokenHelper)
         {
-            this.connection = connection;
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
@@ -46,8 +46,43 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            return Task.FromResult(
-                new ConnectionStatusDto { Status = RemoteConnectionStatus.OK });
+            try
+            {
+                var token = info.GetAuthValue(Constants.TOKEN_AUTH_NAME);
+
+                if (string.IsNullOrWhiteSpace(token))
+                {
+                    return Task.FromResult(
+                        new ConnectionStatusDto
+                        {
+                            Status = RemoteConnectionStatus.Error,
+                            Message = "Token is empty",
+                        });
+                }
+
+                var jwt = new JwtSecurityToken(token);
+                return Task.FromResult(
+                    DateTime.UtcNow.AddMinutes(1) < jwt.ValidTo
+                        ? new ConnectionStatusDto
+                        {
+                            Status = RemoteConnectionStatus.OK,
+                            Message = "Token is still valid",
+                        }
+                        : new ConnectionStatusDto
+                        {
+                            Status = RemoteConnectionStatus.NeedReconnect,
+                            Message = "Token expired",
+                        });
+            }
+            catch
+            {
+                return Task.FromResult(
+                    new ConnectionStatusDto
+                    {
+                        Status = RemoteConnectionStatus.Error,
+                        Message = "Token is invalid",
+                    });
+            }
         }
 
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)

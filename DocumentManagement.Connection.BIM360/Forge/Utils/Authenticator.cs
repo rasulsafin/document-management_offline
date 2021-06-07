@@ -1,6 +1,6 @@
 using System;
 using System.Diagnostics;
-using System.Globalization;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -22,16 +22,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         private static readonly string AUTODESK_WEBSITE = "https://autodesk.com/";
 
         private readonly AuthenticationService service;
+        private readonly TokenHelper tokenHelper;
         private readonly ILogger<Authenticator> logger;
         private HttpListener httpListener;
-        private DateTime sentTime;
 
-        // Is created as scoped as this service
-        private ConnectionInfoExternalDto connectionInfo;
-
-        public Authenticator(AuthenticationService service, ILogger<Authenticator> logger)
+        public Authenticator(AuthenticationService service, TokenHelper tokenHelper, ILogger<Authenticator> logger)
         {
             this.service = service;
+            this.tokenHelper = tokenHelper;
             this.logger = logger;
         }
 
@@ -43,33 +41,31 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             Error,
         }
 
+        public ConnectionInfoExternalDto ConnectionInfo { private get; set; }
+
         private ConnectionStatus Status { get; set; }
 
-        private bool IsLogged => !string.IsNullOrEmpty(AccessEnd) && DateTime.UtcNow < DateTime.Parse(AccessEnd, CultureInfo.InvariantCulture);
+        private bool IsLogged
+            => !string.IsNullOrEmpty(AccessToken) &&
+                DateTime.UtcNow.AddMinutes(1) < new JwtSecurityToken(AccessToken).ValidTo;
 
         private string AccessToken
         {
-            get => connectionInfo.GetAuthValue(TOKEN_AUTH_NAME);
-            set => connectionInfo.SetAuthValue(TOKEN_AUTH_NAME, value);
+            get => ConnectionInfo.GetAuthValue(TOKEN_AUTH_NAME);
+            set => ConnectionInfo.SetAuthValue(TOKEN_AUTH_NAME, value);
         }
 
         private string AccessRefreshToken
         {
-            get => connectionInfo.GetAuthValue(REFRESH_TOKEN_AUTH_NAME);
-            set => connectionInfo.SetAuthValue(REFRESH_TOKEN_AUTH_NAME, value);
+            get => ConnectionInfo.GetAuthValue(REFRESH_TOKEN_AUTH_NAME);
+            set => ConnectionInfo.SetAuthValue(REFRESH_TOKEN_AUTH_NAME, value);
         }
 
-        private string AccessEnd
-        {
-            get => connectionInfo.GetAuthValue(END_AUTH_NAME);
-            set => connectionInfo.SetAuthValue(END_AUTH_NAME, value);
-        }
+        private string AppClientId => ConnectionInfo.GetAppProperty(CLIENT_ID_NAME);
 
-        private string AppClientId => connectionInfo.GetAppProperty(CLIENT_ID_NAME);
+        private string AppClientSecret => ConnectionInfo.GetAppProperty(CLIENT_SECRET_NAME);
 
-        private string AppClientSecret => connectionInfo.GetAppProperty(CLIENT_SECRET_NAME);
-
-        private string AppCallBackUrl => connectionInfo.GetAppProperty(CALLBACK_URL_NAME);
+        private string AppCallBackUrl => ConnectionInfo.GetAppProperty(CALLBACK_URL_NAME);
 
         public void Dispose()
         {
@@ -81,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             ConnectionInfoExternalDto connectionInfo,
             CancellationToken token = default)
         {
-            this.connectionInfo = connectionInfo;
+            this.ConnectionInfo = connectionInfo;
             await CheckAccessAsync(token, true);
 
             var result = new ConnectionStatusDto
@@ -96,16 +92,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             return (result, connectionInfo);
         }
 
-        private void Cancel()
+        public async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
         {
-            httpListener.Abort();
-            httpListener = null;
-        }
-
-        private async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
-        {
-            sentTime = DateTime.UtcNow;
-
             if (!IsLogged || mustUpdate)
             {
                 if (string.IsNullOrEmpty(AccessToken))
@@ -124,6 +112,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                     }
                 }
             }
+        }
+
+        private void Cancel()
+        {
+            httpListener.Abort();
+            httpListener = null;
         }
 
         private async Task RefreshConnectionAsync()
@@ -241,8 +235,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             AccessToken = bearer.AccessToken;
             AccessRefreshToken = bearer.RefreshToken;
-            AccessEnd = sentTime.AddSeconds(bearer.ExpiresIn ?? 0).ToString(CultureInfo.InvariantCulture);
             Status = ConnectionStatus.Connected;
+
+            tokenHelper.SetToken(bearer.AccessToken);
         }
     }
 }

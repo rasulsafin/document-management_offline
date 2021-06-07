@@ -8,6 +8,6 @@
 
         public string Guid { get; set; }
 
-        public string ModelName { get; set; }
+        public ItemExternalDto Item { get; set; }
     }
 }

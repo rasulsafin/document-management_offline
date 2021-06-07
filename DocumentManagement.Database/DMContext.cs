@@ -131,6 +131,11 @@ namespace MRS.DocumentManagement.Database
                 .WithOne(x => x.ObjectiveType)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Objective>()
+               .HasOne(x => x.Location)
+               .WithOne()
+               .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ConnectionType>()
                  .HasIndex(x => x.Name)
                  .IsUnique();

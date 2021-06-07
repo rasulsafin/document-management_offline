@@ -226,7 +226,7 @@ namespace MRS.DocumentManagement.Utility.Mapping
                     o => o.MapFrom(
                         e => new Tuple<float, float, float>(e.CameraPositionX, e.CameraPositionY, e.CameraPositionZ)
                            .ToValueTuple()))
-               .ForMember(d => d.Guid, o => o.MapFrom(s => s.BimElementID));
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
             CreateMap<LocationExternalDto, Location>()
                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location.x))
                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location.y))
@@ -234,7 +234,7 @@ namespace MRS.DocumentManagement.Utility.Mapping
                .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
                .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
-               .ForMember(d => d.BimElementID, o => o.MapFrom(s => s.Guid));
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
         }
 
         private string GetName(User s)

@@ -14,15 +14,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly IssuesService issuesService;
         private readonly ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync;
         private readonly ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync;
+        private readonly ItemsService itemsService;
 
         public IssueSnapshotObjectiveConverter(
             IssuesService issuesService,
             ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync,
-            ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync)
+            ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync,
+            ItemsService itemsService)
         {
             this.issuesService = issuesService;
             this.convertToDtoAsync = convertToDtoAsync;
             this.convertTypeAsync = convertTypeAsync;
+            this.itemsService = itemsService;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -36,6 +39,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
             foreach (var attachment in snapshot.Items)
                 parsedToDto.Items.Add(attachment.Entity.ToDto());
+
+            if (parsedToDto.Location != null)
+            {
+                var target = await itemsService.GetAsync(
+                    snapshot.ProjectSnapshot.ID,
+                    snapshot.Entity.Attributes.TargetUrn);
+                parsedToDto.Location.Item = target.item.ToDto();
+            }
+
             return parsedToDto;
         }
     }

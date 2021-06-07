@@ -21,7 +21,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);
 
-        public string Token { internal get; set; }
+        public Func<string> GetToken { internal get; set; }
 
         public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
         {
@@ -48,7 +48,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             => await GetResponseStreamAuthorizedAsync(
                 methodType,
                 command,
-                authData: (Constants.AUTHORIZATION_SCHEME, Token),
+                authData: (Constants.AUTHORIZATION_SCHEME, GetToken()),
                 arguments);
 
         public async Task<JObject> SendAsync(
@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 settings.MethodType,
                 command,
                 arguments,
-                settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token) : default);
+                settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token: GetToken()) : default);
 
             if (settings.Content != null)
             {
