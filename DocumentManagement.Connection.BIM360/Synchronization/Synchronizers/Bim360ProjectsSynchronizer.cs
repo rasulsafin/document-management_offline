@@ -17,13 +17,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly Bim360ConnectionContext context;
         private readonly ItemsSyncHelper itemsSyncHelper;
-        private readonly SnapshotFiller filler;
+        private readonly IBim360SnapshotFiller filler;
         private readonly Authenticator authenticator;
 
         public Bim360ProjectsSynchronizer(
             Bim360ConnectionContext context,
             ItemsSyncHelper itemsSyncHelper,
-            SnapshotFiller filler,
+            IBim360SnapshotFiller filler,
             Authenticator authenticator)
         {
             this.context = context;

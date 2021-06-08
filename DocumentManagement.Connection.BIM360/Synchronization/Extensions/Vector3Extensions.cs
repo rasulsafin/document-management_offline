@@ -17,12 +17,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
         public static Vector3 GetUpwardVector(this Vector3 vector)
         {
             vector = Vector3.Normalize(vector);
-            var cos = Vector3.Dot(vector, Vector3.UnitZ) / vector.Length() / Vector3.UnitZ.Length();
+            var worldUp = Vector3.UnitZ;
+            var cos = Vector3.Dot(vector, worldUp) / vector.Length() / worldUp.Length();
             var angle = (float)Math.Acos(cos);
             if (angle < EPSILON)
                 return -Vector3.UnitY;
 
-            var up = ((float)(-1.0 / Math.Tan(angle)) * vector) + (Vector3.UnitZ / (float)Math.Sin(angle));
+            var up = ((float)(-1.0 / Math.Tan(angle)) * vector) + (worldUp / (float)Math.Sin(angle));
             return Vector3.Normalize(up);
         }
 

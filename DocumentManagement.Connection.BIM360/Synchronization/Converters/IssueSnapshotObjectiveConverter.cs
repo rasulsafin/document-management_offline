@@ -35,10 +35,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var typeField = await convertTypeAsync(types.First(x => x.ID == snapshot.Entity.Attributes.NgIssueTypeID));
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
-            parsedToDto.Items ??= new List<ItemExternalDto>();
 
-            foreach (var attachment in snapshot.Items)
-                parsedToDto.Items.Add(attachment.Entity.ToDto());
+            if (snapshot.Items != null)
+            {
+                parsedToDto.Items ??= new List<ItemExternalDto>();
+
+                foreach (var attachment in snapshot.Items)
+                    parsedToDto.Items.Add(attachment.Entity.ToDto());
+            }
 
             if (parsedToDto.Location != null && snapshot.Entity.Attributes.TargetUrn != null)
             {

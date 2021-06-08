@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly ItemsService itemsService;
         private readonly ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync;
         private readonly ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync;
-        private readonly SnapshotFiller filler;
+        private readonly IBim360SnapshotFiller filler;
         private readonly FoldersService foldersService;
         private readonly Authenticator authenticator;
         private readonly Bim360ConnectionContext context;
@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             ItemsService itemsService,
             ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync,
             ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync,
-            SnapshotFiller filler,
+            IBim360SnapshotFiller filler,
             FoldersService foldersService,
             Authenticator authenticator)
         {

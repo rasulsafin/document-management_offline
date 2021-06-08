@@ -9,7 +9,7 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
-    internal class SnapshotFiller
+    internal class SnapshotFiller : IBim360SnapshotFiller
     {
         private readonly Bim360ConnectionContext context;
         private readonly HubsService hubsService;
@@ -30,6 +30,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
             this.issuesService = issuesService;
             this.foldersService = foldersService;
         }
+
+        public bool IgnoreTestEntities { private get; set; } = true;
 
         private Bim360Snapshot Snapshot
         {
@@ -55,7 +57,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                 var projectsInHub = await projectsService.GetProjectsAsync(hub.Key);
                 hub.Value.Projects = new Dictionary<string, ProjectSnapshot>();
 
-                foreach (var p in projectsInHub.Where(p => p.Attributes.Name != Constants.INTEGRATION_TEST_PROJECT))
+                foreach (var p in IgnoreTestEntities
+                    ? projectsInHub.Where(p => p.Attributes.Name != Constants.INTEGRATION_TEST_PROJECT)
+                    : projectsInHub)
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);

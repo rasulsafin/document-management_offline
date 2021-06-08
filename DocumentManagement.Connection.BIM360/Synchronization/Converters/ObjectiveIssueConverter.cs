@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
@@ -17,18 +16,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly Bim360ConnectionContext context;
         private readonly ConverterAsync<ObjectiveStatus, Status> statusConvert;
         private readonly IssuesService issuesService;
-        private readonly FoldersService foldersService;
 
         public ObjectiveIssueConverter(
             Bim360ConnectionContext context,
             ConverterAsync<ObjectiveStatus, Status> statusConvert,
-            IssuesService issuesService,
-            FoldersService foldersService)
+            IssuesService issuesService)
         {
             this.context = context;
             this.statusConvert = statusConvert;
             this.issuesService = issuesService;
-            this.foldersService = foldersService;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
@@ -87,6 +83,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private static Issue.PushpinAttributes GetPushpinAttributes(LocationExternalDto locationDto)
         {
+            if (locationDto == null)
+                return null;
+
             var target = locationDto.Location.ToVector().ToFeet().ToXZY();
             var eye = locationDto.CameraPosition.ToVector().ToFeet().ToXZY();
 
@@ -97,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 {
                     Viewport = new Issue.Viewport
                     {
-                        AspectRatio = 50,
+                        AspectRatio = 60,
                         Eye = eye,
                         Up = (target - eye).GetUpwardVector(),
                         Target = target,

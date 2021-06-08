@@ -23,11 +23,11 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddContext();
 
-            services.AddSynchronizer<Bim360ObjectivesSynchronizer>();
-            services.AddSynchronizer<Bim360ProjectsSynchronizer>();
+            services.AddSynchronizer<Bim360ObjectivesSynchronizer, ObjectiveExternalDto>();
+            services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
             services.AddScoped<ItemsSyncHelper>();
-            services.AddScoped<SnapshotFiller>();
+            services.AddScoped<IBim360SnapshotFiller, SnapshotFiller>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
@@ -54,12 +54,12 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        private static IServiceCollection AddSynchronizer<TSynchronizer>(this IServiceCollection services)
-            where TSynchronizer : class
+        private static IServiceCollection AddSynchronizer<TSynchronizer, TDto>(this IServiceCollection services)
+            where TSynchronizer : class, ISynchronizer<TDto>
         {
             services.AddScoped<TSynchronizer>();
             services.AddScoped<Func<TSynchronizer>>(x => x.GetRequiredService<TSynchronizer>);
-            services.AddScoped<IFactory<TSynchronizer>, Factory<TSynchronizer>>();
+            services.AddScoped<IFactory<ISynchronizer<TDto>>, Factory<TSynchronizer>>();
             return services;
         }
     }
