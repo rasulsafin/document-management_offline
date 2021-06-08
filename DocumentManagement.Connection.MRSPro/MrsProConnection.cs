@@ -30,12 +30,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         {
             try
             {
-                info.UserExternalID = await authService.Connect(
+                var authorizationResult = await authService.SignInAsync(
                     info.AuthFieldValues[AUTH_EMAIL],
                     info.AuthFieldValues[AUTH_PASS],
                     info.AuthFieldValues[COMPANY_CODE]);
 
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Connection complete." };
+                info.UserExternalID = authorizationResult.userId;
+
+                return authorizationResult.authStatus;
             }
             catch (Exception ex)
             {

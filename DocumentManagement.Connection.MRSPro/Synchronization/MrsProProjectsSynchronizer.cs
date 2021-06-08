@@ -11,9 +11,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
-        private readonly ProjectService projectService;
+        private readonly ProjectsService projectService;
 
-        public MrsProProjectsSynchronizer(ProjectService projectService)
+        public MrsProProjectsSynchronizer(ProjectsService projectService)
         {
             this.projectService = projectService;
         }

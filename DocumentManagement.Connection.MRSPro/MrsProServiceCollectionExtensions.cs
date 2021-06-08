@@ -12,7 +12,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<MrsProConnection>();
             services.AddScoped<MrsProConnectionContext>();
             services.AddScoped<AuthenticationService>();
-            services.AddScoped<ProjectService>();
+            services.AddScoped<ProjectsService>();
             services.AddScoped<ObjectiveService>();
 
             services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);

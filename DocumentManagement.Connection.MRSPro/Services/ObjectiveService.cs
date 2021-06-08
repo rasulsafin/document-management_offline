@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
@@ -10,7 +9,7 @@ using MRS.DocumentManagement.Connection.MrsPro.Properties;
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
     /// <summary>
-    /// Works with only MrsPro.Models
+    /// Works with MrsPro.Models only.
     /// </summary>
     public class ObjectiveService : Service
     {
@@ -19,10 +18,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         internal async Task<IEnumerable<Objective>> GetObjectives(DateTime date)
         {
-            var listOfAllObjectives = await HttpConnection.SendAsync<IEnumerable<Objective>>(
-                HttpMethod.Get,
-                URLs.GetObjectives);
+            // TODO: try request with data as query?
+            var listOfAllObjectives = await HttpConnection.GetAll<Objective>(URLs.GetObjectives);
 
+            // TODO: Remove it;
             date = new DateTime(2021, 6, 6);
 
             var unixDate = date.ToUnixTime();
@@ -32,14 +31,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         internal async Task<IEnumerable<Objective>> GetObjectivesById(IReadOnlyCollection<string> ids)
         {
-            return await GetById<IEnumerable<Objective>>(GetValueString(ids), URLs.GetObjectivesByIds);
+            return await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, ids);
         }
 
         internal async Task<Objective> TryGetObjectiveById(string id)
         {
             try
             {
-                var res = await GetById<IEnumerable<Objective>>(id, URLs.GetObjectivesByIds);
+                var res = await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, id);
                 return res.FirstOrDefault();
             }
             catch

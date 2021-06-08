@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -22,7 +21,30 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             this.logger = logger;
         }
 
-        private string BaseUrl { get => string.Format(BASE_URL, Auth.CompanyCode); }
+        private static string BaseUrl => string.Format(BASE_URL, Auth.CompanyCode);
+
+        public async Task<IEnumerable<TOut>> GetAll<TOut>(string method)
+        {
+            return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method);
+        }
+
+        public async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, IReadOnlyCollection<string> ids)
+        {
+            StringBuilder str = new ();
+            var count = ids.Count - 1;
+
+            for (int i = 0; i < count; i++)
+                str.Append(ids.ElementAt(i)).Append(',');
+
+            str.Append(ids.ElementAt(count));
+
+            return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: new object[] { str.ToString() });
+        }
+
+        public async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, string id)
+        {
+            return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: new object[] { id });
+        }
 
         public async Task<TOut> SendAsyncJson<TOut, TData>(HttpMethod methodType, string method, TData contentObject)
         {
@@ -30,14 +52,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(methodType, method, content);
         }
 
-        public async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  object[] arguments = null)
+        private async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  params object[] arguments)
         {
             var url = BaseUrl + method;
             var request = CreateRequest(methodType, url, arguments);
             request.Content = content;
             request.Headers.Add(SCHEME, Auth.Token);
-
-            logger.LogInformation("Request {0} send to {1}", methodType, url);
 
             var response = await GetResponseAsync(request);
             return response.ToObject<T>();

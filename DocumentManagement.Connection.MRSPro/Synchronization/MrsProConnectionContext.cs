@@ -7,10 +7,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProConnectionContext : AConnectionContext
     {
-        private ProjectService projectService;
+        private ProjectsService projectService;
         private ObjectiveService objectiveService;
 
-        public MrsProConnectionContext(ProjectService projectService, ObjectiveService objectiveService)
+        public MrsProConnectionContext(ProjectsService projectService, ObjectiveService objectiveService)
         {
             this.projectService = projectService;
             this.objectiveService = objectiveService;

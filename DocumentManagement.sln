@@ -72,6 +72,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Launcher
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro", "DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.MRSPro.Tests", "DocumentManagement.Connection.MRSPro.Tests\DocumentManagement.Connection.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -170,6 +172,10 @@ Global
 		{187991B0-7D6F-41E4-AFDE-1B47620757EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{187991B0-7D6F-41E4-AFDE-1B47620757EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{187991B0-7D6F-41E4-AFDE-1B47620757EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC59CC05-62EE-4D7B-B465-E04851330994}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC59CC05-62EE-4D7B-B465-E04851330994}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC59CC05-62EE-4D7B-B465-E04851330994}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC59CC05-62EE-4D7B-B465-E04851330994}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -193,6 +199,7 @@ Global
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{B7C9A573-FADD-488C-BBA3-B24AE3787C52} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
 		{187991B0-7D6F-41E4-AFDE-1B47620757EF} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{FC59CC05-62EE-4D7B-B465-E04851330994} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}
