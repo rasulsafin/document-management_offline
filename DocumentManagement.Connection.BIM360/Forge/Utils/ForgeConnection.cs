@@ -48,7 +48,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 params object[] arguments)
             => await GetResponseStreamAuthorizedAsync(methodType, command, authData: (Constants.AUTHORIZATION_SCHEME, Token), arguments);
 
-        public async Task<JObject> SendAsync(
+        public async Task<JToken> SendAsync(
                 ForgeSettings settings,
                 string command,
                 params object[] arguments)
