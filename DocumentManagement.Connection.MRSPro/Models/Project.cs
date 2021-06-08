@@ -3,7 +3,7 @@ using System.Runtime.Serialization;
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Project
+    public class Project : IElement
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }

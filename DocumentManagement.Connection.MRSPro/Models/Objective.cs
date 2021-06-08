@@ -1,9 +1,10 @@
+using System;
 using System.Runtime.Serialization;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Task
+    public class Objective : IElement
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -13,6 +14,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "createdDate")]
         public long CreatedDate { get; set; }
+
+        [DataMember(Name = "dueDate")]
+        public long DueDate { get; set; }
 
         [DataMember(Name = "code")]
         public string Code { get; set; }
