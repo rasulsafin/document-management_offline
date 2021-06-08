@@ -31,6 +31,70 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 item.ExternalID = remote.FirstOrDefault(x => x.RelativePath == item.RelativePath)?.ExternalID;
         }
 
+        public async Task FindAndAttachExists(
+            SynchronizingTuple<Item> tuple,
+            SynchronizingData data,
+            object parent,
+            string path)
+        {
+            (int project, int objective) GetParents(bool local)
+            {
+                var i = 0;
+                var objective1 = 0;
+
+                switch (parent)
+                {
+                    case SynchronizingTuple<Objective> objectiveTuple:
+                        var obj = local ? objectiveTuple.Local : objectiveTuple.Synchronized;
+                        i = obj.ProjectID;
+                        objective1 = obj.ID;
+                        break;
+                    case SynchronizingTuple<Project> projectTuple:
+                        i = (local ? projectTuple.Local : projectTuple.Synchronized).ID;
+                        break;
+                }
+
+                return (i, objective1);
+            }
+
+            var external = tuple.ExternalID;
+            int project = 0;
+            int objective = 0;
+
+            Expression<Func<Item, bool>> predicate =
+                x => ((x.Objectives != null &&
+                            x.Objectives.Any(oi => oi.ObjectiveID == objective || oi.Objective.ProjectID == project)) ||
+                        x.ProjectID == project) &&
+                    ((x.ExternalID != null && x.ExternalID == external) || x.RelativePath == path);
+
+            if ((tuple.Local?.ID ?? 0) == 0)
+            {
+                (project, objective) = GetParents(true);
+                tuple.Local = await context.Items.FirstOrDefaultAsync(predicate);
+                tuple.LocalChanged = true;
+            }
+
+            if ((tuple.Synchronized?.ID ?? 0) == 0)
+            {
+                (project, objective) = GetParents(false);
+                tuple.Synchronized = await context.Items.FirstOrDefaultAsync(predicate);
+                tuple.SynchronizedChanged = true;
+            }
+
+            var synced = tuple.Synchronized;
+
+            if (synced != null && tuple.Remote == null)
+            {
+                tuple.Remote = new Item
+                {
+                    ExternalID = synced.ExternalID,
+                    ItemType = synced.ItemType,
+                    RelativePath = synced.RelativePath,
+                };
+                tuple.RemoteChanged = true;
+            }
+        }
+
         protected override async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
@@ -99,70 +163,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     when tuple.Remote.ProjectID == null && tuple.Remote.Project == null:
                     tuple.Remote.Project = projectTuple.Synchronized ?? projectTuple.Local;
                     break;
-            }
-        }
-
-        private async Task FindAndAttachExists(
-            SynchronizingTuple<Item> tuple,
-            SynchronizingData data,
-            object parent,
-            string path)
-        {
-            (int project, int objective) GetParents(bool local)
-            {
-                var i = 0;
-                var objective1 = 0;
-
-                switch (parent)
-                {
-                    case SynchronizingTuple<Objective> objectiveTuple:
-                        var obj = local ? objectiveTuple.Local : objectiveTuple.Synchronized;
-                        i = obj.ProjectID;
-                        objective1 = obj.ID;
-                        break;
-                    case SynchronizingTuple<Project> projectTuple:
-                        i = (local ? projectTuple.Local : projectTuple.Synchronized).ID;
-                        break;
-                }
-
-                return (i, objective1);
-            }
-
-            var external = tuple.ExternalID;
-            int project = 0;
-            int objective = 0;
-
-            Expression<Func<Item, bool>> predicate =
-                x => ((x.Objectives != null &&
-                            x.Objectives.Any(oi => oi.ObjectiveID == objective || oi.Objective.ProjectID == project)) ||
-                        x.ProjectID == project) &&
-                    ((x.ExternalID != null && x.ExternalID == external) || x.RelativePath == path);
-
-            if ((tuple.Local?.ID ?? 0) == 0)
-            {
-                (project, objective) = GetParents(true);
-                tuple.Local = await context.Items.FirstOrDefaultAsync(predicate);
-                tuple.LocalChanged = true;
-            }
-
-            if ((tuple.Synchronized?.ID ?? 0) == 0)
-            {
-                (project, objective) = GetParents(false);
-                tuple.Synchronized = await context.Items.FirstOrDefaultAsync(predicate);
-                tuple.SynchronizedChanged = true;
-            }
-
-            var synced = tuple.Synchronized;
-
-            if (synced != null && tuple.Remote == null)
-            {
-                tuple.Remote = new Item
-                {
-                    ExternalID = synced.ExternalID,
-                    ItemType = synced.ItemType,
-                    RelativePath = synced.RelativePath,
-                };
-                tuple.RemoteChanged = true;
             }
         }
     }

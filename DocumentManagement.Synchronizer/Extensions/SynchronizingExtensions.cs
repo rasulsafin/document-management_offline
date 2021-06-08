@@ -21,6 +21,7 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 : tuple.remote == null                               ? SynchronizingAction.RemoveFromLocal
                                                                        : SynchronizingAction.Merge;
 
+        // TODO: improve Merge methods
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
                 where T : class, ISynchronizable<T>, new()
         {

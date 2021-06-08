@@ -19,7 +19,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
     {
         private const string RESPONSE_HTML_TYPE = "text/html";
         private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
-        private static readonly string AUTODESK_WEBSITE = "https://autodesk.com/";
 
         private readonly AuthenticationService service;
         private readonly TokenHelper tokenHelper;
@@ -134,6 +133,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             catch (Exception e)
             {
                 logger.LogError(e, "Can't refresh connection");
+                throw;
             }
         }
 
@@ -143,7 +143,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             {
                 token.ThrowIfCancellationRequested();
 
-                if (!await WebFeatures.RemoteUrlExistsAsync(AUTODESK_WEBSITE))
+                if (!await Bim360WebFeatures.CanPingAutodesk())
                     throw new Exception("Failed to ping the server");
 
                 Task<HttpListenerContext> getting = null;

@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             foreach (var attachment in snapshot.Items)
                 parsedToDto.Items.Add(attachment.Entity.ToDto());
 
-            if (parsedToDto.Location != null)
+            if (parsedToDto.Location != null && snapshot.Entity.Attributes.TargetUrn != null)
             {
                 var target = await itemsService.GetAsync(
                     snapshot.ProjectSnapshot.ID,

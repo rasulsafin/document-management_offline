@@ -44,44 +44,67 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return authorizationResult.authStatus;
         }
 
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
+            if (!await Bim360WebFeatures.CanPingAutodesk())
+            {
+                return new ConnectionStatusDto
+                {
+                    Status = RemoteConnectionStatus.Error,
+                    Message = "Failed to ping the server",
+                };
+            }
+
             try
             {
                 var token = info.GetAuthValue(Constants.TOKEN_AUTH_NAME);
 
                 if (string.IsNullOrWhiteSpace(token))
                 {
-                    return Task.FromResult(
+                    return
                         new ConnectionStatusDto
                         {
                             Status = RemoteConnectionStatus.Error,
                             Message = "Token is empty",
-                        });
+                        };
                 }
 
                 var jwt = new JwtSecurityToken(token);
-                return Task.FromResult(
-                    DateTime.UtcNow.AddMinutes(1) < jwt.ValidTo
-                        ? new ConnectionStatusDto
-                        {
-                            Status = RemoteConnectionStatus.OK,
-                            Message = "Token is still valid",
-                        }
-                        : new ConnectionStatusDto
-                        {
-                            Status = RemoteConnectionStatus.NeedReconnect,
-                            Message = "Token expired",
-                        });
+
+                if (DateTime.UtcNow.AddMinutes(1) > jwt.ValidTo)
+                {
+                    return new ConnectionStatusDto
+                    {
+                        Status = RemoteConnectionStatus.NeedReconnect,
+                        Message = "Token expired",
+                    };
+                }
+
+                tokenHelper.SetInfo(info.UserExternalID, token);
+
+                if (await authenticationService.GetMe() == null)
+                {
+                    return new ConnectionStatusDto
+                    {
+                        Status = RemoteConnectionStatus.Error,
+                        Message = "Token is invalid",
+                    };
+                }
+
+                return new ConnectionStatusDto
+                {
+                    Status = RemoteConnectionStatus.OK,
+                    Message = "Token is still valid",
+                };
             }
             catch
             {
-                return Task.FromResult(
+                return
                     new ConnectionStatusDto
                     {
                         Status = RemoteConnectionStatus.Error,
                         Message = "Token is invalid",
-                    });
+                    };
             }
         }
 
