@@ -1,9 +1,7 @@
-﻿using System;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Properties;
-using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
@@ -12,25 +10,21 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         public AuthenticationService(MrsProHttpConnection connection)
             : base(connection) { }
 
-        internal async Task<ConnectionStatusDto> Connect(string email, string password)
+        internal async Task<string> Connect(string email, string password, string companyCode)
         {
-            try
-            {
-                var userToLogin = new LoginUser()
-                {
-                    Email = email,
-                    Password = password,
-                };
+            Auth.CompanyCode = companyCode;
 
-                var userWithToken = await Connector.SendAsyncJson<UserWithToken, LoginUser>(HttpMethod.Post, URLs.PostLogin, userToLogin);
-                MrsProHttpConnection.Token = userWithToken.AccessToken;
-
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Connection complete." };
-            }
-            catch (Exception ex)
+            var userToLogin = new LoginUser()
             {
-                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = ex.Message };
-            }
+                Email = email,
+                Password = password,
+            };
+
+            var userWithToken = await HttpConnection.SendAsyncJson<UserWithToken, LoginUser>(HttpMethod.Post, URLs.PostLogin, userToLogin);
+            Auth.Token = userWithToken.AccessToken;
+            Auth.OrganizationId = userWithToken.OrganizationId;
+
+            return userWithToken.Id;
         }
     }
 }

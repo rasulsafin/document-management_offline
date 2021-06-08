@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -13,24 +14,37 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private readonly ILogger<MrsProConnection> logger;
         private readonly AuthenticationService authService;
+        private readonly Func<MrsProConnectionContext> getContext;
 
-        public MrsProConnection(ILogger<MrsProConnection> logger, AuthenticationService authService)
+        public MrsProConnection(
+            ILogger<MrsProConnection> logger,
+            AuthenticationService authService,
+            Func<MrsProConnectionContext> getContextet)
         {
             this.logger = logger;
             this.authService = authService;
+            this.getContext = getContextet;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
-            logger.LogTrace("SignInAsync started with info: {@ConnectionInfo}", info);
-            MrsProHttpConnection.CompanyCode = info.AuthFieldValues[COMPANY_CODE];
-            return await authService.Connect(info.AuthFieldValues[AUTH_EMAIL], info.AuthFieldValues[AUTH_PASS]);
+            try
+            {
+                info.UserExternalID = await authService.Connect(
+                    info.AuthFieldValues[AUTH_EMAIL],
+                    info.AuthFieldValues[AUTH_PASS],
+                    info.AuthFieldValues[COMPANY_CODE]);
+
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Connection complete." };
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = ex.Message };
+            }
         }
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
-        {
-            return new MrsProConnectionContext();
-        }
+            => getContext();
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
@@ -44,7 +58,23 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
-            throw new NotImplementedException();
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            {
+                new ObjectiveTypeExternalDto
+                {
+                   ExternalId = ISSUE_TYPE,
+                   Name = "Замечание",
+                },
+                new ObjectiveTypeExternalDto
+                {
+                   ExternalId = ELEMENT_TYPE,
+                   Name = "Элемент проекта",
+                },
+            };
+
+            // TODO: Dynamic fields
+
+            return Task.FromResult(info);
         }
     }
 }

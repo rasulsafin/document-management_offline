@@ -61,11 +61,38 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /nrs/task.
+        /// </summary>
+        internal static string GetObjectives {
+            get {
+                return ResourceManager.GetString("GetObjectives", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /nrs/task?ids={0}.
+        /// </summary>
+        internal static string GetObjectivesByIds {
+            get {
+                return ResourceManager.GetString("GetObjectivesByIds", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /nrs/project.
         /// </summary>
         internal static string GetProjects {
             get {
                 return ResourceManager.GetString("GetProjects", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /nrs/project?ids={0}.
+        /// </summary>
+        internal static string GetProjectsByIds {
+            get {
+                return ResourceManager.GetString("GetProjectsByIds", resourceCulture);
             }
         }
         

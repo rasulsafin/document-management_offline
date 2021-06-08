@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
@@ -14,11 +15,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private static readonly string SCHEME = "x-auth-token";
 
-        internal static string CompanyCode { get; set; }
+        private readonly ILogger<MrsProConnection> logger;
 
-        internal static string Token { get; set; }
+        public MrsProHttpConnection(ILogger<MrsProConnection> logger)
+        {
+            this.logger = logger;
+        }
 
-        private static string BaseUrl { get => string.Format(BASE_URL, CompanyCode); }
+        private string BaseUrl { get => string.Format(BASE_URL, Auth.CompanyCode); }
 
         public async Task<TOut> SendAsyncJson<TOut, TData>(HttpMethod methodType, string method, TData contentObject)
         {
@@ -29,8 +33,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  object[] arguments = null)
         {
             var url = BaseUrl + method;
-            var request = CreateRequest(methodType, url, new object[] { arguments }, (SCHEME, Token));
+            var request = CreateRequest(methodType, url, arguments);
             request.Content = content;
+            request.Headers.Add(SCHEME, Auth.Token);
+
+            logger.LogInformation("Request {0} send to {1}", methodType, url);
+
             var response = await GetResponseAsync(request);
             return response.ToObject<T>();
         }

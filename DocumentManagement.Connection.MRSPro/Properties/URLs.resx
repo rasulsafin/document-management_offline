@@ -117,9 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="GetObjectives" xml:space="preserve">
+    <value>/nrs/task</value>
+    <comment>Получить замечания</comment>
+  </data>
+  <data name="GetObjectivesByIds" xml:space="preserve">
+    <value>/nrs/task?ids={0}</value>
+    <comment>Получить замечания по id</comment>
+  </data>
   <data name="GetProjects" xml:space="preserve">
     <value>/nrs/project</value>
     <comment>Получить проекты</comment>
+  </data>
+  <data name="GetProjectsByIds" xml:space="preserve">
+    <value>/nrs/project?ids={0}</value>
+    <comment>Получить проекты по id</comment>
   </data>
   <data name="PostLogin" xml:space="preserve">
     <value>/nrs/login</value>

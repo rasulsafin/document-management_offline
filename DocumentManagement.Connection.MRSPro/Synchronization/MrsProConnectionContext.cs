@@ -8,15 +8,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     public class MrsProConnectionContext : AConnectionContext
     {
         private ProjectService projectService;
+        private ObjectiveService objectiveService;
 
-        public MrsProConnectionContext(ProjectService projectService)
+        public MrsProConnectionContext(ProjectService projectService, ObjectiveService objectiveService)
         {
             this.projectService = projectService;
+            this.objectiveService = objectiveService;
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
         {
-            return new MrsProObjectivesSynchronizer();
+            return new MrsProObjectivesSynchronizer(objectiveService, projectService);
         }
 
         protected override ISynchronizer<ProjectExternalDto> CreateProjectsSynchronizer()

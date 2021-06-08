@@ -12,16 +12,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
     {
         internal static ObjectiveExternalDto ToObjectiveExternalDto(this IElement element)
         {
-            if (element is Objective obj)
+            return element switch
             {
-               return obj.ToObjectiveExternalDto();
-            } else
-            {
-                if (element is Project project)
-                    return project.ToObjectiveExternalDto();
-            }
-
-            return null;
+                Objective obj => obj.ToObjectiveExternalDto(),
+                Project project => project.ToObjectiveExternalDto(),
+                _ => null
+            };
         }
 
         internal static ObjectiveExternalDto ToObjectiveExternalDto(this Objective objective)

@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -22,14 +23,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
+        public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            throw new NotImplementedException();
+            var projects = await projectService.GetProjectsById(ids);
+            return projects.Select(x => x.ToProjectExternalDto()).ToArray();
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            var result = await projectService.GetProjects();
+            var result = await projectService.GetRootProjects();
             return result.Select(x => x.Id).ToArray();
         }
 
