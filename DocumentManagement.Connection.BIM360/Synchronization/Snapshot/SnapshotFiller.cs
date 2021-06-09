@@ -66,7 +66,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                     var projectSnapshot = new ProjectSnapshot(p);
                     hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
-                    var topFolder = topFolders.FirstOrDefault(x => x.Attributes.DisplayName == "Project Files") ??
+                    var topFolder = topFolders.FirstOrDefault(
+                            x => x.Attributes.DisplayName == "Project Files" ||
+                                x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
                         topFolders.First();
                     projectSnapshot.ProjectFilesFolder = topFolder;
 
