@@ -91,6 +91,8 @@ namespace MRS.DocumentManagement.Services
                     await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
                 }
 
+                await LinkLocationItem(data.Location?.Item, objective);
+
                 await context.SaveChangesAsync();
                 return mapper.Map<ObjectiveToListDto>(objective);
             }
@@ -403,6 +405,27 @@ namespace MRS.DocumentManagement.Services
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
 
             return dbObjective;
+        }
+
+        private async Task LinkLocationItem(ItemDto locationItemDto, Objective objective)
+        {
+            if (locationItemDto != null)
+            {
+                objective.Project ??= await context.FindOrThrowAsync<Project>(objective.ProjectID);
+
+                var locationItem = await itemHelper.CheckItemToLink(
+                    context,
+                    mapper,
+                    locationItemDto,
+                    objective.Project);
+
+                if (locationItem != null)
+                    objective.Project.Items.Add(locationItem);
+                else
+                    locationItem = await context.FindOrThrowAsync<Item>((int)locationItemDto.ID);
+
+                objective.Location.Item = locationItem;
+            }
         }
     }
 }

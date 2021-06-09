@@ -128,7 +128,8 @@ namespace MRS.DocumentManagement.Utility.Mapping
                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position.z))
                .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
-               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z));
+               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
+               .ForMember(d => d.Item, o => o.Ignore());
         }
 
         private void CreateObjectiveMapToModel()
