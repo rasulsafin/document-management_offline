@@ -17,10 +17,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     /// </summary>
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly ObjectiveService objectiveService;
+        private readonly ObjectivesService objectiveService;
         private readonly ProjectsService projectService;
 
-        public MrsProObjectivesSynchronizer(ObjectiveService objectiveService, ProjectsService projectService)
+        public MrsProObjectivesSynchronizer(ObjectivesService objectiveService, ProjectsService projectService)
         {
             this.objectiveService = objectiveService;
             this.projectService = projectService;

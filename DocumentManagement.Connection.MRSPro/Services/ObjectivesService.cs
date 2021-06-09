@@ -11,12 +11,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     /// <summary>
     /// Works with MrsPro.Models only.
     /// </summary>
-    public class ObjectiveService : Service
+    public class ObjectivesService : Service
     {
-        public ObjectiveService(MrsProHttpConnection connection)
+        public ObjectivesService(MrsProHttpConnection connection)
             : base(connection) { }
 
-        internal async Task<IEnumerable<Objective>> GetObjectives(DateTime date)
+        public async Task<IEnumerable<Objective>> GetObjectives(DateTime date)
         {
             // TODO: try request with data as query?
             var listOfAllObjectives = await HttpConnection.GetAll<Objective>(URLs.GetObjectives);
@@ -29,12 +29,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        internal async Task<IEnumerable<Objective>> GetObjectivesById(IReadOnlyCollection<string> ids)
+        public async Task<IEnumerable<Objective>> TryGetObjectivesById(IReadOnlyCollection<string> ids)
         {
-            return await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, ids);
+            try
+            {
+                return await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, ids);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        internal async Task<Objective> TryGetObjectiveById(string id)
+        public async Task<Objective> TryGetObjectiveById(string id)
         {
             try
             {
