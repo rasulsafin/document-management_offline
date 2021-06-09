@@ -58,6 +58,7 @@ namespace MRS.DocumentManagement.Connection.Utils
             using var response = await SendRequestAsync(request, authData);
             var content = await response.Content.ReadAsStringAsync();
             var jObject = JObject.Parse(content);
+            response.EnsureSuccessStatusCode();
             return jObject;
         }
 
@@ -69,7 +70,6 @@ namespace MRS.DocumentManagement.Connection.Utils
             if (authData != default)
                 request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
             var response = await client.SendAsync(request, completionOption);
-            response.EnsureSuccessStatusCode();
             return response;
         }
     }

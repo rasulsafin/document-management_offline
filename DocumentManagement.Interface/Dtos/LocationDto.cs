@@ -10,6 +10,6 @@
 
         public string BimElementID { get; set; }
 
-        public string ModelName { get; set; }
+        public ItemDto Item { get; set; }
     }
 }

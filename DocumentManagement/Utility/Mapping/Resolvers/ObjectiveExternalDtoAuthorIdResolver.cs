@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Utility.Mapping.Resolvers
         {
             this.dbContext = dbContext;
             this.logger = logger;
-            logger.LogTrace("ItemFullPathResolver created");
+            logger.LogTrace("ObjectiveExternalDtoAuthorIdResolver created");
         }
 
         public int? Resolve(ObjectiveExternalDto source, Objective destination, int? destMember, ResolutionContext context)
