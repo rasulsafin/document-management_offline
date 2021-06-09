@@ -81,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
             return new LocationExternalDto
             {
-                Location = (location - offset).ToMeters().ToXZY().ToTuple(),
+                Location = (location + offset).ToMeters().ToXZY().ToTuple(),
                 CameraPosition = eye.ToMeters().ToXZY().ToTuple(),
             };
         }

@@ -63,8 +63,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var project = GetProjectSnapshot(obj);
 
             var snapshot = new IssueSnapshot(issue, project);
-            await SetGlobalOffset(snapshot);
             await LinkTarget(obj, project, issue);
+            await SetGlobalOffset(snapshot);
             var created = await issuesService.PostIssueAsync(project.IssueContainer, issue);
             snapshot.Entity = created;
             project.Issues.Add(created.ID, snapshot);
@@ -110,9 +110,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var project = GetProjectSnapshot(obj);
             var snapshot = project.Issues[obj.ExternalID];
 
-            await SetGlobalOffset(snapshot);
             if (issue.Attributes.TargetUrn == null || issue.Attributes.StartingVersion == null)
+            {
                 await LinkTarget(obj, project, issue);
+                await SetGlobalOffset(snapshot);
+            }
+
             snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
             var parsedToDto = await convertToDtoAsync(snapshot);
 
@@ -276,7 +279,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private async Task SetGlobalOffset(IssueSnapshot snapshot)
         {
             if (snapshot.Entity.Attributes.PushpinAttributes != null &&
-                snapshot.Entity.Attributes.PushpinAttributes.ViewerState.GlobalOffset == Vector3.Zero)
+                (snapshot.Entity.Attributes.PushpinAttributes.ViewerState.GlobalOffset ?? Vector3.Zero) ==
+                Vector3.Zero && snapshot.Entity.Attributes.TargetUrn != null)
             {
                 var filter = new Filter(
                     typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.TargetUrn)),
