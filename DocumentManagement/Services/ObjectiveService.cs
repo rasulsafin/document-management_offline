@@ -221,6 +221,7 @@ namespace MRS.DocumentManagement.Services
                             .ThenInclude(x => x.BimElement)
                     .Include(x => x.Objectives)
                         .ThenInclude(x => x.Location)
+                            .ThenInclude(x => x.Item)
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
@@ -390,6 +391,7 @@ namespace MRS.DocumentManagement.Services
                .Include(x => x.Author)
                .Include(x => x.ObjectiveType)
                .Include(x => x.Location)
+                    .ThenInclude(x => x.Item)
                .Include(x => x.DynamicFields)
                     .ThenInclude(x => x.ChildrenDynamicFields)
                .Include(x => x.Items)
