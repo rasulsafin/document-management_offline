@@ -20,6 +20,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         }
 
         private static IEnumerable<Status> GetStatusesExceptRemoved()
-            => Enum.GetValues(typeof(Status)).Cast<Status>().Where(x => x != REMOVED_STATUS);
+            => Enum.GetValues(typeof(Status)).Cast<Status>().Where(x => x != REMOVED_STATUS && x != Status.Undefined);
     }
 }

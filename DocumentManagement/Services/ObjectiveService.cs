@@ -48,6 +48,8 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var objective = mapper.Map<Objective>(data);
+                var location = objective.Location;
+                objective.Location = null;
                 logger.LogTrace("Mapped data: {@Objective}", objective);
                 await context.Objectives.AddAsync(objective);
                 await context.SaveChangesAsync();
@@ -91,7 +93,8 @@ namespace MRS.DocumentManagement.Services
                     await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
                 }
 
-                await LinkLocationItem(data.Location?.Item, objective);
+                if (location != null)
+                    await LinkLocation(data.Location?.Item, objective, location);
 
                 await context.SaveChangesAsync();
                 return mapper.Map<ObjectiveToListDto>(objective);
@@ -407,11 +410,12 @@ namespace MRS.DocumentManagement.Services
             return dbObjective;
         }
 
-        private async Task LinkLocationItem(ItemDto locationItemDto, Objective objective)
+        private async Task LinkLocation(ItemDto locationItemDto, Objective objective, Location location)
         {
             if (locationItemDto != null)
             {
-                objective.Project ??= await context.FindOrThrowAsync<Project>(objective.ProjectID);
+                objective.Project ??= await context.Projects.Include(x => x.Items)
+                   .FindOrThrowAsync(x => x.ID, objective.ProjectID);
 
                 var locationItem = await itemHelper.CheckItemToLink(
                     context,
@@ -424,6 +428,7 @@ namespace MRS.DocumentManagement.Services
                 else
                     locationItem = await context.FindOrThrowAsync<Item>((int)locationItemDto.ID);
 
+                objective.Location = location;
                 objective.Location.Item = locationItem;
             }
         }
