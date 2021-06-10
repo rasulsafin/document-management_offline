@@ -8,9 +8,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     public class MrsProConnectionContext : AConnectionContext
     {
         private ProjectsService projectService;
-        private ObjectivesService objectiveService;
+        private IssuesService objectiveService;
 
-        public MrsProConnectionContext(ProjectsService projectService, ObjectivesService objectiveService)
+        public MrsProConnectionContext(ProjectsService projectService, IssuesService objectiveService)
         {
             this.projectService = projectService;
             this.objectiveService = objectiveService;

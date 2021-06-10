@@ -104,5 +104,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Properties {
                 return ResourceManager.GetString("PostLogin", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /nrs/task.
+        /// </summary>
+        internal static string PostObjective {
+            get {
+                return ResourceManager.GetString("PostObjective", resourceCulture);
+            }
+        }
     }
 }

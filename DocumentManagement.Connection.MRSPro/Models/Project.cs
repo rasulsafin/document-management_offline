@@ -14,9 +14,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "createdDate")]
         public long CreatedDate { get; set; }
 
-        [DataMember(Name = "name")]
-        public string Name { get; set; }
-
         [DataMember(Name = "type")]
         public string Type { get; set; }
 
@@ -28,5 +25,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "parentId")]
         public string ParentId { get; set; }
+
+        [DataMember(Name = "name")]
+        public string Name { get; set; }
+
+        public string Title { get => Name; set => Name = value; }
+
+        public string Description { get; set; } = string.Empty;
+
+        public long LastModifiedDate { get; set; }
+
+        public long DueDate { get; set; }
+
+        public string State { get; set; }
     }
 }

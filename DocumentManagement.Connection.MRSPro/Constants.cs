@@ -13,5 +13,7 @@
 
         public static readonly string ROOT = ":ORGANIZATION";
         public static readonly string PROJECT = ":PROJECT";
+
+        public static readonly char ID_SPLITTER = ':';
     }
 }

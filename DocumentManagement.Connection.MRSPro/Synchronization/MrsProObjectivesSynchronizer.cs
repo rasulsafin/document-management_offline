@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
@@ -17,17 +16,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     /// </summary>
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly ObjectivesService objectiveService;
-        private readonly ProjectsService projectService;
+        private readonly IElementService issuesService;
+        private readonly IElementService projectsService;
 
-        public MrsProObjectivesSynchronizer(ObjectivesService objectiveService, ProjectsService projectService)
+        public MrsProObjectivesSynchronizer(IssuesService issuesService, ProjectsService projectsService)
         {
-            this.objectiveService = objectiveService;
-            this.projectService = projectService;
+            this.issuesService = issuesService;
+            this.projectsService = projectsService;
         }
 
         public Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
+            var element = obj.ToModel(obj.ObjectiveType.ExternalId);
             throw new NotImplementedException();
         }
 
@@ -37,11 +37,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
             foreach (var id in ids)
             {
-                IElement result = await projectService.TryGetProjectById(id);
-                if (result == null)
-                    result = await objectiveService.TryGetObjectiveById(id);
-
-                objectives.AddIsNotNull(result.ToObjectiveExternalDto());
+                var idParts = id.Split(Constants.ID_SPLITTER);
+                (var trueId, var type) = (idParts[0], idParts[1]);
+                var result = await GetService(type).TryGetById(trueId);
+                objectives.AddIsNotNull(result.ToDto());
             }
 
             return objectives;
@@ -49,10 +48,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            var listOfObjectives = await objectiveService.GetObjectives(date);
-            var listOfProjects = await projectService.GetProjects();
-            var objectiveIds = listOfObjectives.Select(o => o.Id);
-            var projectIds = listOfProjects.Select(o => o.Id);
+            var projectIds = await GetUpdatedIdsFromService(projectsService, date);
+            var objectiveIds = await GetUpdatedIdsFromService(issuesService, date);
 
             return projectIds.Union(objectiveIds).ToArray();
         }
@@ -65,6 +62,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
             throw new NotImplementedException();
+        }
+
+        private IElementService GetService(string type)
+        {
+            if (type == Constants.ISSUE_TYPE)
+                return issuesService;
+            else
+                return projectsService;
+        }
+
+        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementService service, DateTime date)
+        {
+            var collection = await service.GetAll(date);
+            return collection.Select(o => o.Id);
         }
     }
 }

@@ -46,10 +46,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: new object[] { id });
         }
 
-        public async Task<TOut> SendAsyncJson<TOut, TData>(HttpMethod methodType, string method, TData contentObject)
+        public async Task<TOut> SendAsyncJson<TOut, TData>(string method, TData contentObject)
         {
             var content = new StringContent(JsonConvert.SerializeObject(contentObject), Encoding.UTF8, "application/json");
-            return await SendAsync<TOut>(methodType, method, content);
+            return await SendAsync<TOut>(HttpMethod.Post, method, content);
         }
 
         private async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  params object[] arguments)

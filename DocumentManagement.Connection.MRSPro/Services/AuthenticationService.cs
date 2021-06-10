@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                     Password = password,
                 };
 
-                var userWithToken = await HttpConnection.SendAsyncJson<UserWithToken, LoginUser>(HttpMethod.Post, URLs.PostLogin, userToLogin);
+                var userWithToken = await HttpConnection.SendAsyncJson<UserWithToken, LoginUser>(URLs.PostLogin, userToLogin);
                 if (userWithToken.AccessToken == null)
                     throw new Exception("No connection.");
 

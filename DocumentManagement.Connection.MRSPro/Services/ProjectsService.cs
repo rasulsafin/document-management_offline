@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Properties;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class ProjectsService : Service
+    public class ProjectsService : Service, IElementService
     {
         public ProjectsService(MrsProHttpConnection connection)
             : base(connection) { }
@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return listOfAllProjects.Where(p => p.Ancestry == RootPath).ToArray();
         }
 
-        public async Task<IEnumerable<Project>> GetProjects()
+        public async Task<IEnumerable<IElement>> GetAll(DateTime date)
         {
             var listOfAllProjects = await HttpConnection.GetAll<Project>(
                 URLs.GetProjects);
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return listOfAllProjects.Where(p => p.Ancestry != RootPath).ToArray();
         }
 
-        public async Task<IEnumerable<Project>> TryGetProjectsById(IReadOnlyCollection<string> ids)
+        public async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Project> TryGetProjectById(string id)
+        public async Task<IElement> TryGetById(string id)
         {
             try
             {

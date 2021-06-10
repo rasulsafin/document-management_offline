@@ -14,6 +14,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
     [TestClass]
     public class ProjectsServiceTests
     {
+        private static readonly DateTime DATE = DateTime.MinValue;
+
         private static ProjectsService service;
         private static ServiceProvider serviceProvider;
 
@@ -48,7 +50,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task GetAllProjectsAsync_ReturnsProjectsList()
         {
-            var result = await service.GetProjects();
+            var result = await service.GetAll(DATE);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -67,9 +69,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
         {
-            var projects = await service.GetProjects();
+            var projects = await service.GetAll(DATE);
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
-            var result = await service.TryGetProjectsById(existingIds);
+            var result = await service.TryGetByIds(existingIds);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -85,7 +87,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 $"nonExistingId3{Guid.NewGuid()}",
             };
 
-            var result = await service.TryGetProjectsById(nonExistingIds);
+            var result = await service.TryGetByIds(nonExistingIds);
 
             Assert.IsNull(result);
         }
@@ -93,10 +95,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetExistingProjectByIdAsync_ReturnsProject()
         {
-            var projects = await service.GetProjects();
+            var projects = await service.GetAll(DATE);
             var existingID = projects.First().Id;
 
-            var result = await service.TryGetProjectById(existingID);
+            var result = await service.TryGetById(existingID);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Ancestry != string.Empty);
@@ -109,7 +111,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         public async Task TryGetNonExistingProjectsByIdAsync_ReturnsNull()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
-            var result = await service.TryGetProjectById(nonExistingId);
+            var result = await service.TryGetById(nonExistingId);
 
             Assert.IsNull(result);
         }

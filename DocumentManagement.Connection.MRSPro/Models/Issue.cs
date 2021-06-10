@@ -1,10 +1,9 @@
-using System;
 using System.Runtime.Serialization;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Objective : IElement
+    public class Issue : IElement
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -14,6 +13,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "createdDate")]
         public long CreatedDate { get; set; }
+
+        [DataMember(Name = "type")]
+        public string Type { get; set; }
+
+        [DataMember(Name = "owner")]
+        public string Owner { get; set; }
+
+        [DataMember(Name = "parentType")]
+        public string ParentType { get; set; }
+
+        [DataMember(Name = "parentId")]
+        public string ParentId { get; set; }
 
         [DataMember(Name = "dueDate")]
         public long DueDate { get; set; }
@@ -36,9 +47,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "lastModifiedDate")]
         public long LastModifiedDate { get; set; }
 
-        [DataMember(Name = "type")]
-        public string Type { get; set; }
-
         [DataMember(Name = "important")]
         public bool Important { get; set; }
 
@@ -47,14 +55,5 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "isReopened")]
         public bool IsReopened { get; set; }
-
-        [DataMember(Name = "owner")]
-        public string Owner { get; set; }
-
-        [DataMember(Name = "parentType")]
-        public string ParentType { get; set; }
-
-        [DataMember(Name = "parentId")]
-        public string ParentId { get; set; }
     }
 }

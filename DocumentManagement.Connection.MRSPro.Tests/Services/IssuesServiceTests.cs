@@ -11,9 +11,9 @@ using MRS.DocumentManagement.Interface.Dtos;
 namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 {
     [TestClass]
-    public class ObjectivesServiceTests
+    public class IssuesServiceTests
     {
-        private static ObjectivesService service;
+        private static IssuesService service;
         private static ServiceProvider serviceProvider;
 
         [ClassInitialize]
@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             services.AddMrsPro();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
             serviceProvider = services.BuildServiceProvider();
-            service = serviceProvider.GetService<ObjectivesService>();
+            service = serviceProvider.GetService<IssuesService>();
             var authenticator = serviceProvider.GetService<AuthenticationService>();
 
             // Authorize
@@ -45,18 +45,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
          => await Task.Delay(5000);
 
         [TestMethod]
-        public async Task TryGetExistingObjectivesByIdsAsync_ReturnsObjectivesByIdsList()
+        public async Task TryGetExistingIssuesByIdsAsync_ReturnsIssuesByIdsList()
         {
-            var projects = await service.GetObjectives(DateTime.MinValue);
+            var projects = await service.GetAll(DateTime.MinValue);
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
-            var result = await service.TryGetObjectivesById(existingIds);
+            var result = await service.TryGetByIds(existingIds);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingObjectivesByIdsAsync_ReturnsEmptyList()
+        public async Task TryGetNonExistingIssuesByIdsAsync_ReturnsEmptyList()
         {
             var nonExistingIds = new List<string>()
             {
@@ -65,18 +65,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 $"nonExistingId3{Guid.NewGuid()}",
             };
 
-            var result = await service.TryGetObjectivesById(nonExistingIds);
+            var result = await service.TryGetByIds(nonExistingIds);
 
             Assert.IsNull(result);
         }
 
         [TestMethod]
-        public async Task TryGetExistingObjectiveByIdAsync_ReturnsObjective()
+        public async Task TryGetExistingIssueByIdAsync_ReturnsIssue()
         {
-            var projects = await service.GetObjectives(DateTime.MinValue);
+            var projects = await service.GetAll(DateTime.MinValue);
             var existingID = projects.First().Id;
 
-            var result = await service.TryGetObjectiveById(existingID);
+            var result = await service.TryGetById(existingID);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Ancestry != string.Empty);
@@ -86,12 +86,33 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingObjectiveByIdAsync_ReturnsNull()
+        public async Task TryGetNonExistingIssueByIdAsync_ReturnsNull()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
-            var result = await service.TryGetObjectiveById(nonExistingId);
+            var result = await service.TryGetById(nonExistingId);
 
             Assert.IsNull(result);
         }
+
+        //[TestMethod]
+        //public async Task TryAddIssue_ReturnsAddedIssue()
+        //{
+        //    var Issue = new Issue()
+        //    {
+        //        CreatedDate = 1623242719575,
+        //        Owner = "60b5c2d69fbb9657cf2e0d5f",
+        //        ParentId = "60be1809d90f8f6dc96f8345",
+        //        ParentType = "project",
+        //        ProjectId = "60be1809d90f8f6dc96f8345",
+        //        State = "opened",
+        //        Type = "task",
+        //        Description = "Test description",
+        //        Title = "Test title",
+        //    };
+
+        //    var result = await service.PostObjective(objective);
+
+        //    Assert.IsNotNull(result);
+        //}
     }
 }

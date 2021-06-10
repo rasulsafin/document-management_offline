@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -25,8 +26,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            var projects = await projectService.TryGetProjectsById(ids);
-            return projects.Select(x => x.ToProjectExternalDto()).ToArray();
+            var projects = await projectService.TryGetByIds(ids);
+            return projects.Select(x => (x as Project).ToProjectExternalDto()).ToArray();
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)

@@ -11,15 +11,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     /// <summary>
     /// Works with MrsPro.Models only.
     /// </summary>
-    public class ObjectivesService : Service
+    public class IssuesService : Service, IElementService
     {
-        public ObjectivesService(MrsProHttpConnection connection)
+        public IssuesService(MrsProHttpConnection connection)
             : base(connection) { }
 
-        public async Task<IEnumerable<Objective>> GetObjectives(DateTime date)
+        public async Task<IEnumerable<IElement>> GetAll(DateTime date)
         {
             // TODO: try request with data as query?
-            var listOfAllObjectives = await HttpConnection.GetAll<Objective>(URLs.GetObjectives);
+            var listOfAllObjectives = await HttpConnection.GetAll<Issue>(URLs.GetObjectives);
 
             // TODO: Remove it;
             date = new DateTime(2021, 6, 6);
@@ -29,11 +29,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        public async Task<IEnumerable<Objective>> TryGetObjectivesById(IReadOnlyCollection<string> ids)
+        public async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
-                return await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, ids);
+                return await HttpConnection.GetByIds<Issue>(URLs.GetObjectivesByIds, ids);
             }
             catch
             {
@@ -41,17 +41,23 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Objective> TryGetObjectiveById(string id)
+        public async Task<IElement> TryGetById(string id)
         {
             try
             {
-                var res = await HttpConnection.GetByIds<Objective>(URLs.GetObjectivesByIds, id);
+                var res = await HttpConnection.GetByIds<Issue>(URLs.GetObjectivesByIds, id);
                 return res.FirstOrDefault();
             }
             catch
             {
                 return null;
             }
+        }
+
+        public async Task<Issue> PostObjective(Issue objective)
+        {
+            var result =  await HttpConnection.SendAsyncJson<Issue, Issue>(URLs.PostObjective, objective);
+            return result;
         }
     }
 }
