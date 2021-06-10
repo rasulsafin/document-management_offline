@@ -85,8 +85,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 CreateObjectiveParentLink(data, tuple);
+                var projectID = tuple.Local.ProjectID;
                 var project = await context.Projects.Include(x => x.SynchronizationMate)
-                   .FirstOrDefaultAsync(x => x.ID == tuple.Local.ProjectID);
+                   .FirstOrDefaultAsync(x => x.ID == projectID);
                 tuple.Synchronized.ProjectID = project?.SynchronizationMateID ?? 0;
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
 
@@ -157,6 +158,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
+                tuple.Merge();
                 MergeBimElements(tuple);
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 if (resultAfterChildrenSync.Count > 0)
@@ -313,7 +315,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         // TODO: improve this
         private async Task LinkLocationItem(SynchronizingTuple<Objective> tuple)
         {
-            if (tuple.Local!.Location != null && tuple.Local.Location.Item == null)
+            if (tuple.Local!.Location != null &&
+                (tuple.Local.Location.Item == null || tuple.Synchronized.Location.Item == null))
             {
                 var itemTuple = new SynchronizingTuple<Item>(
                     local: tuple.Local.Location!.Item,
@@ -327,7 +330,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     (string)itemTuple.GetPropertyValue(nameof(Item.RelativePath)));
 
                 tuple.Local.Location.Item = itemTuple.Local;
-                tuple.Synchronized.Location.Item = itemTuple.Synchronized;
+                tuple.Synchronized.Location.Item = itemTuple.Synchronized ?? itemTuple.Local?.SynchronizationMate;
                 tuple.Remote.Location.Item = itemTuple.Remote;
             }
         }

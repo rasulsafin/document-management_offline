@@ -55,11 +55,27 @@ namespace MRS.DocumentManagement.Connection.Utils
                 HttpRequestMessage request,
                 (string scheme, string token) authData = default)
         {
-            using var response = await SendRequestAsync(request, authData);
-            var content = await response.Content.ReadAsStringAsync();
-            var jObject = JObject.Parse(content);
-            response.EnsureSuccessStatusCode();
-            return jObject;
+            Exception exception = null;
+            string result = string.Empty;
+
+            for (int i = 0; i < 5; i++)
+            {
+                try
+                {
+                    using var response = await SendRequestAsync(request, authData);
+                    result = await response.Content.ReadAsStringAsync();
+                    var jObject = JObject.Parse(result);
+                    response.EnsureSuccessStatusCode();
+                    return jObject;
+                }
+                catch (Exception e)
+                {
+                    exception = e;
+                    await Task.Delay(1000);
+                }
+            }
+
+            throw new Exception(result, exception);
         }
 
         public async Task<HttpResponseMessage> SendRequestAsync(

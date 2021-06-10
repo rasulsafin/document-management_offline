@@ -38,7 +38,7 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                         continue;
 
                 if (property.PropertyType.GetCustomAttribute(typeof(MergeContractAttribute)) != null &&
-                    (property.GetValue(tuple.Synchronized) != null || property.GetValue(tuple.Synchronized) != null ||
+                    (property.GetValue(tuple.Local) != null || property.GetValue(tuple.Synchronized) != null ||
                         property.GetValue(tuple.Remote) != null))
                 {
                     var type = typeof(SynchronizingTuple<>)
