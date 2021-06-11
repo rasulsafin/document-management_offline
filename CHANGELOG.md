@@ -10,13 +10,11 @@
 ### Безопасность:
 
 
-## 1.0.2 - xxxx-xx-xx
+## [1.0.2] - 2021-60-11
 
 ### Изменено:
 
 * Конфигурация IIS.
-
-### Исправлено:
 
 
 ## [1.0.1] - 2021-05-07
@@ -108,6 +106,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[1.0.2]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.2
 [1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1
 [1.0.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.0
 [0.8.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/0.8.1
