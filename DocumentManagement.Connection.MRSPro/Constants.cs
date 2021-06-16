@@ -2,6 +2,10 @@
 {
     internal static class Constants
     {
+        internal const string STATE_OPENED = "opened";
+        internal const string STATE_COMPLETED = "completed";
+        internal const string STATE_VERIFIED = "verified ";
+
         internal static readonly string BASE_URL = "https://service-{0}.plotpad.com/nrs";
 
         internal static readonly string AUTH_PASS = "password";
@@ -16,6 +20,9 @@
 
         internal static readonly char ID_SPLITTER = ':';
 
-        internal static string OP_REPLACE = "replace";
+        internal static readonly string OP_REPLACE = "replace";
+
+        internal static string GetByIds(string url)
+            => url + "?ids={0}";
     }
 }

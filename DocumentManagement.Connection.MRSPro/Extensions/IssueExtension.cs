@@ -24,6 +24,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
                 CreationDate = time,
                 DueDate = element.DueDate.ToDateTime() ?? time,
                 UpdatedAt = element.LastModifiedDate.ToDateTime() ?? time,
+
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),
                 // TODO: Items
@@ -49,12 +50,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
             element.State = GetState(dto.Status);
             element.ParentId = dto.ParentObjectiveExternalID ?? dto.ProjectExternalID;
             element.ParentType = Constants.ELEMENT_TYPE;
-            //element. = dto.ParentObjectiveExternalID;
 
             // TODO: DynamicFields
             // TODO: Items
             // TODO: BimElements
-
             return element;
         }
 
@@ -70,16 +69,24 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
         }
 
         private static ObjectiveStatus GetStatus(string state)
-        {
-            // TODO: Status
-            return ObjectiveStatus.Open;
-        }
+         => state switch
+         {
+             Constants.STATE_VERIFIED => ObjectiveStatus.Ready,
+             Constants.STATE_OPENED => ObjectiveStatus.Open,
+             Constants.STATE_COMPLETED => ObjectiveStatus.InProgress,
+             _ => ObjectiveStatus.Undefined,
+         };
 
         private static string GetState(ObjectiveStatus status)
+        => status switch
         {
-            // TODO: State
-            return "opened";
-        }
+            ObjectiveStatus.Open => Constants.STATE_OPENED,
+            ObjectiveStatus.Undefined => Constants.STATE_OPENED,
+            ObjectiveStatus.InProgress => Constants.STATE_COMPLETED,
+            ObjectiveStatus.Ready => Constants.STATE_VERIFIED,
+            ObjectiveStatus.Late => Constants.STATE_OPENED,
+            _ => Constants.STATE_OPENED,
+        };
 
         private static IElement GetElement(string type)
             => type == Constants.ELEMENT_TYPE ? new Project() : new Issue();

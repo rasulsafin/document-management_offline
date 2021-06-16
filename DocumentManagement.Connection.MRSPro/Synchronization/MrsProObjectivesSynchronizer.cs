@@ -12,10 +12,6 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro
 {
-    /// <summary>
-    /// Synchronizes DM.ObjectiveExternalDto models with MrsPro.Objective models.
-    /// Merges different types together. Maps models.
-    /// </summary>
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
         private readonly IElementService issuesService;

@@ -14,30 +14,31 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private readonly ILogger<MrsProConnection> logger;
         private readonly AuthenticationService authService;
+        private readonly UsersService userService;
         private readonly Func<MrsProConnectionContext> getContext;
 
         public MrsProConnection(
             ILogger<MrsProConnection> logger,
             AuthenticationService authService,
-            Func<MrsProConnectionContext> getContextet)
+            UsersService userService,
+            Func<MrsProConnectionContext> getContext)
         {
             this.logger = logger;
             this.authService = authService;
-            this.getContext = getContextet;
+            this.userService = userService;
+            this.getContext = getContext;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
         {
             try
             {
-                var authorizationResult = await authService.SignInAsync(
+                var authStatus = await authService.SignInAsync(
                     info.AuthFieldValues[AUTH_EMAIL],
                     info.AuthFieldValues[AUTH_PASS],
                     info.AuthFieldValues[COMPANY_CODE]);
 
-                info.UserExternalID = authorizationResult.userId;
-
-                return authorizationResult.authStatus;
+                return authStatus;
             }
             catch (Exception ex)
             {
@@ -50,6 +51,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
+            // TODO: Get Status
             throw new NotImplementedException();
         }
 
@@ -58,7 +60,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return new MrsProStorage();
         }
 
-        public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
+        public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
             {
@@ -74,9 +76,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                 },
             };
 
-            // TODO: Dynamic fields
+            var currentUser = await userService.GetMe();
+            info.UserExternalID = currentUser.Id;
 
-            return Task.FromResult(info);
+            // TODO: Dynamic fields
+            return info;
         }
     }
 }

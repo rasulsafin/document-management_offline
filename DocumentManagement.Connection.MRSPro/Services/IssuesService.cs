@@ -4,22 +4,21 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Connection.MrsPro.Properties;
+using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    /// <summary>
-    /// Works with MrsPro.Models only.
-    /// </summary>
     public class IssuesService : Service, IElementService
     {
+        private static readonly string BASE_URL = "/task";
+
         public IssuesService(MrsProHttpConnection connection)
             : base(connection) { }
 
         public async Task<IEnumerable<IElement>> GetAll(DateTime date)
         {
             // TODO: try request with data as query?
-            var listOfAllObjectives = await HttpConnection.GetAll<Issue>(URLs.GetObjectives);
+            var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
 
             // TODO: Remove it;
             date = new DateTime(2021, 6, 6);
@@ -33,7 +32,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             try
             {
-                return await HttpConnection.GetByIds<Issue>(URLs.GetObjectivesByIds, ids);
+                var idsStr = GetListAsString(ids);
+                return await HttpConnection.GetListOf<Issue>(GetByIds(BASE_URL), idsStr);
             }
             catch
             {
@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             try
             {
-                var res = await HttpConnection.GetByIds<Issue>(URLs.GetObjectivesByIds, id);
+                var res = await HttpConnection.GetListOf<Issue>(GetByIds(BASE_URL), new[] { id });
                 return res.FirstOrDefault();
             }
             catch
@@ -56,13 +56,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         public async Task<IElement> TryPost(IElement element)
         {
-            var result =  await HttpConnection.SendAsyncJson<Issue>(URLs.PostObjective, element as Issue);
+            var result =  await HttpConnection.PostJson<Issue>(BASE_URL, element as Issue);
             return result;
         }
 
         public async Task<IElement> TryPatch(UpdatedValues valuesToPatch)
         {
-            var result = await HttpConnection.PatchAsyncJson<IEnumerable<Issue>, UpdatedValues>(URLs.PatchObjective, valuesToPatch);
+            var result = await HttpConnection.PatchJson<IEnumerable<Issue>, UpdatedValues>(BASE_URL, valuesToPatch);
             return result.FirstOrDefault();
         }
     }

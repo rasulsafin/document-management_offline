@@ -3,7 +3,7 @@
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class UserWithToken
+    public class User
     {
         [DataMember(Name = "accessToken")]
         public string AccessToken { get; set; }
