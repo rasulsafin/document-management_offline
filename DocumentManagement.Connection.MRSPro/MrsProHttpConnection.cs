@@ -23,12 +23,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         private static string BaseUrl => string.Format(BASE_URL, Auth.CompanyCode);
 
-        public async Task<IEnumerable<TOut>> GetAll<TOut>(string method)
+        internal async Task<IEnumerable<TOut>> GetAll<TOut>(string method)
         {
             return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method);
         }
 
-        public async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, IReadOnlyCollection<string> ids)
         {
             StringBuilder str = new ();
             var count = ids.Count - 1;
@@ -41,15 +41,35 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: new object[] { str.ToString() });
         }
 
-        public async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, string id)
+        internal async Task<IEnumerable<TOut>> GetByIds<TOut>(string method, string id)
         {
             return await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: new object[] { id });
         }
 
-        public async Task<TOut> SendAsyncJson<TOut, TData>(string method, TData contentObject)
+        internal async Task<TOut> Get<TOut>(string method)
+        {
+            return await SendAsync<TOut>(HttpMethod.Get, method);
+        }
+
+        internal async Task<TData> SendAsyncJson<TData>(string method, TData contentObject)
+        {
+            return await SendAsyncJson<TData, TData>(method, contentObject);
+        }
+
+        internal async Task<TOut> SendAsyncJson<TOut, TData>(string method, TData contentObject)
+        {
+            return await Send<TOut, TData>(HttpMethod.Post, method, contentObject);
+        }
+
+        internal async Task<TOut> PatchAsyncJson<TOut, TData>(string method, TData contentObject)
+        {
+            return await Send<TOut, TData>(HttpMethod.Patch, method, contentObject);
+        }
+
+        private async Task<TOut> Send<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject)
         {
             var content = new StringContent(JsonConvert.SerializeObject(contentObject), Encoding.UTF8, "application/json");
-            return await SendAsync<TOut>(HttpMethod.Post, method, content);
+            return await SendAsync<TOut>(httpMethod, method, content);
         }
 
         private async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  params object[] arguments)

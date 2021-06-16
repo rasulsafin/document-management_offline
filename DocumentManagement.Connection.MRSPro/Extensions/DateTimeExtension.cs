@@ -2,19 +2,19 @@
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
 {
-    public static class DateTimeExtension
+    internal static class DateTimeExtension
     {
         private static readonly DateTime DEFAULT_DATE =
-            new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            new (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
-        public static long ToUnixTime(this DateTime date)
+        internal static long ToUnixTime(this DateTime date)
         {
             var timeSpan = TimeZoneInfo.ConvertTimeToUtc(date)
                 .Subtract(DEFAULT_DATE);
             return (long)timeSpan.TotalMilliseconds;
         }
 
-        public static DateTime? ToDateTime(this long unixDate)
+        internal static DateTime? ToDateTime(this long unixDate)
         {
             if (unixDate == default)
                 return null;

@@ -55,5 +55,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                 return null;
             }
         }
+
+        public Task<IElement> TryPost(IElement element)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

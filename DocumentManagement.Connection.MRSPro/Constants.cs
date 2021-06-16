@@ -1,19 +1,21 @@
 ﻿namespace MRS.DocumentManagement.Connection.MrsPro
 {
-    public static class Constants
+    internal static class Constants
     {
-        public static readonly string BASE_URL = "https://service-{0}.plotpad.com";
+        internal static readonly string BASE_URL = "https://service-{0}.plotpad.com/nrs";
 
-        public static readonly string AUTH_PASS = "password";
-        public static readonly string AUTH_EMAIL = "email";
-        public static readonly string COMPANY_CODE = "companyCode";
+        internal static readonly string AUTH_PASS = "password";
+        internal static readonly string AUTH_EMAIL = "email";
+        internal static readonly string COMPANY_CODE = "companyCode";
 
-        public static readonly string ISSUE_TYPE = "task";
-        public static readonly string ELEMENT_TYPE = "project";
+        internal static readonly string ISSUE_TYPE = "task";
+        internal static readonly string ELEMENT_TYPE = "project";
 
-        public static readonly string ROOT = ":ORGANIZATION";
-        public static readonly string PROJECT = ":PROJECT";
+        internal static readonly string ROOT = ":ORGANIZATION";
+        internal static readonly string PROJECT = ":PROJECT";
 
-        public static readonly char ID_SPLITTER = ':';
+        internal static readonly char ID_SPLITTER = ':';
+
+        internal static string OP_REPLACE = "replace";
     }
 }

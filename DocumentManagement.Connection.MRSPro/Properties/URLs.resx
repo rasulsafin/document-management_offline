@@ -133,6 +133,10 @@
     <value>/nrs/project?ids={0}</value>
     <comment>Получить проекты по id</comment>
   </data>
+  <data name="PatchObjective" xml:space="preserve">
+    <value>/nrs/task</value>
+    <comment>Изменить замечание</comment>
+  </data>
   <data name="PostLogin" xml:space="preserve">
     <value>/nrs/login</value>
     <comment>Зайти в аккаунт</comment>

@@ -7,8 +7,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProConnectionContext : AConnectionContext
     {
-        private ProjectsService projectService;
-        private IssuesService objectiveService;
+        private readonly ProjectsService projectService;
+        private readonly IssuesService objectiveService;
 
         public MrsProConnectionContext(ProjectsService projectService, IssuesService objectiveService)
         {

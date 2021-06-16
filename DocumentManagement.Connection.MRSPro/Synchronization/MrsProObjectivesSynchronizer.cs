@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
@@ -25,10 +27,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             this.projectsService = projectsService;
         }
 
-        public Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
+        public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
             var element = obj.ToModel(obj.ObjectiveType.ExternalId);
-            throw new NotImplementedException();
+            var result = await GetService(element.Type).TryPost(element);
+            return result.ToDto();
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
@@ -59,9 +62,22 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             throw new NotImplementedException();
         }
 
-        public Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
+        public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            throw new NotImplementedException();
+            var element = obj.ToModel(obj.ObjectiveType.ExternalId);
+            var updatedValues = new UpdatedValues { Ids = new[] { element.Id } };
+            var type = element.GetType();
+            var propertiesToPatch = type.GetProperties()
+                .Where(p => Attribute.IsDefined(p, typeof(IsPatchable)))
+                .Select(p => new Patch()
+                    {
+                        Path = $"/{((DataMemberAttribute)Attribute.GetCustomAttribute(p, typeof(DataMemberAttribute))).Name}",
+                        Value = p.GetValue(element) ?? string.Empty,
+                    }).ToArray();
+
+            updatedValues.Patch = propertiesToPatch;
+            var result = await GetService(element.Type).TryPatch(updatedValues);
+            return result.ToDto();
         }
 
         private IElementService GetService(string type)

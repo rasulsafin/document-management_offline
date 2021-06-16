@@ -54,10 +54,16 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Issue> PostObjective(Issue objective)
+        public async Task<IElement> TryPost(IElement element)
         {
-            var result =  await HttpConnection.SendAsyncJson<Issue, Issue>(URLs.PostObjective, objective);
+            var result =  await HttpConnection.SendAsyncJson<Issue>(URLs.PostObjective, element as Issue);
             return result;
+        }
+
+        public async Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        {
+            var result = await HttpConnection.PatchAsyncJson<IEnumerable<Issue>, UpdatedValues>(URLs.PatchObjective, valuesToPatch);
+            return result.FirstOrDefault();
         }
     }
 }

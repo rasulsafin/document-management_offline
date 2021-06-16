@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -15,6 +17,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
     {
         private static IssuesService service;
         private static ServiceProvider serviceProvider;
+        private static string userId;
 
         [ClassInitialize]
         public static void Init(TestContext unused)
@@ -32,8 +35,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var companyCode = "skprofitgroup";
             var signInTask = authenticator.SignInAsync(email, password, companyCode);
             signInTask.Wait();
-            if (signInTask.Result.authStatus.Status != RemoteConnectionStatus.OK)
+            var result = signInTask.Result;
+            if (result.authStatus.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
+
+            userId = result.userId;
         }
 
         [ClassCleanup]
@@ -94,25 +100,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.IsNull(result);
         }
 
-        //[TestMethod]
-        //public async Task TryAddIssue_ReturnsAddedIssue()
-        //{
-        //    var Issue = new Issue()
-        //    {
-        //        CreatedDate = 1623242719575,
-        //        Owner = "60b5c2d69fbb9657cf2e0d5f",
-        //        ParentId = "60be1809d90f8f6dc96f8345",
-        //        ParentType = "project",
-        //        ProjectId = "60be1809d90f8f6dc96f8345",
-        //        State = "opened",
-        //        Type = "task",
-        //        Description = "Test description",
-        //        Title = "Test title",
-        //    };
+        [TestMethod]
+        public async Task TryAddIssue_ReturnsAddedIssue()
+        {
+            var issue = new Issue()
+            {
+                CreatedDate = DateTime.Now.ToUnixTime(),
+                Owner = userId,
+                ParentId = "60b4d2719fbb9657cf2e0cbf",
+                ParentType = Constants.ELEMENT_TYPE,
+                State = "opened",
+                Type = Constants.ISSUE_TYPE,
+                Description = "Test description",
+                Title = "Test title",
+            };
 
-        //    var result = await service.PostObjective(objective);
+            var result = await service.TryPost(issue);
 
-        //    Assert.IsNotNull(result);
-        //}
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result.Id);
+        }
     }
 }

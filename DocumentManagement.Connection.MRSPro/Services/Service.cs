@@ -1,10 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace MRS.DocumentManagement.Connection.MrsPro.Services
+﻿namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
     public class Service
     {

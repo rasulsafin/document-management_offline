@@ -5,9 +5,9 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
 {
-    public static class IssueExtension
+    internal static class IssueExtension
     {
-        public static ObjectiveExternalDto ToDto(this IElement element)
+        internal static ObjectiveExternalDto ToDto(this IElement element)
         {
             var time = element.CreatedDate.ToDateTime() ?? DateTime.Now;
 
@@ -35,15 +35,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
             return resultDto;
         }
 
-        public static IElement ToModel(this ObjectiveExternalDto dto, string type)
+        internal static IElement ToModel(this ObjectiveExternalDto dto, string type)
         {
-            IElement element;
+            IElement element = GetElement(type);
 
-            if (type == Constants.ELEMENT_TYPE)
-                element = new Project();
-            else
-                element = new Issue();
-
+            element.Id = dto.ExternalID?.Split(Constants.ID_SPLITTER)[0];
             element.Owner = dto.AuthorExternalID;
             element.Description = dto.Description;
             element.Title = dto.Title;
@@ -51,8 +47,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
             element.DueDate = dto.DueDate.ToUnixTime();
             element.Type = Constants.ISSUE_TYPE;
             element.State = GetState(dto.Status);
-            element.ParentId = dto.ParentObjectiveExternalID;
-            //element.ProjectId = dto.ParentObjectiveExternalID;
+            element.ParentId = dto.ParentObjectiveExternalID ?? dto.ProjectExternalID;
+            element.ParentType = Constants.ELEMENT_TYPE;
+            //element. = dto.ParentObjectiveExternalID;
 
             // TODO: DynamicFields
             // TODO: Items
@@ -83,5 +80,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
             // TODO: State
             return "opened";
         }
+
+        private static IElement GetElement(string type)
+            => type == Constants.ELEMENT_TYPE ? new Project() : new Issue();
     }
 }

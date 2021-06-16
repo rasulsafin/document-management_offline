@@ -3,7 +3,6 @@ using System.Runtime.Serialization;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
-
     [DataContract]
     public class Settings
     {

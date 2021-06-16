@@ -97,6 +97,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /nrs/task.
+        /// </summary>
+        internal static string PatchObjective {
+            get {
+                return ResourceManager.GetString("PatchObjective", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /nrs/login.
         /// </summary>
         internal static string PostLogin {
