@@ -16,6 +16,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [ClassInitialize]
         public static void Init(TestContext unused)
         {
+            var delay = Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            delay.Wait();
+
             var services = new ServiceCollection();
             services.AddMrsPro();
             services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
@@ -29,7 +32,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestInitialize]
         public async Task Setup()
-         => await Task.Delay(5000);
+         => await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
         public async Task SignInAsync_CorrectCredentials_SuccessfulSignIn()
@@ -38,10 +41,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var password = "GhundU72!c";
             var companyCode = "skprofitgroup";
 
-            var (userExternalID, authStatus) = await service.SignInAsync(email, password, companyCode);
+            var authStatus = await service.SignInAsync(email, password, companyCode);
 
             Assert.IsTrue(authStatus.Status == RemoteConnectionStatus.OK);
-            Assert.IsNotNull(userExternalID);
         }
 
         [TestMethod]
@@ -55,10 +57,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var password = passwordValue;
             var companyCode = companyValue;
 
-            var (userExternalID, authStatus) = await service.SignInAsync(email, password, companyCode);
+            var authStatus = await service.SignInAsync(email, password, companyCode);
 
             Assert.IsTrue(authStatus.Status != RemoteConnectionStatus.OK);
-            Assert.IsNull(userExternalID);
         }
     }
 }

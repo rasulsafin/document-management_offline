@@ -57,6 +57,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
+            // TODO: Get Storage
             return new MrsProStorage();
         }
 

@@ -17,10 +17,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         public async Task<IEnumerable<IElement>> GetAll(DateTime date)
         {
-            // TODO: try request with data as query?
             var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
 
-            // TODO: Remove it;
+            // TODO: Remove this;
             date = new DateTime(2021, 6, 6);
 
             var unixDate = date.ToUnixTime();
@@ -56,14 +55,28 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         public async Task<IElement> TryPost(IElement element)
         {
-            var result =  await HttpConnection.PostJson<Issue>(BASE_URL, element as Issue);
-            return result;
+            try
+            {
+                var result = await HttpConnection.PostJson<Issue>(BASE_URL, element as Issue);
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<IElement> TryPatch(UpdatedValues valuesToPatch)
         {
-            var result = await HttpConnection.PatchJson<IEnumerable<Issue>, UpdatedValues>(BASE_URL, valuesToPatch);
-            return result.FirstOrDefault();
+            try
+            {
+                var result = await HttpConnection.PatchJson<IEnumerable<Issue>, UpdatedValues>(BASE_URL, valuesToPatch);
+                return result.FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }
