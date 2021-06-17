@@ -38,5 +38,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = ex.Message };
             }
         }
+
+        internal async Task<ConnectionStatusDto> TryPing()
+        {
+            try
+            {
+                await HttpConnection.Get<object>("/ping/user");
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Connection is stable." };
+            }
+            catch (Exception ex)
+            {
+                return new ConnectionStatusDto() { Status = RemoteConnectionStatus.NeedReconnect, Message = ex.Message };
+            }
+        }
     }
 }

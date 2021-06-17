@@ -49,10 +49,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
             => getContext();
 
-        public Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
+        public async Task<ConnectionStatusDto> GetStatus(ConnectionInfoExternalDto info)
         {
-            // TODO: Get Status
-            throw new NotImplementedException();
+            return await authService.TryPing();
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
