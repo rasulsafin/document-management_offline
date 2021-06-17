@@ -18,10 +18,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         public async Task<IEnumerable<IElement>> GetAll(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
-
-            // TODO: Remove this;
-            date = new DateTime(2021, 6, 6);
-
             var unixDate = date.ToUnixTime();
             var list = listOfAllObjectives.Where(o => o.LastModifiedDate > unixDate).ToArray();
             return list;

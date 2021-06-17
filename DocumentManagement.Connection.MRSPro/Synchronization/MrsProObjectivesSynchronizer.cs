@@ -47,6 +47,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
+            // TODO: Remove this;
+            date = new DateTime(2021, 6, 10);
+
             var projectIds = await GetUpdatedIdsFromService(projectsService, date);
             var objectiveIds = await GetUpdatedIdsFromService(issuesService, date);
 
@@ -95,7 +98,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementService service, DateTime date)
         {
             var collection = await service.GetAll(date);
-            return collection.Select(o => o.Id);
+            return collection.Select(element => $"{element.Id}{Constants.ID_SPLITTER}{element.Type}");
         }
     }
 }
