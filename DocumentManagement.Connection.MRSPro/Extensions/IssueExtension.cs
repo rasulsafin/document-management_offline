@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
                 Title = element.Title,
                 Description = element.Description,
                 ProjectExternalID = GetProject(element.Ancestry),
-                ParentObjectiveExternalID = element.ParentId,
+                ParentObjectiveExternalID = $"{element.ParentId}{Constants.ID_SPLITTER}{element.ParentType}",
                 Status = GetStatus(element.State),
                 CreationDate = time,
                 DueDate = element.DueDate.ToDateTime() ?? time,
@@ -39,7 +39,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
         internal static IElement ToModel(this ObjectiveExternalDto dto, string type)
         {
             IElement element = GetElement(type);
-
             element.Id = dto.ExternalID?.Split(Constants.ID_SPLITTER)[0];
             element.Owner = dto.AuthorExternalID;
             element.Description = dto.Description;
@@ -48,8 +47,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
             element.DueDate = dto.DueDate.ToUnixTime();
             element.Type = Constants.ISSUE_TYPE;
             element.State = GetState(dto.Status);
-            element.ParentId = dto.ParentObjectiveExternalID ?? dto.ProjectExternalID;
-            element.ParentType = Constants.ELEMENT_TYPE;
+
+            var parentData = dto.ParentObjectiveExternalID?.Split(Constants.ID_SPLITTER);
+            element.ParentId = parentData?[0] ?? dto.ProjectExternalID;
+            element.ParentType = parentData?[1] ?? Constants.ELEMENT_TYPE;
 
             // TODO: DynamicFields
             // TODO: Items
