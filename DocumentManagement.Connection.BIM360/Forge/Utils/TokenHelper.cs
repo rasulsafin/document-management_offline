@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
+    /// <summary>
+    /// Helper class for updating the token for all connections of the same user.
+    /// </summary>
     public class TokenHelper : IDisposable
     {
         private static Dictionary<string, string> tokensContainer;
@@ -26,6 +29,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Sets a new token for all connections of the current user.
+        /// </summary>
+        /// <param name="newUserID">Setting id of the current user.</param>
+        /// <param name="newToken">The new token.</param>
+        /// <exception cref="ArgumentException">Throws if user id is already set.</exception>
+        public void SetInfo(string newUserID, string newToken)
+        {
+            SetToken(newToken);
+            SetUserID(newUserID);
+        }
+
+        /// <summary>
+        /// Sets a new token for all connections of the current user. If no user ID is specified, the token will only be stored for the current connection.
+        /// </summary>
+        /// <param name="newToken">The new token for connections.</param>
         public void SetToken(string newToken)
         {
             if (!string.IsNullOrWhiteSpace(userID))
@@ -35,17 +54,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                 else
                     tokensContainer.Add(userID, newToken);
             }
-
-            connection.GetToken = () => newToken;
+            else
+            {
+                connection.GetToken = () => newToken;
+            }
         }
 
+        /// <summary>
+        /// Sets the id of the current user and updates the token for all connections of the same user.
+        /// </summary>
+        /// <param name="userID">Setting id of the current user.</param>
+        /// <exception cref="ArgumentException">Throws if user id is already set.</exception>
         public void SetUserID(string userID)
         {
             if (this.userID == userID)
                 return;
 
             if (!string.IsNullOrWhiteSpace(this.userID))
-                throw new Exception("User ID is already set");
+                throw new ArgumentException("User ID is already set", nameof(userID));
 
             if (string.IsNullOrWhiteSpace(userID))
                 return;
@@ -53,17 +79,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             this.userID = userID;
 
             if (!tokensContainer.ContainsKey(userID))
-                tokensContainer.Add(this.userID, connection.GetToken());
-            else if (!string.IsNullOrWhiteSpace(connection.GetToken()))
+                tokensContainer.Add(this.userID, connection.GetToken?.Invoke());
+            else if (!string.IsNullOrWhiteSpace(connection.GetToken?.Invoke()))
                 tokensContainer[userID] = connection.GetToken();
-            else
-                connection.GetToken = () => tokensContainer[userID];
-        }
 
-        public void SetInfo(string newUserID, string newToken)
-        {
-            SetToken(newToken);
-            SetUserID(newUserID);
+            connection.GetToken = () => tokensContainer[userID];
         }
     }
 }

@@ -84,8 +84,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         {
             foreach (var project in context.Snapshot.ProjectEnumerable.Where(x => x.Value.Issues == null))
             {
-                project.Value.Issues = new Dictionary<string, IssueSnapshot>();
-                var container = project.Value.IssueContainer;
                 var filters = new List<Filter>();
 
                 if (date != default)
@@ -95,13 +93,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                 }
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
-                var issues = await issuesService.GetIssuesAsync(container, filters);
+                var issues = await issuesService.GetIssuesAsync(project.Value.IssueContainer, filters);
+                project.Value.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project.Value));
+            }
+        }
 
-                foreach (var issue in issues)
-                {
-                    var snapshot = new IssueSnapshot(issue, project.Value);
-                    project.Value.Issues.Add(issue.ID, snapshot);
-                }
+        public async Task UpdateIssueTypesIfNull()
+        {
+            foreach (var project in context.Snapshot.ProjectEnumerable.Where(x => x.Value.IssueTypes == null))
+            {
+                var types = await issuesService.GetIssueTypesAsync(project.Value.IssueContainer);
+                project.Value.IssueTypes = types.ToDictionary(x => x.ID);
             }
         }
     }

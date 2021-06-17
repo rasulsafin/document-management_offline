@@ -14,22 +14,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         bool IgnoreTestEntities { set; }
 
         /// <summary>
-        /// Capture hubs.
+        /// Captures hubs.
         /// </summary>
         /// <returns>The task of the operation.</returns>
         Task UpdateHubsIfNull();
 
         /// <summary>
-        /// Capture projects.
+        /// Captures projects.
         /// </summary>
         /// <returns>The task of the operation.</returns>
         Task UpdateProjectsIfNull();
 
         /// <summary>
-        /// Capture issues.
+        /// Captures issues.
         /// </summary>
         /// <param name="date">The snapshot will be capture for issues updated after this date.</param>
         /// <returns>The task of the operation.</returns>
         Task UpdateIssuesIfNull(DateTime date = default);
+
+        /// <summary>
+        /// Captures issue types.
+        /// </summary>
+        /// <returns>The task of the operation.</returns>
+        Task UpdateIssueTypesIfNull();
     }
 }

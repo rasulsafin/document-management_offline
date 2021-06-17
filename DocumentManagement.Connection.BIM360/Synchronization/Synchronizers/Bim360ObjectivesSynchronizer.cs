@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Numerics;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -17,32 +14,31 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
     internal class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly IssuesService issuesService;
         private readonly ItemsService itemsService;
-        private readonly ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync;
-        private readonly ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync;
-        private readonly IBim360SnapshotFiller filler;
         private readonly FoldersService foldersService;
         private readonly Authenticator authenticator;
+        private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly Bim360ConnectionContext context;
+        private readonly IBim360SnapshotFiller filler;
+        private readonly ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync;
+        private readonly ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync;
 
         public Bim360ObjectivesSynchronizer(
             Bim360ConnectionContext context,
-            ItemsSyncHelper itemsSyncHelper,
             IssuesService issuesService,
             ItemsService itemsService,
-            ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync,
-            ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync,
-            IBim360SnapshotFiller filler,
             FoldersService foldersService,
-            Authenticator authenticator)
+            Authenticator authenticator,
+            ItemsSyncHelper itemsSyncHelper,
+            IBim360SnapshotFiller filler,
+            ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync,
+            ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync)
         {
             this.context = context;
             this.itemsSyncHelper = itemsSyncHelper;
@@ -61,10 +57,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var issue = await convertToIssueAsync(obj);
             var project = GetProjectSnapshot(obj);
-
             var snapshot = new IssueSnapshot(issue, project);
-            await LinkTarget(obj, project, issue);
-            await SetGlobalOffset(snapshot);
             var created = await issuesService.PostIssueAsync(project.IssueContainer, issue);
             snapshot.Entity = created;
             project.Issues.Add(created.ID, snapshot);
@@ -106,17 +99,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var issue = await convertToIssueAsync(obj);
             var project = GetProjectSnapshot(obj);
             var snapshot = project.Issues[obj.ExternalID];
-
-            if (issue.Attributes.TargetUrn == null || issue.Attributes.StartingVersion == null)
-            {
-                await LinkTarget(obj, project, issue);
-                await SetGlobalOffset(snapshot);
-            }
-
-            snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
+            snapshot.Entity = await convertToIssueAsync(obj);
+            snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, snapshot.Entity);
             var parsedToDto = await convertToDtoAsync(snapshot);
 
             if (obj.Items?.Any() ?? false)
@@ -137,6 +123,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull(date);
+            await filler.UpdateIssueTypesIfNull();
             return context.Snapshot.IssueEnumerable.Where(x => x.Value.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.Key)
                .ToList();
@@ -275,64 +262,5 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             => context.Snapshot.Hubs.SelectMany(x => x.Value.Projects)
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
-
-        private async Task SetGlobalOffset(IssueSnapshot snapshot)
-        {
-            if (snapshot.Entity.Attributes.PushpinAttributes != null &&
-                (snapshot.Entity.Attributes.PushpinAttributes.ViewerState.GlobalOffset ?? Vector3.Zero) ==
-                Vector3.Zero && snapshot.Entity.Attributes.TargetUrn != null)
-            {
-                var filter = new Filter(
-                    typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.TargetUrn)),
-                    snapshot.Entity.Attributes.TargetUrn);
-                var other = await issuesService.GetIssuesAsync(
-                    snapshot.ProjectSnapshot.IssueContainer,
-                    new[] { filter });
-                var withGlobalOffset = other.FirstOrDefault(
-                    x => (x.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset ?? Vector3.Zero) != Vector3.Zero);
-                var offset = withGlobalOffset?.Attributes.PushpinAttributes.ViewerState.GlobalOffset ?? Vector3.Zero;
-                snapshot.Entity.Attributes.PushpinAttributes.ViewerState.GlobalOffset = offset;
-                snapshot.Entity.Attributes.PushpinAttributes.Location -= offset;
-            }
-        }
-
-        private async Task LinkTarget(ObjectiveExternalDto obj, ProjectSnapshot project, Issue issue)
-        {
-            if (obj.Location != null)
-            {
-                Item item;
-                Version version;
-
-                if (obj.Location.Item.ExternalID == null)
-                {
-                    var filter = new Filter(
-                        typeof(Version.VersionAttributes).GetDataMemberName(
-                            nameof(Version.VersionAttributes.DisplayName)),
-                        obj.Location.Item.FileName);
-                    var items = (await foldersService.SearchAsync(
-                        project.ID,
-                        project.ProjectFilesFolder.ID,
-                        new[] { filter })).OrderByDescending(x => x.version?.Attributes.VersionNumber ?? 0);
-                    (version, item) = items.FirstOrDefault(
-                        x => x.version?.Attributes.StorageSize == new FileInfo(obj.Location.Item.FullPath).Length);
-                    if (item == default && version == default)
-                        (version, item) = items.FirstOrDefault();
-
-                    if (item == default && version == default)
-                    {
-                        item = await itemsSyncHelper.PostItem(obj.Location.Item, project.ProjectFilesFolder, project.ID);
-                        await Task.Delay(5000);
-                        version = (await itemsService.GetAsync(project.ID, item.ID)).version;
-                    }
-                }
-                else
-                {
-                    (item, version) = await itemsService.GetAsync(project.ID, obj.Location.Item.ExternalID);
-                }
-
-                issue.Attributes.TargetUrn = item?.ID;
-                issue.Attributes.StartingVersion = version?.Attributes.VersionNumber;
-            }
-        }
     }
 }

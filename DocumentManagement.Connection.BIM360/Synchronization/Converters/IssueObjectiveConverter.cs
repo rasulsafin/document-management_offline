@@ -11,14 +11,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
     internal class IssueObjectiveConverter : IConverter<Issue, ObjectiveExternalDto>
     {
-        private readonly Bim360ConnectionContext context;
         private readonly ConverterAsync<Status, ObjectiveStatus> statusConvertAsync;
 
-        public IssueObjectiveConverter(
-            Bim360ConnectionContext context,
-            ConverterAsync<Status, ObjectiveStatus> statusConvertAsync)
+        public IssueObjectiveConverter(ConverterAsync<Status, ObjectiveStatus> statusConvertAsync)
         {
-            this.context = context;
             this.statusConvertAsync = statusConvertAsync;
         }
 
