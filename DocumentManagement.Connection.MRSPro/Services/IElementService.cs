@@ -44,5 +44,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         /// <param name="valuesToPatch">Id of the patched entity and list of patches.</param>
         /// <returns>Patched element.</returns>
         Task<IElement> TryPatch(UpdatedValues valuesToPatch);
+
+        /// <summary>
+        /// Delete element by its id.
+        /// </summary>
+        /// <param name="id">Element id.</param>
+        /// <returns>True if deletion was successful, false otherwise.</returns>
+        Task<bool> TryDelete(string id);
     }
 }

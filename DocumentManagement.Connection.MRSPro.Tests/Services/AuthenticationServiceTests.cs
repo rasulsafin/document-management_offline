@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.MrsPro.Tests.TestConstants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 {
@@ -16,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [ClassInitialize]
         public static void Init(TestContext unused)
         {
-            var delay = Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            var delay = Task.Delay(MILLISECONDS_TIME_DELAY);
             delay.Wait();
 
             var services = new ServiceCollection();
@@ -32,14 +33,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestInitialize]
         public async Task Setup()
-         => await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+         => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
         public async Task SignInAsync_CorrectCredentials_SuccessfulSignIn()
         {
-            var email = "asidorov@briogroup.ru";
-            var password = "GhundU72!c";
-            var companyCode = "skprofitgroup";
+            var email = TEST_EMAIL;
+            var password = TEST_PASSWORD;
+            var companyCode = TEST_COMPANY;
 
             var authStatus = await service.SignInAsync(email, password, companyCode);
 

@@ -67,5 +67,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             throw new NotImplementedException();
         }
+
+        public Task<bool> TryDelete(string id)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

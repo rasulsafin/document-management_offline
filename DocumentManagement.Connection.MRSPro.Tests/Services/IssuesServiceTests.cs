@@ -9,6 +9,8 @@ using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+using static MRS.DocumentManagement.Connection.MrsPro.Tests.TestConstants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 {
@@ -22,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [ClassInitialize]
         public static void Init(TestContext unused)
         {
-            var delay = Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            var delay = Task.Delay(MILLISECONDS_TIME_DELAY);
             delay.Wait();
 
             var services = new ServiceCollection();
@@ -33,25 +35,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var authenticator = serviceProvider.GetService<AuthenticationService>();
 
             // Authorize
-            var email = "asidorov@briogroup.ru";
-            var password = "GhundU72!c";
-            var companyCode = "skprofitgroup";
+            var email = TEST_EMAIL;
+            var password = TEST_PASSWORD;
+            var companyCode = TEST_COMPANY;
             var signInTask = authenticator.SignInAsync(email, password, companyCode);
             signInTask.Wait();
             var result = signInTask.Result;
             if (result.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
-            delay = Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            delay = Task.Delay(MILLISECONDS_TIME_DELAY);
             delay.Wait();
 
             var issue = new Issue()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
                 ParentId = "60b4d2719fbb9657cf2e0cbf",
-                ParentType = Constants.ELEMENT_TYPE,
-                State = Constants.STATE_OPENED,
-                Type = Constants.ISSUE_TYPE,
+                ParentType = ELEMENT_TYPE,
+                State = STATE_OPENED,
+                Type = ISSUE_TYPE,
                 Description = "Test description",
                 Title = "Test title",
             };
@@ -59,16 +61,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             addIssueTask.Wait();
             existingIssueId = addIssueTask.Result.Id;
             if (existingIssueId == null)
-                Assert.Fail("Issue creation failed. Cannot patch non-existing issue.");
+                Assert.Fail("Issue creation failed. Cannot test non-existing issue.");
         }
 
         [ClassCleanup]
-        public static void ClassCleanup()
-            => serviceProvider.Dispose();
+        public static async Task ClassCleanup()
+        {
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            await service.TryDelete(existingIssueId);
+            serviceProvider.Dispose();
+        }
 
         [TestInitialize]
         public async Task Setup()
-        => await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
         public async Task TryGetExistingIssuesByIdsAsync_ReturnsIssuesByIdsList()
@@ -118,15 +124,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPostIssue_ReturnsAddedIssue()
+        public async Task TryPostIssueAsync_ReturnsAddedIssue()
         {
             var issue = new Issue()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
                 ParentId = "60b4d2719fbb9657cf2e0cbf",
-                ParentType = Constants.ELEMENT_TYPE,
-                State = "opened",
-                Type = Constants.ISSUE_TYPE,
+                ParentType = ELEMENT_TYPE,
+                State = STATE_OPENED,
+                Type = ISSUE_TYPE,
                 Description = "Test description",
                 Title = "Test title",
             };
@@ -135,10 +141,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Id);
+
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            await service.TryDelete(result.Id);
         }
 
         [TestMethod]
-        public async Task TryPatchIssueTitle_ReturnsIssueWithNewTitle()
+        public async Task TryPatchIssueTitleAsync_ReturnsIssueWithNewTitle()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.Title;
@@ -157,7 +166,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 },
             };
 
-            await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
 
             var updatedIssue = await service.TryPatch(updatedValues);
 
@@ -169,7 +178,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueDescription_ReturnsIssueWithNewDescription()
+        public async Task TryPatchIssueDescriptionAsync_ReturnsIssueWithNewDescription()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.Description;
@@ -188,7 +197,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 },
             };
 
-            await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
 
             var updatedIssue = await service.TryPatch(updatedValues);
 
@@ -200,7 +209,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueDueDate_ReturnsIssueWithNewDueDate()
+        public async Task TryPatchIssueDueDateAsync_ReturnsIssueWithNewDueDate()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.DueDate;
@@ -219,7 +228,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 },
             };
 
-            await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
 
             var updatedIssue = await service.TryPatch(updatedValues);
 
@@ -231,12 +240,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueState_ReturnsIssueWithNewState()
+        public async Task TryPatchIssueStateAsync_ReturnsIssueWithNewState()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.State;
-            var newValue = existingIssue.State == Constants.STATE_OPENED ?
-                Constants.STATE_COMPLETED : Constants.STATE_VERIFIED;
+            var newValue = existingIssue.State == STATE_OPENED ?
+                STATE_COMPLETED : STATE_VERIFIED;
 
             var updatedValues = new UpdatedValues
             {
@@ -251,7 +260,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 },
             };
 
-            await Task.Delay(TestConstants.MILLISECONDS_TIME_DELAY);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
 
             var updatedIssue = await service.TryPatch(updatedValues);
 
@@ -263,23 +272,34 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryDeleteIssue_ReturnsTrue()
+        public async Task TryDeleteExistingIssueAsync_ReturnsTrue()
         {
-            //var issue = new Issue()
-            //{
-            //    CreatedDate = DateTime.Now.ToUnixTime(),
-            //    ParentId = "60b4d2719fbb9657cf2e0cbf",
-            //    ParentType = Constants.ELEMENT_TYPE,
-            //    State = "opened",
-            //    Type = Constants.ISSUE_TYPE,
-            //    Description = "Test description",
-            //    Title = "Test title",
-            //};
+            var issue = new Issue()
+            {
+                CreatedDate = DateTime.Now.ToUnixTime(),
+                ParentId = "60b4d2719fbb9657cf2e0cbf",
+                ParentType = ELEMENT_TYPE,
+                State = STATE_OPENED,
+                Type = ISSUE_TYPE,
+                Description = "Test description",
+                Title = "Test issue for deletion",
+            };
+            var newAddedIssue = await service.TryPost(issue);
 
-            //var result = await service.TryDelete(issue);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
 
-            //Assert.IsNotNull(result);
-            //Assert.IsNotNull(result.Id);
+            var result = await service.TryDelete(newAddedIssue.Id);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task TryDeleteNonExistingIssueAsync_ReturnsFalse()
+        {
+            var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
+            var result = await service.TryDelete(nonExistingId);
+
+            Assert.IsFalse(result);
         }
     }
 }

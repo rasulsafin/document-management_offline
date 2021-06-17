@@ -53,9 +53,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return projectIds.Union(objectiveIds).ToArray();
         }
 
-        public Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
+        public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            throw new NotImplementedException();
+            var idParts = obj.ExternalID.Split(Constants.ID_SPLITTER);
+            (var trueId, var type) = (idParts[0], idParts[1]);
+
+            if (trueId == null)
+                throw new Exception("Wrong id value");
+
+            var result = await GetService(type).TryDelete(trueId);
+
+            return result ? obj : null;
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)

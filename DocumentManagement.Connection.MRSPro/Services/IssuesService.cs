@@ -78,5 +78,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                 return null;
             }
         }
+
+        public async Task<bool> TryDelete(string id)
+        {
+            try
+            {
+                await HttpConnection.DeleteJson(BASE_URL, new[] { id });
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

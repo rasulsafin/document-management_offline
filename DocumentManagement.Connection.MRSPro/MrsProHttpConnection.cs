@@ -37,6 +37,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         internal async Task<TOut> PatchJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Patch, method, contentObject);
 
+        internal async Task DeleteJson<TData>(string method, TData contentObject)
+            => await SendJson<TData, TData>(HttpMethod.Delete, method, contentObject);
+
         private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject)
         {
             var content = new StringContent(JsonConvert.SerializeObject(contentObject), Encoding.UTF8, "application/json");
