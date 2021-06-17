@@ -8,6 +8,8 @@
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 
     <RootNamespace>MRS.DocumentManagement.Connection.BIM360.Tests</RootNamespace>
+
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
