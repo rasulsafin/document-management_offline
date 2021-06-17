@@ -159,6 +159,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private async Task<(string item, int? version)> GetTarget(ObjectiveExternalDto obj, ProjectSnapshot project)
         {
+            if (obj.Location == null)
+                return default;
+
             Item item;
             Version version;
 

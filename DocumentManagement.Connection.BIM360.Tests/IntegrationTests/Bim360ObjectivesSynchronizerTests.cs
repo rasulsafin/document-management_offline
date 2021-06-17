@@ -66,6 +66,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             await filler!.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull();
+            await filler.UpdateIssueTypesIfNull();
             synchronizer = context.ObjectivesSynchronizer;
         }
 
