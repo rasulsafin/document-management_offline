@@ -26,25 +26,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "parentId")]
         public string ParentId { get; set; }
 
-        [IsPatchable]
+        [CanBePatched]
         [DataMember(Name = "dueDate")]
         public long DueDate { get; set; }
 
         [DataMember(Name = "code")]
         public string Code { get; set; }
 
-        [IsPatchable]
+        [CanBePatched]
         [DataMember(Name = "title")]
         public string Title { get; set; }
 
-        [IsPatchable]
+        [CanBePatched]
         [DataMember(Name = "description")]
         public string Description { get; set; }
 
         [DataMember(Name = "color")]
         public string Color { get; set; }
 
-        [IsPatchable]
+        [CanBePatched]
         [DataMember(Name = "state")]
         public string State { get; set; }
 

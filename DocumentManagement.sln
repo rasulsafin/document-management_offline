@@ -72,7 +72,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Launcher
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro", "DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement.Connection.MRSPro.Tests", "DocumentManagement.Connection.MRSPro.Tests\DocumentManagement.Connection.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro.Tests", "DocumentManagement.Connection.MRSPro.Tests\DocumentManagement.Connection.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

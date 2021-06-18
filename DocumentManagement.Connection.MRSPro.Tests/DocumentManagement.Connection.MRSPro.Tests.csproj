@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Connection.MrsPro\DocumentManagement.Connection.MrsPro.csproj" />
+    <ProjectReference Include="..\DocumentManagement.Connection.MrsPro\DocumentManagement.Connection.MRSPro.csproj" />
   </ItemGroup>
 
 

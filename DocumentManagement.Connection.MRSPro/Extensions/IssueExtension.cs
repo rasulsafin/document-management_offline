@@ -9,7 +9,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
     {
         internal static ObjectiveExternalDto ToDto(this IElement element)
         {
-            var time = element.CreatedDate.ToDateTime() ?? DateTime.Now;
+            var time = element.CreatedDate.ToLocalDateTime() ?? DateTime.Now;
 
             var resultDto = new ObjectiveExternalDto
             {
@@ -22,8 +22,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
                 ParentObjectiveExternalID = $"{element.ParentId}{Constants.ID_SPLITTER}{element.ParentType}",
                 Status = GetStatus(element.State),
                 CreationDate = time,
-                DueDate = element.DueDate.ToDateTime() ?? time,
-                UpdatedAt = element.LastModifiedDate.ToDateTime() ?? time,
+                DueDate = element.DueDate.ToLocalDateTime() ?? time,
+                UpdatedAt = element.LastModifiedDate.ToLocalDateTime() ?? time,
 
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),

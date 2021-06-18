@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         {
             var element = obj.ToModel(obj.ObjectiveType.ExternalId);
             var result = await GetService(element.Type).TryPost(element);
-            return result.ToDto();
+            return result?.ToDto();
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                 var idParts = id.Split(Constants.ID_SPLITTER);
                 (var trueId, var type) = (idParts[0], idParts[1]);
                 var result = await GetService(type).TryGetById(trueId);
-                objectives.AddIsNotNull(result.ToDto());
+                objectives.AddIsNotNull(result?.ToDto());
             }
 
             return objectives;
@@ -75,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             var updatedValues = new UpdatedValues { Ids = new[] { element.Id } };
             var type = element.GetType();
             var propertiesToPatch = type.GetProperties()
-                .Where(p => Attribute.IsDefined(p, typeof(IsPatchable)))
+                .Where(p => Attribute.IsDefined(p, typeof(CanBePatchedAttribute)))
                 .Select(p => new Patch()
                     {
                         Path = $"/{((DataMemberAttribute)Attribute.GetCustomAttribute(p, typeof(DataMemberAttribute))).Name}",
@@ -84,7 +84,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
             updatedValues.Patch = propertiesToPatch;
             var result = await GetService(element.Type).TryPatch(updatedValues);
-            return result.ToDto();
+            return result?.ToDto();
         }
 
         private IElementService GetService(string type)

@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             try
             {
-                var idsStr = GetListAsString(ids);
+                var idsStr = string.Join(QUERY_SEPARATOR, ids);
                 return await HttpConnection.GetListOf<Issue>(GetByIds(BASE_URL), idsStr);
             }
             catch

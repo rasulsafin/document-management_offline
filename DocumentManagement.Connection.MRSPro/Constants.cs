@@ -19,6 +19,7 @@
         internal static readonly string PROJECT = ":PROJECT";
 
         internal static readonly char ID_SPLITTER = ':';
+        internal static readonly char QUERY_SEPARATOR = ',';
 
         internal static readonly string OP_REPLACE = "replace";
 

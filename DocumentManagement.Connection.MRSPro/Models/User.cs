@@ -12,7 +12,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public string Ancestry { get; set; }
 
         [DataMember(Name = "archiveInitiator")]
-        public string ArchiveInitiatorestry { get; set; }
+        public string ArchiveInitiator { get; set; }
 
         [DataMember(Name = "archivedDate")]
         public string ArchivedDate { get; set; }
