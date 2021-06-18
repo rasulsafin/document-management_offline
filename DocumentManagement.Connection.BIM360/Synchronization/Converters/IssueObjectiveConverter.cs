@@ -11,11 +11,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
     internal class IssueObjectiveConverter : IConverter<Issue, ObjectiveExternalDto>
     {
-        private readonly ConverterAsync<Status, ObjectiveStatus> statusConvertAsync;
+        private readonly IConverter<Status, ObjectiveStatus> statusConverter;
 
-        public IssueObjectiveConverter(ConverterAsync<Status, ObjectiveStatus> statusConvertAsync)
+        public IssueObjectiveConverter(IConverter<Status, ObjectiveStatus> statusConverter)
         {
-            this.statusConvertAsync = statusConvertAsync;
+            this.statusConverter = statusConverter;
         }
 
         public async Task<ObjectiveExternalDto> Convert(Issue issue)
@@ -27,7 +27,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = issue.Type },
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,
-                Status = await statusConvertAsync(issue.Attributes.Status),
+                Status = await statusConverter.Convert(issue.Attributes.Status),
                 DynamicFields = GetDynamicFields(),
                 Items = new List<ItemExternalDto>(),
                 BimElements = GetBimElements(issue),

@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
         private readonly Bim360ConnectionContext context;
-        private readonly ConverterAsync<ObjectiveStatus, Status> statusConvert;
+        private readonly IConverter<ObjectiveStatus, Status> statusConverter;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
         private readonly ItemsSyncHelper itemsSyncHelper;
@@ -28,14 +28,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         public ObjectiveIssueConverter(
             Bim360ConnectionContext context,
-            ConverterAsync<ObjectiveStatus, Status> statusConvert,
+            IConverter<ObjectiveStatus, Status> statusConverter,
             IssuesService issuesService,
             FoldersService foldersService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService)
         {
             this.context = context;
-            this.statusConvert = statusConvert;
+            this.statusConverter = statusConverter;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
             this.itemsSyncHelper = itemsSyncHelper;
@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 {
                     Title = objective.Title,
                     Description = objective.Description,
-                    Status = await statusConvert(objective.Status),
+                    Status = await statusConverter.Convert(objective.Status),
                     AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),

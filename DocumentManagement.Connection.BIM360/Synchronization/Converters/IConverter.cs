@@ -2,8 +2,6 @@ using System.Threading.Tasks;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
-    public delegate Task<TOutput> ConverterAsync<in TInput, TOutput>(TInput input);
-
     /// <summary>
     /// Represents a class that converts an object from one type to another type.
     /// </summary>

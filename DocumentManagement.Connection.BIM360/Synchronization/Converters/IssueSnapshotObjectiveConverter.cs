@@ -11,25 +11,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
-        private readonly ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync;
-        private readonly ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync;
+        private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly IConverter<IssueType, DynamicFieldExternalDto> typeConverter;
         private readonly ItemsService itemsService;
 
         public IssueSnapshotObjectiveConverter(
-            ConverterAsync<Issue, ObjectiveExternalDto> convertToDtoAsync,
-            ConverterAsync<IssueType, DynamicFieldExternalDto> convertTypeAsync,
+            IConverter<Issue, ObjectiveExternalDto> converterToDto,
+            IConverter<IssueType, DynamicFieldExternalDto> typeConverter,
             ItemsService itemsService)
         {
-            this.convertToDtoAsync = convertToDtoAsync;
-            this.convertTypeAsync = convertTypeAsync;
+            this.converterToDto = converterToDto;
+            this.typeConverter = typeConverter;
             this.itemsService = itemsService;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
         {
             var types = snapshot.ProjectSnapshot.IssueTypes;
-            var parsedToDto = await convertToDtoAsync(snapshot.Entity);
-            var typeField = await convertTypeAsync(types[snapshot.Entity.Attributes.NgIssueTypeID]);
+            var parsedToDto = await converterToDto.Convert(snapshot.Entity);
+            var typeField = await typeConverter.Convert(types[snapshot.Entity.Attributes.NgIssueTypeID]);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 

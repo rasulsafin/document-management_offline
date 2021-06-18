@@ -26,8 +26,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly Bim360ConnectionContext context;
         private readonly IBim360SnapshotFiller filler;
-        private readonly ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync;
-        private readonly ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync;
+        private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
+        private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
         public Bim360ObjectivesSynchronizer(
             Bim360ConnectionContext context,
@@ -37,15 +37,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
             IBim360SnapshotFiller filler,
-            ConverterAsync<ObjectiveExternalDto, Issue> convertToIssueAsync,
-            ConverterAsync<IssueSnapshot, ObjectiveExternalDto> convertToDtoAsync)
+            IConverter<ObjectiveExternalDto, Issue> converterToIssue,
+            IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
             this.context = context;
             this.itemsSyncHelper = itemsSyncHelper;
             this.issuesService = issuesService;
             this.itemsService = itemsService;
-            this.convertToIssueAsync = convertToIssueAsync;
-            this.convertToDtoAsync = convertToDtoAsync;
+            this.converterToIssue = converterToIssue;
+            this.converterToDto = converterToDto;
             this.filler = filler;
             this.foldersService = foldersService;
             this.authenticator = authenticator;
@@ -55,13 +55,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var issue = await convertToIssueAsync(obj);
+            var issue = await converterToIssue.Convert(obj);
             var project = GetProjectSnapshot(obj);
             var snapshot = new IssueSnapshot(issue, project);
             var created = await issuesService.PostIssueAsync(project.IssueContainer, issue);
             snapshot.Entity = created;
             project.Issues.Add(created.ID, snapshot);
-            var parsedToDto = await convertToDtoAsync(snapshot);
+            var parsedToDto = await converterToDto.Convert(snapshot);
 
             if (obj.Items?.Any() ?? false)
             {
@@ -78,7 +78,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var issue = await convertToIssueAsync(obj);
+            var issue = await converterToIssue.Convert(obj);
             var project = GetProjectSnapshot(obj);
             var snapshot = project.Issues[obj.ExternalID];
 
@@ -92,7 +92,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
             project.Issues.Remove(snapshot.ID);
 
-            return await convertToDtoAsync(snapshot);
+            return await converterToDto.Convert(snapshot);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
@@ -101,9 +101,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var project = GetProjectSnapshot(obj);
             var snapshot = project.Issues[obj.ExternalID];
-            snapshot.Entity = await convertToIssueAsync(obj);
+            snapshot.Entity = await converterToIssue.Convert(obj);
             snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, snapshot.Entity);
-            var parsedToDto = await convertToDtoAsync(snapshot);
+            var parsedToDto = await converterToDto.Convert(snapshot);
 
             if (obj.Items?.Any() ?? false)
             {
@@ -181,7 +181,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                     found.Items.Add(new ItemSnapshot(item) { Version = version });
                 }
 
-                result.Add(await convertToDtoAsync(found));
+                result.Add(await converterToDto.Convert(found));
 
                 if (!found.ProjectSnapshot.Issues.ContainsKey(found.Entity.ID))
                     found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);

@@ -50,7 +50,6 @@ namespace Microsoft.Extensions.DependencyInjection
             where TConverter : class, IConverter<TFrom, TTo>
         {
             services.AddScoped<IConverter<TFrom, TTo>, TConverter>();
-            services.AddScoped<ConverterAsync<TFrom, TTo>>(x => x.GetService<IConverter<TFrom, TTo>>() !.Convert);
             return services;
         }
 
