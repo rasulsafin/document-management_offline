@@ -8,6 +8,8 @@
     <LangVersion>8</LangVersion>
 
     <RootNamespace>MRS.DocumentManagement.Tests</RootNamespace>
+
+    <Version>1.0.2</Version>
   </PropertyGroup>
 
   <ItemGroup>
