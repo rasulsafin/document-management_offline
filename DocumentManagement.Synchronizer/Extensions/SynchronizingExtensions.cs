@@ -104,7 +104,7 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                         property.GetValue(tuple.Local),
                         property.GetValue(tuple.Remote));
 
-                    var merge = typeof(SynchronizingExtensions).GetMethod(nameof(MergePrivate)) !
+                    var merge = typeof(SynchronizingExtensions).GetMethod(nameof(MergePrivate), BindingFlags.Static | BindingFlags.NonPublic) !
                        .MakeGenericMethod(property.PropertyType);
 
                     var parameters = new[] { subtuple, localUpdatedAt, remoteUpdatedAt };

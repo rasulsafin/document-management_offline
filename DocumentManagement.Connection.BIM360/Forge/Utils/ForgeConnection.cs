@@ -56,7 +56,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             string command,
             params object[] arguments)
         {
-            using var request = CreateRequest(
+            return await GetResponseAsync(() => CreateHttpRequestMessage(settings, command, arguments));
+        }
+
+        public override HttpRequestMessage CreateRequest(
+            HttpMethod methodType,
+            string uri,
+            object[] arguments = null,
+            (string scheme, string token) authData = default)
+        {
+            var url = Constants.FORGE_URL + uri;
+            return base.CreateRequest(methodType, url, arguments, authData);
+        }
+
+        private HttpRequestMessage CreateHttpRequestMessage(ForgeSettings settings, string command, object[] arguments)
+        {
+            var request = CreateRequest(
                 settings.MethodType,
                 command,
                 arguments,
@@ -103,17 +118,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 request.Content.Headers.ContentType = new MediaTypeHeaderValue(CONTENT_TYPE);
             }
 
-            return await GetResponseAsync(request);
-        }
-
-        public override HttpRequestMessage CreateRequest(
-            HttpMethod methodType,
-            string uri,
-            object[] arguments = null,
-            (string scheme, string token) authData = default)
-        {
-            var url = Constants.FORGE_URL + uri;
-            return base.CreateRequest(methodType, url, arguments, authData);
+            return request;
         }
     }
 }
