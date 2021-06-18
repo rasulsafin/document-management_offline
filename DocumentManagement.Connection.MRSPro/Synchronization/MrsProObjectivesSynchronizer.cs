@@ -47,9 +47,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            // TODO: Remove this;
-            date = new DateTime(2021, 6, 10);
-
             var projectIds = await GetUpdatedIdsFromService(projectsService, date);
             var objectiveIds = await GetUpdatedIdsFromService(issuesService, date);
 
