@@ -73,26 +73,38 @@ namespace MRS.DocumentManagement.Connection.Utils
         {
             HttpStatusCode code = default;
             HttpContent content = default;
+            Exception exception = default;
 
             for (int i = 0; i < MAX_ATTEMPTS; i++)
             {
                 using var request = createRequest();
-                if (authData != default)
-                    request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
-                var response = await client.SendAsync(request, completionOption);
 
-                if (response.IsSuccessStatusCode)
-                    return response;
+                try
+                {
+                    if (authData != default)
+                        request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
+                    var response = await client.SendAsync(request, completionOption);
 
-                code = response.StatusCode;
-                content = response.Content;
+                    if (response.IsSuccessStatusCode)
+                        return response;
 
-                if (code is > HttpStatusCode.BadRequest and < HttpStatusCode.UnavailableForLegalReasons and not
-                    HttpStatusCode.TooManyRequests)
-                    response.EnsureSuccessStatusCode();
+                    code = response.StatusCode;
+                    content = response.Content;
+
+                    if (code is > HttpStatusCode.BadRequest and < HttpStatusCode.UnavailableForLegalReasons and not
+                        HttpStatusCode.TooManyRequests)
+                        response.EnsureSuccessStatusCode();
+                }
+                catch (TaskCanceledException e)
+                {
+                    exception = e;
+                }
 
                 await Task.Delay(ATTEMPT_DELAY);
             }
+
+            if (exception != null)
+                throw exception;
 
             throw new HttpRequestException(
                 $"{code} Response status code does not indicate success",
