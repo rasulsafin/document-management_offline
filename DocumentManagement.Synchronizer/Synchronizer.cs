@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Synchronization
 
                 var ids = await GetUpdatedIDs(
                     lastSynchronization,
-                    dbContext.Projects,
+                    dbContext.Projects.Where(data.ProjectsFilter),
                     context.ProjectsSynchronizer);
                 results.AddRange(
                     await projectStrategy.Synchronize(
@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Synchronization
 
                 ids = await GetUpdatedIDs(
                     lastSynchronization,
-                    dbContext.Objectives,
+                    dbContext.Objectives.Where(data.ObjectivesFilter),
                     context.ObjectivesSynchronizer);
                 results.AddRange(
                     await objectiveStrategy.Synchronize(
