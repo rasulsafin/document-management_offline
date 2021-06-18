@@ -40,11 +40,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             foreach (var objective in objectives)
             {
-                var external = externalDtos.First(x => x.ExternalID == objective.ExternalID);
+                var external = externalDtos.FirstOrDefault(x => x.ExternalID == objective.ExternalID);
                 if (!string.IsNullOrEmpty(external.ParentObjectiveExternalID))
                 {
                     objective.ParentObjective =
-                        objectives.First(x => x.ExternalID == external.ParentObjectiveExternalID);
+                        objectives.FirstOrDefault(x => x.ExternalID == external.ParentObjectiveExternalID);
                 }
             }
 

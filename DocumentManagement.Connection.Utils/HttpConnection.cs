@@ -56,14 +56,14 @@ namespace MRS.DocumentManagement.Connection.Utils
             return request;
         }
 
-        public async Task<JObject> GetResponseAsync(
-                Func<HttpRequestMessage> createRequest,
-                (string scheme, string token) authData = default)
+        public async Task<JToken> GetResponseAsync(
+            Func<HttpRequestMessage> createRequest,
+            (string scheme, string token) authData = default)
         {
             using var response = await SendRequestAsync(createRequest, authData);
             var content = await response.Content.ReadAsStringAsync();
-            var jObject = JObject.Parse(content);
-            return jObject;
+            var jToken = JToken.Parse(content);
+            return jToken;
         }
 
         public async Task<HttpResponseMessage> SendRequestAsync(

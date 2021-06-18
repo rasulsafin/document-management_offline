@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 authData: (Constants.AUTHORIZATION_SCHEME, GetToken()),
                 arguments);
 
-        public async Task<JObject> SendAsync(
+        public async Task<JToken> SendAsync(
             ForgeSettings settings,
             string command,
             params object[] arguments)
