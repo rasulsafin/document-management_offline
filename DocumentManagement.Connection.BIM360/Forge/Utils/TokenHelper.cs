@@ -8,6 +8,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
     /// </summary>
     public class TokenHelper : IDisposable
     {
+        private static readonly object LOCKER = new ();
         private static Dictionary<string, string> tokensContainer;
         private static uint connectionsCount = 0;
 
@@ -17,15 +18,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public TokenHelper(ForgeConnection connection)
         {
-            this.connection = connection;
-            tokensContainer ??= new Dictionary<string, string>();
-            connectionsCount++;
+            lock (LOCKER)
+            {
+                this.connection = connection;
+                tokensContainer ??= new Dictionary<string, string>();
+                connectionsCount++;
+            }
         }
 
         public void Dispose()
         {
-            if (--connectionsCount == 0)
-                tokensContainer = null;
+            lock (LOCKER)
+            {
+                if (--connectionsCount == 0)
+                    tokensContainer = null;
+            }
+
             GC.SuppressFinalize(this);
         }
 
@@ -49,10 +57,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             if (!string.IsNullOrWhiteSpace(userID))
             {
-                if (tokensContainer.ContainsKey(userID))
-                    tokensContainer[userID] = newToken;
-                else
-                    tokensContainer.Add(userID, newToken);
+                lock (LOCKER)
+                {
+                    if (tokensContainer.ContainsKey(userID))
+                        tokensContainer[userID] = newToken;
+                    else
+                        tokensContainer.Add(userID, newToken);
+                }
             }
             else
             {
@@ -76,14 +87,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             if (string.IsNullOrWhiteSpace(userID))
                 return;
 
-            this.userID = userID;
+            lock (LOCKER)
+            {
+                this.userID = userID;
+                if (!tokensContainer.ContainsKey(userID))
+                    tokensContainer.Add(this.userID, connection.GetToken?.Invoke());
+                else if (!string.IsNullOrWhiteSpace(connection.GetToken?.Invoke()))
+                    tokensContainer[userID] = connection.GetToken();
+            }
 
-            if (!tokensContainer.ContainsKey(userID))
-                tokensContainer.Add(this.userID, connection.GetToken?.Invoke());
-            else if (!string.IsNullOrWhiteSpace(connection.GetToken?.Invoke()))
-                tokensContainer[userID] = connection.GetToken();
-
-            connection.GetToken = () => tokensContainer[userID];
+            connection.GetToken = () =>
+            {
+                lock (LOCKER)
+                    return tokensContainer[userID];
+            };
         }
     }
 }
