@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ForgeUrl" xml:space="preserve">
-    <value>https://developer.api.autodesk.com</value>
-    <comment>URL of Autodesk Forge methods</comment>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="SuccessfulAuthentication" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SuccessfulAuthentication.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1251</value>
@@ -200,10 +196,6 @@
   <data name="PostProjectsVersionMethod" xml:space="preserve">
     <value>/data/v1/projects/{0}/versions</value>
     <comment>Creates new versions of a file (item)</comment>
-  </data>
-  <data name="AutodeskUrl" xml:space="preserve">
-    <value>https://autodesk.com/</value>
-    <comment>URL of Autodesk site</comment>
   </data>
   <data name="PostGetTokenMethod" xml:space="preserve">
     <value>/authentication/v1/gettoken</value>

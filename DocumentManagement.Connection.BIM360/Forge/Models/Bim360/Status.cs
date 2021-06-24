@@ -19,5 +19,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         Void,
         [EnumMember(Value = "answered")]
         Answered,
+        [EnumMember(Value = "work_completed")]
+        WorkCompleted,
+        [EnumMember(Value = "ready_to_inspect")]
+        ReadyToInspect,
+        [EnumMember(Value = "not_approved")]
+        NotApproved,
+        [EnumMember(Value = "in_dispute")]
+        InDispute,
     }
 }

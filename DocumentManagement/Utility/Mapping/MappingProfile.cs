@@ -53,8 +53,15 @@ namespace MRS.DocumentManagement.Utility.Mapping
                 .ForMember(d => d.Key, o => o.MapFrom(x => x.ExternalID));
 
             CreateMap<Location, LocationDto>()
-                .ForMember(d => d.Position, o => o.MapFrom(s => new float[] { s.PositionX, s.PositionY, s.PositionZ }))
-                .ForMember(d => d.CameraPosition, o => o.MapFrom(s => new float[] { s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ }));
+               .ForMember(
+                    d => d.Position,
+                    o => o.MapFrom(
+                        s => new Tuple<float, float, float>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
+               .ForMember(
+                    d => d.CameraPosition,
+                    o => o.MapFrom(
+                        s => new Tuple<float, float, float>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
+                           .ToValueTuple()));
         }
 
         private void CreateObjectiveMapToDto()
@@ -116,12 +123,13 @@ namespace MRS.DocumentManagement.Utility.Mapping
                 .ForMember(d => d.Value, o => o.MapFrom<DynamicFieldDtoToModelValueResolver>());
 
             CreateMap<LocationDto, Location>()
-                .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Position[0]))
-                .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Position[1]))
-                .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position[2]))
-                .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition[0]))
-                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition[1]))
-                .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition[2]));
+               .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Position.x))
+               .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Position.y))
+               .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Position.z))
+               .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
+               .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
+               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
+               .ForMember(d => d.Item, o => o.Ignore());
         }
 
         private void CreateObjectiveMapToModel()
@@ -208,6 +216,26 @@ namespace MRS.DocumentManagement.Utility.Mapping
 
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();
+
+            CreateMap<Location, LocationExternalDto>()
+               .ForMember(
+                    d => d.Location,
+                    o => o.MapFrom(
+                        e => new Tuple<float, float, float>(e.PositionX, e.PositionY, e.PositionZ).ToValueTuple()))
+               .ForMember(
+                    d => d.CameraPosition,
+                    o => o.MapFrom(
+                        e => new Tuple<float, float, float>(e.CameraPositionX, e.CameraPositionY, e.CameraPositionZ)
+                           .ToValueTuple()))
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
+            CreateMap<LocationExternalDto, Location>()
+               .ForMember(d => d.PositionX, o => o.MapFrom(s => s.Location.x))
+               .ForMember(d => d.PositionY, o => o.MapFrom(s => s.Location.y))
+               .ForMember(d => d.PositionZ, o => o.MapFrom(s => s.Location.z))
+               .ForMember(d => d.CameraPositionX, o => o.MapFrom(s => s.CameraPosition.x))
+               .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
+               .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
+               .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
         }
 
         private string GetName(User s)

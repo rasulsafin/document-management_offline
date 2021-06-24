@@ -96,13 +96,5 @@ namespace Microsoft.Extensions.DependencyInjection
                .Aggregate(
                     services,
                     (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
-
-        private static IServiceCollection AddScopedFactory<TResult>(this IServiceCollection services)
-        {
-            services.AddScoped<Func<IServiceScope, TResult>>(
-                x => scope => (scope?.ServiceProvider ?? x).GetRequiredService<TResult>());
-            services.AddScoped<IFactory<IServiceScope, TResult>, Factory<IServiceScope, TResult>>();
-            return services;
-        }
     }
 }

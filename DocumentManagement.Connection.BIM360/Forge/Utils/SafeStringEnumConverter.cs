@@ -14,7 +14,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public object DefaultValue { get; }
 
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        public override object ReadJson(
+            JsonReader reader,
+            Type objectType,
+            object existingValue,
+            JsonSerializer serializer)
         {
             try
             {

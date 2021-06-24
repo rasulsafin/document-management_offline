@@ -1,32 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
-    public class Bim360ProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
+    internal class Bim360ProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
         private readonly Bim360ConnectionContext context;
         private readonly ItemsSyncHelper itemsSyncHelper;
-        private readonly FoldersService foldersService;
-        private readonly FoldersSyncHelper foldersSyncHelper;
+        private readonly IBim360SnapshotFiller filler;
+        private readonly Authenticator authenticator;
 
         public Bim360ProjectsSynchronizer(
             Bim360ConnectionContext context,
             ItemsSyncHelper itemsSyncHelper,
-            FoldersService foldersService)
+            IBim360SnapshotFiller filler,
+            Authenticator authenticator)
         {
             this.context = context;
             this.itemsSyncHelper = itemsSyncHelper;
-            this.foldersService = foldersService;
+            this.filler = filler;
+            this.authenticator = authenticator;
         }
 
         public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
@@ -37,73 +40,55 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         public async Task<ProjectExternalDto> Update(ProjectExternalDto obj)
         {
-            var cashed = context.Projects[obj.ExternalID];
-            var toRemove = cashed.Item2.Items.Where(a => obj.Items.All(b => b.ExternalID != a.ExternalID)).ToArray();
-            var toAdd = obj.Items.Where(a => cashed.Item2.Items.All(b => b.ExternalID != a.ExternalID)).ToArray();
+            await authenticator.CheckAccessAsync(CancellationToken.None);
+
+            var cashed = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID);
+            var toRemove = cashed.Value.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
+               .ToArray();
+            var toAdd = obj.Items.Where(a => cashed.Value.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
 
             foreach (var item in toAdd)
             {
-                cashed.Item2.Items.Add(
-                    (await itemsSyncHelper.PostItem(
-                        item,
-                        context.DefaultFolders[obj.ExternalID],
-                        obj.ExternalID)).ToDto());
+                var posted = await itemsSyncHelper.PostItem(
+                    item,
+                    context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value.ProjectFilesFolder,
+                    obj.ExternalID);
+                cashed.Value.Items.Add(posted.ID, new ItemSnapshot(posted));
             }
 
             foreach (var dto in toRemove)
-                await itemsSyncHelper.Remove(obj.ExternalID, dto);
+            {
+                cashed.Value.Items.Remove(dto.Key);
+                await itemsSyncHelper.Remove(obj.ExternalID, dto.Value.Entity);
+            }
 
-            cashed.Item2 = await GetFullProject(cashed.Item1);
-            context.Projects[cashed.Item1.ID] = cashed;
-            return cashed.Item2;
+            return GetFullProject(cashed.Value);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            await context.UpdateProjects(false);
-            return context.Projects.Keys;
+            await authenticator.CheckAccessAsync(CancellationToken.None);
+
+            await filler.UpdateHubsIfNull();
+            await filler.UpdateProjectsIfNull();
+            return context.Snapshot.ProjectEnumerable.Select(x => x.Key).ToList();
         }
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            var projects = new List<ProjectExternalDto>();
+            await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            foreach (var id in ids)
-            {
-                (Project, ProjectExternalDto) value = default;
-                if (context.Projects.TryGetValue(id, out var project))
-                {
-                    value = project;
-                }
-                else
-                {
-                    await context.UpdateProjects(true);
-                    if (context.Projects.ContainsKey(id))
-                        value = project;
-                }
-
-                if (value != default)
-                {
-                    if ((value.Item2.Items?.Count ?? 0) == 0)
-                    {
-                        value.Item2 = await GetFullProject(value.Item1);
-                        context.Projects[value.Item1.ID] = value;
-                    }
-
-                    projects.Add(value.Item2);
-                }
-            }
-
-            return projects;
+            return (from id in ids
+                select context.Snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
+                into project
+                where project != null
+                select GetFullProject(project)).ToList();
         }
 
-        private async Task<ProjectExternalDto> GetFullProject(Project project)
+        private ProjectExternalDto GetFullProject(ProjectSnapshot project)
         {
-            var dto = project.ToDto();
-            if (!context.DefaultFolders.TryGetValue(project.ID, out var folder))
-                return dto;
-            var items = await foldersService.GetItemsAsync(project.ID, folder.ID);
-            dto.Items = items.Select(x => x.ToDto()).ToList();
+            var dto = project.Entity.ToDto();
+            dto.Items = project.Items.Select(x => x.Value.Entity.ToDto()).ToList();
             return dto;
         }
     }

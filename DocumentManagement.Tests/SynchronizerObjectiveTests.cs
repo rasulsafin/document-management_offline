@@ -540,7 +540,7 @@ namespace MRS.DocumentManagement.Tests
                     BimElement = new BimElement
                     {
                         GlobalID = "guid",
-                        ParentName = "1.ifc",
+                        ParentName = "someIfc",
                     },
                 });
             Fixture.Context.Objectives.Update(objectiveLocal);
@@ -592,7 +592,7 @@ namespace MRS.DocumentManagement.Tests
             var element = new BimElement
             {
                 GlobalID = "guid",
-                ParentName = "1.ifc",
+                ParentName = "someIfc",
             };
             objectiveLocal.BimElements.Add(new BimElementObjective { BimElement = element });
             Fixture.Context.Objectives.Update(objectiveLocal);
@@ -624,7 +624,7 @@ namespace MRS.DocumentManagement.Tests
                     BimElement = new BimElement
                     {
                         GlobalID = "guid",
-                        ParentName = "1.ifc",
+                        ParentName = "someIfc",
                     },
                 });
             Fixture.Context.Objectives.Update(objectiveLocal);
@@ -657,7 +657,7 @@ namespace MRS.DocumentManagement.Tests
             var element = new BimElement
             {
                 GlobalID = "guid",
-                ParentName = "1.ifc",
+                ParentName = "someIfc",
             };
             objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
             Fixture.Context.Objectives.Update(objectiveSynchronized);
@@ -687,7 +687,7 @@ namespace MRS.DocumentManagement.Tests
             var element = new BimElement
             {
                 GlobalID = "guid",
-                ParentName = "1.ifc",
+                ParentName = "someIfc",
             };
             objectiveLocal.BimElements.Add(new BimElementObjective { BimElement = element });
             objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
