@@ -257,4 +257,8 @@
     <value>/userprofile/v1/users/@me</value>
     <comment>Get the profile information of an authorizing end user in a three-legged context</comment>
   </data>
+  <data name="GetProjectsItemsVersionsMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/items/{1}/versions</value>
+    <comment>Returns versions for the given item. Multiple versions of a resource item can be uploaded in a project.</comment>
+  </data>
 </root>

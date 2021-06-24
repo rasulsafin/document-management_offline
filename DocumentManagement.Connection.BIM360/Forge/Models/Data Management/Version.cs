@@ -17,44 +17,38 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         [DataContract]
         public class VersionAttributes : AAttributes
         {
-            [DataMember(Name = "createTime")]
-            public DateTime? CreateTime { get; set; }
-
-            [DataMember(Name = "createUserId")]
-            public string CreateUserId { get; set; }
-
-            [DataMember(Name = "createUserName")]
-            public string CreateUserName { get; set; }
+            [DataMember(Name = "name")]
+            public string Name { get; set; }
 
             [DataMember(Name = "displayName")]
             public string DisplayName { get; set; }
 
-            [DataMember(Name = "hidden")]
-            public bool? Hidden { get; set; }
+            [DataMember(Name = "createTime")]
+            public DateTime? CreateTime { get; set; }
+
+            [DataMember(Name = "createUserId")]
+            public string CreateUserID { get; set; }
+
+            [DataMember(Name = "createUserName")]
+            public string CreateUserName { get; set; }
 
             [DataMember(Name = "lastModifiedTime")]
             public DateTime? LastModifiedTime { get; set; }
 
             [DataMember(Name = "lastModifiedUserId")]
-            public string LastModifiedUserId { get; set; }
+            public string LastModifiedUserID { get; set; }
 
             [DataMember(Name = "lastModifiedUserName")]
             public string LastModifiedUserName { get; set; }
 
-            [DataMember(Name = "name")]
-            public string Name { get; set; }
+            [DataMember(Name = "versionNumber")]
+            public int? VersionNumber { get; set; }
 
-            [DataMember(Name = "reserved")]
-            public bool? Reserved { get; set; }
+            [DataMember(Name = "storageSize")]
+            public int? StorageSize { get; set; }
 
-            [DataMember(Name = "reservedTime")]
-            public DateTime? ReservedTime { get; set; }
-
-            [DataMember(Name = "reservedUserId")]
-            public string ReservedUserId { get; set; }
-
-            [DataMember(Name = "reservedUserName")]
-            public string ReservedUserName { get; set; }
+            [DataMember(Name = "fileType")]
+            public string FileType { get; set; }
         }
 
         [DataContract]
