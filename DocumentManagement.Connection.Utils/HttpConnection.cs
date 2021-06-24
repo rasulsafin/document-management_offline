@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -13,6 +14,9 @@ namespace MRS.DocumentManagement.Connection.Utils
         protected readonly HttpClient client;
         protected readonly JsonSerializerSettings jsonSerializerSettings =
                 new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore };
+
+        private static readonly int MAX_ATTEMPTS = 5;
+        private static readonly int ATTEMPT_DELAY = 2000;
 
         public HttpConnection()
             => client = new HttpClient { Timeout = TimeSpan.FromSeconds(Timeout) };
@@ -31,8 +35,9 @@ namespace MRS.DocumentManagement.Connection.Utils
                 (string scheme, string token) authData = default,
                 params object[] arguments)
         {
-            using var request = CreateRequest(methodType, command, arguments, authData);
-            var response = await SendRequestAsync(request, completionOption: HttpCompletionOption.ResponseHeadersRead);
+            var response = await SendRequestAsync(
+                () => CreateRequest(methodType, command, arguments, authData),
+                completionOption: HttpCompletionOption.ResponseHeadersRead);
             return await response.Content.ReadAsStreamAsync();
         }
 
@@ -52,26 +57,59 @@ namespace MRS.DocumentManagement.Connection.Utils
         }
 
         public async Task<JToken> GetResponseAsync(
-                HttpRequestMessage request,
-                (string scheme, string token) authData = default)
+            Func<HttpRequestMessage> createRequest,
+            (string scheme, string token) authData = default)
         {
-            using var response = await SendRequestAsync(request, authData);
+            using var response = await SendRequestAsync(createRequest, authData);
             var content = await response.Content.ReadAsStringAsync();
             var jToken = JToken.Parse(content);
             return jToken;
         }
 
         public async Task<HttpResponseMessage> SendRequestAsync(
-                HttpRequestMessage request,
-                (string scheme, string token) authData = default,
-                HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
+            Func<HttpRequestMessage> createRequest,
+            (string scheme, string token) authData = default,
+            HttpCompletionOption completionOption = HttpCompletionOption.ResponseContentRead)
         {
-            if (authData != default)
-                request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
-            await Task.Delay(100);
-            var response = await client.SendAsync(request, completionOption);
-            response.EnsureSuccessStatusCode();
-            return response;
+            HttpStatusCode code = default;
+            HttpContent content = default;
+            Exception exception = default;
+
+            for (int i = 0; i < MAX_ATTEMPTS; i++)
+            {
+                using var request = createRequest();
+
+                try
+                {
+                    if (authData != default)
+                        request.Headers.Authorization = new AuthenticationHeaderValue(authData.scheme, authData.token);
+                    var response = await client.SendAsync(request, completionOption);
+
+                    if (response.IsSuccessStatusCode)
+                        return response;
+
+                    code = response.StatusCode;
+                    content = response.Content;
+
+                    if (code is > HttpStatusCode.BadRequest and < HttpStatusCode.UnavailableForLegalReasons and not
+                        HttpStatusCode.TooManyRequests)
+                        response.EnsureSuccessStatusCode();
+                }
+                catch (TaskCanceledException e)
+                {
+                    exception = e;
+                }
+
+                await Task.Delay(ATTEMPT_DELAY);
+            }
+
+            if (exception != null)
+                throw exception;
+
+            throw new HttpRequestException(
+                $"{code} Response status code does not indicate success",
+                new Exception(await content!.ReadAsStringAsync()),
+                code);
         }
     }
 }

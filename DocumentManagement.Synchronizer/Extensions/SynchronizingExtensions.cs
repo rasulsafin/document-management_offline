@@ -1,6 +1,7 @@
 using System;
 using System.Reflection;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 
 namespace MRS.DocumentManagement.Synchronization.Extensions
@@ -22,33 +23,8 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
                 where T : class, ISynchronizable<T>, new()
         {
-            var properties = typeof(T).GetProperties();
-
-            tuple.Local ??= new T();
-            tuple.Remote ??= new T();
-            tuple.Synchronized ??= new T { IsSynchronized = true };
+            MergePrivate(tuple, tuple.Local?.UpdatedAt ?? default, tuple.Remote?.UpdatedAt ?? default);
             tuple.LinkEntities();
-
-            foreach (var property in properties)
-            {
-                if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
-                        continue;
-
-                var synchronizedValue = property.GetValue(tuple.Synchronized);
-                var localValue = property.GetValue(tuple.Local);
-                var remoteValue = property.GetValue(tuple.Remote);
-
-                var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
-                var localNotChanged = Equals(synchronizedValue, localValue);
-                var localMoreRelevant = tuple.Local.UpdatedAt > tuple.Remote.UpdatedAt;
-
-                var value = localSynchronizedAndNotChanged   ? localValue
-                        : localNotChanged                   ? remoteValue
-                        : localMoreRelevant                 ? localValue
-                        : remoteValue;
-
-                UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
-            }
         }
 
         public static object GetPropertyValue<T>(this SynchronizingTuple<T> tuple, string propertyName)
@@ -73,11 +49,11 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 TryGetValue(tuple.Synchronized, out var result3) ? result3 : null;
         }
 
-        private static void LinkEntities<T>(this SynchronizingTuple<T> tuple)
-                where T : class, ISynchronizable<T>, new()
+        public static void SynchronizeChanges(this ISynchronizationChanges parentTuple, ISynchronizationChanges childTuple)
         {
-            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
-            tuple.Local.SynchronizationMate = tuple.Synchronized;
+            parentTuple.LocalChanged |= childTuple.LocalChanged;
+            parentTuple.SynchronizedChanged |= childTuple.SynchronizedChanged;
+            parentTuple.RemoteChanged |= childTuple.RemoteChanged;
         }
 
         private static void UpdateValue<T>(T obj, PropertyInfo property, object oldValue, object newValue, Action action)
@@ -94,7 +70,6 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
             PropertyInfo property,
             (object local, object synhronzied, object remote) oldValues,
             object value)
-            where T : ISynchronizable<T>
         {
             UpdateValue(tuple.Local, property, oldValues.local, value, () => tuple.LocalChanged = true);
             UpdateValue(
@@ -105,5 +80,69 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
                 () => tuple.SynchronizedChanged = true);
             UpdateValue(tuple.Remote, property, oldValues.remote, value, () => tuple.RemoteChanged = true);
         }
+
+        private static void MergePrivate<T>(SynchronizingTuple<T> tuple, DateTime localUpdatedAt, DateTime remoteUpdatedAt)
+        {
+            var properties = typeof(T).GetProperties();
+
+            tuple.Local ??= (T)Activator.CreateInstance(typeof(T));
+            tuple.Remote ??= (T)Activator.CreateInstance(typeof(T));
+            tuple.Synchronized ??= (T)Activator.CreateInstance(typeof(T));
+
+            foreach (var property in properties)
+            {
+                if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
+                    continue;
+
+                if (NeedMergeSubtype(tuple, property))
+                {
+                    var type = typeof(SynchronizingTuple<>).MakeGenericType(property.PropertyType);
+                    dynamic subtuple = Activator.CreateInstance(
+                        type,
+                        default(string),
+                        property.GetValue(tuple.Synchronized),
+                        property.GetValue(tuple.Local),
+                        property.GetValue(tuple.Remote));
+
+                    var merge = typeof(SynchronizingExtensions).GetMethod(nameof(MergePrivate), BindingFlags.Static | BindingFlags.NonPublic) !
+                       .MakeGenericMethod(property.PropertyType);
+
+                    var parameters = new[] { subtuple, localUpdatedAt, remoteUpdatedAt };
+                    merge!.Invoke(null, parameters);
+                    tuple.SynchronizeChanges(subtuple as ISynchronizationChanges);
+                    property.SetValue(tuple.Local, subtuple!.Local);
+                    property.SetValue(tuple.Synchronized, subtuple.Synchronized);
+                    property.SetValue(tuple.Remote, subtuple.Remote);
+                    continue;
+                }
+
+                var synchronizedValue = property.GetValue(tuple.Synchronized);
+                var localValue = property.GetValue(tuple.Local);
+                var remoteValue = property.GetValue(tuple.Remote);
+
+                var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
+                var localNotChanged = Equals(synchronizedValue, localValue);
+                var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
+
+                var value = localSynchronizedAndNotChanged ? localValue
+                    : localNotChanged                      ? remoteValue
+                    : localMoreRelevant                    ? localValue
+                                                             : remoteValue;
+
+                UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
+            }
+        }
+
+        private static void LinkEntities<T>(this SynchronizingTuple<T> tuple)
+            where T : class, ISynchronizable<T>, new()
+        {
+            tuple.Synchronized.IsSynchronized = true;
+            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
+            tuple.Local.SynchronizationMate = tuple.Synchronized;
+        }
+
+        private static bool NeedMergeSubtype<T>(SynchronizingTuple<T> tuple, PropertyInfo property)
+            => property.PropertyType.GetCustomAttribute(typeof(MergeContractAttribute)) != null &&
+                (property.GetValue(tuple.Local) != null || property.GetValue(tuple.Remote) != null);
     }
 }

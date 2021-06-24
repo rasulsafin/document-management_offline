@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
@@ -9,7 +8,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers
+namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 {
     public class ItemsSyncHelper
     {
@@ -106,21 +105,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers
             return addedItem.item;
         }
 
-        internal async Task Remove(string projectID, ItemExternalDto item)
+        internal async Task Remove(string projectID, Item item)
         {
             // Delete uploaded item by marking version as "deleted"
             var deletedVersion = new Version
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = item.FileName,
+                    Name = item.Attributes.DisplayName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
                 {
                     Item = new ObjectInfo
                     {
-                        ID = item.ExternalID,
+                        ID = item.ID,
                         Type = ITEM_TYPE,
                     }.ToDataContainer(),
                 },

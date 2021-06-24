@@ -67,7 +67,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                         .ThenInclude(x => x.SynchronizationMate)
                    .Include(x => x.Author)
                    .Include(x => x.BimElements)
-                        .ThenInclude(x => x.BimElement));
+                        .ThenInclude(x => x.BimElement)
+                   .Include(x => x.Location)
+                        .ThenInclude(x => x.Item));
 
         protected override IEnumerable<Objective> Order(IEnumerable<Objective> objectives)
             => objectives.OrderByParent(x => x.ParentObjective);
@@ -83,8 +85,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             {
                 tuple.Merge();
                 CreateObjectiveParentLink(data, tuple);
+                var projectID = tuple.Local.ProjectID;
                 var project = await context.Projects.Include(x => x.SynchronizationMate)
-                   .FirstOrDefaultAsync(x => x.ID == tuple.Local.ProjectID);
+                   .FirstOrDefaultAsync(x => x.ID == projectID);
                 tuple.Synchronized.ProjectID = project?.SynchronizationMateID ?? 0;
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
 
@@ -94,7 +97,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     throw new Exception($"Exception created while Synchronizing children in Add Objective To Remote");
 
                 var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
-                UpdateChildrenAfterSynchronization(tuple);
+                await UpdateChildrenAfterSynchronization(tuple);
                 return result;
             }
             catch (Exception e)
@@ -155,13 +158,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             try
             {
+                tuple.Merge();
                 MergeBimElements(tuple);
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 if (resultAfterChildrenSync.Count > 0)
                     throw new Exception($"Exception created while Synchronizing children in Merge Objective");
 
                 var result = await base.Merge(tuple, data, connectionContext, parent, token);
-                UpdateChildrenAfterSynchronization(tuple);
+
+                resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
+                if (resultAfterChildrenSync.Count > 0)
+                    throw new Exception($"Exception created while Synchronizing children in Merge Objective");
+
+                await UpdateChildrenAfterSynchronization(tuple);
+
                 return result;
             }
             catch (Exception e)
@@ -249,16 +259,20 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 null,
                 tuple);
 
+            await LinkLocationItem(tuple);
+
             return itemsResult.Concat(fieldResult).ToList();
         }
 
-        private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
+        private async Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
         {
             ItemStrategy<ObjectiveItemLinker>.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Concat(tuple.Synchronized.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Select(x => x.Item),
                 (tuple.Remote.Items ?? ArraySegment<ObjectiveItem>.Empty).Select(x => x.Item).ToArray());
+
+            await LinkLocationItem(tuple);
         }
 
         private void MergeBimElements(SynchronizingTuple<Objective> tuple)
@@ -301,6 +315,29 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 // ReSharper disable once PossibleMultipleEnumeration
                 tuple.Local.ParentObjective = allObjectives
                    .First(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && !x.IsSynchronized);
+            }
+        }
+
+        // TODO: improve this
+        private async Task LinkLocationItem(SynchronizingTuple<Objective> tuple)
+        {
+            if (tuple.Local!.Location != null &&
+                (tuple.Local.Location.Item == null || tuple.Synchronized.Location.Item == null))
+            {
+                var itemTuple = new SynchronizingTuple<Item>(
+                    local: tuple.Local.Location!.Item,
+                    synchronized: tuple.Synchronized!.Location.Item,
+                    remote: tuple.Remote!.Location.Item);
+
+                await itemStrategy.FindAndAttachExists(
+                    itemTuple,
+                    null,
+                    tuple,
+                    (string)itemTuple.GetPropertyValue(nameof(Item.RelativePath)));
+
+                tuple.Local.Location.Item = itemTuple.Local;
+                tuple.Synchronized.Location.Item = itemTuple.Synchronized ?? itemTuple.Local?.SynchronizationMate;
+                tuple.Remote.Location.Item = itemTuple.Remote;
             }
         }
     }
