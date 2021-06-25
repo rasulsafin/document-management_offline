@@ -223,6 +223,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/items/{1}/versions.
+        /// </summary>
+        internal static string GetProjectsItemsVersionsMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsItemsVersionsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects.
         /// </summary>
         internal static string GetProjectsOfHubMethod {

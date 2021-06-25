@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -30,21 +29,27 @@ namespace MRS.DocumentManagement.Connection.Bim360
             CancellationToken cancelToken)
         {
             int i = 0;
+            var count = itemExternalDto.Count();
+
             foreach (var item in itemExternalDto)
             {
                 cancelToken.ThrowIfCancellationRequested();
                 var file = await itemsService.GetAsync(projectId, item.ExternalID);
 
-                var storage = file.version.Relationships.Storage?.Data
-                   .ToObject<StorageObject,
-                        StorageObject.StorageObjectAttributes,
-                        StorageObject.StorageObjectRelationships>();
-                if (storage == null)
-                    continue;
+                var storage = file.version.GetStorage() ??
+                    (await itemsService.GetVersions(projectId, item.ExternalID))
+                   .Select(x => (x.Attributes.VersionNumber, storage: x.GetStorage()))
+                   .Where(x => x.storage != null)
+                   .Aggregate((max, vs) => max.VersionNumber >= vs.VersionNumber ? max : vs)
+                   .storage;
 
-                var (bucketKey, hashedName) = storage.ParseStorageId();
-                await objectsService.GetAsync(bucketKey, hashedName, item.FullPath);
-                progress?.Report(++i / (double)itemExternalDto.Count());
+                if (storage != null)
+                {
+                    var (bucketKey, hashedName) = storage.ParseStorageId();
+                    await objectsService.GetAsync(bucketKey, hashedName, item.FullPath);
+                }
+
+                progress?.Report(++i / (double)count);
             }
 
             return true;

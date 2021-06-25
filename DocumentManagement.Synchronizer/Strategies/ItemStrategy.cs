@@ -134,11 +134,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
-            if (string.IsNullOrWhiteSpace(tuple.Local.ExternalID))
-                tuple.Local.ExternalID = tuple.ExternalID;
-            if (string.IsNullOrWhiteSpace(tuple.Synchronized.ExternalID))
-                tuple.Synchronized.ExternalID = tuple.ExternalID;
-
+            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
             LinkParent(tuple, parent);
             await NothingAction(tuple, data, connectionContext, parent);
             return null;

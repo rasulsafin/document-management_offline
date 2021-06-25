@@ -26,7 +26,8 @@ namespace MRS.DocumentManagement.Services
         public Task<double> GetProgress(string id)
         {
             logger.LogTrace("GetProgress {@LongRequestID}", id);
-            return Task.FromResult(QUEUE.FindOrThrow(id).Progress);
+            var request = QUEUE.FindOrThrow(id);
+            return Task.FromResult(request.Task.IsCompleted ? 1.0 : request.Progress);
         }
 
         public Task Cancel(string id)
