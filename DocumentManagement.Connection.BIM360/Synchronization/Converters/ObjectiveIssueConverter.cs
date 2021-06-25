@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
-                    LocationDescription = GetBimElements(objective),
+                    //// TODO: LocationDescription,
                     PushpinAttributes =
                         await GetPushpinAttributes(objective.Location, project.IssueContainer, targetUrn, globalOffset),
                     NgIssueTypeID = type,
@@ -95,22 +95,34 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 },
             };
 
+            SetBimElements(objective, result);
             return result;
         }
 
         private static DateTime? ConvertToNullable(DateTime dateTime)
-            => dateTime == default ? (DateTime?)null : dateTime;
+            => dateTime == default ? null : dateTime;
 
-        private static string GetDynamicField(ICollection<DynamicFieldExternalDto> dynamicFields, string fieldName)
+        private static string GetDynamicField(IEnumerable<DynamicFieldExternalDto> dynamicFields, string fieldName)
         {
             var field = dynamicFields?.FirstOrDefault(f => f.ExternalID == fieldName);
             return field?.Value;
         }
 
-        private static string GetBimElements(ObjectiveExternalDto objectiveExternalDto)
-            => objectiveExternalDto.BimElements == null
-                ? null
-                : JsonConvert.SerializeObject(objectiveExternalDto.BimElements);
+        private static void SetBimElements(ObjectiveExternalDto objective, Issue result)
+        {
+            if (objective.BimElements == null)
+                return;
+
+            result.Attributes.PushpinAttributes ??= new Issue.PushpinAttributes();
+            result.Attributes.PushpinAttributes.ViewerState ??= new Issue.ViewerState();
+            result.Attributes.PushpinAttributes.ViewerState.OtherInfo = GetOtherInfo(objective);
+        }
+
+        private static object GetOtherInfo(ObjectiveExternalDto objective)
+            => new
+            {
+                objective.BimElements,
+            };
 
         private async Task<Issue.PushpinAttributes> GetPushpinAttributes(
             LocationExternalDto locationDto,
