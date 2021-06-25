@@ -251,7 +251,9 @@ namespace MRS.DocumentManagement.Services
                             logger.LogDebug(
                                 "Synchronization ends with result: {@SynchronizationResult}",
                                 synchronizationResult);
-                            return new RequestResult(synchronizationResult.Count == 0, synchronizationResult?.FirstOrDefault()?.Exception);
+                            return new RequestResult(
+                                synchronizationResult.Count == 0,
+                                synchronizationResult.FirstOrDefault()?.Exception.ConvertToBase());
                         }
                         finally
                         {
