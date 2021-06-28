@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 
@@ -71,8 +72,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
                         topFolders.First();
                     projectSnapshot.ProjectFilesFolder = topFolder;
-
-                    var items = await foldersService.GetItemsAsync(p.ID, projectSnapshot.ProjectFilesFolder.ID);
+                    var items = await GetAllItems(p.ID, topFolders);
                     projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
                     foreach (var item in items)
                         projectSnapshot.Items.Add(item.ID, new ItemSnapshot(item));
@@ -105,6 +105,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                 var types = await issuesService.GetIssueTypesAsync(project.Value.IssueContainer);
                 project.Value.IssueTypes = types.ToDictionary(x => x.ID);
             }
+        }
+
+        private async Task<IEnumerable<Item>> GetAllItems(string projectID, IEnumerable<Folder> folders)
+        {
+            var result = Enumerable.Empty<Item>();
+
+            foreach (var folder in folders)
+            {
+                result = result
+                   .Concat(await GetAllItems(projectID, await foldersService.GetFoldersAsync(projectID, folder.ID)))
+                   .Concat(await foldersService.GetItemsAsync(projectID, folder.ID));
+            }
+
+            return result;
         }
     }
 }
