@@ -238,6 +238,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 
             [DataMember(Name = "attributesVersion")]
             public object AttributesVersion { get; set; }
+
+            /// <summary>
+            /// Our property to save our additional info.
+            /// </summary>
+            [DataMember]
+            public object OtherInfo { get; set; }
         }
 
         [DataContract]

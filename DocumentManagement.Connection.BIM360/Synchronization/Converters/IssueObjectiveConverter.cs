@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
@@ -57,10 +57,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         {
             try
             {
-                return string.IsNullOrWhiteSpace(issue.Attributes.LocationDescription)
-                    ? ArraySegment<BimElementExternalDto>.Empty
-                    : JsonConvert.DeserializeObject<ICollection<BimElementExternalDto>>(
-                        issue.Attributes.LocationDescription);
+                var viewerStateOtherInfo = (JToken)issue.Attributes.PushpinAttributes?.ViewerState?.OtherInfo;
+                return viewerStateOtherInfo?[nameof(ObjectiveExternalDto.BimElements)]
+                  ?.ToObject<ICollection<BimElementExternalDto>>();
             }
             catch
             {
@@ -71,6 +70,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private static LocationExternalDto GetLocation(Issue issue)
         {
             var pushpinAttributes = issue.Attributes.PushpinAttributes;
+
+            if (pushpinAttributes?.Location == null && pushpinAttributes?.ViewerState?.GlobalOffset == null &&
+                pushpinAttributes?.ViewerState?.Viewport?.Eye == null)
+                return null;
+
             var location = pushpinAttributes.Location ?? Vector3.Zero;
             var offset = pushpinAttributes.ViewerState?.GlobalOffset ?? Vector3.Zero;
             var eye = pushpinAttributes.ViewerState?.Viewport?.Eye ?? Vector3.Zero;
