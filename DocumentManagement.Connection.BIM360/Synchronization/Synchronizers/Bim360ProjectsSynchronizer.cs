@@ -51,9 +51,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             {
                 var posted = await itemsSyncHelper.PostItem(
                     item,
-                    context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value.ProjectFilesFolder,
+                    context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value.MrsFolder,
                     obj.ExternalID);
-                cashed.Value.Items.Add(posted.ID, new ItemSnapshot(posted));
+                cashed.Value.Items.Add(posted.Item1.ID, new ItemSnapshot(posted.Item1) {});
             }
 
             foreach (var dto in toRemove)

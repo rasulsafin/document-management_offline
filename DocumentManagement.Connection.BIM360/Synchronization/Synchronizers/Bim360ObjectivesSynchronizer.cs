@@ -7,6 +7,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -14,6 +15,7 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -66,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (obj.Items?.Any() ?? false)
             {
                 snapshot.Items = new List<ItemSnapshot>();
-                var added = await AddItems(obj.Items, project.ID, created, project.IssueContainer);
+                var added = await AddItems(obj.Items, project, created);
                 snapshot.Items.AddRange(added.Select(x => new ItemSnapshot(x)));
                 parsedToDto.Items = snapshot.Items.Select(i => i.Entity.ToDto()).ToList();
             }
@@ -108,7 +110,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (obj.Items?.Any() ?? false)
             {
                 snapshot.Items ??= new List<ItemSnapshot>();
-                var added = await AddItems(obj.Items, project.ID, snapshot.Entity, project.ID);
+                var added = await AddItems(obj.Items, project, snapshot.Entity);
                 snapshot.Items.AddRange(added.Select(x => new ItemSnapshot(x)));
                 parsedToDto.Items = snapshot.Items.Select(i => i.Entity.ToDto()).ToList();
             }
@@ -192,21 +194,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
         private async Task<IEnumerable<Item>> AddItems(
             ICollection<ItemExternalDto> items,
-            string projectId,
-            Issue issue,
-            string containerId)
+            ProjectSnapshot project,
+            Issue issue)
         {
-            var folder = context.Snapshot.ProjectEnumerable.First(x => x.Key == projectId).Value.ProjectFilesFolder;
-
             var resultItems = new List<Item>();
-            var fileTuples = await foldersService.SearchAsync(projectId, folder.ID);
-            var existingItems = fileTuples.Select(t => t.item);
-            var attachment = await issuesService.GetAttachmentsAsync(containerId, issue.ID);
+            var attachment = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
 
             foreach (var item in items)
             {
                 // If item with the same name already exists add existing item
-                var itemWithSameNameExists = existingItems.FirstOrDefault(i => i.Attributes.DisplayName.Equals(item.FileName, StringComparison.InvariantCultureIgnoreCase));
+                Item itemWithSameNameExists = project.FindItemByName(item.FileName).Entity;
+
                 if (itemWithSameNameExists != null)
                 {
                     if (attachment.Any(x => x.Attributes.Name == item.FileName))
@@ -215,7 +213,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                         continue;
                     }
 
-                    var attached = await AttachItem(itemWithSameNameExists, issue.ID, containerId);
+                    var attached = await AttachItem(itemWithSameNameExists, issue.ID, project.IssueContainer);
                     if (attached)
                         resultItems.Add(itemWithSameNameExists);
                     continue;
@@ -223,11 +221,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                 if (string.IsNullOrWhiteSpace(item.ExternalID))
                 {
-                    var posted = await itemsSyncHelper.PostItem(item, folder, projectId);
+                    var posted = await itemsSyncHelper.PostItem(item, project.MrsFolder, project.ID);
+                    project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
                     await Task.Delay(5000);
-                    var attached = await AttachItem(posted, issue.ID, containerId);
+                    var attached = await AttachItem(posted.item, issue.ID, project.IssueContainer);
                     if (attached)
-                        resultItems.Add(posted);
+                        resultItems.Add(posted.item);
                 }
             }
 

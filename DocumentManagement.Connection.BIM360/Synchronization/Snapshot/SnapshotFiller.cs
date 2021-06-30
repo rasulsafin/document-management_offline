@@ -6,7 +6,9 @@ using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
@@ -71,11 +73,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                             x => x.Attributes.DisplayName == "Project Files" ||
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
                         topFolders.First();
-                    projectSnapshot.ProjectFilesFolder = topFolder;
                     var items = await GetAllItems(p.ID, topFolders);
                     projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
-                    foreach (var item in items)
-                        projectSnapshot.Items.Add(item.ID, new ItemSnapshot(item));
+
+                    foreach (var iv in items)
+                    {
+                        if (iv.version?.Attributes.Name != ".mrs")
+                        {
+                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
+                        }
+                        else
+                        {
+                            topFolder = iv.item.Relationships.Parent.Data
+                               .ToObject<Folder, Folder.FolderAttributes, Folder.FolderRelationships>();
+                        }
+                    }
+
+                    projectSnapshot.MrsFolder = topFolder;
                 }
             }
         }
@@ -107,9 +121,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
             }
         }
 
-        private async Task<IEnumerable<Item>> GetAllItems(string projectID, IEnumerable<Folder> folders)
+        private async Task<IEnumerable<(Item item, Version version)>> GetAllItems(
+            string projectID,
+            IEnumerable<Folder> folders)
         {
-            var result = Enumerable.Empty<Item>();
+            var result = Enumerable.Empty<(Item, Version)>();
 
             foreach (var folder in folders)
             {

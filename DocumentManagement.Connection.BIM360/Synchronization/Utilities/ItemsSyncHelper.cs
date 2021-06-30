@@ -26,7 +26,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         }
 
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        internal async Task<Item> PostItem(ItemExternalDto item, Folder folder, string projectId)
+        internal async Task<(Item item, Version version)> PostItem(ItemExternalDto item, Folder folder, string projectId)
         {
             var fileName = Path.GetFileName(item.FullPath);
 
@@ -52,11 +52,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
             var storage = await projectsService.CreateStorageAsync(projectId, objectToUpload);
             if (storage == default)
-                return null;
+                return default;
 
             // STEP 6. Upload file to storage
             if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
-                return null;
+                return default;
 
             var parsedId = storage.ParseStorageId();
             var bucketKey = parsedId.bucketKey;
@@ -100,9 +100,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
             var addedItem = await itemsService.PostItemAsync(projectId, bimItem, version);
             if (addedItem.item == null || addedItem.version == null)
-                return null;
+                return default;
 
-            return addedItem.item;
+            return addedItem;
         }
 
         internal async Task Remove(string projectID, Item item)
