@@ -33,6 +33,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             return posted;
         }
 
+        internal async Task<(Item item, Version version)> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
+        {
+            var snapshot = project.Items[item.ExternalID];
+            var posted = await UpdateVersion(item, project.MrsFolderID, project.ID, snapshot.Entity);
+
+            if (snapshot.ID != posted.item.ID)
+            {
+                project.Items.Remove(snapshot.ID);
+                project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
+            }
+            else
+            {
+                snapshot.Entity = posted.item;
+                snapshot.Version = posted.version;
+            }
+
+            return posted;
+        }
+
         internal async Task Remove(string projectID, Item item)
         {
             // Delete uploaded item by marking version as "deleted"
@@ -56,61 +75,27 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             await versionsService.PostVersionAsync(projectID, deletedVersion);
         }
 
+        // Replication for steps 5, 6, 8 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
+        private async Task<(Item item, Version version)> UpdateVersion(ItemExternalDto item, string folder, string projectId, Item existingItem)
+        {
+            var fileName = Path.GetFileName(item.FullPath);
+            var version = await CreateVersion(projectId, folder, item.FullPath, fileName);
+
+            if (version == null)
+                return default;
+
+            version.Relationships.Item = existingItem.ToInfo().ToDataContainer();
+            return await versionsService.PostVersionAsync(projectId, version);
+        }
+
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
         private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, string folder, string projectId)
         {
             var fileName = Path.GetFileName(item.FullPath);
+            var version = await CreateVersion(projectId, folder, item.FullPath, fileName);
 
-            // STEP 5. Create a Storage Object.
-            var objectToUpload = new StorageObject
-            {
-                Attributes = new StorageObject.StorageObjectAttributes
-                {
-                    Name = fileName,
-                },
-                Relationships = new StorageObject.StorageObjectRelationships
-                {
-                    Target = new
-                    {
-                        data = new
-                        {
-                            type = FOLDER_TYPE,
-                            id = folder,
-                        },
-                    },
-                },
-            };
-
-            var storage = await projectsService.CreateStorageAsync(projectId, objectToUpload);
-            if (storage == default)
+            if (version == null)
                 return default;
-
-            // STEP 6. Upload file to storage
-            if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
-                return default;
-
-            var parsedId = storage.ParseStorageId();
-            var bucketKey = parsedId.bucketKey;
-            var hashedName = parsedId.hashedName;
-            var filePath = item.FullPath;
-            await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
-
-            // STEP 7. Create first version
-            var version = new Version
-            {
-                Attributes = new Version.VersionAttributes
-                {
-                    Name = fileName,
-                    Extension = new Extension
-                    {
-                        Type = AUTODESK_VERSION_FILE_TYPE,
-                    },
-                },
-                Relationships = new Version.VersionRelationships
-                {
-                    Storage = storage.ToInfo().ToDataContainer(),
-                },
-            };
 
             var bimItem = new Item
             {
@@ -138,6 +123,60 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 return default;
 
             return addedItem;
+        }
+
+        private async Task<Version> CreateVersion(string projectId, string folder, string filePath, string fileName)
+        {
+            // STEP 5. Create a Storage Object.
+            var objectToUpload = new StorageObject
+            {
+                Attributes = new StorageObject.StorageObjectAttributes
+                {
+                    Name = fileName,
+                },
+                Relationships = new StorageObject.StorageObjectRelationships
+                {
+                    Target = new
+                    {
+                        data = new
+                        {
+                            type = FOLDER_TYPE,
+                            id = folder,
+                        },
+                    },
+                },
+            };
+
+            var storage = await projectsService.CreateStorageAsync(projectId, objectToUpload);
+            if (storage == default)
+                return null;
+
+            // STEP 6. Upload file to storage
+            if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
+                return null;
+
+            var parsedId = storage.ParseStorageId();
+            var bucketKey = parsedId.bucketKey;
+            var hashedName = parsedId.hashedName;
+            await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
+
+            // STEP 7. Create first version
+            var version = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = fileName,
+                    Extension = new Extension
+                    {
+                        Type = AUTODESK_VERSION_FILE_TYPE,
+                    },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Storage = storage.ToInfo().ToDataContainer(),
+                },
+            };
+            return version;
         }
     }
 }

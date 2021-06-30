@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     var versions = response[INCLUDED_PROPERTY]?.ToObject<Version[]>() ?? Array.Empty<Version>();
                     return items?.Select(
                             item => (item,
-                                versions.FirstOrDefault(vers => vers.Relationships.Item.Data.ID == vers.ID))) ??
+                                versions.FirstOrDefault(vers => vers.Relationships.Item.Data.ID == item.ID))) ??
                         ArraySegment<(Item item, Version version)>.Empty;
                 },
                 projectId,

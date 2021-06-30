@@ -198,7 +198,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             foreach (var item in items)
             {
                 // If item with the same name already exists add existing item
-                Item itemWithSameNameExists = project.FindItemByName(item.FileName).Entity;
+                Item itemWithSameNameExists = project.FindItemByName(item.FileName)?.Entity;
 
                 if (itemWithSameNameExists != null)
                 {
@@ -211,19 +211,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                     var attached = await AttachItem(itemWithSameNameExists, issue.ID, project.IssueContainer);
                     if (attached)
                         resultItems.Add(itemWithSameNameExists);
-                    continue;
                 }
-
-                if (string.IsNullOrWhiteSpace(item.ExternalID))
+                else
                 {
-                    var posted = await itemsSyncHelper.PostItem(project, item);
-                    if (posted == default)
-                        continue;
+                    var uploadedItem = (await itemsSyncHelper.PostItem(project, item)).item;
 
+                    if (uploadedItem == default)
+                        continue;
                     await Task.Delay(5000);
-                    var attached = await AttachItem(posted.item, issue.ID, project.IssueContainer);
+                    var attached = await AttachItem(uploadedItem, issue.ID, project.IssueContainer);
                     if (attached)
-                        resultItems.Add(posted.item);
+                        resultItems.Add(uploadedItem);
                 }
             }
 

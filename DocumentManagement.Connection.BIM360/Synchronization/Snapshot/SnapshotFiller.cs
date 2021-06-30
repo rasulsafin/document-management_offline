@@ -7,6 +7,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -78,7 +79,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 
                     foreach (var iv in items)
                     {
-                        if (iv.version?.Attributes.Name != ".mrs")
+                        if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
+                            iv.version?.Attributes.Name != Resources.MrsFileName)
                             projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
                         else
                             topFolder = iv.item.Relationships.Parent.Data.ID;

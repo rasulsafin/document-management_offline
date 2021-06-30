@@ -110,7 +110,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private static void SetBimElements(ObjectiveExternalDto objective, Issue result)
         {
-            if (objective.BimElements == null)
+            if (objective.BimElements == null || objective.BimElements.Count == 0 || objective.Location?.Item == null)
                 return;
 
             result.Attributes.PushpinAttributes ??= new Issue.PushpinAttributes();
@@ -173,6 +173,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         {
             async Task<Version> GetVersion(string itemID, long size)
             {
+                if (itemID == null)
+                    return null;
+
                 var versions = (await itemsService.GetVersions(project.ID, itemID))
                    .OrderByDescending(x => x.Attributes.VersionNumber)
                    .ToArray();
@@ -188,11 +191,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (obj.Location.Item.ExternalID == null)
             {
                 var snapshot = project.FindItemByName(obj.Location.Item.FileName);
-                item = snapshot.Entity;
+                item = snapshot?.Entity;
                 var size = new FileInfo(obj.Location.Item.FullPath).Length;
-                version = snapshot.Version.Attributes.StorageSize == size
+                version = snapshot?.Version.Attributes.StorageSize == size
                     ? snapshot.Version
-                    : await GetVersion(item.ID, size);
+                    : await GetVersion(item?.ID, size);
 
                 if (item == default && version == default)
                     (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);

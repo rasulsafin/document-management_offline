@@ -253,4 +253,8 @@
     <value>/data/v1/projects/{0}/items/{1}/versions</value>
     <comment>Returns versions for the given item. Multiple versions of a resource item can be uploaded in a project.</comment>
   </data>
+  <data name="MrsFileName" xml:space="preserve">
+    <value>.mrs</value>
+    <comment>The indicator file that defines the folder for uploading.</comment>
+  </data>
 </root>
