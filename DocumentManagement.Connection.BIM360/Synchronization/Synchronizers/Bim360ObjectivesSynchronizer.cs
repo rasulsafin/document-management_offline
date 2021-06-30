@@ -7,7 +7,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -15,7 +14,6 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -23,7 +21,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly IssuesService issuesService;
         private readonly ItemsService itemsService;
-        private readonly FoldersService foldersService;
         private readonly Authenticator authenticator;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly Bim360ConnectionContext context;
@@ -35,7 +32,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             Bim360ConnectionContext context,
             IssuesService issuesService,
             ItemsService itemsService,
-            FoldersService foldersService,
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
             IBim360SnapshotFiller filler,
@@ -49,7 +45,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
             this.filler = filler;
-            this.foldersService = foldersService;
             this.authenticator = authenticator;
         }
 

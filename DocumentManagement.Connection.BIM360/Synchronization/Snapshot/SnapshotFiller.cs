@@ -69,27 +69,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                     var projectSnapshot = new ProjectSnapshot(p);
                     hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
-                    var topFolder = topFolders.FirstOrDefault(
-                            x => x.Attributes.DisplayName == "Project Files" ||
+                    var topFolder = (topFolders.FirstOrDefault(
+                            x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
-                        topFolders.First();
+                        topFolders.First()).ID;
                     var items = await GetAllItems(p.ID, topFolders);
                     projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
 
                     foreach (var iv in items)
                     {
                         if (iv.version?.Attributes.Name != ".mrs")
-                        {
                             projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
-                        }
                         else
-                        {
-                            topFolder = iv.item.Relationships.Parent.Data
-                               .ToObject<Folder, Folder.FolderAttributes, Folder.FolderRelationships>();
-                        }
+                            topFolder = iv.item.Relationships.Parent.Data.ID;
                     }
 
-                    projectSnapshot.MrsFolder = topFolder;
+                    projectSnapshot.MrsFolderID = topFolder;
                 }
             }
         }

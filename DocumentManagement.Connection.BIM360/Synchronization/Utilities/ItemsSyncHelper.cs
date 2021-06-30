@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
         internal async Task<(Item item, Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)
         {
-            var posted = await PostItem(item, project.MrsFolder, project.ID);
+            var posted = await PostItem(item, project.MrsFolderID, project.ID);
             project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
             return posted;
         }
@@ -57,7 +57,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         }
 
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, Folder folder, string projectId)
+        private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, string folder, string projectId)
         {
             var fileName = Path.GetFileName(item.FullPath);
 
@@ -75,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                         data = new
                         {
                             type = FOLDER_TYPE,
-                            id = folder.ID,
+                            id = folder,
                         },
                     },
                 },
@@ -125,7 +125,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 Relationships = new Item.ItemRelationships
                 {
                     Tip = version.ToInfo().ToDataContainer(),
-                    Parent = folder.ToInfo().ToDataContainer(),
+                    Parent = new ObjectInfo
+                    {
+                        ID = folder,
+                        Type = FOLDER_TYPE,
+                    }.ToDataContainer(),
                 },
             };
 
