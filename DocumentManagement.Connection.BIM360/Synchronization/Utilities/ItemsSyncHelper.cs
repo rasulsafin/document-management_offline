@@ -4,6 +4,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -25,8 +26,38 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             this.versionsService = versionsService;
         }
 
+        internal async Task<(Item item, Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)
+        {
+            var posted = await PostItem(item, project.MrsFolder, project.ID);
+            project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
+            return posted;
+        }
+
+        internal async Task Remove(string projectID, Item item)
+        {
+            // Delete uploaded item by marking version as "deleted"
+            var deletedVersion = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = item.Attributes.DisplayName,
+                    Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Item = new ObjectInfo
+                    {
+                        ID = item.ID,
+                        Type = ITEM_TYPE,
+                    }.ToDataContainer(),
+                },
+            };
+
+            await versionsService.PostVersionAsync(projectID, deletedVersion);
+        }
+
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        internal async Task<(Item item, Version version)> PostItem(ItemExternalDto item, Folder folder, string projectId)
+        private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, Folder folder, string projectId)
         {
             var fileName = Path.GetFileName(item.FullPath);
 
@@ -103,29 +134,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 return default;
 
             return addedItem;
-        }
-
-        internal async Task Remove(string projectID, Item item)
-        {
-            // Delete uploaded item by marking version as "deleted"
-            var deletedVersion = new Version
-            {
-                Attributes = new Version.VersionAttributes
-                {
-                    Name = item.Attributes.DisplayName,
-                    Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
-                },
-                Relationships = new Version.VersionRelationships
-                {
-                    Item = new ObjectInfo
-                    {
-                        ID = item.ID,
-                        Type = ITEM_TYPE,
-                    }.ToDataContainer(),
-                },
-            };
-
-            await versionsService.PostVersionAsync(projectID, deletedVersion);
         }
     }
 }

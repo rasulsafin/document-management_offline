@@ -221,8 +221,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                 if (string.IsNullOrWhiteSpace(item.ExternalID))
                 {
-                    var posted = await itemsSyncHelper.PostItem(item, project.MrsFolder, project.ID);
-                    project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
+                    var posted = await itemsSyncHelper.PostItem(project, item);
+                    if (posted == default)
+                        continue;
+
                     await Task.Delay(5000);
                     var attached = await AttachItem(posted.item, issue.ID, project.IssueContainer);
                     if (attached)

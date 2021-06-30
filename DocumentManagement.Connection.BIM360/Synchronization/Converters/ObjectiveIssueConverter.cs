@@ -195,21 +195,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     : await GetVersion(item.ID, size);
 
                 if (item == default && version == default)
-                {
-                    item = (await itemsSyncHelper.PostItem(
-                        obj.Location.Item,
-                        project.MrsFolder,
-                        project.ID)).item;
-                    await Task.Delay(5000);
-                    version = (await itemsService.GetAsync(project.ID, item.ID)).version;
-                }
+                    (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);
             }
             else
             {
                 (item, version) = await itemsService.GetAsync(project.ID, obj.Location.Item.ExternalID);
             }
 
-            return (item?.ID, version.Attributes.VersionNumber);
+            return (item?.ID, version?.Attributes.VersionNumber);
         }
 
         private async Task<Vector3> GetGlobalOffset(string containerID, string targetUrn)

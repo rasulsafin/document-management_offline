@@ -42,27 +42,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var cashed = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID);
-            var toRemove = cashed.Value.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
+            var cashed = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value;
+            var toRemove = cashed.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
                .ToArray();
-            var toAdd = obj.Items.Where(a => cashed.Value.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
+            var toAdd = obj.Items.Where(a => cashed.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
 
             foreach (var item in toAdd)
-            {
-                var posted = await itemsSyncHelper.PostItem(
-                    item,
-                    context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value.MrsFolder,
-                    obj.ExternalID);
-                cashed.Value.Items.Add(posted.Item1.ID, new ItemSnapshot(posted.Item1) {});
-            }
+                await itemsSyncHelper.PostItem(cashed, item);
 
             foreach (var dto in toRemove)
             {
-                cashed.Value.Items.Remove(dto.Key);
+                cashed.Items.Remove(dto.Key);
                 await itemsSyncHelper.Remove(obj.ExternalID, dto.Value.Entity);
             }
 
-            return GetFullProject(cashed.Value);
+            return GetFullProject(cashed);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
