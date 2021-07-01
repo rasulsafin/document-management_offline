@@ -110,7 +110,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private static void SetBimElements(ObjectiveExternalDto objective, Issue result)
         {
-            if (objective.BimElements == null)
+            if (objective.BimElements == null || objective.BimElements.Count == 0 || objective.Location?.Item == null)
                 return;
 
             result.Attributes.PushpinAttributes ??= new Issue.PushpinAttributes();
@@ -171,6 +171,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private async Task<(string item, int? version)> GetTarget(ObjectiveExternalDto obj, ProjectSnapshot project)
         {
+            async Task<Version> GetVersion(string itemID, long size)
+            {
+                if (itemID == null)
+                    return null;
+
+                var versions = (await itemsService.GetVersions(project.ID, itemID))
+                   .OrderByDescending(x => x.Attributes.VersionNumber)
+                   .ToArray();
+                return versions.FirstOrDefault(x => x.Attributes.StorageSize == size) ?? versions.First();
+            }
+
             if (obj.Location == null)
                 return default;
 
@@ -179,35 +190,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
             if (obj.Location.Item.ExternalID == null)
             {
-                var filter = new Filter(
-                    typeof(Version.VersionAttributes).GetDataMemberName(
-                        nameof(Version.VersionAttributes.DisplayName)),
-                    obj.Location.Item.FileName);
-                var items = (await foldersService.SearchAsync(
-                    project.ID,
-                    project.ProjectFilesFolder.ID,
-                    new[] { filter })).OrderByDescending(x => x.version?.Attributes.VersionNumber ?? 0);
-                (version, item) = items.FirstOrDefault(
-                    x => x.version?.Attributes.StorageSize == new FileInfo(obj.Location.Item.FullPath).Length);
-                if (item == default && version == default)
-                    (version, item) = items.FirstOrDefault();
+                var snapshot = project.FindItemByName(obj.Location.Item.FileName);
+                item = snapshot?.Entity;
+                var size = new FileInfo(obj.Location.Item.FullPath).Length;
+                version = snapshot?.Version.Attributes.StorageSize == size
+                    ? snapshot.Version
+                    : await GetVersion(item?.ID, size);
 
                 if (item == default && version == default)
-                {
-                    item = await itemsSyncHelper.PostItem(
-                        obj.Location.Item,
-                        project.ProjectFilesFolder,
-                        project.ID);
-                    await Task.Delay(5000);
-                    version = (await itemsService.GetAsync(project.ID, item.ID)).version;
-                }
+                    (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);
             }
             else
             {
                 (item, version) = await itemsService.GetAsync(project.ID, obj.Location.Item.ExternalID);
             }
 
-            return (item?.ID, version.Attributes.VersionNumber);
+            return (item?.ID, version?.Attributes.VersionNumber);
         }
 
         private async Task<Vector3> GetGlobalOffset(string containerID, string targetUrn)

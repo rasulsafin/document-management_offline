@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             {
                 var viewerStateOtherInfo = (JToken)issue.Attributes.PushpinAttributes?.ViewerState?.OtherInfo;
                 return viewerStateOtherInfo?[nameof(ObjectiveExternalDto.BimElements)]
-                  ?.ToObject<ICollection<BimElementExternalDto>>();
+                  ?.ToObject<ICollection<BimElementExternalDto>>() ?? ArraySegment<BimElementExternalDto>.Empty;
             }
             catch
             {
