@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
@@ -14,15 +15,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
                 Name = "BIM360",
                 AuthFieldNames = new List<string>
                 {
-                    "token",
-                    "refreshtoken",
-                    "end",
+                    TOKEN_AUTH_NAME,
+                    REFRESH_TOKEN_AUTH_NAME,
                 },
                 AppProperties = new Dictionary<string, string>
                 {
-                    { "CLIENT_ID", "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
-                    { "CLIENT_SECRET", "dEGEHfbl9LWmEnd7" },
-                    { "RETURN_URL", "http://localhost:8000/oauth/" },
+                    { CLIENT_ID_NAME, "m5fLEAiDRlW3G7vgnkGGGcg4AABM7hCf" },
+                    { CLIENT_SECRET_NAME, "dEGEHfbl9LWmEnd7" },
+                    { CALLBACK_URL_NAME, "http://localhost:8000/oauth/" },
                 },
             };
 

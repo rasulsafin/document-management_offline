@@ -14,7 +14,7 @@ namespace DocumentManagement.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.1");
+                .HasAnnotation("ProductVersion", "5.0.2");
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.AppProperty", b =>
                 {
@@ -346,9 +346,6 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("BimElementID")
-                        .HasColumnType("TEXT");
-
                     b.Property<float>("CameraPositionX")
                         .HasColumnType("REAL");
 
@@ -357,6 +354,15 @@ namespace DocumentManagement.Database.Migrations
 
                     b.Property<float>("CameraPositionZ")
                         .HasColumnType("REAL");
+
+                    b.Property<string>("Guid")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("ItemID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ObjectiveID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<float>("PositionX")
                         .HasColumnType("REAL");
@@ -368,6 +374,11 @@ namespace DocumentManagement.Database.Migrations
                         .HasColumnType("REAL");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ItemID");
+
+                    b.HasIndex("ObjectiveID")
+                        .IsUnique();
 
                     b.ToTable("Location");
                 });
@@ -396,9 +407,6 @@ namespace DocumentManagement.Database.Migrations
                     b.Property<bool>("IsSynchronized")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("LocationID")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("ObjectiveTypeID")
                         .HasColumnType("INTEGER");
 
@@ -425,8 +433,6 @@ namespace DocumentManagement.Database.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("AuthorID");
-
-                    b.HasIndex("LocationID");
 
                     b.HasIndex("ObjectiveTypeID");
 
@@ -816,16 +822,31 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("SynchronizationMate");
                 });
 
+            modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Location", b =>
+                {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
+                        .WithOne("Location")
+                        .HasForeignKey("MRS.DocumentManagement.Database.Models.Location", "ObjectiveID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("Objective");
+                });
+
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Objective", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.User", "Author")
                         .WithMany("Objectives")
                         .HasForeignKey("AuthorID")
                         .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("MRS.DocumentManagement.Database.Models.Location", "Location")
-                        .WithMany()
-                        .HasForeignKey("LocationID");
 
                     b.HasOne("MRS.DocumentManagement.Database.Models.ObjectiveType", "ObjectiveType")
                         .WithMany("Objectives")
@@ -850,8 +871,6 @@ namespace DocumentManagement.Database.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Author");
-
-                    b.Navigation("Location");
 
                     b.Navigation("ObjectiveType");
 
@@ -1025,6 +1044,8 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("DynamicFields");
 
                     b.Navigation("Items");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.ObjectiveType", b =>

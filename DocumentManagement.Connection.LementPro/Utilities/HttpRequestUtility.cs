@@ -113,11 +113,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 fileName,
                 boundary,
                 url);
-            using var request = InitializeRequest(url, requestType);
-            var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(stream), boundary, fileName);
-            request.Content = content;
-            var response = await connector.SendRequestAsync(request);
+            var response =
+                await connector.SendRequestAsync(() => CreateRequest(url, stream, fileName, boundary, requestType));
             var responseContent = await response.Content.ReadAsStringAsync();
             logger.LogDebug("Received response: {@Response}", responseContent);
             return JToken.Parse(responseContent);
@@ -138,18 +135,8 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 boundary,
                 data,
                 url);
-            using var request = InitializeRequest(url, requestType);
-            var content = new MultipartFormDataContent();
-            content.Add(new StreamContent(stream), boundary, fileName);
-
-            if (data != default)
-            {
-                foreach (var item in data)
-                    content.Add(new StringContent(item.Value), item.Key);
-            }
-
-            request.Content = content;
-            var response = await connector.SendRequestAsync(request);
+            var response = await connector.SendRequestAsync(
+                () => CreateRequest(url, stream, fileName, boundary, data, requestType));
             var responseContent = await response.Content.ReadAsStringAsync();
             logger.LogDebug("Received response: {@Response}", responseContent);
             return JToken.Parse(responseContent);
@@ -165,17 +152,10 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 requestType,
                 data,
                 url);
-            using var request = InitializeRequest(url, requestType);
 
-            if (data != null)
-            {
-                var serializedData = JsonConvert.SerializeObject(data, jsonSerializerSettings);
-                request.Content = new StringContent(serializedData, Encoding.UTF8, STANDARD_CONTENT_TYPE);
-            }
-
-            request.Headers.Add(CONTENT_ACCEPT_LANGUAGE, STANDARD_ACCEPT_LANGUAGE);
-
-            var response = await connector.SendRequestAsync(request, completionOption: completionOption);
+            var response = await connector.SendRequestAsync(
+                () => CreateRequest(url, data, requestType),
+                completionOption: completionOption);
             return response;
         }
 
@@ -212,6 +192,54 @@ namespace MRS.DocumentManagement.Connection.LementPro.Utilities
                 fullUrl,
                 authData: (STANDARD_AUTHENTICATION_SCHEME, Token));
 
+            return request;
+        }
+
+        private HttpRequestMessage CreateRequest(
+            string url,
+            Stream stream,
+            string fileName,
+            string boundary,
+            HttpMethod requestType)
+        {
+            var request = InitializeRequest(url, requestType);
+            var content = new MultipartFormDataContent { { new StreamContent(stream), boundary, fileName } };
+            request.Content = content;
+            return request;
+        }
+
+        private HttpRequestMessage CreateRequest(
+            string url,
+            Stream stream,
+            string fileName,
+            string boundary,
+            Dictionary<string, string> data,
+            HttpMethod requestType)
+        {
+            var request = InitializeRequest(url, requestType);
+            var content = new MultipartFormDataContent { { new StreamContent(stream), boundary, fileName } };
+
+            if (data != default)
+            {
+                foreach (var item in data)
+                    content.Add(new StringContent(item.Value), item.Key);
+            }
+
+            request.Content = content;
+            return request;
+        }
+
+        private HttpRequestMessage CreateRequest<TData>(string url, TData data, HttpMethod requestType)
+        {
+            var request = InitializeRequest(url, requestType);
+
+            if (data != null)
+            {
+                var serializedData = JsonConvert.SerializeObject(data, jsonSerializerSettings);
+                request.Content = new StringContent(serializedData, Encoding.UTF8, STANDARD_CONTENT_TYPE);
+            }
+
+            request.Headers.Add(CONTENT_ACCEPT_LANGUAGE, STANDARD_ACCEPT_LANGUAGE);
             return request;
         }
     }

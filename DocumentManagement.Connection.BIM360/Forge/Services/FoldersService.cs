@@ -1,12 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -21,21 +19,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             => this.connection = connection;
 
         public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)
-        {
-            var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedGet(),
-                    Resources.GetProjectsFoldersContentsMethod,
-                    projectId,
-                    folderId,
-                    FOLDER_TYPE);
-
-            return response[DATA_PROPERTY]?.ToObject<List<Folder>>();
-        }
-
-        public async Task<List<Item>> GetItemsAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<Item>(
+            => await PaginationHelper.GetItemsByPages<Folder>(
                 connection,
                 Resources.GetProjectsFoldersContentsMethod,
+                projectId,
+                folderId,
+                FOLDER_TYPE);
+
+        public async Task<List<(Item item, Version version)>> GetItemsAsync(string projectId, string folderId)
+            => await PaginationHelper.GetItemsByPages<(Item item, Version version)>(
+                connection,
+                Resources.GetProjectsFoldersContentsMethod,
+                response =>
+                {
+                    var items = response[DATA_PROPERTY]?.ToObject<Item[]>();
+                    var versions = response[INCLUDED_PROPERTY]?.ToObject<Version[]>() ?? Array.Empty<Version>();
+                    return items?.Select(
+                            item => (item,
+                                versions.FirstOrDefault(vers => vers.Relationships.Item.Data.ID == item.ID))) ??
+                        ArraySegment<(Item item, Version version)>.Empty;
+                },
                 projectId,
                 folderId,
                 ITEM_TYPE);

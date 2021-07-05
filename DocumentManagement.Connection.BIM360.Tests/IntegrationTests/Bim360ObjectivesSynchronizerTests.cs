@@ -9,6 +9,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -58,7 +60,13 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
 
             await connection.Connect(connectionInfo, CancellationToken.None);
 
-            var context = await connection.GetContext(connectionInfo);
+            var context = await connection.GetContext(connectionInfo) as Bim360ConnectionContext;
+            var filler = context!.Scope.ServiceProvider.GetService<IBim360SnapshotFiller>();
+            filler.IgnoreTestEntities = false;
+            await filler!.UpdateHubsIfNull();
+            await filler.UpdateProjectsIfNull();
+            await filler.UpdateIssuesIfNull();
+            await filler.UpdateIssueTypesIfNull();
             synchronizer = context.ObjectivesSynchronizer;
         }
 

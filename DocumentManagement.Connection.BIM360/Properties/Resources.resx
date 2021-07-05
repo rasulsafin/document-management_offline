@@ -117,10 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ForgeUrl" xml:space="preserve">
-    <value>https://developer.api.autodesk.com</value>
-    <comment>URL of Autodesk Forge methods</comment>
-  </data>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="SuccessfulAuthentication" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SuccessfulAuthentication.html;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;windows-1251</value>
@@ -201,10 +197,6 @@
     <value>/data/v1/projects/{0}/versions</value>
     <comment>Creates new versions of a file (item)</comment>
   </data>
-  <data name="AutodeskUrl" xml:space="preserve">
-    <value>https://autodesk.com/</value>
-    <comment>URL of Autodesk site</comment>
-  </data>
   <data name="PostGetTokenMethod" xml:space="preserve">
     <value>/authentication/v1/gettoken</value>
     <comment>Exchange an authorization code extracted from a GET authorize callback for a three-legged access token</comment>
@@ -256,5 +248,13 @@
   <data name="GetUsersMeMethod" xml:space="preserve">
     <value>/userprofile/v1/users/@me</value>
     <comment>Get the profile information of an authorizing end user in a three-legged context</comment>
+  </data>
+  <data name="GetProjectsItemsVersionsMethod" xml:space="preserve">
+    <value>/data/v1/projects/{0}/items/{1}/versions</value>
+    <comment>Returns versions for the given item. Multiple versions of a resource item can be uploaded in a project.</comment>
+  </data>
+  <data name="MrsFileName" xml:space="preserve">
+    <value>.mrs</value>
+    <comment>The indicator file that defines the folder for uploading.</comment>
   </data>
 </root>

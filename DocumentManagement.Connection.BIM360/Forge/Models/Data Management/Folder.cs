@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         }
 
         [DataContract]
-        public class FolderAttributes : AAttributes
+        public class FolderAttributes : AAttributes<FolderExtension>
         {
             [DataMember(Name = "name")]
             public string Name { get; set; }
@@ -60,6 +60,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 
             [DataMember(Name = "refs")]
             public dynamic Refs { get; set; }
+        }
+
+        [DataContract]
+        public class FolderExtension : Extension
+        {
+            [DataMember(Name = "data")]
+            public FolderExtensionData Data { get; set; }
+        }
+
+        [DataContract]
+        public class FolderExtensionData
+        {
+            [DataMember(Name = "visibleTypes")]
+            public string[] VisibleTypes { get; set; }
+
+            [DataMember(Name = "actions")]
+            public string[] Actions { get; set; }
+
+            [DataMember(Name = "allowedTypes")]
+            public string[] AllowedTypes { get; set; }
         }
     }
 }

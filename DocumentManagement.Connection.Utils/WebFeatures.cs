@@ -1,10 +1,11 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.Bim360
+namespace MRS.DocumentManagement.Connection.Utils
 {
     public static class WebFeatures
     {
+        // https://stackoverflow.com/a/3808841/16047481
         public static async Task<bool> RemoteUrlExistsAsync(string url)
         {
             try

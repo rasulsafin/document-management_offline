@@ -61,36 +61,52 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
                 var action = tuple.DetermineAction();
 
-                switch (action)
+                try
                 {
-                    case SynchronizingAction.Nothing:
-                        await NothingAction(tuple, data, connectionContext, parent);
-                        break;
-                    case SynchronizingAction.Merge:
-                        results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent, token));
-                        break;
-                    case SynchronizingAction.AddToLocal:
-                        results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent, token));
-                        break;
-                    case SynchronizingAction.AddToRemote:
-                        results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent, token));
-                        break;
-                    case SynchronizingAction.RemoveFromLocal:
-                        results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent, token));
-                        break;
-                    case SynchronizingAction.RemoveFromRemote:
-                        results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent, token));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
-                }
+                    switch (action)
+                    {
+                        case SynchronizingAction.Nothing:
+                            await NothingAction(tuple, data, connectionContext, parent);
+                            break;
+                        case SynchronizingAction.Merge:
+                            results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent, token));
+                            break;
+                        case SynchronizingAction.AddToLocal:
+                            results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent, token));
+                            break;
+                        case SynchronizingAction.AddToRemote:
+                            results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent, token));
+                            break;
+                        case SynchronizingAction.RemoveFromLocal:
+                            results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent, token));
+                            break;
+                        case SynchronizingAction.RemoveFromRemote:
+                            results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent, token));
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
+                    }
 
-                if (needSaveOnEachTuple)
+                    if (needSaveOnEachTuple)
+                    {
+                        if (data.Date == default)
+                            await context.SaveChangesAsync();
+                        else
+                            await context.SynchronizationSaveAsync(data.Date);
+                    }
+                }
+                catch (Exception e)
                 {
-                    if (data.Date == default)
-                        await context.SaveChangesAsync();
-                    else
-                        await context.SynchronizationSaveAsync(data.Date);
+                    DBContextUtilities.ReloadContext(context);
+
+                    var isRemote = action == SynchronizingAction.AddToLocal;
+                    results.Add(
+                        new SynchronizingResult
+                        {
+                            Exception = e,
+                            Object = isRemote ? tuple.Remote : tuple.Local,
+                            ObjectType = isRemote ? ObjectType.Remote : ObjectType.Local,
+                        });
                 }
 
                 progress?.Report(++i / (double)tuples.Count);

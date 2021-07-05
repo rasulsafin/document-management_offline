@@ -19,6 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<Authenticator>();
             services.AddScoped<ForgeConnection>();
+            services.AddScoped<TokenHelper>();
             return services;
         }
     }

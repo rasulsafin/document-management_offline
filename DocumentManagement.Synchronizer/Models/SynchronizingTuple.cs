@@ -4,7 +4,6 @@ using MRS.DocumentManagement.Synchronization.Interfaces;
 namespace MRS.DocumentManagement.Synchronization.Models
 {
     internal class SynchronizingTuple<T> : ISynchronizationChanges
-            where T : ISynchronizable<T>
     {
         private T remote;
 
@@ -47,6 +46,13 @@ namespace MRS.DocumentManagement.Synchronization.Models
         public bool HasExternalID => !string.IsNullOrEmpty(ExternalID);
 
         private void UpdateExternalID()
-            => ExternalID ??= Synchronized?.ExternalID ?? Local?.ExternalID ?? Remote?.ExternalID;
+        {
+            if (typeof(T).IsAssignableTo(typeof(ISynchronizableBase)))
+            {
+                ExternalID ??= ((ISynchronizableBase)Synchronized)?.ExternalID ??
+                    ((ISynchronizableBase)Local)?.ExternalID ??
+                    ((ISynchronizableBase)Remote)?.ExternalID;
+            }
+        }
     }
 }

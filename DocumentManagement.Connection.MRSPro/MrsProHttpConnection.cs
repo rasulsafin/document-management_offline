@@ -48,13 +48,21 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         private async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  params object[] arguments)
         {
+            var response = await GetResponseAsync(() => CreateRequest(methodType, method, content, arguments));
+            return response.ToObject<T>(); // TODO: Fix it
+        }
+
+        private HttpRequestMessage CreateRequest(
+            HttpMethod methodType,
+            string method,
+            HttpContent content,
+            object[] arguments)
+        {
             var url = $"{BaseUrl}{method}";
             var request = CreateRequest(methodType, url, arguments);
             request.Content = content;
             request.Headers.Add(SCHEME, Auth.Token);
-
-            var response = await GetResponseAsync(request);
-            return response.ToObject<T>(); // TODO: Fix it
+            return request;
         }
     }
 }

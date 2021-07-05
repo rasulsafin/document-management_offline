@@ -48,6 +48,8 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 var objective = mapper.Map<Objective>(data);
+                var location = objective.Location;
+                objective.Location = null;
                 logger.LogTrace("Mapped data: {@Objective}", objective);
                 await context.Objectives.AddAsync(objective);
                 await context.SaveChangesAsync();
@@ -90,6 +92,9 @@ namespace MRS.DocumentManagement.Services
                 {
                     await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
                 }
+
+                if (location != null)
+                    await LinkLocation(data.Location?.Item, objective, location);
 
                 await context.SaveChangesAsync();
                 return mapper.Map<ObjectiveToListDto>(objective);
@@ -221,6 +226,7 @@ namespace MRS.DocumentManagement.Services
                             .ThenInclude(x => x.BimElement)
                     .Include(x => x.Objectives)
                         .ThenInclude(x => x.Location)
+                            .ThenInclude(x => x.Item)
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
@@ -390,6 +396,7 @@ namespace MRS.DocumentManagement.Services
                .Include(x => x.Author)
                .Include(x => x.ObjectiveType)
                .Include(x => x.Location)
+                    .ThenInclude(x => x.Item)
                .Include(x => x.DynamicFields)
                     .ThenInclude(x => x.ChildrenDynamicFields)
                .Include(x => x.Items)
@@ -401,6 +408,29 @@ namespace MRS.DocumentManagement.Services
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
 
             return dbObjective;
+        }
+
+        private async Task LinkLocation(ItemDto locationItemDto, Objective objective, Location location)
+        {
+            if (locationItemDto != null)
+            {
+                objective.Project ??= await context.Projects.Include(x => x.Items)
+                   .FindOrThrowAsync(x => x.ID, objective.ProjectID);
+
+                var locationItem = await itemHelper.CheckItemToLink(
+                    context,
+                    mapper,
+                    locationItemDto,
+                    objective.Project);
+
+                if (locationItem != null)
+                    objective.Project.Items.Add(locationItem);
+                else
+                    locationItem = await context.FindOrThrowAsync<Item>((int)locationItemDto.ID);
+
+                objective.Location = location;
+                objective.Location.Item = locationItem;
+            }
         }
     }
 }

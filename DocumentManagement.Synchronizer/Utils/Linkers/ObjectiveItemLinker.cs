@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
                 return Task.CompletedTask;
             }
 
-            item.Objectives.Remove(item.Objectives.First(x => Equals(x.Objective, objective)));
+            item.Objectives.Remove(item.Objectives.First(x => Equals(x.ObjectiveID, objective.ID)));
             if (item.Project == null && item.Objectives?.Count == 0)
                 context.Items.Remove(item);
             return Task.CompletedTask;

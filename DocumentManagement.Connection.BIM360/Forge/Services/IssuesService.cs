@@ -44,7 +44,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<Issue> PostIssueAsync(string containerID, Issue issue)
         {
-            // TODO: check required fields from user.
             if (string.IsNullOrEmpty(issue.Attributes.Title))
                 throw new ArgumentException($"{nameof(Issue.IssueAttributes.Title)} is empty");
             if (string.IsNullOrEmpty(issue.Attributes.NgIssueTypeID))

@@ -3,18 +3,28 @@
 ## [Unreleased]
 
 ### Добавлено:
-
-* Синхронизация с MRSPro;
-
 ### Изменено:
 ### Устарело:
 ### Удалено:
 ### Исправлено:
+### Безопасность:
+
+
+## [1.0.3] - 2021-xx-xx
+
+### Добавлено:
+
+* Синхронизация с MRSPro;
+* Синхронизация с pushpin issue в BIM 360;
+* Возможность выбора папки для загрузки файлов в BIM 360;
+* Нарушение в BIM 360 привязывается к модели, если задача была создана для её элемента.
+
+### Исправлено:
 
 * Неправильное присвоение автора, если внешний id автора пустой;
 * Отсутствие фильтрации списка объектов, передаваемых для синхронизации;
-
-### Безопасность:
+* Скачивание файлов из BIM 360;
+* Синхронизация файлов, вложенных в папки в BIM 360;
 
 
 ## [1.0.2] - 2021-06-11
@@ -113,6 +123,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[1.0.3]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.3
 [1.0.2]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.2
 [1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1
 [1.0.0]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.0
