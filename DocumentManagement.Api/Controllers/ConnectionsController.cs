@@ -263,10 +263,10 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         /// <summary>
-        /// Get the date of the last synchronization for the user, if synchronized earlier.
+        /// Get dates of synchronizations for the user.
         /// </summary>
-        /// <returns>The date of the last synchronization or null if user is not synchronized.</returns>
-        /// <response code="202">The date of the last synchronization returned.</response>
+        /// <returns>The collection of synchronization dates.</returns>
+        /// <response code="202">The collection of synchronization dates returned.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to get the date.</response>
         [HttpGet]

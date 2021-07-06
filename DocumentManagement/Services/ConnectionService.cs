@@ -277,17 +277,18 @@ namespace MRS.DocumentManagement.Services
         public async Task<IEnumerable<DateTime>> GetSynchronizationsDates(ID<UserDto> userID)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogInformation("GetLastSynchronization started for user: {UserID}", userID);
+            logger.LogInformation("GetSynchronizationsDates started for user: {UserID}", userID);
             try
             {
                 var user = await context.Users.Include(x => x.Synchronizations)
                    .FindOrThrowAsync(x => x.ID, (int)userID);
+                logger.LogDebug("Found user: {@User}", user);
                 var synchronizations = user.Synchronizations.Select(x => x.Date).OrderByDescending(x => x);
                 return synchronizations;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Can't get last synchronization for user: {UserID}", userID);
+                logger.LogError(ex, "Can't get synchronizations for user: {UserID}", userID);
                 throw;
             }
         }
@@ -301,12 +302,18 @@ namespace MRS.DocumentManagement.Services
             {
                 var user = await context.Users.Include(x => x.Synchronizations)
                    .FindOrThrowAsync(x => x.ID, (int)userID);
+                logger.LogDebug("Found user: {@User}", user);
                 var synchronization = user.Synchronizations.OrderByDescending(x => x.Date).FirstOrDefault();
+                logger.LogDebug("Found synchronization: {@Synchronization}", synchronization);
                 if (synchronization == null)
                     return false;
 
                 context.Synchronizations.Remove(synchronization);
                 await context.SaveChangesAsync();
+                logger.LogInformation(
+                    "Synchronization date {@Synchronization} for user {UserID} removed",
+                    synchronization,
+                    userID);
                 return true;
             }
             catch (Exception ex)
