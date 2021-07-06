@@ -261,5 +261,74 @@ namespace MRS.DocumentManagement.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["CouldNotSynchronize"], ex.Message);
             }
         }
+
+        /// <summary>
+        /// Get the date of the last synchronization for the user, if synchronized earlier.
+        /// </summary>
+        /// <returns>The date of the last synchronization or null if user is not synchronized.</returns>
+        /// <response code="202">The date of the last synchronization returned.</response>
+        /// <response code="404">User was not found.</response>
+        /// <response code="500">Something went wrong while server tried to get the date.</response>
+        [HttpGet]
+        [Route("synchronization/{userID:int}/dates")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetSynchronizationsDates(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID)
+        {
+            try
+            {
+                var result = await service.GetSynchronizationsDates(new ID<UserDto>(userID));
+                return Ok(result);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Remove the last synchronization date of the user for an attempt to sync entities that were updated earlier than the last sync date.
+        /// The entities will not be returned to the previous state.
+        /// </summary>
+        /// <returns>True, the last synchronization date is removed.</returns>
+        /// <response code="202">The last synchronization date removed.</response>
+        /// <response code="404">User was not found.</response>
+        /// <response code="500">Something went wrong while server tried to remove the date.</response>
+        [HttpGet]
+        [Route("synchronization/{userID:int}/remove")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RemoveLastSynchronizationDate(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID)
+        {
+            try
+            {
+                var result = await service.RemoveLastSynchronizationDate(new ID<UserDto>(userID));
+                return Ok(result);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
+            }
+        }
     }
 }

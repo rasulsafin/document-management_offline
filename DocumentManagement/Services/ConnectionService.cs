@@ -273,5 +273,47 @@ namespace MRS.DocumentManagement.Services
                 throw;
             }
         }
+
+        public async Task<IEnumerable<DateTime>> GetSynchronizationsDates(ID<UserDto> userID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogInformation("GetLastSynchronization started for user: {UserID}", userID);
+            try
+            {
+                var user = await context.Users.Include(x => x.Synchronizations)
+                   .FindOrThrowAsync(x => x.ID, (int)userID);
+                var synchronizations = user.Synchronizations.Select(x => x.Date).OrderByDescending(x => x);
+                return synchronizations;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't get last synchronization for user: {UserID}", userID);
+                throw;
+            }
+        }
+
+        public async Task<bool> RemoveLastSynchronizationDate(ID<UserDto> userID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogInformation("RemoveLastSynchronizationDate started for user: {UserID}", userID);
+
+            try
+            {
+                var user = await context.Users.Include(x => x.Synchronizations)
+                   .FindOrThrowAsync(x => x.ID, (int)userID);
+                var synchronization = user.Synchronizations.OrderByDescending(x => x.Date).FirstOrDefault();
+                if (synchronization == null)
+                    return false;
+
+                context.Synchronizations.Remove(synchronization);
+                await context.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't remove last synchronization date for user: {UserID}", userID);
+                throw;
+            }
+        }
     }
 }
