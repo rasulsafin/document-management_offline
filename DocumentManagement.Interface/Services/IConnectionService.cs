@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Interface.Dtos;
-using System;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
@@ -65,7 +65,15 @@ namespace MRS.DocumentManagement.Interface.Services
         /// The entities will not be returned to the previous state.
         /// </summary>
         /// <param name="userID">User's ID.</param>
-        /// <returns>True, the last synchronization date is removed.</returns>
+        /// <returns>True, if the last synchronization date is removed.</returns>
         Task<bool> RemoveLastSynchronizationDate(ID<UserDto> userID);
+
+        /// <summary>
+        /// Removes all synchronization dates of the user for an attempt to synchronize all data.
+        /// The entities will not be returned to the previous state.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <returns>True, if synchronization dates are removed.</returns>
+        Task<bool> RemoveAllSynchronizationDates(ID<UserDto> userID);
     }
 }

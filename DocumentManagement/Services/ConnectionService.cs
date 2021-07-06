@@ -20,7 +20,6 @@ using MRS.DocumentManagement.Synchronization;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
-using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -319,6 +318,29 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove last synchronization date for user: {UserID}", userID);
+                throw;
+            }
+        }
+
+        public async Task<bool> RemoveAllSynchronizationDates(ID<UserDto> userID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogInformation("RemoveAllSynchronizationDate started for user: {UserID}", userID);
+
+            try
+            {
+                var user = await context.Users.Include(x => x.Synchronizations)
+                   .FindOrThrowAsync(x => x.ID, (int)userID);
+                logger.LogDebug("Found user: {@User}", user);
+                user.Synchronizations = new List<Database.Models.Synchronization>();
+                context.Update(user);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Synchronization dates for user {UserID} removed", userID);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't remove synchronization dates for user: {UserID}", userID);
                 throw;
             }
         }

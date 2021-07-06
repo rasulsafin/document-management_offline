@@ -330,5 +330,40 @@ namespace MRS.DocumentManagement.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
         }
+
+        /// <summary>
+        /// Removes all synchronization dates of the user for an attempt to synchronize all data.
+        /// The entities will not be returned to the previous state.
+        /// </summary>
+        /// <returns>True, if all synchronization dates are removed.</returns>
+        /// <response code="202">All synchronization dates removed.</response>
+        /// <response code="404">User was not found.</response>
+        /// <response code="500">Something went wrong while server tried to remove the date.</response>
+        [HttpGet]
+        [Route("synchronization/{userID:int}/remove/all")]
+        [Produces("application/json")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RemoveAllSynchronizationDates(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID)
+        {
+            try
+            {
+                var result = await service.RemoveAllSynchronizationDates(new ID<UserDto>(userID));
+                return Ok(result);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
+            }
+        }
     }
 }
