@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -22,38 +23,37 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<Token> GetTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string code, string appPropertyCallBackUrl)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientId),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD,
-                        appPropertyClientSecret),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_GRANT_TYPE_FIELD,
-                        AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_CODE_FIELD, code),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_REDIRECT_URI_FIELD, appPropertyCallBackUrl),
-            });
+            HttpContent CreateContent()
+                => new FormUrlEncodedContent(
+                    new KeyValuePair<string, string>[]
+                    {
+                        new (AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientId),
+                        new (AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD, appPropertyClientSecret),
+                        new (AUTH_REQUEST_BODY_GRANT_TYPE_FIELD, AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE),
+                        new (AUTH_REQUEST_BODY_CODE_FIELD, code),
+                        new (AUTH_REQUEST_BODY_REDIRECT_URI_FIELD, appPropertyCallBackUrl),
+                    });
 
             var data = await connection.SendAsync(
-                    ForgeSettings.UnauthorizedPost(content),
+                    ForgeSettings.UnauthorizedPost(CreateContent),
                     Resources.PostGetTokenMethod);
             return data.ToObject<Token>();
         }
 
         public async Task<Token> RefreshTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string accessPropertyRefreshToken)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientId),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD,
-                        appPropertyClientSecret),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_GRANT_TYPE_FIELD,
-                        AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE),
-                new KeyValuePair<string, string>(AUTH_REQUEST_BODY_REFRESH_TOKEN_FIELD,
-                        accessPropertyRefreshToken),
-            });
+            HttpContent CreateContent()
+                => new FormUrlEncodedContent(
+                    new KeyValuePair<string, string>[]
+                    {
+                        new (AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientId),
+                        new (AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD, appPropertyClientSecret),
+                        new (AUTH_REQUEST_BODY_GRANT_TYPE_FIELD, AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE),
+                        new (AUTH_REQUEST_BODY_REFRESH_TOKEN_FIELD, accessPropertyRefreshToken),
+                    });
 
             var data = await connection.SendAsync(
-                    ForgeSettings.UnauthorizedPost(content),
+                    ForgeSettings.UnauthorizedPost(CreateContent),
                     Resources.PostRefreshTokenMethod);
             return data.ToObject<Token>();
         }
