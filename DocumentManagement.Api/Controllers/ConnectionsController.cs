@@ -283,7 +283,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         {
             try
             {
-                var result = await service.GetSynchronizationsDates(new ID<UserDto>(userID));
+                var result = await service.GetSynchronizationDates(new ID<UserDto>(userID));
                 return Ok(result);
             }
             catch (ANotFoundException ex)
@@ -304,7 +304,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <response code="202">The last synchronization date removed.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to remove the date.</response>
-        [HttpGet]
+        [HttpDelete]
         [Route("synchronization/{userID:int}/remove")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -339,7 +339,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <response code="202">All synchronization dates removed.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to remove the date.</response>
-        [HttpGet]
+        [HttpDelete]
         [Route("synchronization/{userID:int}/remove/all")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]

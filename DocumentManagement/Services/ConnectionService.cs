@@ -273,16 +273,19 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<IEnumerable<DateTime>> GetSynchronizationsDates(ID<UserDto> userID)
+        public async Task<IEnumerable<DateTime>> GetSynchronizationDates(ID<UserDto> userID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogInformation("GetSynchronizationsDates started for user: {UserID}", userID);
             try
             {
-                var user = await context.Users.Include(x => x.Synchronizations)
-                   .FindOrThrowAsync(x => x.ID, (int)userID);
+                var user = await context.FindOrThrowAsync<User>((int)userID);
                 logger.LogDebug("Found user: {@User}", user);
-                var synchronizations = user.Synchronizations.Select(x => x.Date).OrderByDescending(x => x);
+                var synchronizations = await context.Synchronizations.Where(x => x.UserID == user.ID)
+                   .Select(x => x.Date)
+                   .OrderByDescending(x => x)
+                   .ToListAsync();
+                logger.LogDebug("Found user {UserID} synchronizations: {@Synchronizations}", userID, synchronizations);
                 return synchronizations;
             }
             catch (Exception ex)
@@ -299,10 +302,11 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
-                var user = await context.Users.Include(x => x.Synchronizations)
-                   .FindOrThrowAsync(x => x.ID, (int)userID);
+                var user = await context.FindOrThrowAsync<User>((int)userID);
                 logger.LogDebug("Found user: {@User}", user);
-                var synchronization = user.Synchronizations.OrderByDescending(x => x.Date).FirstOrDefault();
+                var synchronization = await context.Synchronizations.Where(x => x.UserID == user.ID)
+                   .OrderByDescending(x => x)
+                   .FirstOrDefaultAsync();
                 logger.LogDebug("Found synchronization: {@Synchronization}", synchronization);
                 if (synchronization == null)
                     return false;

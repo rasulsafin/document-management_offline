@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>The date of the last synchronization or null if user is not synchronized.</returns>
-        Task<IEnumerable<DateTime>> GetSynchronizationsDates(ID<UserDto> userID);
+        Task<IEnumerable<DateTime>> GetSynchronizationDates(ID<UserDto> userID);
 
         /// <summary>
         /// Removes the last synchronization date of the user for an attempt to sync entities that were updated earlier than the last sync date.
