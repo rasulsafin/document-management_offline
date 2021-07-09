@@ -6,13 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
@@ -22,6 +25,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly Bim360Storage storage;
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
+        private readonly TypeDFHelper typeDfHelper;
         private readonly Authenticator authenticator;
 
         public Bim360Connection(
@@ -29,13 +33,15 @@ namespace MRS.DocumentManagement.Connection.Bim360
             AuthenticationService authenticationService,
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
-            TokenHelper tokenHelper)
+            TokenHelper tokenHelper,
+            TypeDFHelper typeDfHelper)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
             this.contextFactory = contextFactory;
             this.tokenHelper = tokenHelper;
+            this.typeDfHelper = typeDfHelper;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -110,25 +116,16 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
-            info.EnumerationTypes = GetEnumerationTypes();
-            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
+            info.EnumerationTypes = await GetEnumerationTypes();
+            var issueType = new ObjectiveTypeExternalDto
             {
-                new ObjectiveTypeExternalDto
-                {
-                   ExternalId = Constants.ISSUE_TYPE,
-                   Name = "Issue",
-                },
+                ExternalId = Constants.ISSUE_TYPE,
+                Name = "Issue",
             };
-            info.ConnectionType.ObjectiveTypes.First().DefaultDynamicFields = new List<DynamicFieldExternalDto>
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto> { issueType };
+            issueType.DefaultDynamicFields = new List<DynamicFieldExternalDto>
             {
-                new DynamicFieldExternalDto
-                {
-                    ExternalID =
-                        typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID)),
-                    Name = "Type",
-                    Type = DynamicFieldType.ENUM,
-                    Value = Constants.UNDEFINED_NG_TYPE.ExternalID,
-                },
+                TypeDFHelper.GetDefault(),
             };
             tokenHelper.SetToken(info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
             info.UserExternalID = (await authenticationService.GetMe()).UserId;
@@ -145,7 +142,12 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return Task.FromResult<IConnectionStorage>(storage);
         }
 
-        private ICollection<EnumerationTypeExternalDto> GetEnumerationTypes()
-            => new List<EnumerationTypeExternalDto> { Constants.STANDARD_NG_TYPES.Value };
+        private async Task<ICollection<EnumerationTypeExternalDto>> GetEnumerationTypes()
+        {
+            var enumTypes = new List<EnumerationTypeExternalDto>();
+            var enumType = await typeDfHelper.GetTypeEnumeration();
+            enumTypes.Add(enumType);
+            return enumTypes;
+        }
     }
 }

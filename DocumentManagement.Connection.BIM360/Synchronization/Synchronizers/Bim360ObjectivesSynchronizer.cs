@@ -120,7 +120,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull(date);
-            await filler.UpdateIssueTypesIfNull();
+            await filler.UpdateIssueTypes();
             return context.Snapshot.IssueEnumerable.Where(x => x.Value.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.Key)
                .ToList();

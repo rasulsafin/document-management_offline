@@ -1,4 +1,5 @@
 using MRS.DocumentManagement.Connection.Bim360;
+using MRS.DocumentManagement.Connection.Bim360.Utilities;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -8,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddForge();
             services.AddScoped<Bim360Connection>();
+            services.AddScoped<TypeDFHelper>();
             services.AddScoped<Bim360Storage>();
             services.AddBim360Synchronization();
             return services;

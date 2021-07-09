@@ -12,12 +12,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
-        private readonly IConverter<IssueType, DynamicFieldExternalDto> typeConverter;
+        private readonly IConverter<IssueTypeSnapshot, DynamicFieldExternalDto> typeConverter;
         private readonly ItemsService itemsService;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
-            IConverter<IssueType, DynamicFieldExternalDto> typeConverter,
+            IConverter<IssueTypeSnapshot, DynamicFieldExternalDto> typeConverter,
             ItemsService itemsService)
         {
             this.converterToDto = converterToDto;
@@ -27,9 +27,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
         {
-            var types = snapshot.ProjectSnapshot.IssueTypes;
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
-            var typeField = await typeConverter.Convert(types[snapshot.Entity.Attributes.NgIssueTypeID]);
+            var typeField = await typeConverter.Convert(
+                snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID]);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 

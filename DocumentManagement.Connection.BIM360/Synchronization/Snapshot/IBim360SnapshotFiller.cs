@@ -36,6 +36,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         /// Captures issue types.
         /// </summary>
         /// <returns>The task of the operation.</returns>
-        Task UpdateIssueTypesIfNull();
+        Task UpdateIssueTypes();
     }
 }
