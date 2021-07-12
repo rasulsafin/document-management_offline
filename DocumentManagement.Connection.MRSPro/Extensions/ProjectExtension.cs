@@ -5,7 +5,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
 {
     internal static class ProjectExtension
     {
-        internal static ProjectExternalDto ToProjectExternalDto(this Project project)
+        internal static ProjectExternalDto ToDto(this Project project)
         {
             return new ProjectExternalDto
             {

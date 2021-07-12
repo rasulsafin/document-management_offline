@@ -7,32 +7,28 @@ using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class ProjectsService : Service, IElementService
+    public class ProjectsService : Service
     {
         private static readonly string BASE_URL = "/project";
 
         public ProjectsService(MrsProHttpConnection connection)
-            : base(connection) { }
-
-        private static string RootPath => $"/{Auth.OrganizationId}{ROOT}";
-
-        public async Task<IEnumerable<Project>> GetRootProjects()
+            : base(connection)
         {
-            var listOfAllProjects = await HttpConnection.GetListOf<Project>(
-                BASE_URL);
+        }
 
+        internal string RootPath => $"/{Auth.OrganizationId}{ROOT}";
+
+        public async Task<IEnumerable<Project>> GetAll()
+        {
+            var listOfAllProjects = await GetListOfProjects();
             return listOfAllProjects.Where(p => p.Ancestry == RootPath).ToArray();
         }
 
-        public async Task<IEnumerable<IElement>> GetAll(DateTime date)
-        {
-            var listOfAllProjects = await HttpConnection.GetListOf<Project>(
+        public async Task<IEnumerable<Project>> GetListOfProjects()
+            => await HttpConnection.GetListOf<Project>(
                 BASE_URL);
 
-            return listOfAllProjects.Where(p => p.Ancestry != RootPath).ToArray();
-        }
-
-        public async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
+        public async Task<IEnumerable<Project>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -45,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<IElement> TryGetById(string id)
+        public async Task<Project> TryGetById(string id)
         {
             try
             {
@@ -58,12 +54,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public Task<IElement> TryPost(IElement element)
+        public Task<Project> TryPost(Project element)
         {
             throw new NotImplementedException();
         }
 
-        public Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        public Task<Project> TryPatch(UpdatedValues valuesToPatch)
         {
             throw new NotImplementedException();
         }
