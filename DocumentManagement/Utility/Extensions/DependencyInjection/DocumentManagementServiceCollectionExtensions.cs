@@ -27,6 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
+            services.AddScoped<ISynchronizationService, SynchronizationService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IObjectiveService, ObjectiveService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
