@@ -159,12 +159,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
             var dynamicField = obj.DynamicFields.First(d => d.ExternalID == TypeDFHelper.ID);
-            var types = TypeDFHelper.DeserializeID(dynamicField.Value).ToDictionary(x => x.subtype);
-            var type = projectSnapshot.IssueTypes.FirstOrDefault(x => types.ContainsKey(x.Value.SubtypeID)).Value ??
-                projectSnapshot.IssueTypes.FirstOrDefault(
-                        x => x.Value.SubTypeIsType && types.Any(y => y.Value.type == x.Value.ParentTypeID))
-                   .Value ??
-                projectSnapshot.IssueTypes.First().Value;
+            var deserializedIDs = TypeDFHelper.DeserializeID(dynamicField.Value).ToArray();
+            var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtype);
+            var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))
+               .Value;
+
+            if (type == null)
+            {
+                var typeLookup = deserializedIDs.ToLookup(x => x.type);
+                type = projectSnapshot.IssueTypes.FirstOrDefault(
+                            x => x.Value.SubTypeIsType && typeLookup.Contains(x.Value.ParentTypeID))
+                       .Value ??
+                    projectSnapshot.IssueTypes
+                       .FirstOrDefault(x => typeLookup.Contains(x.Value.ParentTypeID))
+                       .Value ??
+                    projectSnapshot.IssueTypes.First().Value;
+            }
+
             return type;
         }
 

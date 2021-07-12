@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
 {
     /// <summary>
-    /// Capttures state of BIM360.
+    /// Captures state of BIM360.
     /// </summary>
     public interface IBim360SnapshotFiller
     {

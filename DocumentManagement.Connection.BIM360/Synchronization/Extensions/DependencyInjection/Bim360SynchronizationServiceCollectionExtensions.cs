@@ -33,7 +33,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
             services.AddConverter<Status, ObjectiveStatus, StatusObjectiveStatusConverter>();
             services.AddConverter<ObjectiveStatus, Status, ObjectiveStatusStatusConverter>();
-            services.AddConverter<IssueTypeSnapshot, DynamicFieldExternalDto, IssueTypeSnapshotDynamicFieldConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
             return services;
         }

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using MRS.DocumentManagement.Interface.Dtos;
-
 namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public static class Constants

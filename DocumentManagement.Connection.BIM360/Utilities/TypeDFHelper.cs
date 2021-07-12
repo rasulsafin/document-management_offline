@@ -12,12 +12,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
     public class TypeDFHelper
     {
-        private static readonly EnumerationValueExternalDto UNDEFINED_NG_TYPE = new ()
-        {
-            ExternalID = "undefined-bim360-ng-type-2021.07.09",
-            Value = "Undefined",
-        };
-
         private static readonly string ENUM_EXTERNAL_ID = "ng_issue_type_id,ng_issue_subtype_id";
         private static readonly string DISPLAY_NAME = "Type";
 
@@ -69,13 +63,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             }
         }
 
-        internal static DynamicFieldExternalDto GetDefault()
+        internal static DynamicFieldExternalDto CreateField(string valueID)
             => new ()
             {
                 ExternalID = ENUM_EXTERNAL_ID,
                 Name = DISPLAY_NAME,
                 Type = DynamicFieldType.ENUM,
-                Value = UNDEFINED_NG_TYPE.ExternalID,
+                Value = valueID,
             };
 
         internal async Task<EnumerationTypeExternalDto> GetTypeEnumeration()
@@ -100,7 +94,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                         ExternalID = GetExternalID(x),
                         Value = x.Key,
                     })
-               .Append(UNDEFINED_NG_TYPE)
                .ToList();
             var enumType = new EnumerationTypeExternalDto
             {

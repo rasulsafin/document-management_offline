@@ -6,7 +6,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
@@ -21,22 +20,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
         private readonly ProjectsService projectsService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
-        private readonly TypeDFHelper typeDfHelper;
 
         public SnapshotFiller(
             Bim360ConnectionContext context,
             HubsService hubsService,
             ProjectsService projectsService,
             IssuesService issuesService,
-            FoldersService foldersService,
-            TypeDFHelper typeDfHelper)
+            FoldersService foldersService)
         {
             this.context = context;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
-            this.typeDfHelper = typeDfHelper;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;

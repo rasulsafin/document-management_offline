@@ -5,17 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
@@ -116,17 +112,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
-            info.EnumerationTypes = await GetEnumerationTypes();
-            var issueType = new ObjectiveTypeExternalDto
-            {
-                ExternalId = Constants.ISSUE_TYPE,
-                Name = "Issue",
-            };
-            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto> { issueType };
-            issueType.DefaultDynamicFields = new List<DynamicFieldExternalDto>
-            {
-                TypeDFHelper.GetDefault(),
-            };
+            await SetIssueType(info);
             tokenHelper.SetToken(info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
             info.UserExternalID = (await authenticationService.GetMe()).UserId;
             tokenHelper.SetUserID(info.UserExternalID);
@@ -142,12 +128,27 @@ namespace MRS.DocumentManagement.Connection.Bim360
             return Task.FromResult<IConnectionStorage>(storage);
         }
 
-        private async Task<ICollection<EnumerationTypeExternalDto>> GetEnumerationTypes()
+        private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
+            var issueType = new ObjectiveTypeExternalDto
+            {
+                ExternalId = Constants.ISSUE_TYPE,
+                Name = "Issue",
+            };
+
             var enumTypes = new List<EnumerationTypeExternalDto>();
-            var enumType = await typeDfHelper.GetTypeEnumeration();
-            enumTypes.Add(enumType);
-            return enumTypes;
+            var typesSubtypes = await typeDfHelper.GetTypeEnumeration();
+            if (typesSubtypes.EnumerationValues.Count == 0)
+                throw new TypeAccessException("You have no access to issue types.");
+
+            enumTypes.Add(typesSubtypes);
+            info.EnumerationTypes = enumTypes;
+
+            info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto> { issueType };
+            issueType.DefaultDynamicFields = new List<DynamicFieldExternalDto>
+            {
+                TypeDFHelper.CreateField(typesSubtypes.EnumerationValues.First().ExternalID),
+            };
         }
     }
 }
