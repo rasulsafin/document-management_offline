@@ -51,10 +51,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             Status[] permittedStatuses = null;
             int? startingVersion;
             Vector3? globalOffset = null;
+            var typeSnapshot = GetIssueTypes(project, objective);
 
             if (exist == null)
             {
-                var typeSnapshot = GetIssueTypes(project, objective);
                 (type, subtype) = (typeSnapshot.ParentTypeID, typeSnapshot.SubtypeID);
                 (targetUrn, startingVersion) = await GetTarget(objective, project);
             }
@@ -63,7 +63,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 type = exist.Attributes.NgIssueTypeID;
                 subtype = exist.Attributes.NgIssueSubtypeID;
 
-                var typeSnapshot = GetIssueTypes(project, objective);
                 if (typeSnapshot.ParentTypeID == type)
                     subtype = typeSnapshot.SubtypeID;
 
