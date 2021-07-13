@@ -37,7 +37,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <param name="userID">User's ID.</param>
         /// <returns>Id of the created long request.</returns>
         /// <response code="202">Request is accepted but can take a long time to proceed. Check with the /RequestQueue to get the result.</response>
-        /// <response code="400">Invalid id.</response>
+        /// <response code="400">Invalid user id.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to synchronize.</response>
         [HttpGet]
@@ -72,13 +72,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// Get dates of synchronizations for the user.
         /// </summary>
         /// <returns>The collection of synchronization dates.</returns>
-        /// <response code="202">The collection of synchronization dates returned.</response>
+        /// <response code="200">The collection of synchronization dates returned.</response>
+        /// <response code="400">Invalid user id.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to get the date.</response>
         [HttpGet]
         [Route("dates/{userID:int}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetSynchronizationsDates(
@@ -107,13 +109,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// The entities will not be returned to the previous state.
         /// </summary>
         /// <returns>True, the last synchronization date is removed.</returns>
-        /// <response code="202">The last synchronization date removed.</response>
+        /// <response code="200">The last synchronization date removed.</response>
+        /// <response code="400">Invalid user id.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to remove the date.</response>
         [HttpDelete]
         [Route("dates/{userID:int}/last")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveLastSynchronizationDate(
@@ -142,13 +146,15 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// The entities will not be returned to the previous state.
         /// </summary>
         /// <returns>True, if all synchronization dates are removed.</returns>
-        /// <response code="202">All synchronization dates removed.</response>
+        /// <response code="200">All synchronization dates removed.</response>
+        /// <response code="400">Invalid user id.</response>
         /// <response code="404">User was not found.</response>
         /// <response code="500">Something went wrong while server tried to remove the date.</response>
         [HttpDelete]
         [Route("dates/{userID:int}/all")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> RemoveAllSynchronizationDates(
