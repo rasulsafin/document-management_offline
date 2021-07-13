@@ -4,28 +4,20 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class IssuesService : AElementService
+    public class IssuesService : Service
     {
         private static readonly string BASE_URL = "/task";
-        private readonly IConverter<Issue, ObjectiveExternalDto> dtoConverter;
-        private readonly IConverter<ObjectiveExternalDto, Issue> modelConverter;
 
-        public IssuesService(MrsProHttpConnection connection,
-            IConverter<Issue, ObjectiveExternalDto> dtoConverter,
-            IConverter<ObjectiveExternalDto, Issue> modelConverter)
+        public IssuesService(MrsProHttpConnection connection)
             : base(connection)
         {
-            this.dtoConverter = dtoConverter;
-            this.modelConverter = modelConverter;
         }
 
-        public override async Task<IEnumerable<IElement>> GetAll(DateTime date)
+        public async Task<IEnumerable<Issue>> GetAll(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
             var unixDate = date.ToUnixTime();
@@ -33,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        public override async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
+        public async Task<IEnumerable<Issue>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -46,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public override async Task<IElement> TryGetById(string id)
+        public async Task<Issue> TryGetById(string id)
         {
             try
             {
@@ -59,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public override async Task<IElement> TryPost(IElement element)
+        public async Task<Issue> TryPost(Issue element)
         {
             try
             {
@@ -72,7 +64,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public override async Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        public async Task<Issue> TryPatch(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -85,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public override async Task<bool> TryDelete(string id)
+        public async Task<bool> TryDelete(string id)
         {
             try
             {
@@ -97,11 +89,5 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                 return false;
             }
         }
-
-        public override async Task<ObjectiveExternalDto> ConvertToDto(IElement element)
-            => element == null ? null : await dtoConverter.Convert(element as Issue);
-
-        public override async Task<IElement> ConvertToModel(ObjectiveExternalDto element)
-            => element == null ? null : await modelConverter.Convert(element);
     }
 }

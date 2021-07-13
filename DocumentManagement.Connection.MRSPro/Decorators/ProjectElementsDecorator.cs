@@ -8,17 +8,16 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class ProjectElementsService : AElementService
+    public class ProjectElementsDecorator : AElementDecorator
     {
         private readonly IConverter<Project, ObjectiveExternalDto> dtoConverter;
         private readonly IConverter<ObjectiveExternalDto, Project> modelConverter;
         private readonly ProjectsService projectsService;
 
-        public ProjectElementsService(MrsProHttpConnection connection,
+        public ProjectElementsDecorator
+            (ProjectsService projectsService,
             IConverter<Project, ObjectiveExternalDto> dtoConverter,
-            IConverter<ObjectiveExternalDto, Project> modelConverter,
-            ProjectsService projectsService)
-            : base(connection)
+            IConverter<ObjectiveExternalDto, Project> modelConverter)
         {
             this.dtoConverter = dtoConverter;
             this.modelConverter = modelConverter;
@@ -31,23 +30,23 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return listOfAllProjects.Where(p => p.Ancestry != projectsService.RootPath).ToArray();
         }
 
-        public override async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
+        public override async Task<IEnumerable<IElement>> GetElementsByIds(IReadOnlyCollection<string> ids)
             => await projectsService.TryGetByIds(ids);
 
-        public override async Task<IElement> TryGetById(string id)
+        public override async Task<IElement> GetElementById(string id)
             => await projectsService.TryGetById(id);
 
-        public override Task<IElement> TryPost(IElement element)
+        public override Task<IElement> PostElement(IElement element)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        public override Task<IElement> PatchElement(UpdatedValues valuesToPatch)
         {
             throw new NotImplementedException();
         }
 
-        public override Task<bool> TryDelete(string id)
+        public override Task<bool> DeleteElementById(string id)
         {
             throw new NotImplementedException();
         }

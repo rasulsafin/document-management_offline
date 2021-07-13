@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.General.Utils.Extensions;
@@ -13,20 +14,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly AElementService issuesService;
-        private readonly AElementService projectsService;
+        private readonly AElementDecorator issuesService;
+        private readonly AElementDecorator projectsService;
 
-        public MrsProObjectivesSynchronizer(IssuesService issuesService, ProjectElementsService projectsService)
+        private readonly IConverter<string, (string id, string type)> idConverter;
+
+        public MrsProObjectivesSynchronizer(IssuesDecorator issuesService,
+            ProjectElementsDecorator projectsService,
+            IConverter<string, (string id, string type)> idConverter)
         {
             this.issuesService = issuesService;
             this.projectsService = projectsService;
+            this.idConverter = idConverter;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
             var service = GetService(obj.ObjectiveType.ExternalId);
             var element = await service.ConvertToModel(obj);
-            var result = await service.TryPost(element);
+            var result = await service.PostElement(element);
             return await service.ConvertToDto(result);
         }
 
@@ -36,11 +42,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
             foreach (var id in ids)
             {
-                var idParts = id.Split(Constants.ID_SPLITTER);
-                (var trueId, var type) = (idParts[0], idParts[1]); // TODO: id is ancestry
-
+                (var trueId, var type) = await idConverter.Convert(id);
                 var service = GetService(type);
-                var result = await service.TryGetById(trueId);
+                var result = await service.GetElementById(trueId);
                 objectives.AddIsNotNull(await service.ConvertToDto(result));
             }
 
@@ -57,13 +61,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            var idParts = obj.ExternalID.Split(Constants.ID_SPLITTER);
-            (var trueId, var type) = (idParts[0], idParts[1]);
+            (var trueId, var type) = await idConverter.Convert(obj.ExternalID);
 
             if (trueId == null)
                 throw new Exception("Wrong id value");
 
-            var result = await GetService(type).TryDelete(trueId);
+            var result = await GetService(type).DeleteElementById(trueId);
 
             return result ? obj : null;
         }
@@ -84,17 +87,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                     }).ToArray();
 
             updatedValues.Patch = propertiesToPatch;
-            var result = await service.TryPatch(updatedValues);
+            var result = await service.PatchElement(updatedValues);
             return await service.ConvertToDto(result);
         }
 
-        private AElementService GetService(string type)
+        private AElementDecorator GetService(string type)
             => type == Constants.ISSUE_TYPE ? issuesService : projectsService;
 
-        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementService service, DateTime date)
+        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementDecorator service, DateTime date)
         {
             var collection = await service.GetAll(date);
-            return collection.Select(element => $"{element.Id}{Constants.ID_SPLITTER}{element.Type}");
+            return collection.Select(element => element.GetExternalId());
         }
     }
 }

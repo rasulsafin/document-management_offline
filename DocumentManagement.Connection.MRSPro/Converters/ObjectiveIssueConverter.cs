@@ -10,16 +10,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
         private readonly IConverter<ObjectiveStatus, string> statusConverter;
+        private readonly IConverter<string, (string id, string type)> idConverter;
 
-        public ObjectiveIssueConverter(IConverter<ObjectiveStatus, string> statusConverter)
+        public ObjectiveIssueConverter(IConverter<ObjectiveStatus, string> statusConverter,
+            IConverter<string, (string id, string type)> idConverter)
         {
             this.statusConverter = statusConverter;
+            this.idConverter = idConverter;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto dto)
         {
             var element = new Issue();
-            element.Id = dto.ExternalID?.Split(ID_SPLITTER)[0]; //TODO: fix it, if ids with be ancestry
+            element.Id = (await idConverter.Convert(dto.ExternalID)).id;
             element.Owner = dto.AuthorExternalID;
             element.Description = dto.Description;
             element.Title = dto.Title;
@@ -28,9 +31,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
             element.Type = ISSUE_TYPE;
             element.State = await statusConverter.Convert(dto.Status);
 
-            var parentData = dto.ParentObjectiveExternalID?.Split(ID_SPLITTER); // TODO: fix it, if ids with be ancestry
-            element.ParentId = parentData?[0] ?? dto.ProjectExternalID;
-            element.ParentType = parentData?[1] ?? ELEMENT_TYPE;
+            (string parentID, string parentType) = await idConverter.Convert(dto.ParentObjectiveExternalID);
+            element.ParentId = string.IsNullOrEmpty(parentID) ? dto.ProjectExternalID : parentID;
+            element.ParentType = string.IsNullOrEmpty(parentType) ? ELEMENT_TYPE : parentType;
 
             // TODO: DynamicFields
             // TODO: Items

@@ -16,11 +16,14 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<MrsProHttpConnection>();
             services.AddScoped<MrsProConnection>();
             services.AddScoped<MrsProConnectionContext>();
+
             services.AddScoped<AuthenticationService>();
             services.AddScoped<ProjectsService>();
-            services.AddScoped<IssuesService>();
             services.AddScoped<UsersService>();
-            services.AddScoped<ProjectElementsService>();
+            services.AddScoped<IssuesService>();
+
+            services.AddScoped<IssuesDecorator>();
+            services.AddScoped<ProjectElementsDecorator>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
@@ -28,6 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<ObjectiveStatus, string, ObjectiveStatusStatusConverter>();
             services.AddConverter<Project, ObjectiveExternalDto, ProjectObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Project, ObjectiveProjectConverter>();
+            services.AddConverter<string, (string id, string type), ExternalIdTypeIdConverter>();
 
             services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);
 

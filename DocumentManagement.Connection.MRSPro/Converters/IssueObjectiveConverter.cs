@@ -23,13 +23,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
 
             var resultDto = new ObjectiveExternalDto
             {
-                ExternalID = $"{element.Id}{Constants.ID_SPLITTER}{element.Type}", //TODO: just leave ancestry as id?
+                ExternalID = element.GetExternalId(),
                 AuthorExternalID = element.Owner,
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = element.Type },
                 Title = element.Title,
                 Description = element.Description,
-                ProjectExternalID = GetProject(element.Ancestry), //TODO: just leave ancestry as id?
-                ParentObjectiveExternalID = $"{element.ParentId}{Constants.ID_SPLITTER}{element.ParentType}",
+                ProjectExternalID = GetProject(element.Ancestry),
+                ParentObjectiveExternalID = element.Ancestry,
                 Status = await statusConverter.Convert(element.State),
                 CreationDate = time,
                 DueDate = element.DueDate.ToLocalDateTime() ?? time,
