@@ -154,11 +154,8 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found user: {@User}", user);
                 var synchronization = await context.Synchronizations.Where(x => x.UserID == user.ID)
                    .OrderByDescending(x => x)
-                   .FirstOrDefaultAsync();
+                   .FirstAsync();
                 logger.LogDebug("Found synchronization: {@Synchronization}", synchronization);
-                if (synchronization == null)
-                    return false;
-
                 context.Synchronizations.Remove(synchronization);
                 await context.SaveChangesAsync();
                 logger.LogInformation(
