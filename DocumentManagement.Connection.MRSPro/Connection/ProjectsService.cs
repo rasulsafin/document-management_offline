@@ -54,19 +54,43 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public Task<Project> TryPost(Project element)
+        public async Task<Project> TryPost(Project element)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await HttpConnection.PostJson<Project>(BASE_URL, element);
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public Task<Project> TryPatch(UpdatedValues valuesToPatch)
+        public async Task<Project> TryPatch(UpdatedValues valuesToPatch)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var result = await HttpConnection.PatchJson<IEnumerable<Project>, UpdatedValues>(BASE_URL, valuesToPatch);
+                return result.FirstOrDefault();
+            }
+            catch
+            {
+                return null;
+            }
         }
 
-        public Task<bool> TryDelete(string id)
+        public async Task<bool> TryDelete(string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await HttpConnection.DeleteJson(BASE_URL, new[] { id });
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

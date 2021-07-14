@@ -8,6 +8,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "id")]
         public string Id { get; set; }
 
+        [CanBePatched]
         [DataMember(Name = "ancestry")]
         public string Ancestry { get; set; }
 
@@ -26,6 +27,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "parentId")]
         public string ParentId { get; set; }
 
+        [CanBePatched]
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
