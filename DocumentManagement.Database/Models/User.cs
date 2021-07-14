@@ -32,5 +32,7 @@ namespace MRS.DocumentManagement.Database.Models
         public ICollection<UserProject> Projects { get; set; }
 
         public ICollection<UserRole> Roles { get; set; }
+
+        public ICollection<Synchronization> Synchronizations { get; set; }
     }
 }
