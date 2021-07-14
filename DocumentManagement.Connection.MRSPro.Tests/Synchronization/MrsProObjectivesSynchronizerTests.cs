@@ -80,14 +80,16 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully()
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully(string typeValue)
         {
             var objective = new ObjectiveExternalDto
             {
                 CreationDate = DateTime.Now,
                 ProjectExternalID = PROJECT_ID,
                 Status = ObjectiveStatus.Open,
-                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = ISSUE_TYPE },
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = typeValue },
                 Description = "Issue description",
                 Title = "First type OPEN issue",
                 DueDate = DateTime.Now.AddDays(5),
@@ -114,9 +116,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         //}
 
         [TestMethod]
-        public async Task Remove_JustAddedObjective_RemovedSuccessfully()
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task Remove_JustAddedObjective_RemovedSuccessfully(string typeValue)
         {
-            var objective = await ArrangeObjective();
+            var objective = await ArrangeObjective(typeValue);
 
             var result = await synchronizer.Remove(objective);
             Assert.IsNotNull(result);
@@ -125,9 +129,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Update_JustAddedObjective_UpdatedSuccessfully()
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task Update_JustAddedObjective_UpdatedSuccessfully(string typeValue)
         {
-            var added = await ArrangeObjective();
+            var added = await ArrangeObjective(typeValue);
             var title = added.Title;
             var description = added.Description;
 
@@ -153,21 +159,23 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         //}
 
         [TestMethod]
-        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful(string typeValue)
         {
-            var added = await ArrangeObjective();
+            var added = await ArrangeObjective(typeValue);
             justAdded = added;
 
             var result = await synchronizer.GetUpdatedIDs(DateTime.Now.AddDays(-1));
             Assert.IsNotNull(result);
             Assert.IsTrue(result?.Any(x => x == added.ExternalID) == true);
         }
-
-        private async Task<ObjectiveExternalDto> ArrangeObjective()
+        
+        private async Task<ObjectiveExternalDto> ArrangeObjective(string typeValue)
         {
             var objective = new ObjectiveExternalDto
             {
-                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = Constants.ISSUE_TYPE },
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = typeValue },
                 CreationDate = DateTime.Now,
                 DueDate = DateTime.Now.AddDays(2),
                 Title = "Title",
