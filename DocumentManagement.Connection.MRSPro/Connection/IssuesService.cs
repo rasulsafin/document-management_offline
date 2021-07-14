@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             try
             {
-                var result = await HttpConnection.PostJson<Issue>(BASE_URL, element as Issue);
+                var result = await HttpConnection.PostJson<Issue>(BASE_URL, element);
                 return result;
             }
             catch

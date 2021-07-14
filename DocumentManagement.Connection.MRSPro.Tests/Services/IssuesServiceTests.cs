@@ -17,6 +17,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
     [TestClass]
     public class IssuesServiceTests
     {
+        private static readonly string PARENT_ID = "60b4d2719fbb9657cf2e0cbf";
         private static IssuesService service;
         private static ServiceProvider serviceProvider;
         private static string existingIssueId;
@@ -50,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var issue = new Issue()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
-                ParentId = "60b4d2719fbb9657cf2e0cbf",
+                ParentId = PARENT_ID,
                 ParentType = ELEMENT_TYPE,
                 State = STATE_OPENED,
                 Type = ISSUE_TYPE,
@@ -67,8 +68,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [ClassCleanup]
         public static async Task ClassCleanup()
         {
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-            await service.TryDelete(existingIssueId);
+            if (!string.IsNullOrEmpty(existingIssueId))
+            {
+                await Task.Delay(MILLISECONDS_TIME_DELAY);
+                await service.TryDelete(existingIssueId);
+            }
+
             serviceProvider.Dispose();
         }
 
@@ -129,7 +134,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var issue = new Issue()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
-                ParentId = "60b4d2719fbb9657cf2e0cbf",
+                ParentId = PARENT_ID,
                 ParentType = ELEMENT_TYPE,
                 State = STATE_OPENED,
                 Type = ISSUE_TYPE,
@@ -277,7 +282,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var issue = new Issue()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
-                ParentId = "60b4d2719fbb9657cf2e0cbf",
+                ParentId = PARENT_ID,
                 ParentType = ELEMENT_TYPE,
                 State = STATE_OPENED,
                 Type = ISSUE_TYPE,

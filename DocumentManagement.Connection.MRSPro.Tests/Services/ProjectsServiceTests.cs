@@ -15,8 +15,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
     [TestClass]
     public class ProjectsServiceTests
     {
-        private static readonly DateTime DATE = DateTime.MinValue;
-
         private static ProjectsService service;
         private static ServiceProvider serviceProvider;
 
@@ -54,26 +52,27 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task GetAllProjectsAsync_ReturnsProjectsList()
         {
-            var result = await service.GetAll(DATE);
-
-            Assert.IsNotNull(result);
-            Assert.IsTrue(result.Any());
-        }
-
-        [TestMethod]
-        public async Task GetRootProjectsAsync_ReturnsRootProjectsList()
-        {
-            var result = await service.GetRootProjects();
+            var result = await service.GetAll();
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
             Assert.IsTrue(CheckRootProjects(result));
         }
 
+        //[TestMethod]
+        //public async Task GetRootProjectsAsync_ReturnsRootProjectsList()
+        //{
+        //    var result = await service.GetAll();
+
+        //    Assert.IsNotNull(result);
+        //    Assert.IsTrue(result.Any());
+        //    Assert.IsTrue(CheckRootProjects(result));
+        //}
+
         [TestMethod]
         public async Task TryGetExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
         {
-            var projects = await service.GetAll(DATE);
+            var projects = await service.GetAll();
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
             var result = await service.TryGetByIds(existingIds);
 
@@ -99,7 +98,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetExistingProjectByIdAsync_ReturnsProject()
         {
-            var projects = await service.GetAll(DATE);
+            var projects = await service.GetAll();
             var existingID = projects.First().Id;
 
             var result = await service.TryGetById(existingID);

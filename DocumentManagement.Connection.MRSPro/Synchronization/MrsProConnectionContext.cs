@@ -8,11 +8,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     public class MrsProConnectionContext : AConnectionContext
     {
         private readonly ProjectsService projectService;
+
         private readonly ProjectElementsDecorator projectElementsService;
         private readonly IssuesDecorator objectiveService;
         private readonly IConverter<string, (string id, string type)> idConverter;
 
-        public MrsProConnectionContext(ProjectsService projectService, IssuesDecorator objectiveService, ProjectElementsDecorator projectElementsService, IConverter<string, (string id, string type)> idConverter)
+        public MrsProConnectionContext(ProjectsService projectService,
+            IssuesDecorator objectiveService,
+            ProjectElementsDecorator projectElementsService,
+            IConverter<string, (string id, string type)> idConverter)
         {
             this.projectService = projectService;
             this.projectElementsService = projectElementsService;

@@ -20,6 +20,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         private static readonly string TEST_BIM_FILE_PATH = "Resources/HelloWallIfc4TEST.ifc";
         private static readonly string TEST_PNG_FILE_PATH = "Resources/TestIcon.png";
         private static readonly string TEST_TXT_FILE_PATH = "Resources/IntegrationTestFile.txt";
+        private static readonly string PROJECT_ID = "60b4d2719fbb9657cf2e0cbf";
         private static ISynchronizer<ObjectiveExternalDto> synchronizer;
         private static ServiceProvider serviceProvider;
         private static ObjectiveExternalDto justAdded;
@@ -83,13 +84,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         {
             var objective = new ObjectiveExternalDto
             {
-                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = ISSUE_TYPE },
                 CreationDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(2),
-                Title = "First type OPEN issue",
-                Description = "Issue description",
+                ProjectExternalID = PROJECT_ID,
                 Status = ObjectiveStatus.Open,
-                ProjectExternalID = "60b4d2719fbb9657cf2e0cbf",
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = ISSUE_TYPE },
+                Description = "Issue description",
+                Title = "First type OPEN issue",
+                DueDate = DateTime.Now.AddDays(5),
             };
 
             var result = await synchronizer.Add(objective);
@@ -100,17 +101,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             justAdded = result;
         }
 
-        [TestMethod]
-        public async Task Add_ObjectiveWithBimElement_AddedSuccessfully()
-        {
-            justAdded = null;
-        }
+        //[TestMethod]
+        //public async Task Add_ObjectiveWithBimElement_AddedSuccessfully()
+        //{
+        //    justAdded = null;
+        //}
 
-        [TestMethod]
-        public async Task Add_ObjectiveWithEmptyIdWithFiles_AddedSuccessfully()
-        {
-            justAdded = null;
-        }
+        //[TestMethod]
+        //public async Task Add_ObjectiveWithEmptyIdWithFiles_AddedSuccessfully()
+        //{
+        //    justAdded = null;
+        //}
 
         [TestMethod]
         public async Task Remove_JustAddedObjective_RemovedSuccessfully()
@@ -145,11 +146,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             justAdded = result;
         }
 
-        [TestMethod]
-        public async Task Update_JustAddedObjectiveWithItems_UpdatedSuccessfully()
-        {
-            justAdded = null;
-        }
+        //[TestMethod]
+        //public async Task Update_JustAddedObjectiveWithItems_UpdatedSuccessfully()
+        //{
+        //    justAdded = null;
+        //}
 
         [TestMethod]
         public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
@@ -172,7 +173,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
                 Title = "Title",
                 Description = "Description",
                 Status = ObjectiveStatus.Open,
-                ProjectExternalID = "60b4d2719fbb9657cf2e0cbf",
+                ProjectExternalID = PROJECT_ID,
             };
 
             var added = await synchronizer.Add(objective);

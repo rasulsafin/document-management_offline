@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +42,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject)
         {
-            var content = new StringContent(JsonConvert.SerializeObject(contentObject), Encoding.UTF8, "application/json");
+            var json = JsonConvert.SerializeObject(contentObject);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
             return await SendAsync<TOut>(httpMethod, method, content);
         }
 

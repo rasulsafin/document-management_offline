@@ -22,7 +22,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
         public async Task<Issue> Convert(ObjectiveExternalDto dto)
         {
             var element = new Issue();
-            element.Id = (await idConverter.Convert(dto.ExternalID)).id;
+            (string id, _) = await idConverter.Convert(dto.ExternalID);
+            element.Id = string.IsNullOrEmpty(id) ? null : id;
             element.Owner = dto.AuthorExternalID;
             element.Description = dto.Description;
             element.Title = dto.Title;
