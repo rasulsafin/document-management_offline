@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
@@ -37,6 +38,28 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var list = listOfAllObjectives.Where(o => o.ParentId == id).ToArray();
             return list;
+        }
+
+        public async Task<Attachment> DownloadAttachmentById(string id)
+        {
+            var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
+            var attachment = listOfAllObjectives.Where(o => o.Id == id).ToArray()[0];
+
+            string link = "https://s3-eu-west-1.amazonaws.com/plotpad-org/" + attachment.UrlToFile;
+            string dirPath = "Downloads\\";
+            string path = dirPath + attachment.OriginalName;
+
+            WebClient webClient = new WebClient();
+            try
+            {
+                Directory.CreateDirectory(dirPath);
+                await webClient.DownloadFileTaskAsync(new Uri(link), path);
+                return attachment;
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)

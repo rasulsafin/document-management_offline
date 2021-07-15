@@ -78,5 +78,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             Assert.IsNotNull(attachments);
         }
+
+        [TestMethod]
+        [DataRow("60eef9c539aeb14087ace51c")]
+        public async Task TryDownloadAttachmentById_ReturnsAttachment(string id)
+        {
+            var attachments = await service.DownloadAttachmentById(id);
+
+            Assert.IsNotNull(attachments);
+        }
+
     }
 }
