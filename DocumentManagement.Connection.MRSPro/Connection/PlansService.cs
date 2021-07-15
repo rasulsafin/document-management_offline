@@ -14,6 +14,5 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         public PlansService(MrsProHttpConnection connection)
             : base(connection) { }
 
-        public async Task<>
     }
 }

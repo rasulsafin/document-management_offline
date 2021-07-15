@@ -50,5 +50,33 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         public async Task Setup()
         => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
+        [TestMethod]
+        public async Task TryGetExistingAttachmentsByIdsAsync_ReturnsAttachmentsByIdsList()
+        {
+            var projects = await service.GetAll(DateTime.MinValue);
+            var existingIds = projects.Take(5).Select(p => p.Id).ToList();
+            var result = await service.TryGetByIds(existingIds);
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        [DataRow("60b5c2d69fbb9657cf2e0d5f")]
+        public async Task TryGetExistingAttachmentsByOwnerIdAsync_ReturnsAttachmentsByOwnerIdList(string id)
+        {
+            var attachments = await service.GetByOwnerId(id);
+
+            Assert.IsNotNull(attachments);
+        }
+
+        [TestMethod]
+        [DataRow("60ed826800fac340ae7049fe")]
+        public async Task TryGetExistingAttachmentsByParentIdAsync_ReturnsAttachmentsByParentIdList(string id)
+        {
+            var attachments = await service.GetByParentId(id);
+
+            Assert.IsNotNull(attachments);
+        }
     }
 }
