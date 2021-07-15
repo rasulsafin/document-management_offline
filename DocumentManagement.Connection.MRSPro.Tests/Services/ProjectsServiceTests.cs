@@ -93,6 +93,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         {
             var projects = await service.GetAll();
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+
             var result = await service.TryGetByIds(existingIds);
 
             Assert.IsNotNull(result);
@@ -117,16 +119,16 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetExistingProjectByIdAsync_ReturnsProject()
         {
-            var projects = await service.GetAll();
-            var existingID = projects.First().Id;
-
-            var result = await service.TryGetById(existingID);
+            var result = await service.TryGetById(existingProjectId);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Ancestry != string.Empty);
             Assert.IsNotNull(result.Ancestry);
             Assert.IsTrue(result.Type != string.Empty);
             Assert.IsNotNull(result.Type);
+            Assert.IsNotNull(result.Name);
+            Assert.IsNotNull(result.Id);
+            Assert.IsTrue(result.Id != string.Empty);
         }
 
         [TestMethod]

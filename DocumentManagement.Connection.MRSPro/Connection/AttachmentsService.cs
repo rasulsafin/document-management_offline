@@ -47,7 +47,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
             string link = "https://s3-eu-west-1.amazonaws.com/plotpad-org/" + attachment.UrlToFile;
             string dirPath = "Downloads\\";
-            string path = dirPath + attachment.OriginalName;
+            string path = dirPath + attachment.OriginalFileName;
 
             WebClient webClient = new WebClient();
             try
