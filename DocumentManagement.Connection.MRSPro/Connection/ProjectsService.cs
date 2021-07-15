@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
@@ -10,10 +11,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     public class ProjectsService : Service
     {
         private static readonly string BASE_URL = "/project";
+        private readonly PlansService plansService;
 
-        public ProjectsService(MrsProHttpConnection connection)
+        public ProjectsService(MrsProHttpConnection connection, PlansService plansService)
             : base(connection)
         {
+            this.plansService = plansService;
         }
 
         internal string RootPath => $"/{Auth.OrganizationId}{ROOT}";
@@ -39,6 +42,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             {
                 return null;
             }
+        }
+
+        internal async Task<IEnumerable<Plan>> GetAttachments(string ancestry)
+        {
+            var result = await plansService.TryGetByParentId(ancestry);
+            return result;
         }
 
         public async Task<Project> TryGetById(string id)

@@ -14,7 +14,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         private readonly IConverter<Project, ObjectiveExternalDto> dtoConverter;
         private readonly IConverter<ObjectiveExternalDto, Project> modelConverter;
         private readonly ProjectsService projectsService;
-        private readonly PlansService plansService;
 
         public ProjectElementsDecorator(
             ProjectsService projectsService,
@@ -25,7 +24,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             this.dtoConverter = dtoConverter;
             this.modelConverter = modelConverter;
             this.projectsService = projectsService;
-            this.plansService = plansService;
         }
 
         public override async Task<IEnumerable<IElementObject>> GetAll(DateTime date)
@@ -56,9 +54,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             => await modelConverter.Convert(element);
 
         public override async Task<IEnumerable<IElementAttachment>> GetAttachments(string id)
-        {
-            var result = await plansService.TryGetByParentId(id);
-            return result;
-        }
+            => await projectsService.GetAttachments(id);
     }
 }

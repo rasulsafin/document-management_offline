@@ -181,7 +181,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                     new Patch()
                     {
                         Value = newValue,
-                        Path = "/title",
+                        Path = "/name",
                     },
                 },
             };

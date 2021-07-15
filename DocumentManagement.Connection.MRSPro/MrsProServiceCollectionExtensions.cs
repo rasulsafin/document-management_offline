@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.MrsPro;
 using MRS.DocumentManagement.Connection.MrsPro.Converters;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface;
@@ -27,6 +29,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IssuesDecorator>();
             services.AddScoped<ProjectElementsDecorator>();
 
+            services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);
+
+            services.AddConverters();
+
+            return services;
+        }
+
+        private static IServiceCollection AddConverters(this IServiceCollection services)
+        {
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
             services.AddConverter<string, ObjectiveStatus, StatusObjectiveStatusConverter>();
@@ -34,9 +45,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<Project, ObjectiveExternalDto, ProjectObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Project, ObjectiveProjectConverter>();
             services.AddConverter<string, (string id, string type), ExternalIdTypeIdConverter>();
-
-            services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);
-
+            services.AddConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>, ElementAttachmentItemConverter>();
             return services;
         }
 

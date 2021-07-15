@@ -26,6 +26,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
             var projects = await projectService.TryGetByIds(ids);
+            foreach (var project in projects)
+            {
+                project.Attachments = await projectService.GetAttachments(project.Ancestry);
+            }
+
             return projects.Select(x => x.ToDto()).ToArray();
         }
 

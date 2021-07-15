@@ -1,6 +1,6 @@
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
@@ -33,6 +33,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
-        public IEnumerable<IElementAttachment> Attachments { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+        public IEnumerable<IElementAttachment> Attachments { get; set; }
     }
 }
