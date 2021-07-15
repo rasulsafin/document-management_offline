@@ -1,27 +1,30 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Services
+namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public abstract class AElementDecorator : IElementDecorator, IElementConvertible
     {
-        public abstract Task<ObjectiveExternalDto> ConvertToDto(IElement element);
+        public abstract Task<ObjectiveExternalDto> ConvertToDto(IElementObject element);
 
-        public abstract Task<IElement> ConvertToModel(ObjectiveExternalDto element);
+        public abstract Task<IElementObject> ConvertToModel(ObjectiveExternalDto element);
 
-        public abstract Task<IEnumerable<IElement>> GetAll(DateTime date);
+        public abstract Task<IEnumerable<IElementObject>> GetAll(DateTime date);
 
         public abstract Task<bool> DeleteElementById(string id);
 
-        public abstract Task<IElement> GetElementById(string id);
+        public abstract Task<IElementObject> GetElementById(string id);
 
-        public abstract Task<IEnumerable<IElement>> GetElementsByIds(IReadOnlyCollection<string> ids);
+        public abstract Task<IEnumerable<IElementObject>> GetElementsByIds(IReadOnlyCollection<string> ids);
 
-        public abstract Task<IElement> PatchElement(UpdatedValues valuesToPatch);
+        public abstract Task<IElementObject> PatchElement(UpdatedValues valuesToPatch);
 
-        public abstract Task<IElement> PostElement(IElement element);
+        public abstract Task<IElementObject> PostElement(IElementObject element);
+
+        public abstract Task<IEnumerable<IElementAttachment>> GetAttachments(string id);
     }
 }

@@ -17,23 +17,23 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
             this.statusConverter = statusConverter;
         }
 
-        public async Task<ObjectiveExternalDto> Convert(Issue element)
+        public async Task<ObjectiveExternalDto> Convert(Issue issue)
         {
-            var time = element.CreatedDate.ToLocalDateTime() ?? DateTime.Now;
+            var time = issue.CreatedDate.ToLocalDateTime() ?? DateTime.Now;
 
             var resultDto = new ObjectiveExternalDto
             {
-                ExternalID = element.GetExternalId(),
-                AuthorExternalID = element.Owner,
-                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = element.Type },
-                Title = element.Title,
-                Description = element.Description,
-                ProjectExternalID = GetProject(element.Ancestry),
-                ParentObjectiveExternalID = element.Ancestry,
-                Status = await statusConverter.Convert(element.State),
+                ExternalID = issue.GetExternalId(),
+                AuthorExternalID = issue.Owner,
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = issue.Type },
+                Title = issue.Title,
+                Description = issue.Description,
+                ProjectExternalID = issue.GetParentProjectId(),
+                ParentObjectiveExternalID = issue.Ancestry,
+                Status = await statusConverter.Convert(issue.State),
                 CreationDate = time,
-                DueDate = element.DueDate.ToLocalDateTime() ?? time,
-                UpdatedAt = element.LastModifiedDate.ToLocalDateTime() ?? time,
+                DueDate = issue.DueDate.ToLocalDateTime() ?? time,
+                UpdatedAt = issue.LastModifiedDate.ToLocalDateTime() ?? time,
 
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),
@@ -44,17 +44,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
             };
 
             return resultDto;
-        }
-
-        private static string GetProject(string projectId)
-        {
-            // from "/5ebb7cb7782f96000146e7f3:ORGANIZATION/5ebbff9021ccb400017d707b:PROJECT"
-            // need "5ebbff9021ccb400017d707b"
-            return projectId?
-                .Split('/', StringSplitOptions.RemoveEmptyEntries)?
-                .ElementAt(1)?
-                .Split(':')?
-                .ElementAt(0);
         }
     }
 }

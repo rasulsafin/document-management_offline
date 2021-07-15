@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -22,28 +23,33 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             this.issuesService = issuesService;
         }
 
-        public override async Task<IEnumerable<IElement>> GetAll(DateTime date)
+        public override async Task<IEnumerable<IElementObject>> GetAll(DateTime date)
             => await issuesService.GetAll(date);
 
-        public override async Task<IEnumerable<IElement>> GetElementsByIds(IReadOnlyCollection<string> ids)
+        public override async Task<IEnumerable<IElementObject>> GetElementsByIds(IReadOnlyCollection<string> ids)
             => await issuesService.TryGetByIds(ids);
 
-        public override async Task<IElement> GetElementById(string id)
+        public override async Task<IElementObject> GetElementById(string id)
             => await issuesService.TryGetById(id);
 
-        public override async Task<IElement> PostElement(IElement element)
+        public override async Task<IElementObject> PostElement(IElementObject element)
             => await issuesService.TryPost(element as Issue);
 
-        public override async Task<IElement> PatchElement(UpdatedValues valuesToPatch)
+        public override async Task<IElementObject> PatchElement(UpdatedValues valuesToPatch)
             => await issuesService.TryPatch(valuesToPatch);
 
         public override async Task<bool> DeleteElementById(string id)
             => await issuesService.TryDelete(id);
 
-        public override async Task<ObjectiveExternalDto> ConvertToDto(IElement element)
+        public override async Task<ObjectiveExternalDto> ConvertToDto(IElementObject element)
             => element == null ? null : await dtoConverter.Convert(element as Issue);
 
-        public override async Task<IElement> ConvertToModel(ObjectiveExternalDto element)
+        public override async Task<IElementObject> ConvertToModel(ObjectiveExternalDto element)
             => element == null ? null : await modelConverter.Convert(element);
+
+        public override async Task<IEnumerable<IElementAttachment>> GetAttachments(string id)
+        {
+            return new List<IElementAttachment>();
+        }
     }
 }

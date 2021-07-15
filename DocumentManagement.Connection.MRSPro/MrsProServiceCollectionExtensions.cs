@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.MrsPro;
 using MRS.DocumentManagement.Connection.MrsPro.Converters;
@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<UsersService>();
             services.AddScoped<IssuesService>();
             services.AddScoped<AttachmentsService>();
+            services.AddScoped<PlansService>();
 
             services.AddScoped<IssuesDecorator>();
             services.AddScoped<ProjectElementsDecorator>();

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.General.Utils.Extensions;
@@ -45,6 +46,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                 (var trueId, var type) = await idConverter.Convert(id);
                 var service = GetService(type);
                 var result = await service.GetElementById(trueId);
+                result.Attachments = await service.GetAttachments(result.Ancestry);
+
                 objectives.AddIsNotNull(await service.ConvertToDto(result));
             }
 

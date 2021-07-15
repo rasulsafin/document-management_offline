@@ -1,9 +1,10 @@
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using System.Runtime.Serialization;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Attachment
+    public class Attachment : IElementAttachment
     {
         [DataMember(Name = "address")]
         public string Address { get; set; }
@@ -42,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public float Longitude { get; set; }
 
         [DataMember(Name = "originalName")]
-        public string OriginalName { get; set; }
+        public string OriginalFileName { get; set; }
 
         [DataMember(Name = "owner")]
         public string Owner { get; set; }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -99,6 +99,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result?.ExternalID);
+            Assert.IsNotNull(result?.Title);
+            Assert.IsNotNull(result?.Description);
+            Assert.IsNotNull(result?.DueDate);
+            Assert.AreEqual(result?.Status, objective.Status);
 
             justAdded = result;
         }

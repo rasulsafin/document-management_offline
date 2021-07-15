@@ -43,11 +43,36 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             signInTask.Wait();
             if (signInTask.Result.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
+
+            delay = Task.Delay(MILLISECONDS_TIME_DELAY);
+            delay.Wait();
+
+            var project = new Project()
+            {
+                CreatedDate = DateTime.Now.ToUnixTime(),
+                ParentId = PARENT_ID,
+                ParentType = ELEMENT_TYPE,
+                Name = "Name",
+                Type = ELEMENT_TYPE,
+            };
+            var addProjectTask = service.TryPost(project);
+            addProjectTask.Wait();
+            existingProjectId = addProjectTask.Result.Id;
+            if (existingProjectId == null)
+                Assert.Fail("Issue creation failed. Cannot test non-existing issue.");
         }
 
         [ClassCleanup]
-        public static void ClassCleanup()
-            => serviceProvider.Dispose();
+        public static async Task ClassCleanup()
+        {
+            if (!string.IsNullOrEmpty(existingProjectId))
+            {
+                await Task.Delay(MILLISECONDS_TIME_DELAY);
+                await service.TryDelete(existingProjectId);
+            }
+
+            serviceProvider.Dispose();
+        }
 
         [TestInitialize]
         public async Task Setup()
@@ -62,16 +87,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.IsTrue(result.Any());
             Assert.IsTrue(CheckRootProjects(result));
         }
-
-        //[TestMethod]
-        //public async Task GetRootProjectsAsync_ReturnsRootProjectsList()
-        //{
-        //    var result = await service.GetAll();
-
-        //    Assert.IsNotNull(result);
-        //    Assert.IsTrue(result.Any());
-        //    Assert.IsTrue(CheckRootProjects(result));
-        //}
 
         [TestMethod]
         public async Task TryGetExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
@@ -124,34 +139,37 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPostProjectAsync_ReturnsAddedProject()
+        public async Task TryPostProjectWithParentProjectAsync_ReturnsAddedProject()
         {
             var project = new Project()
             {
                 CreatedDate = DateTime.Now.ToUnixTime(),
                 ParentId = PARENT_ID,
                 ParentType = ELEMENT_TYPE,
-                State = STATE_OPENED,
                 Type = ELEMENT_TYPE,
-                Description = "Test description",
-                Title = "Test title",
+                Name = "Test project name",
             };
 
             var result = await service.TryPost(project);
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Id);
+            Assert.IsNotNull(result.Id != string.Empty);
+            Assert.AreEqual(result.ParentId, project.ParentId);
+            Assert.AreEqual(result.ParentType, project.ParentType);
+            Assert.AreEqual(result.Type, project.Type);
+            Assert.AreEqual(result.Name, project.Name);
 
             await Task.Delay(MILLISECONDS_TIME_DELAY);
             await service.TryDelete(result.Id);
         }
 
         [TestMethod]
-        public async Task TryPatchProjectTitleAsync_ReturnsProjectWithNewTitle()
+        public async Task TryPatchProjectNameAsync_ReturnsProjectWithNewTitle()
         {
             var existingProject = await service.TryGetById(existingProjectId);
-            var oldValue = existingProject.Title;
-            var newValue = "[PATCHED:]" + existingProject.Title;
+            var oldValue = existingProject.Name;
+            var newValue = "[PATCHED:]" + existingProject.Name;
 
             var updatedValues = new UpdatedValues
             {
@@ -172,104 +190,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             Assert.IsNotNull(updatedProject);
             Assert.IsNotNull(updatedProject.Id);
-            Assert.IsNotNull(updatedProject.Title);
-            Assert.AreEqual(updatedProject.Title, newValue);
-            Assert.AreNotEqual(updatedProject.Title, oldValue);
+            Assert.IsNotNull(updatedProject.Name);
+            Assert.AreEqual(updatedProject.Name, newValue);
+            Assert.AreNotEqual(updatedProject.Name, oldValue);
         }
 
-        [TestMethod]
-        public async Task TryPatchProjectDescriptionAsync_ReturnsProjectWithNewDescription()
-        {
-            var existingProject = await service.TryGetById(existingProjectId);
-            var oldValue = existingProject.Description;
-            var newValue = "[PATCHED:]" + existingProject.Description;
-
-            var updatedValues = new UpdatedValues
-            {
-                Ids = new[] { existingProject.Id },
-                Patch = new Patch[]
-                {
-                    new Patch()
-                    {
-                        Value = newValue,
-                        Path = "/description",
-                    },
-                },
-            };
-
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-
-            var updatedProject = await service.TryPatch(updatedValues);
-
-            Assert.IsNotNull(updatedProject);
-            Assert.IsNotNull(updatedProject.Id);
-            Assert.IsNotNull(updatedProject.Description);
-            Assert.AreEqual(updatedProject.Description, newValue);
-            Assert.AreNotEqual(updatedProject.Description, oldValue);
-        }
-
-        [TestMethod]
-        public async Task TryPatchProjectDueDateAsync_ReturnsProjectWithNewDueDate()
-        {
-            var existingProject = await service.TryGetById(existingProjectId);
-            var oldValue = existingProject.DueDate;
-            var newValue = DateTime.Now.ToUnixTime();
-
-            var updatedValues = new UpdatedValues
-            {
-                Ids = new[] { existingProject.Id },
-                Patch = new Patch[]
-                {
-                    new Patch()
-                    {
-                        Value = newValue,
-                        Path = "/dueDate",
-                    },
-                },
-            };
-
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-
-            var updatedProject = await service.TryPatch(updatedValues);
-
-            Assert.IsNotNull(updatedProject);
-            Assert.IsNotNull(updatedProject.Id);
-            Assert.IsNotNull(updatedProject.DueDate);
-            Assert.AreEqual(updatedProject.DueDate, newValue);
-            Assert.AreNotEqual(updatedProject.DueDate, oldValue);
-        }
-
-        [TestMethod]
-        public async Task TryPatchProjectStateAsync_ReturnsProjectWithNewState()
-        {
-            var existingProject = await service.TryGetById(existingProjectId);
-            var oldValue = existingProject.State;
-            var newValue = existingProject.State == STATE_OPENED ?
-                STATE_COMPLETED : STATE_VERIFIED;
-
-            var updatedValues = new UpdatedValues
-            {
-                Ids = new[] { existingProject.Id },
-                Patch = new Patch[]
-                {
-                    new Patch()
-                    {
-                        Value = newValue,
-                        Path = "/state",
-                    },
-                },
-            };
-
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-
-            var updatedProject = await service.TryPatch(updatedValues);
-
-            Assert.IsNotNull(updatedProject);
-            Assert.IsNotNull(updatedProject.Id);
-            Assert.IsNotNull(updatedProject.State);
-            Assert.AreEqual(updatedProject.State, newValue);
-            Assert.AreNotEqual(updatedProject.State, oldValue);
-        }
+        /// TODO: TryPatchProjectAncestryAsync_ReturnsProjectWithNewTitle()
 
         [TestMethod]
         public async Task TryDeleteExistingProjectAsync_ReturnsTrue()
@@ -279,13 +205,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 CreatedDate = DateTime.Now.ToUnixTime(),
                 ParentId = PARENT_ID,
                 ParentType = ELEMENT_TYPE,
-                State = STATE_OPENED,
                 Type = ELEMENT_TYPE,
-                Description = "Test description",
-                Title = "Test project for deletion",
+                Name = "Test project for deletion",
             };
             var newAddedProject = await service.TryPost(project);
-
             await Task.Delay(MILLISECONDS_TIME_DELAY);
 
             var result = await service.TryDelete(newAddedProject.Id);

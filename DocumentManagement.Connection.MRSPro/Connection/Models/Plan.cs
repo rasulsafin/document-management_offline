@@ -1,9 +1,10 @@
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Connection.Models
+namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Plan
+    public class Plan : IElementAttachment
     {
         [DataMember(Name = "ancestry")]
         public string Ancestry { get; set; }
@@ -24,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Connection.Models
         public string Id { get; set; }
 
         [DataMember(Name = "name")]
-        public string Name { get; set; }
+        public string FileName { get; set; }
 
         [DataMember(Name = "originalFileName")]
         public string OriginalFileName { get; set; }

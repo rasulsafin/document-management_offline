@@ -1,9 +1,11 @@
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Project : IElement
+    public class Project : IElementObject
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -31,14 +33,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
-        public string Title { get => Name; set => Name = value; }
-
-        public string Description { get; set; } = string.Empty;
-
-        public long LastModifiedDate { get; set; }
-
-        public long DueDate { get; set; }
-
-        public string State { get; set; }
+        public IEnumerable<IElementAttachment> Attachments { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
     }
 }

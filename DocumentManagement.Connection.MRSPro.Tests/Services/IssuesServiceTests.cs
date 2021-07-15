@@ -146,6 +146,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Id);
+            Assert.IsNotNull(result.Id != string.Empty);
+            Assert.AreEqual(result.ParentId, issue.ParentId);
+            Assert.AreEqual(result.ParentType, issue.ParentType);
+            Assert.AreEqual(result.Type, issue.Type);
+            Assert.AreEqual(result.Title, issue.Title);
+            Assert.AreEqual(result.State, issue.State);
+            Assert.AreEqual(result.Description, issue.Description);
 
             await Task.Delay(MILLISECONDS_TIME_DELAY);
             await service.TryDelete(result.Id);
