@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
@@ -11,13 +12,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     public class IssuesService : Service
     {
         private static readonly string BASE_URL = "/task";
+        private readonly AttachmentsService attachmentsService;
 
-        public IssuesService(MrsProHttpConnection connection)
+        public IssuesService(MrsProHttpConnection connection, AttachmentsService attachmentsService)
             : base(connection)
         {
+            this.attachmentsService = attachmentsService;
         }
 
-        public async Task<IEnumerable<Issue>> GetAll(DateTime date)
+        internal async Task<IEnumerable<Issue>> GetAll(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
             var unixDate = date.ToUnixTime();
@@ -25,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        public async Task<IEnumerable<Issue>> TryGetByIds(IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<Issue>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -38,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Issue> TryGetById(string id)
+        internal async Task<Issue> TryGetById(string id)
         {
             try
             {
@@ -51,7 +54,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Issue> TryPost(Issue element)
+        internal async Task<Issue> TryPost(Issue element)
         {
             try
             {
@@ -64,7 +67,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Issue> TryPatch(UpdatedValues valuesToPatch)
+        internal async Task<Issue> TryPatch(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -77,7 +80,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryDelete(string id)
+        internal async Task<IEnumerable<IElementAttachment>> GetAttachments(string ancestry)
+        {
+            var result = await attachmentsService.GetByParentId(ancestry);
+            return result;
+        }
+
+        internal async Task<bool> TryDelete(string id)
         {
             try
             {

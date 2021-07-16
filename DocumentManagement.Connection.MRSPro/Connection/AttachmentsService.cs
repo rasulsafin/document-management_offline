@@ -15,9 +15,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         private static readonly string BASE_URL = "/attachment";
 
         public AttachmentsService(MrsProHttpConnection connection)
-            : base(connection) { }
+            : base(connection)
+        {
+        }
 
-        public async Task<IEnumerable<Attachment>> GetAll(DateTime date)
+        internal async Task<IEnumerable<Attachment>> GetAll(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var unixDate = date.ToUnixTime();
@@ -25,21 +27,21 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        public async Task<IEnumerable<Attachment>> GetByOwnerId(string id)
+        internal async Task<IEnumerable<Attachment>> GetByOwnerId(string id)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var list = listOfAllObjectives.Where(o => o.Owner == id).ToArray();
             return list;
         }
 
-        public async Task<IEnumerable<Attachment>> GetByParentId(string id)
+        internal async Task<IEnumerable<Attachment>> GetByParentId(string id)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var list = listOfAllObjectives.Where(o => o.ParentId == id).ToArray();
             return list;
         }
 
-        public async Task<Attachment> DownloadAttachmentById(string id)
+        internal async Task<Attachment> DownloadAttachmentById(string id)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var attachment = listOfAllObjectives.Where(o => o.Id == id).ToArray()[0];
@@ -61,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -74,7 +76,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryDeleteById(string id)
+        internal async Task<bool> TryDeleteById(string id)
         {
             try
             {
@@ -87,7 +89,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Attachment> TryPost(Attachment attachment)
+        internal async Task<Attachment> TryPost(Attachment attachment)
         {
             try
             {

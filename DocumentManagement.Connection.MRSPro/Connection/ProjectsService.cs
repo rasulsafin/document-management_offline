@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
@@ -21,17 +19,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         internal string RootPath => $"/{Auth.OrganizationId}{ROOT}";
 
-        public async Task<IEnumerable<Project>> GetAll()
+        internal async Task<IEnumerable<Project>> GetAll()
         {
             var listOfAllProjects = await GetListOfProjects();
             return listOfAllProjects.Where(p => p.Ancestry == RootPath).ToArray();
         }
 
-        public async Task<IEnumerable<Project>> GetListOfProjects()
+        internal async Task<IEnumerable<Project>> GetListOfProjects()
             => await HttpConnection.GetListOf<Project>(
                 BASE_URL);
 
-        public async Task<IEnumerable<Project>> TryGetByIds(IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<Project>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -44,13 +42,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<IEnumerable<Plan>> GetAttachments(string ancestry)
-        {
-            var result = await plansService.TryGetByParentId(ancestry);
-            return result;
-        }
-
-        public async Task<Project> TryGetById(string id)
+        internal async Task<Project> TryGetById(string id)
         {
             try
             {
@@ -63,7 +55,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Project> TryPost(Project element)
+        internal async Task<Project> TryPost(Project element)
         {
             try
             {
@@ -76,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Project> TryPatch(UpdatedValues valuesToPatch)
+        internal async Task<Project> TryPatch(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -89,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryDelete(string id)
+        internal async Task<bool> TryDelete(string id)
         {
             try
             {
@@ -100,6 +92,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             {
                 return false;
             }
+        }
+
+        internal async Task<IEnumerable<Plan>> GetAttachments(string ancestry)
+        {
+            var result = await plansService.TryGetByParentId(ancestry);
+            return result;
         }
     }
 }

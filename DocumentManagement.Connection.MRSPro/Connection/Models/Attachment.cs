@@ -1,5 +1,5 @@
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {

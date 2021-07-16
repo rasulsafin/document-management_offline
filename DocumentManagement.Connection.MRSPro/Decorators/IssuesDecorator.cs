@@ -48,8 +48,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             => element == null ? null : await modelConverter.Convert(element);
 
         public override async Task<IEnumerable<IElementAttachment>> GetAttachments(string id)
-        {
-            return new List<IElementAttachment>();
-        }
+            => await issuesService.GetAttachments(id);
     }
 }

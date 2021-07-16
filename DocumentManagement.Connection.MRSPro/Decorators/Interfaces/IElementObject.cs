@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Interfaces
         string Owner { get; set; }
 
         /// <summary>
-        /// 
+        /// List of files attached.
         /// </summary>
         IEnumerable<IElementAttachment> Attachments { get; set; }
     }

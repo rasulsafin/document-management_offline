@@ -9,6 +9,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private readonly ProjectsService projectService;
 
+        // TODO: Fix this list
         private readonly ProjectElementsDecorator projectElementsService;
         private readonly IssuesDecorator objectiveService;
         private readonly IConverter<string, (string id, string type)> idConverter;

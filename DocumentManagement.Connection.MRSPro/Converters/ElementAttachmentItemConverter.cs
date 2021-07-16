@@ -11,15 +11,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
 {
     internal class ElementAttachmentItemConverter : IConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>>
     {
-        public async Task<ICollection<ItemExternalDto>> Convert(IEnumerable<IElementAttachment> attachments)
+        public Task<ICollection<ItemExternalDto>> Convert(IEnumerable<IElementAttachment> attachments)
         {
-            return attachments?.Select(x => new ItemExternalDto()
+            return Task.FromResult<ICollection<ItemExternalDto>>(attachments?.Select(x => new ItemExternalDto()
             {
                 ExternalID = x.Ancestry,
                 FileName = x.FileName,
                 ItemType = ItemType.File,
                 UpdatedAt = x.CreatedDate.ToLocalDateTime() ?? DateTime.Now,
-            }).ToList();
+            }).ToList() ?? new List<ItemExternalDto>());
         }
     }
 }

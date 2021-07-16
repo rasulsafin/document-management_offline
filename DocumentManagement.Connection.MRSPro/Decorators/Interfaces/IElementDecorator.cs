@@ -52,6 +52,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Interfaces
         /// <returns>True if deletion was successful, false otherwise.</returns>
         Task<bool> DeleteElementById(string id);
 
+        /// <summary>
+        /// Get files attached to an element by element's id.
+        /// </summary>
+        /// <param name="id">Element's id.</param>
+        /// <returns>Enumerator for attached files.</returns>
         Task<IEnumerable<IElementAttachment>> GetAttachments(string id);
     }
 }

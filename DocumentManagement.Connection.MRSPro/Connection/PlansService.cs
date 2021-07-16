@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         public PlansService(MrsProHttpConnection connection)
             : base(connection) { }
 
-        public async Task<IEnumerable<Plan>> TryGetByParentId(string parentId)
+        internal async Task<IEnumerable<Plan>> TryGetByParentId(string parentId)
         {
             try
             {
@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Plan> TryPost(string filePath)
+        internal async Task<Plan> TryPost(string filePath)
         {
             try
             {
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<Plan> TryPatch(UpdatedValues valuesToPatch)
+        internal async Task<Plan> TryPatch(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -56,7 +56,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryDelete(string id)
+        internal async Task<bool> TryDelete(string id)
         {
             try
             {
