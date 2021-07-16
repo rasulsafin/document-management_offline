@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
@@ -72,6 +71,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             catch
             {
                 return null;
+            }
+        }
+
+        public async Task<bool> TryDeleteById(string id)
+        {
+            try
+            {
+                await HttpConnection.DeleteJson(BASE_URL, new[] { id });
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
 

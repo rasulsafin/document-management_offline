@@ -1,13 +1,17 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface.Dtos;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 using static MRS.DocumentManagement.Connection.MrsPro.Tests.TestConstants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
@@ -88,5 +92,13 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.IsNotNull(attachments);
         }
 
+        [TestMethod]
+        [DataRow("60f12d27546732672f28ede4")]
+        public async Task TryDeleteAttachment_ReturnsBool(string id)
+        {
+            var result = await service.TryDeleteById(id);
+
+            Assert.IsTrue(result);
+        }
     }
 }
