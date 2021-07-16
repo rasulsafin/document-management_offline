@@ -93,6 +93,53 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
+        [DataRow("C:\\repos\\document-management\\DocumentManagement.Connection.MRSPro.Tests\\bin\\Debug\\net5.0\\Downloads",
+            "kotik.png",
+            "60ed826800fac340ae7049fe")]
+        public async Task TryUploadAttachment_ReturnsBool(string pathToDir, string filename, string parentId)
+        {
+            var file = File.ReadAllBytes($"{pathToDir}\\{filename}");
+            HttpContent bytesContent = new ByteArrayContent(file);
+            var form = new MultipartFormDataContent();
+            form.Add(bytesContent, "file");
+
+            var attachment = new Attachment()
+            {
+                Latitude = 0,
+                Longitude = 0,
+                OriginalFileName = filename,
+                ParentId = parentId,
+                ParentType = ISSUE_TYPE,
+                //UrlToFile = $"{pathToDir}\\{filename}",
+            };
+
+            var result = await service.UploadAttachment(attachment);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        [DataRow(
+            "C:\\Users\\Admin\\Downloads\\Большой_Шлёпа.jpg",
+            "60ed826800fac340ae7049fe")]
+        public async Task TryPutFile_ReturnsBool(string path, string parentId)
+        {
+            var file = File.ReadAllBytes(path);
+            var attachment = new Attachment()
+            {
+                Latitude = 0,
+                Longitude = 0,
+                OriginalFileName = " ",
+                ParentId = parentId,
+                ParentType = ISSUE_TYPE,
+                PhotoAttachment = file,
+            };
+            var result = await service.TryPutFile(attachment);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
         [DataRow("60f12d27546732672f28ede4")]
         public async Task TryDeleteAttachment_ReturnsBool(string id)
         {

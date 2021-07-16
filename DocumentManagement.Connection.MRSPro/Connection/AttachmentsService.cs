@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
+using static System.Net.Mime.MediaTypeNames;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
@@ -63,7 +65,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
+        public async Task<bool> UploadAttachment(Attachment attachment)
+        {
+            try
+            {
+                await HttpConnection.PostJson<Attachment>(BASE_URL, attachment);
+                return true;
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -76,7 +91,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<bool> TryDeleteById(string id)
+        public async Task<bool> TryPutFile(Attachment attachment)
+        {
+            try
+            {
+                await HttpConnection.PutJson<bool, Attachment>(BASE_URL, attachment);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> TryDeleteById(string id)
         {
             try
             {

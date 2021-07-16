@@ -68,5 +68,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "urlToThumbnail")]
         public string UrlToThumbnail { get; set; }
+
+        [DataMember(Name = "photoAttachment")]
+        public byte[] PhotoAttachment { get; set; }
     }
 }
