@@ -34,12 +34,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
                 Status = ObjectiveStatus.Open,
                 CreationDate = time,
                 DueDate = time,
-                Items = await itemsConverter.Convert(project.Attachments),
                 UpdatedAt = time,
+                Items = await itemsConverter.Convert(project.Attachments),
+
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),
-                // TODO: Items
-                // Items = GetItems(),
                 // TODO: BimElements
                 // BimElements = GetBimElements(),
             };

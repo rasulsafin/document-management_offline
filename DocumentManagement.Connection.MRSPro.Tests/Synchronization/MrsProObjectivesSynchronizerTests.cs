@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -134,7 +134,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         public async Task Update_JustAddedIssueObjective_UpdatedSuccessfully(string typeValue)
         {
-            var added = await ArrangeObjective("task");
+            var added = await ArrangeObjective(ISSUE_TYPE);
             var title = added.Title;
             var description = added.Description;
 
@@ -155,7 +155,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         public async Task Update_JustAddedElementObjective_UpdatedSuccessfully(string typeValue)
         {
-            var added = await ArrangeObjective("project");
+            var added = await ArrangeObjective(ELEMENT_TYPE);
             var title = added.Title;
 
             var newTitle = added.Title = $"UPDATED: {title}";
@@ -173,11 +173,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         //}
 
         [TestMethod]
-        [DataRow("task", DisplayName = "ISSUE_TYPE")]
-        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful(string typeValue)
+        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
         {
-            var added = await ArrangeObjective(typeValue);
+            var added = await ArrangeObjective(ISSUE_TYPE);
             justAdded = added;
 
             var result = await synchronizer.GetUpdatedIDs(DateTime.Now.AddDays(-1));
