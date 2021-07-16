@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
-        public async Task TryGetExistingPlansByExistingParentIdsAsync_ReturnsListOfPlans()
+        public async Task TryGet_ExistingPlansByExistingParentIdsAsync_ReturnsListOfPlans()
         {
             var plans = await service.TryGetByParentId(PARENT_ID);
 
@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPostExistingPlanToExistingFolderAsync_ReturnsListOfPlans()
+        public async Task TryPost_ExistingPlanToExistingFolderAsync_ReturnsListOfPlans()
         {
             var filePath = @"C:\Users\yigurieva\Desktop\image.png";
             var plan = await service.TryPost(filePath);

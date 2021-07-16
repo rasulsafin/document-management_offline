@@ -79,7 +79,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
          => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
-        public async Task GetAllProjectsAsync_ReturnsProjectsList()
+        public async Task GetAll_ReturnsProjectsList()
         {
             var result = await service.GetAll();
 
@@ -89,7 +89,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
+        public async Task TryGet_ExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
         {
             var projects = await service.GetAll();
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
@@ -102,7 +102,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingProjectsByIdsAsync_ReturnsEmptyList()
+        public async Task TryGet_NonExistingProjectsByIdsAsync_ReturnsEmptyList()
         {
             var nonExistingIds = new List<string>()
             {
@@ -117,7 +117,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetExistingProjectByIdAsync_ReturnsProject()
+        public async Task TryGet_ExistingProjectByIdAsync_ReturnsProject()
         {
             var result = await service.TryGetById(existingProjectId);
 
@@ -132,7 +132,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingProjectsByIdAsync_ReturnsNull()
+        public async Task TryGet_NonExistingProjectsByIdAsync_ReturnsNull()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryGetById(nonExistingId);
@@ -141,7 +141,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPostProjectWithParentProjectAsync_ReturnsAddedProject()
+        public async Task TryPost_ProjectWithParentProjectAsync_ReturnsAddedProject()
         {
             var project = new Project()
             {
@@ -154,6 +154,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             var result = await service.TryPost(project);
 
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            await service.TryDelete(result.Id);
+
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Id);
             Assert.IsNotNull(result.Id != string.Empty);
@@ -161,13 +164,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.AreEqual(result.ParentType, project.ParentType);
             Assert.AreEqual(result.Type, project.Type);
             Assert.AreEqual(result.Name, project.Name);
-
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-            await service.TryDelete(result.Id);
         }
 
         [TestMethod]
-        public async Task TryPatchProjectNameAsync_ReturnsProjectWithNewTitle()
+        public async Task TryPatch_ProjectNameAsync_ReturnsProjectWithNewTitle()
         {
             var existingProject = await service.TryGetById(existingProjectId);
             var oldValue = existingProject.Name;
@@ -200,7 +200,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         /// TODO: TryPatchProjectAncestryAsync_ReturnsProjectWithNewTitle()
 
         [TestMethod]
-        public async Task TryDeleteExistingProjectAsync_ReturnsTrue()
+        public async Task TryDelete_ExistingProjectAsync_ReturnsTrue()
         {
             var project = new Project()
             {
@@ -219,7 +219,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryDeleteNonExistingProjectAsync_ReturnsFalse()
+        public async Task TryDelete_NonExistingProjectAsync_ReturnsFalse()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryDelete(nonExistingId);

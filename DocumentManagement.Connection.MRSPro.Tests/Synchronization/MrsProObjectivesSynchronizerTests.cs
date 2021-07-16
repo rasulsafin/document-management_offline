@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         [DataRow("task", DisplayName = "ISSUE_TYPE")]
         [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task Add_ObjectiveWithEmptyId_AddedSuccessfully(string typeValue)
+        public async Task Add_ObjectiveWithoutParent_AddedSuccessfully(string typeValue)
         {
             var objective = new ObjectiveExternalDto
             {
@@ -96,6 +96,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             };
 
             var result = await synchronizer.Add(objective);
+            justAdded = result;
 
             Assert.IsNotNull(result);
             Assert.IsNotNull(result?.ExternalID);
@@ -103,8 +104,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             Assert.IsNotNull(result?.Description);
             Assert.IsNotNull(result?.DueDate);
             Assert.AreEqual(result?.Status, objective.Status);
-
-            justAdded = result;
         }
 
         //[TestMethod]
@@ -127,17 +126,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             var objective = await ArrangeObjective(typeValue);
 
             var result = await synchronizer.Remove(objective);
-            Assert.IsNotNull(result);
-
             justAdded = null;
+
+            Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        [DataRow("task", DisplayName = "ISSUE_TYPE")]
-        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task Update_JustAddedObjective_UpdatedSuccessfully(string typeValue)
+        public async Task Update_JustAddedIssueObjective_UpdatedSuccessfully(string typeValue)
         {
-            var added = await ArrangeObjective(typeValue);
+            var added = await ArrangeObjective("task");
             var title = added.Title;
             var description = added.Description;
 
@@ -146,14 +143,27 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             var newDueDate = added.DueDate = added.DueDate.AddDays(1);
             var newStatus = added.Status = ObjectiveStatus.Open;
             var result = await synchronizer.Update(added);
+            justAdded = result;
 
             Assert.IsNotNull(result?.ExternalID);
             Assert.AreEqual(newTitle, result.Title);
             Assert.AreEqual(newDescription, result.Description);
             Assert.AreEqual(newDueDate, result.DueDate);
             Assert.AreEqual(newStatus, result.Status);
+        }
 
+        [TestMethod]
+        public async Task Update_JustAddedElementObjective_UpdatedSuccessfully(string typeValue)
+        {
+            var added = await ArrangeObjective("project");
+            var title = added.Title;
+
+            var newTitle = added.Title = $"UPDATED: {title}";
+            var result = await synchronizer.Update(added);
             justAdded = result;
+
+            Assert.IsNotNull(result?.ExternalID);
+            Assert.AreEqual(newTitle, result.Title);
         }
 
         //[TestMethod]
@@ -174,7 +184,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             Assert.IsNotNull(result);
             Assert.IsTrue(result?.Any(x => x == added.ExternalID) == true);
         }
-        
+
+        [TestMethod]
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task Get_ExistingObjectiveById_RetrivedSuccessful(string typeValue)
+        {
+            var added = await ArrangeObjective(typeValue);
+            justAdded = added;
+
+            var result = await synchronizer.Get(new[] { added.ExternalID });
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result?.Any(x => x.ExternalID == added.ExternalID) == true);
+        }
+
         private async Task<ObjectiveExternalDto> ArrangeObjective(string typeValue)
         {
             var objective = new ObjectiveExternalDto

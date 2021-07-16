@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
     {
         public async Task<ICollection<ItemExternalDto>> Convert(IEnumerable<IElementAttachment> attachments)
         {
-            return attachments.Select(x => new ItemExternalDto()
+            return attachments?.Select(x => new ItemExternalDto()
             {
                 ExternalID = x.Ancestry,
                 FileName = x.FileName,

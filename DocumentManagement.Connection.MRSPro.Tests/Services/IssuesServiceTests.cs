@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
-        public async Task TryGetExistingIssuesByIdsAsync_ReturnsIssuesByIdsList()
+        public async Task TryGet_ExistingIssuesByIdsAsync_ReturnsIssuesByIdsList()
         {
             var projects = await service.GetAll(DateTime.MinValue);
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
@@ -93,7 +93,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingIssuesByIdsAsync_ReturnsEmptyList()
+        public async Task TryGet_NonExistingIssuesByIdsAsync_ReturnsEmptyList()
         {
             var nonExistingIds = new List<string>()
             {
@@ -108,7 +108,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetExistingIssueByIdAsync_ReturnsIssue()
+        public async Task TryGet_ExistingIssueByIdAsync_ReturnsIssue()
         {
             var result = await service.TryGetById(existingIssueId);
 
@@ -120,7 +120,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetNonExistingIssueByIdAsync_ReturnsNull()
+        public async Task TryGet_NonExistingIssueByIdAsync_ReturnsNull()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryGetById(nonExistingId);
@@ -129,7 +129,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPostIssueAsync_ReturnsAddedIssue()
+        public async Task TryPost_IssueAsync_ReturnsAddedIssue()
         {
             var issue = new Issue()
             {
@@ -144,6 +144,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             var result = await service.TryPost(issue);
 
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            await service.TryDelete(result.Id);
+
             Assert.IsNotNull(result);
             Assert.IsNotNull(result.Id);
             Assert.IsNotNull(result.Id != string.Empty);
@@ -153,13 +156,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.AreEqual(result.Title, issue.Title);
             Assert.AreEqual(result.State, issue.State);
             Assert.AreEqual(result.Description, issue.Description);
-
-            await Task.Delay(MILLISECONDS_TIME_DELAY);
-            await service.TryDelete(result.Id);
         }
 
         [TestMethod]
-        public async Task TryPatchIssueTitleAsync_ReturnsIssueWithNewTitle()
+        public async Task TryPatch_IssueTitleAsync_ReturnsIssueWithNewTitle()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.Title;
@@ -190,7 +190,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueDescriptionAsync_ReturnsIssueWithNewDescription()
+        public async Task TryPatch_IssueDescriptionAsync_ReturnsIssueWithNewDescription()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.Description;
@@ -221,7 +221,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueDueDateAsync_ReturnsIssueWithNewDueDate()
+        public async Task TryPatch_IssueDueDateAsync_ReturnsIssueWithNewDueDate()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.DueDate;
@@ -252,7 +252,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatchIssueStateAsync_ReturnsIssueWithNewState()
+        public async Task TryPatch_IssueStateAsync_ReturnsIssueWithNewState()
         {
             var existingIssue = await service.TryGetById(existingIssueId);
             var oldValue = existingIssue.State;
@@ -284,7 +284,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryDeleteExistingIssueAsync_ReturnsTrue()
+        public async Task TryDelete_ExistingIssueAsync_ReturnsTrue()
         {
             var issue = new Issue()
             {
@@ -306,7 +306,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryDeleteNonExistingIssueAsync_ReturnsFalse()
+        public async Task TryDelete_NonExistingIssueAsync_ReturnsFalse()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryDelete(nonExistingId);

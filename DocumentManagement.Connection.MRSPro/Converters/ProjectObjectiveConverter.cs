@@ -29,12 +29,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
                 AuthorExternalID = project.Owner,
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = project.Type },
                 Title = project.Name,
+                Description = string.Empty,
                 ProjectExternalID = project.GetParentProjectId(),
                 ParentObjectiveExternalID = project.Ancestry,
                 Status = ObjectiveStatus.Open,
                 CreationDate = time,
                 DueDate = time,
                 Items = await itemsConverter.Convert(project.Attachments),
+                UpdatedAt = time,
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),
                 // TODO: Items
