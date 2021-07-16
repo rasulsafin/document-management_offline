@@ -44,12 +44,5 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="enumerationTypeID">Enumeration Type's ID.</param>
         /// <returns>Collection of enumeration values.</returns>
         Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID);
-
-        /// <summary>
-        /// Synchronize user's data.
-        /// </summary>
-        /// <param name="userID">User's ID.</param>
-        /// <returns>Id of the created long request.</returns>
-        Task<RequestID> Synchronize(ID<UserDto> userID);
     }
 }

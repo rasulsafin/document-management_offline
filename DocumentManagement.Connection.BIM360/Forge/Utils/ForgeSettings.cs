@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -12,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public HttpMethod MethodType { get; private set; }
 
-        public HttpContent Content { get; private set; }
+        public Func<HttpContent> CreateContent { get; private set; }
 
         public Stream Stream { get; private set; }
 
@@ -28,35 +29,35 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public RangeHeaderValue RangeHeaderValue { get; private set; }
 
-        public static ForgeSettings UnauthorizedPost(HttpContent content)
-            => new ForgeSettings
+        public static ForgeSettings UnauthorizedPost(Func<HttpContent> createContent)
+            => new ()
             {
                 MethodType = HttpMethod.Post,
-                Content = content,
+                CreateContent = createContent,
                 IsAuthorized = false,
             };
 
         public static ForgeSettings AuthorizedGet()
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Get,
             };
 
         public static ForgeSettings AuthorizedDelete()
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Delete,
             };
 
         public static ForgeSettings AuthorizedPost(object data)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Post,
                 Data = data,
             };
 
         public static ForgeSettings AuthorizedPostWithoutKeyData(object data)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Post,
                 Data = data,
@@ -64,7 +65,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             };
 
         public static ForgeSettings AuthorizedPostWithJsonApi(object data)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Post,
                 Data = data,
@@ -72,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             };
 
         public static ForgeSettings AuthorizedPostWithJsonApi(object data, object included)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Post,
                 Data = data,
@@ -81,14 +82,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             };
 
         public static ForgeSettings AuthorizedPut(Stream stream)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Put,
                 Stream = stream,
             };
 
         public static ForgeSettings AuthorizedPut(Stream stream, RangeHeaderValue range)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Put,
                 Stream = stream,
@@ -96,7 +97,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             };
 
         public static ForgeSettings AuthorizedPatch(object data)
-            => new ForgeSettings
+            => new ()
             {
                 MethodType = HttpMethod.Patch,
                 Data = data,

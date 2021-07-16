@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
@@ -16,11 +15,8 @@ using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Synchronization;
-using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
-using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -31,9 +27,7 @@ namespace MRS.DocumentManagement.Services
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<ConnectionService> logger;
         private readonly IFactory<Type, IConnection> connectionFactory;
-        private readonly IFactory<IServiceScope, Type, IConnection> connectionScopedFactory;
         private readonly IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory;
-        private readonly IFactory<IServiceScope, Synchronizer> synchronizerFactory;
         private readonly IRequestService requestQueue;
         private readonly ConnectionHelper helper;
 
@@ -45,9 +39,7 @@ namespace MRS.DocumentManagement.Services
             IServiceScopeFactory serviceScopeFactory,
             ILogger<ConnectionService> logger,
             IFactory<Type, IConnection> connectionFactory,
-            IFactory<IServiceScope, Type, IConnection> connectionScopedFactory,
-            IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory,
-            IFactory<IServiceScope, Synchronizer> synchronizerFactory)
+            IFactory<IServiceScope, ConnectionHelper> connectionHelperFactory)
         {
             this.context = context;
             this.mapper = mapper;
@@ -56,9 +48,7 @@ namespace MRS.DocumentManagement.Services
             this.helper = helper;
             this.logger = logger;
             this.connectionFactory = connectionFactory;
-            this.connectionScopedFactory = connectionScopedFactory;
             this.connectionHelperFactory = connectionHelperFactory;
-            this.synchronizerFactory = synchronizerFactory;
 
             logger.LogTrace("ConnectionService created");
         }
@@ -200,76 +190,6 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't get Enumeration Variants with user id {UserID} and enumeration type id {EnumerationTypeID}", userID, enumerationTypeID);
-                throw;
-            }
-        }
-
-        public async Task<RequestID> Synchronize(ID<UserDto> userID)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogInformation("Synchronize started for user: {UserID}", userID);
-            try
-            {
-                var iUserID = (int)userID;
-                var user = await context.Users
-                   .Include(x => x.ConnectionInfo)
-                   .ThenInclude(x => x.ConnectionType)
-                   .ThenInclude(x => x.AppProperties)
-                   .Include(x => x.ConnectionInfo)
-                   .ThenInclude(x => x.ConnectionType)
-                   .ThenInclude(x => x.AuthFieldNames)
-                   .Include(x => x.ConnectionInfo)
-                   .ThenInclude(x => x.AuthFieldValues)
-                   .FindOrThrowAsync(x => x.ID, iUserID);
-
-                var scope = serviceScopeFactory.CreateScope();
-                var synchronizer = synchronizerFactory.Create(scope);
-
-                var data = new SynchronizingData
-                {
-                    User = user,
-                    ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
-                    ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
-                };
-
-                var connection = connectionScopedFactory.Create(
-                    scope,
-                    ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
-                var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
-                logger.LogTrace("Mapped info {@Info}", info);
-
-                var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
-                var src = new CancellationTokenSource();
-                var task = Task.Factory.StartNew(
-                    async () =>
-                    {
-                        try
-                        {
-                            logger.LogTrace("Synchronization task started ({ID})", id);
-                            var synchronizationResult = await synchronizer.Synchronize(data, connection, info, progress, src.Token);
-                            logger.LogDebug(
-                                "Synchronization ends with result: {@SynchronizationResult}",
-                                synchronizationResult);
-                            return new RequestResult(
-                                synchronizationResult.Count == 0,
-                                synchronizationResult.FirstOrDefault()?.Exception.ConvertToBase());
-                        }
-                        finally
-                        {
-                            scope.Dispose();
-                            logger.LogTrace("Scope for Synchronize disposed");
-                        }
-                    },
-                    TaskCreationOptions.LongRunning);
-
-                requestQueue.AddRequest(id, task.Unwrap(), src);
-
-                return new RequestID(id);
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Can't start the synchronizing process with user id {UserID}", userID);
                 throw;
             }
         }
