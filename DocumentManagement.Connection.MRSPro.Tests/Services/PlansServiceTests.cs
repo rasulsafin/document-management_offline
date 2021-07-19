@@ -13,6 +13,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
     public class PlansServiceTests
     {
         private static readonly string PARENT_ID = "/5ebb7cb7782f96000146e7f3:ORGANIZATION/60b4d2719fbb9657cf2e0cbf:PROJECT";
+        private static readonly string PROJECT_ID = "60b4d2719fbb9657cf2e0cbf";
         private static PlansService service;
         private static ServiceProvider serviceProvider;
 
@@ -49,7 +50,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
-        public async Task TryGet_ExistingPlansByExistingParentIdsAsync_ReturnsListOfPlans()
+        public async Task TryGetByParentIdAsync_ExistingParentId_ReturnsListOfPlans()
         {
             var plans = await service.TryGetByParentId(PARENT_ID);
 
@@ -64,6 +65,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             var plan = await service.TryPost(filePath);
 
             Assert.IsNotNull(plan);
+        }
+
+        [TestMethod]
+        public async Task TryGetByProjectId_ExistingProject_ReturnsListOfPlans()
+        {
+            var plans = await service.TryGetByProjectId(PROJECT_ID);
+
+            Assert.IsNotNull(plans);
+            Assert.IsTrue(plans.Any());
         }
     }
 }

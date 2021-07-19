@@ -27,5 +27,8 @@
 
         internal static string GetByIds(string url)
             => url + "?ids={0}";
+
+        internal static string GetByParentPath(string url)
+            => url + "?ancestry={0}";
     }
 }

@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
+using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
@@ -12,14 +13,28 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         private static readonly string BASE_NAME = "file";
 
         public PlansService(MrsProHttpConnection connection)
-            : base(connection) { }
+            : base(connection)
+        {
+        }
+
+        internal async Task<IEnumerable<Plan>> TryGetByProjectId(string projectId)
+        {
+            try
+            {
+                var res = await HttpConnection.GetListOf<Plan>(BASE_URL);
+                return res.Where(x => x.Ancestry.Contains(projectId));
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         internal async Task<IEnumerable<Plan>> TryGetByParentId(string parentId)
         {
             try
             {
-                var url = BASE_URL + "?ancestry={0}";
-                var res = await HttpConnection.GetListOf<Plan>(url, parentId);
+                var res = await HttpConnection.GetListOf<Plan>(GetByParentPath(BASE_URL), parentId);
                 return res;
             }
             catch
