@@ -266,6 +266,9 @@ namespace MRS.DocumentManagement.Utility
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }
 
+            if (status.Status != RemoteConnectionStatus.OK)
+                return new RequestResult(status);
+
             // Update connection info
             connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);
             connectionInfo = mapper.Map(connectionInfoExternalDto, connectionInfo);

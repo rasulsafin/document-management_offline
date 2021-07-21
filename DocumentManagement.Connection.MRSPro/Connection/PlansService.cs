@@ -43,20 +43,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<Plan> TryPost(string filePath)
-        {
-            try
-            {
-                using FileStream fileStream = File.OpenRead(filePath);
-                //var result = await HttpConnection.PostFormData<Plan>(BASE_URL, fileStream, BASE_NAME);
-                //return result;
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
-        }
+        //internal async Task<Plan> TryPost(string filePath)
+        //{
+        //    try
+        //    {
+        //        using FileStream fileStream = File.OpenRead(filePath);
+        //        //var result = await HttpConnection.PostFormData<Plan>(BASE_URL, fileStream, BASE_NAME);
+        //        //return result;
+        //        return null;
+        //    }
+        //    catch
+        //    {
+        //        return null;
+        //    }
+        //}
 
         internal async Task<Plan> TryPatch(UpdatedValues valuesToPatch)
         {

@@ -15,9 +15,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
         {
             return Task.FromResult<ICollection<ItemExternalDto>>(attachments?.Select(x => new ItemExternalDto()
             {
-                ExternalID = x.Ancestry,
-                FileName = x.FileName,
-                ItemType = ItemType.File,
+                ExternalID = x.GetExternalId(),
+                FileName = x.OriginalFileName,
+                ItemType = ItemType.File, // TODO: Differentiate
                 UpdatedAt = x.CreatedDate.ToLocalDateTime() ?? DateTime.Now,
             }).ToList() ?? new List<ItemExternalDto>());
         }

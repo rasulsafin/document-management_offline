@@ -63,5 +63,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public bool IsReopened { get; set; }
 
         public IEnumerable<IElementAttachment> Attachments { get; set; }
+
+        public bool HasAttachments { get; set; }
     }
 }

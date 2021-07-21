@@ -61,10 +61,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryPost_ExistingPlanToExistingFolderAsync_ReturnsListOfPlans()
         {
-            var filePath = @"C:\Users\yigurieva\Desktop\image.png";
-            var plan = await service.TryPost(filePath);
+            //var filePath = @"C:\Users\yigurieva\Desktop\image.png";
+            //var plan = await service.TryPost(filePath);
 
-            Assert.IsNotNull(plan);
+            //Assert.IsNotNull(plan);
         }
 
         [TestMethod]

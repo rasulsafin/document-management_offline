@@ -196,6 +196,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             Assert.IsTrue(result?.Any(x => x.ExternalID == added.ExternalID) == true);
         }
 
+        [TestMethod]
+        public async Task Get_ExistingObjectivesByIds_RetrivedSuccessful()
+        {
+            var projectElementId = "/5ebb7cb7782f96000146e7f3:ORGANIZATION/60b4d2719fbb9657cf2e0cbf:PROJECT"; // Project with items
+            var issueId = "/5ebb7cb7782f96000146e7f3:ORGANIZATION/60b4d2719fbb9657cf2e0cbf:PROJECT/60f178ef0049c040b8e7c584:TASK"; // Issue with items
+            var result = await synchronizer.Get(new[] { issueId, projectElementId });
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result?.Any(x => x.ExternalID == projectElementId && x.ObjectiveType.ExternalId == ELEMENT_TYPE && x.Items?.Count > 0) == true);
+            Assert.IsTrue(result?.Any(x => x.ExternalID == issueId && x.ObjectiveType.ExternalId == ISSUE_TYPE && x.Items?.Count > 0) == true);
+        }
+
         private async Task<ObjectiveExternalDto> ArrangeObjective(string typeValue)
         {
             var objective = new ObjectiveExternalDto

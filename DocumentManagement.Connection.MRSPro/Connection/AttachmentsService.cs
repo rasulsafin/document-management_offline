@@ -117,6 +117,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
+        internal async Task<IEnumerable<Attachment>> TryGetByParentId(string parentId)
+        {
+            try
+            {
+                var res = await HttpConnection.GetListOf<Attachment>(GetByParentPath(BASE_URL), parentId);
+                return res;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         internal async Task<Attachment> TryPost(Attachment attachment)
         {
             try

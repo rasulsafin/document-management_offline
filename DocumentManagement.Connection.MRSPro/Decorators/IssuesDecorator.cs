@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
@@ -8,7 +9,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class IssuesDecorator : AElementDecorator
+    public class IssuesDecorator : AObjectiveElementDecorator
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> dtoConverter;
         private readonly IConverter<ObjectiveExternalDto, Issue> modelConverter;
@@ -27,7 +28,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             => await issuesService.GetAll(date);
 
         public override async Task<IEnumerable<IElementObject>> GetElementsByIds(IReadOnlyCollection<string> ids)
-            => await issuesService.TryGetByIds(ids);
+        {
+            var issues = await issuesService.TryGetByIds(ids);
+            var attachments = await issuesService.TryGetAttachmentInfoByIds(ids);
+            return issues.Join(
+                attachments,
+                issue => issue.Id,
+                attachment => attachment.TaskId,
+                (issue, attachment) =>
+                {
+                    issue.HasAttachments = attachment.HasImage;
+                    return issue;
+                });
+        }
 
         public override async Task<IElementObject> GetElementById(string id)
             => await issuesService.TryGetById(id);

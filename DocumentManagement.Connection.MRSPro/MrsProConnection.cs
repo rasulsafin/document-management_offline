@@ -14,18 +14,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private readonly ILogger<MrsProConnection> logger;
         private readonly AuthenticationService authService;
-        private readonly UsersService userService;
         private readonly Func<MrsProConnectionContext> getContext;
 
         public MrsProConnection(
             ILogger<MrsProConnection> logger,
             AuthenticationService authService,
-            UsersService userService,
             Func<MrsProConnectionContext> getContext)
         {
             this.logger = logger;
             this.authService = authService;
-            this.userService = userService;
             this.getContext = getContext;
         }
 
@@ -76,8 +73,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                 },
             };
 
-            var currentUser = await userService.GetMe();
-            info.UserExternalID = currentUser.Id;
+            info.UserExternalID = Auth.UserId;
 
             // TODO: Dynamic fields
             return info;

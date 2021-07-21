@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public string Id { get; set; }
 
         [DataMember(Name = "name")]
-        public string FileName { get; set; }
+        public string Name { get; set; }
 
         [DataMember(Name = "originalFileName")]
         public string OriginalFileName { get; set; }
@@ -53,6 +53,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "version")]
         public string Version { get; set; }
+
+        public string FileName { get => Name; set => Name = value; }
     }
 
     [DataContract]

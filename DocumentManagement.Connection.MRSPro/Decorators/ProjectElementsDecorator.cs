@@ -9,7 +9,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class ProjectElementsDecorator : AElementDecorator
+    public class ProjectElementsDecorator : AObjectiveElementDecorator
     {
         private readonly IConverter<Project, ObjectiveExternalDto> dtoConverter;
         private readonly IConverter<ObjectiveExternalDto, Project> modelConverter;
@@ -28,12 +28,24 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         public override async Task<IEnumerable<IElementObject>> GetAll(DateTime date)
         {
-            var listOfAllProjects = await projectsService.GetListOfProjects();
+            var listOfAllProjects = await projectsService.GetAll();
             return listOfAllProjects.Where(p => p.Ancestry != projectsService.RootPath).ToArray();
         }
 
         public override async Task<IEnumerable<IElementObject>> GetElementsByIds(IReadOnlyCollection<string> ids)
-            => await projectsService.TryGetByIds(ids);
+        {
+            var projects = await projectsService.TryGetByIds(ids);
+            var attachments = await projectsService.TryGetAttachmentInfoByIds(ids);
+            return projects.Join(
+                attachments,
+                project => project.Id,
+                attachment => attachment.ProjectId,
+                (project, attachment) =>
+                {
+                    project.HasAttachments = attachment.HasDocumentation;
+                    return project;
+                });
+        }
 
         public override async Task<IElementObject> GetElementById(string id)
             => await projectsService.TryGetById(id);
