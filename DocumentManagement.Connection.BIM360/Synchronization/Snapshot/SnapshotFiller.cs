@@ -6,9 +6,9 @@ using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
@@ -109,12 +109,36 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
             }
         }
 
-        public async Task UpdateIssueTypesIfNull()
+        public async Task UpdateIssueTypes()
         {
-            foreach (var project in context.Snapshot.ProjectEnumerable.Where(x => x.Value.IssueTypes == null))
+            var dictionary =
+                new Dictionary<IssueSubtype, (ProjectSnapshot projectSnapshot, IssueTypeSnapshot snapshot)>();
+
+            foreach (var project in context.Snapshot.ProjectEnumerable.Select(x => x.Value))
             {
-                var types = await issuesService.GetIssueTypesAsync(project.Value.IssueContainer);
-                project.Value.IssueTypes = types.ToDictionary(x => x.ID);
+                var types = await issuesService.GetIssueTypesAsync(project.IssueContainer);
+
+                foreach (var info in types.SelectMany(
+                    type => type.Subtypes.Select(
+                        subtype => (project, snapshot: new IssueTypeSnapshot(type, subtype)))))
+                    dictionary.Add(info.snapshot.Entity, info);
+
+                project.IssueTypes = new Dictionary<string, IssueTypeSnapshot>();
+            }
+
+            var groups = TypeDFHelper.GetGroupedTypes(
+                dictionary.Select(x => (x.Value.snapshot.ParentType, x.Value.snapshot.Entity)));
+
+            foreach (var info in groups)
+            {
+                var externalID = TypeDFHelper.GetExternalID(info);
+
+                foreach (var infoType in info)
+                {
+                    (ProjectSnapshot projectSnapshot, IssueTypeSnapshot snapshot) = dictionary[infoType.subtype];
+                    snapshot.SetExternalID(externalID);
+                    projectSnapshot.IssueTypes.Add(infoType.subtype.ID, snapshot);
+                }
             }
         }
 
