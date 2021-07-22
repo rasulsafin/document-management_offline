@@ -87,54 +87,27 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [DataRow("60eef9c539aeb14087ace51c")]
         public async Task TryDownloadAttachmentById_ReturnsAttachment(string id)
         {
-            var attachments = await service.DownloadAttachmentById(id);
+            var attachments = await service.TryDownloadAttachmentById(id);
 
             Assert.IsNotNull(attachments);
         }
 
         [TestMethod]
-        [DataRow("C:\\repos\\document-management\\DocumentManagement.Connection.MRSPro.Tests\\bin\\Debug\\net5.0\\Downloads",
-            "kotik.png",
-            "60ed826800fac340ae7049fe")]
-        public async Task TryUploadAttachment_ReturnsBool(string pathToDir, string filename, string parentId)
-        {
-            var file = File.ReadAllBytes($"{pathToDir}\\{filename}");
-            HttpContent bytesContent = new ByteArrayContent(file);
-            var form = new MultipartFormDataContent();
-            form.Add(bytesContent, "file");
-
-            var attachment = new Attachment()
-            {
-                Latitude = 0,
-                Longitude = 0,
-                OriginalFileName = filename,
-                ParentId = parentId,
-                ParentType = ISSUE_TYPE,
-                //UrlToFile = $"{pathToDir}\\{filename}",
-            };
-
-            var result = await service.UploadAttachment(attachment);
-
-            Assert.IsTrue(result);
-        }
-
-        [TestMethod]
         [DataRow(
             "C:\\Users\\Admin\\Downloads\\Большой_Шлёпа.jpg",
-            "60ed826800fac340ae7049fe")]
-        public async Task TryPutFile_ReturnsBool(string path, string parentId)
+            "60f1790939c96a40a149d556",
+            "%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B9_%D0%A8%D0%BB%D1%91%D0%BF%D0%B0.jpg",
+            "60f178ef0049c040b8e7c584",
+            "task")]
+        public async Task TryUploadAttachment_ReturnsBool(string path, string id, string originalName, string parentId, string parentType)
         {
             var file = File.ReadAllBytes(path);
-            var attachment = new Attachment()
+            var attachment = new PhotoAttachmentData()
             {
-                Latitude = 0,
-                Longitude = 0,
-                OriginalFileName = " ",
-                ParentId = parentId,
-                ParentType = ISSUE_TYPE,
-                PhotoAttachment = file,
+                File = file.ToString(),
             };
-            var result = await service.TryPutFile(attachment);
+
+            var result = await service.TryUploadAttachment(attachment, id, originalName, parentId, parentType, file);
 
             Assert.IsTrue(result);
         }

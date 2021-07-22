@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        internal async Task<Attachment> DownloadAttachmentById(string id)
+        internal async Task<Attachment> TryDownloadAttachmentById(string id)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
             var attachment = listOfAllObjectives.Where(o => o.Id == id).ToArray()[0];
@@ -65,20 +65,26 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> UploadAttachment(Attachment attachment)
+        internal async Task<bool> TryUploadAttachment(PhotoAttachmentData attachment,
+                                                string id,
+                                                string originalName,
+                                                string parentId,
+                                                string parentType,
+                                                byte[] file)
         {
+            string query = $"?id={id}&originalName={originalName}&parentId={parentId}&parentType={parentType}";
             try
             {
-                await HttpConnection.PostJson<Attachment>(BASE_URL, attachment);
+                await HttpConnection.PutJson<PhotoAttachmentData>(BASE_URL + query, attachment, file);
                 return true;
             }
-            catch (Exception e)
+            catch
             {
                 return false;
             }
         }
 
-        public async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<Attachment>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -91,20 +97,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryPutFile(Attachment attachment)
-        {
-            try
-            {
-                await HttpConnection.PutJson<bool, Attachment>(BASE_URL, attachment);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
-        }
-
-        public async Task<bool> TryDeleteById(string id)
+        internal async Task<bool> TryDeleteById(string id)
         {
             try
             {
