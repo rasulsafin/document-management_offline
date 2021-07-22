@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPost_ExistingPlanToExistingFolderAsync_ReturnsListOfPlans()
+        public async Task TryPostAsync_ExistingPlanToExistingFolder_ReturnsListOfPlans()
         {
             //var filePath = @"C:\Users\yigurieva\Desktop\image.png";
             //var plan = await service.TryPost(filePath);
@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGetByProjectId_ExistingProject_ReturnsListOfPlans()
+        public async Task TryGetByProjectIdAsync_ExistingProject_ReturnsListOfPlans()
         {
             var plans = await service.TryGetByProjectId(PROJECT_ID);
 

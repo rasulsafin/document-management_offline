@@ -78,8 +78,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         public async Task Setup()
          => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
+        [TestCleanup]
+        public async Task Cleanup()
+        {
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+        }
+
         [TestMethod]
-        public async Task GetAll_ReturnsProjectsList()
+        public async Task GetAllAsync_ReturnsProjectsList()
         {
             var result = await service.GetAll();
 
@@ -89,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGet_ExistingProjectsByIdsAsync_ReturnsProjectsByIdsList()
+        public async Task TryGetAsync_ExistingProjectsByIds_ReturnsProjectsByIdsList()
         {
             var projects = await service.GetAll();
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
@@ -102,7 +108,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGet_NonExistingProjectsByIdsAsync_ReturnsEmptyList()
+        public async Task TryGetAsync_NonExistingProjectsByIds_ReturnsEmptyList()
         {
             var nonExistingIds = new List<string>()
             {
@@ -117,7 +123,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGet_ExistingProjectByIdAsync_ReturnsProject()
+        public async Task TryGetAsync_ExistingProjectById_ReturnsProject()
         {
             var result = await service.TryGetById(existingProjectId);
 
@@ -132,7 +138,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryGet_NonExistingProjectsByIdAsync_ReturnsNull()
+        public async Task TryGetAsync_NonExistingProjectsById_ReturnsNull()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryGetById(nonExistingId);
@@ -141,7 +147,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPost_ProjectWithParentProjectAsync_ReturnsAddedProject()
+        public async Task TryPostAsync_ProjectWithParentProject_ReturnsAddedProject()
         {
             var project = new Project()
             {
@@ -167,7 +173,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryPatch_ProjectNameAsync_ReturnsProjectWithNewTitle()
+        public async Task TryPatchAsync_ProjectName_ReturnsProjectWithNewTitle()
         {
             var existingProject = await service.TryGetById(existingProjectId);
             var oldValue = existingProject.Name;
@@ -197,10 +203,55 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             Assert.AreNotEqual(updatedProject.Name, oldValue);
         }
 
-        /// TODO: TryPatchProjectAncestryAsync_ReturnsProjectWithNewTitle()
+        [TestMethod]
+        public async Task TryPatchAsync_ProjectAncestry_ReturnsProjectWithNewParent()
+        {
+            var project = new Project()
+            {
+                CreatedDate = DateTime.Now.ToUnixTime(),
+                ParentId = PARENT_ID,
+                ParentType = ELEMENT_TYPE,
+                Type = ELEMENT_TYPE,
+                Name = "Test project name",
+            };
+
+            var newProject = await service.TryPost(project);
+
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+
+            var existingProject = await service.TryGetById(existingProjectId);
+            var oldValue = existingProject.Ancestry;
+            var newValue = newProject.GetExternalId();
+
+            var updatedValues = new UpdatedValues
+            {
+                Ids = new[] { existingProject.Id },
+                Patch = new Patch[]
+                {
+                    new Patch()
+                    {
+                        Value = newValue,
+                        Path = "/ancestry",
+                    },
+                },
+            };
+
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            var updatedProject = await service.TryPatch(updatedValues);
+
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+            await service.TryDelete(newProject.Id);
+
+            Assert.IsNotNull(updatedProject);
+            Assert.IsNotNull(updatedProject.Id);
+            Assert.IsNotNull(updatedProject.Name);
+            Assert.AreEqual(updatedProject.Ancestry, newValue);
+            Assert.AreNotEqual(updatedProject.Ancestry, oldValue);
+            Assert.AreEqual(updatedProject.ParentId, newProject.Id);
+        }
 
         [TestMethod]
-        public async Task TryDelete_ExistingProjectAsync_ReturnsTrue()
+        public async Task TryDeleteAsync_ExistingProject_ReturnsTrue()
         {
             var project = new Project()
             {
@@ -219,7 +270,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        public async Task TryDelete_NonExistingProjectAsync_ReturnsFalse()
+        public async Task TryDeleteAsync_NonExistingProject_ReturnsFalse()
         {
             var nonExistingId = $"nonExistingId{Guid.NewGuid()}";
             var result = await service.TryDelete(nonExistingId);

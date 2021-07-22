@@ -53,12 +53,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
                 },
             };
 
+            var context = await connection.GetContext(connectionInfo);
+            synchronizer = context.ObjectivesSynchronizer;
+
             var result = await connection!.Connect(connectionInfo, CancellationToken.None);
             if (result.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
-
-            var context = await connection.GetContext(connectionInfo);
-            synchronizer = context.ObjectivesSynchronizer;
         }
 
         [ClassCleanup]
@@ -82,7 +82,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         [DataRow("task", DisplayName = "ISSUE_TYPE")]
         [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task Add_ObjectiveWithoutParent_AddedSuccessfully(string typeValue)
+        public async Task AddAsync_ObjectiveWithoutParent_AddedSuccessfully(string typeValue)
         {
             var objective = new ObjectiveExternalDto
             {
@@ -106,6 +106,38 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
             Assert.AreEqual(result?.Status, objective.Status);
         }
 
+        [TestMethod]
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task AddAsync_ObjectiveWithElementTypeParent_AddedSuccessfully(string typeValue)
+        {
+            justAdded = await ArrangeObjective(ELEMENT_TYPE);
+            await Task.Delay(MILLISECONDS_TIME_DELAY);
+
+            var objective = new ObjectiveExternalDto
+            {
+                CreationDate = DateTime.Now,
+                ProjectExternalID = PROJECT_ID,
+                ParentObjectiveExternalID = justAdded.ExternalID,
+                Status = ObjectiveStatus.Open,
+                ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = typeValue },
+                Description = "Description",
+                Title = $"Child objective ({typeValue})",
+                DueDate = DateTime.Now.AddDays(5),
+            };
+
+            var result = await synchronizer.Add(objective);
+
+            Assert.IsNotNull(result);
+            Assert.IsNotNull(result?.ExternalID);
+            Assert.IsNotNull(result?.Title);
+            Assert.IsNotNull(result?.Description);
+            Assert.IsNotNull(result?.DueDate);
+            Assert.AreEqual(result?.Status, objective.Status);
+            Assert.IsNotNull(result?.ParentObjectiveExternalID);
+            Assert.AreEqual(result?.ParentObjectiveExternalID, justAdded.ExternalID);
+        }
+
         //[TestMethod]
         //public async Task Add_ObjectiveWithBimElement_AddedSuccessfully()
         //{
@@ -121,7 +153,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         [DataRow("task", DisplayName = "ISSUE_TYPE")]
         [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task Remove_JustAddedObjective_RemovedSuccessfully(string typeValue)
+        public async Task RemoveAsync_JustAddedObjective_RemovedSuccessfully(string typeValue)
         {
             var objective = await ArrangeObjective(typeValue);
 
@@ -132,7 +164,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Update_JustAddedIssueObjective_UpdatedSuccessfully(string typeValue)
+        public async Task UpdateAsync_JustAddedIssueObjective_UpdatedSuccessfully()
         {
             var added = await ArrangeObjective(ISSUE_TYPE);
             var title = added.Title;
@@ -153,7 +185,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Update_JustAddedElementObjective_UpdatedSuccessfully(string typeValue)
+        public async Task UpdateAsync_JustAddedElementObjective_UpdatedSuccessfully()
         {
             var added = await ArrangeObjective(ELEMENT_TYPE);
             var title = added.Title;
@@ -173,9 +205,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         //}
 
         [TestMethod]
-        public async Task GetUpdatedIDs_AtLeastOneObjectiveAdded_RetrivedSuccessful()
+        [DataRow("task", DisplayName = "ISSUE_TYPE")]
+        [DataRow("project", DisplayName = "ELEMENT_TYPE")]
+        public async Task GetUpdatedIDsAsync_AtLeastOneObjectiveAdded_RetrievedSuccessfully(string typeValue)
         {
-            var added = await ArrangeObjective(ISSUE_TYPE);
+            var added = await ArrangeObjective(typeValue);
             justAdded = added;
 
             var result = await synchronizer.GetUpdatedIDs(DateTime.Now.AddDays(-1));
@@ -186,7 +220,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         [TestMethod]
         [DataRow("task", DisplayName = "ISSUE_TYPE")]
         [DataRow("project", DisplayName = "ELEMENT_TYPE")]
-        public async Task Get_ExistingObjectiveById_RetrivedSuccessful(string typeValue)
+        public async Task GetAsync_ExistingObjectiveById_RetrievedSuccessfully(string typeValue)
         {
             var added = await ArrangeObjective(typeValue);
             justAdded = added;
@@ -197,7 +231,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Get_ExistingObjectivesByIds_RetrivedSuccessful()
+        public async Task GetAsync_ExistingObjectivesWithFiles_RetrievedSuccessfully()
         {
             var projectElementId = "/5ebb7cb7782f96000146e7f3:ORGANIZATION/60b4d2719fbb9657cf2e0cbf:PROJECT"; // Project with items
             var issueId = "/5ebb7cb7782f96000146e7f3:ORGANIZATION/60b4d2719fbb9657cf2e0cbf:PROJECT/60f178ef0049c040b8e7c584:TASK"; // Issue with items
