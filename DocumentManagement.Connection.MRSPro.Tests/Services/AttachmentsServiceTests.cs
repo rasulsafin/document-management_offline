@@ -99,7 +99,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             "%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B9_%D0%A8%D0%BB%D1%91%D0%BF%D0%B0.jpg",
             "60f178ef0049c040b8e7c584",
             "task")]
-        public async Task TryUploadAttachmentAsync_UploadingAttachments_ReturnsBool(string path, string id, string originalName, string parentId, string parentType)
+        public async Task TryUploadAttachmentAsync_UploadingAttachments_ReturnsTrue(string path, string id, string originalName, string parentId, string parentType)
         {
             var file = File.ReadAllBytes(path);
             var attachment = new PhotoAttachmentData()
@@ -114,7 +114,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestMethod]
         [DataRow("60f12d27546732672f28ede4")]
-        public async Task TryDeleteAttachmentAsync_DeletingAttachment_ReturnsBool(string id)
+        public async Task TryDeleteAttachmentAsync_DeletingAttachment_ReturnsTrue(string id)
         {
             var result = await service.TryDeleteByIdAsync(id);
 
