@@ -7,14 +7,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProConnectionContext : AConnectionContext
     {
-        private readonly ProjectsService projectService;
+        private readonly ProjectsDecorator projectService;
 
         // TODO: Fix this list
         private readonly ProjectElementsDecorator projectElementsService;
         private readonly IssuesDecorator objectiveService;
         private readonly IConverter<string, (string id, string type)> idConverter;
 
-        public MrsProConnectionContext(ProjectsService projectService,
+        public MrsProConnectionContext(ProjectsDecorator projectService,
             IssuesDecorator objectiveService,
             ProjectElementsDecorator projectElementsService,
             IConverter<string, (string id, string type)> idConverter)

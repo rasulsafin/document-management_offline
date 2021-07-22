@@ -21,13 +21,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<AuthenticationService>();
             services.AddScoped<ProjectsService>();
-            services.AddScoped<UsersService>();
             services.AddScoped<IssuesService>();
             services.AddScoped<AttachmentsService>();
             services.AddScoped<PlansService>();
 
             services.AddScoped<IssuesDecorator>();
             services.AddScoped<ProjectElementsDecorator>();
+            services.AddScoped<ProjectsDecorator>();
 
             services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);
 
@@ -45,6 +45,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<Project, ObjectiveExternalDto, ProjectObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Project, ObjectiveProjectConverter>();
             services.AddConverter<string, (string id, string type), ExternalIdTypeIdConverter>();
+            services.AddConverter<Project, ProjectExternalDto, ProjectProjectDtoConverter>();
+            services.AddConverter<ProjectExternalDto, Project, ProjectDtoProjectConverter>();
+
             services.AddConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>, ElementAttachmentItemConverter>();
             return services;
         }

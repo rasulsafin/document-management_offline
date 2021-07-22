@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -10,10 +12,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
     internal class IssueObjectiveConverter : IConverter<Issue, ObjectiveExternalDto>
     {
         private readonly IConverter<string, ObjectiveStatus> statusConverter;
+        private readonly IConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>> itemsConverter;
 
-        public IssueObjectiveConverter(IConverter<string, ObjectiveStatus> statusConverter)
+        public IssueObjectiveConverter(
+            IConverter<string, ObjectiveStatus> statusConverter,
+            IConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>> itemsConverter)
         {
             this.statusConverter = statusConverter;
+            this.itemsConverter = itemsConverter;
         }
 
         public async Task<ObjectiveExternalDto> Convert(Issue issue)
@@ -33,11 +39,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Converters
                 CreationDate = time,
                 DueDate = issue.DueDate.ToLocalDateTime() ?? time,
                 UpdatedAt = issue.LastModifiedDate.ToLocalDateTime() ?? time,
+                Items = await itemsConverter.Convert(issue.Attachments),
 
                 // TODO: DynamicFields
                 // DynamicFields = GetDynamicFields(),
-                // TODO: Items
-                // Items = GetItems(),
                 // TODO: BimElements
                 // BimElements = GetBimElements(),
             };

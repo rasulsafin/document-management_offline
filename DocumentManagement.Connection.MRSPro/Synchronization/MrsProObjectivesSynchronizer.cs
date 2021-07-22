@@ -4,7 +4,6 @@ using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.General.Utils.Extensions;
@@ -15,8 +14,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly AElementDecorator issuesService;
-        private readonly AElementDecorator projectsService;
+        private readonly AObjectiveElementDecorator issuesService;
+        private readonly AObjectiveElementDecorator projectsService;
 
         private readonly IConverter<string, (string id, string type)> idConverter;
 
@@ -41,14 +40,27 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         {
             var objectives = new List<ObjectiveExternalDto>();
 
-            foreach (var id in ids)
+            var objectiveGroups = ids.Select(id => idConverter.Convert(id).Result).GroupBy(t => t.type);
+            foreach (var group in objectiveGroups)
             {
-                (var trueId, var type) = await idConverter.Convert(id);
-                var service = GetService(type);
-                var result = await service.GetElementById(trueId);
-                result.Attachments = await service.GetAttachments(result.Ancestry);
+                var service = GetService(group.Key);
+                var trueIds = group.Select(x => x.id).ToArray();
+                var stepCount = 0;
+                var stepValue = 100;
+                var trueIdsQueue = trueIds.Take(stepValue);
+                while (trueIdsQueue.Any())
+                {
+                    var result = await service.GetElementsByIds(trueIdsQueue.ToList());
+                    foreach (var objective in result)
+                    {
+                        if (objective.HasAttachments)
+                            objective.Attachments = await service.GetAttachments(objective.GetExternalId());
+                        objectives.AddIsNotNull(await service.ConvertToDto(objective));
+                    }
 
-                objectives.AddIsNotNull(await service.ConvertToDto(result));
+                    stepCount += stepValue;
+                    trueIdsQueue = trueIds.Skip(stepCount).Take(stepValue);
+                }
             }
 
             return objectives;
@@ -94,10 +106,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await service.ConvertToDto(result);
         }
 
-        private AElementDecorator GetService(string type)
+        private AObjectiveElementDecorator GetService(string type)
             => type == Constants.ISSUE_TYPE ? issuesService : projectsService;
 
-        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementDecorator service, DateTime date)
+        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(AObjectiveElementDecorator service, DateTime date)
         {
             var collection = await service.GetAll(date);
             return collection.Select(element => element.GetExternalId());

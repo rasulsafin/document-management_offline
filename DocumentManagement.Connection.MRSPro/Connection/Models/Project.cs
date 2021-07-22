@@ -34,5 +34,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public string Name { get; set; }
 
         public IEnumerable<IElementAttachment> Attachments { get; set; }
+
+        public bool HasAttachments { get; set; }
     }
 }

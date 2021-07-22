@@ -9,6 +9,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     public class ProjectsService : Service
     {
         private static readonly string BASE_URL = "/project";
+        private static readonly string BASE_EXTRA_URL = $"/extra{BASE_URL}";
         private readonly PlansService plansService;
 
         public ProjectsService(MrsProHttpConnection connection, PlansService plansService)
@@ -20,12 +21,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         internal string RootPath => $"/{Auth.OrganizationId}{ROOT}";
 
         internal async Task<IEnumerable<Project>> GetAll()
-        {
-            var listOfAllProjects = await GetListOfProjects();
-            return listOfAllProjects.Where(p => p.Ancestry == RootPath).ToArray();
-        }
-
-        internal async Task<IEnumerable<Project>> GetListOfProjects()
             => await HttpConnection.GetListOf<Project>(
                 BASE_URL);
 
@@ -98,6 +93,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             var result = await plansService.TryGetByParentId(ancestry);
             return result;
+        }
+
+        internal async Task<IEnumerable<ProjectExtraInfo>> TryGetAttachmentInfoByIds(IReadOnlyCollection<string> ids)
+        {
+            try
+            {
+                var idsStr = string.Join(QUERY_SEPARATOR, ids);
+                return await HttpConnection.GetListOf<ProjectExtraInfo>(GetByIds(BASE_EXTRA_URL), idsStr);
+            }
+            catch
+            {
+                return null;
+            }
         }
     }
 }

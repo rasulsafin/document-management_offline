@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public float Longitude { get; set; }
 
         [DataMember(Name = "originalName")]
-        public string OriginalFileName { get; set; }
+        public string OriginalName { get; set; }
 
         [DataMember(Name = "owner")]
         public string Owner { get; set; }

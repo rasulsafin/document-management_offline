@@ -7,7 +7,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.MrsPro
 {
-    public abstract class AElementDecorator : IElementDecorator, IElementConvertible
+    public abstract class AObjectiveElementDecorator : IElementDecorator<IElementObject, IElementAttachment>, IElementConvertible<ObjectiveExternalDto, IElementObject>
     {
         public abstract Task<ObjectiveExternalDto> ConvertToDto(IElementObject element);
 

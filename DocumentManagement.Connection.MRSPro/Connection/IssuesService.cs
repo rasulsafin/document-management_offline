@@ -12,6 +12,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     public class IssuesService : Service
     {
         private static readonly string BASE_URL = "/task";
+        private static readonly string BASE_EXTRA_URL = $"/extra{BASE_URL}";
         private readonly AttachmentsService attachmentsService;
 
         public IssuesService(MrsProHttpConnection connection, AttachmentsService attachmentsService)
@@ -80,12 +81,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<IEnumerable<IElementAttachment>> GetAttachments(string ancestry)
-        {
-            var result = await attachmentsService.GetByParentId(ancestry);
-            return result;
-        }
-
         internal async Task<bool> TryDelete(string id)
         {
             try
@@ -96,6 +91,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             catch
             {
                 return false;
+            }
+        }
+
+        internal async Task<IEnumerable<IElementAttachment>> GetAttachments(string ancestry)
+        {
+            var result = await attachmentsService.TryGetByParentId(ancestry);
+            return result;
+        }
+
+        internal async Task<IEnumerable<IssueExtraInfo>> TryGetAttachmentInfoByIds(IReadOnlyCollection<string> ids)
+        {
+            try
+            {
+                var idsStr = string.Join(QUERY_SEPARATOR, ids);
+                return await HttpConnection.GetListOf<IssueExtraInfo>(GetByIds(BASE_EXTRA_URL), idsStr);
+            }
+            catch
+            {
+                return null;
             }
         }
     }
