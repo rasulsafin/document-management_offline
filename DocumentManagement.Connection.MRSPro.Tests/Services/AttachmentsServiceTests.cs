@@ -55,11 +55,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         => await Task.Delay(MILLISECONDS_TIME_DELAY);
 
         [TestMethod]
-        public async Task TryGetExistingAttachmentsByIdsAsync_ReturnsAttachmentsByIdsList()
+        public async Task TryGetExistingAttachmentsByIdsAsync_GettingExistingAttachments_ReturnsAttachmentsByIdsList()
         {
-            var projects = await service.GetAll(DateTime.MinValue);
+            var projects = await service.GetAllAsync(DateTime.MinValue);
             var existingIds = projects.Take(5).Select(p => p.Id).ToList();
-            var result = await service.TryGetByIds(existingIds);
+            var result = await service.TryGetByIdsAsync(existingIds);
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Any());
@@ -67,27 +67,27 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestMethod]
         [DataRow("60b5c2d69fbb9657cf2e0d5f")]
-        public async Task TryGetExistingAttachmentsByOwnerIdAsync_ReturnsAttachmentsByOwnerIdList(string id)
+        public async Task TryGetExistingAttachmentsByOwnerIdAsync_GettingExistingAttachments_ReturnsAttachmentsByOwnerIdList(string id)
         {
-            var attachments = await service.GetByOwnerId(id);
+            var attachments = await service.GetByOwnerIdAsync(id);
 
             Assert.IsNotNull(attachments);
         }
 
         [TestMethod]
         [DataRow("60ed826800fac340ae7049fe")]
-        public async Task TryGetExistingAttachmentsByParentIdAsync_ReturnsAttachmentsByParentIdList(string id)
+        public async Task TryGetExistingAttachmentsByParentIdAsync_GettingAttachments_ReturnsAttachmentsByParentIdList(string id)
         {
-            var attachments = await service.GetByParentId(id);
+            var attachments = await service.GetByParentIdAsync(id);
 
             Assert.IsNotNull(attachments);
         }
 
         [TestMethod]
         [DataRow("60eef9c539aeb14087ace51c")]
-        public async Task TryDownloadAttachmentById_ReturnsAttachment(string id)
+        public async Task TryDownloadAttachmentByIdAsync_DownloadingAttachment_ReturnsAttachment(string id)
         {
-            var attachments = await service.TryDownloadAttachmentById(id);
+            var attachments = await service.TryDownloadAttachmentByIdAsync(id);
 
             Assert.IsNotNull(attachments);
         }
@@ -99,7 +99,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
             "%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B9_%D0%A8%D0%BB%D1%91%D0%BF%D0%B0.jpg",
             "60f178ef0049c040b8e7c584",
             "task")]
-        public async Task TryUploadAttachment_ReturnsBool(string path, string id, string originalName, string parentId, string parentType)
+        public async Task TryUploadAttachmentAsync_UploadingAttachments_ReturnsBool(string path, string id, string originalName, string parentId, string parentType)
         {
             var file = File.ReadAllBytes(path);
             var attachment = new PhotoAttachmentData()
@@ -107,16 +107,16 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 File = file.ToString(),
             };
 
-            var result = await service.TryUploadAttachment(attachment, id, originalName, parentId, parentType, file);
+            var result = await service.TryUploadAttachmentAsync(attachment, id, originalName, parentId, parentType, file);
 
             Assert.IsTrue(result);
         }
 
         [TestMethod]
         [DataRow("60f12d27546732672f28ede4")]
-        public async Task TryDeleteAttachment_ReturnsBool(string id)
+        public async Task TryDeleteAttachmentAsync_DeletingAttachment_ReturnsBool(string id)
         {
-            var result = await service.TryDeleteById(id);
+            var result = await service.TryDeleteByIdAsync(id);
 
             Assert.IsTrue(result);
         }

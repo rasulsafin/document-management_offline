@@ -96,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         internal async Task<IEnumerable<IElementAttachment>> GetAttachments(string ancestry)
         {
-            var result = await attachmentsService.TryGetByParentId(ancestry);
+            var result = await attachmentsService.TryGetByParentIdAsync(ancestry);
             return result;
         }
 

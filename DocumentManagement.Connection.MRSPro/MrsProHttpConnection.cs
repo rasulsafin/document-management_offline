@@ -41,8 +41,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         internal async Task<TOut> PutJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Put, method, contentObject);
 
-        internal async Task<TData> PutJson<TData>(string method, TData contentObject, byte[] file)
-            => await SendJson<TData, TData>(HttpMethod.Put, method, contentObject, file);
+        internal async Task<TData> PutJson<TData>(string method, TData contentObject, byte[] file, string filename)
+            => await SendJson<TData, TData>(HttpMethod.Put, method, contentObject, file, filename);
 
         internal async Task DeleteJson<TData>(string method, TData contentObject)
             => await SendJson<TData, TData>(HttpMethod.Delete, method, contentObject);
@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(httpMethod, method, content);
         }
 
-        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file)
+        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename)
         {
             var json = JsonConvert.SerializeObject(contentObject);
             var multipart = new MultipartFormDataContent();
@@ -65,7 +65,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
             var byteContent = new ByteArrayContent(file);
             byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            multipart.Add(byteContent, "file", "%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B9_%D0%A8%D0%BB%D1%91%D0%BF%D0%B0.jpg");
+            multipart.Add(byteContent, "file", filename);
             return await SendAsync<TOut>(httpMethod, method, multipart);
         }
 
