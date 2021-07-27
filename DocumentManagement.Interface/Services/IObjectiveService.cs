@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.General;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Filters;
 
 namespace MRS.DocumentManagement.Interface.Services
 {
@@ -42,7 +44,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <returns>Collection of objectives.</returns>
-        Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID);
+        Task<PagedList<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
 
         /// <summary>
         /// Generate report about selected objectives.

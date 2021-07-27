@@ -437,10 +437,10 @@ namespace MRS.DocumentManagement.Tests
             var existingProject = Fixture.Context.Projects.Unsynchronized().First(p => p.Objectives.Count > 0);
             var dtoId = new ID<ProjectDto>(existingProject.ID);
 
-            var result = await service.GetObjectives(dtoId);
+            var result = await service.GetObjectives(dtoId, new Interface.Filters.ObjectiveFilterParameters());
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(existingProject.Objectives.Count, result.Count());
+            Assert.IsTrue(result.Items.Any());
         }
 
         [TestMethod]
@@ -449,7 +449,7 @@ namespace MRS.DocumentManagement.Tests
         {
             var dtoId = ID<ProjectDto>.InvalidID;
 
-            var result = await service.GetObjectives(dtoId);
+            var result = await service.GetObjectives(dtoId, new Interface.Filters.ObjectiveFilterParameters());
 
             Assert.Fail();
         }

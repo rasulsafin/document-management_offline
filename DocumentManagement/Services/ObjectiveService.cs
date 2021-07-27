@@ -9,8 +9,10 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Filters;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -210,7 +212,7 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
+        public async Task<PagedList<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -231,7 +233,7 @@ namespace MRS.DocumentManagement.Services
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                return dbProject.Objectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
+                return dbProject.Objectives.AsQueryable().Select(x => mapper.Map<ObjectiveToListDto>(x)).ToPagedList(filter.PageNumber, filter.PageSize);
             }
             catch (Exception ex)
             {
