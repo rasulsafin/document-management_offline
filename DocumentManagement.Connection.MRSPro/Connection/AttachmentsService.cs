@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,6 +27,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             var unixDate = date.ToUnixTime();
             var list = listOfAllObjectives.Where(o => o.CreatedDate > unixDate).ToArray();
             return list;
+        }
+
+        internal async Task<Attachment> GetByIdAsync(string id)
+        {
+            var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
+            var attachment = listOfAllObjectives.Where(o => o.Id == id).ToArray()[0];
+
+            return attachment;
         }
 
         internal async Task<IEnumerable<Attachment>> GetByOwnerIdAsync(string id)

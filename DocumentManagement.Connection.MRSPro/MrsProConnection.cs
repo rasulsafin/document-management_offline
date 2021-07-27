@@ -15,15 +15,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         private readonly ILogger<MrsProConnection> logger;
         private readonly AuthenticationService authService;
         private readonly Func<MrsProConnectionContext> getContext;
+        private readonly MrsProStorage storage;
 
         public MrsProConnection(
             ILogger<MrsProConnection> logger,
             AuthenticationService authService,
-            Func<MrsProConnectionContext> getContext)
+            Func<MrsProConnectionContext> getContext,
+            MrsProStorage storage)
         {
             this.logger = logger;
             this.authService = authService;
             this.getContext = getContext;
+            this.storage = storage;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -51,10 +54,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await authService.TryPing();
         }
 
-        public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
+        public Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
             // TODO: Get Storage
-            return new MrsProStorage();
+            return Task.FromResult<IConnectionStorage>(storage);
         }
 
         public async Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
