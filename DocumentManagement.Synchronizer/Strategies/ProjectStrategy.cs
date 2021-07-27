@@ -36,11 +36,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             logger.LogTrace("ProjectStrategy created");
         }
 
-        protected override DbSet<Project> GetDBSet(DMContext context)
-            => context.Projects;
+        protected override DbSet<Project> GetDBSet(DMContext source)
+            => source.Projects;
 
-        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(IConnectionContext context)
-            => context.ProjectsSynchronizer;
+        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(IConnectionContext source)
+            => source.ProjectsSynchronizer;
 
         protected override Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
             => data.ProjectsFilter;
@@ -145,7 +145,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
                 logger.LogTrace("Items synchronized");
                 if (resultAfterItemSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing Items in Merge Project");
+                    throw new Exception("Exception created while Synchronizing Items in Merge Project");
 
                 AddUser(tuple, data);
                 logger.LogTrace("User linked");

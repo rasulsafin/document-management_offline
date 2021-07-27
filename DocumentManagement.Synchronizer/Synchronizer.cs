@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Synchronization
                 var lastSynchronization =
                     (await dbContext.Synchronizations.Where(x => x.UserID == userID)
                        .OrderBy(x => x.Date)
-                       .LastOrDefaultAsync())?.Date ??
+                       .LastOrDefaultAsync(CancellationToken.None))?.Date ??
                     DateTime.MinValue;
                 context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
 
@@ -119,13 +119,14 @@ namespace MRS.DocumentManagement.Synchronization
                     {
                         Date = data.Date,
                         UserID = data.User.ID,
-                    });
+                    },
+                    CancellationToken.None);
                 logger.LogTrace("Added synchronization date");
-                await dbContext.SynchronizationSaveAsync(data.Date);
+                await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None);
                 logger.LogDebug("DB updated");
                 await SynchronizationFinalizer.Finalize(dbContext);
                 logger.LogTrace("Synchronization finalized");
-                await dbContext.SynchronizationSaveAsync(data.Date);
+                await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None);
                 logger.LogDebug("DB updated");
             }
             catch (OperationCanceledException)

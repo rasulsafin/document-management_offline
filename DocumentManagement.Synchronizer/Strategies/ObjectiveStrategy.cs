@@ -58,8 +58,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             return objectives;
         }
 
-        protected override DbSet<Objective> GetDBSet(DMContext context)
-            => context.Objectives;
+        protected override DbSet<Objective> GetDBSet(DMContext source)
+            => source.Objectives;
 
         protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(IConnectionContext context)
             => context.ObjectivesSynchronizer;
@@ -100,7 +100,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 logger.LogTrace("Created parent link");
                 var projectID = tuple.Local.ProjectID;
                 var project = await context.Projects.Include(x => x.SynchronizationMate)
-                   .FirstOrDefaultAsync(x => x.ID == projectID);
+                   .FirstOrDefaultAsync(x => x.ID == projectID, CancellationToken.None);
                 tuple.Synchronized.ProjectID = project?.SynchronizationMateID ?? 0;
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
                 logger.LogTrace("Created links for project ids");
@@ -110,7 +110,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 logger.LogTrace("Children synchronized");
                 if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Add Objective To Remote");
+                    throw new Exception("Exception created while Synchronizing children in Add Objective To Remote");
 
                 var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
                 await UpdateChildrenAfterSynchronization(tuple);
@@ -161,7 +161,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 logger.LogTrace("Children synchronized");
                 if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Add Objective To Local");
+                    throw new Exception("Exception created while Synchronizing children in Add Objective To Local");
 
                 return null;
             }
@@ -197,14 +197,14 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 logger.LogTrace("Children synchronized");
                 if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Merge Objective");
+                    throw new Exception("Exception created while Synchronizing children in Merge Objective");
 
                 var result = await base.Merge(tuple, data, connectionContext, parent, token);
 
                 resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 logger.LogTrace("Children synchronized");
                 if (resultAfterChildrenSync.Count > 0)
-                    throw new Exception($"Exception created while Synchronizing children in Merge Objective");
+                    throw new Exception("Exception created while Synchronizing children in Merge Objective");
 
                 await UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
