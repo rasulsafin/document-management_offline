@@ -6,14 +6,6 @@ namespace MRS.DocumentManagement.Synchronization.Extensions
 {
     internal static class CollectionExtensions
     {
-        public static void AddIsNotNull<T>(this ICollection<T> collection, T item)
-        {
-            if (item == null)
-                return;
-
-            collection.Add(item);
-        }
-
         public static IEnumerable<T> OrderByParent<T>(this IEnumerable<T> ie, Func<T, T> getParentFunc)
         {
             var result = new List<T>();
