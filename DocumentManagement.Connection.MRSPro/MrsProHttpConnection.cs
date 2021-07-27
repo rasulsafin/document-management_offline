@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -26,14 +27,26 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         internal async Task<TOut> Get<TOut>(string method)
             => await SendAsync<TOut>(HttpMethod.Get, method);
 
+        internal async Task<Uri> GetUri(string method)
+            => await SendAsyncToGetUri<Uri>(HttpMethod.Get, method);
+
         internal async Task<IEnumerable<TOut>> GetListOf<TOut>(string method, params object[] args)
             => await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: args);
 
         internal async Task<TData> PostJson<TData>(string method, TData contentObject)
             => await PostJson<TData, TData>(method, contentObject);
 
+        internal async Task<TData> PostJson<TData>(string method)
+            => await PostJson<TData, TData>(method);
+
         internal async Task<TOut> PostJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Post, method, contentObject);
+
+        internal async Task<TOut> PostJson<TOut, TData>(string method)
+            => await SendJson<TOut, TData>(HttpMethod.Post, method);
+
+        internal async Task<TData> PostJson<TData>(string method, TData contentObject, byte[] file, string filename, string folderId)
+            => await SendJson<TData, TData>(HttpMethod.Post, method, contentObject, file, filename, folderId);
 
         internal async Task<TOut> PatchJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Patch, method, contentObject);
@@ -54,6 +67,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(httpMethod, method, content);
         }
 
+        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method)
+        {
+            return await SendAsync<TOut>(httpMethod, method);
+        }
+
         private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename)
         {
             var json = JsonConvert.SerializeObject(contentObject);
@@ -69,10 +87,35 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(httpMethod, method, multipart);
         }
 
+        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename, string folderId)
+        {
+            var json = JsonConvert.SerializeObject(contentObject);
+            var multipart = new MultipartFormDataContent();
+
+            multipart.Headers.ContentType.MediaType = "multipart/form-data";
+            multipart.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
+
+            multipart.Add(new StringContent(json, Encoding.UTF8, "application/json"));
+
+            var byteContent = new ByteArrayContent(file);
+            byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
+            multipart.Add(byteContent, "file", filename);
+
+            multipart.Add(new StringContent(folderId, Encoding.UTF8, "text/plain"), "folderId");
+
+            return await SendAsync<TOut>(httpMethod, method, multipart);
+        }
+
         private async Task<T> SendAsync<T>(HttpMethod methodType, string method, HttpContent content = null,  params object[] arguments)
         {
             var response = await GetResponseAsync(() => CreateRequest(methodType, method, content, arguments));
             return response.ToObject<T>(); // TODO: Fix it
+        }
+
+        private async Task<Uri> SendAsyncToGetUri<T>(HttpMethod methodType, string method, HttpContent content = null, params object[] arguments)
+        {
+            var response = await GetUriAsync(() => CreateRequest(methodType, method, content, arguments));
+            return response;
         }
 
         private HttpRequestMessage CreateRequest(

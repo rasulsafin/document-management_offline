@@ -1,8 +1,10 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.MrsPro.Tests.TestConstants;
@@ -74,6 +76,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
             Assert.IsNotNull(plans);
             Assert.IsTrue(plans.Any());
+        }
+
+        [TestMethod]
+        [DataRow(
+            "C:\\Users\\Admin\\Downloads\\Big_Flopa.jpg",
+            "Big_Flopa.jpg.jpg",
+            "60fabf44bcc3334b8b9377a6")]
+        public async Task TryUploadPlanAsync_UploadingPlan_ReturnsTrue(string path, string originalName, string parentId)
+        {
+            var file = File.ReadAllBytes(path);
+            var plan = new Plan()
+            {
+                OriginalFileName = originalName,
+                ParentId = parentId,
+            };
+
+            var result = await service.TryUpload(plan, originalName, file, parentId);
+
+            Assert.IsTrue(result);
         }
     }
 }

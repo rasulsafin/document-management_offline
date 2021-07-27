@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
@@ -76,6 +78,22 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             try
             {
                 await HttpConnection.DeleteJson(BASE_URL, new[] { id });
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        internal async Task<bool> TryUpload(Plan plan,
+            string originalName,
+            byte[] file,
+            string folderId)
+        {
+            try
+            {
+                await HttpConnection.PostJson<Plan>(BASE_URL, plan, file, originalName, folderId);
                 return true;
             }
             catch
