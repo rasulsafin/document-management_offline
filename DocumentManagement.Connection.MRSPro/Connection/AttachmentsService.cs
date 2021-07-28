@@ -15,6 +15,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     public class AttachmentsService : Service
     {
         private static readonly string BASE_URL = "/attachment";
+        private static readonly string SERVER_URL = "https://s3-eu-west-1.amazonaws.com/plotpad-org/";
 
         public AttachmentsService(MrsProHttpConnection connection)
             : base(connection)
@@ -51,37 +52,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        internal async Task<Uri> GetUriAttachment(string id)
+        internal async Task<Uri> GetAttachmentUriAsync(string id)
         {
             var attachment = await GetByIdAsync(id);
 
-            string link = "https://s3-eu-west-1.amazonaws.com/plotpad-org/" + attachment.UrlToFile;
+            string link = SERVER_URL + attachment.UrlToFile;
 
             var uri = new Uri(link);
 
             return uri;
-        }
-
-        internal async Task<Attachment> TryDownloadAttachmentByIdAsync(string id)
-        {
-            var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
-            var attachment = listOfAllObjectives.Where(o => o.Id == id).ToArray()[0];
-
-            string link = "https://s3-eu-west-1.amazonaws.com/plotpad-org/" + attachment.UrlToFile;
-            string dirPath = "Downloads\\";
-            string path = dirPath + attachment.OriginalName;
-
-            WebClient webClient = new WebClient();
-            try
-            {
-                Directory.CreateDirectory(dirPath);
-                await webClient.DownloadFileTaskAsync(new Uri(link), path);
-                return attachment;
-            }
-            catch
-            {
-                return null;
-            }
         }
 
         internal async Task<bool> TryUploadAttachmentAsync(PhotoAttachmentData attachment,

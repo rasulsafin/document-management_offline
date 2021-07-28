@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
         }
 
-        internal async Task<IEnumerable<Plan>> TryGetByProjectId(string projectId)
+        internal async Task<IEnumerable<Plan>> TryGetByProjectIdAsync(string projectId)
         {
             try
             {
@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<IEnumerable<Plan>> TryGetByParentId(string parentId)
+        internal async Task<IEnumerable<Plan>> TryGetByParentIdAsync(string parentId)
         {
             try
             {
@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<Uri> GetAsyncPlanUri(string id,
+        internal async Task<Uri> GetPlanUriAsync(string id,
             string parentId)
         {
             string query = $"?ids={id}&parentId={parentId}&tokenOnly=false&type=plan";
@@ -54,22 +54,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return uri;
         }
 
-        //internal async Task<Plan> TryPost(string filePath)
-        //{
-        //    try
-        //    {
-        //        using FileStream fileStream = File.OpenRead(filePath);
-        //        //var result = await HttpConnection.PostFormData<Plan>(BASE_URL, fileStream, BASE_NAME);
-        //        //return result;
-        //        return null;
-        //    }
-        //    catch
-        //    {
-        //        return null;
-        //    }
-        //}
-
-        internal async Task<Plan> TryPatch(UpdatedValues valuesToPatch)
+        internal async Task<Plan> TryPatchAsync(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -82,7 +67,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<bool> TryDelete(string id)
+        internal async Task<bool> TryDeleteAsync(string id)
         {
             try
             {
@@ -95,7 +80,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<bool> TryUpload(Plan plan,
+        internal async Task<bool> TryUploadAsync(Plan plan,
             string originalName,
             byte[] file,
             string folderId)

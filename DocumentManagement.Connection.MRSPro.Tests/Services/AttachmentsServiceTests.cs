@@ -84,15 +84,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         }
 
         [TestMethod]
-        [DataRow("60f1790939c96a40a149d543")]
-        public async Task TryDownloadAttachmentByIdAsync_DownloadingAttachment_ReturnsAttachment(string id)
-        {
-            var attachments = await service.TryDownloadAttachmentByIdAsync(id);
-
-            Assert.IsNotNull(attachments);
-        }
-
-        [TestMethod]
         [DataRow(
             "C:\\Users\\Admin\\Downloads\\Большой_Шлёпа.jpg",
             "60f1790939c96a40a149d556",

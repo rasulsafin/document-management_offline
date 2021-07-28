@@ -91,7 +91,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
         internal async Task<IEnumerable<Plan>> GetAttachments(string ancestry)
         {
-            var result = await plansService.TryGetByParentId(ancestry);
+            var result = await plansService.TryGetByParentIdAsync(ancestry);
             return result;
         }
 

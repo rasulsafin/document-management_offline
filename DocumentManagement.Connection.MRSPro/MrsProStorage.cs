@@ -44,11 +44,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
                 try
                 {
-                    uri = await attachmentsService.GetUriAttachment(id);
+                    uri = await attachmentsService.GetAttachmentUriAsync(id);
                 }
                 catch
                 {
-                    uri = await plansService.GetAsyncPlanUri(id, parentId);
+                    uri = await plansService.GetPlanUriAsync(id, parentId);
                 }
 
                 string dirPath = "Downloads\\";

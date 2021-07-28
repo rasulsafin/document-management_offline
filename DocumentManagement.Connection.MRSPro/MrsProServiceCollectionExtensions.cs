@@ -24,7 +24,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IssuesService>();
             services.AddScoped<AttachmentsService>();
             services.AddScoped<PlansService>();
-            services.AddScoped<DownloadService>();
 
             services.AddScoped<IssuesDecorator>();
             services.AddScoped<ProjectElementsDecorator>();

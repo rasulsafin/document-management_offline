@@ -54,7 +54,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetByParentIdAsync_ExistingParentId_ReturnsListOfPlans()
         {
-            var plans = await service.TryGetByParentId(PARENT_ID);
+            var plans = await service.TryGetByParentIdAsync(PARENT_ID);
 
             Assert.IsNotNull(plans);
             Assert.IsTrue(plans.Any());
@@ -72,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         [TestMethod]
         public async Task TryGetByProjectIdAsync_ExistingProject_ReturnsListOfPlans()
         {
-            var plans = await service.TryGetByProjectId(PROJECT_ID);
+            var plans = await service.TryGetByProjectIdAsync(PROJECT_ID);
 
             Assert.IsNotNull(plans);
             Assert.IsTrue(plans.Any());
@@ -92,7 +92,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 ParentId = parentId,
             };
 
-            var result = await service.TryUpload(plan, originalName, file, parentId);
+            var result = await service.TryUploadAsync(plan, originalName, file, parentId);
 
             Assert.IsTrue(result);
         }
