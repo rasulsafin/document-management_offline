@@ -15,11 +15,14 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     public class MrsProStorage : IConnectionStorage
     {
         private readonly AttachmentsService attachmentsService;
+        private readonly PlansService plansService;
 
         public MrsProStorage(
-            AttachmentsService attachmentsService)
+            AttachmentsService attachmentsService,
+            PlansService plansService)
         {
             this.attachmentsService = attachmentsService;
+            this.plansService = plansService;
         }
 
         public async Task<bool> DownloadFiles(string projectId,
@@ -33,16 +36,32 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             foreach (var item in itemExternalDto)
             {
                 cancelToken.ThrowIfCancellationRequested();
-                var attachment = await attachmentsService.GetByIdAsync(item.ExternalID);
 
-                string link = $"https://s3-eu-west-1.amazonaws.com/plotpad-org/{attachment.UrlToFile}";
-                string dirPath = item.FullPath;
-                string path = dirPath + item.FileName;
+                string id = item.ExternalID.Split(":")[0];
+                string parentId = item.ExternalID.Split(":")[1];
+
+                Uri uri = null;
+
+                try
+                {
+                    uri = await attachmentsService.GetUriAttachment(id);
+                }
+                catch
+                {
+                    uri = await plansService.GetAsyncPlanUri(id, parentId);
+                }
+
+                string dirPath = "Downloads\\";
+
+                string name = WebUtility.UrlDecode(uri.Segments[uri.Segments.Length - 1]);
+                string path = dirPath + name;
 
                 Directory.CreateDirectory(dirPath);
 
-                WebClient webClient = new WebClient();
-                await webClient.DownloadFileTaskAsync(new Uri(link), path);
+                using (WebClient webClient = new WebDownload())
+                {
+                    await webClient.DownloadFileTaskAsync(uri, path);
+                }
 
                 progress?.Report(++i / (double)count);
             }
@@ -53,6 +72,20 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
             throw new NotImplementedException();
+        }
+
+        private class WebDownload : WebClient
+        {
+            protected override WebRequest GetWebRequest(Uri address)
+            {
+                HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
+                if (request != null)
+                {
+                    request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+                }
+
+                return request;
+            }
         }
     }
 }

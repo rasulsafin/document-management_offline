@@ -51,6 +51,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
+        internal async Task<Uri> GetUriAttachment(string id)
+        {
+            var attachment = await GetByIdAsync(id);
+
+            string link = "https://s3-eu-west-1.amazonaws.com/plotpad-org/" + attachment.UrlToFile;
+
+            var uri = new Uri(link);
+
+            return uri;
+        }
+
         internal async Task<Attachment> TryDownloadAttachmentByIdAsync(string id)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);

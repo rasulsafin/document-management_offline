@@ -18,7 +18,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         private static readonly string BASE_URL = "/download";
         private static readonly string BASE_URL_ATTACHMENT = "/attachment";
 
-
         public DownloadService(MrsProHttpConnection connection)
             : base(connection)
         {

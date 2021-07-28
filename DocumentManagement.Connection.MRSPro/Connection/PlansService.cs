@@ -45,6 +45,15 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
+        internal async Task<Uri> GetAsyncPlanUri(string id,
+            string parentId)
+        {
+            string query = $"?ids={id}&parentId={parentId}&tokenOnly=false&type=plan";
+            var uri = await HttpConnection.GetUri(BASE_URL + query);
+
+            return uri;
+        }
+
         //internal async Task<Plan> TryPost(string filePath)
         //{
         //    try
