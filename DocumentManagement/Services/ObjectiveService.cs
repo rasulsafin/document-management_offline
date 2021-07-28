@@ -9,13 +9,13 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.General;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Filters;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
+using MRS.DocumentManagement.Utility.Pagination;
 using MRS.DocumentManagement.Utils.ReportCreator;
 
 namespace MRS.DocumentManagement.Services
@@ -212,7 +212,7 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<PagedList<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -233,7 +233,8 @@ namespace MRS.DocumentManagement.Services
 
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                return dbProject.Objectives.AsQueryable().Select(x => mapper.Map<ObjectiveToListDto>(x)).ToPagedList(filter.PageNumber, filter.PageSize);
+                var pagedList = dbProject.Objectives.AsQueryable().Select(x => mapper.Map<ObjectiveToListDto>(x)).ToPagedList(filter.PageNumber, filter.PageSize);
+                return mapper.Map<PagedListDto<ObjectiveToListDto>>(pagedList);
             }
             catch (Exception ex)
             {

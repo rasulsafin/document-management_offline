@@ -1,6 +1,6 @@
-﻿namespace MRS.DocumentManagement.General
+﻿namespace MRS.DocumentManagement.Utility.Pagination
 {
-    public class PagedData
+    public struct PagedData
     {
         public PagedData(int currentPage, int pageSize, int totalPages, int totalCount)
         {

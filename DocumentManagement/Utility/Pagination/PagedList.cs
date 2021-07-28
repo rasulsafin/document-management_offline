@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.General
+namespace MRS.DocumentManagement.Utility.Pagination
 {
     public class PagedList<T>
     {
@@ -17,17 +16,8 @@ namespace MRS.DocumentManagement.General
             Items = items;
         }
 
-        [JsonConstructor]
-        public PagedList(IEnumerable<T> items, PagedData pageData)
-        {
-            PageData = pageData;
-            Items = items;
-        }
-
-        [JsonProperty]
         public PagedData PageData { get; private set; }
 
-        [JsonProperty]
         public IEnumerable<T> Items { get; private set; }
     }
 }

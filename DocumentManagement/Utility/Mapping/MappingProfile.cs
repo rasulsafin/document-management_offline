@@ -5,6 +5,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Utility.Mapping.Converters;
 using MRS.DocumentManagement.Utility.Mapping.Resolvers;
+using MRS.DocumentManagement.Utility.Pagination;
 
 namespace MRS.DocumentManagement.Utility.Mapping
 {
@@ -62,6 +63,9 @@ namespace MRS.DocumentManagement.Utility.Mapping
                     o => o.MapFrom(
                         s => new Tuple<float, float, float>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
                            .ToValueTuple()));
+
+            CreateMap<PagedData, PagedDataDto>();
+            CreateMap(typeof(PagedList<>), typeof(PagedListDto<>));
         }
 
         private void CreateObjectiveMapToDto()
