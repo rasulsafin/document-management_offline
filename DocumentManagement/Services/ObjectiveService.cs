@@ -218,23 +218,35 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             try
             {
-                var dbProject = await context.Projects.Unsynchronized()
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.DynamicFields)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.ObjectiveType)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.Location)
-                            .ThenInclude(x => x.Item)
-                    .FindOrThrowAsync(x => x.ID, (int)projectID);
 
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var pagedList = dbProject.Objectives.AsQueryable().Select(x => mapper.Map<ObjectiveToListDto>(x)).ToPagedList(filter.PageNumber, filter.PageSize);
-                return mapper.Map<PagedListDto<ObjectiveToListDto>>(pagedList);
+                var objectives = await context.Objectives.Unsynchronized()
+                    .Where(x => x.ProjectID == dbProject.ID)
+                    .ByPages(x => x.ID, filter.PageNumber, filter.PageSize)
+                    .Include(x => x.ObjectiveType)
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Location)
+                            .ThenInclude(x => x.Item)
+                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                    .ToListAsync();
+
+                var totalPages = (int)Math.Ceiling(objectives.Count / (double)filter.PageSize);
+
+                return new PagedListDto<ObjectiveToListDto>()
+                {
+                    Items = objectives,
+                    PageData = new PagedDataDto()
+                    {
+                        CurrentPage = filter.PageNumber,
+                        PageSize = filter.PageSize,
+                        TotalCount = objectives.Count,
+                        TotalPages = totalPages,
+                    },
+                };
             }
             catch (Exception ex)
             {

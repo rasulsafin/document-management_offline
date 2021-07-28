@@ -63,9 +63,6 @@ namespace MRS.DocumentManagement.Utility.Mapping
                     o => o.MapFrom(
                         s => new Tuple<float, float, float>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
                            .ToValueTuple()));
-
-            CreateMap<PagedData, PagedDataDto>();
-            CreateMap(typeof(PagedList<>), typeof(PagedListDto<>));
         }
 
         private void CreateObjectiveMapToDto()
