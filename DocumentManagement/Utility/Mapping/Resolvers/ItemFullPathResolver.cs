@@ -27,7 +27,19 @@ namespace MRS.DocumentManagement.Utility.Mapping.Resolvers
             logger.LogDebug("Project ID of the item = {ProjectID}", projectID);
             var project = dbContext.Projects.FirstOrDefault(x => x.ID == projectID);
             logger.LogDebug("Found project {@Project}", project);
-            return project == null ? null : PathHelper.GetFullPath(project, source.RelativePath);
+
+            if (project == null)
+                return null;
+
+            if (project.IsSynchronized)
+            {
+                var projectSync = dbContext.Projects.FirstOrDefault(x => x.SynchronizationMateID == projectID);
+                return projectSync == null ? null : PathHelper.GetFullPath(projectSync, source.RelativePath);
+            }
+            else
+            {
+                return PathHelper.GetFullPath(project, source.RelativePath);
+            }
         }
     }
 }
