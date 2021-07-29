@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
 {

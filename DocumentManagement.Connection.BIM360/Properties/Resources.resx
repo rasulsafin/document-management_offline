@@ -257,4 +257,8 @@
     <value>.mrs</value>
     <comment>The indicator file that defines the folder for uploading.</comment>
   </data>
+  <data name="GetRootCausesMethod" xml:space="preserve">
+    <value>/issues/v1/containers/:container_id/root-causes</value>
+    <comment>Retrieves a list of supported root causes that you can allocate to an issue. For example, communication and coordination.</comment>
+  </data>
 </root>

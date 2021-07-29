@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string AssignedToType { get; set; }
 
             [DataMember(Name = "answer")]
-            public object Answer { get; set; }
+            public string Answer { get; set; }
 
             [DataMember(Name = "answered_at")]
             public object AnsweredAt { get; set; }

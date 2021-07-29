@@ -4,9 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -15,18 +14,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
     internal class Bim360ProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
-        private readonly Bim360ConnectionContext context;
+        private readonly Bim360Snapshot snapshot;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly IBim360SnapshotFiller filler;
         private readonly Authenticator authenticator;
 
         public Bim360ProjectsSynchronizer(
-            Bim360ConnectionContext context,
+            Bim360Snapshot snapshot,
             ItemsSyncHelper itemsSyncHelper,
             IBim360SnapshotFiller filler,
             Authenticator authenticator)
         {
-            this.context = context;
+            this.snapshot = snapshot;
             this.itemsSyncHelper = itemsSyncHelper;
             this.filler = filler;
             this.authenticator = authenticator;
@@ -42,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var cashed = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value;
+            var cashed = snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value;
             var toRemove = cashed.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
                .ToArray();
             var toAdd = obj.Items.Where(a => cashed.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
@@ -63,9 +62,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
-            return context.Snapshot.ProjectEnumerable.Select(x => x.Key).ToList();
+            return snapshot.ProjectEnumerable.Select(x => x.Key).ToList();
         }
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
@@ -73,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
             return (from id in ids
-                select context.Snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
+                select snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
                 into project
                 where project != null
                 select GetFullProject(project)).ToList();

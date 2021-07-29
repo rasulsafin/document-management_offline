@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
@@ -21,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly Bim360Storage storage;
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
-        private readonly TypeDFHelper typeDfHelper;
+        private readonly EnumerationTypeCreator typeDfHelper;
         private readonly Authenticator authenticator;
 
         public Bim360Connection(
@@ -30,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
             TokenHelper tokenHelper,
-            TypeDFHelper typeDfHelper)
+            EnumerationTypeCreator typeDfHelper)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
@@ -130,25 +131,35 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
+            var helper = new TypeDFHelper();
+            var typesSubtypes = await typeDfHelper.Create(helper);
+            if (typesSubtypes.EnumerationValues.Count == 0)
+                throw new TypeAccessException("You have no access to issue types.");
+
+            var helper2 = new RootCauseDFHelper();
+            var rootCauses = await typeDfHelper.Create(helper2, true);
+
+            info.EnumerationTypes = new List<EnumerationTypeExternalDto> { typesSubtypes, rootCauses };
+
             var issueType = new ObjectiveTypeExternalDto
             {
                 ExternalId = Constants.ISSUE_TYPE,
                 Name = "Issue",
+                DefaultDynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    DynamicFieldUtilities.CreateField(typesSubtypes.EnumerationValues.First().ExternalID, helper),
+                    DynamicFieldUtilities.CreateField(null, helper2),
+                    new ()
+                    {
+                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
+                        Type = DynamicFieldType.STRING,
+                        Name = "Location Details",
+                        Value = string.Empty,
+                    },
+                },
             };
-
-            var enumTypes = new List<EnumerationTypeExternalDto>();
-            var typesSubtypes = await typeDfHelper.GetTypeEnumeration();
-            if (typesSubtypes.EnumerationValues.Count == 0)
-                throw new TypeAccessException("You have no access to issue types.");
-
-            enumTypes.Add(typesSubtypes);
-            info.EnumerationTypes = enumTypes;
 
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto> { issueType };
-            issueType.DefaultDynamicFields = new List<DynamicFieldExternalDto>
-            {
-                TypeDFHelper.CreateField(typesSubtypes.EnumerationValues.First().ExternalID),
-            };
         }
     }
 }
