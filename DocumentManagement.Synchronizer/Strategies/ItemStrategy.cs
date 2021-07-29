@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Synchronization.Extensions;
@@ -20,9 +22,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
     internal class ItemStrategy<TLinker> : ALinkingStrategy<Item, ItemExternalDto>
         where TLinker : ILinker<Item>
     {
-        public ItemStrategy(DMContext context, IMapper mapper, TLinker linker)
-            : base(context, mapper, linker)
+        private readonly ILogger<ItemStrategy<TLinker>> logger;
+
+        public ItemStrategy(DMContext context, IMapper mapper, TLinker linker, ILogger<ItemStrategy<TLinker>> logger)
+            : base(context, mapper, linker, logger)
         {
+            this.logger = logger;
+            logger.LogTrace("ItemStrategy created");
         }
 
         public static void UpdateExternalIDs(IEnumerable<Item> local, ICollection<Item> remote)
@@ -37,6 +43,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             string path)
         {
+            logger.LogStartAction(tuple, data, parent);
+
             (int project, int objective) GetParents(bool local)
             {
                 var i = 0;
@@ -45,11 +53,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 switch (parent)
                 {
                     case SynchronizingTuple<Objective> objectiveTuple:
+                        logger.LogDebug("Parent is a objective");
                         var obj = local ? objectiveTuple.Local : objectiveTuple.Synchronized;
                         i = obj.ProjectID;
                         objective1 = obj.ID;
                         break;
                     case SynchronizingTuple<Project> projectTuple:
+                        logger.LogDebug("Parent is a project");
                         i = (local ? projectTuple.Local : projectTuple.Synchronized).ID;
                         break;
                 }
@@ -69,15 +79,21 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             if ((tuple.Local?.ID ?? 0) == 0)
             {
+                logger.LogDebug("Local searching");
                 (project, objective) = GetParents(true);
+                logger.LogDebug("Project {@Project}, Objective {@Objective}", project, objective);
                 tuple.Local = await context.Items.FirstOrDefaultAsync(predicate);
+                logger.LogDebug("Found item: {@Object}", tuple.Local);
                 tuple.LocalChanged = true;
             }
 
             if ((tuple.Synchronized?.ID ?? 0) == 0)
             {
+                logger.LogDebug("Synchronized searching");
                 (project, objective) = GetParents(false);
+                logger.LogDebug("Project {@Project}, Objective {@Objective}", project, objective);
                 tuple.Synchronized = await context.Items.FirstOrDefaultAsync(predicate);
+                logger.LogDebug("Found item: {@Object}", tuple.Local);
                 tuple.SynchronizedChanged = true;
             }
 
@@ -85,6 +101,8 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             if (synced != null && tuple.Remote == null)
             {
+                logger.LogDebug("Creating remote");
+
                 tuple.Remote = new Item
                 {
                     ExternalID = synced.ExternalID,
@@ -92,6 +110,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     RelativePath = synced.RelativePath,
                     ProjectID = synced.ProjectID,
                 };
+                logger.LogDebug("Created item: {@Object}", tuple.Local);
                 tuple.RemoteChanged = true;
             }
         }
@@ -103,8 +122,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             await FindAndAttachExists(tuple, data, parent, tuple.Remote.RelativePath);
+            logger.LogTrace("Attached");
             LinkParent(tuple, parent);
+            logger.LogTrace("Parent linked");
             return await base.AddToLocal(tuple, data, connectionContext, parent, token);
         }
 
@@ -115,8 +139,13 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             await FindAndAttachExists(tuple, data, parent, tuple.Local.RelativePath);
+            logger.LogTrace("Attached");
             LinkParent(tuple, parent);
+            logger.LogTrace("Parent linked");
             return await base.AddToRemote(tuple, data, connectionContext, parent, token);
         }
 
@@ -128,25 +157,29 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 set.Include(x => x.Objectives)
                    .Include(x => x.Project));
 
-        protected override async Task<SynchronizingResult> Merge(
+        protected override Task<SynchronizingResult> Merge(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
             LinkParent(tuple, parent);
-            await NothingAction(tuple, data, connectionContext, parent);
-            return null;
+            logger.LogTrace("Parent linked");
+            return Task.FromResult<SynchronizingResult>(null);
         }
 
         protected override bool IsEntitiesEquals(Item element, SynchronizingTuple<Item> tuple)
             => base.IsEntitiesEquals(element, tuple) ||
                 element.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
 
-        private static void LinkParent(SynchronizingTuple<Item> tuple, object parent)
+        private void LinkParent(SynchronizingTuple<Item> tuple, object parent)
         {
+            logger.LogTrace("LinkParent started with tuple:\r\n{@Tuple}\r\nparent:\r\n{@Parent}", tuple, parent);
             tuple.Remote ??= new Item();
             tuple.Remote.Objectives ??= new List<ObjectiveItem>();
 
@@ -155,10 +188,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 case SynchronizingTuple<Objective> objectiveTuple
                     when tuple.Remote.Objectives.All(x => x.Objective != objectiveTuple.Remote):
                     tuple.Remote.Objectives.Add(new ObjectiveItem { Objective = objectiveTuple.Remote });
+                    logger.LogDebug("Added link to objective");
                     break;
                 case SynchronizingTuple<Project> projectTuple
                     when tuple.Remote.ProjectID == null && tuple.Remote.Project == null:
                     tuple.Remote.Project = projectTuple.Synchronized ?? projectTuple.Local;
+                    logger.LogDebug("Added link to project");
                     break;
             }
         }
