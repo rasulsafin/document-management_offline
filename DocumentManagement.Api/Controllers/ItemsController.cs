@@ -179,7 +179,17 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         /// <summary>
         /// Download files from remote connection to local storage.
-        /// </summary>
+        /// </summary>        
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Items/{userID}
+        ///     [
+        ///        {"id": 1},
+        ///        {"id": 2},
+        ///        {"id": 3}
+        ///     ]
+        /// </remarks>
         /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>Id of the created long request.</returns>

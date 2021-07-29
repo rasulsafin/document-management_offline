@@ -1,13 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
-using static System.Net.Mime.MediaTypeNames;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services

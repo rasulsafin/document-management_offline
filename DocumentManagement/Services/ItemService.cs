@@ -67,8 +67,10 @@ namespace MRS.DocumentManagement.Services
                     .Where(x => ids.Contains(x.ID))
                     .ToListAsync();
                 logger.LogDebug("Found items: {@DBItems}", dbItems);
+
+                var projectID = dbItems.FirstOrDefault().ProjectID ?? -1;
                 var project = await context.Projects
-                    .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
+                    .Where(x => x.ID == projectID)
                     .FirstOrDefaultAsync();
                 logger.LogDebug("Found project: {@Project}", project);
 
@@ -102,7 +104,7 @@ namespace MRS.DocumentManagement.Services
                         try
                         {
                             logger.LogTrace("DownloadItems task started ({ID})", id);
-                            var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
+                            var result = await storage.DownloadFiles(project?.ExternalID, data, progress, src.Token);
                             return new RequestResult(result);
                         }
                         finally

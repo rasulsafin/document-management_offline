@@ -18,6 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<MrsProHttpConnection>();
             services.AddScoped<MrsProConnection>();
             services.AddScoped<MrsProConnectionContext>();
+            services.AddScoped<MrsProStorage>();
 
             services.AddScoped<AuthenticationService>();
             services.AddScoped<ProjectsService>();

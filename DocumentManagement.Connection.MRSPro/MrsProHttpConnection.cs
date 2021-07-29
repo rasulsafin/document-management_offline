@@ -94,7 +94,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
             multipart.Headers.ContentType.MediaType = "multipart/form-data";
             multipart.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
-
             multipart.Add(new StringContent(json, Encoding.UTF8, "application/json"));
 
             var byteContent = new ByteArrayContent(file);
