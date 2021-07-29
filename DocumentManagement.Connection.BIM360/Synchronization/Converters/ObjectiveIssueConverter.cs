@@ -242,7 +242,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (!string.IsNullOrWhiteSpace(targetUrn))
             {
                 var filter = new Filter(
-                    typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.TargetUrn)),
+                    DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.TargetUrn),
                     targetUrn);
                 var other = await issuesService.GetIssuesAsync(
                     containerID,

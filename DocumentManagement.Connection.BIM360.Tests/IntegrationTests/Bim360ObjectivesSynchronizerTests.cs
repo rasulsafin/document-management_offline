@@ -8,9 +8,10 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -138,7 +139,7 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
         }
 
         private ObjectiveExternalDto CreateDto()
-            => new ObjectiveExternalDto
+            => new ()
             {
                 ProjectExternalID = PROJECT_ID,
                 ParentObjectiveExternalID = string.Empty,
@@ -151,11 +152,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
                 Status = ObjectiveStatus.Open,
                 DynamicFields = new List<DynamicFieldExternalDto>
                 {
-                    new DynamicFieldExternalDto
+                    new ()
                     {
-                        ExternalID =
-                            typeof(Issue.IssueAttributes).GetDataMemberName(
-                                nameof(Issue.IssueAttributes.NgIssueTypeID)),
+                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueTypeID),
                         Value = NG_ISSUE_TYPE_ID,
                     },
                 },
