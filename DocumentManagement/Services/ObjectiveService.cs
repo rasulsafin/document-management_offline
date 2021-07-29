@@ -223,8 +223,15 @@ namespace MRS.DocumentManagement.Services
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var objectives = await context.Objectives.Unsynchronized()
-                    .Where(x => x.ProjectID == dbProject.ID)
+                var allObjectives = context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Where(x => x.ProjectID == dbProject.ID);
+
+                var totalCount = await allObjectives.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
+
+                var objectives = await allObjectives
                     .ByPages(x => x.ID, filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
@@ -234,8 +241,6 @@ namespace MRS.DocumentManagement.Services
                     .Select(x => mapper.Map<ObjectiveToListDto>(x))
                     .ToListAsync();
 
-                var totalPages = (int)Math.Ceiling(objectives.Count / (double)filter.PageSize);
-
                 return new PagedListDto<ObjectiveToListDto>()
                 {
                     Items = objectives,
@@ -243,7 +248,7 @@ namespace MRS.DocumentManagement.Services
                     {
                         CurrentPage = filter.PageNumber,
                         PageSize = filter.PageSize,
-                        TotalCount = objectives.Count,
+                        TotalCount = totalCount,
                         TotalPages = totalPages,
                     },
                 };
