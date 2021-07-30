@@ -23,19 +23,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         }
 
         internal static IEnumerable<IGrouping<string, T>> GetGroupedTypes<T, TID>(
-            IDFHelper<T, TID> helper,
+            IEnumCreator<T, TID> helper,
             IEnumerable<T> allTypes)
-            => allTypes.Select(item => (displayName: helper.GetDisplayName(item), tupleTypes: item))
+            => allTypes.Select(item => (displayName: helper.GetVariantDisplayName(item), tupleTypes: item))
                .GroupBy(x => x.displayName, x => x.tupleTypes, StringComparer.CurrentCultureIgnoreCase);
 
         internal static string GetExternalID<TID>(IOrderedEnumerable<TID> types)
             => JsonConvert.SerializeObject(types);
 
-        internal static DynamicFieldExternalDto CreateField<T, TID>(string valueID, IDFHelper<T, TID> helper)
+        internal static DynamicFieldExternalDto CreateField<T, TID>(string valueID, IEnumCreator<T, TID> helper)
             => new ()
             {
-                ExternalID = helper.ID,
-                Name = helper.DisplayName,
+                ExternalID = helper.EnumExternalID,
+                Name = helper.EnumDisplayName,
                 Type = DynamicFieldType.ENUM,
                 Value = valueID,
             };

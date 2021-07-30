@@ -163,7 +163,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == new TypeDFHelper().ID);
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == new TypeSubtypeEnumCreator().EnumExternalID);
             var deserializedIDs = DynamicFieldUtilities.DeserializeID<(string parentTypeID, string subtypeID)>(dynamicField.Value).ToArray();
             var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtypeID);
             var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))

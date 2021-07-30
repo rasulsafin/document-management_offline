@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             this.issuesService = issuesService;
         }
 
-        internal async Task<EnumerationTypeExternalDto> Create<T, TID>(IDFHelper<T, TID> helper, bool canBeNull = false)
+        internal async Task<EnumerationTypeExternalDto> Create<T, TID>(IEnumCreator<T, TID> creator, bool canBeNull = false)
         {
             await snapshotFiller.UpdateProjectsIfNull();
             var types = new List<T>();
@@ -32,18 +32,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             {
                 try
                 {
-                    types.AddRange(await helper.GetFromRemote(issuesService, project.Value));
+                    types.AddRange(await creator.GetVariantsFromRemote(issuesService, project.Value));
                 }
                 catch
                 {
                 }
             }
 
-            var values = DynamicFieldUtilities.GetGroupedTypes(helper, types)
+            var values = DynamicFieldUtilities.GetGroupedTypes(creator, types)
                .Select(
                     x => new EnumerationValueExternalDto
                     {
-                        ExternalID = DynamicFieldUtilities.GetExternalID(helper.Order(x)),
+                        ExternalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(x)),
                         Value = x.Key,
                     });
 
@@ -52,15 +52,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                 values = values.Append(
                     new EnumerationValueExternalDto
                     {
-                        ExternalID = $"{helper.ID}_null_value",
+                        ExternalID = $"{creator.EnumExternalID}_null_value",
                         Value = null,
                     });
             }
 
             var enumType = new EnumerationTypeExternalDto
             {
-                ExternalID = helper.ID,
-                Name = helper.DisplayName,
+                ExternalID = creator.EnumExternalID,
+                Name = creator.EnumDisplayName,
                 EnumerationValues = values.ToList(),
             };
             return enumType;

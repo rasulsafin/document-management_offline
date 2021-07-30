@@ -141,14 +141,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 project.IssueTypes = new Dictionary<string, IssueTypeSnapshot>();
             }
 
-            var helper = new TypeDFHelper();
+            var helper = new TypeSubtypeEnumCreator();
             var groups = DynamicFieldUtilities.GetGroupedTypes(
                 helper,
                 dictionary.Select(x => (parentType: x.Value.snapshot.ParentType, subtype: x.Value.snapshot.Subtype)));
 
             foreach (var info in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(helper.Order(info));
+                var externalID = DynamicFieldUtilities.GetExternalID(helper.GetOrderedIDs(info));
 
                 foreach (var infoType in info)
                 {

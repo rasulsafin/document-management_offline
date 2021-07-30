@@ -131,13 +131,13 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
-            var helper = new TypeDFHelper();
-            var typesSubtypes = await typeDfHelper.Create(helper);
+            var subtypeEnumCreator = new TypeSubtypeEnumCreator();
+            var typesSubtypes = await typeDfHelper.Create(subtypeEnumCreator);
             if (typesSubtypes.EnumerationValues.Count == 0)
                 throw new TypeAccessException("You have no access to issue types.");
 
-            var helper2 = new RootCauseDFHelper();
-            var rootCauses = await typeDfHelper.Create(helper2, true);
+            var rootCauseEnumCreator = new RootCauseEnumCreator();
+            var rootCauses = await typeDfHelper.Create(rootCauseEnumCreator, true);
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto> { typesSubtypes, rootCauses };
 
@@ -147,8 +147,8 @@ namespace MRS.DocumentManagement.Connection.Bim360
                 Name = "Issue",
                 DefaultDynamicFields = new List<DynamicFieldExternalDto>
                 {
-                    DynamicFieldUtilities.CreateField(typesSubtypes.EnumerationValues.First().ExternalID, helper),
-                    DynamicFieldUtilities.CreateField(null, helper2),
+                    DynamicFieldUtilities.CreateField(typesSubtypes.EnumerationValues.First().ExternalID, subtypeEnumCreator),
+                    DynamicFieldUtilities.CreateField(null, rootCauseEnumCreator),
                     new ()
                     {
                         ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),

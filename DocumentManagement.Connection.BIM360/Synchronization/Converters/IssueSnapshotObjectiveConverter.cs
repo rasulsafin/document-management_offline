@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
             var typeField = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
-                new TypeDFHelper());
+                new TypeSubtypeEnumCreator());
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 
