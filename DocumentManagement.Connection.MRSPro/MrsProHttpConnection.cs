@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -29,7 +28,10 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             => await SendAsync<TOut>(HttpMethod.Get, method);
 
         internal async Task<Uri> GetUri(string method)
-            => await GetUri(HttpMethod.Get, method);
+        {
+            var response = await GetUriAsync(() => CreateRequest(HttpMethod.Get, method, null, new object[] { }));
+            return response;
+        }
 
         internal async Task<IEnumerable<TOut>> GetListOf<TOut>(string method, params object[] args)
             => await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: args);
@@ -96,12 +98,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         {
             var response = await GetResponseAsync(() => CreateRequest(methodType, method, content, arguments));
             return response.ToObject<T>(); // TODO: Fix it
-        }
-
-        private async Task<Uri> GetUri(HttpMethod methodType, string method, HttpContent content = null, params object[] arguments)
-        {
-            var response = await GetUriAsync(() => CreateRequest(methodType, method, content, arguments));
-            return response;
         }
 
         private HttpRequestMessage CreateRequest(

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -16,6 +15,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         private readonly AttachmentsService attachmentsService;
         private readonly PlansService plansService;
         private readonly ItemService itemService;
+
+        private readonly string dirPath = "Downloads\\";
 
         public MrsProStorage(
             AttachmentsService attachmentsService,
@@ -53,8 +54,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                     uri = await plansService.GetPlanUriAsync(id, parentId);
                 }
 
-                string dirPath = "Downloads\\";
-
                 string name = WebUtility.UrlDecode(uri.Segments[uri.Segments.Length - 1]);
                 string path = dirPath + name;
 
@@ -69,20 +68,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
         {
             throw new NotImplementedException();
-        }
-
-        private class WebDownload : WebClient
-        {
-            protected override WebRequest GetWebRequest(Uri address)
-            {
-                HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
-                if (request != null)
-                {
-                    request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-                }
-
-                return request;
-            }
         }
     }
 }

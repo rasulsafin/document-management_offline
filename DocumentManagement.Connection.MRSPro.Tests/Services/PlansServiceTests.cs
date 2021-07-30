@@ -80,8 +80,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestMethod]
         [DataRow(
-            "60febf88bcc3334b8b937931",
-            "60fabf44bcc3334b8b9377a6")]
+            "60f1750a546732672f28eed9",
+            "60b4d2719fbb9657cf2e0cbf")]
         public async Task GetPlanUriAsync_GetingPlanUri_ReturnsPlanUri(string id,
             string parentId)
         {
