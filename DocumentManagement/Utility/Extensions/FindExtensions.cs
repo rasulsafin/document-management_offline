@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Exceptions;
+using MRS.DocumentManagement.Interface.Exceptions;
 
 namespace MRS.DocumentManagement.Utility.Extensions
 {

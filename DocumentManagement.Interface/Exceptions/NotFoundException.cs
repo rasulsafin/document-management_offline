@@ -1,6 +1,4 @@
-using MRS.DocumentManagement.Interface.Exceptions;
-
-namespace MRS.DocumentManagement.Exceptions
+namespace MRS.DocumentManagement.Interface.Exceptions
 {
     public class NotFoundException<T> : ANotFoundException
     {
