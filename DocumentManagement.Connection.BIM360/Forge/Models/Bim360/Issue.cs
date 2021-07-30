@@ -1,5 +1,8 @@
 using System;
+using System.Numerics;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
@@ -55,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object Tags { get; set; }
 
             [DataMember(Name = "target_urn")]
-            public object TargetUrn { get; set; }
+            public string TargetUrn { get; set; }
 
             [DataMember(Name = "snapshot_urn")]
             public object SnapshotUrn { get; set; }
@@ -91,7 +94,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object AnsweredBy { get; set; }
 
             [DataMember(Name = "pushpin_attributes")]
-            public object PushpinAttributes { get; set; }
+            public PushpinAttributes PushpinAttributes { get; set; }
 
             [DataMember(Name = "owner")]
             public string Owner { get; set; }
@@ -130,7 +133,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public string[] PermittedActions { get; set; }
 
             [DataMember(Name = "sheet_metadata")]
-            public object SheetMetadata { get; set; }
+            public SheetMetadata SheetMetadata { get; set; }
 
             [DataMember(Name = "lbs_location")]
             public string LbsLocation { get; set; }
@@ -174,6 +177,128 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 
             [DataMember(Name = "issue_type_obj")]
             public dynamic IssueTypeObj { get; set; }
+        }
+
+        [DataContract]
+        public class PushpinAttributes
+        {
+            [DataMember(Name = "type")]
+            public object Type { get; set; } = Constants.PUSHPIN_TYPE;
+
+            [DataMember(Name = "location")]
+            [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
+            public Vector3? Location { get; set; }
+
+            [DataMember(Name = "object_id")]
+            public string ObjectID { get; set; }
+
+            [DataMember(Name = "viewer_state")]
+            public ViewerState ViewerState { get; set; }
+
+            [DataMember(Name = "created_at")]
+            public object CreatedAt { get; set; }
+
+            [DataMember(Name = "created_by")]
+            public object CreatedBy { get; set; }
+
+            [DataMember(Name = "created_doc_version")]
+            public object CreatedDocVersion { get; set; }
+
+            [DataMember(Name = "external_id")]
+            public object ExternalID { get; set; }
+
+            [DataMember(Name = "attributes_version")]
+            public object AttributesVersion { get; set; }
+        }
+
+        [DataContract]
+        public class ViewerState
+        {
+            [DataMember(Name = "seedURN")]
+            public string SeedURN { get; set; }
+
+            [DataMember(Name = "viewport")]
+            public Viewport Viewport { get; set; }
+
+            [DataMember(Name = "cutplanes")]
+            public object CutPlanes { get; set; }
+
+            [DataMember(Name = "floorGuid")]
+            public object FloorGuid { get; set; }
+
+            [DataMember(Name = "objectSet")]
+            public object ObjectSet { get; set; }
+
+            [DataMember(Name = "globalOffset")]
+            [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
+            public Vector3? GlobalOffset { get; set; }
+
+            [DataMember(Name = "renderOptions")]
+            public object RenderOptions { get; set; }
+
+            [DataMember(Name = "attributesVersion")]
+            public object AttributesVersion { get; set; }
+
+            /// <summary>
+            /// Our property to save our additional info.
+            /// </summary>
+            [DataMember]
+            public object OtherInfo { get; set; }
+        }
+
+        [DataContract]
+        public class SheetMetadata
+        {
+            [DataMember(Name = "is3D")]
+            public bool Is3D { get; set; } = true;
+
+            [DataMember(Name = "sheetGuid")]
+            public string Guid { get; set; }
+
+            [DataMember(Name = "sheetName")]
+            public string Name { get; set; }
+        }
+
+        [DataContract]
+        public class Viewport
+        {
+            [DataMember(Name = "up")]
+            [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
+            public Vector3? Up { get; set; }
+
+            [DataMember(Name = "eye")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? Eye { get; set; }
+
+            [DataMember(Name = "name")]
+            public string Name { get; set; }
+
+            [DataMember(Name = "target")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? Target { get; set; }
+
+            [DataMember(Name = "pivotPoint")]
+            [JsonConverter(typeof(NullableVector3StringArrayConverter))]
+            public Vector3? PivotPoint { get; set; }
+
+            [DataMember(Name = "projection")]
+            public string Projection { get; set; }
+
+            [DataMember(Name = "aspectRatio")]
+            public float? AspectRatio { get; set; }
+
+            [DataMember(Name = "fieldOfView")]
+            public float? FieldOfView { get; set; }
+
+            [DataMember(Name = "worldUpVector")]
+            [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
+            public Vector3? WorldUpVector { get; set; }
+
+            [DataMember(Name = "isOrthographic")]
+            public bool? IsOrthographic { get; set; }
+
+            [DataMember(Name = "distanceToOrbit")]
+            public float? DistanceToOrbit { get; set; }
         }
     }
 }

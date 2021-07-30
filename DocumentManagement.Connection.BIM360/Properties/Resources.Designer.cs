@@ -61,29 +61,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на https://autodesk.com/.
-        /// </summary>
-        internal static string AutodeskUrl {
-            get {
-                return ResourceManager.GetString("AutodeskUrl", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на /oss/v2/buckets/{0}/objects/{1}.
         /// </summary>
         internal static string DeleteBucketsObjectMethod {
             get {
                 return ResourceManager.GetString("DeleteBucketsObjectMethod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на https://developer.api.autodesk.com.
-        /// </summary>
-        internal static string ForgeUrl {
-            get {
-                return ResourceManager.GetString("ForgeUrl", resourceCulture);
             }
         }
         
@@ -241,6 +223,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/items/{1}/versions.
+        /// </summary>
+        internal static string GetProjectsItemsVersionsMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsItemsVersionsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects.
         /// </summary>
         internal static string GetProjectsOfHubMethod {
@@ -264,6 +255,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string GetUsersMeMethod {
             get {
                 return ResourceManager.GetString("GetUsersMeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на .mrs.
+        /// </summary>
+        internal static string MrsFileName {
+            get {
+                return ResourceManager.GetString("MrsFileName", resourceCulture);
             }
         }
         

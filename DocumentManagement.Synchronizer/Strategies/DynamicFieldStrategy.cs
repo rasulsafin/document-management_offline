@@ -204,7 +204,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                                 field.SynchronizationMate.ParentFieldID == id2)),
                     null,
                     tuple);
-                SynchronizeChanges(parent as ISynchronizationChanges, tuple);
+                ((ISynchronizationChanges)parent).SynchronizeChanges(tuple);
                 return results;
             }
 
@@ -213,12 +213,5 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private bool HasChildren(DynamicField field)
             => (field?.ChildrenDynamicFields?.Count ?? 0) != 0;
-
-        private void SynchronizeChanges(ISynchronizationChanges parentTuple, ISynchronizationChanges childTuple)
-        {
-            parentTuple.LocalChanged |= childTuple.LocalChanged;
-            parentTuple.SynchronizedChanged |= childTuple.SynchronizedChanged;
-            parentTuple.RemoteChanged |= childTuple.RemoteChanged;
-        }
     }
 }

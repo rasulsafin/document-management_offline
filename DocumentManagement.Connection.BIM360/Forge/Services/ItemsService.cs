@@ -1,3 +1,4 @@
+using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,7 +24,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 projectId,
                 itemID);
 
-            return (response[DATA_PROPERTY]?.ToObject<Item>(), response[INCLUDED_PROPERTY]?.ToObject<IEnumerable<Version>>()?.FirstOrDefault());
+            var versions = response[INCLUDED_PROPERTY]?.ToObject<IEnumerable<Version>>();
+            return (response[DATA_PROPERTY]?.ToObject<Item>(), versions.Max());
         }
 
         public async Task<(Item item, Version version)> PostItemAsync(string projectId, Item item, Version version)
@@ -34,6 +36,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     projectId);
 
             return (response[DATA_PROPERTY]?.ToObject<Item>(), response[INCLUDED_PROPERTY]?.First?.ToObject<Version>());
+        }
+
+        public async Task<List<Version>> GetVersions(string projectID, string itemID)
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetProjectsItemsVersionsMethod,
+                projectID,
+                itemID);
+
+            return response[DATA_PROPERTY]?.ToObject<List<Version>>();
         }
     }
 }

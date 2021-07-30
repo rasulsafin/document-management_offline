@@ -71,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (signInTask.Result.authStatus.Status != RemoteConnectionStatus.OK)
                 Assert.Fail("Authorization failed");
 
-            connection.Token = connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
+            connection.GetToken = () => connectionInfo.AuthFieldValues[TOKEN_AUTH_NAME];
 
             // STEP 1. Find hub with projects
             var hubsTask = hubsService.GetHubsAsync();

@@ -23,6 +23,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public string Description { get; set; }
 
+        public LocationExternalDto Location { get; set; }
+
         public ObjectiveStatus Status { get; set; }
 
         public ICollection<ItemExternalDto> Items { get; set; }

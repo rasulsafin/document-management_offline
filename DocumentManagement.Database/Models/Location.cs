@@ -1,5 +1,6 @@
 ﻿namespace MRS.DocumentManagement.Database.Models
 {
+    [MergeContract]
     public class Location
     {
         [ForbidMerge]
@@ -17,6 +18,18 @@
 
         public float CameraPositionZ { get; set; }
 
-        public string BimElementID { get; set; }
+        public string Guid { get; set; }
+
+        [ForbidMerge]
+        public int ItemID { get; set; }
+
+        [ForbidMerge]
+        public Item Item { get; set; }
+
+        [ForbidMerge]
+        public int ObjectiveID { get; set; }
+
+        [ForbidMerge]
+        public Objective Objective { get; set; }
     }
 }

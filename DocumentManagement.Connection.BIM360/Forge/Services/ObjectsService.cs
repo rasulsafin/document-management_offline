@@ -46,7 +46,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             // TODO: check is it working or not?
             var length = file.Length;
-            var tasks = new List<Task<JObject>>();
+            var tasks = new List<Task<JToken>>();
 
             for (long i = 0; i < length; i += chunkSize)
             {
@@ -93,13 +93,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                     bucketKey,
                     objectKey);
 
-        public async Task<JObject> GetBuckets()
+        public async Task<JToken> GetBuckets()
             => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketsMethod);
 
-        public async Task<JObject> GetBucketDetails(string bucketKey)
+        public async Task<JToken> GetBucketDetails(string bucketKey)
             => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketDetailsMethod, bucketKey);
 
-        public async Task<JObject> PostBucket(string bucketKeyToAdd)
+        public async Task<JToken> PostBucket(string bucketKeyToAdd)
         {
             var bucket = new
             {
