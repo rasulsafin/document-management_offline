@@ -16,6 +16,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public Dictionary<string, IssueTypeSnapshot> IssueTypes { get; set; }
 
+        public Dictionary<string, RootCauseSnapshot> RootCauses { get; set; }
+
         public Dictionary<string, ItemSnapshot> Items { get; set; }
 
         public string MrsFolderID { get; set; }

@@ -3,10 +3,8 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {
-    internal class IssueTypeSnapshot : ASnapshotEntity<IssueSubtype>
+    internal class IssueTypeSnapshot : AEnumVariantSnapshot<IssueSubtype>
     {
-        private string id;
-
         public IssueTypeSnapshot(IssueType parentType, IssueSubtype subtype)
             : base(subtype)
         {
@@ -22,14 +20,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public string SubtypeID => Entity.ID;
 
-        public override string ID
-        {
-            get => id;
-        }
-
         public bool SubTypeIsType { get; }
-
-        public void SetExternalID(string externalID)
-            => id = externalID;
     }
 }

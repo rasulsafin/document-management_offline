@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
-    internal class RootCauseEnumCreator : IEnumCreator<RootCause, string>
+    internal class RootCauseEnumCreator : IEnumCreator<RootCause, RootCause, string>
     {
         private static readonly string ENUM_EXTERNAL_ID =
             DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.RootCause);
@@ -25,7 +25,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         public string GetVariantDisplayName(RootCause type)
             => type.Attributes.Title;
 
+        public string GetVariantDisplayName(AEnumVariantSnapshot<RootCause> snapshot)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public async Task<IEnumerable<RootCause>> GetVariantsFromRemote(IssuesService issuesService, ProjectSnapshot projectSnapshot)
             => await issuesService.GetRootCausesAsync(projectSnapshot.IssueContainer);
+
+        public RootCause GetMain(RootCause variant)
+            => variant;
+
+        public RootCause GetVariant(AEnumVariantSnapshot<RootCause> snapshot)
+            => snapshot.Entity;
     }
 }

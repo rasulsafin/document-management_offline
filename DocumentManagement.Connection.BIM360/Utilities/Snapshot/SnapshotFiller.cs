@@ -125,37 +125,56 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public async Task UpdateIssueTypes()
         {
+            await UpdateProjectsEnums(
+                list => list.Select(x => new IssueTypeSnapshot(x.parentType, x.subtype)),
+                p => p.IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
+                new TypeSubtypeEnumCreator(),
+                (project, rootCauseSnapshot) => project.IssueTypes.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+        }
+
+        public async Task UpdateRootCauses()
+        {
+            await UpdateProjectsEnums(
+                list => list.Select(x => new RootCauseSnapshot(x)),
+                p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
+                new RootCauseEnumCreator(),
+                (project, rootCauseSnapshot) => project.RootCauses.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+        }
+
+        private async Task UpdateProjectsEnums<T, TSnapshot, TVariant, TID>(
+            Func<IEnumerable<TVariant>, IEnumerable<TSnapshot>> getSnapshots,
+            Action<ProjectSnapshot> createEmpty,
+            IEnumCreator<T, TVariant, TID> creator,
+            Action<ProjectSnapshot, TSnapshot> addSnapshot)
+            where TSnapshot : AEnumVariantSnapshot<T>
+        {
             await UpdateProjectsIfNull();
-            var dictionary =
-                new Dictionary<IssueSubtype, (ProjectSnapshot projectSnapshot, IssueTypeSnapshot snapshot)>();
+            var dictionary = new Dictionary<T, (ProjectSnapshot projectSnapshot, TSnapshot snapshot)>();
 
             foreach (var project in snapshot.ProjectEnumerable.Select(x => x.Value))
             {
-                var types = await issuesService.GetIssueTypesAsync(project.IssueContainer);
+                var types = await creator.GetVariantsFromRemote(issuesService, project);
 
-                foreach (var info in types.SelectMany(
-                    type => type.Subtypes.Select(
-                        subtype => (project, snapshot: new IssueTypeSnapshot(type, subtype)))))
-                    dictionary.Add(info.snapshot.Entity, info);
+                foreach (var info in getSnapshots(types))
+                    dictionary.Add(info.Entity, (project, info));
 
-                project.IssueTypes = new Dictionary<string, IssueTypeSnapshot>();
+                createEmpty(project);
             }
 
-            var helper = new TypeSubtypeEnumCreator();
             var groups = DynamicFieldUtilities.GetGroupedTypes(
-                helper,
-                dictionary.Select(x => (parentType: x.Value.snapshot.ParentType, subtype: x.Value.snapshot.Subtype)));
+                creator,
+                dictionary.Select(x => creator.GetVariant(x.Value.snapshot)));
 
             foreach (var info in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(helper.GetOrderedIDs(info));
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(info));
 
                 foreach (var infoType in info)
                 {
-                    (ProjectSnapshot projectSnapshot, IssueTypeSnapshot issueTypeSnapshot) =
-                        dictionary[infoType.subtype];
+                    (ProjectSnapshot projectSnapshot, TSnapshot issueTypeSnapshot) =
+                        dictionary[creator.GetMain(infoType)];
                     issueTypeSnapshot.SetExternalID(externalID);
-                    projectSnapshot.IssueTypes.Add(infoType.subtype.ID, issueTypeSnapshot);
+                    addSnapshot(projectSnapshot, issueTypeSnapshot);
                 }
             }
         }

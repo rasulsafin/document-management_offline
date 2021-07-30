@@ -9,7 +9,8 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
-    internal class TypeSubtypeEnumCreator : IEnumCreator<(IssueType parentType, IssueSubtype subtype), (string parentTypeID, string subtypeID)>
+    internal class TypeSubtypeEnumCreator : IEnumCreator<IssueSubtype, (IssueType parentType, IssueSubtype subtype), (
+        string parentTypeID, string subtypeID)>
     {
         private static readonly string ENUM_EXTERNAL_ID =
             $"{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueTypeID)},{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueSubtypeID)}";
@@ -31,8 +32,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                 ? type.parentType.Title
                 : $"{type.parentType.Title}: {type.subtype.Title}";
 
-        public async Task<IEnumerable<(IssueType parentType, IssueSubtype subtype)>> GetVariantsFromRemote(IssuesService issuesService, ProjectSnapshot projectSnapshot)
+        public string GetVariantDisplayName(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
+        {
+            var snapshot = GetSupportedSnapshot(aSnapshot);
+            return GetVariantDisplayName((snapshot.ParentType, snapshot.Subtype));
+        }
+
+        public async Task<IEnumerable<(IssueType parentType, IssueSubtype subtype)>> GetVariantsFromRemote(
+            IssuesService issuesService,
+            ProjectSnapshot projectSnapshot)
             => (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer)).SelectMany(
                 x => x.Subtypes.Select(y => (x, y)));
+
+        public IssueSubtype GetMain((IssueType parentType, IssueSubtype subtype) variant)
+            => variant.subtype;
+
+        public (IssueType parentType, IssueSubtype subtype) GetVariant(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
+        {
+            var snapshot = GetSupportedSnapshot(aSnapshot);
+            return (snapshot.ParentType, snapshot.Subtype);
+        }
+
+        private static IssueTypeSnapshot GetSupportedSnapshot(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
+            => aSnapshot as IssueTypeSnapshot ?? throw new NotSupportedException();
     }
 }

@@ -23,10 +23,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             this.issuesService = issuesService;
         }
 
-        internal async Task<EnumerationTypeExternalDto> Create<T, TID>(IEnumCreator<T, TID> creator, bool canBeNull = false)
+        internal async Task<EnumerationTypeExternalDto> Create<T, TVariant, TID>(IEnumCreator<T, TVariant, TID> creator, bool canBeNull = false)
         {
             await snapshotFiller.UpdateProjectsIfNull();
-            var types = new List<T>();
+            var types = new List<TVariant>();
 
             foreach (var project in snapshot.ProjectEnumerable)
             {
