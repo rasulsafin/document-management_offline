@@ -25,7 +25,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly EnumerationTypeCreator typeDfHelper;
         private readonly Authenticator authenticator;
 
-        public Bim360Connection(
+        internal Bim360Connection(
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
