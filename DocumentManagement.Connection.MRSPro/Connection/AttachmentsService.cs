@@ -67,10 +67,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
                                                 string id,
                                                 string originalName,
                                                 string parentId,
-                                                string parentType,
                                                 byte[] file)
         {
-            string query = $"?id={id}&originalName={originalName}&parentId={parentId}&parentType={parentType}";
+            string query = $"?id={id}&originalName={originalName}&parentId={parentId}&parentType=task";
             try
             {
                 await HttpConnection.PutJson<PhotoAttachmentData>(BASE_URL + query, attachment, file, originalName);

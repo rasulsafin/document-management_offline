@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
@@ -13,6 +14,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
     {
         private static readonly string BASE_URL = "/plan";
         private static readonly string BASE_NAME = "file";
+        private static readonly string DOWNLOAD_URL = "/download";
 
         public PlansService(MrsProHttpConnection connection)
             : base(connection)
@@ -49,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             string parentId)
         {
             string query = $"?ids={id}&parentId={parentId}&tokenOnly=false&type=plan";
-            var uri = await HttpConnection.GetUri(BASE_URL + query);
+            var uri = await HttpConnection.GetUri(DOWNLOAD_URL + query);
 
             return uri;
         }

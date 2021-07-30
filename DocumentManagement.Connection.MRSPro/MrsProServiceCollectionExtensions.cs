@@ -18,12 +18,14 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<MrsProHttpConnection>();
             services.AddScoped<MrsProConnection>();
             services.AddScoped<MrsProConnectionContext>();
+            services.AddScoped<MrsProStorage>();
 
             services.AddScoped<AuthenticationService>();
             services.AddScoped<ProjectsService>();
             services.AddScoped<IssuesService>();
             services.AddScoped<AttachmentsService>();
             services.AddScoped<PlansService>();
+            services.AddScoped<ItemService>();
 
             services.AddScoped<IssuesDecorator>();
             services.AddScoped<ProjectElementsDecorator>();

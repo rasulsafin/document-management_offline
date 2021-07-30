@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -28,7 +29,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             => await SendAsync<TOut>(HttpMethod.Get, method);
 
         internal async Task<Uri> GetUri(string method)
-            => await SendAsyncToGetUri<Uri>(HttpMethod.Get, method);
+            => await GetUri(HttpMethod.Get, method);
 
         internal async Task<IEnumerable<TOut>> GetListOf<TOut>(string method, params object[] args)
             => await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: args);
@@ -72,7 +73,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(httpMethod, method);
         }
 
-        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename)
+        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename, string folderId = null)
         {
             var json = JsonConvert.SerializeObject(contentObject);
             var multipart = new MultipartFormDataContent();
@@ -84,24 +85,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             var byteContent = new ByteArrayContent(file);
             byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
             multipart.Add(byteContent, "file", filename);
-            return await SendAsync<TOut>(httpMethod, method, multipart);
-        }
 
-        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename, string folderId)
-        {
-            var json = JsonConvert.SerializeObject(contentObject);
-            var multipart = new MultipartFormDataContent();
-
-            multipart.Headers.ContentType.MediaType = "multipart/form-data";
-            multipart.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data");
-
-            multipart.Add(new StringContent(json, Encoding.UTF8, "application/json"));
-
-            var byteContent = new ByteArrayContent(file);
-            byteContent.Headers.ContentType = new MediaTypeHeaderValue("image/jpeg");
-            multipart.Add(byteContent, "file", filename);
-
-            multipart.Add(new StringContent(folderId, Encoding.UTF8, "text/plain"), "folderId");
+            if (folderId != null)
+                multipart.Add(new StringContent(folderId, Encoding.UTF8, "text/plain"), "folderId");
 
             return await SendAsync<TOut>(httpMethod, method, multipart);
         }
@@ -112,7 +98,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return response.ToObject<T>(); // TODO: Fix it
         }
 
-        private async Task<Uri> SendAsyncToGetUri<T>(HttpMethod methodType, string method, HttpContent content = null, params object[] arguments)
+        private async Task<Uri> GetUri(HttpMethod methodType, string method, HttpContent content = null, params object[] arguments)
         {
             var response = await GetUriAsync(() => CreateRequest(methodType, method, content, arguments));
             return response;

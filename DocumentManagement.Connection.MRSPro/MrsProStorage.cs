@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -16,13 +15,16 @@ namespace MRS.DocumentManagement.Connection.MrsPro
     {
         private readonly AttachmentsService attachmentsService;
         private readonly PlansService plansService;
+        private readonly ItemService itemService;
 
         public MrsProStorage(
             AttachmentsService attachmentsService,
-            PlansService plansService)
+            PlansService plansService,
+            ItemService itemService)
         {
             this.attachmentsService = attachmentsService;
             this.plansService = plansService;
+            this.itemService = itemService;
         }
 
         public async Task<bool> DownloadFiles(string projectId,
@@ -37,8 +39,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             {
                 cancelToken.ThrowIfCancellationRequested();
 
-                string id = item.ExternalID.Split(":")[0];
-                string parentId = item.ExternalID.Split(":")[1];
+                string id = item.ExternalID.Split("/")[3].Split(":")[0];
+                string parentId = item.ExternalID.Split("/")[2].Split(":")[0];
 
                 Uri uri = null;
 
@@ -56,12 +58,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                 string name = WebUtility.UrlDecode(uri.Segments[uri.Segments.Length - 1]);
                 string path = dirPath + name;
 
-                Directory.CreateDirectory(dirPath);
-
-                using (WebClient webClient = new WebDownload())
-                {
-                    await webClient.DownloadFileTaskAsync(uri, path);
-                }
+                await itemService.GetAsync(uri.AbsoluteUri, path);
 
                 progress?.Report(++i / (double)count);
             }

@@ -80,6 +80,18 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestMethod]
         [DataRow(
+            "60febf88bcc3334b8b937931",
+            "60fabf44bcc3334b8b9377a6")]
+        public async Task GetPlanUriAsync_GetingPlanUri_ReturnsPlanUri(string id,
+            string parentId)
+        {
+            var uri = await service.GetPlanUriAsync(id, parentId);
+
+            Assert.IsNotNull(uri);
+        }
+
+        [TestMethod]
+        [DataRow(
             "C:\\Users\\Admin\\Downloads\\Big_Flopa.jpg",
             "Big_Flopa.jpg.jpg",
             "60fabf44bcc3334b8b9377a6")]

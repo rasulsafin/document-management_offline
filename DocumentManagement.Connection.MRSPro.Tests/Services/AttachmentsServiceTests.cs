@@ -85,12 +85,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
 
         [TestMethod]
         [DataRow(
-            "C:\\Users\\Admin\\Downloads\\Большой_Шлёпа.jpg",
-            "60f1790939c96a40a149d556",
-            "%D0%91%D0%BE%D0%BB%D1%8C%D1%88%D0%BE%D0%B9_%D0%A8%D0%BB%D1%91%D0%BF%D0%B0.jpg",
-            "60f178ef0049c040b8e7c584",
-            "task")]
-        public async Task TryUploadAttachmentAsync_UploadingAttachments_ReturnsTrue(string path, string id, string originalName, string parentId, string parentType)
+            "C:\\Users\\Admin\\Downloads\\Big_Flopa.jpg",
+            "61024880203f664081129a8c",
+            "Big_Flopa.jpg",
+            "60f178ef0049c040b8e7c584")]
+        public async Task TryUploadAttachmentAsync_UploadingAttachments_ReturnsTrue(string path, string id, string originalName, string parentId)
         {
             var file = File.ReadAllBytes(path);
             var attachment = new PhotoAttachmentData()
@@ -98,7 +97,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
                 File = file.ToString(),
             };
 
-            var result = await service.TryUploadAttachmentAsync(attachment, id, originalName, parentId, parentType, file);
+            var result = await service.TryUploadAttachmentAsync(attachment, id, originalName, parentId, file);
 
             Assert.IsTrue(result);
         }
