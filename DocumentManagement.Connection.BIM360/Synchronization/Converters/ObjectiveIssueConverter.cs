@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -22,7 +23,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly Bim360ConnectionContext context;
         private readonly IConverter<ObjectiveStatus, Status> statusConverter;
         private readonly IssuesService issuesService;
-        private readonly FoldersService foldersService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
 
@@ -30,14 +30,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             Bim360ConnectionContext context,
             IConverter<ObjectiveStatus, Status> statusConverter,
             IssuesService issuesService,
-            FoldersService foldersService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService)
         {
             this.context = context;
             this.statusConverter = statusConverter;
             this.issuesService = issuesService;
-            this.foldersService = foldersService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.itemsService = itemsService;
         }
@@ -54,17 +52,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             Status[] permittedStatuses = null;
             int? startingVersion;
             Vector3? globalOffset = null;
+            var typeSnapshot = GetIssueTypes(project, objective);
 
             if (exist == null)
             {
-                var issueType = GetIssueType(objective);
-                (type, subtype) = (issueType.ID, issueType.Subtypes[0].ID);
+                (type, subtype) = (typeSnapshot.ParentTypeID, typeSnapshot.SubtypeID);
                 (targetUrn, startingVersion) = await GetTarget(objective, project);
             }
             else
             {
                 type = exist.Attributes.NgIssueTypeID;
                 subtype = exist.Attributes.NgIssueSubtypeID;
+
+                if (typeSnapshot.ParentTypeID == type)
+                    subtype = typeSnapshot.SubtypeID;
+
                 permittedAttributes = exist.Attributes.PermittedAttributes;
                 permittedStatuses = exist.Attributes.PermittedStatuses;
                 targetUrn = exist.Attributes.TargetUrn;
@@ -80,7 +82,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Title = objective.Title,
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
-                    AssignedTo = GetDynamicField(objective.DynamicFields, nameof(Issue.Attributes.AssignedTo)),
+                    //// TODO: AssignedTo,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     //// TODO: LocationDescription,
@@ -154,13 +156,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             };
         }
 
-        private IssueType GetIssueType(ObjectiveExternalDto obj)
+        private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var types = context.Snapshot.ProjectEnumerable.First(x => x.Key == obj.ProjectExternalID).Value.IssueTypes;
-            var dynamicFieldID =
-                typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.NgIssueTypeID));
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == dynamicFieldID);
-            var type = types.FirstOrDefault(x => x.Value.Title == dynamicField.Value).Value ?? types.First().Value;
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == TypeDFHelper.ID);
+            var deserializedIDs = TypeDFHelper.DeserializeID(dynamicField.Value).ToArray();
+            var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtype);
+            var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))
+               .Value;
+
+            if (type == null)
+            {
+                var typeLookup = deserializedIDs.ToLookup(x => x.type);
+                type = projectSnapshot.IssueTypes.FirstOrDefault(
+                            x => x.Value.SubTypeIsType && typeLookup.Contains(x.Value.ParentTypeID))
+                       .Value ??
+                    projectSnapshot.IssueTypes
+                       .FirstOrDefault(x => typeLookup.Contains(x.Value.ParentTypeID))
+                       .Value ??
+                    projectSnapshot.IssueTypes.First().Value;
+            }
+
             return type;
         }
 

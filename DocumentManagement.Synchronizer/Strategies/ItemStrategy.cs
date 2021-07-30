@@ -90,6 +90,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     ExternalID = synced.ExternalID,
                     ItemType = synced.ItemType,
                     RelativePath = synced.RelativePath,
+                    ProjectID = synced.ProjectID,
                 };
                 tuple.RemoteChanged = true;
             }
