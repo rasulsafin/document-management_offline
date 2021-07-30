@@ -8,7 +8,7 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
-    internal class RootCauseEnumCreator : IEnumCreator<RootCause, RootCause, string>
+    internal class RootCauseEnumCreator : IEnumCreator<RootCause, RootCauseSnapshot, string>
     {
         private static readonly string ENUM_EXTERNAL_ID =
             DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.RootCause);
@@ -19,24 +19,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public string EnumDisplayName => DISPLAY_NAME;
 
-        public IOrderedEnumerable<string> GetOrderedIDs(IEnumerable<RootCause> types)
-            => types.Select(cause => cause.Attributes.Key).OrderBy(id => id);
+        public IOrderedEnumerable<string> GetOrderedIDs(IEnumerable<RootCauseSnapshot> variants)
+            => variants.Select(cause => cause.Entity.Attributes.Key).OrderBy(id => id);
 
-        public string GetVariantDisplayName(RootCause type)
-            => type.Attributes.Title;
+        public string GetVariantDisplayName(RootCauseSnapshot variant)
+            => variant.Entity.Attributes.Title;
 
-        public string GetVariantDisplayName(AEnumVariantSnapshot<RootCause> snapshot)
-        {
-            throw new System.NotImplementedException();
-        }
+        public async Task<IEnumerable<RootCauseSnapshot>> GetVariantsFromRemote(
+            IssuesService issuesService,
+            ProjectSnapshot projectSnapshot)
+            => (await issuesService.GetRootCausesAsync(projectSnapshot.IssueContainer)).Select(
+                x => new RootCauseSnapshot(x, projectSnapshot));
 
-        public async Task<IEnumerable<RootCause>> GetVariantsFromRemote(IssuesService issuesService, ProjectSnapshot projectSnapshot)
-            => await issuesService.GetRootCausesAsync(projectSnapshot.IssueContainer);
-
-        public RootCause GetMain(RootCause variant)
-            => variant;
-
-        public RootCause GetVariant(AEnumVariantSnapshot<RootCause> snapshot)
-            => snapshot.Entity;
+        public IEnumerable<RootCauseSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects)
+            => projects.SelectMany(x => x.RootCauses.Values);
     }
 }

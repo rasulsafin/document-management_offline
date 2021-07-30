@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -11,45 +9,38 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
     {
         private readonly SnapshotFiller snapshotFiller;
         private readonly Bim360Snapshot snapshot;
-        private readonly IssuesService issuesService;
+
+        private bool snapshotFilled = false;
 
         protected EnumerationTypeCreator(
             SnapshotFiller snapshotFiller,
-            Bim360Snapshot snapshot,
-            IssuesService issuesService)
+            Bim360Snapshot snapshot)
         {
             this.snapshotFiller = snapshotFiller;
             this.snapshot = snapshot;
-            this.issuesService = issuesService;
         }
 
-        internal async Task<EnumerationTypeExternalDto> Create<T, TVariant, TID>(IEnumCreator<T, TVariant, TID> creator, bool canBeNull = false)
+        internal async Task<EnumerationTypeExternalDto> Create<T, TVariant, TID>(
+            IEnumCreator<T, TVariant, TID> creator,
+            bool canBeNull = false)
+            where TVariant : AEnumVariantSnapshot<T>
         {
-            await snapshotFiller.UpdateProjectsIfNull();
-            var types = new List<TVariant>();
+            await FillSnapshotIfNotFilled();
 
-            foreach (var project in snapshot.ProjectEnumerable)
-            {
-                try
-                {
-                    types.AddRange(await creator.GetVariantsFromRemote(issuesService, project.Value));
-                }
-                catch
-                {
-                }
-            }
-
-            var values = DynamicFieldUtilities.GetGroupedTypes(creator, types)
+            var values = DynamicFieldUtilities.GetGroupedTypes(
+                    creator,
+                    creator.GetSnapshots(snapshot.ProjectEnumerable))
                .Select(
                     x => new EnumerationValueExternalDto
                     {
-                        ExternalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(x)),
+                        ExternalID = x.First().ID,
                         Value = x.Key,
-                    });
+                    })
+               .ToList();
 
             if (canBeNull)
             {
-                values = values.Append(
+                values.Add(
                     new EnumerationValueExternalDto
                     {
                         ExternalID = $"{creator.EnumExternalID}_null_value",
@@ -61,9 +52,19 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             {
                 ExternalID = creator.EnumExternalID,
                 Name = creator.EnumDisplayName,
-                EnumerationValues = values.ToList(),
+                EnumerationValues = values,
             };
             return enumType;
+        }
+
+        private async Task FillSnapshotIfNotFilled()
+        {
+            if (snapshotFilled)
+                return;
+
+            await snapshotFiller.UpdateIssueTypes();
+            await snapshotFiller.UpdateRootCauses();
+            snapshotFilled = true;
         }
     }
 }

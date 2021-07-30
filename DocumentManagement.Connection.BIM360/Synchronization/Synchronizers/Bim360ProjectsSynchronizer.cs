@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var cashed = snapshot.ProjectEnumerable.First(x => x.Key == obj.ExternalID).Value;
+            var cashed = snapshot.ProjectEnumerable.First(x => x.ID == obj.ExternalID);
             var toRemove = cashed.Items.Where(a => obj.Items.All(b => b.ExternalID != a.Value.Entity.ID))
                .ToArray();
             var toAdd = obj.Items.Where(a => cashed.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
@@ -63,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
             await filler.UpdateProjectsIfNull();
-            return snapshot.ProjectEnumerable.Select(x => x.Key).ToList();
+            return snapshot.ProjectEnumerable.Select(x => x.ID).ToList();
         }
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
@@ -71,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
             return (from id in ids
-                select snapshot.ProjectEnumerable.FirstOrDefault(x => x.Key == id).Value
+                select snapshot.ProjectEnumerable.FirstOrDefault(x => x.ID == id)
                 into project
                 where project != null
                 select GetFullProject(project)).ToList();

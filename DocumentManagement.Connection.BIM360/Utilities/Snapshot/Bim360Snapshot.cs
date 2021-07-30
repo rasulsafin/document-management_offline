@@ -7,10 +7,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
     {
         public Dictionary<string, HubSnapshot> Hubs { get; set; }
 
-        public IEnumerable<KeyValuePair<string, ProjectSnapshot>> ProjectEnumerable
-            => Hubs.SelectMany(x => x.Value.Projects);
+        public IEnumerable<ProjectSnapshot> ProjectEnumerable => Hubs.SelectMany(x => x.Value.Projects.Values);
 
-        public IEnumerable<KeyValuePair<string, IssueSnapshot>> IssueEnumerable
-            => Hubs.SelectMany(x => x.Value.Projects).SelectMany(x => x.Value.Issues);
+        public IEnumerable<IssueSnapshot> IssueEnumerable => ProjectEnumerable.SelectMany(x => x.Issues.Values);
     }
 }

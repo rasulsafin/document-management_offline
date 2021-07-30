@@ -9,8 +9,8 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
-    internal class TypeSubtypeEnumCreator : IEnumCreator<IssueSubtype, (IssueType parentType, IssueSubtype subtype), (
-        string parentTypeID, string subtypeID)>
+    internal class TypeSubtypeEnumCreator
+        : IEnumCreator<IssueSubtype, IssueTypeSnapshot, (string parentTypeID, string subtypeID)>
     {
         private static readonly string ENUM_EXTERNAL_ID =
             $"{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueTypeID)},{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueSubtypeID)}";
@@ -22,8 +22,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         public string EnumDisplayName => DISPLAY_NAME;
 
         public IOrderedEnumerable<(string parentTypeID, string subtypeID)> GetOrderedIDs(
-            IEnumerable<(IssueType parentType, IssueSubtype subtype)> types)
-            => types.Select(x => (type: x.parentType.ID, subtype: x.subtype.ID))
+            IEnumerable<IssueTypeSnapshot> variants)
+            => variants
+               .Select(x => (type: x.ParentType.ID, subtype: x.Subtype.ID))
                .OrderBy(id => id.type)
                .ThenBy(id => id.subtype);
 
@@ -32,28 +33,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                 ? type.parentType.Title
                 : $"{type.parentType.Title}: {type.subtype.Title}";
 
-        public string GetVariantDisplayName(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
-        {
-            var snapshot = GetSupportedSnapshot(aSnapshot);
-            return GetVariantDisplayName((snapshot.ParentType, snapshot.Subtype));
-        }
+        public string GetVariantDisplayName(IssueTypeSnapshot snapshot)
+            => string.Equals(snapshot.ParentType.Title, snapshot.Subtype.Title, StringComparison.Ordinal)
+                ? snapshot.ParentType.Title
+                : $"{snapshot.ParentType.Title}: {snapshot.Subtype.Title}";
 
-        public async Task<IEnumerable<(IssueType parentType, IssueSubtype subtype)>> GetVariantsFromRemote(
+        public async Task<IEnumerable<IssueTypeSnapshot>> GetVariantsFromRemote(
             IssuesService issuesService,
             ProjectSnapshot projectSnapshot)
             => (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer)).SelectMany(
-                x => x.Subtypes.Select(y => (x, y)));
+                x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
 
-        public IssueSubtype GetMain((IssueType parentType, IssueSubtype subtype) variant)
-            => variant.subtype;
-
-        public (IssueType parentType, IssueSubtype subtype) GetVariant(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
-        {
-            var snapshot = GetSupportedSnapshot(aSnapshot);
-            return (snapshot.ParentType, snapshot.Subtype);
-        }
-
-        private static IssueTypeSnapshot GetSupportedSnapshot(AEnumVariantSnapshot<IssueSubtype> aSnapshot)
-            => aSnapshot as IssueTypeSnapshot ?? throw new NotSupportedException();
+        public IEnumerable<IssueTypeSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects)
+            => projects.SelectMany(x => x.IssueTypes.Values);
     }
 }

@@ -4,10 +4,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
     {
         private string id;
 
-        protected AEnumVariantSnapshot(T entity)
+        protected AEnumVariantSnapshot(T entity, ProjectSnapshot projectSnapshot)
             : base(entity)
         {
+            ProjectSnapshot = projectSnapshot;
         }
+
+        public ProjectSnapshot ProjectSnapshot { get; }
 
         public override string ID
         {

@@ -8,7 +8,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
@@ -91,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         {
             await UpdateProjectsIfNull();
 
-            foreach (var project in snapshot.ProjectEnumerable.Where(x => x.Value.Issues == null))
+            foreach (var project in snapshot.ProjectEnumerable.Where(x => x.Issues == null))
             {
                 var filters = new List<Filter>();
 
@@ -102,79 +101,65 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 }
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
-                var issues = await issuesService.GetIssuesAsync(project.Value.IssueContainer, filters);
-                project.Value.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project.Value));
+                var issues = await issuesService.GetIssuesAsync(project.IssueContainer, filters);
+                project.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project));
 
-                foreach (var issueSnapshot in project.Value.Issues.Values)
+                foreach (var issueSnapshot in project.Issues.Values)
                 {
                     issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
                     var attachments = await issuesService.GetAttachmentsAsync(
-                        project.Value.IssueContainer,
+                        project.IssueContainer,
                         issueSnapshot.ID);
 
                     foreach (var attachment in attachments.Where(
-                        x => project.Value.Items.ContainsKey(x.Attributes.Urn)))
+                        x => project.Items.ContainsKey(x.Attributes.Urn)))
                     {
                         issueSnapshot.Items.Add(
                             attachment.ID,
-                            project.Value.Items[attachment.Attributes.Urn]);
+                            project.Items[attachment.Attributes.Urn]);
                     }
                 }
             }
         }
 
         public async Task UpdateIssueTypes()
-        {
-            await UpdateProjectsEnums(
-                list => list.Select(x => new IssueTypeSnapshot(x.parentType, x.subtype)),
+            => await UpdateProjectsEnums(
                 p => p.IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
                 new TypeSubtypeEnumCreator(),
                 (project, rootCauseSnapshot) => project.IssueTypes.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
-        }
 
         public async Task UpdateRootCauses()
-        {
-            await UpdateProjectsEnums(
-                list => list.Select(x => new RootCauseSnapshot(x)),
+            => await UpdateProjectsEnums(
                 p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
                 new RootCauseEnumCreator(),
                 (project, rootCauseSnapshot) => project.RootCauses.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
-        }
 
-        private async Task UpdateProjectsEnums<T, TSnapshot, TVariant, TID>(
-            Func<IEnumerable<TVariant>, IEnumerable<TSnapshot>> getSnapshots,
-            Action<ProjectSnapshot> createEmpty,
-            IEnumCreator<T, TVariant, TID> creator,
+        private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
+            Action<ProjectSnapshot> createEmptyEnumVariants,
+            IEnumCreator<T, TSnapshot, TID> creator,
             Action<ProjectSnapshot, TSnapshot> addSnapshot)
             where TSnapshot : AEnumVariantSnapshot<T>
         {
             await UpdateProjectsIfNull();
-            var dictionary = new Dictionary<T, (ProjectSnapshot projectSnapshot, TSnapshot snapshot)>();
+            var dictionary = new List<TSnapshot>();
 
-            foreach (var project in snapshot.ProjectEnumerable.Select(x => x.Value))
+            foreach (var project in snapshot.ProjectEnumerable)
             {
-                var types = await creator.GetVariantsFromRemote(issuesService, project);
-
-                foreach (var info in getSnapshots(types))
-                    dictionary.Add(info.Entity, (project, info));
-
-                createEmpty(project);
+                var variants = await creator.GetVariantsFromRemote(issuesService, project);
+                createEmptyEnumVariants(project);
+                dictionary.AddRange(variants);
             }
 
-            var groups = DynamicFieldUtilities.GetGroupedTypes(
-                creator,
-                dictionary.Select(x => creator.GetVariant(x.Value.snapshot)));
+            var groups = DynamicFieldUtilities.GetGroupedTypes(creator, dictionary);
 
-            foreach (var info in groups)
+            foreach (var group in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(info));
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group));
 
-                foreach (var infoType in info)
+                foreach (var issueTypeSnapshot in group)
                 {
-                    (ProjectSnapshot projectSnapshot, TSnapshot issueTypeSnapshot) =
-                        dictionary[creator.GetMain(infoType)];
                     issueTypeSnapshot.SetExternalID(externalID);
-                    addSnapshot(projectSnapshot, issueTypeSnapshot);
+                    addSnapshot(issueTypeSnapshot.ProjectSnapshot, issueTypeSnapshot);
                 }
             }
         }

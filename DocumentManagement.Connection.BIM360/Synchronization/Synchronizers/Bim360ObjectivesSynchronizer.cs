@@ -113,8 +113,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
-            return snapshot.IssueEnumerable.Where(x => x.Value.Entity.Attributes.UpdatedAt > date)
-               .Select(x => x.Key)
+            return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
+               .Select(x => x.ID)
                .ToList();
         }
 
@@ -126,13 +126,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             foreach (var id in ids)
             {
-                var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.Key == id).Value;
+                var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.ID == id);
 
                 if (found == null)
                 {
                     foreach (var project in snapshot.ProjectEnumerable)
                     {
-                        var container = project.Value.IssueContainer;
+                        var container = project.IssueContainer;
                         Issue received = null;
 
                         try
@@ -148,7 +148,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                             if (IssueUtilities.IsRemoved(received))
                                 break;
 
-                            found = new IssueSnapshot(received, project.Value)
+                            found = new IssueSnapshot(received, project)
                             {
                                 Items = new Dictionary<string, ItemSnapshot>(),
                             };
@@ -158,11 +158,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                 found.ID);
 
                             foreach (var attachment in attachments.Where(
-                                x => project.Value.Items.ContainsKey(x.Attributes.Urn)))
+                                x => project.Items.ContainsKey(x.Attributes.Urn)))
                             {
                                 found.Items.Add(
                                     attachment.ID,
-                                    project.Value.Items[attachment.Attributes.Urn]);
+                                    project.Items[attachment.Attributes.Urn]);
                             }
 
                             found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);

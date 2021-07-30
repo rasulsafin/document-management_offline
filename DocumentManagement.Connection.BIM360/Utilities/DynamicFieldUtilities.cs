@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
@@ -22,18 +23,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             }
         }
 
-        internal static IEnumerable<IGrouping<string, TVariant>> GetGroupedTypes<T, TVariant, TID>(
-            IEnumCreator<T, TVariant, TID> helper,
-            IEnumerable<TVariant> allTypes)
-            => allTypes.Select(item => (displayName: helper.GetVariantDisplayName(item), tupleTypes: item))
+        internal static IEnumerable<IGrouping<string, TSnapshot>> GetGroupedTypes<T, TSnapshot, TID>(
+            IEnumCreator<T, TSnapshot, TID> helper,
+            IEnumerable<TSnapshot> allVariants)
+            where TSnapshot : AEnumVariantSnapshot<T>
+            => allVariants.Select(item => (displayName: helper.GetVariantDisplayName(item), tupleTypes: item))
                .GroupBy(x => x.displayName, x => x.tupleTypes, StringComparer.CurrentCultureIgnoreCase);
 
         internal static string GetExternalID<TID>(IOrderedEnumerable<TID> types)
             => JsonConvert.SerializeObject(types);
 
-        internal static DynamicFieldExternalDto CreateField<T, TVariant, TID>(
+        internal static DynamicFieldExternalDto CreateField<T, TSnapshot, TID>(
             string valueID,
-            IEnumCreator<T, TVariant, TID> helper)
+            IEnumCreator<T, TSnapshot, TID> helper)
+            where TSnapshot : AEnumVariantSnapshot<T>
             => new ()
             {
                 ExternalID = helper.EnumExternalID,
