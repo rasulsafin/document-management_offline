@@ -11,5 +11,10 @@ namespace MRS.DocumentManagement.Interface.Exceptions
             : base($"{typeof(T).Name} with {propertyName?.ToLower()} {propertyValue} not found")
         {
         }
+
+        public NotFoundException(string message)
+           : base(message)
+        {
+        }
     }
 }

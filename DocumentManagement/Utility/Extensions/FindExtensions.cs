@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Utility.Extensions
         {
             if (!(property.Body is MemberExpression body) || !(body.Expression is ParameterExpression))
             {
-                throw new ArgumentException(
+                throw new ArgumentValidationException(
                     $"The lambda expression must return member of {typeof(T).Name}",
                     nameof(property));
             }
