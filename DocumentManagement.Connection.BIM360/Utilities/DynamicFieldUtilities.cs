@@ -9,6 +9,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
     internal static class DynamicFieldUtilities
     {
+        internal static readonly string NULL_VALUE_ID = "_null_value";
+
         internal static IEnumerable<TID> DeserializeID<TID>(string externalID)
         {
             try

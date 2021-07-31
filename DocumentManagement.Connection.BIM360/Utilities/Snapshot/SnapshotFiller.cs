@@ -12,7 +12,7 @@ using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManage
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {
-    internal class SnapshotFiller : IBim360SnapshotFiller
+    internal class SnapshotFiller
     {
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
@@ -63,8 +63,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
                     var projectSnapshot = new ProjectSnapshot(p);
-                    hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
+
+                    if (!topFolders.Any())
+                        continue;
+
+                    hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolder = (topFolders.FirstOrDefault(
                             x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??

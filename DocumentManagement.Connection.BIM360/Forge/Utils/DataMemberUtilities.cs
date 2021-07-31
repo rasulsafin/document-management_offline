@@ -18,6 +18,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
             var expression = property.Body;
 
+            if (expression is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpression)
+                expression = unaryExpression.Operand;
+
             while (expression is not ParameterExpression)
             {
                 if (expression is not MemberExpression { Member: PropertyInfo propertyInfo } prop)

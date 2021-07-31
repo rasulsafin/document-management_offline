@@ -21,6 +21,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public string EnumDisplayName => DISPLAY_NAME;
 
+        public bool CanBeNull => false;
+
+        public string NullID => throw new NotSupportedException();
+
         public IOrderedEnumerable<(string parentTypeID, string subtypeID)> GetOrderedIDs(
             IEnumerable<IssueTypeSnapshot> variants)
             => variants

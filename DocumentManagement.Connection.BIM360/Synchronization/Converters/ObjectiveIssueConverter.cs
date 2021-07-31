@@ -190,7 +190,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var creator = new RootCauseEnumCreator();
             var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
 
-            if (EnumerationTypeCreator.IsNullValue(dynamicField.Value))
+            if (dynamicField.Value == creator.NullID)
                 return null;
 
             var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();

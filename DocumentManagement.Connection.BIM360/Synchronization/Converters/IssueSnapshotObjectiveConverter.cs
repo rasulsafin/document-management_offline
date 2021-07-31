@@ -24,9 +24,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var typeField = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
                 new TypeSubtypeEnumCreator());
-            var rootCause = DynamicFieldUtilities.CreateField(
-                snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
-                new RootCauseEnumCreator());
+            var rootCauseEnumCreator = new RootCauseEnumCreator();
+            var rootCause = snapshot.Entity.Attributes.RootCauseID == null
+                ? DynamicFieldUtilities.CreateField(rootCauseEnumCreator.NullID, rootCauseEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
+                    rootCauseEnumCreator);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;

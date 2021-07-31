@@ -62,9 +62,9 @@ namespace MRS.DocumentManagement.Connection.BIM360.Tests.IntegrationTests
             await connection.Connect(connectionInfo, CancellationToken.None);
 
             var context = await connection.GetContext(connectionInfo) as Bim360ConnectionContext;
-            var filler = context!.Scope.ServiceProvider.GetService<IBim360SnapshotFiller>();
-            filler.IgnoreTestEntities = false;
-            await filler!.UpdateHubsIfNull();
+            var filler = context!.Scope.ServiceProvider.GetService<SnapshotFiller>();
+            filler!.IgnoreTestEntities = false;
+            await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull();
             await filler.UpdateIssueTypes();

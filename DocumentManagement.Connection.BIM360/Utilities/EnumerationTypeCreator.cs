@@ -7,13 +7,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
     internal class EnumerationTypeCreator
     {
-        private static readonly string NULL_VALUE_ID = "_null_value";
         private readonly SnapshotFiller snapshotFiller;
         private readonly Bim360Snapshot snapshot;
 
         private bool snapshotFilled = false;
 
-        protected EnumerationTypeCreator(
+        public EnumerationTypeCreator(
             SnapshotFiller snapshotFiller,
             Bim360Snapshot snapshot)
         {
@@ -21,12 +20,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             this.snapshot = snapshot;
         }
 
-        internal static bool IsNullValue(string id)
-            => id.EndsWith(NULL_VALUE_ID);
-
         internal async Task<EnumerationTypeExternalDto> Create<T, TVariant, TID>(
-            IEnumCreator<T, TVariant, TID> creator,
-            bool canBeNull = false)
+            IEnumCreator<T, TVariant, TID> creator)
             where TVariant : AEnumVariantSnapshot<T>
         {
             await FillSnapshotIfNotFilled();
@@ -42,12 +37,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     })
                .ToList();
 
-            if (canBeNull)
+            if (creator.CanBeNull)
             {
                 values.Add(
                     new EnumerationValueExternalDto
                     {
-                        ExternalID = $"{creator.EnumExternalID}{NULL_VALUE_ID}",
+                        ExternalID = creator.NullID,
                         Value = "----------",
                     });
             }

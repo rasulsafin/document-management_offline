@@ -16,29 +16,29 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360Connection : IConnection
+    internal class Bim360Connection : IConnection
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
-        private readonly EnumerationTypeCreator typeDfHelper;
+        private readonly EnumerationTypeCreator typeCreator;
         private readonly Authenticator authenticator;
 
-        internal Bim360Connection(
+        public Bim360Connection(
             Authenticator authenticator,
             AuthenticationService authenticationService,
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
             TokenHelper tokenHelper,
-            EnumerationTypeCreator typeDfHelper)
+            EnumerationTypeCreator typeCreator)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
             this.contextFactory = contextFactory;
             this.tokenHelper = tokenHelper;
-            this.typeDfHelper = typeDfHelper;
+            this.typeCreator = typeCreator;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -132,12 +132,12 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
             var subtypeEnumCreator = new TypeSubtypeEnumCreator();
-            var typesSubtypes = await typeDfHelper.Create(subtypeEnumCreator);
+            var typesSubtypes = await typeCreator.Create(subtypeEnumCreator);
             if (typesSubtypes.EnumerationValues.Count == 0)
                 throw new TypeAccessException("You have no access to issue types.");
 
             var rootCauseEnumCreator = new RootCauseEnumCreator();
-            var rootCauses = await typeDfHelper.Create(rootCauseEnumCreator, true);
+            var rootCauses = await typeCreator.Create(rootCauseEnumCreator);
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto> { typesSubtypes, rootCauses };
 
@@ -147,13 +147,24 @@ namespace MRS.DocumentManagement.Connection.Bim360
                 Name = "Issue",
                 DefaultDynamicFields = new List<DynamicFieldExternalDto>
                 {
-                    DynamicFieldUtilities.CreateField(typesSubtypes.EnumerationValues.First().ExternalID, subtypeEnumCreator),
-                    DynamicFieldUtilities.CreateField(null, rootCauseEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        typesSubtypes.EnumerationValues.First().ExternalID,
+                        subtypeEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        rootCauseEnumCreator.NullID,
+                        rootCauseEnumCreator),
                     new ()
                     {
                         ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
                         Type = DynamicFieldType.STRING,
                         Name = "Location Details",
+                        Value = string.Empty,
+                    },
+                    new ()
+                    {
+                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Answer),
+                        Type = DynamicFieldType.STRING,
+                        Name = "Response",
                         Value = string.Empty,
                     },
                 },

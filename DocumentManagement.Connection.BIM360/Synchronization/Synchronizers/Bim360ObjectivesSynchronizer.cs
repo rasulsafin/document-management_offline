@@ -9,8 +9,8 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly IssuesService issuesService;
         private readonly Authenticator authenticator;
         private readonly ItemsSyncHelper itemsSyncHelper;
-        private readonly IBim360SnapshotFiller filler;
+        private readonly SnapshotFiller filler;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             IssuesService issuesService,
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
-            IBim360SnapshotFiller filler,
+            SnapshotFiller filler,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -113,6 +113,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
+            await filler.UpdateRootCauses();
             return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.ID)
                .ToList();

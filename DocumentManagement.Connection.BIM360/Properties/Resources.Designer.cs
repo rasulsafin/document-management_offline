@@ -241,7 +241,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/:container_id/root-causes.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/root-causes.
         /// </summary>
         internal static string GetRootCausesMethod {
             get {

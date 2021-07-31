@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -16,13 +16,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly Bim360Snapshot snapshot;
         private readonly ItemsSyncHelper itemsSyncHelper;
-        private readonly IBim360SnapshotFiller filler;
+        private readonly SnapshotFiller filler;
         private readonly Authenticator authenticator;
 
         public Bim360ProjectsSynchronizer(
             Bim360Snapshot snapshot,
             ItemsSyncHelper itemsSyncHelper,
-            IBim360SnapshotFiller filler,
+            SnapshotFiller filler,
             Authenticator authenticator)
         {
             this.snapshot = snapshot;

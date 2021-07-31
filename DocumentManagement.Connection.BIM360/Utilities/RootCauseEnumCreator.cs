@@ -19,8 +19,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public string EnumDisplayName => DISPLAY_NAME;
 
+        public bool CanBeNull => true;
+
+        public string NullID => $"{EnumExternalID}{DynamicFieldUtilities.NULL_VALUE_ID}";
+
         public IOrderedEnumerable<string> GetOrderedIDs(IEnumerable<RootCauseSnapshot> variants)
-            => variants.Select(cause => cause.Entity.Attributes.Key).OrderBy(id => id);
+            => variants.Select(cause => cause.Entity.ID).OrderBy(id => id);
 
         public string GetVariantDisplayName(RootCauseSnapshot variant)
             => variant.Entity.Attributes.Title;

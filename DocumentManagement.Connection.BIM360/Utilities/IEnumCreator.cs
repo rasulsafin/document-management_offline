@@ -62,5 +62,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         /// <param name="externalID">The stored identifier with multiple variant IDs.</param>
         /// <returns>Multiple variant IDs.</returns>
         IEnumerable<TVariantID> DeserializeID(string externalID);
+
+        bool CanBeNull { get; }
+
+        string NullID { get; }
     }
 }
