@@ -46,5 +46,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public IEnumerable<IssueTypeSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects)
             => projects.SelectMany(x => x.IssueTypes.Values);
+
+        public IEnumerable<(string parentTypeID, string subtypeID)> DeserializeID(string externalID)
+            => DynamicFieldUtilities.DeserializeID<(string parentTypeID, string subtypeID)>(externalID);
     }
 }

@@ -109,6 +109,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public object IssueSubType { get; set; }
 
             [DataMember(Name = "root_cause_id")]
+            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
             public string RootCauseID { get; set; }
 
             [DataMember(Name = "root_cause")]

@@ -55,5 +55,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         /// <param name="projects">The source snapshot of project.</param>
         /// <returns>The enumeration of the snapshots of this enum.</returns>
         IEnumerable<TSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects);
+
+        /// <summary>
+        /// Deserializes a stored identifier with multiple variant IDs.
+        /// </summary>
+        /// <param name="externalID">The stored identifier with multiple variant IDs.</param>
+        /// <returns>Multiple variant IDs.</returns>
+        IEnumerable<TVariantID> DeserializeID(string externalID);
     }
 }

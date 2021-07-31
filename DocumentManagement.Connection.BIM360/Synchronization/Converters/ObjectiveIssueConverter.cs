@@ -10,9 +10,9 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface.Dtos;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -82,11 +82,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Title = objective.Title,
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
-                    AssignedTo = GetDynamicField(objective.DynamicFields, x => x.AssignedTo),
+                    ////AssignedTo = GetDynamicField(objective.DynamicFields, x => x.AssignedTo),
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
-                    RootCause = GetDynamicField(objective.DynamicFields, x => x.RootCause),
+                    RootCause = GetRootCause(project, objective).Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes =
                         await GetPushpinAttributes(objective.Location, project.IssueContainer, targetUrn, globalOffset),
@@ -163,8 +163,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == new TypeSubtypeEnumCreator().EnumExternalID);
-            var deserializedIDs = DynamicFieldUtilities.DeserializeID<(string parentTypeID, string subtypeID)>(dynamicField.Value).ToArray();
+            var creator = new TypeSubtypeEnumCreator();
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
+            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
             var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtypeID);
             var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))
                .Value;
@@ -182,6 +183,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             }
 
             return type;
+        }
+
+        private RootCauseSnapshot GetRootCause(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
+        {
+            var creator = new RootCauseEnumCreator();
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
+
+            if (EnumerationTypeCreator.IsNullValue(dynamicField.Value))
+                return null;
+
+            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
+            var rootCause = projectSnapshot.RootCauses
+               .FirstOrDefault(x => deserializedIDs.Contains(x.Value.Entity.ID))
+               .Value;
+            return rootCause;
         }
 
         private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)

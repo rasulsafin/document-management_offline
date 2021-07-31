@@ -33,5 +33,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public IEnumerable<RootCauseSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects)
             => projects.SelectMany(x => x.RootCauses.Values);
+
+        public IEnumerable<string> DeserializeID(string externalID)
+            => DynamicFieldUtilities.DeserializeID<string>(externalID);
     }
 }
