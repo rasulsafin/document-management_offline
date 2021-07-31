@@ -7,7 +7,9 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Interfaces;
@@ -22,12 +24,19 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         protected readonly IMapper mapper;
         protected readonly DMContext context;
         private readonly bool needSaveOnEachTuple = false;
+        private readonly ILogger<ASynchronizationStrategy<TDB, TDto>> logger;
 
-        protected ASynchronizationStrategy(DMContext context, IMapper mapper, bool needSaveOnEachTuple = true)
+        protected ASynchronizationStrategy(
+            DMContext context,
+            IMapper mapper,
+            ILogger<ASynchronizationStrategy<TDB, TDto>> logger,
+            bool needSaveOnEachTuple = true)
         {
             this.context = context;
             this.mapper = mapper;
             this.needSaveOnEachTuple = needSaveOnEachTuple;
+            this.logger = logger;
+            logger.LogTrace("ASynchronizationStrategy created");
         }
 
         public async Task<List<SynchronizingResult>> Synchronize(SynchronizingData data,
@@ -39,6 +48,9 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent = null,
             IProgress<double> progress = null)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Synchronize started");
+
             progress?.Report(0.0);
             var defaultFiler = GetDefaultFilter(data);
             var list = Include(GetDBSet(context))
@@ -51,15 +63,18 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                 Order(list),
                 Order(remoteFilter == null ? remoteCollection : remoteCollection.Where(remoteFilter)),
                 IsEntitiesEquals);
+            logger.LogDebug("{@Count} tuples created", tuples.Count);
 
             var results = new List<SynchronizingResult>();
             var i = 0;
 
             foreach (var tuple in tuples)
             {
+                logger.LogTrace("Tuple {ID}", tuple.ExternalID);
                 token.ThrowIfCancellationRequested();
 
                 var action = tuple.DetermineAction();
+                logger.LogDebug("Tuple {ID} must {@Action}", tuple.ExternalID, action);
 
                 try
                 {
@@ -93,10 +108,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                             await context.SaveChangesAsync();
                         else
                             await context.SynchronizationSaveAsync(data.Date);
+                        logger.LogTrace("DB updated");
                     }
                 }
                 catch (Exception e)
                 {
+                    logger.LogError(e, "Synchronization failed");
                     DBContextUtilities.ReloadContext(context);
 
                     var isRemote = action == SynchronizingAction.AddToLocal;
@@ -117,7 +134,10 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         }
 
         public virtual IReadOnlyCollection<TDB> Map(IReadOnlyCollection<TDto> externalDtos)
-            => mapper.Map<IReadOnlyCollection<TDB>>(externalDtos);
+        {
+            logger.LogTrace("Map started for externalDtos: {@Dtos}", externalDtos);
+            return mapper.Map<IReadOnlyCollection<TDB>>(externalDtos);
+        }
 
         protected abstract DbSet<TDB> GetDBSet(DMContext context);
 
@@ -145,7 +165,11 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent) => Task.CompletedTask;
+            object parent)
+        {
+            logger.LogStartAction(tuple, data, parent);
+            return Task.CompletedTask;
+        }
 
         protected virtual async Task<SynchronizingResult> Merge(
             SynchronizingTuple<TDB> tuple,
@@ -154,21 +178,28 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             try
             {
                 token.ThrowIfCancellationRequested();
 
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
+                logger.LogTrace("Remote updated");
                 UpdateDB(GetDBSet(context), tuple);
+                logger.LogTrace("DB entities updated");
 
                 return null;
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 throw;
             }
             catch (Exception e)
             {
+                logger.LogExceptionOnAction(SynchronizingAction.Merge, e, tuple);
                 return new SynchronizingResult
                 {
                     Exception = e,
@@ -185,19 +216,25 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             try
             {
                 token.ThrowIfCancellationRequested();
 
                 UpdateDB(GetDBSet(context), tuple);
+                logger.LogTrace("DB entities added");
                 return Task.FromResult<SynchronizingResult>(null);
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 throw;
             }
             catch (Exception e)
             {
+                logger.LogExceptionOnAction(SynchronizingAction.AddToLocal, e, tuple);
                 return Task.FromResult(new SynchronizingResult
                 {
                     Exception = e,
@@ -214,22 +251,29 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             try
             {
                 token.ThrowIfCancellationRequested();
 
                 await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
+                logger.LogTrace("Added to remote");
                 UpdateDB(GetDBSet(context), tuple);
+                logger.LogTrace("DB entities updated");
                 return null;
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 throw;
             }
             catch (Exception e)
             {
+                logger.LogExceptionOnAction(SynchronizingAction.AddToRemote, e, tuple);
                 tuple.Local.SynchronizationMate = null;
-                return new SynchronizingResult()
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -245,20 +289,26 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             try
             {
                 token.ThrowIfCancellationRequested();
 
                 RemoveFromDB(tuple, data);
+                logger.LogTrace("DB entities removed");
                 return Task.FromResult<SynchronizingResult>(null);
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 throw;
             }
             catch (Exception e)
             {
-                return Task.FromResult(new SynchronizingResult()
+                logger.LogExceptionOnAction(SynchronizingAction.RemoveFromLocal, e, tuple);
+                return Task.FromResult(new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Local,
@@ -274,22 +324,28 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             object parent,
             CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogStartAction(tuple, data, parent);
+
             try
             {
                 token.ThrowIfCancellationRequested();
 
-                var project = mapper.Map<TDto>(tuple.Remote);
-                await GetSynchronizer(connectionContext).Remove(project);
+                await RemoveFromRemote(tuple, GetSynchronizer(connectionContext).Remove);
+                logger.LogTrace("Removed from remote");
                 RemoveFromDB(tuple, data);
+                logger.LogTrace("DB entities removed");
                 return null;
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 throw;
             }
             catch (Exception e)
             {
-                return new SynchronizingResult()
+                logger.LogExceptionOnAction(SynchronizingAction.RemoveFromRemote, e, tuple);
+                return new SynchronizingResult
                 {
                     Exception = e,
                     Object = tuple.Remote,
@@ -300,37 +356,71 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
         private void RemoveFromDB(SynchronizingTuple<TDB> tuple, SynchronizingData data)
         {
+            logger.LogDebug("RemoveFromDB started with tuple {@Tuple}", tuple);
             if (tuple.Local != null)
+            {
                 GetDBSet(context).Remove(tuple.Local);
+                logger.LogInformation("Removed {@ID}", tuple.Local.ID);
+            }
+
             if (tuple.Synchronized != null)
+            {
                 GetDBSet(context).Remove(tuple.Synchronized);
+                logger.LogDebug("Removed {@ID}", tuple.Synchronized.ID);
+            }
+        }
+
+        private async Task RemoveFromRemote(SynchronizingTuple<TDB> tuple, Func<TDto, Task<TDto>> remoteFunc)
+        {
+            var dto = mapper.Map<TDto>(tuple.Remote);
+            logger.LogDebug("Created dto: {@Dto}", dto);
+            await remoteFunc(dto);
+            logger.LogInformation("Removed {ID}", tuple.ExternalID);
         }
 
         private void UpdateDB(DbSet<TDB> set, SynchronizingTuple<TDB> tuple)
         {
+            logger.LogBeforeMerge(tuple);
             tuple.Merge();
+            logger.LogAfterMerge(tuple);
 
             if (tuple.Synchronized.ID == 0)
+            {
                 set.Add(tuple.Synchronized);
+                logger.LogDebug("Added {ID}", tuple.Synchronized.ID);
+            }
             else if (!tuple.SynchronizedChanged)
+            {
                 set.Update(tuple.Synchronized);
+                logger.LogDebug("Updated {ID}", tuple.Synchronized.ID);
+            }
 
             if (tuple.Local.ID == 0)
+            {
                 set.Add(tuple.Local);
+                logger.LogInformation("Added {ID}", tuple.Local.ID);
+            }
             else if (!tuple.RemoteChanged)
+            {
                 set.Update(tuple.Local);
+                logger.LogInformation("Updated {ID}", tuple.Local.ID);
+            }
         }
 
         private async Task UpdateRemote(
             SynchronizingTuple<TDB> tuple,
             Func<TDto, Task<TDto>> remoteFunc)
         {
+            logger.LogBeforeMerge(tuple);
             tuple.Merge();
+            logger.LogAfterMerge(tuple);
             if (!tuple.RemoteChanged)
                 return;
 
             var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote));
+            logger.LogDebug("Remote return {@Data}", result);
             tuple.Remote = mapper.Map<TDB>(result);
+            logger.LogInformation("Updated {ID}", tuple.ExternalID);
         }
     }
 }
