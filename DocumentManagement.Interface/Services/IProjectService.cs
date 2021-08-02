@@ -13,6 +13,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Get list of all projects.
         /// </summary>
         /// <returns>List of all projects.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
         Task<IEnumerable<ProjectToListDto>> GetAllProjects();
 
         /// <summary>
@@ -20,6 +21,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's id.</param>
         /// <returns>List of projects.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ProjectToListDto>> GetUserProjects(ID<UserDto> userID);
 
         /// <summary>
@@ -27,6 +30,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectToCreate">Project data.</param>
         /// <returns>Created project.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when project data is invalid.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ProjectToListDto> Add(ProjectToCreateDto projectToCreate);
 
         /// <summary>
@@ -34,6 +39,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's id.</param>
         /// <returns>True if project was deleted.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Remove(ID<ProjectDto> projectID);
 
         /// <summary>
@@ -41,6 +48,9 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="project">Project data to update.</param>
         /// <returns>True, if updated successfully.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when project data is invalid.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Update(ProjectDto project);
 
         /// <summary>
@@ -48,6 +58,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's id.</param>
         /// <returns>Found project.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ProjectDto> Find(ID<ProjectDto> projectID);
 
         /// <summary>
@@ -55,6 +67,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's id.</param>
         /// <returns>List of users.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<UserDto>> GetUsers(ID<ProjectDto> projectID);
 
         /// <summary>
@@ -63,6 +77,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="projectID">Project's id.</param>
         /// <param name="users">List of user's ids connect project to.</param>
         /// <returns>True if linked successfully.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project OR user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> LinkToUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
 
         /// <summary>
@@ -71,6 +87,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="projectID">Project's id.</param>
         /// <param name="users">List of user's ids unlink project from.</param>
         /// <returns>True if unlinked successfully.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project OR user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> UnlinkFromUsers(ID<ProjectDto> projectID, IEnumerable<ID<UserDto>> users);
     }
 }
