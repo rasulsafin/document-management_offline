@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
@@ -15,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         private static readonly string ENUM_EXTERNAL_ID =
             $"{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueTypeID)},{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueSubtypeID)}";
 
-        private static readonly string DISPLAY_NAME = "Type";
+        private static readonly string DISPLAY_NAME = MrsConstants.TYPE_FIELD_NAME;
 
         public string EnumExternalID => ENUM_EXTERNAL_ID;
 

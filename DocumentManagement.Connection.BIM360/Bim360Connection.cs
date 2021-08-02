@@ -8,6 +8,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
@@ -144,7 +145,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             var issueType = new ObjectiveTypeExternalDto
             {
                 ExternalId = Constants.ISSUE_TYPE,
-                Name = "Issue",
+                Name = MrsConstants.ISSUE_TYPE_NAME,
                 DefaultDynamicFields = new List<DynamicFieldExternalDto>
                 {
                     DynamicFieldUtilities.CreateField(
@@ -157,14 +158,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     {
                         ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
                         Type = DynamicFieldType.STRING,
-                        Name = "Location Details",
+                        Name = MrsConstants.LOCATION_DETAILS_FIELD_NAME,
                         Value = string.Empty,
                     },
                     new ()
                     {
                         ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Answer),
                         Type = DynamicFieldType.STRING,
-                        Name = "Response",
+                        Name = MrsConstants.RESPONSE_FIELD_NAME,
                         Value = string.Empty,
                     },
                 },

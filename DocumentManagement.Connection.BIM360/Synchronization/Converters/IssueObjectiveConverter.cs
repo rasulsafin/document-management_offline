@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
 
@@ -57,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 {
                     ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
                     Type = DynamicFieldType.STRING,
-                    Name = "Location Details",
+                    Name = MrsConstants.LOCATION_DETAILS_FIELD_NAME,
                     Value = issue.Attributes.LocationDescription,
                     UpdatedAt = issue.Attributes.UpdatedAt ?? default,
                 },
@@ -65,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 {
                     ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Answer),
                     Type = DynamicFieldType.STRING,
-                    Name = "Response",
+                    Name = MrsConstants.RESPONSE_FIELD_NAME,
                     Value = issue.Attributes.Answer,
                     UpdatedAt = issue.Attributes.UpdatedAt ?? default,
                 },
