@@ -100,10 +100,10 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return mapper.Map<ObjectiveToListDto>(objective);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't add objective {@Data}", data);
-                throw;
+                logger.LogError(ex, "Can't add objective {@Data}", data);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
