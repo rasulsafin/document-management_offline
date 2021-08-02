@@ -13,15 +13,16 @@ namespace MRS.DocumentManagement.Interface.Services
         /// Get all registered users.
         /// </summary>
         /// <returns>A IEnumerable of <see cref="UserDto"/> representing the list of users.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
         Task<IEnumerable<UserDto>> GetAllUsers();
 
         /// <summary>
         /// Add new user.
         /// </summary>
         /// <param name="data">New user data.</param>
-        /// <exception cref="InvalidDataException">Throws if passed data fails database validation checks
-        /// (e.g. user with current login already exists).</exception>
         /// <returns>Identifier of new user.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user data is invalid.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ID<UserDto>> Add(UserToCreateDto data);
 
         /// <summary>
@@ -29,7 +30,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User ID to be deleted.</param>
         /// <returns>True, if user was deleted.</returns>
-        /// <exception cref="ArgumentException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Delete(ID<UserDto> userID);
 
         /// <summary>
@@ -37,7 +39,9 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="user">User data.</param>
         /// <returns>True, if user was updated.</returns>
-        /// <exception cref="ArgumentException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user with the same login already exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Update(UserDto user);
 
         /// <summary>
@@ -46,8 +50,9 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="userID">User's ID.</param>
         /// <param name="password">Password to verify.</param>
         /// <returns>True if password was verified successfully.</returns>
-        /// <exception cref="InvalidDataException">Throws if password is wrong.</exception>
-        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when password is invalid.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> VerifyPassword(ID<UserDto> userID, string password);
 
         /// <summary>
@@ -56,7 +61,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>True if password was successfully updated.</returns>
         /// <param name="userID">User's ID.</param>
         /// <param name="newPass">New password.</param>
-        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> UpdatePassword(ID<UserDto> userID, string newPass);
 
         /// <summary>
@@ -64,7 +70,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Found User.</returns>
-        /// <exception cref="ANotFoundException">Throws if user with passed ID does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<UserDto> Find(ID<UserDto> userID);
 
         /// <summary>
@@ -72,7 +79,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="login">User's login.</param>
         /// <returns>Null if user with specified login was not found</returns>
-        /// <exception cref="ANotFoundException">Throws if user with passed login does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<UserDto> Find(string login);
 
         /// <summary>
@@ -80,6 +88,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>True if user exists, returns false otherwise.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> Exists(ID<UserDto> userID);
 
         /// <summary>
@@ -87,6 +96,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="login">User's login.</param>
         /// <returns>True if user exists, returns false otherwise.</returns>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> Exists(string login);
     }
 }
