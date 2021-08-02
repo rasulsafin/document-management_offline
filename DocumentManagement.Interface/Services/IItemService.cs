@@ -14,7 +14,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="item">Data to update.</param>
         /// <returns>True if updated.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when items does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when items does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Update(ItemDto item);
 
@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="itemID">Id of item to find.</param>
         /// <returns>Found item.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when item with that id does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when item does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ItemDto> Find(ID<ItemDto> itemID);
 
@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's id.</param>
         /// <returns>Collection of items.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project with that id does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID);
 
@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="objectiveID">Objective's id.</param>
         /// <returns>Collection of items.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective with that id does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);
 

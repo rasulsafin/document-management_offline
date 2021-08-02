@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="id">Type's ID.</param>
         /// <returns>Searching connection type.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type with that id does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ConnectionTypeDto> Find(ID<ConnectionTypeDto> id);
 
@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="name">Type's name.</param>
         /// <returns>Searching connection type.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type with that name does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type with that name does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ConnectionTypeDto> Find(string name);
 
@@ -48,7 +48,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="id">ID of the type to remove.</param>
         /// <returns>Removing result.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type with that id does not exists.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when connection type does not exist.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Remove(ID<ConnectionTypeDto> id);
 

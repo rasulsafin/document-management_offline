@@ -34,7 +34,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="role">Role to remove.</param>
         /// <returns>True if role was removed.</returns>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user do not have the role.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user does not have the role.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> RemoveRole(ID<UserDto> userID, string role);
 
@@ -64,7 +64,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="password">User's password.</param>
         /// <returns>Validated user.</returns>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user login OR password is invalid.</exception>
+        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when user's login OR password is invalid.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ValidatedUserDto> Login(string username, string password);
     }
