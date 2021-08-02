@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
-                    RootCause = GetRootCause(project, objective).Entity.ID,
+                    RootCauseID = GetRootCause(project, objective)?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes =
                         await GetPushpinAttributes(objective.Location, project.IssueContainer, targetUrn, globalOffset),
