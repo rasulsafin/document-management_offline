@@ -15,7 +15,7 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360Connection : IConnection
+    internal class Bim360Connection : IConnection
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;

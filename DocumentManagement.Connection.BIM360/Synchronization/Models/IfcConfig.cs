@@ -7,7 +7,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models
     internal class IfcConfig
     {
         [DataMember]
-        public LinkedModel[] LinkedModels { get; set; }
+        public LinkedModel RedirectTo { get; set; }
 
         [DataContract]
         public class LinkedModel

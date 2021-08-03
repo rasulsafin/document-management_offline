@@ -10,9 +10,11 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
@@ -24,19 +26,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
+        private readonly Downloader downloader;
 
         public ObjectiveIssueConverter(
             Bim360ConnectionContext context,
             IConverter<ObjectiveStatus, Status> statusConverter,
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
-            ItemsService itemsService)
+            ItemsService itemsService,
+            Downloader downloader)
         {
             this.context = context;
             this.statusConverter = statusConverter;
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.itemsService = itemsService;
+            this.downloader = downloader;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
@@ -210,8 +215,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 }
                 else
                 {
+                    var redirect = await GetTargetFromConfigAndSetOffset(obj, project, snapshot);
+                    if (redirect != default)
+                        return redirect;
+
                     item = snapshot.Entity;
-                    var size = new FileInfo(obj.Location.Item.FullPath).Length;
+                    var info = new FileInfo(obj.Location.Item.FullPath);
+                    var size = info.Exists ? info.Length : -1;
                     version = snapshot.Version.Attributes.StorageSize == size
                         ? snapshot.Version
                         : await GetVersion(item?.ID, size);
@@ -231,6 +241,44 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
                     if (snapshot != null)
                         return (snapshot.Entity?.ID, snapshot.Version?.Attributes.VersionNumber);
+                }
+            }
+
+            return default;
+        }
+
+        private async Task<(string item, int? version)> GetTargetFromConfigAndSetOffset(
+            ObjectiveExternalDto obj,
+            ProjectSnapshot project,
+            ItemSnapshot snapshot)
+        {
+            var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
+            var config = project.Items
+               .Where(
+                    x => x.Value.Entity.Relationships.Parent.Data.ID ==
+                        snapshot.Entity.Relationships.Parent.Data.ID)
+               .FirstOrDefault(
+                    x => string.Equals(
+                        x.Value.Entity.Attributes.DisplayName,
+                        configName,
+                        StringComparison.OrdinalIgnoreCase))
+               .Value;
+
+            if (config != null)
+            {
+                var downloadedConfig = await downloader.Download(
+                    project.ID,
+                    config.Entity,
+                    config.Version,
+                    Path.GetTempFileName());
+
+                if (downloadedConfig?.Exists ?? false)
+                {
+                    var ifcConfig = JsonConvert.DeserializeObject<IfcConfig>(
+                        await File.ReadAllTextAsync(downloadedConfig.FullName));
+                    downloadedConfig.Delete();
+                    obj.Location.Location = (obj.Location.Location.ToVector() - ifcConfig.RedirectTo.Offset).ToTuple();
+                    return (ifcConfig.RedirectTo.Urn, ifcConfig.RedirectTo.Version);
                 }
             }
 
