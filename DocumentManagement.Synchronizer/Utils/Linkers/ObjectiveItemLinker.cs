@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Synchronization.Models;
@@ -9,8 +10,21 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 {
     internal class ObjectiveItemLinker : AItemLinker
     {
+        private readonly ILogger<ObjectiveItemLinker> logger;
+
+        public ObjectiveItemLinker(ILogger<ObjectiveItemLinker> logger)
+        {
+            this.logger = logger;
+            logger.LogTrace("ObjectiveItemLinker created");
+        }
+
         public override Task Link(DMContext context, Item item, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Link started with item: {@Item}, parent: {@Parent}, entityType: {@EntityType}",
+                item,
+                parent,
+                entityType);
             var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
             objective.Items ??= new List<ObjectiveItem>();
             objective.Items.Add(
@@ -24,7 +38,7 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
             {
                 item.Objectives ??= new List<ObjectiveItem>
                 {
-                    new ObjectiveItem
+                    new ()
                     {
                         Item = item,
                         ObjectiveID = objective.ID,
@@ -38,6 +52,11 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 
         public override Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Unlink started with item: {@Item}, parent: {@Parent}, entityType: {@EntityType}",
+                item,
+                parent,
+                entityType);
             var objective = LinkingUtils.CheckAndUpdateLinking<Objective>(parent, entityType);
 
             if (entityType == EntityType.Remote)

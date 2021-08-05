@@ -7,7 +7,7 @@ namespace MRS.DocumentManagement.General.Utils.Extensions
     public static class LoggerExtensions
     {
         public static IDisposable BeginMethodScope(this ILogger logger, [CallerMemberName] string method = "")
-            => new ScopeContainer(logger.BeginScope("{@MethodName}", method), () => logger.LogTrace("Method ends."));
+            => new ScopeContainer(logger.BeginScope("{@MethodName}", method), () => logger.LogTrace("Method ends"));
 
         private class ScopeContainer : IDisposable
         {
