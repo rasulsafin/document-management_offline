@@ -54,7 +54,6 @@ namespace MRS.DocumentManagement.Synchronization.Utils
                     case SynchronizingAction.RemoveFromRemote:
                         RemoveItem(remote, selectFunc, elements.Item3, () => tuple.RemoteChanged = true);
                         RemoveItem(synchronized, selectFunc, elements.Item2, () => tuple.SynchronizedChanged = true);
-
                         break;
                 }
             }
