@@ -211,7 +211,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 else
                 {
                     item = snapshot.Entity;
-                    var size = new FileInfo(obj.Location.Item.FullPath).Length;
+                    var info = new FileInfo(obj.Location.Item.FullPath);
+                    var size = info.Exists ? info.Length : 0;
                     version = snapshot.Version.Attributes.StorageSize == size
                         ? snapshot.Version
                         : await GetVersion(item?.ID, size);
