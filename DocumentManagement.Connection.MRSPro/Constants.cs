@@ -18,6 +18,7 @@
         internal static readonly string ROOT = ":ORGANIZATION";
         internal static readonly string PROJECT = ":PROJECT";
         internal static readonly string TASK = ":TASK";
+        internal static readonly string ATTACHMENT = ":ATTACHMENT";
 
         internal static readonly char ID_SPLITTER = ':';
         internal static readonly char ID_PATH_SPLITTER = '/';

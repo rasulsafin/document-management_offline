@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro
 {
@@ -15,8 +15,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         private readonly AttachmentsService attachmentsService;
         private readonly PlansService plansService;
         private readonly ItemService itemService;
-
-        private readonly string dirPath = "Downloads\\";
 
         public MrsProStorage(
             AttachmentsService attachmentsService,
@@ -40,25 +38,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             {
                 cancelToken.ThrowIfCancellationRequested();
 
-                string id = item.ExternalID.Split("/")[3].Split(":")[0];
-                string parentId = item.ExternalID.Split("/")[2].Split(":")[0];
+                string id = item.ExternalID.Split(ID_PATH_SPLITTER, StringSplitOptions.RemoveEmptyEntries)[^1]
+                    .Split(ID_SPLITTER)[0];
+                string parentId = item.ExternalID.Split(ID_PATH_SPLITTER, StringSplitOptions.RemoveEmptyEntries)[^2]
+                    .Split(ID_SPLITTER)[0];
 
                 Uri uri = null;
 
-                try
-                {
-                    uri = await attachmentsService.GetAttachmentUriAsync(id);
-                }
-                catch
-                {
-                    uri = await plansService.GetPlanUriAsync(id, parentId);
-                }
+                if (item.ExternalID.EndsWith(ATTACHMENT))
+                    uri = await attachmentsService.GetUriAsync(id);
+                else
+                    uri = await plansService.GetUriAsync(id, parentId);
 
-                string name = WebUtility.UrlDecode(uri.Segments[uri.Segments.Length - 1]);
-                string path = dirPath + name;
-
-                await itemService.GetAsync(uri.AbsoluteUri, path);
-
+                await itemService.GetAsync(uri.AbsoluteUri, item.FullPath);
                 progress?.Report(++i / (double)count);
             }
 

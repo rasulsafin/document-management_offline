@@ -68,7 +68,7 @@ namespace MRS.DocumentManagement.Services
                     .ToListAsync();
                 logger.LogDebug("Found items: {@DBItems}", dbItems);
 
-                var projectID = dbItems.FirstOrDefault().ProjectID ?? -1;
+                var projectID = dbItems.FirstOrDefault()?.ProjectID ?? -1;
                 var project = await context.Projects
                     .Where(x => x.ID == projectID)
                     .FirstOrDefaultAsync();

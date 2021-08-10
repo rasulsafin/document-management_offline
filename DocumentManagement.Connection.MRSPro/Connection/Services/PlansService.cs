@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        internal async Task<Uri> GetPlanUriAsync(string id,
+        internal async Task<Uri> GetUriAsync(string id,
             string parentId)
         {
             string query = $"?ids={id}&parentId={parentId}&tokenOnly=false&type=plan";
@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
             try
             {
-                await HttpConnection.PostJson<Plan>(BASE_URL, plan, file, originalName, folderId);
+                await HttpConnection.PostMultipart<Plan>(BASE_URL, plan, file, originalName, folderId);
                 return true;
             }
             catch

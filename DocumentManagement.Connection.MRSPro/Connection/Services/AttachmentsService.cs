@@ -18,6 +18,19 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
         {
         }
 
+        internal async Task<IEnumerable<Attachment>> TryGetByParentIdAsync(string parentId)
+        {
+            try
+            {
+                var res = await HttpConnection.GetListOf<Attachment>(GetByParentPath(BASE_URL), parentId);
+                return res;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         internal async Task<IEnumerable<Attachment>> GetAllAsync(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Attachment>(BASE_URL);
@@ -48,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        internal async Task<Uri> GetAttachmentUriAsync(string id)
+        internal async Task<Uri> GetUriAsync(string id)
         {
             var attachment = await GetByIdAsync(id);
 
@@ -68,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             string query = $"?id={id}&originalName={originalName}&parentId={parentId}&parentType=task";
             try
             {
-                await HttpConnection.PutJson<PhotoAttachmentData>(BASE_URL + query, attachment, file, originalName);
+                await HttpConnection.PutMultipart<PhotoAttachmentData>(BASE_URL + query, attachment, file, originalName);
                 return true;
             }
             catch
@@ -100,19 +113,6 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             catch
             {
                 return false;
-            }
-        }
-
-        internal async Task<IEnumerable<Attachment>> TryGetByParentIdAsync(string parentId)
-        {
-            try
-            {
-                var res = await HttpConnection.GetListOf<Attachment>(GetByParentPath(BASE_URL), parentId);
-                return res;
-            }
-            catch
-            {
-                return null;
             }
         }
     }

@@ -24,14 +24,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         private static string BaseUrl => string.Format(BASE_URL, Auth.CompanyCode);
 
+        internal async Task<Uri> GetUri(string method)
+            => await GetUriAsync(() => CreateRequest(HttpMethod.Get, method));
+
         internal async Task<TOut> Get<TOut>(string method)
             => await SendAsync<TOut>(HttpMethod.Get, method);
-
-        internal async Task<Uri> GetUri(string method)
-        {
-            var response = await GetUriAsync(() => CreateRequest(HttpMethod.Get, method, null, new object[] { }));
-            return response;
-        }
 
         internal async Task<IEnumerable<TOut>> GetListOf<TOut>(string method, params object[] args)
             => await SendAsync<IEnumerable<TOut>>(HttpMethod.Get, method, arguments: args);
@@ -39,17 +36,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         internal async Task<TData> PostJson<TData>(string method, TData contentObject)
             => await PostJson<TData, TData>(method, contentObject);
 
-        internal async Task<TData> PostJson<TData>(string method)
-            => await PostJson<TData, TData>(method);
-
         internal async Task<TOut> PostJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Post, method, contentObject);
 
-        internal async Task<TOut> PostJson<TOut, TData>(string method)
-            => await SendJson<TOut, TData>(HttpMethod.Post, method);
-
-        internal async Task<TData> PostJson<TData>(string method, TData contentObject, byte[] file, string filename, string folderId)
-            => await SendJson<TData, TData>(HttpMethod.Post, method, contentObject, file, filename, folderId);
+        internal async Task<TData> PostMultipart<TData>(string method, TData contentObject, byte[] file, string filename, string folderId)
+            => await SendMultipart<TData, TData>(HttpMethod.Post, method, contentObject, file, filename, folderId);
 
         internal async Task<TOut> PatchJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Patch, method, contentObject);
@@ -57,8 +48,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         internal async Task<TOut> PutJson<TOut, TData>(string method, TData contentObject)
             => await SendJson<TOut, TData>(HttpMethod.Put, method, contentObject);
 
-        internal async Task<TData> PutJson<TData>(string method, TData contentObject, byte[] file, string filename)
-            => await SendJson<TData, TData>(HttpMethod.Put, method, contentObject, file, filename);
+        internal async Task<TData> PutMultipart<TData>(string method, TData contentObject, byte[] file, string filename)
+            => await SendMultipart<TData, TData>(HttpMethod.Put, method, contentObject, file, filename);
 
         internal async Task DeleteJson<TData>(string method, TData contentObject)
             => await SendJson<TData, TData>(HttpMethod.Delete, method, contentObject);
@@ -70,12 +61,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro
             return await SendAsync<TOut>(httpMethod, method, content);
         }
 
-        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method)
-        {
-            return await SendAsync<TOut>(httpMethod, method);
-        }
-
-        private async Task<TOut> SendJson<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename, string folderId = null)
+        private async Task<TOut> SendMultipart<TOut, TData>(HttpMethod httpMethod, string method, TData contentObject, byte[] file, string filename, string folderId = null)
         {
             var json = JsonConvert.SerializeObject(contentObject);
             var multipart = new MultipartFormDataContent();
@@ -103,8 +89,8 @@ namespace MRS.DocumentManagement.Connection.MrsPro
         private HttpRequestMessage CreateRequest(
             HttpMethod methodType,
             string method,
-            HttpContent content,
-            object[] arguments)
+            HttpContent content = null,
+            params object[] arguments)
         {
             var url = $"{BaseUrl}{method}";
             var request = CreateRequest(methodType, url, arguments);

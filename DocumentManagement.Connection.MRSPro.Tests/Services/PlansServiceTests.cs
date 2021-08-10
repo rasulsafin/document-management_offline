@@ -85,7 +85,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
         public async Task GetPlanUriAsync_GetingPlanUri_ReturnsPlanUri(string id,
             string parentId)
         {
-            var uri = await service.GetPlanUriAsync(id, parentId);
+            var uri = await service.GetUriAsync(id, parentId);
 
             Assert.IsNotNull(uri);
         }
