@@ -200,8 +200,7 @@ namespace MRS.DocumentManagement.Utility
                 .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
-                .Where(x => !newValues.Any(t =>
-                    t.ExternalID == x.EnumerationValue.ExternalId))
+                .Where(x => newValues.All(t => t.ExternalID != x.EnumerationValue.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
 
@@ -210,7 +209,7 @@ namespace MRS.DocumentManagement.Utility
                 var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
                 if (linkedType != null)
                 {
-                    foreach (var enumVal in newValues)
+                    foreach (var enumVal in enumType.EnumerationValues)
                     {
                         await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
                     }
