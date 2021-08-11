@@ -6,8 +6,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
+using MRS.DocumentManagement.General;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Exceptions;
+using MRS.DocumentManagement.Interface.Filters;
 using MRS.DocumentManagement.Interface.Services;
 using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
 
@@ -172,15 +175,16 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// Return list of objectives, linked to specific project.
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
+        /// <param name="filter">Parameters for filtration.</param>
         /// <returns>Collection of objectives.</returns>
-        /// <response code="200">Collection of objectives linked to project.</response>
+        /// <response code="200">Collection of objectives linked to project with the pagination info.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
         [HttpGet]
         [Route("project/{projectID}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -188,11 +192,13 @@ namespace MRS.DocumentManagement.Api.Controllers
             [FromRoute]
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
-            int projectID)
+            int projectID,
+            [FromQuery]
+            ObjectiveFilterParameters filter)
         {
             try
             {
-                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID));
+                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)

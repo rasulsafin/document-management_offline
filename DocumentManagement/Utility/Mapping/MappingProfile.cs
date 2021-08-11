@@ -5,6 +5,7 @@ using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Utility.Mapping.Converters;
 using MRS.DocumentManagement.Utility.Mapping.Resolvers;
+using MRS.DocumentManagement.Utility.Pagination;
 
 namespace MRS.DocumentManagement.Utility.Mapping
 {

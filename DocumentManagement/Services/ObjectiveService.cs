@@ -11,9 +11,11 @@ using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Filters;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
+using MRS.DocumentManagement.Utility.Pagination;
 using MRS.DocumentManagement.Utils.ReportCreator;
 
 namespace MRS.DocumentManagement.Services
@@ -210,28 +212,46 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             try
             {
-                var dbProject = await context.Projects.Unsynchronized()
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.DynamicFields)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.ObjectiveType)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
-                    .Include(x => x.Objectives)
-                        .ThenInclude(x => x.Location)
-                            .ThenInclude(x => x.Item)
-                    .FindOrThrowAsync(x => x.ID, (int)projectID);
 
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                return dbProject.Objectives.Select(x => mapper.Map<ObjectiveToListDto>(x)).ToList();
+                var allObjectives = context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Where(x => x.ProjectID == dbProject.ID);
+
+                var totalCount = await allObjectives.CountAsync();
+                var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
+
+                var objectives = await allObjectives
+                    .ByPages(x => x.ID, filter.PageNumber, filter.PageSize)
+                    .Include(x => x.ObjectiveType)
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Location)
+                            .ThenInclude(x => x.Item)
+                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                    .ToListAsync();
+
+                return new PagedListDto<ObjectiveToListDto>()
+                {
+                    Items = objectives,
+                    PageData = new PagedDataDto()
+                    {
+                        CurrentPage = filter.PageNumber,
+                        PageSize = filter.PageSize,
+                        TotalCount = totalCount,
+                        TotalPages = totalPages,
+                    },
+                };
             }
             catch (Exception ex)
             {
