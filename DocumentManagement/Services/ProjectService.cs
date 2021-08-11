@@ -10,6 +10,7 @@ using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -43,7 +44,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(projectToCreate.Title))
-                    throw new ArgumentException("Title of the project is empty", nameof(projectToCreate));
+                    throw new ArgumentValidationException("Title of the project is empty", nameof(projectToCreate));
                 var projectToDb = mapper.Map<Project>(projectToCreate);
                 logger.LogDebug("Mapped project: {@ProjectToDb}", projectToDb);
                 await context.Projects.AddAsync(projectToDb);
@@ -82,7 +83,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add project {@ProjectToCreate}", projectToCreate);
-                throw;
+                if (ex is ArgumentValidationException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -98,10 +101,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
                 return mapper.Map<ProjectDto>(dbProject);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get project {ProjectID}", projectID);
-                throw;
+                logger.LogError(ex, "Can't get project {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -115,10 +120,10 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found projects: {@DBProjects}", dbProjects);
                 return dbProjects.Select(x => mapper.Map<ProjectToListDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of all projects");
-                throw;
+                logger.LogError(ex, "Can't get list of all projects");
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -142,10 +147,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Mapped projects: {@UserProjects}", userProjects);
                 return userProjects;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of projects");
-                throw;
+                logger.LogError(ex, "Can't get list of projects");
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -163,10 +170,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found users: {@UsersDb}", usersDb);
                 return usersDb.Select(x => mapper.Map<UserDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of users from project {ProjectID}", projectID);
-                throw;
+                logger.LogError(ex, "Can't get list of users from project {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -202,10 +211,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't link project {ProjectID} to list of users {@Users}", projectID, users);
-                throw;
+                logger.LogError(ex, "Can't link project {ProjectID} to list of users {@Users}", projectID, users);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -224,7 +235,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't delete project {ProjectID}", projectID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -256,10 +269,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't unlink project {ProjectID} from list of users {@Users}", projectID, users);
-                throw;
+                logger.LogError(ex, "Can't unlink project {ProjectID} from list of users {@Users}", projectID, users);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -270,7 +285,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (string.IsNullOrWhiteSpace(project.Title))
-                    throw new ArgumentException("Title of the project is empty", nameof(project));
+                    throw new ArgumentValidationException("Title of the project is empty", nameof(project));
                 var projectID = project.ID;
                 var projectFromDb = await context.Projects
                    .Include(x => x.Items)
@@ -297,10 +312,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't update project {@Project}", project);
-                throw;
+                logger.LogError(ex, "Can't update project {@Project}", project);
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 

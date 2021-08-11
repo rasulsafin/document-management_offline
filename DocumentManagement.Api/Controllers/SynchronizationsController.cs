@@ -62,7 +62,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["CouldNotSynchronize"], ex.Message);
             }
@@ -98,7 +98,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -139,7 +139,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
@@ -176,7 +176,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }

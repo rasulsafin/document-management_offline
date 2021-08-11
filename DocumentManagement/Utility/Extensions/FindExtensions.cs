@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Exceptions;
+using MRS.DocumentManagement.Interface.Exceptions;
 
 namespace MRS.DocumentManagement.Utility.Extensions
 {
@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Utility.Extensions
         {
             if (!(property.Body is MemberExpression body) || !(body.Expression is ParameterExpression))
             {
-                throw new ArgumentException(
+                throw new ArgumentValidationException(
                     $"The lambda expression must return member of {typeof(T).Name}",
                     nameof(property));
             }

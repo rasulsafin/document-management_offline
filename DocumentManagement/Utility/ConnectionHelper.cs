@@ -230,7 +230,7 @@ namespace MRS.DocumentManagement.Utility
             if (user == null)
             {
                 progress?.Report(1.0);
-                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", });
+                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутствует в базе!", });
             }
 
             token.ThrowIfCancellationRequested();

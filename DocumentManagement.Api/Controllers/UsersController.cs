@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -47,7 +46,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var users = await service.GetAllUsers();
                 return Ok(users);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -86,11 +85,11 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var userId = await service.Add(data);
                 return Created(string.Empty, userId);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(this, 400, localizer["CheckValidUserToCreate_AlreadyExists"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
             }
@@ -127,7 +126,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
@@ -169,11 +168,15 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Update(user);
                 return Ok(true);
             }
+            catch (ArgumentValidationException ex)
+            {
+                return CreateProblemResult(this, 400, localizer["CheckValidUserID_Missing"], ex.Message);
+            }
             catch (ANotFoundException ex)
             {
-                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
+                return CreateProblemResult(this, 404, localizer["CheckValidUserToCreate_AlreadyExists"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -214,11 +217,11 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(this, 400, localizer["WrongPassword"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError"], ex.Message);
             }
@@ -259,7 +262,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -296,7 +299,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -332,7 +335,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -362,7 +365,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var exists = await service.Exists(new ID<UserDto>(userID));
                 return Ok(exists);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -391,7 +394,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var exists = await service.Exists(login);
                 return Ok(exists);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
