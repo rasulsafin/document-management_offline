@@ -218,18 +218,18 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             try
             {
-
                 var dbProject = await context.Projects.Unsynchronized()
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
                 var allObjectives = context.Objectives
-                    .AsNoTracking()
-                    .Unsynchronized()
+                                    .AsNoTracking()
+                                    .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID)
                                     .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
                                     .Where(x => string.IsNullOrEmpty(filter.BimElementParentName) || x.BimElements.Any(e => e.BimElement.ParentName == filter.BimElementParentName))
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
+                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart));
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
