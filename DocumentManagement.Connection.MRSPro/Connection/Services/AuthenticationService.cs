@@ -30,6 +30,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
 
                 Auth.Token = userWithToken.AccessToken;
                 Auth.OrganizationId = userWithToken.OrganizationId;
+                Auth.UserId = userWithToken.Id;
 
                 return new ConnectionStatusDto() { Status = RemoteConnectionStatus.OK, Message = "Connection complete." };
             }
