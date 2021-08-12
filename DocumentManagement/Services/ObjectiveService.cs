@@ -226,12 +226,15 @@ namespace MRS.DocumentManagement.Services
                 var allObjectives = context.Objectives
                     .AsNoTracking()
                     .Unsynchronized()
-                    .Where(x => x.ProjectID == dbProject.ID);
+                                    .Where(x => x.ProjectID == dbProject.ID)
+                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
+                                    .Where(x => string.IsNullOrEmpty(filter.BimElementParentName) || x.BimElements.Any(e => e.BimElement.ParentName == filter.BimElementParentName))
+                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
 
-                var totalCount = await allObjectives.CountAsync();
+                var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
-                var objectives = await allObjectives
+                var objectives = await allObjectives?
                     .ByPages(x => x.ID, filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
@@ -243,7 +246,7 @@ namespace MRS.DocumentManagement.Services
 
                 return new PagedListDto<ObjectiveToListDto>()
                 {
-                    Items = objectives,
+                    Items = objectives ?? Enumerable.Empty<ObjectiveToListDto>(),
                     PageData = new PagedDataDto()
                     {
                         CurrentPage = filter.PageNumber,
