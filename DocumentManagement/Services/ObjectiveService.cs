@@ -231,6 +231,25 @@ namespace MRS.DocumentManagement.Services
                                     .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
                                     .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart));
 
+                if (!(filter.ParentCandidate == 0 || filter.ParentCandidate == null))
+                {
+                    var list = new List<int>();
+                    var obj = context.Objectives
+                        .AsNoTracking()
+                        .Unsynchronized()
+                        .Where(x => x.ProjectID == dbProject.ID)
+                        .Include(x => x.ChildrenObjectives)
+                        .FirstOrDefault(o => o.ID == (int)filter.ParentCandidate);
+
+                    if (obj != null)
+                    {
+                        list.Add((int)filter.ParentCandidate);
+                        list.AddRange(obj.ChildrenObjectives?.Select(x => x.ID) ?? Enumerable.Empty<int>());
+                    }
+
+                    allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
+                }
+
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
