@@ -10,6 +10,6 @@
 
         public string TitlePart { get; set; }
 
-        public int? ParentCandidate { get; set; }
+        public int? ExceptChildrenOf { get; set; }
     }
 }
