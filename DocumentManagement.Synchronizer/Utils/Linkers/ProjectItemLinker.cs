@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Synchronization.Models;
@@ -8,8 +9,21 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 {
     internal class ProjectItemLinker : AItemLinker
     {
+        private readonly ILogger<ProjectItemLinker> logger;
+
+        public ProjectItemLinker(ILogger<ProjectItemLinker> logger)
+        {
+            this.logger = logger;
+            logger.LogTrace("ProjectItemLinker created");
+        }
+
         public override Task Link(DMContext context, Item item, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Link started with item: {@Item}, parent: {@Parent}, entityType: {@EntityType}",
+                item,
+                parent,
+                entityType);
             var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
             project.Items ??= new List<Item>();
             project.Items.Add(item);
@@ -18,6 +32,11 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 
         public override Task Unlink(DMContext context, Item item, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Unlink started with item: {@Item}, parent: {@Parent}, entityType: {@EntityType}",
+                item,
+                parent,
+                entityType);
             var project = LinkingUtils.CheckAndUpdateLinking<Project>(parent, entityType);
             item.ProjectID = null;
 

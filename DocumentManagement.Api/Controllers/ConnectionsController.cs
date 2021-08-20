@@ -224,42 +224,5 @@ namespace MRS.DocumentManagement.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
         }
-
-        /// <summary>
-        /// Synchronize user's data.
-        /// </summary>
-        /// <param name="userID">User's ID.</param>
-        /// <returns>Id of the created long request.</returns>
-        /// <response code="202">Request is accepted but can take a long time to proceed. Check with the /RequestQueue to get the result.</response>
-        /// <response code="400">Invalid id.</response>
-        /// <response code="404">User was not found.</response>
-        /// <response code="500">Something went wrong while server tried to synchronize.</response>
-        [HttpGet]
-        [Route("synchronization/{userID}")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(RequestID), StatusCodes.Status202Accepted)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Synchronize(
-            [FromRoute]
-            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
-            [CheckValidID]
-            int userID)
-        {
-            try
-            {
-                var result = await service.Synchronize(new ID<UserDto>(userID));
-                return Accepted(result);
-            }
-            catch (ANotFoundException ex)
-            {
-                return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
-            }
-            catch (Exception ex)
-            {
-                return CreateProblemResult(this, 500, localizer["CouldNotSynchronize"], ex.Message);
-            }
-        }
     }
 }

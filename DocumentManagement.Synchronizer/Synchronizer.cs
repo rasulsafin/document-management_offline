@@ -5,10 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Synchronization.Extensions;
 using MRS.DocumentManagement.Synchronization.Interfaces;
 using MRS.DocumentManagement.Synchronization.Models;
 using MRS.DocumentManagement.Synchronization.Utils;
@@ -21,17 +24,20 @@ namespace MRS.DocumentManagement.Synchronization
         private readonly IMapper mapper;
         private readonly ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy;
         private readonly ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy;
+        private readonly ILogger<Synchronizer> logger;
 
         public Synchronizer(
             DMContext dbContext,
             IMapper mapper,
             ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy,
-            ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy)
+            ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy,
+            ILogger<Synchronizer> logger)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
             this.projectStrategy = projectStrategy;
             this.objectiveStrategy = objectiveStrategy;
+            this.logger = logger;
         }
 
         public async Task<ICollection<SynchronizingResult>> Synchronize(
@@ -41,6 +47,9 @@ namespace MRS.DocumentManagement.Synchronization
                 IProgress<double> progress,
                 CancellationToken token)
         {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Synchronization started with {@Data}", data);
+
             var results = new List<SynchronizingResult>();
             var projectProgress = new Progress<double>(v => { progress.Report(v / 2); });
             var objectiveProgress = new Progress<double>(v => { progress.Report((v + 1) / 2); });
@@ -53,7 +62,7 @@ namespace MRS.DocumentManagement.Synchronization
                 var lastSynchronization =
                     (await dbContext.Synchronizations.Where(x => x.UserID == userID)
                        .OrderBy(x => x.Date)
-                       .LastOrDefaultAsync())?.Date ??
+                       .LastOrDefaultAsync(CancellationToken.None))?.Date ??
                     DateTime.MinValue;
                 context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info));
 
@@ -61,6 +70,7 @@ namespace MRS.DocumentManagement.Synchronization
                     lastSynchronization,
                     dbContext.Projects.Where(data.ProjectsFilter),
                     context.ProjectsSynchronizer);
+                logger.LogDebug("Updated project ids: {@IDs}", (object)ids);
                 results.AddRange(
                     await projectStrategy.Synchronize(
                         data,
@@ -70,12 +80,15 @@ namespace MRS.DocumentManagement.Synchronization
                         x => x.ExternalID == null || ids.Contains(x.ExternalID),
                         x => x.ExternalID == null || ids.Contains(x.ExternalID),
                         progress: projectProgress));
+                logger.LogInformation("Projects synchronized");
                 var unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
                    .Select(x => x.Object.ID)
                    .ToArray();
+                logger.LogDebug("Unsynchronized projects: {@IDs}", unsyncProjectsIDs);
                 var unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
                    .Select(x => x.Object.ExternalID)
                    .ToArray();
+                logger.LogDebug("Unsynchronized projects: {@IDs}", (object)unsyncProjectsExternalIDs);
 
                 token.ThrowIfCancellationRequested();
 
@@ -83,6 +96,7 @@ namespace MRS.DocumentManagement.Synchronization
                     lastSynchronization,
                     dbContext.Objectives.Where(data.ObjectivesFilter),
                     context.ObjectivesSynchronizer);
+                logger.LogDebug("Updated objective ids: {@IDs}", (object)ids);
                 results.AddRange(
                     await objectiveStrategy.Synchronize(
                         data,
@@ -96,6 +110,7 @@ namespace MRS.DocumentManagement.Synchronization
                          && !unsyncProjectsIDs.Contains(x.ProjectID)
                          && !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
                         progress: objectiveProgress));
+                logger.LogInformation("Objective synchronized");
 
                 token.ThrowIfCancellationRequested();
 
@@ -104,17 +119,24 @@ namespace MRS.DocumentManagement.Synchronization
                     {
                         Date = data.Date,
                         UserID = data.User.ID,
-                    });
-                await dbContext.SynchronizationSaveAsync(data.Date);
+                    },
+                    CancellationToken.None);
+                logger.LogTrace("Added synchronization date");
+                await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None);
+                logger.LogDebug("DB updated");
                 await SynchronizationFinalizer.Finalize(dbContext);
-                await dbContext.SynchronizationSaveAsync(data.Date);
+                logger.LogTrace("Synchronization finalized");
+                await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None);
+                logger.LogDebug("DB updated");
             }
             catch (OperationCanceledException)
             {
+                logger.LogCanceled();
                 return results;
             }
             catch (Exception e)
             {
+                logger.LogCritical(e, "Synchronization failed");
                 results.Add(new SynchronizingResult { Exception = e });
                 progress?.Report(1.0);
                 return results;
@@ -123,6 +145,7 @@ namespace MRS.DocumentManagement.Synchronization
             {
                 if (context is IDisposable disposable)
                     disposable.Dispose();
+                logger.LogTrace("Context closed");
             }
 
             return results;
@@ -131,18 +154,23 @@ namespace MRS.DocumentManagement.Synchronization
         private async Task<string[]> GetUpdatedIDs<TDB, TDto>(DateTime date, IQueryable<TDB> set, ISynchronizer<TDto> synchronizer)
             where TDB : class, ISynchronizable<TDB>
         {
+            logger.LogTrace("GetUpdatedIDs started with date: {@Date}", date);
+
             // TODO: GetAllIDs to know what is removed from remote.
             var remoteUpdated = (await synchronizer.GetUpdatedIDs(date)).ToArray();
+            logger.LogDebug("Updated on remote: {@IDs}", (object)remoteUpdated);
             var localUpdated = await set.Where(x => x.UpdatedAt > date)
                .Where(x => x.ExternalID != null)
                .Select(x => x.ExternalID)
                .ToListAsync();
+            logger.LogDebug("Updated on local: {@IDs}", localUpdated);
             var localRemoved = await set
                .Where(x => x.ExternalID != null)
                .GroupBy(x => x.ExternalID)
                .Where(x => x.Count() < 2)
                .Select(x => x.Key)
                .ToListAsync();
+            logger.LogDebug("Removed on local: {@IDs}", localRemoved);
             return remoteUpdated.Union(localUpdated).Union(localRemoved).ToArray();
         }
     }

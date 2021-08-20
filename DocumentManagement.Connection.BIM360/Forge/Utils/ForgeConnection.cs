@@ -77,9 +77,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 arguments,
                 settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token: GetToken()) : default);
 
-            if (settings.Content != null)
+            if (settings.CreateContent != null)
             {
-                request.Content = settings.Content;
+                request.Content = settings.CreateContent();
             }
             else if (settings.Stream != null)
             {

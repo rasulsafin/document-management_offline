@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.Synchronization.Interfaces;
@@ -9,8 +10,21 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 {
     internal class DynamicFieldDynamicFieldLinker : ILinker<DynamicField>
     {
+        private readonly ILogger<DynamicFieldDynamicFieldLinker> logger;
+
+        public DynamicFieldDynamicFieldLinker(ILogger<DynamicFieldDynamicFieldLinker> logger)
+        {
+            this.logger = logger;
+            logger.LogTrace("DynamicFieldDynamicFieldLinker created");
+        }
+
         public Task Link(DMContext context, DynamicField field, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Link started with field: {@Field}, parent: {@Parent}, entityType: {@EntityType}",
+                field,
+                parent,
+                entityType);
             var p = LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
             p.ChildrenDynamicFields ??= new List<DynamicField>();
             p.ChildrenDynamicFields.Add(field);
@@ -19,6 +33,11 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 
         public Task Unlink(DMContext context, DynamicField field, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Unlink started with field: {@Field}, parent: {@Parent}, entityType: {@EntityType}",
+                field,
+                parent,
+                entityType);
             var p =  LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
             field.ParentField = null;
 
@@ -33,6 +52,11 @@ namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
 
         public Task Update(DMContext context, DynamicField field, object parent, EntityType entityType)
         {
+            logger.LogTrace(
+                "Update started with field: {@Field}, parent: {@Parent}, entityType: {@EntityType}",
+                field,
+                parent,
+                entityType);
             LinkingUtils.CheckAndUpdateLinking<DynamicField>(parent, entityType);
             if (entityType != EntityType.Remote)
                 context.DynamicFields.Update(field);

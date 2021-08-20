@@ -120,7 +120,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull(date);
-            await filler.UpdateIssueTypesIfNull();
+            await filler.UpdateIssueTypes();
             return context.Snapshot.IssueEnumerable.Where(x => x.Value.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.Key)
                .ToList();
@@ -173,9 +173,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                 foreach (var attachment in attachments)
                 {
-                    var (item, version) = await itemsService.GetAsync(found.ProjectSnapshot.ID, attachment.Attributes.Urn);
+                    try
+                    {
+                        var (item, version) = await itemsService.GetAsync(
+                            found.ProjectSnapshot.ID,
+                            attachment.Attributes.Urn);
 
-                    found.Items.Add(new ItemSnapshot(item) { Version = version });
+                        found.Items.Add(new ItemSnapshot(item) { Version = version });
+                    }
+                    catch (Exception e)
+                    {
+                    }
                 }
 
                 result.Add(await converterToDto.Convert(found));
