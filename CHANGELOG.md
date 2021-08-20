@@ -10,7 +10,7 @@
 ### Безопасность:
 
 
-## [1.0.4] - 2021-xx-xx
+## [1.0.4] - 2021-08-20
 
 ### Добавлено:
 
@@ -20,7 +20,7 @@
 ### Исправлено:
 
 * Размер файлов при получении и конвертации;
-* Создание значений перечислений;
+* Создание значений перечислений.
 
 
 ## [1.0.3] - 2021-07-30
@@ -136,7 +136,8 @@
 * Синхронизация с Google Drive;
 * Синхронизация с Bim 360.
 
-[Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4
 [1.0.3]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.3
 [1.0.2]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.2
 [1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1
