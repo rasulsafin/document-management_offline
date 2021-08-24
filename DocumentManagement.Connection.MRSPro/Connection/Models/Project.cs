@@ -1,13 +1,16 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Project : IElement
+    public class Project : IElementObject
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
 
+        [CanBePatched]
         [DataMember(Name = "ancestry")]
         public string Ancestry { get; set; }
 
@@ -26,17 +29,12 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         [DataMember(Name = "parentId")]
         public string ParentId { get; set; }
 
+        [CanBePatched]
         [DataMember(Name = "name")]
         public string Name { get; set; }
 
-        public string Title { get => Name; set => Name = value; }
+        public IEnumerable<IElementAttachment> Attachments { get; set; }
 
-        public string Description { get; set; } = string.Empty;
-
-        public long LastModifiedDate { get; set; }
-
-        public long DueDate { get; set; }
-
-        public string State { get; set; }
+        public bool HasAttachments { get; set; }
     }
 }

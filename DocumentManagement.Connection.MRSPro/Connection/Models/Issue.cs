@@ -1,9 +1,11 @@
+using System.Collections.Generic;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Models
 {
     [DataContract]
-    public class Issue : IElement
+    public class Issue : IElementObject
     {
         [DataMember(Name = "id")]
         public string Id { get; set; }
@@ -59,5 +61,9 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
 
         [DataMember(Name = "isReopened")]
         public bool IsReopened { get; set; }
+
+        public IEnumerable<IElementAttachment> Attachments { get; set; }
+
+        public bool HasAttachments { get; set; }
     }
 }

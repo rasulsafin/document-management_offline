@@ -3,19 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 using MRS.DocumentManagement.Connection.MrsPro.Models;
 using static MRS.DocumentManagement.Connection.MrsPro.Constants;
 
 namespace MRS.DocumentManagement.Connection.MrsPro.Services
 {
-    public class IssuesService : Service, IElementService
+    public class IssuesService : Service
     {
         private static readonly string BASE_URL = "/task";
+        private static readonly string BASE_EXTRA_URL = $"/extra{BASE_URL}";
+        private readonly AttachmentsService attachmentsService;
 
-        public IssuesService(MrsProHttpConnection connection)
-            : base(connection) { }
+        public IssuesService(MrsProHttpConnection connection, AttachmentsService attachmentsService)
+            : base(connection)
+        {
+            this.attachmentsService = attachmentsService;
+        }
 
-        public async Task<IEnumerable<IElement>> GetAll(DateTime date)
+        internal async Task<IEnumerable<Issue>> GetAll(DateTime date)
         {
             var listOfAllObjectives = await HttpConnection.GetListOf<Issue>(BASE_URL);
             var unixDate = date.ToUnixTime();
@@ -23,7 +29,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             return list;
         }
 
-        public async Task<IEnumerable<IElement>> TryGetByIds(IReadOnlyCollection<string> ids)
+        internal async Task<IEnumerable<Issue>> TryGetByIds(IReadOnlyCollection<string> ids)
         {
             try
             {
@@ -36,7 +42,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<IElement> TryGetById(string id)
+        internal async Task<Issue> TryGetById(string id)
         {
             try
             {
@@ -49,11 +55,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<IElement> TryPost(IElement element)
+        internal async Task<Issue> TryPost(Issue element)
         {
             try
             {
-                var result = await HttpConnection.PostJson<Issue>(BASE_URL, element as Issue);
+                var result = await HttpConnection.PostJson<Issue>(BASE_URL, element);
                 return result;
             }
             catch
@@ -62,7 +68,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<IElement> TryPatch(UpdatedValues valuesToPatch)
+        internal async Task<Issue> TryPatch(UpdatedValues valuesToPatch)
         {
             try
             {
@@ -75,7 +81,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             }
         }
 
-        public async Task<bool> TryDelete(string id)
+        internal async Task<bool> TryDelete(string id)
         {
             try
             {
@@ -85,6 +91,25 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Services
             catch
             {
                 return false;
+            }
+        }
+
+        internal async Task<IEnumerable<IElementAttachment>> GetAttachments(string ancestry)
+        {
+            var result = await attachmentsService.TryGetByParentIdAsync(ancestry);
+            return result;
+        }
+
+        internal async Task<IEnumerable<IssueExtraInfo>> TryGetAttachmentInfoByIds(IReadOnlyCollection<string> ids)
+        {
+            try
+            {
+                var idsStr = string.Join(QUERY_SEPARATOR, ids);
+                return await HttpConnection.GetListOf<IssueExtraInfo>(GetByIds(BASE_EXTRA_URL), idsStr);
+            }
+            catch
+            {
+                return null;
             }
         }
     }

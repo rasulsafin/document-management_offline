@@ -1,6 +1,4 @@
-using MRS.DocumentManagement.Interface.Exceptions;
-
-namespace MRS.DocumentManagement.Exceptions
+namespace MRS.DocumentManagement.Interface.Exceptions
 {
     public class NotFoundException<T> : ANotFoundException
     {
@@ -11,6 +9,11 @@ namespace MRS.DocumentManagement.Exceptions
 
         public NotFoundException(string propertyName, string propertyValue)
             : base($"{typeof(T).Name} with {propertyName?.ToLower()} {propertyValue} not found")
+        {
+        }
+
+        public NotFoundException(string message)
+           : base(message)
         {
         }
     }

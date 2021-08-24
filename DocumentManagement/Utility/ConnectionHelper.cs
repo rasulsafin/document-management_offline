@@ -200,8 +200,7 @@ namespace MRS.DocumentManagement.Utility
                 .SelectMany(x => x.EnumerationValues)?.ToList() ?? Enumerable.Empty<EnumerationValueExternalDto>();
             var currentEnumerationValues = connectionInfo.EnumerationValues.ToList();
             var valuesToRemove = currentEnumerationValues?
-                .Where(x => !newValues.Any(t =>
-                    t.ExternalID == x.EnumerationValue.ExternalId))
+                .Where(x => newValues.All(t => t.ExternalID != x.EnumerationValue.ExternalId))
                 .ToList();
             context.ConnectionInfoEnumerationValues.RemoveRange(valuesToRemove);
 
@@ -210,7 +209,7 @@ namespace MRS.DocumentManagement.Utility
                 var linkedType = await LinkEnumerationTypes(enumType, connectionInfo);
                 if (linkedType != null)
                 {
-                    foreach (var enumVal in newValues)
+                    foreach (var enumVal in enumType.EnumerationValues)
                     {
                         await LinkEnumerationValues(enumVal, linkedType, connectionInfo);
                     }
@@ -231,7 +230,7 @@ namespace MRS.DocumentManagement.Utility
             if (user == null)
             {
                 progress?.Report(1.0);
-                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутвует в базе!", });
+                return new RequestResult(new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = "Пользователь отсутствует в базе!", });
             }
 
             token.ThrowIfCancellationRequested();
@@ -265,6 +264,9 @@ namespace MRS.DocumentManagement.Utility
                 progress?.Report(1.0);
                 return new RequestResult( new ConnectionStatusDto() { Status = RemoteConnectionStatus.Error, Message = e.Message });
             }
+
+            if (status.Status != RemoteConnectionStatus.OK)
+                return new RequestResult(status);
 
             // Update connection info
             connectionInfoExternalDto = await connection.UpdateConnectionInfo(connectionInfoExternalDto);

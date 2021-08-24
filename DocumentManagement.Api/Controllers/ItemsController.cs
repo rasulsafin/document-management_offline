@@ -60,7 +60,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidItemID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -97,7 +97,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidItemID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -134,7 +134,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -171,7 +171,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -179,7 +179,17 @@ namespace MRS.DocumentManagement.Api.Controllers
 
         /// <summary>
         /// Download files from remote connection to local storage.
-        /// </summary>
+        /// </summary>        
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Items/{userID}
+        ///     [
+        ///        {"id": 1},
+        ///        {"id": 2},
+        ///        {"id": 3}
+        ///     ]
+        /// </remarks>
         /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>Id of the created long request.</returns>
@@ -203,7 +213,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var result = await service.DownloadItems(new ID<UserDto>(userID), itemIds);
                 return Accepted(result);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["CouldNotDownload"], ex.Message);
             }
@@ -240,7 +250,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 501, localizer["MethodIsNotImplemented"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }

@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.MrsPro.Models
         public string Lang { get; set; }
 
         [DataMember(Name = "last_online")]
-        public LastOnline LastOnline { get; set; }
+        public object LastOnline { get; set; }
 
         [DataMember(Name = "name")]
         public string Name { get; set; }

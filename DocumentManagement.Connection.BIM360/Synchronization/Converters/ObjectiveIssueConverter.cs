@@ -13,6 +13,7 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
@@ -233,7 +234,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 else
                 {
                     item = itemSnapshot.Entity;
-                    var size = new FileInfo(obj.Location.Item.FullPath).Length;
+                    var info = new FileInfo(obj.Location.Item.FullPath);
+                    var size = info.Exists ? info.Length : 0;
                     version = itemSnapshot.Version.Attributes.StorageSize == size
                         ? itemSnapshot.Version
                         : await GetVersion(item?.ID, size);
