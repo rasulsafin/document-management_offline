@@ -26,6 +26,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         string EnumDisplayName { get; }
 
         /// <summary>
+        /// Gets whether the field can contain null value.
+        /// </summary>
+        bool CanBeNull { get; }
+
+        /// <summary>
+        /// Gets identifier for a null value for the current field.
+        /// </summary>
+        string NullID { get; }
+
+        /// <summary>
         /// Gets ordered identifiers of this variants.
         /// </summary>
         /// <param name="variants">Variants required to get identifiers.</param>
@@ -62,9 +72,5 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         /// <param name="externalID">The stored identifier with multiple variant IDs.</param>
         /// <returns>Multiple variant IDs.</returns>
         IEnumerable<TVariantID> DeserializeID(string externalID);
-
-        bool CanBeNull { get; }
-
-        string NullID { get; }
     }
 }
