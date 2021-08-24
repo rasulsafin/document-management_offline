@@ -8,7 +8,6 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
@@ -134,62 +133,68 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             foreach (var id in ids)
             {
-                var found = context.Snapshot.IssueEnumerable.FirstOrDefault(x => x.Key == id).Value;
-
-                if (found == null)
+                try
                 {
-                    foreach (var project in context.Snapshot.ProjectEnumerable)
-                    {
-                        var container = project.Value.IssueContainer;
-                        Issue received = null;
+                    var found = context.Snapshot.IssueEnumerable.FirstOrDefault(x => x.Key == id).Value;
 
+                    if (found == null)
+                    {
+                        foreach (var project in context.Snapshot.ProjectEnumerable)
+                        {
+                            var container = project.Value.IssueContainer;
+                            Issue received = null;
+
+                            try
+                            {
+                                received = await issuesService.GetIssueAsync(container, id);
+                            }
+                            catch
+                            {
+                            }
+
+                            if (received != null)
+                            {
+                                if (IssueUtilities.IsRemoved(received))
+                                    break;
+
+                                found = new IssueSnapshot(received, project.Value);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (found == null)
+                        continue;
+
+                    found.Items = new List<ItemSnapshot>();
+
+                    var attachments = await issuesService.GetAttachmentsAsync(
+                        found.ProjectSnapshot.IssueContainer,
+                        found.ID);
+
+                    foreach (var attachment in attachments)
+                    {
                         try
                         {
-                            received  = await issuesService.GetIssueAsync(container, id);
-                        }
-                        catch
-                        {
-                        }
+                            var (item, version) = await itemsService.GetAsync(
+                                found.ProjectSnapshot.ID,
+                                attachment.Attributes.Urn);
 
-                        if (received  != null)
+                            found.Items.Add(new ItemSnapshot(item) { Version = version });
+                        }
+                        catch (Exception e)
                         {
-                            if (IssueUtilities.IsRemoved(received))
-                                break;
-
-                            found = new IssueSnapshot(received, project.Value);
-                            break;
                         }
                     }
+
+                    result.Add(await converterToDto.Convert(found));
+
+                    if (!found.ProjectSnapshot.Issues.ContainsKey(found.Entity.ID))
+                        found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
                 }
-
-                if (found == null)
-                    continue;
-
-                found.Items = new List<ItemSnapshot>();
-
-                var attachments = await issuesService.GetAttachmentsAsync(
-                    found.ProjectSnapshot.IssueContainer,
-                    found.ID);
-
-                foreach (var attachment in attachments)
+                catch (Exception e)
                 {
-                    try
-                    {
-                        var (item, version) = await itemsService.GetAsync(
-                            found.ProjectSnapshot.ID,
-                            attachment.Attributes.Urn);
-
-                        found.Items.Add(new ItemSnapshot(item) { Version = version });
-                    }
-                    catch (Exception e)
-                    {
-                    }
                 }
-
-                result.Add(await converterToDto.Convert(found));
-
-                if (!found.ProjectSnapshot.Issues.ContainsKey(found.Entity.ID))
-                    found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
             }
 
             return result;
