@@ -85,6 +85,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 containerID,
                 issueID);
 
+        public async Task<List<RootCause>> GetRootCausesAsync(string containerID)
+            => await PaginationHelper.GetItemsByPages<RootCause>(
+                connection,
+                Resources.GetRootCausesMethod,
+                containerID);
+
         public Task<object> GetMeAsync()
         {
             throw new NotImplementedException();

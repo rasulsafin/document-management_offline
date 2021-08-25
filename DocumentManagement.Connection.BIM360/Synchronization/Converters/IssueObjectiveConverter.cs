@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
@@ -29,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,
                 Status = await statusConverter.Convert(issue.Attributes.Status),
-                DynamicFields = GetDynamicFields(),
+                DynamicFields = GetDynamicFields(issue),
                 Items = new List<ItemExternalDto>(),
                 BimElements = GetBimElements(issue),
             };
@@ -49,9 +51,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return resultDto;
         }
 
-        private static ICollection<DynamicFieldExternalDto> GetDynamicFields()
+        private static ICollection<DynamicFieldExternalDto> GetDynamicFields(Issue issue)
         {
-            return new List<DynamicFieldExternalDto>();
+            var result = new List<DynamicFieldExternalDto>
+            {
+                new ()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.LOCATION_DETAILS_FIELD_NAME,
+                    Value = issue.Attributes.LocationDescription,
+                    UpdatedAt = issue.Attributes.UpdatedAt ?? default,
+                },
+                new ()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Answer),
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.RESPONSE_FIELD_NAME,
+                    Value = issue.Attributes.Answer,
+                    UpdatedAt = issue.Attributes.UpdatedAt ?? default,
+                },
+            };
+            return result;
         }
 
         private static ICollection<BimElementExternalDto> GetBimElements(Issue issue)

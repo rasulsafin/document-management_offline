@@ -7,10 +7,9 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -18,29 +17,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
     internal class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
+        private readonly Bim360Snapshot snapshot;
         private readonly IssuesService issuesService;
-        private readonly ItemsService itemsService;
         private readonly Authenticator authenticator;
         private readonly ItemsSyncHelper itemsSyncHelper;
-        private readonly Bim360ConnectionContext context;
-        private readonly IBim360SnapshotFiller filler;
+        private readonly SnapshotFiller filler;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
         public Bim360ObjectivesSynchronizer(
-            Bim360ConnectionContext context,
+            Bim360Snapshot snapshot,
             IssuesService issuesService,
-            ItemsService itemsService,
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
-            IBim360SnapshotFiller filler,
+            SnapshotFiller filler,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
-            this.context = context;
+            this.snapshot = snapshot;
             this.itemsSyncHelper = itemsSyncHelper;
             this.issuesService = issuesService;
-            this.itemsService = itemsService;
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
             this.filler = filler;
@@ -53,18 +49,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var issue = await converterToIssue.Convert(obj);
             var project = GetProjectSnapshot(obj);
-            var snapshot = new IssueSnapshot(issue, project);
+            var issueSnapshot = new IssueSnapshot(issue, project);
             var created = await issuesService.PostIssueAsync(project.IssueContainer, issue);
-            snapshot.Entity = created;
-            project.Issues.Add(created.ID, snapshot);
-            var parsedToDto = await converterToDto.Convert(snapshot);
+            issueSnapshot.Entity = created;
+            project.Issues.Add(created.ID, issueSnapshot);
+            var parsedToDto = await converterToDto.Convert(issueSnapshot);
 
             if (obj.Items?.Any() ?? false)
             {
-                snapshot.Items = new List<ItemSnapshot>();
                 var added = await AddItems(obj.Items, project, created);
-                snapshot.Items.AddRange(added.Select(x => new ItemSnapshot(x)));
-                parsedToDto.Items = snapshot.Items.Select(i => i.Entity.ToDto()).ToList();
+                issueSnapshot.Items = added.ToDictionary(x => x.ID, x => new ItemSnapshot(x));
+                parsedToDto.Items = issueSnapshot.Items.Values.Select(i => i.Entity.ToDto()).ToList();
             }
 
             return parsedToDto;
@@ -76,7 +71,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             var issue = await converterToIssue.Convert(obj);
             var project = GetProjectSnapshot(obj);
-            var snapshot = project.Issues[obj.ExternalID];
+            var issueSnapshot = project.Issues[obj.ExternalID];
 
             if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
             {
@@ -85,10 +80,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             }
 
             issue.Attributes.Status = Status.Void;
-            snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
-            project.Issues.Remove(snapshot.ID);
+            issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
+            project.Issues.Remove(issueSnapshot.ID);
 
-            return await converterToDto.Convert(snapshot);
+            return await converterToDto.Convert(issueSnapshot);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
@@ -96,17 +91,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
             var project = GetProjectSnapshot(obj);
-            var snapshot = project.Issues[obj.ExternalID];
-            snapshot.Entity = await converterToIssue.Convert(obj);
-            snapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, snapshot.Entity);
-            var parsedToDto = await converterToDto.Convert(snapshot);
+            var issueSnapshot = project.Issues[obj.ExternalID];
+            issueSnapshot.Entity = await converterToIssue.Convert(obj);
+            issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issueSnapshot.Entity);
+            var parsedToDto = await converterToDto.Convert(issueSnapshot);
 
             if (obj.Items?.Any() ?? false)
             {
-                snapshot.Items ??= new List<ItemSnapshot>();
-                var added = await AddItems(obj.Items, project, snapshot.Entity);
-                snapshot.Items.AddRange(added.Select(x => new ItemSnapshot(x)));
-                parsedToDto.Items = snapshot.Items.Select(i => i.Entity.ToDto()).ToList();
+                var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
+                issueSnapshot.Items = added.ToDictionary(x => x.ID, x => new ItemSnapshot(x));
+                parsedToDto.Items = issueSnapshot.Items.Values.Select(i => i.Entity.ToDto()).ToList();
             }
 
             return parsedToDto;
@@ -116,12 +110,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            await filler.UpdateHubsIfNull();
-            await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
-            return context.Snapshot.IssueEnumerable.Where(x => x.Value.Entity.Attributes.UpdatedAt > date)
-               .Select(x => x.Key)
+            await filler.UpdateRootCauses();
+            return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
+               .Select(x => x.ID)
                .ToList();
         }
 
@@ -135,13 +128,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             {
                 try
                 {
-                    var found = context.Snapshot.IssueEnumerable.FirstOrDefault(x => x.Key == id).Value;
+                    var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.ID == id);
 
                     if (found == null)
                     {
-                        foreach (var project in context.Snapshot.ProjectEnumerable)
+                        foreach (var project in snapshot.ProjectEnumerable)
                         {
-                            var container = project.Value.IssueContainer;
+                            var container = project.IssueContainer;
                             Issue received = null;
 
                             try
@@ -157,40 +150,32 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                 if (IssueUtilities.IsRemoved(received))
                                     break;
 
-                                found = new IssueSnapshot(received, project.Value);
+                                found = new IssueSnapshot(received, project)
+                                {
+                                    Items = new Dictionary<string, ItemSnapshot>(),
+                                };
+
+                                var attachments = await issuesService.GetAttachmentsAsync(
+                                    found.ProjectSnapshot.IssueContainer,
+                                    found.ID);
+
+                                foreach (var attachment in attachments.Where(
+                                    x => project.Items.ContainsKey(x.Attributes.Urn)))
+                                {
+                                    found.Items.Add(
+                                        attachment.ID,
+                                        project.Items[attachment.Attributes.Urn]);
+                                }
+
+                                found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
+
                                 break;
                             }
                         }
                     }
 
-                    if (found == null)
-                        continue;
-
-                    found.Items = new List<ItemSnapshot>();
-
-                    var attachments = await issuesService.GetAttachmentsAsync(
-                        found.ProjectSnapshot.IssueContainer,
-                        found.ID);
-
-                    foreach (var attachment in attachments)
-                    {
-                        try
-                        {
-                            var (item, version) = await itemsService.GetAsync(
-                                found.ProjectSnapshot.ID,
-                                attachment.Attributes.Urn);
-
-                            found.Items.Add(new ItemSnapshot(item) { Version = version });
-                        }
-                        catch (Exception e)
-                        {
-                        }
-                    }
-
-                    result.Add(await converterToDto.Convert(found));
-
-                    if (!found.ProjectSnapshot.Issues.ContainsKey(found.Entity.ID))
-                        found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
+                    if (found != null)
+                        result.Add(await converterToDto.Convert(found));
                 }
                 catch (Exception e)
                 {
@@ -266,7 +251,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         }
 
         private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
-            => context.Snapshot.Hubs.SelectMany(x => x.Value.Projects)
+            => snapshot.Hubs.SelectMany(x => x.Value.Projects)
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
     }

@@ -8,27 +8,26 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
+namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {
-    internal class SnapshotFiller : IBim360SnapshotFiller
+    internal class SnapshotFiller
     {
-        private readonly Bim360ConnectionContext context;
+        private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
 
         public SnapshotFiller(
-            Bim360ConnectionContext context,
+            Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
             IssuesService issuesService,
             FoldersService foldersService)
         {
-            this.context = context;
+            this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
@@ -37,26 +36,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 
         public bool IgnoreTestEntities { private get; set; } = true;
 
-        private Bim360Snapshot Snapshot
-        {
-            get => context?.Snapshot;
-            set => context.Snapshot = value;
-        }
-
         public async Task UpdateHubsIfNull()
         {
-            if (Snapshot.Hubs != null)
+            if (snapshot.Hubs != null)
                 return;
 
-            Snapshot = new Bim360Snapshot { Hubs = new Dictionary<string, HubSnapshot>() };
+            snapshot.Hubs = new Dictionary<string, HubSnapshot>();
             var hubs = await hubsService.GetHubsAsync();
             foreach (var hub in hubs)
-                Snapshot.Hubs.Add(hub.ID, new HubSnapshot(hub));
+                snapshot.Hubs.Add(hub.ID, new HubSnapshot(hub));
         }
 
         public async Task UpdateProjectsIfNull()
         {
-            foreach (var hub in Snapshot.Hubs.Where(hub => hub.Value.Projects == null))
+            await UpdateHubsIfNull();
+
+            foreach (var hub in snapshot.Hubs.Where(hub => hub.Value.Projects == null))
             {
                 var projectsInHub = await projectsService.GetProjectsAsync(hub.Key);
                 hub.Value.Projects = new Dictionary<string, ProjectSnapshot>();
@@ -68,8 +63,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
                     var projectSnapshot = new ProjectSnapshot(p);
-                    hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
+
+                    if (!topFolders.Any())
+                        continue;
+
+                    hub.Value.Projects.Add(p.ID, projectSnapshot);
                     var topFolder = (topFolders.FirstOrDefault(
                             x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
@@ -93,7 +92,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
 
         public async Task UpdateIssuesIfNull(DateTime date = default)
         {
-            foreach (var project in context.Snapshot.ProjectEnumerable.Where(x => x.Value.Issues == null))
+            await UpdateProjectsIfNull();
+
+            foreach (var project in snapshot.ProjectEnumerable.Where(x => x.Issues == null))
             {
                 var filters = new List<Filter>();
 
@@ -104,40 +105,65 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
                 }
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
-                var issues = await issuesService.GetIssuesAsync(project.Value.IssueContainer, filters);
-                project.Value.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project.Value));
+                var issues = await issuesService.GetIssuesAsync(project.IssueContainer, filters);
+                project.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project));
+
+                foreach (var issueSnapshot in project.Issues.Values)
+                {
+                    issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
+                    var attachments = await issuesService.GetAttachmentsAsync(
+                        project.IssueContainer,
+                        issueSnapshot.ID);
+
+                    foreach (var attachment in attachments.Where(
+                        x => project.Items.ContainsKey(x.Attributes.Urn)))
+                    {
+                        issueSnapshot.Items.Add(
+                            attachment.ID,
+                            project.Items[attachment.Attributes.Urn]);
+                    }
+                }
             }
         }
 
         public async Task UpdateIssueTypes()
+            => await UpdateProjectsEnums(
+                p => p.IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
+                new TypeSubtypeEnumCreator(),
+                (project, rootCauseSnapshot) => project.IssueTypes.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+
+        public async Task UpdateRootCauses()
+            => await UpdateProjectsEnums(
+                p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
+                new RootCauseEnumCreator(),
+                (project, rootCauseSnapshot) => project.RootCauses.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+
+        private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
+            Action<ProjectSnapshot> createEmptyEnumVariants,
+            IEnumCreator<T, TSnapshot, TID> creator,
+            Action<ProjectSnapshot, TSnapshot> addSnapshot)
+            where TSnapshot : AEnumVariantSnapshot<T>
         {
-            var dictionary =
-                new Dictionary<IssueSubtype, (ProjectSnapshot projectSnapshot, IssueTypeSnapshot snapshot)>();
+            await UpdateProjectsIfNull();
+            var dictionary = new List<TSnapshot>();
 
-            foreach (var project in context.Snapshot.ProjectEnumerable.Select(x => x.Value))
+            foreach (var project in snapshot.ProjectEnumerable)
             {
-                var types = await issuesService.GetIssueTypesAsync(project.IssueContainer);
-
-                foreach (var info in types.SelectMany(
-                    type => type.Subtypes.Select(
-                        subtype => (project, snapshot: new IssueTypeSnapshot(type, subtype)))))
-                    dictionary.Add(info.snapshot.Entity, info);
-
-                project.IssueTypes = new Dictionary<string, IssueTypeSnapshot>();
+                var variants = await creator.GetVariantsFromRemote(issuesService, project);
+                createEmptyEnumVariants(project);
+                dictionary.AddRange(variants);
             }
 
-            var groups = TypeDFHelper.GetGroupedTypes(
-                dictionary.Select(x => (x.Value.snapshot.ParentType, x.Value.snapshot.Entity)));
+            var groups = DynamicFieldUtilities.GetGroupedTypes(creator, dictionary);
 
-            foreach (var info in groups)
+            foreach (var group in groups)
             {
-                var externalID = TypeDFHelper.GetExternalID(info);
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group));
 
-                foreach (var infoType in info)
+                foreach (var issueTypeSnapshot in group)
                 {
-                    (ProjectSnapshot projectSnapshot, IssueTypeSnapshot snapshot) = dictionary[infoType.subtype];
-                    snapshot.SetExternalID(externalID);
-                    projectSnapshot.IssueTypes.Add(infoType.subtype.ID, snapshot);
+                    issueTypeSnapshot.SetExternalID(externalID);
+                    addSnapshot(issueTypeSnapshot.ProjectSnapshot, issueTypeSnapshot);
                 }
             }
         }

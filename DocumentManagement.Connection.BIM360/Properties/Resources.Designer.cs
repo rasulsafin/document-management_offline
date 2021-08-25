@@ -241,6 +241,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/root-causes.
+        /// </summary>
+        internal static string GetRootCausesMethod {
+            get {
+                return ResourceManager.GetString("GetRootCausesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}/topFolders.
         /// </summary>
         internal static string GetTopFoldersMethod {

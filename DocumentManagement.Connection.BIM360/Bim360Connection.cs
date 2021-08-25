@@ -5,8 +5,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
@@ -15,13 +17,13 @@ using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360Connection : IConnection
+    internal class Bim360Connection : IConnection
     {
         private readonly AuthenticationService authenticationService;
         private readonly Bim360Storage storage;
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
-        private readonly TypeDFHelper typeDfHelper;
+        private readonly EnumerationTypeCreator typeCreator;
         private readonly Authenticator authenticator;
 
         public Bim360Connection(
@@ -30,14 +32,14 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
             TokenHelper tokenHelper,
-            TypeDFHelper typeDfHelper)
+            EnumerationTypeCreator typeCreator)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
             this.storage = storage;
             this.contextFactory = contextFactory;
             this.tokenHelper = tokenHelper;
-            this.typeDfHelper = typeDfHelper;
+            this.typeCreator = typeCreator;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -130,25 +132,46 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
-            var issueType = new ObjectiveTypeExternalDto
-            {
-                ExternalId = Constants.ISSUE_TYPE,
-                Name = "Issue",
-            };
-
-            var enumTypes = new List<EnumerationTypeExternalDto>();
-            var typesSubtypes = await typeDfHelper.GetTypeEnumeration();
+            var subtypeEnumCreator = new TypeSubtypeEnumCreator();
+            var typesSubtypes = await typeCreator.Create(subtypeEnumCreator);
             if (typesSubtypes.EnumerationValues.Count == 0)
                 throw new TypeAccessException("You have no access to issue types.");
 
-            enumTypes.Add(typesSubtypes);
-            info.EnumerationTypes = enumTypes;
+            var rootCauseEnumCreator = new RootCauseEnumCreator();
+            var rootCauses = await typeCreator.Create(rootCauseEnumCreator);
+
+            info.EnumerationTypes = new List<EnumerationTypeExternalDto> { typesSubtypes, rootCauses };
+
+            var issueType = new ObjectiveTypeExternalDto
+            {
+                ExternalId = Constants.ISSUE_TYPE,
+                Name = MrsConstants.ISSUE_TYPE_NAME,
+                DefaultDynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    DynamicFieldUtilities.CreateField(
+                        typesSubtypes.EnumerationValues.First().ExternalID,
+                        subtypeEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        rootCauseEnumCreator.NullID,
+                        rootCauseEnumCreator),
+                    new ()
+                    {
+                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),
+                        Type = DynamicFieldType.STRING,
+                        Name = MrsConstants.LOCATION_DETAILS_FIELD_NAME,
+                        Value = string.Empty,
+                    },
+                    new ()
+                    {
+                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Answer),
+                        Type = DynamicFieldType.STRING,
+                        Name = MrsConstants.RESPONSE_FIELD_NAME,
+                        Value = string.Empty,
+                    },
+                },
+            };
 
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto> { issueType };
-            issueType.DefaultDynamicFields = new List<DynamicFieldExternalDto>
-            {
-                TypeDFHelper.CreateField(typesSubtypes.EnumerationValues.First().ExternalID),
-            };
         }
     }
 }

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot
+namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {
     internal class IssueSnapshot : ASnapshotEntity<Issue>
     {
@@ -11,7 +11,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snaps
             ProjectSnapshot = projectSnapshot;
         }
 
-        public List<ItemSnapshot> Items { get; set; }
+        public Dictionary<string, ItemSnapshot> Items { get; set; }
 
         public ProjectSnapshot ProjectSnapshot { get; }
 
