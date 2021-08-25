@@ -126,54 +126,60 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             foreach (var id in ids)
             {
-                var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.ID == id);
-
-                if (found == null)
+                try
                 {
-                    foreach (var project in snapshot.ProjectEnumerable)
+                    var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.ID == id);
+
+                    if (found == null)
                     {
-                        var container = project.IssueContainer;
-                        Issue received = null;
-
-                        try
+                        foreach (var project in snapshot.ProjectEnumerable)
                         {
-                            received  = await issuesService.GetIssueAsync(container, id);
-                        }
-                        catch
-                        {
-                        }
+                            var container = project.IssueContainer;
+                            Issue received = null;
 
-                        if (received  != null)
-                        {
-                            if (IssueUtilities.IsRemoved(received))
-                                break;
-
-                            found = new IssueSnapshot(received, project)
+                            try
                             {
-                                Items = new Dictionary<string, ItemSnapshot>(),
-                            };
-
-                            var attachments = await issuesService.GetAttachmentsAsync(
-                                found.ProjectSnapshot.IssueContainer,
-                                found.ID);
-
-                            foreach (var attachment in attachments.Where(
-                                x => project.Items.ContainsKey(x.Attributes.Urn)))
+                                received = await issuesService.GetIssueAsync(container, id);
+                            }
+                            catch
                             {
-                                found.Items.Add(
-                                    attachment.ID,
-                                    project.Items[attachment.Attributes.Urn]);
                             }
 
-                            found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
+                            if (received != null)
+                            {
+                                if (IssueUtilities.IsRemoved(received))
+                                    break;
 
-                            break;
+                                found = new IssueSnapshot(received, project)
+                                {
+                                    Items = new Dictionary<string, ItemSnapshot>(),
+                                };
+
+                                var attachments = await issuesService.GetAttachmentsAsync(
+                                    found.ProjectSnapshot.IssueContainer,
+                                    found.ID);
+
+                                foreach (var attachment in attachments.Where(
+                                    x => project.Items.ContainsKey(x.Attributes.Urn)))
+                                {
+                                    found.Items.Add(
+                                        attachment.ID,
+                                        project.Items[attachment.Attributes.Urn]);
+                                }
+
+                                found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
+
+                                break;
+                            }
                         }
                     }
-                }
 
-                if (found != null)
-                    result.Add(await converterToDto.Convert(found));
+                    if (found != null)
+                        result.Add(await converterToDto.Convert(found));
+                }
+                catch (Exception e)
+                {
+                }
             }
 
             return result;
