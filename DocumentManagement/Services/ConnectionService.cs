@@ -9,11 +9,11 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -72,7 +72,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add new ConnectionInfo {@Data}", data);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -117,7 +119,7 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't start the connection process to remote with user id {UserID}", userID);
-                throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -134,7 +136,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't get connection info with user id {UserID}", userID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -163,7 +167,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't get status info with user id {UserID}", userID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -190,7 +196,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't get Enumeration Variants with user id {UserID} and enumeration type id {EnumerationTypeID}", userID, enumerationTypeID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
     }

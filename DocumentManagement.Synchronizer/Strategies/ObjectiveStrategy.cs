@@ -379,7 +379,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
         {
             logger.LogTrace("LinkLocationItem started with {@Tuple}", tuple);
             if (tuple.Local!.Location != null &&
-                (tuple.Local.Location.Item == null || tuple.Synchronized.Location.Item == null))
+                (tuple.Local.Location.Item == null || tuple.Synchronized.Location.Item == null || tuple.Remote.Location.Item == null))
             {
                 var itemTuple = new SynchronizingTuple<Item>(
                     local: tuple.Local.Location!.Item,

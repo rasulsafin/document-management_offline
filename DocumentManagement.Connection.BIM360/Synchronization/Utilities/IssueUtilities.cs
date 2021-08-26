@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
@@ -15,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
         internal static Filter GetFilterForUnremoved()
         {
-            var statusKey = typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.Status));
+            var statusKey = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status);
             return new Filter(statusKey, GetStatusesExceptRemoved().Select(x => x.GetEnumMemberValue()).ToArray());
         }
 

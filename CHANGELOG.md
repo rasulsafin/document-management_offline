@@ -4,14 +4,32 @@
 
 ### Добавлено:
 
-* Удаление временной отметки синхронизации;
-* Получение временных отметок синхронизации;
+* Новые типы исключений;
+* Динамическое поле причины в BIM 360;
+* Динамическое поле описания местоположения в BIM 360;
+* Динамическое поле ответа в BIM 360;
 
 ### Изменено:
+
+* Обработка ошибок документооборота;
+
 ### Устарело:
 ### Удалено:
 ### Исправлено:
 ### Безопасность:
+
+
+## [1.0.4] - 2021-08-20
+
+### Добавлено:
+
+* Удаление временной отметки синхронизации;
+* Получение временных отметок синхронизации.
+
+### Исправлено:
+
+* Размер файлов при получении и конвертации;
+* Создание значений перечислений.
 
 
 ## [1.0.3] - 2021-07-30
@@ -127,7 +145,8 @@
 * Синхронизация с Google Drive;
 * Синхронизация с Bim 360.
 
-[Unreleased]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/activity
+[Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4
 [1.0.3]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.3
 [1.0.2]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.2
 [1.0.1]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.1

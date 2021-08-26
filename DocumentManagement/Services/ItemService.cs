@@ -10,14 +10,13 @@ using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Connection;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility.Extensions;
-using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Services
 {
@@ -67,8 +66,10 @@ namespace MRS.DocumentManagement.Services
                     .Where(x => ids.Contains(x.ID))
                     .ToListAsync();
                 logger.LogDebug("Found items: {@DBItems}", dbItems);
+
+                var projectID = dbItems.FirstOrDefault()?.ProjectID ?? -1;
                 var project = await context.Projects
-                    .Where(x => x.ID == (int)dbItems.FirstOrDefault().ProjectID)
+                    .Where(x => x.ID == projectID)
                     .FirstOrDefaultAsync();
                 logger.LogDebug("Found project: {@Project}", project);
 
@@ -102,7 +103,7 @@ namespace MRS.DocumentManagement.Services
                         try
                         {
                             logger.LogTrace("DownloadItems task started ({ID})", id);
-                            var result = await storage.DownloadFiles(project.ExternalID, data, progress, src.Token);
+                            var result = await storage.DownloadFiles(project?.ExternalID, data, progress, src.Token);
                             return new RequestResult(result);
                         }
                         finally
@@ -115,10 +116,10 @@ namespace MRS.DocumentManagement.Services
 
                 return new RequestID(id);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't download items {@ItemIds} with user key {UserID}", itemIds, userID);
-                throw;
+                logger.LogError(ex, "Can't download items {@ItemIds} with user key {UserID}", itemIds, userID);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -132,10 +133,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found dbItem: {@DbItem}", dbItem);
                 return mapper.Map<ItemDto>(dbItem);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get item with key {ItemID}", itemID);
-                throw;
+                logger.LogError(ex, "Can't get item with key {ItemID}", itemID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -152,10 +155,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
                 return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't find items by project key {@ProjectID}", projectID);
-                throw;
+                logger.LogError(ex, "Can't find items by project key {@ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -173,10 +178,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found dbItems: {@DbItem}", dbItems);
                 return dbItems.Select(x => mapper.Map<ItemDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't find items by objective key {@ObjectiveID}", objectiveID);
-                throw;
+                logger.LogError(ex, "Can't find items by objective key {@ObjectiveID}", objectiveID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -195,10 +202,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't update item {@Item}", item);
-                throw;
+                logger.LogError(ex, "Can't update item {@Item}", item);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
     }

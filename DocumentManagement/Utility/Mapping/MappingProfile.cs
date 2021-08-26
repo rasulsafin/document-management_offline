@@ -213,7 +213,8 @@ namespace MRS.DocumentManagement.Utility.Mapping
 
             CreateMap<EnumerationType, EnumerationTypeExternalDto>();
             CreateMap<EnumerationTypeExternalDto, EnumerationType>()
-                .ForMember(d => d.ID, o => o.Ignore());
+               .ForMember(d => d.ID, o => o.Ignore())
+               .ForMember(d => d.EnumerationValues, o => o.Ignore());
 
             CreateMap<EnumerationValue, EnumerationValueExternalDto>();
             CreateMap<EnumerationValueExternalDto, EnumerationValue>();

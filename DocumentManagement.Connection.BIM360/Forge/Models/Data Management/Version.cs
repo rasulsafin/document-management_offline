@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
             public int? VersionNumber { get; set; }
 
             [DataMember(Name = "storageSize")]
-            public int? StorageSize { get; set; }
+            public long? StorageSize { get; set; }
 
             [DataMember(Name = "fileType")]
             public string FileType { get; set; }

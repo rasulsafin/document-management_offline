@@ -7,9 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -43,7 +43,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
-                    throw new ArgumentException("This login is already being used");
+                    throw new ArgumentValidationException("This login is already being used");
 
                 var newUser = mapper.Map<User>(user);
                 logger.LogDebug("Mapped user: {@User}", newUser);
@@ -59,7 +59,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add user {@User}", user);
-                throw;
+                if (ex is ArgumentValidationException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -93,7 +95,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't delete user {UserID}", userID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -105,10 +109,10 @@ namespace MRS.DocumentManagement.Services
             {
                 return await context.Users.AnyAsync(x => x.ID == (int)userID);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get user {UserID}", userID);
-                throw;
+                logger.LogError(ex, "Can't get user {UserID}", userID);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -121,10 +125,10 @@ namespace MRS.DocumentManagement.Services
                 login = login?.Trim();
                 return await context.Users.AnyAsync(x => x.Login == login);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get user {Login}", login);
-                throw;
+                logger.LogError(ex, "Can't get user {Login}", login);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -142,10 +146,12 @@ namespace MRS.DocumentManagement.Services
 
                 return mapper.Map<UserDto>(dbUser);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get user {UserID}", userID);
-                throw;
+                logger.LogError(ex, "Can't get user {UserID}", userID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -161,10 +167,12 @@ namespace MRS.DocumentManagement.Services
 
                 return mapper.Map<UserDto>(dbUser);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get user {Login}", login);
-                throw;
+                logger.LogError(ex, "Can't get user {Login}", login);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -178,10 +186,10 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found users: {@Users}", dbUsers);
                 return dbUsers.Select(x => mapper.Map<UserDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of users");
-                throw;
+                logger.LogError(ex, "Can't get list of users");
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -193,7 +201,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (context.Users.Any(x => x.Login.ToLower() == user.Login.ToLower()))
-                    throw new ArgumentException("This login is already being used");
+                    throw new ArgumentValidationException("This login is already being used");
 
                 var storedUser = await GetUserChecked(user.ID);
                 logger.LogDebug("Found user: {@User}", storedUser);
@@ -202,10 +210,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't update user {@User}", user);
-                throw;
+                logger.LogError(ex, "Can't update user {@User}", user);
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -223,10 +233,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't update password of user {UserID}", userID);
-                throw;
+                logger.LogError(ex, "Can't update password of user {UserID}", userID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -241,14 +253,16 @@ namespace MRS.DocumentManagement.Services
                 var result = cryptographyHelper.VerifyPasswordHash(password, user.PasswordHash, user.PasswordSalt);
 
                 if (!result)
-                    throw new ArgumentException("Wrong password!");
+                    throw new ArgumentValidationException("Wrong password!");
 
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't verify password of user {UserID}", userID);
-                throw;
+                logger.LogError(ex, "Can't verify password of user {UserID}", userID);
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 

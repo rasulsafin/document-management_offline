@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -23,8 +22,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
         }
 
         public IServiceScope Scope { get; set; }
-
-        internal Bim360Snapshot Snapshot { get; set; } = new Bim360Snapshot();
 
         public void Dispose()
         {

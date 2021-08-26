@@ -9,14 +9,14 @@
     <UserSecretsId>f16ae3b8-e260-4bfc-84ad-2f42d42b7d0f</UserSecretsId>
     <RootNamespace>MRS.DocumentManagement.Api</RootNamespace>
     <Company>Brio MRS©</Company>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
+    <AssemblyVersion>1.0.4.0</AssemblyVersion>
+    <FileVersion>1.0.4.0</FileVersion>
     <Copyright>Brio MRS©</Copyright>
     <Authors>Brio MRS</Authors>
     <Product>Brio MRS Document Management API</Product>
     <PackageIcon>logo64.ico</PackageIcon>
     <ApplicationIcon>Resources\logo64.ico</ApplicationIcon>
-    <Version>1.0.3</Version>
+    <Version>1.0.4</Version>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="DocumentManagement.db-shm" />

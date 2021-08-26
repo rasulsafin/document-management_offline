@@ -6,9 +6,9 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Services
                 var id = await CheckUser(userID);
 
                 if (await IsInRole(userID, role))
-                    throw new ArgumentException($"User with key {userID} already has role {role}");
+                    throw new ArgumentValidationException($"User with key {userID} already has role {role}");
 
                 var storedRole = await context.Roles.FirstOrDefaultAsync(x => x.Name == role);
 
@@ -67,7 +67,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't assign role {Role} to user {UserID}", role, userID);
-                throw;
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -80,10 +82,10 @@ namespace MRS.DocumentManagement.Services
             {
                 return await context.Roles.Select(x => x.Name).ToListAsync();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of roles");
-                throw;
+                logger.LogError(ex, "Can't get list of roles");
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -102,10 +104,12 @@ namespace MRS.DocumentManagement.Services
                     .Select(x => x.Role.Name)
                     .ToListAsync();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of user's {UserID} roles", userID);
-                throw;
+                logger.LogError(ex, "Can't get list of user's {UserID} roles", userID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -123,10 +127,12 @@ namespace MRS.DocumentManagement.Services
                     .Select(x => x.Role)
                     .AnyAsync(x => x.Name == role);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get result of user {UserID} is in role {Role} or not", userID, role);
-                throw;
+                logger.LogError(ex, "Can't get result of user {UserID} is in role {Role} or not", userID, role);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -145,7 +151,7 @@ namespace MRS.DocumentManagement.Services
                     .ToListAsync();
                 logger.LogDebug("Found links: {@Links}", links);
                 if (!links.Any())
-                    throw new ArgumentException($"User with key {userID} do not have role {role}");
+                    throw new ArgumentValidationException($"User with key {userID} do not have role {role}");
 
                 context.UserRoles.RemoveRange(links);
                 await context.SaveChangesAsync();
@@ -167,7 +173,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove role {Role} from user {UserID}", role, userID);
-                throw;
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -184,7 +192,7 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found user: {@DbUser}", dbUser);
 
                 if (!cryptographyHelper.VerifyPasswordHash(password, dbUser.PasswordHash, dbUser.PasswordSalt))
-                    throw new ArgumentException($"Wrong password!");
+                    throw new ArgumentValidationException($"Wrong password!");
 
                 var dtoUser = mapper.Map<UserDto>(dbUser);
 
@@ -197,7 +205,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't login with username {Username}", username);
-                throw;
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 

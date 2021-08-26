@@ -5,9 +5,9 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -27,7 +27,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
             services.AddScoped<ItemsSyncHelper>();
-            services.AddScoped<IBim360SnapshotFiller, SnapshotFiller>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();

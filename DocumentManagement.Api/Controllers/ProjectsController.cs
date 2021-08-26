@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -7,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
 using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
@@ -63,7 +61,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -114,7 +112,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var projectToReturn = await service.Add(project);
                 return Created(string.Empty, projectToReturn);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(
                     this,
@@ -122,7 +120,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                     localizer["CheckValidProjectTitleToAdd_TitleRequired"],
                     ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
             }
@@ -159,7 +157,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
@@ -206,7 +204,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 await service.Update(projectData);
                 return Ok(true);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(
                     this,
@@ -218,7 +216,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -255,7 +253,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -292,7 +290,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -345,7 +343,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -398,7 +396,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -421,7 +419,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var projects = await service.GetAllProjects();
                 return Ok(projects);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }

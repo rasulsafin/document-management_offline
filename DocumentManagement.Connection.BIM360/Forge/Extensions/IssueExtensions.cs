@@ -20,8 +20,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
 
             var type = typeof(IssueAttributes);
             var properties = type
-                    .GetProperties()
-                    .ToDictionary(p => type.GetDataMemberName(p), p => p);
+               .GetProperties()
+               .ToDictionary(DataMemberUtilities.GetDataMemberName, p => p);
 
             foreach (var attribute in issue.Attributes.PermittedAttributes)
             {
