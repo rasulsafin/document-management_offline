@@ -231,11 +231,26 @@ namespace MRS.DocumentManagement.Services
                                     .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
                                     .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart));
 
+                if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
+                {
+                    var list = new List<int>();
+                    var obj = context.Objectives
+                        .AsNoTracking()
+                        .Unsynchronized()
+                        .Where(x => x.ProjectID == dbProject.ID)
+                        .FirstOrDefault(o => o.ID == (int)filter.ExceptChildrenOf);
+
+                    if (obj != null)
+                        GetAllObjectiveIds(obj, list);
+
+                    allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
+                }
+
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .ByPages(x => x.ID, filter.PageNumber, filter.PageSize)
+                    .ByPages(x => x.Title, filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
                             .ThenInclude(x => x.BimElement)
@@ -454,6 +469,20 @@ namespace MRS.DocumentManagement.Services
                 objective.Location = location;
                 objective.Location.Item = locationItem;
             }
+        }
+
+        private List<int> GetAllObjectiveIds(Objective obj, List<int> ids)
+        {
+            ids.Add(obj.ID);
+
+            var children = context.Objectives
+                .Unsynchronized()
+                .Where(x => x.ParentObjectiveID == obj.ID);
+
+            foreach (var child in children ?? Enumerable.Empty<Objective>())
+                GetAllObjectiveIds(child, ids);
+
+            return ids;
         }
     }
 }
