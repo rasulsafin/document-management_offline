@@ -23,6 +23,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public Func<string> GetToken { internal get; set; }
 
+        public static string SetFilter(string uri, Filter filter)
+        {
+            var stringBuilder = new StringBuilder(uri);
+
+            if (stringBuilder[^1] != '&')
+                stringBuilder.Append('&');
+            stringBuilder.AppendFormat(filter.ToString());
+
+            if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+
+            return stringBuilder.ToString();
+        }
+
         public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
         {
             var stringBuilder = new StringBuilder(uri);

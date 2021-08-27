@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -178,7 +178,7 @@
     <comment>Returns the details of the highest level folders the user has access to for a given project</comment>
   </data>
   <data name="GetProjectsFoldersContentsMethod" xml:space="preserve">
-    <value>/data/v1/projects/{0}/folders/{1}/contents?filter[type]={2}</value>
+    <value>/data/v1/projects/{0}/folders/{1}/contents?&amp;page[limit]={1}&amp;page[number]={2}</value>
     <comment>Returns a collection of items and folders within a folder</comment>
   </data>
   <data name="GetProjectsFoldersSearchMethod" xml:space="preserve">

@@ -1,41 +1,43 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using Newtonsoft.Json.Linq;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
 {
     public static class PaginationHelper
     {
-        public static async Task<List<T>> GetItemsByPages<T>(
+        public static async Task<List<TResult>> GetItemsByPages<TResult, TPaginationStrategy>(
             ForgeConnection connection,
             string command,
+            string itemsProperty,
             params object[] arguments)
+            where TPaginationStrategy : IPaginationStrategy, new()
         {
-            return await GetItemsByPages(
+            return await GetItemsByPages<TResult, TPaginationStrategy>(
                 connection,
                 command,
-                response => response[DATA_PROPERTY]?.ToObject<IEnumerable<T>>() ?? ArraySegment<T>.Empty,
+                response => response[itemsProperty]?.ToObject<IEnumerable<TResult>>() ?? ArraySegment<TResult>.Empty,
                 arguments);
         }
 
-        public static async Task<List<T>> GetItemsByPages<T>(
+        public static async Task<List<TResult>> GetItemsByPages<TResult, TPaginationStrategy>(
             ForgeConnection connection,
             string command,
-            Func<JToken, IEnumerable<T>> convert,
+            Func<JToken, IEnumerable<TResult>> convert,
             params object[] arguments)
+            where TPaginationStrategy : IPaginationStrategy, new()
         {
-            var result = new List<T>();
-            var all = false;
+            var strategy = new TPaginationStrategy();
+            var result = new List<TResult>();
             var length = arguments.Length;
             Array.Resize(ref arguments, length + 2);
             arguments[length++] = ITEMS_ON_PAGE;
 
-            for (int i = 0; !all; i += ITEMS_ON_PAGE)
+            foreach (var argument in strategy.GetPageArguments())
             {
-                arguments[length] = i;
+                arguments[length] = argument;
                 var response = await connection.SendAsync(
                     ForgeSettings.AuthorizedGet(),
                     command,
@@ -43,8 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                 var data = convert(response);
                 if (data != null)
                     result.AddRange(data);
-                var meta = response[META_PROPERTY]?.ToObject<Meta>();
-                all = meta == null || i + ITEMS_ON_PAGE >= meta.RecordCount;
+                strategy.SetResponse(response);
             }
 
             return result;
