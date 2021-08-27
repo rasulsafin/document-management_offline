@@ -50,9 +50,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string AUTH_REQUEST_BODY_CODE_FIELD = "code";
         internal static readonly string AUTH_REQUEST_BODY_REDIRECT_URI_FIELD = "redirect_uri";
         internal static readonly string AUTH_REQUEST_BODY_REFRESH_TOKEN_FIELD = "refresh_token";
+        internal static readonly string AUTH_REQUEST_BODY_SCOPE_FIELD = "scope";
 
         internal static readonly string AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE = "authorization_code";
         internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
+        internal static readonly string AUTH_GRANT_TYPE_CLIENT_CREDENTIALS_VALUE = "client_credentials";
 
         internal static readonly string FILTER_KEY_ISSUE_UPDATED_AFTER = "synced_after";
     }

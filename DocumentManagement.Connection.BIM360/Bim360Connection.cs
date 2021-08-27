@@ -75,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 var jwt = new JwtSecurityToken(token);
 
-                if (DateTime.UtcNow.AddMinutes(1) > jwt.ValidTo)
+                if (DateTime.UtcNow.AddMinutes(3) > jwt.ValidTo)
                 {
                     return new ConnectionStatusDto
                     {
@@ -86,7 +86,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 tokenHelper.SetInfo(info.UserExternalID, token);
 
-                if (await authenticationService.GetMe() == null)
+                if (await authenticationService.GetMeAsync() == null)
                 {
                     return new ConnectionStatusDto
                     {
@@ -116,8 +116,8 @@ namespace MRS.DocumentManagement.Connection.Bim360
         {
             await SetIssueType(info);
             tokenHelper.SetToken(info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
-            info.UserExternalID = (await authenticationService.GetMe()).UserId;
-            tokenHelper.SetUserID(info.UserExternalID);
+            info.UserExternalID = (await authenticationService.GetMeAsync()).UserId;
+            tokenHelper.SetClientID(info.UserExternalID);
             return info;
         }
 

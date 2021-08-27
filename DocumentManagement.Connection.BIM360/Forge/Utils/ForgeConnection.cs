@@ -23,6 +23,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public Func<string> GetToken { internal get; set; }
 
+        public Func<string> GetAppToken { internal get; set; }
+
         public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
         {
             var stringBuilder = new StringBuilder(uri);
@@ -75,7 +77,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 settings.MethodType,
                 command,
                 arguments,
-                settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token: GetToken()) : default);
+                settings.IsAuthorized
+                    ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
+                    : default);
 
             if (settings.CreateContent != null)
             {
