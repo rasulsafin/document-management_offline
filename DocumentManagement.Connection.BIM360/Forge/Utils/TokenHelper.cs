@@ -4,9 +4,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     public class TokenHelper : ATokenHelper
     {
+        private readonly ForgeConnection connection;
+
         public TokenHelper(ForgeConnection connection)
-            : base(connection)
         {
+            this.connection = connection;
         }
 
         protected override void SetGettingToken(Func<string> func)

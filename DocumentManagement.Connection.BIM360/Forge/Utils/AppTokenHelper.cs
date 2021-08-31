@@ -5,10 +5,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     internal class AppTokenHelper : ATokenHelper
     {
+        private readonly ForgeConnection connection;
+
         public AppTokenHelper(ForgeConnection connection)
-            : base(connection)
-        {
-        }
+            => this.connection = connection;
 
         public bool HasClientID { get; private set; } = false;
 

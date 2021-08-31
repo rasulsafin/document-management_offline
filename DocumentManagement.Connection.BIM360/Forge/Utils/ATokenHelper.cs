@@ -8,19 +8,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
     /// </summary>
     public abstract class ATokenHelper : IDisposable
     {
-        protected readonly ForgeConnection connection;
-
         private static readonly object LOCKER = new ();
         private static Dictionary<string, string> tokensContainer;
         private static uint connectionsCount = 0;
 
         private string userID = null;
 
-        protected ATokenHelper(ForgeConnection connection)
+        protected ATokenHelper()
         {
             lock (LOCKER)
             {
-                this.connection = connection;
                 tokensContainer ??= new Dictionary<string, string>();
                 connectionsCount++;
             }
