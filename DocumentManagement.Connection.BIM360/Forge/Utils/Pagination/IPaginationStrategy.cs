@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
@@ -7,6 +7,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
     {
         void SetResponse(JToken response);
 
-        IEnumerable GetPageArguments();
+        IEnumerable<string> GetPages(string command);
     }
 }

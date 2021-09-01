@@ -1,4 +1,5 @@
-using System.Collections;
+using System.Collections.Generic;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
@@ -13,13 +14,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
         public void SetResponse(JToken response)
             => lastResponse = response;
 
-        public IEnumerable GetPageArguments()
+        public IEnumerable<string> GetPages(string command)
         {
             var all = false;
 
             for (int i = 0; !all; i += Constants.ITEMS_ON_PAGE)
             {
-                yield return i;
+                yield return ForgeConnection.SetParameter(command, PageFilter.ByOffset(Constants.ITEMS_ON_PAGE, i));
 
                 var page = lastResponse[PropertyName]?.ToObject<TPage>();
                 all = page == null || i + Constants.ITEMS_ON_PAGE >= GetCount(page);

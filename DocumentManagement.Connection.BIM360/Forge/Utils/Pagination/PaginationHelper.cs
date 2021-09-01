@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
 {
@@ -31,16 +30,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
         {
             var strategy = new TPaginationStrategy();
             var result = new List<TResult>();
-            var length = arguments.Length;
-            Array.Resize(ref arguments, length + 2);
-            arguments[length++] = ITEMS_ON_PAGE;
 
-            foreach (var argument in strategy.GetPageArguments())
+            foreach (var page in strategy.GetPages(command))
             {
-                arguments[length] = argument;
                 var response = await connection.SendAsync(
                     ForgeSettings.AuthorizedGet(),
-                    command,
+                    page,
                     arguments);
                 var data = convert(response);
                 if (data != null)

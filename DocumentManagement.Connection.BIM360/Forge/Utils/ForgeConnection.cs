@@ -23,11 +23,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         public Func<string> GetToken { internal get; set; }
 
-        public static string SetFilter(string uri, Filter filter)
+        public static string SetParameter(string uri, IQueryParameter filter)
         {
             var stringBuilder = new StringBuilder(uri);
 
-            if (stringBuilder[^1] != '&')
+            if (!uri.Contains('?'))
+                stringBuilder.Append('?');
+            if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
                 stringBuilder.Append('&');
             stringBuilder.AppendFormat(filter.ToString());
 
@@ -37,16 +39,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
             return stringBuilder.ToString();
         }
 
-        public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
+        public static string SetParameters(string uri, IEnumerable<IQueryParameter> filters = null)
         {
             var stringBuilder = new StringBuilder(uri);
+            if (!uri.Contains('?'))
+                stringBuilder.Append('?');
 
             if (filters != null)
             {
-                if (stringBuilder[^1] != '&')
-                    stringBuilder.Append('&');
                 foreach (var filter in filters)
+                {
+                    if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
+                        stringBuilder.Append('&');
                     stringBuilder.AppendFormat(filter.ToString());
+                }
             }
 
             if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')

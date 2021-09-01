@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)
             => await PaginationHelper.GetItemsByPages<Folder, LinksStrategy>(
                 connection,
-                ForgeConnection.SetFilter(
+                ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
                     new Filter(TYPE_PROPERTY, FOLDER_TYPE)),
                 DATA_PROPERTY,
@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<(Item item, Version version)>> GetItemsAsync(string projectId, string folderId)
             => await PaginationHelper.GetItemsByPages<(Item item, Version version), LinksStrategy>(
                 connection,
-                ForgeConnection.SetFilter(
+                ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
                     new Filter(TYPE_PROPERTY, ITEM_TYPE)),
                 response =>
@@ -54,7 +54,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                ForgeConnection.SetFilters(Resources.GetProjectsFoldersSearchMethod, filters),
+                ForgeConnection.SetParameters(
+                    Resources.GetProjectsFoldersSearchMethod,
+                    filters?.Cast<IQueryParameter>()),
                 projectId,
                 folderId);
 

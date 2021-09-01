@@ -142,7 +142,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/attachments?&amp;page[limit]={2}&amp;page[offset]={3}.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/attachments.
         /// </summary>
         internal static string GetIssuesAttachmentMethod {
             get {
@@ -151,7 +151,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues.
         /// </summary>
         internal static string GetIssuesMethod {
             get {
@@ -187,7 +187,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/contents?&amp;page[limit]={2}&amp;page[number]={3}.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/contents.
         /// </summary>
         internal static string GetProjectsFoldersContentsMethod {
             get {
@@ -196,7 +196,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/search?.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/search.
         /// </summary>
         internal static string GetProjectsFoldersSearchMethod {
             get {

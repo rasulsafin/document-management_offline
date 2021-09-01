@@ -37,8 +37,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string TYPE_PROPERTY = "type";
 
         internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}&";
+        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}&";
 
-        internal static readonly int ITEMS_ON_PAGE = 100;
+        internal static readonly string LIMIT_PARAMETER_NAME = "limit";
+        internal static readonly string OFFSET_PARAMETER_NAME = "offset";
+        internal static readonly string NUMBER_QUERY_PARAMETER = "number";
+
         internal static readonly string JSON_API_VERSION = "1.0";
         internal static readonly string CALLBACK_URL_NAME = "RETURN_URL";
         internal static readonly string CLIENT_ID_NAME = "CLIENT_ID";
