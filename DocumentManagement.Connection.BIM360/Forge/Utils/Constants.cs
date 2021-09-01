@@ -43,6 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string OFFSET_PARAMETER_NAME = "offset";
         internal static readonly string NUMBER_QUERY_PARAMETER = "number";
 
+        internal static readonly int ITEMS_ON_PAGE = 100;
         internal static readonly string JSON_API_VERSION = "1.0";
         internal static readonly string CALLBACK_URL_NAME = "RETURN_URL";
         internal static readonly string CLIENT_ID_NAME = "CLIENT_ID";
