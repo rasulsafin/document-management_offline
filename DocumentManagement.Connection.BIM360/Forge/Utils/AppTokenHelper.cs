@@ -16,7 +16,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             var token = GetToken();
             return string.IsNullOrWhiteSpace(token) ||
-                DateTime.UtcNow.AddMinutes(3) > new JwtSecurityToken(token).ValidTo;
+                DateTime.UtcNow.Add(ForgeConnection.MIN_TOKEN_LIFE) > new JwtSecurityToken(token).ValidTo;
         }
 
         public override void SetClientID(string clientID)

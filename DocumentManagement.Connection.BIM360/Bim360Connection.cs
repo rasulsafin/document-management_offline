@@ -75,7 +75,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 var jwt = new JwtSecurityToken(token);
 
-                if (DateTime.UtcNow.AddMinutes(3) > jwt.ValidTo)
+                if (DateTime.UtcNow.Add(ForgeConnection.MIN_TOKEN_LIFE) > jwt.ValidTo)
                 {
                     return new ConnectionStatusDto
                     {
