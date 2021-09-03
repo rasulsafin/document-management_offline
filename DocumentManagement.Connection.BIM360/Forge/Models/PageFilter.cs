@@ -2,13 +2,13 @@ using System.Text;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
-    public readonly struct PageFilter : IQueryParameter
+    public class PageFilter : IQueryParameter
     {
         private readonly int limit;
         private readonly int offset;
         private readonly int number;
 
-        public PageFilter(int limit = 100, int offset = -1, int number = -1)
+        private PageFilter(int limit = 100, int offset = -1, int number = -1)
         {
             this.limit = limit;
             this.offset = offset;
@@ -21,8 +21,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public static PageFilter ByOffset(int limit, int offset)
             => new (limit, offset);
 
-        /// <inheritdoc cref="IQueryParameter.ToString" />
-        public override string ToString()
+        /// <inheritdoc cref="IQueryParameter.ToQueryString" />
+        public string ToQueryString()
         {
             var builder = new StringBuilder();
             builder.AppendFormat(Constants.PAGE_QUERY_PARAMETER, Constants.LIMIT_PARAMETER_NAME, limit);

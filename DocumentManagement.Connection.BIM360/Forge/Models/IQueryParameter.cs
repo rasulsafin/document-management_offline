@@ -9,6 +9,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         /// Gets the query string for a url.
         /// </summary>
         /// <returns>The query string for a request.</returns>
-        string ToString();
+        string ToQueryString();
     }
 }

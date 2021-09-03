@@ -54,9 +54,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                ForgeConnection.SetParameters(
-                    Resources.GetProjectsFoldersSearchMethod,
-                    filters?.Cast<IQueryParameter>()),
+                ForgeConnection.SetParameters(Resources.GetProjectsFoldersSearchMethod, filters),
                 projectId,
                 folderId);
 

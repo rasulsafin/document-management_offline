@@ -4,7 +4,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
-    public readonly struct Filter : IQueryParameter
+    public class Filter : IQueryParameter
     {
         private readonly string key;
         private readonly string[] values;
@@ -60,8 +60,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             Contains,
         }
 
-        /// <inheritdoc cref="IQueryParameter.ToString" />
-        public override string ToString()
+        /// <inheritdoc cref="IQueryParameter.ToQueryString" />
+        public string ToQueryString()
             => string.Format(
                 Constants.FILTER_QUERY_PARAMETER,
                 key,

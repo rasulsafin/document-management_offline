@@ -31,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 stringBuilder.Append('?');
             if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
                 stringBuilder.Append('&');
-            stringBuilder.AppendFormat(filter.ToString());
+            stringBuilder.AppendFormat(filter.ToQueryString());
 
             if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
                 stringBuilder.Remove(stringBuilder.Length - 1, 1);
@@ -51,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 {
                     if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
                         stringBuilder.Append('&');
-                    stringBuilder.AppendFormat(filter.ToString());
+                    stringBuilder.AppendFormat(filter.ToQueryString());
                 }
             }
 
