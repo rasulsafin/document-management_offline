@@ -1,0 +1,18 @@
+variables:
+  MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
+  API_PATH: '\'
+
+stages:
+  - build
+
+build_job:
+  stage: build
+  only:
+    - branches
+  script:
+    - 'nuget restore'
+    - '"%MSBUILD_PATH%" /property:Configuration=Release'
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - '%API_PATH%\*'
