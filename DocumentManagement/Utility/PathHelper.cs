@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Utility
         private static readonly string MEDIA_DIRECTORY_NAME = "Media";
         private static readonly string MY_DOCUMENTS = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-        private static readonly char[] INVALID_PATH_CHARS = Path.GetInvalidFileNameChars().Union(new char[] { '.' }).ToArray();
+        private static readonly char[] INVALID_PATH_CHARS = Path.GetInvalidFileNameChars().Append('.').ToArray();
 
         public static string ApplicationFolder => Combine(MY_DOCUMENTS, APPLICATION_DIRECTORY_NAME);
 
