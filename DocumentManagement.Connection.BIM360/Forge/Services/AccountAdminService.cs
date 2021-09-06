@@ -38,13 +38,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Company>> GetCompaniesAsync(string accountID, string projectID)
-        {
-            var response = await connection.SendAsync(
+            => await PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
+                connection,
                 ForgeSettings.AppGet(),
                 Resources.GetProjectsCompaniesMethodUS,
+                token => token.ToObject<List<Company>>(),
                 accountID,
                 projectID);
-            return response.ToObject<List<Company>>();
-        }
     }
 }

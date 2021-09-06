@@ -32,6 +32,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<(Item item, Version version)>> GetItemsAsync(string projectId, string folderId)
             => await PaginationHelper.GetItemsByPages<(Item item, Version version), LinksStrategy>(
                 connection,
+                ForgeSettings.AuthorizedGet(),
                 ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
                     new Filter(TYPE_PROPERTY, ITEM_TYPE)),

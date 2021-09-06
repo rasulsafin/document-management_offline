@@ -14,8 +14,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
                 command,
                 new IQueryParameter[]
                 {
-                    new Filter(Constants.LIMIT_PARAMETER_NAME, limit.ToString()),
-                    new Filter(Constants.OFFSET_PARAMETER_NAME, offset.ToString()),
+                    new QueryParameter(Constants.LIMIT_PARAMETER_NAME, limit.ToString()),
+                    new QueryParameter(Constants.OFFSET_PARAMETER_NAME, offset.ToString()),
                 });
     }
 }
