@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             IEnumerable<Filter> filters = null)
             => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
-                ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters?.Cast<IQueryParameter>()),
+                ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
                 DATA_PROPERTY,
                 containerID);
 

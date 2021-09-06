@@ -66,7 +66,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
                 Constants.FILTER_QUERY_PARAMETER,
                 key,
                 comparisonType.GetAttribute<ComparisonTypeAttribute>().Command,
-                values.Aggregate((sum, s) => $"{sum},{s}"));
+                string.Join(',', values));
 
         [AttributeUsage(AttributeTargets.Field)]
         private class ComparisonTypeAttribute : Attribute
