@@ -24,145 +24,39 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             public string Role { get; set; }
 
             [DataMember(Name = "is_project_admin")]
-            public bool Is_project_admin { get; set; }
+            public bool IsProjectAdmin { get; set; }
 
             [DataMember(Name = "workflow_roles")]
-            public string[] Workflow_roles { get; set; }
+            public string[] WorkflowRoles { get; set; }
 
             [DataMember(Name = "workflow_type")]
-            public string Workflow_type { get; set; }
+            public string WorkflowType { get; set; }
 
             [DataMember(Name = "rfis")]
-            public Rfis Rfis { get; set; }
+            public object Rfis { get; set; }
 
             [DataMember(Name = "quality_issues")]
-            public Quality_Issues Quality_issues { get; set; }
+            public QualityIssues QualityIssues { get; set; }
         }
 
         [DataContract]
-        public class Rfis
+        public class QualityIssues
         {
-            [DataMember(Name = "workflow_roles")]
-            public string[] Workflow_roles { get; set; }
-
-            [DataMember(Name = "workflow_type")]
-            public string Workflow_type { get; set; }
-
-            [DataMember(Name = "_new")]
-            public New _new { get; set; }
+            [DataMember(Name = "new")]
+            public InitialInfo New { get; set; }
         }
 
         [DataContract]
-        public class New
-        {
-            [DataMember(Name = "required_attributes")]
-            public string[] Required_attributes { get; set; }
-
-            [DataMember(Name = "optional_attributes")]
-            public string[] Optional_attributes { get; set; }
-
-            [DataMember(Name = "initial_data")]
-            public Initial_Data[] Initial_data { get; set; }
-        }
-
-        [DataContract]
-        public class Initial_Data
-        {
-            [DataMember(Name = "status")]
-            public string Status { get; set; }
-
-            [DataMember(Name = "workflow_state")]
-            public Workflow_State Workflow_state { get; set; }
-
-            [DataMember(Name = "assignees")]
-            public Assignee[] Assignees { get; set; }
-
-            [DataMember(Name = "transitions")]
-            public Transition[] Transitions { get; set; }
-        }
-
-        [DataContract]
-        public class Workflow_State
-        {
-            [DataMember(Name = "id")]
-            public string Id { get; set; }
-
-            [DataMember(Name = "title")]
-            public string Title { get; set; }
-
-            [DataMember(Name = "short_title")]
-            public string Short_title { get; set; }
-
-            [DataMember(Name = "name")]
-            public string Name { get; set; }
-
-            [DataMember(Name = "status")]
-            public string Status { get; set; }
-        }
-
-        [DataContract]
-        public class Assignee
-        {
-            [DataMember(Name = "type")]
-            public string Type { get; set; }
-
-            [DataMember(Name = "id")]
-            public string Id { get; set; }
-        }
-
-        [DataContract]
-        public class Transition
-        {
-            [DataMember(Name = "id")]
-            public string Id { get; set; }
-
-            [DataMember(Name = "title")]
-            public string Title { get; set; }
-
-            [DataMember(Name = "status")]
-            public string Status { get; set; }
-
-            [DataMember(Name = "workflow_state")]
-            public Workflow_State1 Workflow_state { get; set; }
-
-            [DataMember(Name = "required_attributes")]
-            public string[] Required_attributes { get; set; }
-        }
-
-        [DataContract]
-        public class Workflow_State1
-        {
-            [DataMember(Name = "id")]
-            public string Id { get; set; }
-
-            [DataMember(Name = "title")]
-            public string Title { get; set; }
-
-            [DataMember(Name = "short_title")]
-            public string Short_title { get; set; }
-
-            [DataMember(Name = "name")]
-            public string Name { get; set; }
-        }
-
-        [DataContract]
-        public class Quality_Issues
-        {
-            [DataMember(Name = "_new")]
-            public New1 _new { get; set; }
-        }
-
-        [DataContract]
-        public class New1
+        public class InitialInfo
         {
             [DataMember(Name = "permitted_actions")]
-            public string[] Permitted_actions { get; set; }
+            public string[] PermittedActions { get; set; }
 
             [DataMember(Name = "permitted_statuses")]
-            public string[] Permitted_statuses { get; set; }
+            public string[] PermittedStatuses { get; set; }
 
             [DataMember(Name = "permitted_attributes")]
-            public string[] Permitted_attributes { get; set; }
+            public string[] PermittedAttributes { get; set; }
         }
     }
 }
