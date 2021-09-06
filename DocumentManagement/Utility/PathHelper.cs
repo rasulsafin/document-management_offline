@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Utility
         private static readonly string MEDIA_DIRECTORY_NAME = "Media";
         private static readonly string MY_DOCUMENTS = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-        private static readonly char[] INVALID_PATH_CHARS = Path.GetInvalidFileNameChars();
+        private static readonly char[] INVALID_PATH_CHARS = Path.GetInvalidFileNameChars().Union(new char[] { '.' }).ToArray();
 
         public static string ApplicationFolder => Combine(MY_DOCUMENTS, APPLICATION_DIRECTORY_NAME);
 
@@ -28,23 +28,9 @@ namespace MRS.DocumentManagement.Utility
         public static string GetFullPath(Project project, string fileName)
         => Combine(Database, GetValidDirectoryName(project), fileName.TrimStart('/', '\\'));
 
-        public static string GetValidDirectoryName(Project project)
-        {
-            var db = new DirectoryInfo(Database);
-            var dir = db.GetDirectories().FirstOrDefault((info) =>
-            {
-                (string title, int id) = GetProjectTitleAndId(info.Name);
-                if (id == (int)project.ID)
-                    return true;
-                return false;
-            });
-
-            if (dir != null)
-                return dir.Name;
-
+        public static string GetValidDirectoryName(Project project) =>
             // TODO : You can trim the project title, for example, by taking the first 50 characters.
-            return GetValidDirectoryName($"{project.Title}-{project.ID}");
-        }
+            GetValidDirectoryName(project.Title);
 
         public static string GetRelativePath(string fileName, ItemType type)
         {
@@ -54,21 +40,6 @@ namespace MRS.DocumentManagement.Utility
                 _ => Path.Combine(string.Empty, fileName),
             };
             return '\\' + relativePath;
-        }
-
-        private static (string title, int id) GetProjectTitleAndId(string folderName)
-        {
-            int index = folderName.LastIndexOf('-');
-            if (index != -1)
-            {
-                string idText = folderName.Substring(index + 1);
-                if (int.TryParse(idText, out int id))
-                {
-                    return (folderName.Substring(0, index - 1), id);
-                }
-            }
-
-            return (folderName, -1);
         }
 
         private static string GetValidDirectoryName(string name)
