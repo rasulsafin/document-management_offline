@@ -117,7 +117,7 @@ namespace MRS.DocumentManagement.Connection.Utils
 
             throw new HttpRequestException(
                 $"{code} Response status code does not indicate success",
-                new Exception(await content!.ReadAsStringAsync()),
+                new Exception(content == null ? null : await content.ReadAsStringAsync()),
                 code);
         }
     }

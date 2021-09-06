@@ -18,10 +18,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         private const string MEDIA_TYPE_JSON = "text/json";
         private const string CONTENT_TYPE = "application/vnd.api+json";
 
+        internal static readonly TimeSpan MIN_TOKEN_LIFE = TimeSpan.FromMinutes(3);
+
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);
 
         public Func<string> GetToken { internal get; set; }
+
+        public Func<string> GetAppToken { internal get; set; }
 
         public static string SetParameter(string uri, IQueryParameter filter)
         {
@@ -95,7 +99,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 settings.MethodType,
                 command,
                 arguments,
-                settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token: GetToken()) : default);
+                settings.IsAuthorized
+                    ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
+                    : default);
 
             if (settings.CreateContent != null)
             {

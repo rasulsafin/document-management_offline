@@ -261,4 +261,8 @@
     <value>/issues/v1/containers/{0}/root-causes</value>
     <comment>Retrieves a list of supported root causes that you can allocate to an issue. For example, communication and coordination.</comment>
   </data>
+  <data name="PostAuthenticateMethod" xml:space="preserve">
+    <value>/authentication/v1/authenticate</value>
+    <comment>Get a two-legged access token by providing your app’s client ID and secret.</comment>
+  </data>
 </root>

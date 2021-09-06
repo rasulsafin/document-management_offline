@@ -11,6 +11,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
     public class AuthenticationService
     {
         private static readonly string SCOPE = "data:read%20data:write%20data:create";
+        private static readonly string APP_SCOPE = "account:read";
 
         private readonly ForgeConnection connection;
 
@@ -57,7 +58,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             return data.ToObject<Token>();
         }
 
-        public async Task<User> GetMe()
+        public async Task<Token> AuthenticateAppAsync(string appPropertyClientID, string appPropertyClientSecret)
+        {
+            HttpContent CreateContent()
+                => new FormUrlEncodedContent(
+                    new KeyValuePair<string, string>[]
+                    {
+                        new (AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientID),
+                        new (AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD, appPropertyClientSecret),
+                        new (AUTH_REQUEST_BODY_GRANT_TYPE_FIELD, AUTH_GRANT_TYPE_CLIENT_CREDENTIALS_VALUE),
+                        new (AUTH_REQUEST_BODY_SCOPE_FIELD, APP_SCOPE),
+                    });
+
+            var data = await connection.SendAsync(
+                ForgeSettings.UnauthorizedPost(CreateContent),
+                Resources.PostAuthenticateMethod);
+            return data.ToObject<Token>();
+        }
+
+        public async Task<User> GetMeAsync()
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),

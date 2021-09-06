@@ -15,20 +15,27 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
-    public class Authenticator : IDisposable
+    internal class Authenticator : IDisposable
     {
         private const string RESPONSE_HTML_TYPE = "text/html";
         private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
 
         private readonly AuthenticationService service;
         private readonly TokenHelper tokenHelper;
+        private readonly AppTokenHelper appTokenHelper;
         private readonly ILogger<Authenticator> logger;
+
         private HttpListener httpListener;
 
-        public Authenticator(AuthenticationService service, TokenHelper tokenHelper, ILogger<Authenticator> logger)
+        public Authenticator(
+            AuthenticationService service,
+            TokenHelper tokenHelper,
+            AppTokenHelper appTokenHelper,
+            ILogger<Authenticator> logger)
         {
             this.service = service;
             this.tokenHelper = tokenHelper;
+            this.appTokenHelper = appTokenHelper;
             this.logger = logger;
         }
 
@@ -93,6 +100,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
         {
+            await AuthenticateAppAsync();
+
             if (!IsLogged || mustUpdate)
             {
                 if (string.IsNullOrEmpty(AccessToken))
@@ -117,6 +126,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
         {
             httpListener.Abort();
             httpListener = null;
+        }
+
+        private async Task AuthenticateAppAsync()
+        {
+            if (!appTokenHelper.HasClientID)
+                appTokenHelper.SetClientID(AppClientId);
+
+            if (appTokenHelper.IsNeedReconnect())
+            {
+                var token = await service.AuthenticateAppAsync(AppClientId, AppClientSecret);
+                appTokenHelper.SetToken(token.AccessToken);
+            }
         }
 
         private async Task RefreshConnectionAsync()
