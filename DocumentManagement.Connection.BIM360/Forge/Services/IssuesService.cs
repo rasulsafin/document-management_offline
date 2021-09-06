@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -19,9 +21,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<Issue>> GetIssuesAsync(
             string containerID,
             IEnumerable<Filter> filters = null)
-            => await PaginationHelper.GetItemsByPages<Issue>(
+            => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
-                ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
+                ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
+                DATA_PROPERTY,
                 containerID);
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
@@ -79,21 +82,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
-            => await PaginationHelper.GetItemsByPages<Attachment>(
+            => await PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
                 connection,
                 Resources.GetIssuesAttachmentMethod,
+                DATA_PROPERTY,
                 containerID,
                 issueID);
 
         public async Task<List<RootCause>> GetRootCausesAsync(string containerID)
-            => await PaginationHelper.GetItemsByPages<RootCause>(
+            => await PaginationHelper.GetItemsByPages<RootCause, MetaStrategy>(
                 connection,
                 Resources.GetRootCausesMethod,
+                DATA_PROPERTY,
                 containerID);
-
-        public Task<object> GetMeAsync()
-        {
-            throw new NotImplementedException();
-        }
     }
 }

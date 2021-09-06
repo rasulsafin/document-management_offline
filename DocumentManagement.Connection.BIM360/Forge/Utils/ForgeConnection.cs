@@ -18,21 +18,45 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         private const string MEDIA_TYPE_JSON = "text/json";
         private const string CONTENT_TYPE = "application/vnd.api+json";
 
+        internal static readonly TimeSpan MIN_TOKEN_LIFE = TimeSpan.FromMinutes(3);
+
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);
 
         public Func<string> GetToken { internal get; set; }
 
-        public static string SetFilters(string uri, IEnumerable<Filter> filters = null)
+        public Func<string> GetAppToken { internal get; set; }
+
+        public static string SetParameter(string uri, IQueryParameter filter)
         {
             var stringBuilder = new StringBuilder(uri);
 
+            if (!uri.Contains('?'))
+                stringBuilder.Append('?');
+            if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
+                stringBuilder.Append('&');
+            stringBuilder.AppendFormat(filter.ToQueryString());
+
+            if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
+                stringBuilder.Remove(stringBuilder.Length - 1, 1);
+
+            return stringBuilder.ToString();
+        }
+
+        public static string SetParameters(string uri, IEnumerable<IQueryParameter> filters = null)
+        {
+            var stringBuilder = new StringBuilder(uri);
+            if (!uri.Contains('?'))
+                stringBuilder.Append('?');
+
             if (filters != null)
             {
-                if (stringBuilder[^1] != '&')
-                    stringBuilder.Append('&');
                 foreach (var filter in filters)
-                    stringBuilder.AppendFormat(filter.ToString());
+                {
+                    if (stringBuilder[^1] != '&' && stringBuilder[^1] != '?')
+                        stringBuilder.Append('&');
+                    stringBuilder.AppendFormat(filter.ToQueryString());
+                }
             }
 
             if (stringBuilder.Length > 0 && stringBuilder[^1] == '&')
@@ -75,7 +99,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
                 settings.MethodType,
                 command,
                 arguments,
-                settings.IsAuthorized ? (Constants.AUTHORIZATION_SCHEME, Token: GetToken()) : default);
+                settings.IsAuthorized
+                    ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
+                    : default);
 
             if (settings.CreateContent != null)
             {
