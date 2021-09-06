@@ -89,7 +89,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 assignToEnumCreator,
                 project,
                 objective,
-                (ids, s) => ids.Contains(s.Entity.ID),
+                (ids, s) => ids.Contains(s.Entity),
                 out _);
             var result = new Issue
             {
@@ -99,8 +99,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Title = objective.Title,
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
-                    AssignedTo = assignToVariant?.Entity.ID,
-                    AssignedToType = assignToVariant?.Entity.Type,
+                    AssignedTo = assignToVariant?.Entity,
+                    AssignedToType = assignToVariant?.Type ?? AssignToType.None,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),

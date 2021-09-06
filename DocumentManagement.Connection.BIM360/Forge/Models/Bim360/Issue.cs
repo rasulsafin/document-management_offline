@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             public string AssignedTo { get; set; }
 
             [DataMember(Name = "assigned_to_type")]
-            public string AssignedToType { get; set; }
+            public AssignToType AssignedToType { get; set; } = AssignToType.None;
 
             [DataMember(Name = "answer")]
             public string Answer { get; set; }
@@ -217,7 +217,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
         public class ViewerState
         {
             [DataMember(Name = "seedURN")]
-            public string SeedURN { get; set; }
+            public string SeedUrn { get; set; }
 
             [DataMember(Name = "viewport")]
             public Viewport Viewport { get; set; }

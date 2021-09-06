@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,7 +10,7 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
-    internal class AssignToEnumCreator : IEnumCreator<ObjectInfo, AssignToVariant, string>
+    internal class AssignToEnumCreator : IEnumCreator<string, AssignToVariant, string>
     {
         private static readonly string ENUM_EXTERNAL_ID =
             $"{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.AssignedTo)},{DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.AssignedToType)}";
@@ -32,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         public string NullID => $"{EnumExternalID}{DynamicFieldUtilities.NULL_VALUE_ID}";
 
         public IEnumerable<string> GetOrderedIDs(IEnumerable<AssignToVariant> variants)
-            => variants.OrderBy(x => x.Entity.Type).ThenBy(x => x.Entity.ID).Select(x => x.Entity.ID);
+            => variants.OrderBy(x => x.Type).ThenBy(x => x.Entity).Select(x => x.Entity);
 
         public string GetVariantDisplayName(AssignToVariant variant)
             => variant.Title;
@@ -45,41 +44,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                .ToArray();
 
             var result = users.Select(
-                    user => new AssignToVariant(
-                        new ObjectInfo
-                        {
-                            ID = user.AutodeskID,
-                            Type = "user",
-                        },
-                        projectSnapshot) { Title = user.Name })
+                    user => new AssignToVariant(user.AutodeskID, AssignToType.User, user.Name, projectSnapshot))
                .ToList();
 
             var accountID = projectSnapshot.HubSnapshot.Entity.ID.Remove(0, 2);
+
             var roles = await accountAdminService.GetRolesAsync(
                 accountID,
                 projectSnapshot.ID);
-
             result.AddRange(
                 roles.Where(x => users.Any(y => y.RoleIds.Contains(x.ID)))
-                   .Select(
-                        x => new AssignToVariant(
-                            new ObjectInfo
-                            {
-                                ID = x.MemberGroupID,
-                                Type = "role",
-                            },
-                            projectSnapshot) { Title = x.Name }));
+                   .Select(x => new AssignToVariant(x.MemberGroupID, AssignToType.Role, x.Name, projectSnapshot)));
 
             var companies = await accountAdminService.GetCompaniesAsync(accountID, projectSnapshot.ID);
             result.AddRange(
                 companies.Select(
-                    x => new AssignToVariant(
-                        new ObjectInfo
-                        {
-                            ID = x.MemberGroupID,
-                            Type = "company",
-                        },
-                        projectSnapshot) { Title = x.Name }));
+                    x => new AssignToVariant(x.MemberGroupID, AssignToType.Company, x.Name, projectSnapshot)));
             return result;
         }
 

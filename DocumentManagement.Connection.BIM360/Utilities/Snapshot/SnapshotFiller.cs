@@ -152,7 +152,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             => await UpdateProjectsEnums(
                 p => p.AssignToVariants = new Dictionary<string, AssignToVariant>(),
                 assignToEnumCreator,
-                (project, variant) => project.AssignToVariants.Add(variant.Entity.ID, variant));
+                (project, variant) => project.AssignToVariants.Add(variant.Entity, variant));
 
         private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
             Action<ProjectSnapshot> createEmptyEnumVariants,
