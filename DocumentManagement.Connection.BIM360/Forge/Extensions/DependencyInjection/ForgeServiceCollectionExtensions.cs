@@ -9,6 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddForge(this IServiceCollection services)
         {
             services.AddScoped<AuthenticationService>();
+            services.AddScoped<AccountAdminService>();
             services.AddScoped<FoldersService>();
             services.AddScoped<HubsService>();
             services.AddScoped<IssuesService>();

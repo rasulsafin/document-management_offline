@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -19,19 +20,28 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly ProjectsService projectsService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
+        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
+        private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly AssignToEnumCreator assignToEnumCreator;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
             IssuesService issuesService,
-            FoldersService foldersService)
+            FoldersService foldersService,
+            TypeSubtypeEnumCreator subtypeEnumCreator,
+            RootCauseEnumCreator rootCauseEnumCreator,
+            AssignToEnumCreator assignToEnumCreator)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
+            this.subtypeEnumCreator = subtypeEnumCreator;
+            this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.assignToEnumCreator = assignToEnumCreator;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -62,7 +72,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
-                    var projectSnapshot = new ProjectSnapshot(p);
+                    var projectSnapshot = new ProjectSnapshot(p, hub.Value);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
 
                     if (!topFolders.Any())
@@ -129,14 +139,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         public async Task UpdateIssueTypes()
             => await UpdateProjectsEnums(
                 p => p.IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
-                new TypeSubtypeEnumCreator(),
-                (project, rootCauseSnapshot) => project.IssueTypes.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+                subtypeEnumCreator,
+                (project, variant) => project.IssueTypes.Add(variant.Entity.ID, variant));
 
         public async Task UpdateRootCauses()
             => await UpdateProjectsEnums(
                 p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
-                new RootCauseEnumCreator(),
-                (project, rootCauseSnapshot) => project.RootCauses.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+                rootCauseEnumCreator,
+                (project, variant) => project.RootCauses.Add(variant.Entity.ID, variant));
+
+        public async Task UpdateAssignTo()
+            => await UpdateProjectsEnums(
+                p => p.AssignToVariants = new Dictionary<string, AssignToVariant>(),
+                assignToEnumCreator,
+                (project, variant) => project.AssignToVariants.Add(variant.Entity.ID, variant));
 
         private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
             Action<ProjectSnapshot> createEmptyEnumVariants,
@@ -149,7 +165,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
             foreach (var project in snapshot.ProjectEnumerable)
             {
-                var variants = await creator.GetVariantsFromRemote(issuesService, project);
+                var variants = await creator.GetVariantsFromRemote(project);
                 createEmptyEnumVariants(project);
                 dictionary.AddRange(variants);
             }

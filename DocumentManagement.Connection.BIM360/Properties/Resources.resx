@@ -245,7 +245,7 @@
     <value>/data/v1/projects/{0}/items/{1}</value>
     <comment>Retrieves metadata for a specified item. Items represent word documents, fusion design files, drawings, spreadsheets, etc.</comment>
   </data>
-  <data name="GetUsersMeMethod" xml:space="preserve">
+  <data name="GetUsersAtMeMethod" xml:space="preserve">
     <value>/userprofile/v1/users/@me</value>
     <comment>Get the profile information of an authorizing end user in a three-legged context</comment>
   </data>
@@ -264,5 +264,37 @@
   <data name="PostAuthenticateMethod" xml:space="preserve">
     <value>/authentication/v1/authenticate</value>
     <comment>Get a two-legged access token by providing your app’s client ID and secret.</comment>
+  </data>
+  <data name="GetUsersMethodEmea" xml:space="preserve">
+    <value>/hq/v1/regions/eu/accounts/{0}/users</value>
+    <comment>Query all the users in a specific BIM 360 EMEA account.</comment>
+  </data>
+  <data name="GetUsersMethodUS" xml:space="preserve">
+    <value>/hq/v1/accounts/{0}/users</value>
+    <comment>Query all the users in a specific BIM 360 US account.</comment>
+  </data>
+  <data name="GetUsersMeMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/users/me</value>
+    <comment>Retrieves the profile information about an end user, including the user’s name and workflow role, as well as details about whether the user has permissions to create issues.</comment>
+  </data>
+  <data name="GetProjectsCompaniesMethodEmea" xml:space="preserve">
+    <value>/hq/v1/regions/eu/accounts/{0}/projects/{1}/companies</value>
+    <comment>Query all the partner companies in a specific BIM 360 project.</comment>
+  </data>
+  <data name="GetProjectsCompaniesMethodUS" xml:space="preserve">
+    <value>/hq/v1/accounts/{0}/projects/{1}/companies</value>
+    <comment>Query all the partner companies in a specific BIM 360 project.</comment>
+  </data>
+  <data name="GetProjectsIndustryRolesMethodEmea" xml:space="preserve">
+    <value>/hq/v2/regions/eu/accounts/{0}/projects/{1}/industry_roles</value>
+    <comment>Retrieves the industry roles for the project. For example, contractor and architect.</comment>
+  </data>
+  <data name="GetProjectsIndustryRolesMethodUS" xml:space="preserve">
+    <value>/hq/v2/accounts/{0}/projects/{1}/industry_roles</value>
+    <comment>Retrieves the industry roles for the project. For example, contractor and architect.</comment>
+  </data>
+  <data name="GetProjectsUsersMethod" xml:space="preserve">
+    <value>/bim360/admin/v1/projects/{0}/users</value>
+    <comment>Retrieves information about all the users in a project. To get information about all the users in an account, see GET accounts/users.</comment>
   </data>
 </root>

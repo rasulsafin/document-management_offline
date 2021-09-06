@@ -1,6 +1,6 @@
 using System;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;

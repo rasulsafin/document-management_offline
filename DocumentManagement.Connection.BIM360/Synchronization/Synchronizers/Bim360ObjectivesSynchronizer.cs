@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
@@ -113,6 +114,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
             await filler.UpdateRootCauses();
+            await filler.UpdateAssignTo();
             return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.ID)
                .ToList();

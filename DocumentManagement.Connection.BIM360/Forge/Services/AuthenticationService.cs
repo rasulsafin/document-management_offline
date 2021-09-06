@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 {
     public class AuthenticationService
     {
-        private static readonly string SCOPE = "data:read%20data:write%20data:create";
+        private static readonly string SCOPE = "data:read%20data:write%20data:create%20account:read";
         private static readonly string APP_SCOPE = "account:read";
 
         private readonly ForgeConnection connection;
@@ -80,7 +80,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                Resources.GetUsersMeMethod);
+                Resources.GetUsersAtMeMethod);
             return response.ToObject<User>();
         }
     }
