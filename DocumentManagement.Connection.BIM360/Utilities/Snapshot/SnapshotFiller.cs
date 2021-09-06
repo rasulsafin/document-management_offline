@@ -173,7 +173,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
             foreach (var group in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group));
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group).Distinct());
 
                 foreach (var issueTypeSnapshot in group)
                 {
