@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
@@ -39,24 +39,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         public async Task<IEnumerable<AssignToVariant>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
         {
             var users = (await accountAdminService.GetProjectUsersAsync(projectSnapshot.ID)).Where(
-                    x => (x.Services.FirstOrDefault(s => s.ServiceName == "documentManagement")?.Access ?? "none") !=
-                        "none")
+                    x => (x.Services.FirstOrDefault(s => s.ServiceName == Constants.DOCUMENT_MANAGEMENT_SERVICE_NAME)
+                      ?.Access ?? Constants.SERVICE_NONE_ACCESS) != Constants.SERVICE_NONE_ACCESS)
                .ToArray();
 
             var result = users.Select(
                     user => new AssignToVariant(user.AutodeskID, AssignToType.User, user.Name, projectSnapshot))
                .ToList();
 
-            var accountID = projectSnapshot.HubSnapshot.Entity.ID.Remove(0, 2);
+            var hub = projectSnapshot.HubSnapshot.Entity;
 
-            var roles = await accountAdminService.GetRolesAsync(
-                accountID,
-                projectSnapshot.ID);
+            var roles = await accountAdminService.GetRolesAsync(hub, projectSnapshot.ID);
             result.AddRange(
                 roles.Where(x => users.Any(y => y.RoleIds.Contains(x.ID)))
                    .Select(x => new AssignToVariant(x.MemberGroupID, AssignToType.Role, x.Name, projectSnapshot)));
 
-            var companies = await accountAdminService.GetCompaniesAsync(accountID, projectSnapshot.ID);
+            var companies = await accountAdminService.GetCompaniesAsync(hub, projectSnapshot.ID);
             result.AddRange(
                 companies.Select(
                     x => new AssignToVariant(x.MemberGroupID, AssignToType.Company, x.Name, projectSnapshot)));

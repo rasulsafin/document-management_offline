@@ -14,6 +14,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
 
+        public static readonly string DOCUMENT_MANAGEMENT_SERVICE_NAME = "documentManagement";
+        public static readonly string SERVICE_NONE_ACCESS = "none";
+
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_DELETED_TYPE = "versions:autodesk.core:Deleted";
