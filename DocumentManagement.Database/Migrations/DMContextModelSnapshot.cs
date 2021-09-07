@@ -183,6 +183,9 @@ namespace DocumentManagement.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("ConnectionInfoID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ExternalID")
                         .HasColumnType("TEXT");
 
@@ -214,6 +217,8 @@ namespace DocumentManagement.Database.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("ConnectionInfoID");
+
                     b.HasIndex("ObjectiveID");
 
                     b.HasIndex("ParentFieldID");
@@ -228,6 +233,9 @@ namespace DocumentManagement.Database.Migrations
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int?>("ConnectionInfoID")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ExternalID")
@@ -249,6 +257,8 @@ namespace DocumentManagement.Database.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("ConnectionInfoID");
 
                     b.HasIndex("ObjectiveTypeID");
 
@@ -745,6 +755,10 @@ namespace DocumentManagement.Database.Migrations
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicField", b =>
                 {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
+                        .WithMany()
+                        .HasForeignKey("ConnectionInfoID");
+
                     b.HasOne("MRS.DocumentManagement.Database.Models.Objective", "Objective")
                         .WithMany("DynamicFields")
                         .HasForeignKey("ObjectiveID")
@@ -760,6 +774,8 @@ namespace DocumentManagement.Database.Migrations
                         .HasForeignKey("MRS.DocumentManagement.Database.Models.DynamicField", "SynchronizationMateID")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.Navigation("ConnectionInfo");
+
                     b.Navigation("Objective");
 
                     b.Navigation("ParentField");
@@ -769,6 +785,10 @@ namespace DocumentManagement.Database.Migrations
 
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.DynamicFieldInfo", b =>
                 {
+                    b.HasOne("MRS.DocumentManagement.Database.Models.ConnectionInfo", "ConnectionInfo")
+                        .WithMany()
+                        .HasForeignKey("ConnectionInfoID");
+
                     b.HasOne("MRS.DocumentManagement.Database.Models.ObjectiveType", "ObjectiveType")
                         .WithMany("DefaultDynamicFields")
                         .HasForeignKey("ObjectiveTypeID")
@@ -778,6 +798,8 @@ namespace DocumentManagement.Database.Migrations
                         .WithMany("ChildrenDynamicFields")
                         .HasForeignKey("ParentFieldID")
                         .OnDelete(DeleteBehavior.Cascade);
+
+                    b.Navigation("ConnectionInfo");
 
                     b.Navigation("ObjectiveType");
 
@@ -923,7 +945,7 @@ namespace DocumentManagement.Database.Migrations
             modelBuilder.Entity("MRS.DocumentManagement.Database.Models.Synchronization", b =>
                 {
                     b.HasOne("MRS.DocumentManagement.Database.Models.User", "User")
-                        .WithMany()
+                        .WithMany("Synchronizations")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1076,6 +1098,8 @@ namespace DocumentManagement.Database.Migrations
                     b.Navigation("Projects");
 
                     b.Navigation("Roles");
+
+                    b.Navigation("Synchronizations");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.MrsPro.Extensions;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
+using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
@@ -12,11 +12,11 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
-        private readonly ProjectsService projectService;
+        private readonly ProjectsDecorator projectsService;
 
-        public MrsProProjectsSynchronizer(ProjectsService projectService)
+        public MrsProProjectsSynchronizer(ProjectsDecorator projectsService)
         {
-            this.projectService = projectService;
+            this.projectsService = projectsService;
         }
 
         public Task<ProjectExternalDto> Add(ProjectExternalDto obj)
@@ -26,13 +26,21 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<IReadOnlyCollection<ProjectExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            var projects = await projectService.TryGetByIds(ids);
-            return projects.Select(x => (x as Project).ToProjectExternalDto()).ToArray();
+            var projectsDtoList = new List<ProjectExternalDto>();
+            var projects = await projectsService.GetElementsByIds(ids);
+            foreach (var project in projects)
+            {
+                if (project.HasAttachments)
+                    project.Attachments = await projectsService.GetAttachments(project.GetExternalId());
+                projectsDtoList.AddIsNotNull(await projectsService.ConvertToDto(project));
+            }
+
+            return projectsDtoList;
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            var result = await projectService.GetRootProjects();
+            var result = await projectsService.GetAll(date);
             return result.Select(x => x.Id).ToArray();
         }
 

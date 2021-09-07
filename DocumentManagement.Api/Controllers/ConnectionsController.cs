@@ -74,7 +74,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
             }
@@ -103,7 +103,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var result = await service.Connect(new ID<UserDto>(userID));
                 return Accepted(result);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["CouldNotConnect"], ex.Message);
             }
@@ -140,7 +140,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidUserID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -177,7 +177,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -219,7 +219,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }

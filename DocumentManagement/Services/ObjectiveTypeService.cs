@@ -9,6 +9,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility.Extensions;
 
@@ -38,7 +39,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (context.ObjectiveTypes.Any(x => x.ConnectionTypeID == null && x.Name == typeName))
-                    throw new ArgumentException($"Objective type {typeName} already exists", typeName);
+                    throw new ArgumentValidationException($"Objective type {typeName} already exists", typeName);
                 var objType = mapper.Map<ObjectiveType>(typeName);
                 await context.ObjectiveTypes.AddAsync(objType);
                 await context.SaveChangesAsync();
@@ -47,7 +48,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
-                throw;
+                if (ex is ArgumentValidationException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -65,10 +68,12 @@ namespace MRS.DocumentManagement.Services
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get ObjectiveType {Id}", id);
-                throw;
+                logger.LogError(ex, "Can't get ObjectiveType {Id}", id);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -86,36 +91,59 @@ namespace MRS.DocumentManagement.Services
 
                 return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get ObjectiveType {Typename}", typename);
-                throw;
+                logger.LogError(ex, "Can't get ObjectiveType {Typename}", typename);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
-        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
+        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<UserDto> id)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectiveTypes started with connection type id: {ID}", id);
 
             try
             {
-                int? connectionTypeId = (int)id == -1 ? (int?)null : (int)id;
+                var user = await context.Users.FindOrThrowAsync((int)id);
+                var connectionInfo = await context.ConnectionInfos
+                    .Where(x => x.User == user)
+                    .Include(x => x.ConnectionType)
+                    .FirstOrDefaultAsync();
+
+                int? connectionTypeId = connectionInfo == null ? (int?)null : (int)connectionInfo.ConnectionTypeID;
 
                 if (connectionTypeId != null)
                     await context.ConnectionTypes.FindOrThrowAsync((int)connectionTypeId);
 
-                var db = await context.ObjectiveTypes
-                   .Include(x => x.DefaultDynamicFields)
-                   .Where(x => x.ConnectionTypeID == connectionTypeId)
-                   .ToListAsync();
-                logger.LogDebug("Found objective types: {@ObjectiveTypes}", db);
-                return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+                var types = await context.ObjectiveTypes.AsNoTracking()
+                    .Where(x => x.ConnectionTypeID == connectionTypeId).ToListAsync();
+
+                foreach (var t in types)
+                {
+                    var query = context.DynamicFieldInfos
+                     .AsNoTracking()
+                     .Where(x => x.ObjectiveTypeID == t.ID);
+
+                    if (connectionInfo?.ID != null)
+                        query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
+                    else
+                        query = query.Where(x => x.ConnectionInfoID == null);
+
+                    t.DefaultDynamicFields = await query.ToListAsync();
+                }
+
+                logger.LogDebug("Found objective types: {@ObjectiveTypes}", types);
+                return types.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of objective type from connection type {Id}", id);
-                throw;
+                logger.LogError(ex, "Can't get list of objective type from connection type {Id}", id);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -134,7 +162,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove objective type with key {ID}", id);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
     }

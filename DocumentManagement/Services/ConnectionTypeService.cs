@@ -10,6 +10,7 @@ using MRS.DocumentManagement.Database;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility.Extensions;
 
@@ -39,17 +40,19 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found type: {@ConnectionType}", type);
 
                 if (type != null)
-                    throw new ArgumentException("This type name is already being used");
+                    throw new ArgumentValidationException("This type name is already being used");
 
                 var connectionType = new ConnectionType { Name = typeName };
                 await context.ConnectionTypes.AddAsync(connectionType);
                 await context.SaveChangesAsync();
                 return (ID<ConnectionTypeDto>)connectionType.ID;
             }
-            catch (DbUpdateException ex)
+            catch (Exception ex)
             {
                 logger.LogError(ex, "Can't add new objective type with typeName = {TypeName}", typeName);
-                throw;
+                if (ex is ArgumentValidationException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -67,10 +70,12 @@ namespace MRS.DocumentManagement.Services
 
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get ConnectionType {Id}", id);
-                throw;
+                logger.LogError(ex, "Can't get ConnectionType {Id}", id);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -87,10 +92,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found connection type : {@DBConnectionType}", dbConnectionType);
                 return mapper.Map<ConnectionTypeDto>(dbConnectionType);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get ConnectionType {Name}", name);
-                throw;
+                logger.LogError(ex, "Can't get ConnectionType {Name}", name);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -107,10 +114,10 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Found connection types : {@DBList}", dbList);
                 return dbList.Select(t => mapper.Map<ConnectionTypeDto>(t)).ToList();
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get list of all registered connection types");
-                throw;
+                logger.LogError(ex, "Can't get list of all registered connection types");
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -173,7 +180,7 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Something went wrong with presented ConnectionTypes");
-                throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -192,7 +199,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove connection type with key {ID}", id);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
     }

@@ -14,32 +14,53 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 {
     public class MrsProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly IElementService issuesService;
-        private readonly IElementService projectsService;
+        private readonly AObjectiveElementDecorator issuesService;
+        private readonly AObjectiveElementDecorator projectsService;
 
-        public MrsProObjectivesSynchronizer(IssuesService issuesService, ProjectsService projectsService)
+        private readonly IConverter<string, (string id, string type)> idConverter;
+
+        public MrsProObjectivesSynchronizer(IssuesDecorator issuesService,
+            ProjectElementsDecorator projectsService,
+            IConverter<string, (string id, string type)> idConverter)
         {
             this.issuesService = issuesService;
             this.projectsService = projectsService;
+            this.idConverter = idConverter;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
-            var element = obj.ToModel(obj.ObjectiveType.ExternalId);
-            var result = await GetService(element.Type).TryPost(element);
-            return result?.ToDto();
+            var service = GetService(obj.ObjectiveType.ExternalId);
+            var element = await service.ConvertToModel(obj);
+            var result = await service.PostElement(element);
+            return await service.ConvertToDto(result);
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
             var objectives = new List<ObjectiveExternalDto>();
 
-            foreach (var id in ids)
+            var objectiveGroups = ids.Select(id => idConverter.Convert(id).Result).GroupBy(t => t.type);
+            foreach (var group in objectiveGroups)
             {
-                var idParts = id.Split(Constants.ID_SPLITTER);
-                (var trueId, var type) = (idParts[0], idParts[1]);
-                var result = await GetService(type).TryGetById(trueId);
-                objectives.AddIsNotNull(result?.ToDto());
+                var service = GetService(group.Key);
+                var trueIds = group.Select(x => x.id).ToArray();
+                var stepCount = 0;
+                var stepValue = 100;
+                var trueIdsQueue = trueIds.Take(stepValue);
+                while (trueIdsQueue.Any())
+                {
+                    var result = await service.GetElementsByIds(trueIdsQueue.ToList());
+                    foreach (var objective in result)
+                    {
+                        if (objective.HasAttachments)
+                            objective.Attachments = await service.GetAttachments(objective.GetExternalId());
+                        objectives.AddIsNotNull(await service.ConvertToDto(objective));
+                    }
+
+                    stepCount += stepValue;
+                    trueIdsQueue = trueIds.Skip(stepCount).Take(stepValue);
+                }
             }
 
             return objectives;
@@ -55,20 +76,21 @@ namespace MRS.DocumentManagement.Connection.MrsPro
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            var idParts = obj.ExternalID.Split(Constants.ID_SPLITTER);
-            (var trueId, var type) = (idParts[0], idParts[1]);
+            (var trueId, var type) = await idConverter.Convert(obj.ExternalID);
 
             if (trueId == null)
                 throw new Exception("Wrong id value");
 
-            var result = await GetService(type).TryDelete(trueId);
+            var result = await GetService(type).DeleteElementById(trueId);
 
             return result ? obj : null;
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            var element = obj.ToModel(obj.ObjectiveType.ExternalId);
+            var service = GetService(obj.ObjectiveType.ExternalId);
+
+            var element = await service.ConvertToModel(obj);
             var updatedValues = new UpdatedValues { Ids = new[] { element.Id } };
             var type = element.GetType();
             var propertiesToPatch = type.GetProperties()
@@ -80,22 +102,17 @@ namespace MRS.DocumentManagement.Connection.MrsPro
                     }).ToArray();
 
             updatedValues.Patch = propertiesToPatch;
-            var result = await GetService(element.Type).TryPatch(updatedValues);
-            return result?.ToDto();
+            var result = await service.PatchElement(updatedValues);
+            return await service.ConvertToDto(result);
         }
 
-        private IElementService GetService(string type)
-        {
-            if (type == Constants.ISSUE_TYPE)
-                return issuesService;
-            else
-                return projectsService;
-        }
+        private AObjectiveElementDecorator GetService(string type)
+            => type == Constants.ISSUE_TYPE ? issuesService : projectsService;
 
-        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(IElementService service, DateTime date)
+        private async Task<IEnumerable<string>> GetUpdatedIdsFromService(AObjectiveElementDecorator service, DateTime date)
         {
             var collection = await service.GetAll(date);
-            return collection.Select(element => $"{element.Id}{Constants.ID_SPLITTER}{element.Type}");
+            return collection.Select(element => element.GetExternalId());
         }
     }
 }

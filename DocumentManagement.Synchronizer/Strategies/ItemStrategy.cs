@@ -167,6 +167,12 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             using var lScope = logger.BeginMethodScope();
             logger.LogStartAction(tuple, data, parent);
 
+            if (tuple.Synchronized == null)
+            {
+                tuple.Merge();
+                tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
+            }
+
             tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
             LinkParent(tuple, parent);
             logger.LogTrace("Parent linked");

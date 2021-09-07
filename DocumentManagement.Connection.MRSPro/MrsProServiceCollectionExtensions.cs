@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using MRS.DocumentManagement;
 using MRS.DocumentManagement.Connection.MrsPro;
+using MRS.DocumentManagement.Connection.MrsPro.Converters;
+using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
+using MRS.DocumentManagement.Connection.MrsPro.Models;
 using MRS.DocumentManagement.Connection.MrsPro.Services;
+using MRS.DocumentManagement.Interface;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -11,13 +18,46 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<MrsProHttpConnection>();
             services.AddScoped<MrsProConnection>();
             services.AddScoped<MrsProConnectionContext>();
+            services.AddScoped<MrsProStorage>();
+
             services.AddScoped<AuthenticationService>();
             services.AddScoped<ProjectsService>();
             services.AddScoped<IssuesService>();
-            services.AddScoped<UsersService>();
+            services.AddScoped<AttachmentsService>();
+            services.AddScoped<PlansService>();
+            services.AddScoped<ItemService>();
+
+            services.AddScoped<IssuesDecorator>();
+            services.AddScoped<ProjectElementsDecorator>();
+            services.AddScoped<ProjectsDecorator>();
 
             services.AddScoped<Func<MrsProConnectionContext>>(x => x.GetService<MrsProConnectionContext>);
 
+            services.AddConverters();
+
+            return services;
+        }
+
+        private static IServiceCollection AddConverters(this IServiceCollection services)
+        {
+            services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
+            services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
+            services.AddConverter<string, ObjectiveStatus, StatusObjectiveStatusConverter>();
+            services.AddConverter<ObjectiveStatus, string, ObjectiveStatusStatusConverter>();
+            services.AddConverter<Project, ObjectiveExternalDto, ProjectObjectiveConverter>();
+            services.AddConverter<ObjectiveExternalDto, Project, ObjectiveProjectConverter>();
+            services.AddConverter<string, (string id, string type), ExternalIdTypeIdConverter>();
+            services.AddConverter<Project, ProjectExternalDto, ProjectProjectDtoConverter>();
+            services.AddConverter<ProjectExternalDto, Project, ProjectDtoProjectConverter>();
+
+            services.AddConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>, ElementAttachmentItemConverter>();
+            return services;
+        }
+
+        private static IServiceCollection AddConverter<TFrom, TTo, TConverter>(this IServiceCollection services)
+      where TConverter : class, IConverter<TFrom, TTo>
+        {
+            services.AddScoped<IConverter<TFrom, TTo>, TConverter>();
             return services;
         }
     }

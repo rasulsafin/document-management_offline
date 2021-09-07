@@ -2,17 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Helpers.Snapshot;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -21,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
-        private readonly Bim360ConnectionContext context;
+        private readonly Bim360Snapshot snapshot;
         private readonly IConverter<ObjectiveStatus, Status> statusConverter;
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
@@ -29,14 +31,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly Downloader downloader;
 
         public ObjectiveIssueConverter(
-            Bim360ConnectionContext context,
+            Bim360Snapshot snapshot,
             IConverter<ObjectiveStatus, Status> statusConverter,
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
             Downloader downloader)
         {
-            this.context = context;
+            this.snapshot = snapshot;
             this.statusConverter = statusConverter;
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
@@ -86,10 +88,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Title = objective.Title,
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
-                    //// TODO: AssignedTo,
+                    ////AssignedTo = GetDynamicField(objective.DynamicFields, x => x.AssignedTo),
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
-                    //// TODO: LocationDescription,
+                    LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
+                    RootCauseID = GetRootCause(project, objective)?.Entity.ID,
+                    Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes =
                         await GetPushpinAttributes(objective.Location, project.IssueContainer, targetUrn, globalOffset),
                     NgIssueTypeID = type,
@@ -108,9 +112,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private static DateTime? ConvertToNullable(DateTime dateTime)
             => dateTime == default ? null : dateTime;
 
-        private static string GetDynamicField(IEnumerable<DynamicFieldExternalDto> dynamicFields, string fieldName)
+        private static string GetDynamicField(
+            IEnumerable<DynamicFieldExternalDto> dynamicFields,
+            Expression<Func<Issue.IssueAttributes, object>> property)
         {
-            var field = dynamicFields?.FirstOrDefault(f => f.ExternalID == fieldName);
+            var fieldID = DataMemberUtilities.GetPath(property);
+            var field = dynamicFields?.FirstOrDefault(f => f.ExternalID == fieldID);
             return field?.Value;
         }
 
@@ -162,15 +169,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == TypeDFHelper.ID);
-            var deserializedIDs = TypeDFHelper.DeserializeID(dynamicField.Value).ToArray();
-            var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtype);
+            var creator = new TypeSubtypeEnumCreator();
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
+            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
+            var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtypeID);
             var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))
                .Value;
 
             if (type == null)
             {
-                var typeLookup = deserializedIDs.ToLookup(x => x.type);
+                var typeLookup = deserializedIDs.ToLookup(x => x.parentTypeID);
                 type = projectSnapshot.IssueTypes.FirstOrDefault(
                             x => x.Value.SubTypeIsType && typeLookup.Contains(x.Value.ParentTypeID))
                        .Value ??
@@ -183,8 +191,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return type;
         }
 
+        private RootCauseSnapshot GetRootCause(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
+        {
+            var creator = new RootCauseEnumCreator();
+            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
+
+            if (dynamicField.Value == creator.NullID)
+                return null;
+
+            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
+            var rootCause = projectSnapshot.RootCauses
+               .FirstOrDefault(x => deserializedIDs.Contains(x.Value.Entity.ID))
+               .Value;
+            return rootCause;
+        }
+
         private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
-            => context.Snapshot.Hubs.SelectMany(x => x.Value.Projects)
+            => snapshot.Hubs.SelectMany(x => x.Value.Projects)
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
 
@@ -206,24 +229,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 Item item;
                 Version version;
 
-                if (!project.Items.TryGetValue(obj.Location.Item.ExternalID, out var snapshot))
-                    snapshot = project.FindItemByName(obj.Location.Item.FileName);
+                if (!project.Items.TryGetValue(obj.Location.Item.ExternalID, out var itemSnapshot))
+                    itemSnapshot = project.FindItemByName(obj.Location.Item.FileName);
 
-                if (snapshot == null)
+                if (itemSnapshot == null)
                 {
                     (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);
                 }
                 else
                 {
-                    var redirect = await GetTargetFromConfigAndSetOffset(obj, project, snapshot);
-                    if (redirect != default)
-                        return redirect;
-
-                    item = snapshot.Entity;
+                    item = itemSnapshot.Entity;
                     var info = new FileInfo(obj.Location.Item.FullPath);
-                    var size = info.Exists ? info.Length : -1;
-                    version = snapshot.Version.Attributes.StorageSize == size
-                        ? snapshot.Version
+                    var size = info.Exists ? info.Length : 0;
+                    version = itemSnapshot.Version.Attributes.StorageSize == size
+                        ? itemSnapshot.Version
                         : await GetVersion(item?.ID, size);
                 }
 
@@ -237,10 +256,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                    .OrderByDescending(x => x.count)
                    .Select(x => x.name))
                 {
-                    var snapshot = project.FindItemByName(file, true);
+                    var itemSnapshot = project.FindItemByName(file, true);
 
-                    if (snapshot != null)
-                        return (snapshot.Entity?.ID, snapshot.Version?.Attributes.VersionNumber);
+                    if (itemSnapshot != null)
+                        return (itemSnapshot.Entity?.ID, itemSnapshot.Version?.Attributes.VersionNumber);
                 }
             }
 
@@ -290,7 +309,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (!string.IsNullOrWhiteSpace(targetUrn))
             {
                 var filter = new Filter(
-                    typeof(Issue.IssueAttributes).GetDataMemberName(nameof(Issue.IssueAttributes.TargetUrn)),
+                    DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.TargetUrn),
                     targetUrn);
                 var other = await issuesService.GetIssuesAsync(
                     containerID,
