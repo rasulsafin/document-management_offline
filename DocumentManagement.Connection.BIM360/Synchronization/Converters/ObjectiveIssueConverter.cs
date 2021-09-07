@@ -238,6 +238,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 }
                 else
                 {
+                    var redirect = await GetTargetFromConfigAndSetOffset(obj, project, itemSnapshot);
+                    if (redirect != default)
+                        return redirect;
+
                     item = itemSnapshot.Entity;
                     var info = new FileInfo(obj.Location.Item.FullPath);
                     var size = info.Exists ? info.Length : 0;
@@ -269,13 +273,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private async Task<(string item, int? version)> GetTargetFromConfigAndSetOffset(
             ObjectiveExternalDto obj,
             ProjectSnapshot project,
-            ItemSnapshot snapshot)
+            ItemSnapshot itemSnapshot)
         {
             var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
             var config = project.Items
                .Where(
                     x => x.Value.Entity.Relationships.Parent.Data.ID ==
-                        snapshot.Entity.Relationships.Parent.Data.ID)
+                        itemSnapshot.Entity.Relationships.Parent.Data.ID)
                .FirstOrDefault(
                     x => string.Equals(
                         x.Value.Entity.Attributes.DisplayName,
