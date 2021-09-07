@@ -35,23 +35,45 @@ namespace MRS.DocumentManagement.Utility.Mapping.Resolvers
                 DynamicFieldType.BOOL => bool.Parse(source.Value),
                 DynamicFieldType.INTEGER => int.Parse(source.Value),
                 DynamicFieldType.FLOAT => float.Parse(source.Value),
-                DynamicFieldType.ENUM => GetEnum(source.Value),
+                DynamicFieldType.ENUM => GetEnum(source.Value, source.ConnectionInfoID),
                 DynamicFieldType.DATE => DateTime.Parse(source.Value),
                 _ => null,
             };
         }
 
-        private Enumeration GetEnum(string valueFromDb)
+        private Enumeration GetEnum(string valueFromDb, int? id)
         {
             logger.LogTrace("GetEnum started with valueFromDb: {@ValueFromDb}", valueFromDb);
             var enumValue = dbContext.EnumerationValues
-               .Include(x => x.EnumerationType)
-                    .ThenInclude(x => x.EnumerationValues)
-               .FirstOrDefault(x => x.ID == int.Parse(valueFromDb));
+                .AsNoTracking()
+                .FirstOrDefault(x => x.ID == int.Parse(valueFromDb));
 
             logger.LogDebug("Found enum value: {@EnumValue}", enumValue);
 
-            var type = mapper.Map<EnumerationTypeDto>(enumValue.EnumerationType);
+            var enumType = dbContext.EnumerationTypes
+                .AsNoTracking()
+                .FirstOrDefault(x => x.ID == enumValue.EnumerationTypeID);
+
+            IQueryable<EnumerationValue> enumValuesFromDb;
+            if (id != 0)
+            {
+                enumValuesFromDb = dbContext.ConnectionInfoEnumerationValues
+                .AsNoTracking()
+                .Where(x => x.ConnectionInfoID == id)
+                .Include(x => x.EnumerationValue)
+                .Select(x => x.EnumerationValue)
+                .Where(x => x.EnumerationTypeID == enumType.ID);
+            }
+            else
+            {
+                enumValuesFromDb = dbContext.EnumerationValues
+                    .AsNoTracking()
+                    .Where(x => x.EnumerationTypeID == enumType.ID);
+            }
+
+            enumType.EnumerationValues = enumValuesFromDb.ToList();
+
+            var type = mapper.Map<EnumerationTypeDto>(enumType);
             logger.LogDebug("Mapped type: {@Type}", type);
             var value = mapper.Map<EnumerationValueDto>(enumValue);
             logger.LogDebug("Mapped value: {@Value}", value);
