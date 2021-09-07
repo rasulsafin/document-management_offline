@@ -147,26 +147,26 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         /// <summary>
-        /// Get list of objective types accessible to specific Connection Type.
+        /// Get list of objective types accessible to specific User.
         /// </summary>
-        /// <param name="connectionTypeId">Connection type id.</param>
+        /// <param name="userDtoId">User id.</param>
         /// <returns>Collection of Objective Types.</returns>
         /// <response code="200">List of Objective Types found. If Connection type id was null or invalid, method will return default list of objective types. </response>
         /// <response code="404">If Connection type id was valid, but could not find its value in database.</response>
         /// <response code="500">Something went wrong while retrieving the objective type.</response>
         [HttpGet]
-        [Route("list/{connectionTypeId}")]
+        [Route("list/{userDtoId}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetObjectiveTypes(
             [FromRoute]
-            int connectionTypeId)
+            int userDtoId)
         {
             try
             {
-                var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));
+                var allTypes = await service.GetObjectiveTypes(new ID<UserDto>(userDtoId));
                 return Ok(allTypes);
             }
             catch (ANotFoundException ex)
