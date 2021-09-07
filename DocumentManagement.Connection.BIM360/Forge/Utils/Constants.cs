@@ -40,9 +40,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string INCLUDED_PROPERTY = "included";
         internal static readonly string TYPE_PROPERTY = "type";
 
-        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}&";
-        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}&";
-        internal static readonly string QUERY_PARAMETER = "{0}={1}&";
+        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}";
+        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}";
+        internal static readonly string QUERY_PARAMETER = "{0}={1}";
 
         internal static readonly string LIMIT_PARAMETER_NAME = "limit";
         internal static readonly string OFFSET_PARAMETER_NAME = "offset";

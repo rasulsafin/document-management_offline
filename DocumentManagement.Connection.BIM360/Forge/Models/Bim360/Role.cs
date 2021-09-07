@@ -24,21 +24,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
         public class RoleServices
         {
             [DataMember(Name = "project_administration")]
-            public ProjectAdministration ProjectAdministration { get; set; }
+            public RoleService ProjectAdministration { get; set; }
 
             [DataMember(Name = "document_management")]
-            public DocumentManagement DocumentManagement { get; set; }
+            public RoleService DocumentManagement { get; set; }
         }
 
         [DataContract]
-        public class ProjectAdministration
-        {
-            [DataMember(Name = "access_level")]
-            public string AccessLevel { get; set; }
-        }
-
-        [DataContract]
-        public class DocumentManagement
+        public class RoleService
         {
             [DataMember(Name = "access_level")]
             public string AccessLevel { get; set; }

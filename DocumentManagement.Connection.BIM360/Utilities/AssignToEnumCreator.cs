@@ -39,7 +39,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         public async Task<IEnumerable<AssignToVariant>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
         {
             var users = (await accountAdminService.GetProjectUsersAsync(projectSnapshot.ID)).Where(
-                    x => (x.Services.FirstOrDefault(s => s.ServiceName == Constants.DOCUMENT_MANAGEMENT_SERVICE_NAME)
+                    user => (user.Services
+                       .FirstOrDefault(service => service.ServiceName == Constants.DOCUMENT_MANAGEMENT_SERVICE_NAME)
                       ?.Access ?? Constants.SERVICE_NONE_ACCESS) != Constants.SERVICE_NONE_ACCESS)
                .ToArray();
 
@@ -51,13 +52,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
             var roles = await accountAdminService.GetRolesAsync(hub, projectSnapshot.ID);
             result.AddRange(
-                roles.Where(x => users.Any(y => y.RoleIds.Contains(x.ID)))
-                   .Select(x => new AssignToVariant(x.MemberGroupID, AssignToType.Role, x.Name, projectSnapshot)));
+                roles.Where(role => users.Any(y => y.RoleIds.Contains(role.ID)))
+                   .Select(
+                        role => new AssignToVariant(
+                            role.MemberGroupID,
+                            AssignToType.Role,
+                            role.Name,
+                            projectSnapshot)));
 
             var companies = await accountAdminService.GetCompaniesAsync(hub, projectSnapshot.ID);
             result.AddRange(
                 companies.Select(
-                    x => new AssignToVariant(x.MemberGroupID, AssignToType.Company, x.Name, projectSnapshot)));
+                    company => new AssignToVariant(
+                        company.MemberGroupID,
+                        AssignToType.Company,
+                        company.Name,
+                        projectSnapshot)));
             return result;
         }
 
