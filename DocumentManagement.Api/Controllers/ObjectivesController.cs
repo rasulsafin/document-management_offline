@@ -5,8 +5,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using MRS.DocumentManagement.Api.Validators;
-using MRS.DocumentManagement.General;
-using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Filters;
