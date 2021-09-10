@@ -1,9 +1,9 @@
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using System.IO;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {

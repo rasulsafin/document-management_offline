@@ -16,7 +16,6 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
@@ -59,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             int? startingVersion;
             Vector3? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
-            var itemSnapshot = await GetSnapshot(objective, project);
+            var itemSnapshot = await GetTargetSnapshot(objective, project);
             var config = await ifcConfigUtilities.GetConfig(objective, project, itemSnapshot);
 
             if (exist == null)
@@ -258,7 +257,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return default;
         }
 
-        private async Task<ItemSnapshot> GetSnapshot(ObjectiveExternalDto obj, ProjectSnapshot project)
+        private async Task<ItemSnapshot> GetTargetSnapshot(ObjectiveExternalDto obj, ProjectSnapshot project)
         {
             if (obj.Location != null)
             {
@@ -309,7 +308,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             }
 
             return GetGlobalOffsetOrZeroVector(found);
-
         }
 
         private bool IsNotZeroOffset(Issue issue)
