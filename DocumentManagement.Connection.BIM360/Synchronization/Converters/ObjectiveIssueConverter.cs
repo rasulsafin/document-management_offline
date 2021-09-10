@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
-        private readonly Downloader downloader;
+        private readonly IfcConfigUtilities ifcConfigUtilities;
 
         public ObjectiveIssueConverter(
             Bim360Snapshot snapshot,
@@ -36,14 +36,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
-            Downloader downloader)
+            IfcConfigUtilities ifcConfigUtilities)
         {
             this.snapshot = snapshot;
             this.statusConverter = statusConverter;
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.itemsService = itemsService;
-            this.downloader = downloader;
+            this.ifcConfigUtilities = ifcConfigUtilities;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
@@ -59,11 +59,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             int? startingVersion;
             Vector3? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
+            var itemSnapshot = GetSnapshot(objective, project);
 
             if (exist == null)
             {
                 (type, subtype) = (typeSnapshot.ParentTypeID, typeSnapshot.SubtypeID);
-                (targetUrn, startingVersion) = await GetTarget(objective, project);
+                (targetUrn, startingVersion) = await GetTarget(objective, project, itemSnapshot);
             }
             else
             {
@@ -80,6 +81,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 globalOffset = exist.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset;
             }
 
+            var config = await ifcConfigUtilities.GetConfig(objective, project, itemSnapshot);
+
             var result = new Issue
             {
                 ID = objective.ExternalID,
@@ -94,8 +97,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
                     RootCauseID = GetRootCause(project, objective)?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
-                    PushpinAttributes =
-                        await GetPushpinAttributes(objective.Location, project.IssueContainer, targetUrn, globalOffset),
+                    PushpinAttributes = GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
                     NgIssueTypeID = type,
                     NgIssueSubtypeID = subtype,
                     PermittedAttributes = permittedAttributes,
@@ -109,8 +111,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return result;
         }
 
-        private static DateTime? ConvertToNullable(DateTime dateTime)
-            => dateTime == default ? null : dateTime;
+        private static T? ConvertToNullable<T>(T dateTime)
+            where T : struct
+            => Equals(dateTime, default(T)) ? null : dateTime;
 
         private static string GetDynamicField(
             IEnumerable<DynamicFieldExternalDto> dynamicFields,
@@ -132,23 +135,34 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         }
 
         private static object GetOtherInfo(ObjectiveExternalDto objective)
-            => new
+            => new OtherInfo
             {
-                objective.BimElements,
+                BimElements = objective.BimElements,
+                OriginalTargetUrn = objective.Location?.Item?.ExternalID,
             };
 
-        private async Task<Issue.PushpinAttributes> GetPushpinAttributes(
+        private Issue.PushpinAttributes GetPushpinAttributes(
             LocationExternalDto locationDto,
-            string containerID,
+            ProjectSnapshot projectSnapshot,
             string targetUrn,
-            Vector3? globalOffset = default)
+            Vector3? globalOffset = default,
+            IfcConfig config = null)
         {
             if (locationDto == null)
                 return null;
 
-            var offset = globalOffset ?? await GetGlobalOffset(containerID, targetUrn);
-            var target = locationDto.Location.ToVector().ToFeet().ToXZY();
-            var eye = locationDto.CameraPosition.ToVector().ToFeet().ToXZY();
+            var offset = globalOffset ?? GetGlobalOffsetOrZeroVector(projectSnapshot, targetUrn);
+            var location = locationDto.Location.ToVector();
+            var camera = locationDto.CameraPosition.ToVector();
+
+            if (config != null)
+            {
+                location -= config.RedirectTo.Offset;
+                camera -= config.RedirectTo.Offset;
+            }
+
+            var target = location.ToFeet().ToXZY();
+            var eye = camera.ToFeet().ToXZY();
 
             return new Issue.PushpinAttributes
             {
@@ -211,7 +225,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
 
-        private async Task<(string item, int? version)> GetTarget(ObjectiveExternalDto obj, ProjectSnapshot project)
+        private async Task<(string item, int? version)> GetTarget(
+            ObjectiveExternalDto obj,
+            ProjectSnapshot project,
+            ItemSnapshot itemSnapshot)
         {
             async Task<Version> GetVersion(string itemID, long size)
             {
@@ -224,107 +241,57 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 return versions.FirstOrDefault(x => x.Attributes.StorageSize == size) ?? versions.First();
             }
 
+            if (itemSnapshot == null && obj.Location != null)
+            {
+                var (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);
+                return (item?.ID, version?.Attributes.VersionNumber);
+            }
+
+            if (itemSnapshot != null)
+            {
+                Item item = itemSnapshot.Entity;
+                var info = obj.Location == null ? null : new FileInfo(obj.Location.Item.FullPath);
+                var size = (info?.Exists ?? false) ? info.Length : 0;
+                Version version = size == 0 || itemSnapshot.Version.Attributes.StorageSize == size
+                    ? itemSnapshot.Version
+                    : await GetVersion(item?.ID, size);
+                return (item?.ID, version?.Attributes.VersionNumber);
+            }
+
+            return default;
+        }
+
+        private ItemSnapshot GetSnapshot(ObjectiveExternalDto obj, ProjectSnapshot project)
+        {
             if (obj.Location != null)
             {
-                Item item;
-                Version version;
-
                 if (!project.Items.TryGetValue(obj.Location.Item.ExternalID, out var itemSnapshot))
                     itemSnapshot = project.FindItemByName(obj.Location.Item.FileName);
-
-                if (itemSnapshot == null)
-                {
-                    (item, version) = await itemsSyncHelper.PostItem(project, obj.Location.Item);
-                }
-                else
-                {
-                    var redirect = await GetTargetFromConfigAndSetOffset(obj, project, itemSnapshot);
-                    if (redirect != default)
-                        return redirect;
-
-                    item = itemSnapshot.Entity;
-                    var info = new FileInfo(obj.Location.Item.FullPath);
-                    var size = info.Exists ? info.Length : 0;
-                    version = itemSnapshot.Version.Attributes.StorageSize == size
-                        ? itemSnapshot.Version
-                        : await GetVersion(item?.ID, size);
-                }
-
-                return (item?.ID, version?.Attributes.VersionNumber);
+                return itemSnapshot;
             }
 
             if (obj.BimElements is { Count: > 0 })
             {
-                foreach (var file in obj.BimElements
-                   .GroupBy(x => x.ParentName, (name, elements) => (name, count: elements.Count()))
-                   .OrderByDescending(x => x.count)
-                   .Select(x => x.name))
-                {
-                    var itemSnapshot = project.FindItemByName(file, true);
-
-                    if (itemSnapshot != null)
-                        return (itemSnapshot.Entity?.ID, itemSnapshot.Version?.Attributes.VersionNumber);
-                }
+                return obj.BimElements.GroupBy(x => x.ParentName, (name, elements) => (name, count: elements.Count()))
+                    .OrderByDescending(x => x.count)
+                    .Select(x => x.name)
+                    .Select(file => project.FindItemByName(file, true))
+                    .FirstOrDefault(itemSnapshot => itemSnapshot != null);
             }
 
-            return default;
+            return null;
         }
 
-        private async Task<(string item, int? version)> GetTargetFromConfigAndSetOffset(
-            ObjectiveExternalDto obj,
-            ProjectSnapshot project,
-            ItemSnapshot itemSnapshot)
-        {
-            var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
-            var config = project.Items
-               .Where(
-                    x => x.Value.Entity.Relationships.Parent.Data.ID ==
-                        itemSnapshot.Entity.Relationships.Parent.Data.ID)
-               .FirstOrDefault(
-                    x => string.Equals(
-                        x.Value.Entity.Attributes.DisplayName,
-                        configName,
-                        StringComparison.OrdinalIgnoreCase))
-               .Value;
+        private Vector3 GetGlobalOffsetOrZeroVector(ProjectSnapshot projectSnapshot, string targetUrn)
+            => !string.IsNullOrWhiteSpace(targetUrn)
+                ? GetGlobalOffsetOrZeroVector(
+                    projectSnapshot.Issues.Values
+                       .Select(issueSnapshot => issueSnapshot.Entity)
+                       .Where(issue => issue.Attributes.TargetUrn == targetUrn)
+                       .FirstOrDefault(issue => GetGlobalOffsetOrZeroVector(issue) != Vector3.Zero))
+                : Vector3.Zero;
 
-            if (config != null)
-            {
-                var downloadedConfig = await downloader.Download(
-                    project.ID,
-                    config.Entity,
-                    config.Version,
-                    Path.GetTempFileName());
-
-                if (downloadedConfig?.Exists ?? false)
-                {
-                    var ifcConfig = JsonConvert.DeserializeObject<IfcConfig>(
-                        await File.ReadAllTextAsync(downloadedConfig.FullName));
-                    downloadedConfig.Delete();
-                    obj.Location.Location = (obj.Location.Location.ToVector() - ifcConfig.RedirectTo.Offset).ToTuple();
-                    return (ifcConfig.RedirectTo.Urn, ifcConfig.RedirectTo.Version);
-                }
-            }
-
-            return default;
-        }
-
-        private async Task<Vector3> GetGlobalOffset(string containerID, string targetUrn)
-        {
-            if (!string.IsNullOrWhiteSpace(targetUrn))
-            {
-                var filter = new Filter(
-                    DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.TargetUrn),
-                    targetUrn);
-                var other = await issuesService.GetIssuesAsync(
-                    containerID,
-                    new[] { filter });
-                var withGlobalOffset = other.FirstOrDefault(
-                    x => (x.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset ?? Vector3.Zero) != Vector3.Zero);
-                var offset = withGlobalOffset?.Attributes.PushpinAttributes.ViewerState.GlobalOffset ?? Vector3.Zero;
-                return offset;
-            }
-
-            return Vector3.Zero;
-        }
+        private Vector3 GetGlobalOffsetOrZeroVector(Issue issue)
+            => issue?.Attributes?.PushpinAttributes?.ViewerState?.GlobalOffset ?? Vector3.Zero;
     }
 }

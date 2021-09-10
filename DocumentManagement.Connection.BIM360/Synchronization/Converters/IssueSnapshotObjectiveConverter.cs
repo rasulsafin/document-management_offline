@@ -12,11 +12,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly IfcConfigUtilities ifcConfigUtilities;
 
         public IssueSnapshotObjectiveConverter(
-            IConverter<Issue, ObjectiveExternalDto> converterToDto)
+            IConverter<Issue, ObjectiveExternalDto> converterToDto,
+            IfcConfigUtilities ifcConfigUtilities)
         {
             this.converterToDto = converterToDto;
+            this.ifcConfigUtilities = ifcConfigUtilities;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -46,7 +49,30 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (parsedToDto.Location != null &&
                 snapshot.Entity.Attributes.TargetUrn != null &&
                 snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
-                parsedToDto.Location.Item = target.Entity.ToDto();
+            {
+                var otherInfo = snapshot.Entity.GetOtherInfo();
+
+                if (otherInfo?.OriginalTargetUrn != null && snapshot.ProjectSnapshot.Items.TryGetValue(
+                    otherInfo.OriginalTargetUrn,
+                    out var originalTarget))
+                {
+                    parsedToDto.Location.Item = originalTarget.Entity.ToDto();
+                    var config = await ifcConfigUtilities.GetConfig(
+                        parsedToDto,
+                        snapshot.ProjectSnapshot,
+                        originalTarget);
+                    var location = parsedToDto.Location.Location.ToVector();
+                    var camera = parsedToDto.Location.CameraPosition.ToVector();
+                    location += config.RedirectTo.Offset;
+                    camera += config.RedirectTo.Offset;
+                    parsedToDto.Location.Location = location.ToTuple();
+                    parsedToDto.Location.CameraPosition = camera.ToTuple();
+                }
+                else
+                {
+                    parsedToDto.Location.Item = target.Entity.ToDto();
+                }
+            }
 
             return parsedToDto;
         }
