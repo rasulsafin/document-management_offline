@@ -76,18 +76,21 @@ namespace MRS.DocumentManagement.Database
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
             UpdateDateTime();
+            UpdateObjective();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
         {
             UpdateDateTime();
+            UpdateObjective();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public Task<int> SynchronizationSaveAsync(DateTime dateTime, CancellationToken cancellationToken = new CancellationToken())
         {
             UpdateDateTime(dateTime);
+            UpdateObjective();
             return base.SaveChangesAsync(true, cancellationToken);
         }
 
@@ -294,7 +297,6 @@ namespace MRS.DocumentManagement.Database
                     .WithOne()
                     .OnDelete(DeleteBehavior.SetNull);
 
-
             modelBuilder.Entity<Project>()
                     .Property(x => x.UpdatedAt)
                     .HasDefaultValue(DEFAULT_DATE_TIME);
@@ -319,6 +321,19 @@ namespace MRS.DocumentManagement.Database
             {
                 var synchronizable = (ISynchronizableBase)entityEntry.Entity;
                 synchronizable.UpdatedAt = dateTime == default ? DateTime.UtcNow : dateTime;
+            }
+        }
+
+        private void UpdateObjective()
+        {
+            foreach (var entityEntry in ChangeTracker
+               .Entries()
+               .Where(
+                    e => e.Entity is Objective &&
+                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
+            {
+                var objective = (Objective)entityEntry.Entity;
+                objective.TitleToLower = objective.Title.ToLowerInvariant();
             }
         }
     }
