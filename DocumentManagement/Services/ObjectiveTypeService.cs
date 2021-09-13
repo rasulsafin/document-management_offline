@@ -100,24 +100,43 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id)
+        public async Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<UserDto> id)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectiveTypes started with connection type id: {ID}", id);
 
             try
             {
-                int? connectionTypeId = (int)id == -1 ? (int?)null : (int)id;
+                var user = await context.Users.FindOrThrowAsync((int)id);
+                var connectionInfo = await context.ConnectionInfos
+                    .Where(x => x.User == user)
+                    .Include(x => x.ConnectionType)
+                    .FirstOrDefaultAsync();
+
+                int? connectionTypeId = connectionInfo == null ? (int?)null : (int)connectionInfo.ConnectionTypeID;
 
                 if (connectionTypeId != null)
                     await context.ConnectionTypes.FindOrThrowAsync((int)connectionTypeId);
 
-                var db = await context.ObjectiveTypes
-                   .Include(x => x.DefaultDynamicFields)
-                   .Where(x => x.ConnectionTypeID == connectionTypeId)
-                   .ToListAsync();
-                logger.LogDebug("Found objective types: {@ObjectiveTypes}", db);
-                return db.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
+                var types = await context.ObjectiveTypes.AsNoTracking()
+                    .Where(x => x.ConnectionTypeID == connectionTypeId).ToListAsync();
+
+                foreach (var t in types)
+                {
+                    var query = context.DynamicFieldInfos
+                     .AsNoTracking()
+                     .Where(x => x.ObjectiveTypeID == t.ID);
+
+                    if (connectionInfo?.ID != null)
+                        query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
+                    else
+                        query = query.Where(x => x.ConnectionInfoID == null);
+
+                    t.DefaultDynamicFields = await query.ToListAsync();
+                }
+
+                logger.LogDebug("Found objective types: {@ObjectiveTypes}", types);
+                return types.Select(x => mapper.Map<ObjectiveTypeDto>(x)).ToList();
             }
             catch (Exception ex)
             {
