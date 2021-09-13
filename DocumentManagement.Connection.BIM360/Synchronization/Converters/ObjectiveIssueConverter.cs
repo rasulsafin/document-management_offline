@@ -52,10 +52,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (objective.ExternalID != null)
                 exist = await issuesService.GetIssueAsync(project.IssueContainer, objective.ExternalID);
 
-            string type, subtype, targetUrn;
+            string type;
+            string subtype;
+            string targetUrn;
+            string originalUrn = null;
             string[] permittedAttributes = null;
             Status[] permittedStatuses = null;
-            int? startingVersion;
+            int? startingVersion, originalStartingVersion = null;
             Vector3? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
             var itemSnapshot = await GetTargetSnapshot(objective, project);
@@ -64,7 +67,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (exist == null)
             {
                 (type, subtype) = (typeSnapshot.ParentTypeID, typeSnapshot.SubtypeID);
-                (targetUrn, startingVersion) = await GetTarget(objective, project, itemSnapshot, config);
+                (targetUrn, startingVersion) = await GetTarget(objective, project, itemSnapshot);
+
+                if (config != null)
+                {
+                    (targetUrn, originalUrn) = (config.RedirectTo.Urn, targetUrn);
+                    (startingVersion, originalStartingVersion) = (config.RedirectTo.Version, startingVersion);
+                }
             }
             else
             {
@@ -105,7 +114,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 },
             };
 
-            SetBimElements(objective, result);
+            SetOtherInfo(objective, result, config, originalUrn, originalStartingVersion);
             return result;
         }
 
@@ -122,22 +131,35 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return field?.Value;
         }
 
-        private static void SetBimElements(ObjectiveExternalDto objective, Issue result)
+        private static void SetOtherInfo(
+            ObjectiveExternalDto objective,
+            Issue result,
+            IfcConfig config,
+            string originalUrn,
+            int? originalStartingVersion)
         {
             if (objective.BimElements is not { Count: > 0 } || objective.Location == null)
                 return;
 
             result.Attributes.PushpinAttributes ??= new Issue.PushpinAttributes();
             result.Attributes.PushpinAttributes.ViewerState ??= new Issue.ViewerState();
-            result.Attributes.PushpinAttributes.ViewerState.OtherInfo = GetOtherInfo(objective);
-        }
+            var otherInfo = new OtherInfo { BimElements = objective.BimElements };
 
-        private static object GetOtherInfo(ObjectiveExternalDto objective)
-            => new OtherInfo
+            if (config != null &&
+                originalUrn != null &&
+                originalStartingVersion != null &&
+                objective.Location?.Item?.ExternalID != null)
             {
-                BimElements = objective.BimElements,
-                OriginalTargetUrn = objective.Location?.Item?.ExternalID,
-            };
+                otherInfo.OriginalModelInfo = new LinkedInfo
+                {
+                    Urn = objective.Location?.Item?.ExternalID,
+                    Version = originalStartingVersion.Value,
+                    Offset = config.RedirectTo.Offset,
+                };
+            }
+
+            result.Attributes.PushpinAttributes.ViewerState.OtherInfo = otherInfo;
+        }
 
         private async Task<Issue.PushpinAttributes> GetPushpinAttributes(
             LocationExternalDto locationDto,
@@ -226,8 +248,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private async Task<(string item, int? version)> GetTarget(
             ObjectiveExternalDto obj,
             ProjectSnapshot project,
-            ItemSnapshot itemSnapshot,
-            IfcConfig ifcConfig)
+            ItemSnapshot itemSnapshot)
         {
             async Task<Version> GetVersion(string itemID, long size)
             {
@@ -239,9 +260,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                    .ToArray();
                 return versions.FirstOrDefault(x => x.Attributes.StorageSize == size) ?? versions.First();
             }
-
-            if (ifcConfig != null)
-                return (ifcConfig.RedirectTo.Urn, ifcConfig.RedirectTo.Version);
 
             if (itemSnapshot != null)
             {

@@ -12,15 +12,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
-        private readonly IfcConfigUtilities ifcConfigUtilities;
 
         public IssueSnapshotObjectiveConverter(
-            IConverter<Issue, ObjectiveExternalDto> converterToDto,
-            IfcConfigUtilities ifcConfigUtilities)
-        {
-            this.converterToDto = converterToDto;
-            this.ifcConfigUtilities = ifcConfigUtilities;
-        }
+            IConverter<Issue, ObjectiveExternalDto> converterToDto)
+            => this.converterToDto = converterToDto;
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
         {
@@ -50,31 +45,30 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 snapshot.Entity.Attributes.TargetUrn != null &&
                 snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
             {
-                var otherInfo = snapshot.Entity.GetOtherInfo();
-
-                if (otherInfo?.OriginalTargetUrn != null && snapshot.ProjectSnapshot.Items.TryGetValue(
-                    otherInfo.OriginalTargetUrn,
-                    out var originalTarget))
-                {
-                    parsedToDto.Location.Item = originalTarget.Entity.ToDto();
-                    var config = await ifcConfigUtilities.GetConfig(
-                        parsedToDto,
-                        snapshot.ProjectSnapshot,
-                        originalTarget);
-                    var location = parsedToDto.Location.Location.ToVector();
-                    var camera = parsedToDto.Location.CameraPosition.ToVector();
-                    location += config.RedirectTo.Offset;
-                    camera += config.RedirectTo.Offset;
-                    parsedToDto.Location.Location = location.ToTuple();
-                    parsedToDto.Location.CameraPosition = camera.ToTuple();
-                }
-                else
-                {
+                if (!TryRedirect(snapshot, parsedToDto))
                     parsedToDto.Location.Item = target.Entity.ToDto();
-                }
             }
 
             return parsedToDto;
+        }
+
+        private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
+        {
+            var otherInfo = snapshot.Entity.GetOtherInfo();
+            var linkedInfo = otherInfo?.OriginalModelInfo;
+
+            if (linkedInfo == null ||
+                !snapshot.ProjectSnapshot.Items.TryGetValue(otherInfo.OriginalModelInfo.Urn, out var originalTarget))
+                return false;
+
+            parsedToDto.Location.Item = originalTarget.Entity.ToDto();
+            var location = parsedToDto.Location.Location.ToVector();
+            var camera = parsedToDto.Location.CameraPosition.ToVector();
+            location += linkedInfo.Offset;
+            camera += linkedInfo.Offset;
+            parsedToDto.Location.Location = location.ToTuple();
+            parsedToDto.Location.CameraPosition = camera.ToTuple();
+            return true;
         }
     }
 }

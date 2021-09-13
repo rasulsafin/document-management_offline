@@ -11,6 +11,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models
         public ICollection<BimElementExternalDto> BimElements { get; set; }
 
         [DataMember]
-        public string OriginalTargetUrn { get; set; }
+        public LinkedInfo OriginalModelInfo { get; set; }
     }
 }
