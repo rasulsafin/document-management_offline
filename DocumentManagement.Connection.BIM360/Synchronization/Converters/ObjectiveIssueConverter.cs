@@ -118,9 +118,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return result;
         }
 
-        private static T? ConvertToNullable<T>(T dateTime)
+        private static T? ConvertToNullable<T>(T value)
             where T : struct
-            => Equals(dateTime, default(T)) ? null : dateTime;
+            => EqualityComparer<T>.Default.Equals(value, default) ? null : value;
 
         private static string GetDynamicField(
             IEnumerable<DynamicFieldExternalDto> dynamicFields,
