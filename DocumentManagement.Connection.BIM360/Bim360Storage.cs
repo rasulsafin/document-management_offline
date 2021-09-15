@@ -5,22 +5,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360
 {
-    public class Bim360Storage : IConnectionStorage
+    internal class Bim360Storage : IConnectionStorage
     {
-        private readonly ObjectsService objectsService;
         private readonly ItemsService itemsService;
+        private readonly Downloader downloader;
 
         public Bim360Storage(
-            ObjectsService objectsService,
-            ItemsService itemsService)
+            ItemsService itemsService,
+            Downloader downloader)
         {
-            this.objectsService = objectsService;
             this.itemsService = itemsService;
+            this.downloader = downloader;
         }
 
         public async Task<bool> DownloadFiles(string projectId,
@@ -35,20 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             {
                 cancelToken.ThrowIfCancellationRequested();
                 var file = await itemsService.GetAsync(projectId, item.ExternalID);
-
-                var storage = file.version.GetStorage() ??
-                    (await itemsService.GetVersions(projectId, item.ExternalID))
-                   .Select(x => (x.Attributes.VersionNumber, storage: x.GetStorage()))
-                   .Where(x => x.storage != null)
-                   .Aggregate((max, vs) => max.VersionNumber >= vs.VersionNumber ? max : vs)
-                   .storage;
-
-                if (storage != null)
-                {
-                    var (bucketKey, hashedName) = storage.ParseStorageId();
-                    await objectsService.GetAsync(bucketKey, hashedName, item.FullPath);
-                }
-
+                await downloader.Download(projectId, file.item, file.version, item.FullPath);
                 progress?.Report(++i / (double)count);
             }
 

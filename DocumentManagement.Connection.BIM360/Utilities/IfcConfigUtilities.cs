@@ -1,0 +1,57 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+using MRS.DocumentManagement.Interface.Dtos;
+using Newtonsoft.Json;
+
+namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+{
+    internal class IfcConfigUtilities
+    {
+        private readonly Downloader downloader;
+
+        public IfcConfigUtilities(Downloader downloader)
+            => this.downloader = downloader;
+
+        public async Task<IfcConfig> GetConfig(
+            ObjectiveExternalDto obj,
+            ProjectSnapshot project,
+            ItemSnapshot itemSnapshot)
+        {
+            var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
+            var config = project.Items
+               .Where(
+                    x => x.Value.Entity.Relationships.Parent.Data.ID ==
+                        itemSnapshot.Entity.Relationships.Parent.Data.ID)
+               .FirstOrDefault(
+                    x => string.Equals(
+                        x.Value.Entity.Attributes.DisplayName,
+                        configName,
+                        StringComparison.OrdinalIgnoreCase))
+               .Value;
+
+            if (config != null)
+            {
+                var downloadedConfig = await downloader.Download(
+                    project.ID,
+                    config.Entity,
+                    config.Version,
+                    Path.GetTempFileName());
+
+                if (downloadedConfig?.Exists ?? false)
+                {
+                    var ifcConfig = JsonConvert.DeserializeObject<IfcConfig>(
+                        await File.ReadAllTextAsync(downloadedConfig.FullName));
+                    downloadedConfig.Delete();
+                    return ifcConfig;
+                }
+            }
+
+            return default;
+        }
+    }
+}
