@@ -22,6 +22,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             ProjectSnapshot project,
             ItemSnapshot itemSnapshot)
         {
+            if (string.IsNullOrWhiteSpace(obj.Location?.Item?.FileName))
+                return null;
+
             var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
             var config = project.Items
                .Where(
