@@ -8,7 +8,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
     /// Represents a class for working with BIM 360 properties as dynamic field.
     /// </summary>
     /// <typeparam name="T">The type that can uniquely represent a given variant of BIM 360 dependent properties.</typeparam>
-    /// <typeparam name="TSnapshot">The type of snaphot for given type.</typeparam>
+    /// <typeparam name="TSnapshot">The type of snapshot for given type.</typeparam>
     /// <typeparam name="TVariantID">The identifier to find needed variant.</typeparam>
     internal interface IEnumCreator<T, TSnapshot, out TVariantID>
         where TSnapshot : AEnumVariantSnapshot<T>

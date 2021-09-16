@@ -12,11 +12,11 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <summary>
         /// Get list of objective types accessible to specific Connection Type.
         /// </summary>
-        /// <param name="id">Connection type id.</param>
+        /// <param name="id">User id.</param>
         /// <returns>Objective Type.</returns>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective type not found.</exception>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<ConnectionTypeDto> id);
+        Task<IEnumerable<ObjectiveTypeDto>> GetObjectiveTypes(ID<UserDto> id);
 
         /// <summary>
         /// Add new objective type.

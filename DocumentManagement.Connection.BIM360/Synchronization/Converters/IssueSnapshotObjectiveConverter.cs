@@ -62,9 +62,31 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (parsedToDto.Location != null &&
                 snapshot.Entity.Attributes.TargetUrn != null &&
                 snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
-                parsedToDto.Location.Item = target.Entity.ToDto();
+            {
+                if (!TryRedirect(snapshot, parsedToDto))
+                    parsedToDto.Location.Item = target.Entity.ToDto();
+            }
 
             return parsedToDto;
+        }
+
+        private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
+        {
+            var otherInfo = snapshot.Entity.GetOtherInfo();
+            var linkedInfo = otherInfo?.OriginalModelInfo;
+
+            if (linkedInfo == null ||
+                !snapshot.ProjectSnapshot.Items.TryGetValue(otherInfo.OriginalModelInfo.Urn, out var originalTarget))
+                return false;
+
+            parsedToDto.Location.Item = originalTarget.Entity.ToDto();
+            var location = parsedToDto.Location.Location.ToVector();
+            var camera = parsedToDto.Location.CameraPosition.ToVector();
+            location += linkedInfo.Offset;
+            camera += linkedInfo.Offset;
+            parsedToDto.Location.Location = location.ToTuple();
+            parsedToDto.Location.CameraPosition = camera.ToTuple();
+            return true;
         }
     }
 }

@@ -13,7 +13,6 @@ using MRS.DocumentManagement.General.Utils.Factories;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
 using MRS.DocumentManagement.Utility.Extensions;
-using MRS.DocumentManagement.Utility.Factories;
 
 namespace MRS.DocumentManagement.Utility
 {
@@ -290,7 +289,15 @@ namespace MRS.DocumentManagement.Utility
                 var dbType = connectionInfo.ConnectionType.ObjectiveTypes.FirstOrDefault(x => x.ExternalId == externalType.ExternalId);
                 if (dbType != null)
                 {
-                    dbType.DefaultDynamicFields = mapper.Map<ICollection<DynamicFieldInfo>>(externalType.DefaultDynamicFields);
+                    dbType.DefaultDynamicFields = dbType.DefaultDynamicFields.Where(d => d.ConnectionInfoID != connectionInfo.ID).ToList();
+                    var newDefaultDynamicFileds = mapper.Map<ICollection<DynamicFieldInfo>>(externalType.DefaultDynamicFields);
+                    foreach (var d in newDefaultDynamicFileds)
+                    {
+                        d.ConnectionInfoID = connectionInfo.ID;
+                        d.ConnectionInfo = connectionInfo;
+                        dbType.DefaultDynamicFields.Add(d);
+                    }
+
                     dbType.Name = externalType.Name;
                 }
                 else

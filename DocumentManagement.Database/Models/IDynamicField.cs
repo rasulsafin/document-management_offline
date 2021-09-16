@@ -5,5 +5,7 @@
         string Type { get; set; }
 
         string Value { get; set; }
+
+        int? ConnectionInfoID { get; set; }
     }
 }
