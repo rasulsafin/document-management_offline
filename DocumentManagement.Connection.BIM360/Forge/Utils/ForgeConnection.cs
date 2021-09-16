@@ -15,10 +15,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 {
     public class ForgeConnection : HttpConnection
     {
+        internal static readonly TimeSpan MIN_TOKEN_LIFE = TimeSpan.FromMinutes(3);
+
         private const string MEDIA_TYPE_JSON = "text/json";
         private const string CONTENT_TYPE = "application/vnd.api+json";
-
-        internal static readonly TimeSpan MIN_TOKEN_LIFE = TimeSpan.FromMinutes(3);
 
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);

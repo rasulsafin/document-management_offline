@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models

@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Extension

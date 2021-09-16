@@ -10,6 +10,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         {
             [DataMember(Name = "name")]
             public string Name { get; set; }
+
+            [DataMember(Name = "region")]
+            public Region Region { get; set; }
         }
 
         [DataContract]

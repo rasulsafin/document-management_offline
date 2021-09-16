@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {

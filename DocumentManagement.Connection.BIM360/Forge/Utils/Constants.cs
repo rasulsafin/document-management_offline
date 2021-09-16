@@ -14,6 +14,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
 
+        public static readonly string DOCUMENT_MANAGEMENT_SERVICE_NAME = "documentManagement";
+        public static readonly string SERVICE_NONE_ACCESS = "none";
+
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_DELETED_TYPE = "versions:autodesk.core:Deleted";
@@ -32,12 +35,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
         internal static readonly string LINKS_PROPERTY = "links";
+        internal static readonly string PAGINATION_PROPERTY = "pagination";
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";
         internal static readonly string TYPE_PROPERTY = "type";
 
-        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}&";
-        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}&";
+        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}";
+        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}";
+        internal static readonly string QUERY_PARAMETER = "{0}={1}";
 
         internal static readonly string LIMIT_PARAMETER_NAME = "limit";
         internal static readonly string OFFSET_PARAMETER_NAME = "offset";

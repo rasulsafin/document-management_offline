@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
@@ -90,10 +90,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 issueID);
 
         public async Task<List<RootCause>> GetRootCausesAsync(string containerID)
-            => await PaginationHelper.GetItemsByPages<RootCause, MetaStrategy>(
-                connection,
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
                 Resources.GetRootCausesMethod,
-                DATA_PROPERTY,
                 containerID);
+            return response[DATA_PROPERTY]?.ToObject<List<RootCause>>();
+        }
+
+        public async Task<UserInfo> GetMeAsync(string containerID)
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetUsersMeMethod,
+                containerID);
+            return response[DATA_PROPERTY]?.ToObject<UserInfo>();
+        }
     }
 }
