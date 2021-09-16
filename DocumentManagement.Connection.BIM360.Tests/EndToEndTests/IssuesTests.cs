@@ -6,13 +6,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Interface.Dtos;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Tests
 {
@@ -165,7 +164,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var title = "Integration Post Test";
             var issue = new Issue
             {
-                Attributes = new IssueAttributes
+                Attributes = new Issue.IssueAttributes
                 {
                     Title = title,
                     NgIssueTypeID = types[0].ID,
@@ -206,7 +205,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var title = "Integration Post Attachment Test";
             var issue = new Issue
             {
-                Attributes = new IssueAttributes
+                Attributes = new Issue.IssueAttributes
                 {
                     Title = title,
                     NgIssueTypeID = types[0].ID,

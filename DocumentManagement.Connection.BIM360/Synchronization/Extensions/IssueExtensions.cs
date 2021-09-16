@@ -1,4 +1,4 @@
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
