@@ -399,5 +399,35 @@ namespace MRS.DocumentManagement.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
         }
+
+        /// <summary>
+        /// Set current user if user exists.
+        /// </summary>
+        /// <param name="userID">User's id.</param>
+        /// <returns>Code 200 if everything is fine.</returns>
+        /// <response code="200">User exists.</response>
+        /// <response code="400">If id is invalid.</response>
+        /// <response code="500">Something went wrong while checking the user.</response>
+        [HttpGet]
+        [Route("current")]
+        [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SetCurrent(
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID)
+        {
+            try
+            {
+                var result = await service.SetCurrent(new ID<UserDto>(userID));
+                return Ok(result);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
     }
 }
