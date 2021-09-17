@@ -98,6 +98,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<List<RootCause>>();
         }
 
+        public async Task<List<Location>> GetLocationsAsync(string containerID)
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetRootCausesMethod,
+                containerID);
+            return response[DATA_PROPERTY]?.ToObject<List<Location>>();
+        }
+
         public async Task<UserInfo> GetMeAsync(string containerID)
         {
             var response = await connection.SendAsync(

@@ -1,0 +1,50 @@
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
+using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+
+namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+{
+    internal class LocationEnumCreator : IEnumCreator<Location, LocationSnapshot, string>
+    {
+        private static readonly string ENUM_EXTERNAL_ID =
+            DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Location);
+
+        private static readonly string DISPLAY_NAME = MrsConstants.LOCATION;
+
+        private readonly IssuesService issuesService;
+
+        public LocationEnumCreator(IssuesService issuesService)
+            => this.issuesService = issuesService;
+
+        public string EnumExternalID => ENUM_EXTERNAL_ID;
+
+        public string EnumDisplayName => DISPLAY_NAME;
+
+        public bool CanBeNull => true;
+
+        public string NullID => $"{EnumExternalID}{DynamicFieldUtilities.NULL_VALUE_ID}";
+
+        public IEnumerable<string> GetOrderedIDs(IEnumerable<LocationSnapshot> variants)
+            => variants.Select(cause => cause.Entity.ID).OrderBy(id => id);
+
+        public string GetVariantDisplayName(LocationSnapshot variant)
+            => variant.Entity.Attributes.Title;
+
+        public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
+            ProjectSnapshot projectSnapshot)
+            => (await issuesService.GetLocationsAsync(projectSnapshot.IssueContainer)).Select(
+                    x => new LocationSnapshot(x, projectSnapshot));
+
+        public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
+            => project.Locations.Values;
+
+        public IEnumerable<string> DeserializeID(string externalID)
+             => DynamicFieldUtilities.DeserializeID<string>(externalID);
+    }
+}

@@ -19,6 +19,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public Dictionary<string, RootCauseSnapshot> RootCauses { get; set; }
 
+        public Dictionary<string, LocationSnapshot> Locations { get; set; }
+
         public Dictionary<string, AssignToVariant> AssignToVariants { get; set; }
 
         public Dictionary<string, ItemSnapshot> Items { get; set; }

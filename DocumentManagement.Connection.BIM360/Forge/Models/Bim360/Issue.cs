@@ -116,6 +116,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             [DataMember(Name = "root_cause")]
             public string RootCause { get; set; }
 
+            [DataMember(Name = "location")]
+            public string Location { get; set; }
+
             [DataMember(Name = "quality_urns")]
             public object QualityUrns { get; set; }
 
