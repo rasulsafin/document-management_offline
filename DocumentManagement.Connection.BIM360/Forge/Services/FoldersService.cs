@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -19,17 +20,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             => this.connection = connection;
 
         public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<Folder>(
+            => await PaginationHelper.GetItemsByPages<Folder, LinksStrategy>(
                 connection,
-                Resources.GetProjectsFoldersContentsMethod,
+                ForgeConnection.SetParameter(
+                    Resources.GetProjectsFoldersContentsMethod,
+                    new Filter(TYPE_PROPERTY, FOLDER_TYPE)),
+                DATA_PROPERTY,
                 projectId,
-                folderId,
-                FOLDER_TYPE);
+                folderId);
 
         public async Task<List<(Item item, Version version)>> GetItemsAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<(Item item, Version version)>(
+            => await PaginationHelper.GetItemsByPages<(Item item, Version version), LinksStrategy>(
                 connection,
-                Resources.GetProjectsFoldersContentsMethod,
+                ForgeConnection.SetParameter(
+                    Resources.GetProjectsFoldersContentsMethod,
+                    new Filter(TYPE_PROPERTY, ITEM_TYPE)),
                 response =>
                 {
                     var items = response[DATA_PROPERTY]?.ToObject<Item[]>();
@@ -40,8 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                         ArraySegment<(Item item, Version version)>.Empty;
                 },
                 projectId,
-                folderId,
-                ITEM_TYPE);
+                folderId);
 
         public async Task<List<(Version version, Item item)>> SearchAsync(
                 string projectId,
@@ -50,7 +54,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                ForgeConnection.SetFilters(Resources.GetProjectsFoldersSearchMethod, filters),
+                ForgeConnection.SetParameters(Resources.GetProjectsFoldersSearchMethod, filters),
                 projectId,
                 folderId);
 

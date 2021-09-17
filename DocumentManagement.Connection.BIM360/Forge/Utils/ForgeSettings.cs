@@ -21,11 +21,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public object Included { get; private set; }
 
-        public bool NeedJsonApi { get; private set; } = false;
+        public bool NeedJsonApi { get; private init; } = false;
 
-        public bool IsAuthorized { get; private set; } = true;
+        public bool IsAuthorized { get; private init; } = true;
 
-        public bool NeedDataKey { get; private set; } = true;
+        public bool NeedDataKey { get; private init; } = true;
+
+        public bool UseAppToken { get; private set; } = false;
 
         public RangeHeaderValue RangeHeaderValue { get; private set; }
 
@@ -101,6 +103,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             {
                 MethodType = HttpMethod.Patch,
                 Data = data,
+            };
+
+        public static ForgeSettings AppGet()
+            => new ()
+            {
+                MethodType = HttpMethod.Get,
+                UseAppToken = true,
             };
     }
 }

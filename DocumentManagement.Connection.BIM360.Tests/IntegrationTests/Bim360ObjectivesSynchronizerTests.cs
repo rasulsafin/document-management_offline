@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement.Connection.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization;

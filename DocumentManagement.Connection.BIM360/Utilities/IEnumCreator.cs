@@ -1,7 +1,5 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
@@ -40,7 +38,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         /// </summary>
         /// <param name="variants">Variants required to get identifiers.</param>
         /// <returns>Ordered identifiers of this variants.</returns>
-        IOrderedEnumerable<TVariantID> GetOrderedIDs(IEnumerable<TSnapshot> variants);
+        IEnumerable<TVariantID> GetOrderedIDs(IEnumerable<TSnapshot> variants);
 
         /// <summary>
         /// Gets display name of this variant.
@@ -52,19 +50,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
         /// <summary>
         /// Sends request for getting variants of the current enum.
         /// </summary>
-        /// <param name="issuesService">Issues Service for Forge requests.</param>
         /// <param name="projectSnapshot">Projects Service for Forge requests.</param>
         /// <returns>All variants of the current enum for this user.</returns>
-        Task<IEnumerable<TSnapshot>> GetVariantsFromRemote(
-            IssuesService issuesService,
-            ProjectSnapshot projectSnapshot);
+        Task<IEnumerable<TSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot);
 
         /// <summary>
         /// Gets snapshots of variants from a given project snapshot.
         /// </summary>
-        /// <param name="projects">The source snapshot of project.</param>
+        /// <param name="project">The source snapshot of project.</param>
         /// <returns>The enumeration of the snapshots of this enum.</returns>
-        IEnumerable<TSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects);
+        IEnumerable<TSnapshot> GetSnapshots(ProjectSnapshot project);
 
         /// <summary>
         /// Deserializes a stored identifier with multiple variant IDs.

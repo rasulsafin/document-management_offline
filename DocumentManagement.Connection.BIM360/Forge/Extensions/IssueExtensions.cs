@@ -1,6 +1,5 @@
 using System.Linq;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Models.Issue;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
 {
@@ -15,10 +14,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
             {
                 ID = issue.ID,
                 Type = issue.Type,
-                Attributes = new IssueAttributes(),
+                Attributes = new Issue.IssueAttributes(),
             };
 
-            var type = typeof(IssueAttributes);
+            var type = typeof(Issue.IssueAttributes);
             var properties = type
                .GetProperties()
                .ToDictionary(DataMemberUtilities.GetDataMemberName, p => p);

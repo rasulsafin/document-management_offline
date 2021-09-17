@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
 {
     [DataContract]
     public class Issue : Object<Issue.IssueAttributes, Issue.IssueRelationships>
@@ -79,10 +79,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             public Status Status { get; set; } = Status.Draft;
 
             [DataMember(Name = "assigned_to")]
+            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
             public string AssignedTo { get; set; }
 
             [DataMember(Name = "assigned_to_type")]
-            public string AssignedToType { get; set; }
+            public AssignToType AssignedToType { get; set; } = AssignToType.None;
 
             [DataMember(Name = "answer")]
             public string Answer { get; set; }
@@ -216,7 +217,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public class ViewerState
         {
             [DataMember(Name = "seedURN")]
-            public string SeedURN { get; set; }
+            public string SeedUrn { get; set; }
 
             [DataMember(Name = "viewport")]
             public Viewport Viewport { get; set; }

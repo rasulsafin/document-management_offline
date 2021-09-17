@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
@@ -27,6 +28,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
+        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
+        private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IfcConfigUtilities ifcConfigUtilities;
 
         public ObjectiveIssueConverter(
@@ -35,6 +39,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
+            TypeSubtypeEnumCreator subtypeEnumCreator,
+            RootCauseEnumCreator rootCauseEnumCreator,
+            AssignToEnumCreator assignToEnumCreator,
             IfcConfigUtilities ifcConfigUtilities)
         {
             this.snapshot = snapshot;
@@ -42,6 +49,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.itemsService = itemsService;
+            this.subtypeEnumCreator = subtypeEnumCreator;
+            this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.assignToEnumCreator = assignToEnumCreator;
             this.ifcConfigUtilities = ifcConfigUtilities;
         }
 
@@ -90,6 +100,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 globalOffset = exist.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset;
             }
 
+            var assignToVariant = GetValue(
+                assignToEnumCreator,
+                project,
+                objective,
+                (ids, s) => ids.Contains(s.Entity),
+                out _);
             var result = new Issue
             {
                 ID = objective.ExternalID,
@@ -98,11 +114,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Title = objective.Title,
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
-                    ////AssignedTo = GetDynamicField(objective.DynamicFields, x => x.AssignedTo),
+                    AssignedTo = assignToVariant?.Entity,
+                    AssignedToType = assignToVariant?.Type ?? AssignToType.None,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
-                    RootCauseID = GetRootCause(project, objective)?.Entity.ID,
+                    RootCauseID =
+                        GetValue(rootCauseEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                          ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes = await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
                     NgIssueTypeID = type,
@@ -203,12 +222,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var creator = new TypeSubtypeEnumCreator();
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
-            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
-            var subtypeDictionary = deserializedIDs.ToDictionary(x => x.subtypeID);
-            var type = projectSnapshot.IssueTypes.FirstOrDefault(x => subtypeDictionary.ContainsKey(x.Value.SubtypeID))
-               .Value;
+            var type = GetValue(
+                subtypeEnumCreator,
+                projectSnapshot,
+                obj,
+                (ids, s) => ids.Any(x => x.subtypeID == s.SubtypeID),
+                out var deserializedIDs);
 
             if (type == null)
             {
@@ -225,19 +244,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return type;
         }
 
-        private RootCauseSnapshot GetRootCause(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
+        private TSnapshot GetValue<T, TSnapshot, TID>(
+            IEnumCreator<T, TSnapshot, TID> creator,
+            ProjectSnapshot projectSnapshot,
+            ObjectiveExternalDto obj,
+            Func<IEnumerable<TID>, TSnapshot, bool> findPredicate,
+            out IEnumerable<TID> deserializedIDs)
+            where TSnapshot : AEnumVariantSnapshot<T>
         {
-            var creator = new RootCauseEnumCreator();
+            deserializedIDs = null;
             var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
 
-            if (dynamicField.Value == creator.NullID)
+            if (creator.CanBeNull && dynamicField.Value == creator.NullID)
                 return null;
 
-            var deserializedIDs = creator.DeserializeID(dynamicField.Value).ToArray();
-            var rootCause = projectSnapshot.RootCauses
-               .FirstOrDefault(x => deserializedIDs.Contains(x.Value.Entity.ID))
-               .Value;
-            return rootCause;
+            var ids = creator.DeserializeID(dynamicField.Value).ToArray();
+            deserializedIDs = ids;
+            return creator.GetSnapshots(projectSnapshot)
+               .FirstOrDefault(x => findPredicate(ids, x));
         }
 
         private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
