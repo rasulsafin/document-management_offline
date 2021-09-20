@@ -17,6 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ObjectsService>();
             services.AddScoped<ProjectsService>();
             services.AddScoped<VersionsService>();
+            services.AddScoped<BucketsService>();
 
             services.AddScoped<Authenticator>();
             services.AddScoped<ForgeConnection>();

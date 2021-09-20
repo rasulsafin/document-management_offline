@@ -5,13 +5,12 @@ using Newtonsoft.Json;
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
-    [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
-    public enum Region
+    [JsonConverter(typeof(SafeStringEnumConverter), DM)]
+    public enum UrnType
     {
-        Undefined,
-        [EnumMember(Value = "US")]
-        US,
-        [EnumMember(Value = "EMEA")]
-        Emea,
+        [EnumMember(Value = "oss")]
+        Oss,
+        [EnumMember(Value = "dm")]
+        DM,
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
@@ -11,19 +13,26 @@ using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManage
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 {
-    public class ItemsSyncHelper
+    internal class ItemsSyncHelper
     {
         private readonly ItemsService itemsService;
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
         private readonly VersionsService versionsService;
+        private readonly BucketsService bucketsService;
 
-        public ItemsSyncHelper(ItemsService itemsService, ProjectsService projectsService, ObjectsService objectsService, VersionsService versionsService)
+        public ItemsSyncHelper(
+            ItemsService itemsService,
+            ProjectsService projectsService,
+            ObjectsService objectsService,
+            VersionsService versionsService,
+            BucketsService bucketsService)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
             this.objectsService = objectsService;
             this.versionsService = versionsService;
+            this.bucketsService = bucketsService;
         }
 
         internal async Task<(Item item, Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)
@@ -177,6 +186,38 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 },
             };
             return version;
+        }
+
+        public async Task<UploadResult> PostInBucket(string filePath, string fileName)
+        {
+            var buckets = await bucketsService.GetBucketsAsync();
+            var bucketKey = MrsConstants.PHOTO_BUCKET_KEY;
+
+            if (buckets.All(x => x.BucketKey != bucketKey))
+            {
+                await bucketsService.PostBucketAsync(
+                    new Bucket
+                    {
+                        Access = BucketAccess.Full,
+                        BucketKey = bucketKey,
+                        PolicyKey = OssRetentionPolicy.Transient,
+                    });
+
+                try
+                {
+                    var bucket = await bucketsService.GetBucketDetailsAsync(bucketKey);
+                    if (bucket == null)
+                        return null;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+
+            var hashedName = $"{Guid.NewGuid()}{Path.GetExtension(fileName)}";
+            var res = await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
+            return res;
         }
     }
 }

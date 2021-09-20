@@ -58,8 +58,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, project, created);
-                issueSnapshot.Items = added.ToDictionary(x => x.ID, x => new ItemSnapshot(x));
-                parsedToDto.Items = issueSnapshot.Items.Values.Select(i => i.Entity.ToDto()).ToList();
+                issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
+                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
 
             return parsedToDto;
@@ -99,8 +99,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
-                issueSnapshot.Items = added.ToDictionary(x => x.ID, x => new ItemSnapshot(x));
-                parsedToDto.Items = issueSnapshot.Items.Values.Select(i => i.Entity.ToDto()).ToList();
+                issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
+                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
 
             return parsedToDto;
@@ -153,7 +153,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                                 found = new IssueSnapshot(received, project)
                                 {
-                                    Items = new Dictionary<string, ItemSnapshot>(),
+                                    Attachments = new Dictionary<string, Attachment>(),
                                 };
 
                                 var attachments = await issuesService.GetAttachmentsAsync(
@@ -161,12 +161,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                     found.ID);
 
                                 foreach (var attachment in attachments.Where(
-                                    x => project.Items.ContainsKey(x.Attributes.Urn)))
-                                {
-                                    found.Items.Add(
-                                        attachment.ID,
-                                        project.Items[attachment.Attributes.Urn]);
-                                }
+                                    x => x.Attributes.UrnType == UrnType.Oss ||
+                                        project.Items.ContainsKey(x.Attributes.Urn)))
+                                    found.Attachments.Add(attachment.ID, attachment);
 
                                 found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
 
@@ -186,30 +183,45 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             return result;
         }
 
-        private async Task<IEnumerable<Item>> AddItems(
+        private async Task<IEnumerable<Attachment>> AddItems(
             ICollection<ItemExternalDto> items,
             ProjectSnapshot project,
             Issue issue)
         {
-            var resultItems = new List<Item>();
-            var attachment = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
+            var resultItems = new List<Attachment>();
+            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
 
             foreach (var item in items)
             {
+                if (item.ItemType == ItemType.Media)
+                {
+                    var uploaded = await itemsSyncHelper.PostInBucket(item.FullPath, item.FileName);
+                    if (uploaded == default)
+                        continue;
+                    await Task.Delay(5000);
+                    var attached = await AttachPhoto(uploaded, item.FileName, issue.ID, project.IssueContainer);
+                    if (attached != null)
+                        resultItems.Add(attached);
+
+                    continue;
+                }
+
                 // If item with the same name already exists add existing item
                 Item itemWithSameNameExists = project.FindItemByName(item.FileName)?.Entity;
 
                 if (itemWithSameNameExists != null)
                 {
-                    if (attachment.Any(x => x.Attributes.Name == item.FileName))
+                    var attachment = attachments.FirstOrDefault(x => x.Attributes.Name == item.FileName);
+
+                    if (attachment != null)
                     {
-                        resultItems.Add(itemWithSameNameExists);
+                        resultItems.Add(attachment);
                         continue;
                     }
 
                     var attached = await AttachItem(itemWithSameNameExists, issue.ID, project.IssueContainer);
-                    if (attached)
-                        resultItems.Add(itemWithSameNameExists);
+                    if (attached != null)
+                        resultItems.Add(attached);
                 }
                 else
                 {
@@ -217,17 +229,18 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
                     if (uploadedItem == default)
                         continue;
+
                     await Task.Delay(5000);
                     var attached = await AttachItem(uploadedItem, issue.ID, project.IssueContainer);
-                    if (attached)
-                        resultItems.Add(uploadedItem);
+                    if (attached != null)
+                        resultItems.Add(attached);
                 }
             }
 
             return resultItems;
         }
 
-        private async Task<bool> AttachItem(Item posted, string issueId, string containerId)
+        private async Task<Attachment> AttachItem(Item posted, string issueId, string containerId)
         {
             var attachment = new Attachment
             {
@@ -236,19 +249,41 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                     Name = posted.Attributes.DisplayName,
                     IssueId = issueId,
                     Urn = posted.ID,
+                    UrnType = UrnType.DM,
                 },
             };
 
             try
             {
-                await issuesService.PostIssuesAttachmentsAsync(containerId, attachment);
+                return await issuesService.PostIssuesAttachmentsAsync(containerId, attachment);
             }
             catch
             {
-                return false;
+                return null;
             }
+        }
 
-            return true;
+        private async Task<Attachment> AttachPhoto(UploadResult posted, string fileName, string issueId, string containerId)
+        {
+            var attachment = new Attachment
+            {
+                Attributes = new Attachment.AttachmentAttributes
+                {
+                    Name = fileName,
+                    IssueId = issueId,
+                    Urn = posted.ObjectId,
+                    UrnType = UrnType.Oss,
+                },
+            };
+
+            try
+            {
+                return await issuesService.PostIssuesAttachmentsAsync(containerId, attachment);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)

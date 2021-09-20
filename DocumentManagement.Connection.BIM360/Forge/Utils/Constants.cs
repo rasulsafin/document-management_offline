@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string OBJECT_TYPE = "objects";
         public static readonly string ISSUE_TYPE = "quality_issues";
         public static readonly string ATTACHMENT_TYPE = "attachments";
-        public static readonly string ATTACHMENT_URN_TYPE = "dm";
+        public static readonly string ATTACHMENT_URN_TYPE = "oss";
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
 
@@ -35,6 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
         internal static readonly string LINKS_PROPERTY = "links";
+        internal static readonly string ITEMS_PROPERTY = "items";
         internal static readonly string PAGINATION_PROPERTY = "pagination";
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";
