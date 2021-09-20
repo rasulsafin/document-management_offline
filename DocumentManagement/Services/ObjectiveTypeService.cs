@@ -187,7 +187,5 @@ namespace MRS.DocumentManagement.Services
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
-
-
     }
 }
