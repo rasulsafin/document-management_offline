@@ -160,6 +160,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /bim360/locations/v2/containers/{0}/trees/{1}/nodes.
+        /// </summary>
+        internal static string GetLocationMethod {
+            get {
+                return ResourceManager.GetString("GetLocationMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/ng-issue-types?include=subtypes.
         /// </summary>
         internal static string GetNGIssueTypesMethod {
@@ -293,18 +302,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
                 return ResourceManager.GetString("GetRootCausesMethod", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на /bim360/locations/v2/containers/{0}/trees/{1}/nodes.
-        /// </summary>
-        internal static string GetLocationMethod
-        {
-            get
-            {
-                return ResourceManager.GetString("GetLocationMethod", resourceCulture);
-            }
-        }
-
+        
         /// <summary>
         ///   Ищет локализованную строку, похожую на /project/v1/hubs/{0}/projects/{1}/topFolders.
         /// </summary>

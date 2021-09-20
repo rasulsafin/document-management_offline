@@ -297,4 +297,8 @@
     <value>/bim360/admin/v1/projects/{0}/users</value>
     <comment>Retrieves information about all the users in a project. To get information about all the users in an account, see GET accounts/users.</comment>
   </data>
+  <data name="GetLocationMethod" xml:space="preserve">
+    <value>/bim360/locations/v2/containers/{0}/trees/{1}/nodes</value>
+    <comment>Get location</comment>
+  </data>
 </root>

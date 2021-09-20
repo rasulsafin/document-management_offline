@@ -17,6 +17,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         private static readonly string DISPLAY_NAME = MrsConstants.LOCATION;
 
+        private static readonly string DEFAULT_TREE_ID = "default";
+
         private readonly IssuesService issuesService;
 
         public LocationEnumCreator(IssuesService issuesService)
@@ -38,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await issuesService.GetLocationsAsync(projectSnapshot.IssueContainer)).Select(
+            => (await issuesService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_TREE_ID)).Select(
                     x => new LocationSnapshot(x, projectSnapshot));
 
         public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
