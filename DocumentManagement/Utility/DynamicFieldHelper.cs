@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Utility
             return mapper.Map<DynamicFieldDto>(dynamicField);
         }
 
-        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int connectionInfoID, int parentID = -1)
+        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int? connectionInfoID, int parentID = -1)
         {
             logger.LogTrace(
                 "AddDynamicFields started with field: {@DynamicField}, objectiveID: {ObjectiveID}, parentID: {ParentID}",
