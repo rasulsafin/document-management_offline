@@ -36,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             => variants.Select(cause => cause.Entity.ID).OrderBy(id => id);
 
         public string GetVariantDisplayName(LocationSnapshot variant)
-            => variant.Entity.Attributes.Title;
+            => variant.Entity.Attributes.Name;
 
         public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
