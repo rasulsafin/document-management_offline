@@ -35,10 +35,8 @@ namespace MRS.DocumentManagement.Database.Models
         [ForbidMergeAttribute]
         public DateTime UpdatedAt { get; set; }
 
-        [ForbidMergeAttribute]
         public int? ConnectionInfoID { get; set; }
 
-        [ForbidMergeAttribute]
         public ConnectionInfo ConnectionInfo { get; set; }
 
         [ForbidMergeAttribute]

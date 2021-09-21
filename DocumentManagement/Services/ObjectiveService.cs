@@ -90,10 +90,13 @@ namespace MRS.DocumentManagement.Services
                     await LinkItem(item, objective);
                 }
 
+                var connectionInfo = await context.Users
+                    .Include(x => x.ConnectionInfoID)
+                    .FindOrThrowAsync(x => x.ID, objective.AuthorID);
                 objective.DynamicFields = new List<DynamicField>();
                 foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
                 {
-                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
+                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID, connectionInfo.ID);
                 }
 
                 if (location != null)

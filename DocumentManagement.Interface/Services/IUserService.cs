@@ -98,5 +98,12 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <returns>True if user exists, returns false otherwise.</returns>
         /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> Exists(string login);
+
+        /// <summary>
+        /// TEMPORARY: Sets current user for later use.
+        /// </summary>
+        /// <param name="userID">User's id</param>
+        /// <returns>True, if user exists.</returns>
+        Task<bool> SetCurrent(ID<UserDto> userID);
     }
 }
