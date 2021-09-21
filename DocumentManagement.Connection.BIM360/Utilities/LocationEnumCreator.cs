@@ -19,10 +19,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         private static readonly string DEFAULT_TREE_ID = "default";
 
-        private readonly IssuesService issuesService;
+        private readonly LocationService locationService;
 
-        public LocationEnumCreator(IssuesService issuesService)
-            => this.issuesService = issuesService;
+        public LocationEnumCreator(LocationService locationService)
+            => this.locationService = locationService;
 
         public string EnumExternalID => ENUM_EXTERNAL_ID;
 
@@ -40,7 +40,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await issuesService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_TREE_ID)).Select(
+            => (await locationService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_TREE_ID)).Select(
                     x => new LocationSnapshot(x, projectSnapshot));
 
         public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
