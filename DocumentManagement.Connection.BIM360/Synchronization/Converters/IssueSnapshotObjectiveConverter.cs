@@ -35,12 +35,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             parsedToDto.DynamicFields.Add(rootCause);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 
-            if (snapshot.Items != null)
+            if (snapshot.Attachments != null)
             {
                 parsedToDto.Items ??= new List<ItemExternalDto>();
 
-                foreach (var attachment in snapshot.Items.Values)
-                    parsedToDto.Items.Add(attachment.Entity.ToDto());
+                foreach (var attachment in snapshot.Attachments.Values)
+                    parsedToDto.Items.Add(attachment.ToDto());
             }
 
             if (parsedToDto.Location != null &&
