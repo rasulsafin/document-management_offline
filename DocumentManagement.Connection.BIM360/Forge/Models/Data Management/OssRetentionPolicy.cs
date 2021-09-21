@@ -5,9 +5,10 @@ using Newtonsoft.Json;
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
-    [JsonConverter(typeof(SafeStringEnumConverter), Transient)]
+    [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
     public enum OssRetentionPolicy
     {
+        Undefined,
         [EnumMember(Value = "transient")]
         Transient,
         [EnumMember(Value = "temporary")]

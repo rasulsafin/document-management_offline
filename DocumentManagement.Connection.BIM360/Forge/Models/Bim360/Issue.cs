@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             public string AssignedTo { get; set; }
 
             [DataMember(Name = "assigned_to_type")]
-            public AssignToType AssignedToType { get; set; } = AssignToType.None;
+            public AssignToType? AssignedToType { get; set; }
 
             [DataMember(Name = "answer")]
             public string Answer { get; set; }

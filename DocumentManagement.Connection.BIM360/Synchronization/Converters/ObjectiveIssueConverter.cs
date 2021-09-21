@@ -115,7 +115,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective.Status),
                     AssignedTo = assignToVariant?.Entity,
-                    AssignedToType = assignToVariant?.Type ?? AssignToType.None,
+                    AssignedToType = assignToVariant?.Type,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),

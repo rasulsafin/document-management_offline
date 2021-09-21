@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
         [DataMember(Name = "allow")]
         public object[] Allow { get; set; }
 
-        [JsonConverter(typeof(NullableUnixDateTimeConverter))]
+        [JsonConverter(typeof(MillisecondsUnixDateTimeConverter))]
         [DataMember(Name = "createdDate")]
         public DateTime? CreatedDate { get; set; }
 

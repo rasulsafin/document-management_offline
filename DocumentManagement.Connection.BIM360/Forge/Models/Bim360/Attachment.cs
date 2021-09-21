@@ -23,7 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             public string Urn { get; set; }
 
             [DataMember(Name = "urn_type")]
-            public UrnType UrnType { get; set; }
+            public UrnType? UrnType { get; set; }
 
             [DataMember(Name = "issue_id")]
             public string IssueId { get; set; }

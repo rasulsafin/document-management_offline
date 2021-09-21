@@ -5,9 +5,10 @@ using Newtonsoft.Json;
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
-    [JsonConverter(typeof(SafeStringEnumConverter), Read)]
+    [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
     public enum BucketAccess
     {
+        Undefined,
         [EnumMember(Value = "full")]
         Full,
         [EnumMember(Value = "read")]

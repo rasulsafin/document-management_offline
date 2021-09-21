@@ -94,13 +94,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         private HttpRequestMessage CreateHttpRequestMessage(ForgeSettings settings, string command, object[] arguments)
         {
-            var request = CreateRequest(
-                settings.MethodType,
-                command,
-                arguments,
-                settings.IsAuthorized
-                    ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
-                    : default);
+            var authData = settings.IsAuthorized
+                ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
+                : default;
+            var request = CreateRequest(settings.MethodType, command, arguments, authData);
 
             if (settings.CreateContent != null)
             {
