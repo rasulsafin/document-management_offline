@@ -61,19 +61,12 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
-                var dbObjectiveType = await context.ObjectiveTypes
+                var dbObjective = await context.ObjectiveTypes
+                   .Include(x => x.DefaultDynamicFields)
                    .FindOrThrowAsync(x => x.ID, (int)id);
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
-                var user = await context.Users.FindOrThrowAsync(CurrentUser.ID);
-                var connectionInfo = await context.ConnectionInfos
-                    .Where(x => x.User == user)
-                    .Include(x => x.ConnectionType)
-                    .FirstOrDefaultAsync();
-                dbObjectiveType.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, dbObjectiveType.ID);
-
-                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjectiveType);
-
-                return mapper.Map<ObjectiveTypeDto>(dbObjectiveType);
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }
             catch (Exception ex)
             {
@@ -91,20 +84,12 @@ namespace MRS.DocumentManagement.Services
 
             try
             {
-                var dbObjectiveType = await context.ObjectiveTypes
+                var dbObjective = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
                    .FindOrThrowAsync(x => x.Name, typename);
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
-                var user = await context.Users.FindOrThrowAsync(CurrentUser.ID);
-                var connectionInfo = await context.ConnectionInfos
-                    .Where(x => x.User == user)
-                    .Include(x => x.ConnectionType)
-                    .FirstOrDefaultAsync();
-                dbObjectiveType.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, dbObjectiveType.ID);
-
-                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjectiveType);
-
-                return mapper.Map<ObjectiveTypeDto>(dbObjectiveType);
+                return mapper.Map<ObjectiveTypeDto>(dbObjective);
             }
             catch (Exception ex)
             {
@@ -138,7 +123,16 @@ namespace MRS.DocumentManagement.Services
 
                 foreach (var t in types)
                 {
-                    t.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, t.ID);
+                    var query = context.DynamicFieldInfos
+                     .AsNoTracking()
+                     .Where(x => x.ObjectiveTypeID == t.ID);
+
+                    if (connectionInfo?.ID != null)
+                        query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
+                    else
+                        query = query.Where(x => x.ConnectionInfoID == null);
+
+                    t.DefaultDynamicFields = await query.ToListAsync();
                 }
 
                 logger.LogDebug("Found objective types: {@ObjectiveTypes}", types);
@@ -151,20 +145,6 @@ namespace MRS.DocumentManagement.Services
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
-        }
-
-        private async Task<ICollection<DynamicFieldInfo>> GetDefaultDynamicFields(ConnectionInfo connectionInfo, int typeID)
-        {
-            var query = context.DynamicFieldInfos
-                                 .AsNoTracking()
-                                 .Where(x => x.ObjectiveTypeID == typeID);
-
-            if (connectionInfo?.ID != null)
-                query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
-            else
-                query = query.Where(x => x.ConnectionInfoID == null);
-
-            return await query.ToListAsync();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)
