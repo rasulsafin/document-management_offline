@@ -11,6 +11,8 @@ namespace MRS.DocumentManagement.Interface.Dtos
 
         public DateTime CreationDate { get; set; }
 
+        public string Title { get; set; }
+
         public string Description { get; set; }
 
         public IEnumerable<BimElementDto> BimElements { get; set; }
