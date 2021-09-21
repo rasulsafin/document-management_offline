@@ -195,7 +195,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             {
                 if (item.ItemType == ItemType.Media)
                 {
-                    var uploaded = await itemsSyncHelper.PostInBucket(item.FullPath, item.FileName);
+                    var uploaded = await itemsSyncHelper.Post(project, item);
                     if (uploaded == default)
                         continue;
                     await Task.Delay(5000);
