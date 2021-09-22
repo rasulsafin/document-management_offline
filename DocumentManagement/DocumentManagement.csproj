@@ -17,7 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj" />

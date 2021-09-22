@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj" />
   </ItemGroup>
 
   <ItemGroup>
