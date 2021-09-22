@@ -22,7 +22,7 @@
       <ProjectReference Include="..\Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj" />
       <ProjectReference Include="..\Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj" />
       <ProjectReference Include="..\Brio.Docs.Connections.Tdms\Brio.Docs.Connections.Tdms.csproj" />
-      <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj" />
       <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />
       <ProjectReference Include="..\DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj" />
       <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />

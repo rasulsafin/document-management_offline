@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Database
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk", "DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.YandexDisk", "Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
 	ProjectSection(SolutionItems) = preProject

@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj" />
   </ItemGroup>
 
   <ItemGroup>
