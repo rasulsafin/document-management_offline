@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Tdms"
 		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tdms.Tests", "DocumentManagement.Connection.Tdms.Tests\DocumentManagement.Connection.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Tdms.Tests", "Brio.Docs.Connections.Tdms.Tests\Brio.Docs.Connections.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.LementPro", "Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj", "{4743FB4F-E042-449B-AF24-F57B2DB781A5}"
 EndProject
