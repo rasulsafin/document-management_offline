@@ -54,7 +54,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F0DDE61F
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Connections", "Connections", "{D6D41822-CE95-4B4A-A095-3BC461268736}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Interface", "DocumentManagement.Connection.Interface\DocumentManagement.Connection.Interface.csproj", "{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Integration", "Brio.Docs.Integration\Brio.Docs.Integration.csproj", "{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Common", "Brio.Docs.Common\Brio.Docs.Common.csproj", "{B0800032-F53B-4CC8-A07F-45829DCB5C48}"
 EndProject
