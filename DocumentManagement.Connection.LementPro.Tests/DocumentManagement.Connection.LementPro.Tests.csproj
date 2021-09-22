@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj" />
   </ItemGroup>
 
   <ItemGroup>
