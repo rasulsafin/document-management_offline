@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Interface.Dtos
+﻿namespace Brio.Docs.Common.Dtos
 {
     public class ConnectionStatusDto
     {

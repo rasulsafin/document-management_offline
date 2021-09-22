@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs
+﻿namespace Brio.Docs.Common
 {
     public enum ObjectiveStatus
     {

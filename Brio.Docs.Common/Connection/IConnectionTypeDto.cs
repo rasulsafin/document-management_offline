@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Common.Dtos
 {
     /// <summary>
     /// Interface for Automapper to collect all ConnectionTypeDtos under one umbrella.
