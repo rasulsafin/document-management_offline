@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Brio.Docs.Integration\Brio.Docs.Integration.csproj" />
-    <ProjectReference Include="..\DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj" />
+    <ProjectReference Include="..\Brio.Docs.External\Brio.Docs.External.csproj" />
   </ItemGroup>
 
   <ItemGroup>

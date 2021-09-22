@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BIM36
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.BIM360.Tests", "DocumentManagement.Connection.BIM360.Tests\DocumentManagement.Connection.BIM360.Tests.csproj", "{D1CC8DE3-3847-43F2-9088-23C5ECECF385}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Utils", "DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.External", "Brio.Docs.External\Brio.Docs.External.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Synchronizer", "Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
 EndProject
