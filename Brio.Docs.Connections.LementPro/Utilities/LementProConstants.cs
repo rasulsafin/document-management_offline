@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Integration.Dtos;
-using System;
+﻿using System;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.LementPro
 {

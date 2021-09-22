@@ -180,7 +180,7 @@ namespace Brio.Docs.Api.Controllers
 
         /// <summary>
         /// Download files from remote connection to local storage.
-        /// </summary>        
+        /// </summary>
         /// <remarks>
         /// Sample request:
         ///

@@ -13,6 +13,7 @@ namespace Brio.Docs.Client
         /// </summary>
         /// <returns>Null if can not login with these credentials</returns>
         Task<IAuthenticatedAccess> Login(string login, string password);
+
         /// <summary>
         /// Get authenticated access to API as new user
         /// </summary>

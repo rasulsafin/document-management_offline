@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Dtos;
-using Brio.Docs.Client.Exceptions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 
 namespace Brio.Docs.Client.Services
 {
@@ -59,6 +59,5 @@ namespace Brio.Docs.Client.Services
         /// <returns>Result of registration.</returns>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> RegisterAll();
-
     }
 }

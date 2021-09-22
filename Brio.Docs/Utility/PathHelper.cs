@@ -1,8 +1,8 @@
-﻿using Brio.Docs.Database.Models;
-using Brio.Docs.Common.Dtos;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Database.Models;
 
 namespace Brio.Docs.Utility
 {

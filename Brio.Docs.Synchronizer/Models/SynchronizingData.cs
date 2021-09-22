@@ -1,6 +1,6 @@
-using Brio.Docs.Database.Models;
 using System;
 using System.Linq.Expressions;
+using Brio.Docs.Database.Models;
 
 namespace Brio.Docs.Synchronization.Models
 {

@@ -1,6 +1,6 @@
-﻿using Brio.Docs.Client;
-using System.Threading;
+﻿using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Client;
 
 namespace Brio.Docs.Utility
 {

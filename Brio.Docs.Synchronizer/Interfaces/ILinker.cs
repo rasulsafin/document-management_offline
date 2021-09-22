@@ -1,6 +1,6 @@
+using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Models;
-using System.Threading.Tasks;
 
 namespace Brio.Docs.Synchronization.Interfaces
 {

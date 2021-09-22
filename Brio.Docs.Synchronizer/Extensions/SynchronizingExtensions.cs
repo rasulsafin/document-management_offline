@@ -1,8 +1,8 @@
+using System;
+using System.Reflection;
 using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
-using System;
-using System.Reflection;
 
 namespace Brio.Docs.Synchronization.Extensions
 {

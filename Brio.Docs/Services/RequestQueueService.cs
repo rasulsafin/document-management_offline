@@ -1,12 +1,12 @@
-﻿using Brio.Docs.Client;
-using Brio.Docs.Client.Services;
-using Brio.Docs.Utility;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Services;
+using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Services
 {

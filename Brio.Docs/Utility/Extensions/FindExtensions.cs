@@ -1,10 +1,10 @@
-using Brio.Docs.Client.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Client.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Brio.Docs.Utility.Extensions

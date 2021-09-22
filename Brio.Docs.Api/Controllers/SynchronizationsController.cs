@@ -1,11 +1,11 @@
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
 using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Services;
-using System;
-using System.ComponentModel.DataAnnotations;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;

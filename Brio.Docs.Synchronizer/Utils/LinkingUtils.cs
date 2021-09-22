@@ -1,6 +1,6 @@
+using System;
 using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Models;
-using System;
 
 namespace Brio.Docs.Synchronization.Utils
 {

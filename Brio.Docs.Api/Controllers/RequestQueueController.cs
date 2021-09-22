@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Services;
-using System;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Brio.Docs.Client.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using static Brio.Docs.Api.Validators.ServiceResponsesValidator;

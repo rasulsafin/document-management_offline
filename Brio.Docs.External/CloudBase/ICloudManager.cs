@@ -1,6 +1,6 @@
-﻿using Brio.Docs.External.Utils;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.External.Utils;
 
 namespace Brio.Docs.External
 {

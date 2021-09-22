@@ -1,6 +1,6 @@
-using Brio.Docs.Database;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Database;
 using Microsoft.EntityFrameworkCore;
 
 namespace Brio.Docs.Synchronization.Utils

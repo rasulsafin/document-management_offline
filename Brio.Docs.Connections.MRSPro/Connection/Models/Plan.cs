@@ -1,5 +1,5 @@
-using Brio.Docs.Connections.MrsPro.Interfaces;
 using System.Runtime.Serialization;
+using Brio.Docs.Connections.MrsPro.Interfaces;
 
 namespace Brio.Docs.Connections.MrsPro.Models
 {

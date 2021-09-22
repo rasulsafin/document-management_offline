@@ -1,9 +1,9 @@
 using System;
 using System.Linq;
 using AutoMapper;
-using Brio.Docs.Integration;
-using Brio.Docs.Database;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Database;
+using Brio.Docs.Integration;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Services;

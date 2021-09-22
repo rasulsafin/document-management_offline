@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Utility
 {

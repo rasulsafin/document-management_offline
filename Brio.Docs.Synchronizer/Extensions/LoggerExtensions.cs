@@ -1,6 +1,6 @@
-using Brio.Docs.Synchronization.Models;
 using System;
 using System.Runtime.CompilerServices;
+using Brio.Docs.Synchronization.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Extensions

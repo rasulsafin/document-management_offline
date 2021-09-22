@@ -1,9 +1,9 @@
-using Brio.Docs.Api.Validators;
-using Brio.Docs.Utility.Mapping;
 using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using Brio.Docs.Api.Validators;
+using Brio.Docs.Utility.Mapping;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

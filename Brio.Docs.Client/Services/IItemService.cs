@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Dtos;
-using Brio.Docs.Client.Exceptions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 
 namespace Brio.Docs.Client.Services
 {

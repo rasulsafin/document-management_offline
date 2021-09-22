@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Connections.MrsPro.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.MrsPro.Models;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro.Services

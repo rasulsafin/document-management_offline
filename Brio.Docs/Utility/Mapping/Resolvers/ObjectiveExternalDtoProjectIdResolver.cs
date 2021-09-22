@@ -1,10 +1,10 @@
 ﻿using System.Linq;
 using AutoMapper;
 using Brio.Docs.Database;
-using Brio.Docs.Database.Models;
-using Microsoft.Extensions.Logging;
 using Brio.Docs.Database.Extensions;
+using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Utility.Mapping.Resolvers
 {

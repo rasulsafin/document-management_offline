@@ -1,9 +1,9 @@
-using Brio.Docs.Database;
-using Brio.Docs.Database.Models;
-using Brio.Docs.Synchronization.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Synchronization.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Utils.Linkers

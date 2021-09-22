@@ -2,9 +2,9 @@ using System;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Brio.Docs.Api.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using Brio.Docs.Api.Extensions;
 using Serilog;
 
 namespace Brio.Docs.Api

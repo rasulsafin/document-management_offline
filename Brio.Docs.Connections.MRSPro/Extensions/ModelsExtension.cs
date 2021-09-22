@@ -1,6 +1,6 @@
-﻿using Brio.Docs.Connections.MrsPro.Interfaces;
-using System;
+﻿using System;
 using System.Linq;
+using Brio.Docs.Connections.MrsPro.Interfaces;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro.Extensions
