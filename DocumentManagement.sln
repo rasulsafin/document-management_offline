@@ -60,7 +60,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Common", "Brio.Do
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk.Tests", "DocumentManagement.Connection.YandexDisk.Tests\DocumentManagement.Connection.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive.Tests", "DocumentManagement.Connection.GoogleDrive.Tests\DocumentManagement.Connection.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.GoogleDrive.Tests", "Brio.Docs.Connections.GoogleDrive.Tests\Brio.Docs.Connections.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Launcher", "Brio.Docs.Launcher\Brio.Docs.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
