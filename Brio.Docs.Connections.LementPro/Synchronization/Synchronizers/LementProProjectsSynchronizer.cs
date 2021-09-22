@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.LementPro.Services;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;

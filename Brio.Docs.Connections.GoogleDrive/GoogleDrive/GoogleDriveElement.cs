@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connections.Utils;
+﻿using Brio.Docs.External.Utils;
 using Google.Apis.Drive.v3.Data;
 
 namespace Brio.Docs.Connections.GoogleDrive

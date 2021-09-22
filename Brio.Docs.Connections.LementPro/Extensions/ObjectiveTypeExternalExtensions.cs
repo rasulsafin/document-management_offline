@@ -1,5 +1,5 @@
 ﻿using Brio.Docs.Connections.LementPro.Models;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.LementPro
 {

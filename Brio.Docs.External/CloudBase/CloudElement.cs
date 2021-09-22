@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Brio.Docs.Connections.Utils
+namespace Brio.Docs.External.Utils
 {
     public class CloudElement
     {

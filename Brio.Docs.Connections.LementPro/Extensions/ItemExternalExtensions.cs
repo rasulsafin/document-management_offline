@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connections.LementPro.Models;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.Integration.Dtos;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 
 namespace Brio.Docs.Connections.LementPro

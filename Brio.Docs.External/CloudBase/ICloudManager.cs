@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.External.Utils;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connections.Utils
+namespace Brio.Docs.External
 {
     /// <summary>
     /// Manager to handle work with cloud storages like DMs.

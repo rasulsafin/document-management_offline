@@ -1,7 +1,7 @@
 ﻿using System;
-using Brio.Docs.General.Utils.Factories;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 

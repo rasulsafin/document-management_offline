@@ -4,7 +4,7 @@ using Brio.Docs.Connections.LementPro.Services;
 using Brio.Docs.Connections.LementPro.Synchronization;
 using Brio.Docs.Connections.LementPro.Synchronization.Factories;
 using Brio.Docs.Connections.LementPro.Utilities;
-using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Integration.Factories;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

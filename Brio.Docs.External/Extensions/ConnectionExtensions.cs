@@ -1,7 +1,7 @@
-using Brio.Docs.Client.Dtos;
 using System.Collections.Generic;
+using Brio.Docs.Integration.Dtos;
 
-namespace Brio.Docs.Connections.Utils.Extensions
+namespace Brio.Docs.External.Extensions
 {
     public static class ConnectionExtensions
     {

@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connections.Utils;
+using Brio.Docs.External.Utils;
 using Brio.Docs.Integration.Dtos;
 using Google;
 using Google.Apis.Auth.OAuth2;

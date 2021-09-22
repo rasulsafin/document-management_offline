@@ -9,7 +9,7 @@ using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge.Models.Authentication;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Properties;
-using Brio.Docs.Connections.Utils.Extensions;
+using Brio.Docs.External.Extensions;
 using Brio.Docs.Integration.Dtos;
 using Microsoft.Extensions.Logging;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;

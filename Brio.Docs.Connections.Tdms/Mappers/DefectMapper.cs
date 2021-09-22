@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Integration.Dtos;

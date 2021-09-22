@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.LementPro.Models;
 using Brio.Docs.Connections.LementPro.Properties;
-using Brio.Docs.Connections.Utils;
+using Brio.Docs.External;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.Connections.LementPro.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static Brio.Docs.Connections.LementPro.LementProConstants;

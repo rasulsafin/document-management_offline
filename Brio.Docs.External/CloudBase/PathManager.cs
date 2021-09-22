@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connections.Utils
+namespace Brio.Docs.External
 {
     public static class PathManager
     {

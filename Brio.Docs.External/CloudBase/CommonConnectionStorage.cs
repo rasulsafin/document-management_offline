@@ -1,13 +1,13 @@
-﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.External.CloudBase.Synchronizers;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
-namespace Brio.Docs.Connections.Utils.CloudBase
+namespace Brio.Docs.External.CloudBase
 {
     public class CommonConnectionStorage : IConnectionStorage
     {

@@ -1,6 +1,6 @@
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Utils;
+using Brio.Docs.External;
 using System;
 using System.Collections.Generic;
 using System.IO;

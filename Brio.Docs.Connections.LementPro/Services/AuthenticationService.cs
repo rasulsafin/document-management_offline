@@ -1,10 +1,10 @@
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.LementPro.Utilities;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.External.Extensions;
+using Brio.Docs.Integration.Dtos;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.Connections.Utils.Extensions;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 
 namespace Brio.Docs.Connections.LementPro.Services

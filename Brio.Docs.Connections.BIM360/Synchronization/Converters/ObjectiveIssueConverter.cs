@@ -5,8 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
 using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -18,10 +16,8 @@ using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
-using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {

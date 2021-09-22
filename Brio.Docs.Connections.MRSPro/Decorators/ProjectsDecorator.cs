@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.MrsPro.Interfaces;
 using Brio.Docs.Connections.MrsPro.Models;
-using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 

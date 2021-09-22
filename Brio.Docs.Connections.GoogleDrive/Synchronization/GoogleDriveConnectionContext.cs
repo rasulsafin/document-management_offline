@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
+﻿using Brio.Docs.External.CloudBase.Synchronizers;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;

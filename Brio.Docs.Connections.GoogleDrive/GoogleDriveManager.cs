@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
-using Brio.Docs.Connections.Utils;
+using Brio.Docs.External;
+using Brio.Docs.External.Utils;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.GoogleDrive

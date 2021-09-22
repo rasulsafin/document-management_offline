@@ -1,6 +1,7 @@
-﻿using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+﻿using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Factories;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.LementPro.Synchronization
 {

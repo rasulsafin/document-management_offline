@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connections.Utils
+namespace Brio.Docs.External
 {
     public static class WebFeatures
     {

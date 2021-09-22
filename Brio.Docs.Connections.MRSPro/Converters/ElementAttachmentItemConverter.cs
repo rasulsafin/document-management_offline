@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.MrsPro.Extensions;
 using Brio.Docs.Connections.MrsPro.Interfaces;
-using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 

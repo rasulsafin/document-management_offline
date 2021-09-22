@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Client.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Integration.Dtos;
 
-namespace Brio.Docs.Connections.Utils.CloudBase.Synchronizers
+namespace Brio.Docs.External.CloudBase.Synchronizers
 {
     internal class ItemsSyncHelper
     {

@@ -1,5 +1,5 @@
 using Brio.Docs.Connections.LementPro.Services;
-using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Integration.Factories;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Connections.LementPro.Synchronization.Factories

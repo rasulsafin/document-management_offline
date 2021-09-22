@@ -1,5 +1,4 @@
-﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Brio.Docs.Connections.YandexDisk;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.External.CloudBase.Synchronizers;
 
 namespace Brio.Docs.Connections.YandexDisk.Tests.TestsToInitialize
 {

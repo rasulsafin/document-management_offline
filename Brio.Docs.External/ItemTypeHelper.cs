@@ -1,10 +1,10 @@
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Brio.Docs.Common.Dtos;
 
-namespace Brio.Docs.Connections.Utils
+namespace Brio.Docs.External
 {
     public static class ItemTypeHelper
     {

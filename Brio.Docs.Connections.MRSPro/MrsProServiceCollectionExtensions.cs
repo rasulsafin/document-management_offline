@@ -6,7 +6,6 @@ using Brio.Docs.Connections.MrsPro.Converters;
 using Brio.Docs.Connections.MrsPro.Interfaces;
 using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 

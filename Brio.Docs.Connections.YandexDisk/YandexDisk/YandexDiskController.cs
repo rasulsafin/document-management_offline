@@ -1,4 +1,5 @@
-﻿using Brio.Docs.Connections.Utils;
+﻿using Brio.Docs.External;
+using Brio.Docs.External.Utils;
 using Brio.Docs.Integration;
 using System;
 using System.Collections.Generic;

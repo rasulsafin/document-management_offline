@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
-using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services
 {

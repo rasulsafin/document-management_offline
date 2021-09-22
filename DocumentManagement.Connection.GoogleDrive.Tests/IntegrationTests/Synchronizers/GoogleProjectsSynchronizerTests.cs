@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
-using Brio.Docs.Client.Dtos;
+﻿using Brio.Docs.Client.Dtos;
+using Brio.Docs.External.CloudBase.Synchronizers;
 using System;
 using System.Collections.Generic;
 using System.IO;
