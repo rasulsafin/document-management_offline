@@ -20,7 +20,7 @@
       <ProjectReference Include="..\Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj" />
       <ProjectReference Include="..\Brio.Docs.Connections.GoogleDrive\Brio.Docs.Connections.GoogleDrive.csproj" />
       <ProjectReference Include="..\Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj" />
-      <ProjectReference Include="..\DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj" />
       <ProjectReference Include="..\DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj" />
       <ProjectReference Include="..\DocumentManagement.Database\DocumentManagement.Database.csproj" />

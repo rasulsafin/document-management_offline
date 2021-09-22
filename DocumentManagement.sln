@@ -66,7 +66,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.General.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Launcher", "DocumentManagement.Launcher\DocumentManagement.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro", "DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.MRSPro", "Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro.Tests", "DocumentManagement.Connection.MRSPro.Tests\DocumentManagement.Connection.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
 EndProject
