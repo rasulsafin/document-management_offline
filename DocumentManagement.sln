@@ -33,7 +33,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Googl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BIM360", "Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj", "{CD3E74B2-84F3-4797-9F72-F22424021ED7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.BIM360.Tests", "DocumentManagement.Connection.BIM360.Tests\DocumentManagement.Connection.BIM360.Tests.csproj", "{D1CC8DE3-3847-43F2-9088-23C5ECECF385}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BIM360.Tests", "Brio.Docs.Connections.BIM360.Tests\Brio.Docs.Connections.BIM360.Tests.csproj", "{D1CC8DE3-3847-43F2-9088-23C5ECECF385}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.External", "Brio.Docs.External\Brio.Docs.External.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
 EndProject
