@@ -107,15 +107,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         }
 
         [TestMethod]
-        public async Task GetLocations_HaveAccessToIssueContainer_ReturnsIssuesList()
-        {
-            var locations = await issuesService.GetLocationsAsync(issuesContainer, "default");
-
-            if (locations == null)
-                Assert.Fail();
-        }
-
-        [TestMethod]
         public async Task PatchTestingIssue_HaveAccessToTestingIssue_PatchedPropertyChanged()
         {
             var issues = await issuesService.GetIssuesAsync(issuesContainer);
