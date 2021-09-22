@@ -26,7 +26,7 @@
       <ProjectReference Include="..\Brio.Docs.Database\Brio.Docs.Database.csproj" />
       <ProjectReference Include="..\DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj" />
       <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
-      <ProjectReference Include="..\DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj" />
       <ProjectReference Include="..\DocumentManagement.Utils\DocumentManagement.Utils.csproj" />
     </ItemGroup>
 

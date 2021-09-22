@@ -37,7 +37,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connecti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Utils", "DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Synchronizer", "DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Synchronizer", "Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Tdms", "Brio.Docs.Connections.Tdms\Brio.Docs.Connections.Tdms.csproj", "{6B2CB931-05A8-436C-A577-0B214C6371AC}"
 	ProjectSection(ProjectDependencies) = postProject
