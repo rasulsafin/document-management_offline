@@ -3,7 +3,7 @@ using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     public class TdmsConnectionMeta : IConnectionMeta
     {

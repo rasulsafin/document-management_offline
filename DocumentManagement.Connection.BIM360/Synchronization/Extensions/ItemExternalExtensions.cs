@@ -1,8 +1,8 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Utils;
 using Brio.Docs.Interface.Dtos;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     public static class ItemExternalExtensions
     {

@@ -1,6 +1,6 @@
-﻿using Brio.Docs.Connection.LementPro.Services;
-using Brio.Docs.Connection.LementPro.Synchronization;
-using Brio.Docs.Connection.LementPro.Utilities;
+﻿using Brio.Docs.Connections.LementPro.Services;
+using Brio.Docs.Connections.LementPro.Synchronization;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.General.Utils.Factories;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
@@ -9,10 +9,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.Connection.Utils.Extensions;
-using static Brio.Docs.Connection.LementPro.LementProConstants;
+using Brio.Docs.Connections.Utils.Extensions;
+using static Brio.Docs.Connections.LementPro.LementProConstants;
 
-namespace Brio.Docs.Connection.LementPro
+namespace Brio.Docs.Connections.LementPro
 {
     public class LementProConnection : IConnection
     {

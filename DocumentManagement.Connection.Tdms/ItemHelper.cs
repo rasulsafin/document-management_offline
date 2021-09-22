@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     internal class ItemHelper
     {

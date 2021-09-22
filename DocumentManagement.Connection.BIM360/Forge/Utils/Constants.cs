@@ -1,4 +1,4 @@
-namespace Brio.Docs.Connection.Bim360.Forge
+namespace Brio.Docs.Connections.Bim360.Forge
 {
     public static class Constants
     {

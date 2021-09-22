@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.Utils;
+﻿using Brio.Docs.Connections.Utils;
 using System;
 using System.Collections.Generic;
 using System.Xml;

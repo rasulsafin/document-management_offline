@@ -3,10 +3,10 @@ using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.Tdms.Mappers;
+using Brio.Docs.Connections.Tdms.Mappers;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     public class TdmsConnectionContext : AConnectionContext
     {

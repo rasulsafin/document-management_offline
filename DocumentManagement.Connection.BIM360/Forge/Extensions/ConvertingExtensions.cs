@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils.Extensions
+namespace Brio.Docs.Connections.Bim360.Forge.Utils.Extensions
 {
     public static class ConvertingExtensions
     {

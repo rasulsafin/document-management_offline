@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.Tdms;
+﻿using Brio.Docs.Connections.Tdms;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

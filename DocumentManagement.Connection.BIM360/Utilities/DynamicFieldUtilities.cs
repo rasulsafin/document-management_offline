@@ -1,11 +1,11 @@
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 
-namespace Brio.Docs.Connection.Bim360.Utilities
+namespace Brio.Docs.Connections.Bim360.Utilities
 {
     internal static class DynamicFieldUtilities
     {

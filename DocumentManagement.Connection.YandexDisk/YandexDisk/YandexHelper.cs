@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Runtime.InteropServices;
 
-namespace Brio.Docs.Connection.YandexDisk
+namespace Brio.Docs.Connections.YandexDisk
 {
     public static class YandexHelper
     {

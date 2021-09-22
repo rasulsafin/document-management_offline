@@ -1,4 +1,4 @@
-using Brio.Docs.Connection.MrsPro.Services;
+using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Brio.Docs.Connection.MrsPro.Constants;
-using static Brio.Docs.Connection.MrsPro.Tests.TestConstants;
+using static Brio.Docs.Connections.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Tests.TestConstants;
 
-namespace Brio.Docs.Connection.MrsPro.Tests.Synchronization
+namespace Brio.Docs.Connections.MrsPro.Tests.Synchronization
 {
     [TestClass]
     public class MrsProObjectivesSynchronizerTests

@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Connection.LementPro.Models;
+﻿using Brio.Docs.Connections.LementPro.Models;
 using Brio.Docs.Interface.Dtos;
 
-namespace Brio.Docs.Connection.LementPro
+namespace Brio.Docs.Connections.LementPro
 {
     internal static class ObjectiveTypeExternalExtensions
     {

@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     // https://stackoverflow.com/a/61685864
     public class SafeStringEnumConverter : StringEnumConverter

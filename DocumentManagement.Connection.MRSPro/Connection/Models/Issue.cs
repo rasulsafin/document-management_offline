@@ -1,8 +1,8 @@
-using Brio.Docs.Connection.MrsPro.Interfaces;
+using Brio.Docs.Connections.MrsPro.Interfaces;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.MrsPro.Models
+namespace Brio.Docs.Connections.MrsPro.Models
 {
     [DataContract]
     public class Issue : IElementObject

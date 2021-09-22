@@ -1,7 +1,7 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils.Pagination
+namespace Brio.Docs.Connections.Bim360.Forge.Utils.Pagination
 {
     public class MetaStrategy : ACountStrategy<Meta>
     {

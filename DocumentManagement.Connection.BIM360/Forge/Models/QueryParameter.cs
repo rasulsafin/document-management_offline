@@ -1,4 +1,4 @@
-namespace Brio.Docs.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connections.Bim360.Forge.Models
 {
     public class QueryParameter : IQueryParameter
     {

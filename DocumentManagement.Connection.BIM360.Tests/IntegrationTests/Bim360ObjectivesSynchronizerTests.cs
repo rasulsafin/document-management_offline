@@ -1,8 +1,8 @@
-using Brio.Docs.Connection.Bim360;
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Synchronization;
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Synchronization;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -13,10 +13,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
 
-namespace Brio.Docs.Connection.BIM360.Tests.IntegrationTests
+namespace Brio.Docs.Connections.BIM360.Tests.IntegrationTests
 {
     [TestClass]
     public class Bim360ObjectivesSynchronizerTests

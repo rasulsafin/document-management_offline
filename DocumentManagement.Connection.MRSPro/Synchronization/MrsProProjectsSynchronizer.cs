@@ -1,14 +1,14 @@
-﻿using Brio.Docs.Connection.MrsPro.Services;
+﻿using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.MrsPro.Extensions;
+using Brio.Docs.Connections.MrsPro.Extensions;
 using Brio.Docs.General.Utils.Extensions;
 
-namespace Brio.Docs.Connection.MrsPro
+namespace Brio.Docs.Connections.MrsPro
 {
     public class MrsProProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {

@@ -1,9 +1,9 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connection.Bim360.Synchronization.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     internal static class IssueExtensions
     {

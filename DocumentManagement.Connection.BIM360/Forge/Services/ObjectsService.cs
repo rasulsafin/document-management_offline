@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Properties;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
     public class ObjectsService
     {

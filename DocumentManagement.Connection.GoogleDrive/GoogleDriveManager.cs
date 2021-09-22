@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.Utils;
+﻿using Brio.Docs.Connections.Utils;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Brio.Docs.Connection.GoogleDrive
+namespace Brio.Docs.Connections.GoogleDrive
 {
     public class GoogleDriveManager : ICloudManager
     {

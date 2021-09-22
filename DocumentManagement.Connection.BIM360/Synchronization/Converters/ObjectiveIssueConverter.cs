@@ -1,12 +1,12 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Synchronization.Models;
-using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
-using Brio.Docs.Connection.Bim360.Utilities;
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -16,10 +16,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.Bim360.Synchronization.Extensions;
-using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Converters
+namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {

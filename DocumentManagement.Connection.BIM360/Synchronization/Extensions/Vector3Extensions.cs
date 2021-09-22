@@ -1,7 +1,7 @@
 using System;
 using System.Numerics;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     public static class Vector3Extensions
     {

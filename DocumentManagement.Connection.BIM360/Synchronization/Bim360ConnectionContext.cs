@@ -4,7 +4,7 @@ using Brio.Docs.Interface.Dtos;
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization
+namespace Brio.Docs.Connections.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext, IDisposable
     {

@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connection.LementPro.Tests.IntegrationTests.Synchronization
+namespace Brio.Docs.Connections.LementPro.Tests.IntegrationTests.Synchronization
 {
     [TestClass]
     public class LementProProjectsSynchronizerTests

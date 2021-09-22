@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     public class ForgeSettings
     {

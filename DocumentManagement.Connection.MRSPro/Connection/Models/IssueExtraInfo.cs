@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.MrsPro.Models
+namespace Brio.Docs.Connections.MrsPro.Models
 {
     [DataContract]
     public class IssueExtraInfo

@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.MrsPro
+﻿namespace Brio.Docs.Connections.MrsPro
 {
     internal static class Auth
     {

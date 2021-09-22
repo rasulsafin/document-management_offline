@@ -3,7 +3,7 @@ using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connection.GoogleDrive
+namespace Brio.Docs.Connections.GoogleDrive
 {
     public class GoogleConnectionMeta : IConnectionMeta
     {

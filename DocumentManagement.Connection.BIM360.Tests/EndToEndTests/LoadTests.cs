@@ -1,7 +1,7 @@
-using Brio.Docs.Connection.Bim360.Forge;
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
@@ -11,12 +11,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
-using static Brio.Docs.Connection.Bim360.Forge.Constants;
-using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
+using static Brio.Docs.Connections.Bim360.Forge.Constants;
+using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
-namespace Brio.Docs.Connection.Bim360.Tests
+namespace Brio.Docs.Connections.Bim360.Tests
 {
     [TestClass]
     public class LoadTests

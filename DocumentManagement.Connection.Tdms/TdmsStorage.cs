@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     public class TdmsStorage : IConnectionStorage
     {

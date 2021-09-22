@@ -1,9 +1,9 @@
 ﻿using System;
-using Brio.Docs.Connection.LementPro;
-using Brio.Docs.Connection.LementPro.Services;
-using Brio.Docs.Connection.LementPro.Synchronization;
-using Brio.Docs.Connection.LementPro.Synchronization.Factories;
-using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.Connections.LementPro;
+using Brio.Docs.Connections.LementPro.Services;
+using Brio.Docs.Connections.LementPro.Synchronization;
+using Brio.Docs.Connections.LementPro.Synchronization.Factories;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.General.Utils.Factories;
 
 namespace Microsoft.Extensions.DependencyInjection

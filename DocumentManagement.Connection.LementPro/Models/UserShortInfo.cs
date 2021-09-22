@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.LementPro.Models
+namespace Brio.Docs.Connections.LementPro.Models
 {
     [DataContract]
     public class UserShortInfo

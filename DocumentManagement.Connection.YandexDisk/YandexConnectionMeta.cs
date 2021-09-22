@@ -3,7 +3,7 @@ using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connection.YandexDisk
+namespace Brio.Docs.Connections.YandexDisk
 {
     public class YandexConnectionMeta : IConnectionMeta
     {

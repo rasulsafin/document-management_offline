@@ -1,8 +1,8 @@
 ﻿using Brio.Docs.Interface;
 using System.Threading.Tasks;
-using static Brio.Docs.Connection.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Constants;
 
-namespace Brio.Docs.Connection.MrsPro.Converters
+namespace Brio.Docs.Connections.MrsPro.Converters
 {
     internal class StatusObjectiveStatusConverter : IConverter<string, ObjectiveStatus>
     {

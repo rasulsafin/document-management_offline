@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connections.Bim360.Forge.Models
 {
     [DataContract]
     public class Object<TAttributes, TRelationships>

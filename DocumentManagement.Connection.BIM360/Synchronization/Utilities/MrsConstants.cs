@@ -1,4 +1,4 @@
-namespace Brio.Docs.Connection.Bim360.Synchronization.Utilities
+namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
     internal static class MrsConstants
     {

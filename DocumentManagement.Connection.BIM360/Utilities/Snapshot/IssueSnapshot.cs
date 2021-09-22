@@ -1,7 +1,7 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
     internal class IssueSnapshot : ASnapshotEntity<Issue>
     {

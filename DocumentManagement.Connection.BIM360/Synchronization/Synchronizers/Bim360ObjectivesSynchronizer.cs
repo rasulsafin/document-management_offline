@@ -1,9 +1,9 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -11,9 +11,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 
-namespace Brio.Docs.Connection.Bim360.Synchronizers
+namespace Brio.Docs.Connections.Bim360.Synchronizers
 {
     internal class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {

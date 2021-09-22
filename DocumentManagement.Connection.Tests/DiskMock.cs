@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using Brio.Docs.Connection.Utils;
+using Brio.Docs.Connections.Utils;
 using Brio.Docs.Interface.Dtos;
 using Brio.Docs.Synchronizer;
 

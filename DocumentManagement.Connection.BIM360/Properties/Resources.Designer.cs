@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Brio.Docs.Connection.Bim360.Properties {
+namespace Brio.Docs.Connections.Bim360.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Brio.Docs.Connection.Bim360.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Brio.Docs.Connection.Bim360.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Brio.Docs.Connections.Bim360.Properties.Resources", typeof(Resources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

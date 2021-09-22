@@ -1,15 +1,15 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Forge.Utils.Pagination;
-using Brio.Docs.Connection.Bim360.Properties;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Pagination;
+using Brio.Docs.Connections.Bim360.Properties;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
-using static Brio.Docs.Connection.Bim360.Forge.Constants;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
+using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
     public class IssuesService
     {

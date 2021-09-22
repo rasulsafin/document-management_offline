@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360;
-using Brio.Docs.Connection.Bim360.Utilities;
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360;
+using Brio.Docs.Connections.Bim360.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

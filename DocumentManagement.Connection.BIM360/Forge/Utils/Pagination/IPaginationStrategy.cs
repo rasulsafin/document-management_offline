@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils.Pagination
+namespace Brio.Docs.Connections.Bim360.Forge.Utils.Pagination
 {
     /// <summary>
     /// Represents pagination strategies for BIM 360 queries.

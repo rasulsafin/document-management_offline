@@ -3,7 +3,7 @@ using System.Numerics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     public class NullableVector3FloatArrayConverter : ANullableVector3Converter
     {

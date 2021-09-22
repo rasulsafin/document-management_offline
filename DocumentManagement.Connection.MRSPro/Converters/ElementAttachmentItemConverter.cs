@@ -1,13 +1,13 @@
-﻿using Brio.Docs.Connection.MrsPro.Interfaces;
+﻿using Brio.Docs.Connections.MrsPro.Interfaces;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.MrsPro.Extensions;
+using Brio.Docs.Connections.MrsPro.Extensions;
 
-namespace Brio.Docs.Connection.MrsPro.Converters
+namespace Brio.Docs.Connections.MrsPro.Converters
 {
     internal class ElementAttachmentItemConverter : IConverter<IEnumerable<IElementAttachment>, ICollection<ItemExternalDto>>
     {

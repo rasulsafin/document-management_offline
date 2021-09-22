@@ -1,7 +1,7 @@
 ﻿#define TEST
 
-using Brio.Docs.Connection.Utils;
-using Brio.Docs.Connection.YandexDisk;
+using Brio.Docs.Connections.Utils;
+using Brio.Docs.Connections.YandexDisk;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;

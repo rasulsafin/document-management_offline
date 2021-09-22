@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Connection.MrsPro.Models;
-using Brio.Docs.Connection.MrsPro.Services;
+﻿using Brio.Docs.Connections.MrsPro.Models;
+using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connection.MrsPro.Extensions;
-using static Brio.Docs.Connection.MrsPro.Constants;
-using static Brio.Docs.Connection.MrsPro.Tests.TestConstants;
+using Brio.Docs.Connections.MrsPro.Extensions;
+using static Brio.Docs.Connections.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Tests.TestConstants;
 
-namespace Brio.Docs.Connection.MrsPro.Tests.Services
+namespace Brio.Docs.Connections.MrsPro.Tests.Services
 {
     [TestClass]
     public class IssuesServiceTests

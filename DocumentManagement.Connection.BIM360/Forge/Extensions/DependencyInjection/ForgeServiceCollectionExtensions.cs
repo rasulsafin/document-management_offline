@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360.Forge;
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

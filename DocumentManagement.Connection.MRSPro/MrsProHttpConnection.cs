@@ -1,4 +1,4 @@
-using Brio.Docs.Connection.Utils;
+using Brio.Docs.Connections.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using static Brio.Docs.Connection.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Constants;
 
-namespace Brio.Docs.Connection.MrsPro
+namespace Brio.Docs.Connections.MrsPro
 {
     public class MrsProHttpConnection : HttpConnection
     {

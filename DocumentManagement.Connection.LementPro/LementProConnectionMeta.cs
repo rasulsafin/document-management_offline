@@ -2,9 +2,9 @@ using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
-using static Brio.Docs.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connections.LementPro.LementProConstants;
 
-namespace Brio.Docs.Connection.LementPro
+namespace Brio.Docs.Connections.LementPro
 {
     public class LementProConnectionMeta : IConnectionMeta
     {

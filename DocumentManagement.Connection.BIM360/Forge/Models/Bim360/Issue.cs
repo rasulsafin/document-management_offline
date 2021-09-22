@@ -1,10 +1,10 @@
-using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using System;
 using System.Numerics;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Models.Bim360
+namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {
     [DataContract]
     public class Issue : Object<Issue.IssueAttributes, Issue.IssueRelationships>

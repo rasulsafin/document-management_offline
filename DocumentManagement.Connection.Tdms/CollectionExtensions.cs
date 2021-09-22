@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     internal static class CollectionExtensions
     {

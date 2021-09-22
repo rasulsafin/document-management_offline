@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connection.MrsPro.Services;
+﻿using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 
-namespace Brio.Docs.Connection.MrsPro
+namespace Brio.Docs.Connections.MrsPro
 {
     public class MrsProConnectionContext : AConnectionContext
     {

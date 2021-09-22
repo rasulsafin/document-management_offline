@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
     internal class Bim360Snapshot
     {

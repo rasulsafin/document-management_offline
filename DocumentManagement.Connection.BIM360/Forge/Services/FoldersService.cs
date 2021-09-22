@@ -1,16 +1,16 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Utils;
-using Brio.Docs.Connection.Bim360.Forge.Utils.Pagination;
-using Brio.Docs.Connection.Bim360.Properties;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Pagination;
+using Brio.Docs.Connections.Bim360.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Brio.Docs.Connection.Bim360.Forge.Constants;
-using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
+using static Brio.Docs.Connections.Bim360.Forge.Constants;
+using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
     public class FoldersService
     {

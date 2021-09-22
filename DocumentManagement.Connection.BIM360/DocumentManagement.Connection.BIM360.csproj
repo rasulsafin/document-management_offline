@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <RootNamespace>Brio.Docs.Connection.Bim360</RootNamespace>
+        <RootNamespace>Brio.Docs.Connections.Bim360</RootNamespace>
         <Authors>Brio MRS</Authors>
         <Product>Brio MRS Connection</Product>
         <Company>Brio MRS©</Company>

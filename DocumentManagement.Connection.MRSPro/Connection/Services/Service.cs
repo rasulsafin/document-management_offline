@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.MrsPro.Services
+﻿namespace Brio.Docs.Connections.MrsPro.Services
 {
     public class Service
     {

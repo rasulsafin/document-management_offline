@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.YandexDisk;
+﻿using Brio.Docs.Connections.YandexDisk;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

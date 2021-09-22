@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.Tdms
+﻿namespace Brio.Docs.Connections.Tdms
 {
     public static class ParameterID
     {

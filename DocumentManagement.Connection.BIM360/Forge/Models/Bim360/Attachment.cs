@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Models.Bim360
+namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {
     [DataContract]
     public class Attachment : Object<Attachment.AttachmentAttributes, Attachment.AttachmentRelationships>

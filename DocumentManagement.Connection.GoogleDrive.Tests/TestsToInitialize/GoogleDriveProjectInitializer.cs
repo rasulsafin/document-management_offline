@@ -1,14 +1,14 @@
-﻿using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connection.GoogleDrive;
+using Brio.Docs.Connections.GoogleDrive;
 using Brio.Docs.Interface.Dtos;
 
-namespace Brio.Docs.Connection.GoogleDrive.Tests.ProjectInitializer
+namespace Brio.Docs.Connections.GoogleDrive.Tests.ProjectInitializer
 {
     /// <summary>
     /// Uncomment and run this tests to initialize standard project to test at the remote DM.

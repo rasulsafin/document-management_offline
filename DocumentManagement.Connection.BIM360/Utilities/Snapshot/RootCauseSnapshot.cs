@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 
-namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
     internal class RootCauseSnapshot : AEnumVariantSnapshot<RootCause>
     {

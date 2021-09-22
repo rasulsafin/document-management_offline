@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.GoogleDrive;
+﻿using Brio.Docs.Connections.GoogleDrive;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

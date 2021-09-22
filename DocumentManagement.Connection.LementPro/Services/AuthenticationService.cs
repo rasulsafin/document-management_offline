@@ -1,13 +1,13 @@
-using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.Connection.Utils.Extensions;
-using static Brio.Docs.Connection.LementPro.LementProConstants;
+using Brio.Docs.Connections.Utils.Extensions;
+using static Brio.Docs.Connections.LementPro.LementProConstants;
 
-namespace Brio.Docs.Connection.LementPro.Services
+namespace Brio.Docs.Connections.LementPro.Services
 {
     public class AuthenticationService
     {

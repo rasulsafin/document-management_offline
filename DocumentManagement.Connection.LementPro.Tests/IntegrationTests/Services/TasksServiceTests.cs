@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Connection.LementPro.Models;
-using Brio.Docs.Connection.LementPro.Services;
+﻿using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.Connections.LementPro.Services;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connection.LementPro.Tests.IntegrationTests.Services
+namespace Brio.Docs.Connections.LementPro.Tests.IntegrationTests.Services
 {
     [TestClass]
     public class TasksServiceTests

@@ -2,9 +2,9 @@ using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
-using static Brio.Docs.Connection.Bim360.Forge.Constants;
+using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
-namespace Brio.Docs.Connection.Bim360
+namespace Brio.Docs.Connections.Bim360
 {
     public class Bim360ConnectionMeta : IConnectionMeta
     {

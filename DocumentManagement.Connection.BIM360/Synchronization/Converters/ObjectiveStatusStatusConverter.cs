@@ -1,8 +1,8 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Interface;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Converters
+namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class ObjectiveStatusStatusConverter : IConverter<ObjectiveStatus, Status>
     {

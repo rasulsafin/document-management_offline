@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 
-namespace Brio.Docs.Connection.LementPro
+namespace Brio.Docs.Connections.LementPro
 {
     /// <summary>
     /// Contains constants to use in LementProConnection.

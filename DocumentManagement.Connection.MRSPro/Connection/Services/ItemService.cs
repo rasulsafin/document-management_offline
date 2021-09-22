@@ -2,7 +2,7 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.MrsPro.Services
+namespace Brio.Docs.Connections.MrsPro.Services
 {
     public class ItemService : Service
     {

@@ -1,13 +1,13 @@
-﻿using Brio.Docs.Connection.LementPro.Models;
-using Brio.Docs.Connection.Utils;
+﻿using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.Connections.Utils;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using static Brio.Docs.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connections.LementPro.LementProConstants;
 
-namespace Brio.Docs.Connection.LementPro
+namespace Brio.Docs.Connections.LementPro
 {
     internal static class ProjectExternalExtension
     {

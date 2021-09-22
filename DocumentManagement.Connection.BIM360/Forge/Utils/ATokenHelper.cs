@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     /// <summary>
     /// Helper class for updating the token for all connections of the same user.

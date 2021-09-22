@@ -1,12 +1,12 @@
-﻿using Brio.Docs.Connection.MrsPro.Services;
+﻿using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.Interface.Dtos;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using static Brio.Docs.Connection.MrsPro.Tests.TestConstants;
+using static Brio.Docs.Connections.MrsPro.Tests.TestConstants;
 
-namespace Brio.Docs.Connection.MrsPro.Tests.Services
+namespace Brio.Docs.Connections.MrsPro.Tests.Services
 {
     [TestClass]
     public class AuthenticationServiceTests

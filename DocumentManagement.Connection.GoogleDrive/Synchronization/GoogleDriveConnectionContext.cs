@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
 
-namespace Brio.Docs.Connection.GoogleDrive.Synchronization
+namespace Brio.Docs.Connections.GoogleDrive.Synchronization
 {
     public class GoogleDriveConnectionContext : AConnectionContext
     {

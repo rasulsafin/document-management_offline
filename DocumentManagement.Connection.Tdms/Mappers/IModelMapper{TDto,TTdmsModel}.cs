@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.Tdms.Mappers
+﻿namespace Brio.Docs.Connections.Tdms.Mappers
 {
     /// <summary>
     /// Interface for object mapping.

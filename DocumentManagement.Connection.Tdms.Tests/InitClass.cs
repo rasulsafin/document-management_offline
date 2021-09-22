@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connection.Tdms.Tests
+namespace Brio.Docs.Connections.Tdms.Tests
 {
     [TestClass]
     public class InitClass

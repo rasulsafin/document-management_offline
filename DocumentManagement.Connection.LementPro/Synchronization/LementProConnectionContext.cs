@@ -2,7 +2,7 @@
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 
-namespace Brio.Docs.Connection.LementPro.Synchronization
+namespace Brio.Docs.Connections.LementPro.Synchronization
 {
     // TODO: capture remote state and work with it.
     public class LementProConnectionContext : AConnectionContext

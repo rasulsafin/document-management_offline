@@ -1,4 +1,4 @@
-using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connection.GoogleDrive.Tests.IntegrationTests.Synchronizers
+namespace Brio.Docs.Connections.GoogleDrive.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class GoogleObjectivesSynchronizerTests

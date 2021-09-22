@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms.Mappers
+namespace Brio.Docs.Connections.Tdms.Mappers
 {
     internal class ObjectiveMapper
     {

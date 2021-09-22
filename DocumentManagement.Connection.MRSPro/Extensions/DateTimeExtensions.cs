@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Brio.Docs.Connection.MrsPro.Extensions
+namespace Brio.Docs.Connections.MrsPro.Extensions
 {
     internal static class DateTimeExtensions
     {

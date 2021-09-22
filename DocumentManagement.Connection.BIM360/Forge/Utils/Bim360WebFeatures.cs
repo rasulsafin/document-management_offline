@@ -1,7 +1,7 @@
-using Brio.Docs.Connection.Utils;
+using Brio.Docs.Connections.Utils;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     public static class Bim360WebFeatures
     {

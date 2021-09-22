@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.Tdms.Mappers;
+﻿using Brio.Docs.Connections.Tdms.Mappers;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms
+namespace Brio.Docs.Connections.Tdms
 {
     public class TdmsObjectivesSynchronizer : TdmsSynchronizer, ISynchronizer<ObjectiveExternalDto>
     {

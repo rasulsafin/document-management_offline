@@ -2,7 +2,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.MrsPro.Converters
+namespace Brio.Docs.Connections.MrsPro.Converters
 {
     internal class ExternalIdTypeIdConverter : IConverter<string, (string id, string type)>
     {

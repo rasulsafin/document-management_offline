@@ -1,11 +1,11 @@
-﻿using Brio.Docs.Connection.MrsPro.Interfaces;
-using Brio.Docs.Connection.MrsPro.Models;
+﻿using Brio.Docs.Connections.MrsPro.Interfaces;
+using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.MrsPro
+namespace Brio.Docs.Connections.MrsPro
 {
     public abstract class AObjectiveElementDecorator : IElementDecorator<IElementObject, IElementAttachment>, IElementConvertible<ObjectiveExternalDto, IElementObject>
     {

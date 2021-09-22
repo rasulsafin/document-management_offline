@@ -1,16 +1,16 @@
-using Brio.Docs.Connection.Bim360.Forge;
-using Brio.Docs.Connection.Bim360.Forge.Models;
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Properties;
-using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Properties;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
-namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
     internal class SnapshotFiller
     {

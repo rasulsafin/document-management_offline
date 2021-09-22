@@ -6,7 +6,7 @@ using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Util.Store;
 using Newtonsoft.Json;
 
-namespace Brio.Docs.Connection.GoogleDrive
+namespace Brio.Docs.Connections.GoogleDrive
 {
 
     public class DataStore : IDataStore

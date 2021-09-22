@@ -5,7 +5,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using TDMS;
 
-namespace Brio.Docs.Connection.Tdms.Mappers
+namespace Brio.Docs.Connections.Tdms.Mappers
 {
     public class DefectMapper : IModelMapper<ObjectiveExternalDto, TDMSObject>
     {

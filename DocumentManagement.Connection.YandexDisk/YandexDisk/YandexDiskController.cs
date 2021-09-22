@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.Utils;
+﻿using Brio.Docs.Connections.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace Brio.Docs.Connection.YandexDisk
+namespace Brio.Docs.Connections.YandexDisk
 {
     public class YandexDiskController
     {

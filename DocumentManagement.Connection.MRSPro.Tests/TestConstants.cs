@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.MrsPro.Tests
+﻿namespace Brio.Docs.Connections.MrsPro.Tests
 {
     internal static class TestConstants
     {

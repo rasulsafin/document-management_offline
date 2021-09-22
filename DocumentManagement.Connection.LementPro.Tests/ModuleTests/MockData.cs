@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.LementPro.Tests.ModuleTests
+﻿namespace Brio.Docs.Connections.LementPro.Tests.ModuleTests
 {
     /// <summary>
     /// This data mocked because of access to Lement Pro system limitted in time.

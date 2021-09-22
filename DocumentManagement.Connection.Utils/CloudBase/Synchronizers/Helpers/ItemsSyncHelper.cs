@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.Utils.CloudBase.Synchronizers
+namespace Brio.Docs.Connections.Utils.CloudBase.Synchronizers
 {
     internal class ItemsSyncHelper
     {

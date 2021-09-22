@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Connection.LementPro.Utilities;
+﻿using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.Interface.Dtos;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connection.LementPro.Tests.IntegrationTests.Utilities
+namespace Brio.Docs.Connections.LementPro.Tests.IntegrationTests.Utilities
 {
     [TestClass]
     public class CommonRequestsUtilityTests

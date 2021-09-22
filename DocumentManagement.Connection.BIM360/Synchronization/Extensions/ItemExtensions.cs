@@ -1,9 +1,9 @@
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using System;
 using System.IO;
 using System.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     internal static class ItemExtensions
     {

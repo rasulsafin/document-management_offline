@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Connection.MrsPro.Interfaces
+﻿namespace Brio.Docs.Connections.MrsPro.Interfaces
 {
     /// <summary>
     /// Element from MRSPro.

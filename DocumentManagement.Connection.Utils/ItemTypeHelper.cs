@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace Brio.Docs.Connection.Utils
+namespace Brio.Docs.Connections.Utils
 {
     public static class ItemTypeHelper
     {

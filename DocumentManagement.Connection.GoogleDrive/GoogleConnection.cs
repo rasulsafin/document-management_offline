@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Connection.GoogleDrive.Synchronization;
-using Brio.Docs.Connection.Utils.CloudBase;
+﻿using Brio.Docs.Connections.GoogleDrive.Synchronization;
+using Brio.Docs.Connections.Utils.CloudBase;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.GoogleDrive
+namespace Brio.Docs.Connections.GoogleDrive
 {
     public class GoogleConnection : IConnection
     {

@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Connection.Utils;
+﻿using Brio.Docs.Connections.Utils;
 using Google.Apis.Drive.v3.Data;
 
-namespace Brio.Docs.Connection.GoogleDrive
+namespace Brio.Docs.Connections.GoogleDrive
 {
     public class GoogleDriveElement : CloudElement
     {

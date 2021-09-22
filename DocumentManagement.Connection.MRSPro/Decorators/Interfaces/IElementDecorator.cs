@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connection.MrsPro.Models;
+﻿using Brio.Docs.Connections.MrsPro.Models;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.MrsPro.Interfaces
+namespace Brio.Docs.Connections.MrsPro.Interfaces
 {
     /// <summary>
     /// Decorator for MrsPro objects.

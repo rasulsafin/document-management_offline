@@ -1,6 +1,6 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Extensions
+namespace Brio.Docs.Connections.Bim360.Forge.Extensions
 {
     public static class HubExtensions
     {

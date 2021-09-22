@@ -1,8 +1,8 @@
-using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.Bim360.Utilities
+namespace Brio.Docs.Connections.Bim360.Utilities
 {
     /// <summary>
     /// Represents a class for working with BIM 360 properties as dynamic field.

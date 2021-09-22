@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Brio.Docs.Interface.Dtos;
 
-namespace Brio.Docs.Connection.MrsPro.Interfaces
+namespace Brio.Docs.Connections.MrsPro.Interfaces
 {
     /// <summary>
     /// Element that can be converted to dto.

@@ -1,7 +1,7 @@
-using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using System.Linq;
 
-namespace Brio.Docs.Connection.Bim360.Forge.Utils.Extensions
+namespace Brio.Docs.Connections.Bim360.Forge.Utils.Extensions
 {
     internal static class IssueExtensions
     {

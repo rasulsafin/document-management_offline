@@ -1,7 +1,7 @@
 using System.Numerics;
 using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connection.Bim360.Synchronization.Models
+namespace Brio.Docs.Connections.Bim360.Synchronization.Models
 {
     [DataContract]
     public class LinkedInfo

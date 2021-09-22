@@ -1,10 +1,10 @@
-﻿using Brio.Docs.Connection.MrsPro.Models;
+﻿using Brio.Docs.Connections.MrsPro.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Brio.Docs.Connection.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Constants;
 
-namespace Brio.Docs.Connection.MrsPro.Services
+namespace Brio.Docs.Connections.MrsPro.Services
 {
     public class ProjectsService : Service
     {

@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connection.MrsPro.Models;
+﻿using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connection.MrsPro.Services
+namespace Brio.Docs.Connections.MrsPro.Services
 {
     public class AuthenticationService : Service
     {

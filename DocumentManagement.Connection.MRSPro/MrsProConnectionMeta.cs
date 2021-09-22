@@ -2,9 +2,9 @@
 using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
-using static Brio.Docs.Connection.MrsPro.Constants;
+using static Brio.Docs.Connections.MrsPro.Constants;
 
-namespace Brio.Docs.Connection.MrsPro
+namespace Brio.Docs.Connections.MrsPro
 {
     public class MrsProConnectionMeta : IConnectionMeta
     {

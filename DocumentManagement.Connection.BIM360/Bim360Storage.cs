@@ -1,5 +1,5 @@
-using Brio.Docs.Connection.Bim360.Forge.Services;
-using Brio.Docs.Connection.Bim360.Utilities;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Interface;
 using Brio.Docs.Interface.Dtos;
 using System;
@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connection.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 
-namespace Brio.Docs.Connection.Bim360
+namespace Brio.Docs.Connections.Bim360
 {
     internal class Bim360Storage : IConnectionStorage
     {
