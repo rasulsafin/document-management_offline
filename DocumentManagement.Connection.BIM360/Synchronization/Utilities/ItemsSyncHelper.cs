@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
@@ -19,20 +17,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
         private readonly VersionsService versionsService;
-        private readonly BucketsService bucketsService;
 
         public ItemsSyncHelper(
             ItemsService itemsService,
             ProjectsService projectsService,
             ObjectsService objectsService,
-            VersionsService versionsService,
-            BucketsService bucketsService)
+            VersionsService versionsService)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
             this.objectsService = objectsService;
             this.versionsService = versionsService;
-            this.bucketsService = bucketsService;
         }
 
         internal async Task<(Item item, Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)

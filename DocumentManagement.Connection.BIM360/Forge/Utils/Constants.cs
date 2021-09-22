@@ -10,7 +10,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string OBJECT_TYPE = "objects";
         public static readonly string ISSUE_TYPE = "quality_issues";
         public static readonly string ATTACHMENT_TYPE = "attachments";
-        public static readonly string ATTACHMENT_URN_TYPE = "oss";
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
 

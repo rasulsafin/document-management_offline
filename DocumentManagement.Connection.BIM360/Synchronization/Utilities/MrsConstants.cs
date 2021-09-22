@@ -8,7 +8,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         public static readonly string TYPE_FIELD_NAME = "Type";
         public static readonly string ROOT_CAUSE_FIELD_NAME = "Root Cause";
         public static readonly string ASSIGN_TO_FIELD_NAME = "Assign To";
-        public static readonly string PHOTO_BUCKET_KEY = "brio_mrs.media_bucket";
         public static readonly string CONFIG_EXTENSION = ".mrsbc";
     }
 }

@@ -17,7 +17,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             DataScope.Read, DataScope.Write, DataScope.Create, AccountScope.Read,
         };
 
-        private static readonly Enum[] APP_SCOPES = { AccountScope.Read, BucketScope.Create, BucketScope.Read };
+        private static readonly Enum[] APP_SCOPES = { AccountScope.Read };
 
         private readonly ForgeConnection connection;
 

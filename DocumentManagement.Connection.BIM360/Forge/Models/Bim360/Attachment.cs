@@ -1,6 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using System;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
 {
