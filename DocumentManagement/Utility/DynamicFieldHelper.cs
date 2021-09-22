@@ -49,7 +49,7 @@ namespace MRS.DocumentManagement.Utility
             return mapper.Map<DynamicFieldDto>(dynamicField);
         }
 
-        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int parentID = -1)
+        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int? connectionInfoID, int parentID = -1)
         {
             logger.LogTrace(
                 "AddDynamicFields started with field: {@DynamicField}, objectiveID: {ObjectiveID}, parentID: {ParentID}",
@@ -64,6 +64,8 @@ namespace MRS.DocumentManagement.Utility
             else
                 dynamicField.ObjectiveID = objectiveID;
 
+            dynamicField.ConnectionInfoID = connectionInfoID;
+
             await context.DynamicFields.AddAsync(dynamicField);
             await context.SaveChangesAsync();
 
@@ -73,7 +75,7 @@ namespace MRS.DocumentManagement.Utility
 
                 foreach (var childField in children)
                 {
-                    await AddDynamicFields(childField, objectiveID, dynamicField.ID);
+                    await AddDynamicFields(childField, objectiveID, connectionInfoID, dynamicField.ID);
                 }
             }
         }
@@ -87,23 +89,17 @@ namespace MRS.DocumentManagement.Utility
                 parentID);
             var dbField = await context.DynamicFields.FindAsync((int)field.ID);
             logger.LogDebug("Found dynamic field: {@DynamicField}", dbField);
-            if (dbField == null)
-            {
-                await AddDynamicFields(field, objectiveID, parentID);
-            }
-            else
-            {
-                dbField.Name = field.Name;
-                dbField.Value = GetValue(field);
 
-                if (field.Type == DynamicFieldType.OBJECT)
+            dbField.Name = field.Name;
+            dbField.Value = GetValue(field);
+
+            if (field.Type == DynamicFieldType.OBJECT)
+            {
+                var children = (field.Value as JArray).ToObject<ICollection<DynamicFieldDto>>();
+
+                foreach (var child in children)
                 {
-                    var children = (field.Value as JArray).ToObject<ICollection<DynamicFieldDto>>();
-
-                    foreach (var child in children)
-                    {
-                        await UpdateDynamicField(child, objectiveID, dbField.ID);
-                    }
+                    await UpdateDynamicField(child, objectiveID, dbField.ID);
                 }
             }
         }
