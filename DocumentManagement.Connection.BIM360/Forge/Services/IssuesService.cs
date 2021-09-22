@@ -106,5 +106,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 containerID);
             return response[DATA_PROPERTY]?.ToObject<UserInfo>();
         }
+
+        public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetIssuesCommentsMethod,
+                containerID,
+                issueID);
+            return response[DATA_PROPERTY]?.ToObject<List<Comment>>();
+        }
     }
 }

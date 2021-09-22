@@ -151,6 +151,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/comments.
+        /// </summary>
+        internal static string GetIssuesCommentsMethod {
+            get {
+                return ResourceManager.GetString("GetIssuesCommentsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues.
         /// </summary>
         internal static string GetIssuesMethod {
@@ -300,6 +309,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string GetTopFoldersMethod {
             get {
                 return ResourceManager.GetString("GetTopFoldersMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/accounts/{0}/users/{1}.
+        /// </summary>
+        internal static string GetUserMethodEmea {
+            get {
+                return ResourceManager.GetString("GetUserMethodEmea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/regions/eu/accounts/{0}/users/{1}.
+        /// </summary>
+        internal static string GetUserMethodUS {
+            get {
+                return ResourceManager.GetString("GetUserMethodUS", resourceCulture);
             }
         }
         

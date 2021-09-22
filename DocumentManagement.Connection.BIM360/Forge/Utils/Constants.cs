@@ -13,6 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ATTACHMENT_URN_TYPE = "dm";
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
+        public static readonly string COMMENT_TYPE = "comments";
 
         public static readonly string DOCUMENT_MANAGEMENT_SERVICE_NAME = "documentManagement";
         public static readonly string SERVICE_NONE_ACCESS = "none";

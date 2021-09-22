@@ -17,6 +17,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
+        private readonly AccountAdminService accountAdminService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
@@ -27,6 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
+            AccountAdminService accountAdminService,
             IssuesService issuesService,
             FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
@@ -36,6 +38,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
+            this.accountAdminService = accountAdminService;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
             this.subtypeEnumCreator = subtypeEnumCreator;
@@ -119,6 +122,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
+                    // Items
                     issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
                     var attachments = await issuesService.GetAttachmentsAsync(
                         project.IssueContainer,
@@ -130,6 +134,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                         issueSnapshot.Items.Add(
                             attachment.ID,
                             project.Items[attachment.Attributes.Urn]);
+                    }
+
+                    // Comments
+                    issueSnapshot.Comments = new List<CommentSnapshot>();
+                    if (issueSnapshot.Entity.Attributes.CommentCount > 0)
+                    {
+                        var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID);
+                        foreach (var comment in comments)
+                        {
+                            var author = (await accountAdminService.GetAccountUsersAsync(project.HubSnapshot.Entity)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
+                            issueSnapshot.Comments.Add(
+                                new CommentSnapshot(comment)
+                                {
+                                    Author = author == null ? "Unauthorized name" : author.Name,
+                                });
+                        }
                     }
                 }
             }
