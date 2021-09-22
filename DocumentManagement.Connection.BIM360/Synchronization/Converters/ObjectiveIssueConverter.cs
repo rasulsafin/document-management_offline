@@ -1,3 +1,14 @@
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Synchronization.Models;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connection.Bim360.Utilities;
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,21 +16,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Brio.Docs.Connection.Bim360.Synchronization.Extensions;
+using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
+namespace Brio.Docs.Connection.Bim360.Synchronization.Converters
 {
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
@@ -274,7 +274,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             ProjectSnapshot project,
             ItemSnapshot itemSnapshot)
         {
-            async Task<Version> GetVersion(string itemID, long size)
+            async Task<Forge.Models.DataManagement.Version> GetVersion(string itemID, long size)
             {
                 if (itemID == null)
                     return null;
@@ -290,7 +290,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 Item item = itemSnapshot.Entity;
                 var info = obj.Location == null ? null : new FileInfo(obj.Location.Item.FullPath);
                 var size = (info?.Exists ?? false) ? info.Length : 0;
-                Version version = size == 0 || itemSnapshot.Version.Attributes.StorageSize == size
+                Forge.Models.DataManagement.Version version = size == 0 || itemSnapshot.Version.Attributes.StorageSize == size
                     ? itemSnapshot.Version
                     : await GetVersion(item?.ID, size);
                 return (item?.ID, version?.Attributes.VersionNumber);

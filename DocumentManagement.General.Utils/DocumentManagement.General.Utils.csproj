@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
-        <RootNamespace> MRS.DocumentManagement.General.Utils</RootNamespace>
+        <RootNamespace> Brio.Docs.General.Utils</RootNamespace>
         <Version>1.0.4</Version>
     </PropertyGroup>
 

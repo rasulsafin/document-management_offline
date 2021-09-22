@@ -1,19 +1,19 @@
 ﻿using System;
 using CommandLine;
 
-namespace MRS.DocumentManagement.Launcher
+namespace Brio.Docs.Launcher
 {
     internal class Program
     {
         [STAThread]
         public static void Main(string[] args)
         {
-            var mutName = "MRS.DocumentManagement.Launcher";
+            var mutName = "Brio.Docs.Launcher";
             using var mutex = new System.Threading.Mutex(true, mutName, out bool createdNew);
             if (!createdNew)
                 Environment.Exit(0);
 
-            using var app = new MRS.DocumentManagement.Launcher.App();
+            using var app = new App();
             var options = new AppOptions();
 
             new Parser(with => with.EnableDashDash = true)

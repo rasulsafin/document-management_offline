@@ -1,7 +1,7 @@
 using System;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connection.Bim360.Forge.Utils
 {
     internal class AppTokenHelper : ATokenHelper
     {

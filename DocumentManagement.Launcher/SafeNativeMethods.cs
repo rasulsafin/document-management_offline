@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace MRS.DocumentManagement.Launcher
+namespace Brio.Docs.Launcher
 {
     internal static class SafeNativeMethods
     {

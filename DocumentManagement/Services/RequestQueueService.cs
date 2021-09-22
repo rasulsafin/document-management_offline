@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Brio.Docs.Interface;
+using Brio.Docs.Interface.Services;
+using Brio.Docs.Utility;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Utility.Extensions;
+using Brio.Docs.Utility.Extensions;
 
-namespace MRS.DocumentManagement.Services
+namespace Brio.Docs.Services
 {
     public class RequestQueueService : IRequestQueueService, IRequestService
     {

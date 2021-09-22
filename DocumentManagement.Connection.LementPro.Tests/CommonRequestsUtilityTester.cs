@@ -1,12 +1,12 @@
+using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Utilities;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests
+namespace Brio.Docs.Connection.LementPro.Tests
 {
     [SuppressMessage("ReSharper", "ContextualLoggerProblem", Justification = "Only for test")]
     internal class CommonRequestsUtilityTester : CommonRequestsUtility

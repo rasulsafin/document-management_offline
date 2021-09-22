@@ -1,13 +1,13 @@
+using Brio.Docs.Connection.Utils.CloudBase;
+using Brio.Docs.Connection.YandexDisk.Synchronization;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils.CloudBase;
-using MRS.DocumentManagement.Connection.YandexDisk.Synchronization;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace Brio.Docs.Connection.YandexDisk
 {
     public class YandexConnection : IConnection
     {

@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Tdms.Mappers;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Connection.Tdms.Mappers;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms
+namespace Brio.Docs.Connection.Tdms
 {
     public class TdmsConnectionContext : AConnectionContext
     {

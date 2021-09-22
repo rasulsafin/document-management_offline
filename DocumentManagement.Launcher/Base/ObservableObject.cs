@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace MRS.DocumentManagement.Launcher.Base
+namespace Brio.Docs.Launcher.Base
 {
     public class ObservableObject : INotifyPropertyChanged
     {

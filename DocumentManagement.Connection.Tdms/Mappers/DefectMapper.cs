@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Mappers
+namespace Brio.Docs.Connection.Tdms.Mappers
 {
     public class DefectMapper : IModelMapper<ObjectiveExternalDto, TDMSObject>
     {

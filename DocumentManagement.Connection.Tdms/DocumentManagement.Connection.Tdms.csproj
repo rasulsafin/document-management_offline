@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Connection.Tdms</RootNamespace>
+    <RootNamespace>Brio.Docs.Connection.Tdms</RootNamespace>
     <OutputType>Library</OutputType>
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>

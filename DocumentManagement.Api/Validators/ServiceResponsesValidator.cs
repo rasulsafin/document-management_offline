@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace MRS.DocumentManagement.Api.Validators
+namespace Brio.Docs.Api.Validators
 {
     internal static class ServiceResponsesValidator
     {

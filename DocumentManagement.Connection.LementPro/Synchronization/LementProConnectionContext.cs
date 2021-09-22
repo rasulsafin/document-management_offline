@@ -1,8 +1,8 @@
-﻿using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
+namespace Brio.Docs.Connection.LementPro.Synchronization
 {
     // TODO: capture remote state and work with it.
     public class LementProConnectionContext : AConnectionContext

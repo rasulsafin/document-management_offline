@@ -1,8 +1,8 @@
+using Brio.Docs.Interface.Dtos;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models
+namespace Brio.Docs.Connection.Bim360.Synchronization.Models
 {
     [DataContract]
     internal class OtherInfo

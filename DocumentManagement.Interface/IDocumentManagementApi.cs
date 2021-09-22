@@ -1,7 +1,7 @@
-﻿using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Interface.Dtos;
+using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     /// <summary>
     /// Entry point to DocumentManagement API

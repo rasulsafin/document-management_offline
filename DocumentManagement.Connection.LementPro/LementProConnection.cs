@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Connection.LementPro.Services;
+using Brio.Docs.Connection.LementPro.Synchronization;
+using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils.Extensions;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using Brio.Docs.Connection.Utils.Extensions;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     public class LementProConnection : IConnection
     {

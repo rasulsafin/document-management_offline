@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Tests.Utility;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Tests.Utility;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     internal class SynchronizerTestsHelper
     {

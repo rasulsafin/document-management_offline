@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Brio.Docs.Interface;
+using System;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Converters
+namespace Brio.Docs.Connection.MrsPro.Converters
 {
     internal class ExternalIdTypeIdConverter : IConverter<string, (string id, string type)>
     {

@@ -1,6 +1,6 @@
 using System.Linq;
 
-namespace MRS.DocumentManagement.Database.Extensions
+namespace Brio.Docs.Database.Extensions
 {
     public static class DBExtensions
     {

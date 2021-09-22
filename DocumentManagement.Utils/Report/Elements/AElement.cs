@@ -1,8 +1,8 @@
-﻿using System.Xml.Linq;
+﻿using Brio.Docs.Utils.ReportCreator.Attributes;
+using System.Xml.Linq;
 using DocumentFormat.OpenXml;
-using MRS.DocumentManagement.Utils.ReportCreator.Attributes;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Elements
+namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal abstract class AElement : IElement
     {

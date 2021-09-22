@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Tests
+namespace Brio.Docs.Connection.Tdms.Tests
 {
     [TestClass]
     public class InitClass

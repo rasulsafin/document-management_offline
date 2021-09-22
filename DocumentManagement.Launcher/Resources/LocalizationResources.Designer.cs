@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace MRS.DocumentManagement.Launcher.Resources {
+namespace Brio.Docs.Launcher.Resources {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Launcher.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("MRS.DocumentManagement.Launcher.Resources.LocalizationResources", typeof(LocalizationResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Brio.Docs.Launcher.Resources.LocalizationResources", typeof(LocalizationResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

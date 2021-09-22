@@ -1,10 +1,10 @@
+using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Models;
 using System;
 using System.Reflection;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronization.Interfaces;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Extensions
+namespace Brio.Docs.Synchronization.Extensions
 {
     internal static class SynchronizingExtensions
     {

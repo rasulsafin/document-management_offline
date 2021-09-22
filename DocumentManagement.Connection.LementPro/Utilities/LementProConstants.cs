@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Globalization;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     /// <summary>
     /// Contains constants to use in LementProConnection.

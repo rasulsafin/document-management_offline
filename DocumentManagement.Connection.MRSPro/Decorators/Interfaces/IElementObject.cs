@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Interfaces
+namespace Brio.Docs.Connection.MrsPro.Interfaces
 {
     /// <summary>
     /// MrsPro.Element that can be a DM.ObjectiveExternalDto.

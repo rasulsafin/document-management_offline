@@ -1,7 +1,7 @@
+using Brio.Docs.Connection.MrsPro.Interfaces;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Models
+namespace Brio.Docs.Connection.MrsPro.Models
 {
     [DataContract]
     public class Plan : IElementAttachment

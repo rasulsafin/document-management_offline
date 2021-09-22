@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.Tdms
+﻿namespace Brio.Docs.Connection.Tdms
 {
     public static class StatusID
     {

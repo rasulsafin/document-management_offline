@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Launcher.Base;
+using Brio.Docs.Launcher.Resources;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
-using MRS.DocumentManagement.Launcher.Base;
-using MRS.DocumentManagement.Launcher.Resources;
 
-namespace MRS.DocumentManagement.Launcher
+namespace Brio.Docs.Launcher
 {
     public class NotifyIconViewModel : ObservableObject, IDisposable
     {

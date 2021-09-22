@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class CryptographyHelper
     {

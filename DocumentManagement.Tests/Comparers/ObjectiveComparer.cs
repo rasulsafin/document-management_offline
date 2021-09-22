@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     internal class ObjectiveComparer : AbstractModelComparer<ObjectiveDto>
     {

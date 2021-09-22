@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
+namespace Brio.Docs.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Item : Object<Item.ItemAttributes, Item.ItemRelationships>

@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace MRS.DocumentManagement.Api.Validators
+namespace Brio.Docs.Api.Validators
 {
     public class AuthOptions
     {

@@ -1,10 +1,10 @@
 ﻿using System;
-using MRS.DocumentManagement.Connection.LementPro;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization.Factories;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.General.Utils.Factories;
+using Brio.Docs.Connection.LementPro;
+using Brio.Docs.Connection.LementPro.Services;
+using Brio.Docs.Connection.LementPro.Synchronization;
+using Brio.Docs.Connection.LementPro.Synchronization.Factories;
+using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.General.Utils.Factories;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

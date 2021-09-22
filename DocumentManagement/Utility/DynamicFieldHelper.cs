@@ -2,13 +2,13 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class DynamicFieldHelper
     {

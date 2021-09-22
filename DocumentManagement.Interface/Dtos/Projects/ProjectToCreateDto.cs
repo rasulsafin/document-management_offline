@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace MRS.DocumentManagement.Interface.Dtos
+namespace Brio.Docs.Interface.Dtos
 {
     public struct ProjectToCreateDto
     {

@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Synchronization.Models
+namespace Brio.Docs.Synchronization.Models
 {
     internal enum EntityType
     {

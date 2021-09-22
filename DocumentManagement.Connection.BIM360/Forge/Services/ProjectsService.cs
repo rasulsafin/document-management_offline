@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Properties;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
+using static Brio.Docs.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connection.Bim360.Forge.Services
 {
     public class ProjectsService
     {

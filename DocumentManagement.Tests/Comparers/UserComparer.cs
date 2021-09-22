@@ -1,6 +1,6 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     internal class UserComparer : AbstractModelComparer<UserDto>
     {

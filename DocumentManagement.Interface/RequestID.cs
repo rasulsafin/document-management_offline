@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Interface
+﻿namespace Brio.Docs.Interface
 {
     public struct RequestID
     {

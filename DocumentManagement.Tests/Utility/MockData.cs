@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Tests.Utility
+namespace Brio.Docs.Tests.Utility
 {
     /// <summary>
     /// TODO: Test enums.

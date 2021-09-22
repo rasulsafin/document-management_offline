@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.MrsPro
+﻿namespace Brio.Docs.Connection.MrsPro
 {
     internal static class Constants
     {

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using Brio.Docs.Utility;
+using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Utility;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     [TestClass]
     public class CryptographyHelperTests

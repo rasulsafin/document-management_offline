@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.Utils
+namespace Brio.Docs.Connection.Utils
 {
     public class HttpConnection : IDisposable
     {

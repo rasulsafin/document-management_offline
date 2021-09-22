@@ -1,9 +1,9 @@
+using Brio.Docs.Database;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Database;
 
-namespace MRS.DocumentManagement.Synchronization.Utils
+namespace Brio.Docs.Synchronization.Utils
 {
     internal static class SynchronizationFinalizer
     {

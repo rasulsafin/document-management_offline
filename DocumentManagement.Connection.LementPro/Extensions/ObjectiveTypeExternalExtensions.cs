@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     internal static class ObjectiveTypeExternalExtensions
     {

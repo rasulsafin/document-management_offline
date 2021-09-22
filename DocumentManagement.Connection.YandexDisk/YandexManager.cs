@@ -1,17 +1,17 @@
 ﻿#define TEST
 
+using Brio.Docs.Connection.Utils;
+using Brio.Docs.Connection.YandexDisk;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection
+namespace Brio.Docs.Connection
 {
     public class YandexManager : ICloudManager
     {

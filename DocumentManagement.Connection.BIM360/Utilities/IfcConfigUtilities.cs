@@ -1,14 +1,14 @@
+using Brio.Docs.Connection.Bim360.Synchronization.Models;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+namespace Brio.Docs.Connection.Bim360.Utilities
 {
     internal class IfcConfigUtilities
     {

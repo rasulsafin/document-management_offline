@@ -1,8 +1,8 @@
+using Brio.Docs.Connection.LementPro.Models;
 using Destructurama;
-using MRS.DocumentManagement.Connection.LementPro.Models;
 using Serilog;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     public static class LPLoggerExtensions
     {

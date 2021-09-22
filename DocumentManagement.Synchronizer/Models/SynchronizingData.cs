@@ -1,8 +1,8 @@
+using Brio.Docs.Database.Models;
 using System;
 using System.Linq.Expressions;
-using MRS.DocumentManagement.Database.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Models
+namespace Brio.Docs.Synchronization.Models
 {
     public class SynchronizingData
     {

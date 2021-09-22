@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Database.Models
+namespace Brio.Docs.Database.Models
 {
     public class ReportCount
     {

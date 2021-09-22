@@ -1,9 +1,9 @@
+using Brio.Docs.Synchronization.Models;
 using System;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Extensions
+namespace Brio.Docs.Synchronization.Extensions
 {
     internal static class LoggerExtensions
     {

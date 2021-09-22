@@ -1,15 +1,15 @@
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Connection.Bim360.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
+namespace Brio.Docs.Connection.Bim360.Synchronization.Converters
 {
     internal class IssueObjectiveConverter : IConverter<Issue, ObjectiveExternalDto>
     {

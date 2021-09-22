@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.Utils
+namespace Brio.Docs.Connection.Utils
 {
     /// <summary>
     /// Manager to handle work with cloud storages like DMs.

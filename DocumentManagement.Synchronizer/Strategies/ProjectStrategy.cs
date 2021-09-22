@@ -5,19 +5,19 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Synchronization.Models;
+using Brio.Docs.Synchronization.Utils.Linkers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.General.Utils.Extensions;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronization.Extensions;
-using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Synchronization.Utils.Linkers;
+using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Synchronization.Strategies
+namespace Brio.Docs.Synchronization.Strategies
 {
     internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
     {

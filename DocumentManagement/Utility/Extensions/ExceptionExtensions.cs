@@ -1,6 +1,6 @@
 using System;
 
-namespace MRS.DocumentManagement.Utility.Extensions
+namespace Brio.Docs.Utility.Extensions
 {
     public static class ExceptionExtensions
     {

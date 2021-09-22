@@ -1,3 +1,8 @@
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,17 +11,12 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
+using static Brio.Docs.Connection.Bim360.Forge.Constants;
+using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Tests
+namespace Brio.Docs.Connection.Bim360.Tests
 {
     [TestClass]
     public class LoadTests
@@ -147,9 +147,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-            var version = new Version
+            var version = new Forge.Models.DataManagement.Version
             {
-                Attributes = new Version.VersionAttributes
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
                     Name = testFileName,
                     Extension = new Extension
@@ -157,7 +157,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                         Type = AUTODESK_VERSION_FILE_TYPE,
                     },
                 },
-                Relationships = new Version.VersionRelationships
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Storage = storage.ToInfo().ToDataContainer(),
                 },
@@ -186,14 +186,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Assert.Fail("Adding item failed");
 
             // Delete uploaded item by marking version as "deleted"
-            var deletedVersion = new Version
+            var deletedVersion = new Forge.Models.DataManagement.Version
             {
-                Attributes = new Version.VersionAttributes
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
                     Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
-                Relationships = new Version.VersionRelationships
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Item = addedItem.item.ToInfo().ToDataContainer(),
                 },
@@ -318,9 +318,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(bucketKey, hashedName, TEST_FILE_PATH);
 
             // STEP 7. Create first version
-            var version = new Version
+            var version = new Forge.Models.DataManagement.Version
             {
-                Attributes = new Version.VersionAttributes
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
                     Name = testFileName,
                     Extension = new Extension
@@ -328,7 +328,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                         Type = AUTODESK_VERSION_FILE_TYPE,
                     },
                 },
-                Relationships = new Version.VersionRelationships
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Storage = firstStorage.ToInfo().ToDataContainer(),
                 },
@@ -373,14 +373,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             await objectsService.PutObjectAsync(secondStorageBucketKey, secondStorageHashedName, TEST_FILE_PATH);
 
             // STEP 8: Update version
-            var updatedVersion = new Version
+            var updatedVersion = new Forge.Models.DataManagement.Version
             {
-                Attributes = new Version.VersionAttributes
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
                     Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_FILE_TYPE },
                 },
-                Relationships = new Version.VersionRelationships
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Item = addedItem.item.ToInfo().ToDataContainer(),
                     Storage = secondStorage.ToInfo().ToDataContainer(),
@@ -392,14 +392,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
                 Assert.Fail("Updating item failed");
 
             // Delete uploaded item by marking version as "deleted"
-            var deletedVersion = new Version
+            var deletedVersion = new Forge.Models.DataManagement.Version
             {
-                Attributes = new Version.VersionAttributes
+                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                 {
                     Name = testFileName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
-                Relationships = new Version.VersionRelationships
+                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                 {
                     Item = addedItem.item.ToInfo().ToDataContainer(),
                 },

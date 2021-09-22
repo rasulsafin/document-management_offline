@@ -6,7 +6,7 @@
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Connection</Product>
     <Version>1.0.4</Version>
-    <RootNamespace>MRS.DocumentManagement.Connection.MrsPro</RootNamespace>
+    <RootNamespace>Brio.Docs.Connection.MrsPro</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

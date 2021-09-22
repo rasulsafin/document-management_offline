@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Utils;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer;
+using Brio.Docs.Connection.Utils;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Synchronizer;
 
 namespace DocumentManagement.Connection.Tests
 {

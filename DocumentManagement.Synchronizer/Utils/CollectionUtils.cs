@@ -1,11 +1,11 @@
+using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronization.Extensions;
-using MRS.DocumentManagement.Synchronization.Models;
+using Brio.Docs.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Synchronization.Utils
+namespace Brio.Docs.Synchronization.Utils
 {
     internal static class CollectionUtils
     {

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Brio.Docs.Database;
+using System;
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Database;
 
-namespace MRS.DocumentManagement.Tests.Utility
+namespace Brio.Docs.Tests.Utility
 {
     public class SharedDatabaseFixture : IDisposable
     {

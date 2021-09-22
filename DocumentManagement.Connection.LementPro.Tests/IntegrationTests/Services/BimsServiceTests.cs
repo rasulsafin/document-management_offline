@@ -1,14 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Connection.LementPro.Services;
+using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Services
+namespace Brio.Docs.Connection.LementPro.Tests.IntegrationTests.Services
 {
     [TestClass]
     public class BimsServiceTests

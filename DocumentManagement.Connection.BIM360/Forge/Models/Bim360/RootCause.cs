@@ -1,7 +1,7 @@
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connection.Bim360.Forge.Models
 {
     [DataContract]
     public class RootCause : Object<RootCause.RootCauseAttributes, object>

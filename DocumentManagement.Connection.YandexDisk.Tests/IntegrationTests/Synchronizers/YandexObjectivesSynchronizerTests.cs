@@ -1,13 +1,13 @@
+using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
+namespace Brio.Docs.Connection.YandexDisk.Tests.IntegrationTests.Synchronizers
 {
     [TestClass]
     public class YandexObjectivesSynchronizerTests

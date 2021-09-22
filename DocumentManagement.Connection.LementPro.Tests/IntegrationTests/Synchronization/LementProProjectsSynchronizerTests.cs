@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,10 +9,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests.IntegrationTests.Synchronization
+namespace Brio.Docs.Connection.LementPro.Tests.IntegrationTests.Synchronization
 {
     [TestClass]
     public class LementProProjectsSynchronizerTests

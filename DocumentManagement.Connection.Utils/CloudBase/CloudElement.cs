@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection.Utils
+namespace Brio.Docs.Connection.Utils
 {
     public class CloudElement
     {

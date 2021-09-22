@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.Utils;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.Utils;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     internal static class ObjectiveExternalExtensions
     {

@@ -3,7 +3,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace Brio.Docs.Connection.YandexDisk
 {
     public class YandexDiskAuth
     {

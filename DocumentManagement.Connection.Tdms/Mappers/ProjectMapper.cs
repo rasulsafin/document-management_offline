@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Interface.Dtos;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Mappers
+namespace Brio.Docs.Connection.Tdms.Mappers
 {
     internal class ProjectMapper : IModelMapper<ProjectExternalDto, TDMSObject>
     {

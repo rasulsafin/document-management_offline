@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace MRS.DocumentManagement.Launcher
+namespace Brio.Docs.Launcher
 {
     public class AppOptions
     {

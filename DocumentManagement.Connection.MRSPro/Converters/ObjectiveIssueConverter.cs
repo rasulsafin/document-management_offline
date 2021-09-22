@@ -1,11 +1,11 @@
-﻿using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.MrsPro.Extensions;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+﻿using Brio.Docs.Connection.MrsPro.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System.Threading.Tasks;
+using Brio.Docs.Connection.MrsPro.Extensions;
+using static Brio.Docs.Connection.MrsPro.Constants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Converters
+namespace Brio.Docs.Connection.MrsPro.Converters
 {
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {

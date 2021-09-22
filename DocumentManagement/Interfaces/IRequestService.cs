@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Interface.Services
+namespace Brio.Docs.Interface.Services
 {
     /// <summary>
     /// Service for managing long tasks on server side.

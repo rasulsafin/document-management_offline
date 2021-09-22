@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.General.Utils.Factories
+namespace Brio.Docs.General.Utils.Factories
 {
     /// <summary>
     /// A factory for creating instances of T.

@@ -1,7 +1,7 @@
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronization.Interfaces;
+using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Interfaces;
 
-namespace MRS.DocumentManagement.Synchronization.Models
+namespace Brio.Docs.Synchronization.Models
 {
     internal class SynchronizingTuple<T> : ISynchronizationChanges
     {

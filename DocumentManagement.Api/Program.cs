@@ -4,10 +4,10 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
-using MRS.DocumentManagement.Api.Extensions;
+using Brio.Docs.Api.Extensions;
 using Serilog;
 
-namespace MRS.DocumentManagement.Api
+namespace Brio.Docs.Api
 {
     public class Program
     {

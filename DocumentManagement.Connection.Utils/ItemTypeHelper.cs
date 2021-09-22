@@ -1,10 +1,10 @@
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Utils
+namespace Brio.Docs.Connection.Utils
 {
     public static class ItemTypeHelper
     {

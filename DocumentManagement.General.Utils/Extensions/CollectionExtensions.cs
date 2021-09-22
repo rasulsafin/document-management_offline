@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.General.Utils.Extensions
+namespace Brio.Docs.General.Utils.Extensions
 {
     public static class CollectionExtensions
     {

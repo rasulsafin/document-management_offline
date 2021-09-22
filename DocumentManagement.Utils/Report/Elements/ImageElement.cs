@@ -11,7 +11,7 @@ using Picture = DocumentFormat.OpenXml.Drawing.Pictures.Picture;
 using Pictures = DocumentFormat.OpenXml.Drawing.Pictures;
 using Wordprocessing = DocumentFormat.OpenXml.Wordprocessing;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Elements
+namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class ImageElement : AElement
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection
+namespace Brio.Docs.Connection
 {
     public class TimeoutException : Exception
     {

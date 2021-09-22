@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Database.Models
+namespace Brio.Docs.Database.Models
 {
     public class Objective : ISynchronizable<Objective>
     {
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int ID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int ProjectID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public Project Project { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int? ParentObjectiveID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public Objective ParentObjective { get; set; }
 
         public int? AuthorID { get; set; }
@@ -40,34 +40,34 @@ namespace MRS.DocumentManagement.Database.Models
 
         public Location Location { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ObjectiveType ObjectiveType { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<Objective> ChildrenObjectives { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<DynamicField> DynamicFields { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<ObjectiveItem> Items { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<BimElementObjective> BimElements { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public string ExternalID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public DateTime UpdatedAt { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public bool IsSynchronized { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int? SynchronizationMateID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public Objective SynchronizationMate { get; set; }
     }
 }

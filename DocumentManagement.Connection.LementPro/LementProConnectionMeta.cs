@@ -1,10 +1,10 @@
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro
+namespace Brio.Docs.Connection.LementPro
 {
     public class LementProConnectionMeta : IConnectionMeta
     {

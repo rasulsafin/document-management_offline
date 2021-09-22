@@ -1,13 +1,13 @@
+using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Connection.Utils.Extensions;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using Brio.Docs.Connection.Utils.Extensions;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Services
+namespace Brio.Docs.Connection.LementPro.Services
 {
     public class AuthenticationService
     {

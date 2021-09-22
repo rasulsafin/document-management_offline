@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using Microsoft.Extensions.DependencyInjection;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization
+namespace Brio.Docs.Connection.Bim360.Synchronization
 {
     public class Bim360ConnectionContext : AConnectionContext, IDisposable
     {

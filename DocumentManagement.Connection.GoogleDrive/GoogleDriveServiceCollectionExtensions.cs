@@ -1,4 +1,4 @@
-﻿using MRS.DocumentManagement.Connection.GoogleDrive;
+﻿using Brio.Docs.Connection.GoogleDrive;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

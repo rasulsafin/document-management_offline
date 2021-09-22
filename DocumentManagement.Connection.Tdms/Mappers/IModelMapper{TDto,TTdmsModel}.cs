@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.Tdms.Mappers
+﻿namespace Brio.Docs.Connection.Tdms.Mappers
 {
     /// <summary>
     /// Interface for object mapping.

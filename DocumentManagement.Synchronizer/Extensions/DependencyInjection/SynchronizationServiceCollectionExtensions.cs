@@ -1,10 +1,10 @@
 using System;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronization;
-using MRS.DocumentManagement.Synchronization.Interfaces;
-using MRS.DocumentManagement.Synchronization.Strategies;
-using MRS.DocumentManagement.Synchronization.Utils.Linkers;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Synchronization;
+using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Strategies;
+using Brio.Docs.Synchronization.Utils.Linkers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

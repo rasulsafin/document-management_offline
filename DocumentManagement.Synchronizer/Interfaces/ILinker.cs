@@ -1,8 +1,8 @@
+using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Models;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Interfaces
+namespace Brio.Docs.Synchronization.Interfaces
 {
     /// <summary>
     /// Represents methods to bind to a parent object.

@@ -1,6 +1,6 @@
 using System;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connection.Bim360.Forge.Utils
 {
     public class TokenHelper : ATokenHelper
     {

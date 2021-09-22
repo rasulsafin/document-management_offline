@@ -4,21 +4,21 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Synchronization;
+using Brio.Docs.Synchronization.Models;
+using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Database.Extensions;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronization;
-using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility.Mapping;
+using Brio.Docs.Database.Extensions;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     [TestClass]
     public class SynchronizerObjectiveTests

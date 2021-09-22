@@ -1,6 +1,6 @@
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

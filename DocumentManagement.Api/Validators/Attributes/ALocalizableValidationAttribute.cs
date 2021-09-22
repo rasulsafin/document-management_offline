@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Localization;
 
-namespace MRS.DocumentManagement.Api.Validators
+namespace Brio.Docs.Api.Validators
 {
     /// <summary>
     /// Base class for custom validation attributes with error message localization support.

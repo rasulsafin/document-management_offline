@@ -1,8 +1,8 @@
+using Brio.Docs.Interface.Dtos;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     /// <summary>
     /// Interface for any type of connection.

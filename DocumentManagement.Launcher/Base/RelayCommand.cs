@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Windows.Input;
 
-namespace MRS.DocumentManagement.Launcher.Base
+namespace Brio.Docs.Launcher.Base
 {
     public class RelayCommand : ICommand
     {

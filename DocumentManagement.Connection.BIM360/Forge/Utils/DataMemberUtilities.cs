@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connection.Bim360.Forge.Utils
 {
     public static class DataMemberUtilities
     {

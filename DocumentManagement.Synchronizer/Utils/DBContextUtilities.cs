@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 
-namespace MRS.DocumentManagement.Synchronization.Utils
+namespace Brio.Docs.Synchronization.Utils
 {
     public static class DBContextUtilities
     {

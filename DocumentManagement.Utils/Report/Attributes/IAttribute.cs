@@ -1,6 +1,6 @@
 ﻿using DocumentFormat.OpenXml;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Attributes
+namespace Brio.Docs.Utils.ReportCreator.Attributes
 {
     internal interface IAttribute
     {

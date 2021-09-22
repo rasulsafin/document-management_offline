@@ -1,6 +1,6 @@
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     /// <summary>
     /// Context of the working with external connection.

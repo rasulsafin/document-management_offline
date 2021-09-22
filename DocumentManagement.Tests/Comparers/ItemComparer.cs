@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using MRS.DocumentManagement.Database.Models;
+﻿using Brio.Docs.Database.Models;
+using System.Diagnostics.CodeAnalysis;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     internal class ItemComparer : AbstractModelComparer<Item>
     {

@@ -5,18 +5,18 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Interface;
+using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Models;
+using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.General.Utils.Extensions;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Synchronization.Extensions;
-using MRS.DocumentManagement.Synchronization.Interfaces;
-using MRS.DocumentManagement.Synchronization.Models;
-using MRS.DocumentManagement.Synchronization.Utils;
+using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Synchronization.Strategies
+namespace Brio.Docs.Synchronization.Strategies
 {
     internal abstract class ASynchronizationStrategy<TDB, TDto> : ISynchronizationStrategy<TDB, TDto>
         where TDB : class, ISynchronizable<TDB>, new()

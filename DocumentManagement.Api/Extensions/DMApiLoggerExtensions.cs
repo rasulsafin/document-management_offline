@@ -1,7 +1,7 @@
-using MRS.DocumentManagement.Utility.Extensions;
+using Brio.Docs.Utility.Extensions;
 using Serilog;
 
-namespace MRS.DocumentManagement.Api.Extensions
+namespace Brio.Docs.Api.Extensions
 {
     public static class DMApiLoggerExtensions
     {

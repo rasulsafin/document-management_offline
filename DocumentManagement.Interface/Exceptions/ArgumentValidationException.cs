@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Interface.Exceptions
+namespace Brio.Docs.Interface.Exceptions
 {
     public class ArgumentValidationException : DocumentManagementException
     {

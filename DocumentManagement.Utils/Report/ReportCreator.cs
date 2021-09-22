@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Brio.Docs.Utils.ReportCreator.Elements;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
@@ -8,9 +9,8 @@ using System.Xml.Xsl;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using MRS.DocumentManagement.Utils.ReportCreator.Elements;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator
+namespace Brio.Docs.Utils.ReportCreator
 {
     public class ReportCreator
     {

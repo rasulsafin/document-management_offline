@@ -1,11 +1,11 @@
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Services;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+namespace Brio.Docs.Connection.Bim360.Utilities
 {
     internal class Downloader
     {

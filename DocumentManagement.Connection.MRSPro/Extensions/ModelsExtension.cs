@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Brio.Docs.Connection.MrsPro.Interfaces;
+using System;
 using System.Linq;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+using static Brio.Docs.Connection.MrsPro.Constants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Extensions
+namespace Brio.Docs.Connection.MrsPro.Extensions
 {
     internal static class ModelsExtension
     {

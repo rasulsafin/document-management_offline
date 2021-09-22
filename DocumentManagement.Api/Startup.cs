@@ -1,3 +1,5 @@
+using Brio.Docs.Api.Validators;
+using Brio.Docs.Utility.Mapping;
 using System;
 using System.Globalization;
 using System.IO;
@@ -12,11 +14,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using MRS.DocumentManagement.Api.Validators;
-using MRS.DocumentManagement.Utility.Mapping;
 using Serilog;
 
-namespace MRS.DocumentManagement.Api
+namespace Brio.Docs.Api
 {
     public class Startup
     {

@@ -1,8 +1,8 @@
+using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Models;
 using System;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Utils
+namespace Brio.Docs.Synchronization.Utils
 {
     internal class LinkingUtils
     {

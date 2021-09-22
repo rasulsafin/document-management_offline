@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Models
+namespace Brio.Docs.Connection.MrsPro.Models
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class CanBePatchedAttribute : Attribute

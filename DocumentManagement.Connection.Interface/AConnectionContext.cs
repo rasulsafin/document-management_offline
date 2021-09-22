@@ -1,9 +1,9 @@
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Threading;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection
+namespace Brio.Docs.Connection
 {
     public abstract class AConnectionContext : IConnectionContext
     {

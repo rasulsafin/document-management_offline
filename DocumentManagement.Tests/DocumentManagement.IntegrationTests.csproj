@@ -7,7 +7,7 @@
 
     <LangVersion>8</LangVersion>
 
-    <RootNamespace>MRS.DocumentManagement.Tests</RootNamespace>
+    <RootNamespace>Brio.Docs.Tests</RootNamespace>
 
     <Version>1.0.4</Version>
   </PropertyGroup>

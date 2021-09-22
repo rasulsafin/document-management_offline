@@ -1,3 +1,9 @@
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,15 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
+using static Brio.Docs.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Tests
+namespace Brio.Docs.Connection.Bim360.Tests
 {
     [TestClass]
     public class IssuesTests

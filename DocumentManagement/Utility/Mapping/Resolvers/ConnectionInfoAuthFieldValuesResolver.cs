@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using AutoMapper;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Utility.Mapping.Resolvers
+namespace Brio.Docs.Utility.Mapping.Resolvers
 {
     public class ConnectionInfoAuthFieldValuesResolver : IValueResolver<ConnectionInfo, IConnectionInfoDto, IDictionary<string, string>>
     {

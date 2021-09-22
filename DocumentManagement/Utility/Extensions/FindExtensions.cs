@@ -1,3 +1,4 @@
+using Brio.Docs.Interface.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,9 +6,8 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using MRS.DocumentManagement.Interface.Exceptions;
 
-namespace MRS.DocumentManagement.Utility.Extensions
+namespace Brio.Docs.Utility.Extensions
 {
     internal static class FindExtensions
     {

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Connection.LementPro</RootNamespace>
+    <RootNamespace>Brio.Docs.Connection.LementPro</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Connection</Product>

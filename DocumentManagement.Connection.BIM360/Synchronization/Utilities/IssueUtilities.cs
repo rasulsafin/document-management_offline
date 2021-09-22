@@ -1,12 +1,12 @@
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
+namespace Brio.Docs.Connection.Bim360.Synchronization.Utilities
 {
     internal static class IssueUtilities
     {

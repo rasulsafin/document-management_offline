@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms
+namespace Brio.Docs.Connection.Tdms
 {
     public class TdmsSynchronizer
     {

@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Mappers
+namespace Brio.Docs.Connection.Tdms.Mappers
 {
     internal class ObjectiveMapper
     {

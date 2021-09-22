@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MRS.DocumentManagement.Database
+namespace Brio.Docs.Database
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class ForbidMergeAttribute : Attribute

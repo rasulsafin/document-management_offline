@@ -1,9 +1,9 @@
-﻿using System;
-using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 
-namespace MRS.DocumentManagement.Connection.GoogleDrive.Synchronization
+namespace Brio.Docs.Connection.GoogleDrive.Synchronization
 {
     public class GoogleDriveConnectionContext : AConnectionContext
     {

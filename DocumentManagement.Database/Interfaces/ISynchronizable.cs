@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Database
+namespace Brio.Docs.Database
 {
     /// <summary>
     /// The interface that all synchronizable models must implement.

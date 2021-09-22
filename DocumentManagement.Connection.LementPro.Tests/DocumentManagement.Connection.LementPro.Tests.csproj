@@ -5,7 +5,7 @@
 
     <IsPackable>false</IsPackable>
 
-    <RootNamespace>MRS.DocumentManagement.Connection.LementPro.Tests</RootNamespace>
+    <RootNamespace>Brio.Docs.Connection.LementPro.Tests</RootNamespace>
 
     <Version>1.0.4</Version>
   </PropertyGroup>

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Synchronizer;
+using Brio.Docs.Synchronizer;
 
 namespace DocumentManagement.Connection.Tests
 {

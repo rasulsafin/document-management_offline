@@ -1,16 +1,16 @@
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Properties;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
+using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
 {
     internal class SnapshotFiller
     {
@@ -183,11 +183,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             }
         }
 
-        private async Task<IEnumerable<(Item item, Version version)>> GetAllItems(
+        private async Task<IEnumerable<(Item item, Forge.Models.DataManagement.Version version)>> GetAllItems(
             string projectID,
             IEnumerable<Folder> folders)
         {
-            var result = Enumerable.Empty<(Item, Version)>();
+            var result = Enumerable.Empty<(Item, Forge.Models.DataManagement.Version)>();
 
             foreach (var folder in folders)
             {

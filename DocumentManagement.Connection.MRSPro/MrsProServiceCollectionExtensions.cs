@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.MrsPro;
-using MRS.DocumentManagement.Connection.MrsPro.Converters;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Connection.MrsPro.Services;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs;
+using Brio.Docs.Connection.MrsPro;
+using Brio.Docs.Connection.MrsPro.Converters;
+using Brio.Docs.Connection.MrsPro.Interfaces;
+using Brio.Docs.Connection.MrsPro.Models;
+using Brio.Docs.Connection.MrsPro.Services;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

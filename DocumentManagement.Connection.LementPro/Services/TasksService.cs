@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Properties;
+using Brio.Docs.Connection.LementPro.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Properties;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Services
+namespace Brio.Docs.Connection.LementPro.Services
 {
     public class TasksService
     {

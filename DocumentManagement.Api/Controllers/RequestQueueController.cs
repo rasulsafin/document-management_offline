@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Services;
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using MRS.DocumentManagement.Interface.Services;
-using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
+using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 
-namespace MRS.DocumentManagement.Api.Controllers
+namespace Brio.Docs.Api.Controllers
 {
     /// <summary>
     /// Controller for managing long running jobs.

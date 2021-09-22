@@ -15,4 +15,4 @@ using Microsoft.Extensions.Localization;
 // The following GUID is for the ID of the typelib if this project is exposed to COM
 [assembly: Guid("0c2f4383-8f22-4760-bdd1-b8605908445d")]
 
-[assembly: RootNamespace("MRS.DocumentManagement.Api")]
+[assembly: RootNamespace("Brio.Docs.Api")]

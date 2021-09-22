@@ -1,7 +1,7 @@
 ﻿using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Attributes
+namespace Brio.Docs.Utils.ReportCreator.Attributes
 {
     internal class BoldAttribute : IAttribute
     {

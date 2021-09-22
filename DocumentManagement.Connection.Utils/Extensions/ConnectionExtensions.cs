@@ -1,7 +1,7 @@
+using Brio.Docs.Interface.Dtos;
 using System.Collections.Generic;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Utils.Extensions
+namespace Brio.Docs.Connection.Utils.Extensions
 {
     public static class ConnectionExtensions
     {

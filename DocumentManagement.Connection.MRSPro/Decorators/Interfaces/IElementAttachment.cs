@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Connection.MrsPro.Interfaces
+﻿namespace Brio.Docs.Connection.MrsPro.Interfaces
 {
     /// <summary>
     /// File of the element.

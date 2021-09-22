@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
+namespace Brio.Docs.Connection.Bim360.Forge.Utils.Pagination
 {
     public abstract class ACountStrategy<TPage> : IPaginationStrategy
         where TPage : class

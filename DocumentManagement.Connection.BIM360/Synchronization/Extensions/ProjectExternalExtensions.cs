@@ -1,7 +1,7 @@
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connection.Bim360.Synchronization.Extensions
 {
     internal static class ProjectExternalExtensions
     {

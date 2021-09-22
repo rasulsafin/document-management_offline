@@ -2,7 +2,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Wordprocessing;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Elements
+namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class TextElement : AElement
     {

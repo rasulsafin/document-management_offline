@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 
-namespace MRS.DocumentManagement.Api.Validators
+namespace Brio.Docs.Api.Validators
 {
     /// <summary>
     /// Validation attribute intended to check if supplied ID values are valid. Does NOT check if entity with supplied ID actually exists.

@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Connection.GoogleDrive.Synchronization;
+using Brio.Docs.Connection.Utils.CloudBase;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.GoogleDrive.Synchronization;
-using MRS.DocumentManagement.Connection.Utils.CloudBase;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.GoogleDrive
+namespace Brio.Docs.Connection.GoogleDrive
 {
     public class GoogleConnection : IConnection
     {

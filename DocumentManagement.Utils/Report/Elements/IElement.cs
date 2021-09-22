@@ -1,7 +1,7 @@
 ﻿using System.Xml.Linq;
 using DocumentFormat.OpenXml;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Elements
+namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal interface IElement
     {

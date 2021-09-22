@@ -1,18 +1,18 @@
-﻿using System;
+﻿using Brio.Docs.Connection.MrsPro.Models;
+using Brio.Docs.Connection.MrsPro.Services;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.MrsPro.Extensions;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Connection.MrsPro.Services;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
-using static MRS.DocumentManagement.Connection.MrsPro.Tests.TestConstants;
+using Brio.Docs.Connection.MrsPro.Extensions;
+using static Brio.Docs.Connection.MrsPro.Constants;
+using static Brio.Docs.Connection.MrsPro.Tests.TestConstants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Tests.Services
+namespace Brio.Docs.Connection.MrsPro.Tests.Services
 {
     [TestClass]
     public class ProjectsServiceTests

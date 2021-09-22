@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Interface.Exceptions
+namespace Brio.Docs.Interface.Exceptions
 {
     public class NotFoundException<T> : ANotFoundException
     {

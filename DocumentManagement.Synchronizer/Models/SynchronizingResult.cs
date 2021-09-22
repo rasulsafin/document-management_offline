@@ -1,7 +1,7 @@
+using Brio.Docs.Database;
 using System;
-using MRS.DocumentManagement.Database;
 
-namespace MRS.DocumentManagement.Synchronization.Models
+namespace Brio.Docs.Synchronization.Models
 {
     public enum ObjectType
     {

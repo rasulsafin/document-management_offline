@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
+namespace Brio.Docs.Connection.Utils.CloudBase.Synchronizers
 {
     internal class ItemsSyncHelper
     {

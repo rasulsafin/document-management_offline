@@ -1,8 +1,8 @@
-﻿using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+﻿using Brio.Docs.Interface;
+using System.Threading.Tasks;
+using static Brio.Docs.Connection.MrsPro.Constants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Converters
+namespace Brio.Docs.Connection.MrsPro.Converters
 {
     internal class ObjectiveStatusStatusConverter : IConverter<ObjectiveStatus, string>
     {

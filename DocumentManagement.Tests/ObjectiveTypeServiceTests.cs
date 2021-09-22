@@ -2,17 +2,17 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Services;
+using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility.Mapping;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility.Mapping;
+using Brio.Docs.Exceptions;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     [TestClass]
     public class ObjectiveTypeServiceTests

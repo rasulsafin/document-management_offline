@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+namespace Brio.Docs.Connection.Bim360.Utilities
 {
     internal class AssignToEnumCreator : IEnumCreator<string, AssignToVariant, string>
     {

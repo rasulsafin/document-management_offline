@@ -4,22 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Interface.Filters;
+using Brio.Docs.Interface.Services;
+using Brio.Docs.Utility;
+using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Extensions;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.General.Utils.Extensions;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Exceptions;
-using MRS.DocumentManagement.Interface.Filters;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Utility.Extensions;
-using MRS.DocumentManagement.Utility.Pagination;
-using MRS.DocumentManagement.Utils.ReportCreator;
+using Brio.Docs.Database.Extensions;
+using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Utility.Extensions;
+using Brio.Docs.Utility.Pagination;
 
-namespace MRS.DocumentManagement.Services
+namespace Brio.Docs.Services
 {
     public class ObjectiveService : IObjectiveService
     {

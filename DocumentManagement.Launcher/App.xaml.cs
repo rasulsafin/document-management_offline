@@ -3,7 +3,7 @@ using System.Threading;
 using System.Windows;
 using Hardcodet.Wpf.TaskbarNotification;
 
-namespace MRS.DocumentManagement.Launcher
+namespace Brio.Docs.Launcher
 {
     /// <summary>
     /// Interaction logic for App.xaml.

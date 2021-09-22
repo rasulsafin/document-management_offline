@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Brio.Docs.Connection.Utils;
+using System;
 using System.Collections.Generic;
 using System.Xml;
-using MRS.DocumentManagement.Connection.Utils;
 
-namespace MRS.DocumentManagement.Connection
+namespace Brio.Docs.Connection
 {
     public class YandexDiskElement : CloudElement
     {

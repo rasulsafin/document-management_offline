@@ -1,6 +1,6 @@
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Models;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination
+namespace Brio.Docs.Connection.Bim360.Forge.Utils.Pagination
 {
     public class PaginationStrategy : ACountStrategy<Models.Bim360.Pagination>
     {

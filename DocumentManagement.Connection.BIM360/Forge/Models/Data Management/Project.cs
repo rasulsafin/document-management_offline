@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
+namespace Brio.Docs.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Project : Object<Project.ProjectAttributes, Project.ProjectRelationships>

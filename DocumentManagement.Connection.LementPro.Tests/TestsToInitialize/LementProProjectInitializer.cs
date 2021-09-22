@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Synchronization;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.LementPro.Synchronization;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Tests.TestsToInitialize
+namespace Brio.Docs.Connection.LementPro.Tests.TestsToInitialize
 {
     /// <summary>
     /// Uncomment and run this tests to initialize standard project to test at the remote DM.

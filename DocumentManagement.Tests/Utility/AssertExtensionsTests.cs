@@ -2,7 +2,7 @@
 //using System.Collections.Generic;
 //using System.Diagnostics.CodeAnalysis;
 
-//namespace MRS.DocumentManagement.Tests.Utility
+//namespace Brio.Docs.Tests.Utility
 //{
 //    [TestClass]
 //    public class AssertExtensionsTests

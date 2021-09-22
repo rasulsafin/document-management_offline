@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Interface.Services
+namespace Brio.Docs.Interface.Services
 {
     /// <summary>
     /// Service to manage RemoteConnections (e.g. YandexDisk, TDMS, BIM360).
@@ -14,8 +15,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="connectionInfo">ConnectionInfo to create.</param>
         /// <returns>True if ConnectionInfo was successfully created.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ID<ConnectionInfoDto>> Add(ConnectionInfoToCreateDto connectionInfo);
 
         /// <summary>
@@ -23,8 +24,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>ConnectionInfoDto.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ConnectionInfoDto> Get(ID<UserDto> userID);
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Id of the created long request.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<RequestID> Connect(ID<UserDto> userID);
 
         /// <summary>
@@ -40,8 +41,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="userID">User's ID.</param>
         /// <returns>Status of the connection.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when user not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ConnectionStatusDto> GetRemoteConnectionStatus(ID<UserDto> userID);
 
         /// <summary>
@@ -50,8 +51,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="userID">User's ID.</param>
         /// <param name="enumerationTypeID">Enumeration Type's ID.</param>
         /// <returns>Collection of enumeration values.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when user or connection info not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when user or connection info not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<EnumerationValueDto>> GetEnumerationVariants(ID<UserDto> userID, ID<EnumerationTypeDto> enumerationTypeID);
     }
 }

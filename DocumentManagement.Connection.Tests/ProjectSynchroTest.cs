@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MRS.DocumentManagement;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Synchronizer;
-using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Synchronizer;
+using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility;
 
 namespace DocumentManagement.Connection.Tests
 {

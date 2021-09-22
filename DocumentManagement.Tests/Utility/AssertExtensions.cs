@@ -2,7 +2,7 @@
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace MRS.DocumentManagement.Tests.Utility
+namespace Brio.Docs.Tests.Utility
 {
     public static class AssertExtensions
     {

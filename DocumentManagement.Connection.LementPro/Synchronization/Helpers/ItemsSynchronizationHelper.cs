@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Utilities;
+using Brio.Docs.Interface.Dtos;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Utilities;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
+namespace Brio.Docs.Connection.LementPro.Synchronization
 {
     internal static class ItemsSynchronizationHelper
     {

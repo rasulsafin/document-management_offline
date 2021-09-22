@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Brio.Docs.Api.Validators;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Interface.Services;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,13 +12,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
-using MRS.DocumentManagement.Api.Validators;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Exceptions;
-using MRS.DocumentManagement.Interface.Services;
-using static MRS.DocumentManagement.Api.Validators.ServiceResponsesValidator;
+using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 
-namespace MRS.DocumentManagement.Api.Controllers
+namespace Brio.Docs.Api.Controllers
 {
     /// <summary>
     /// Controller for managing authorization of users.

@@ -1,3 +1,4 @@
+using Brio.Docs.Connection.Utils;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -5,11 +6,10 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+using static Brio.Docs.Connection.MrsPro.Constants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro
+namespace Brio.Docs.Connection.MrsPro
 {
     public class MrsProHttpConnection : HttpConnection
     {

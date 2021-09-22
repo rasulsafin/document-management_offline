@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Connection.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using MRS.DocumentManagement.Connection.Utils;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace Brio.Docs.Connection.YandexDisk
 {
     public class YandexDiskController
     {

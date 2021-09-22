@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace MRS.DocumentManagement.Database.Models
+namespace Brio.Docs.Database.Models
 {
     public class User
     {

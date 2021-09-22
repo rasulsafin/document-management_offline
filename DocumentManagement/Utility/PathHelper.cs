@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.IO;
 using System.Linq;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class PathHelper
     {

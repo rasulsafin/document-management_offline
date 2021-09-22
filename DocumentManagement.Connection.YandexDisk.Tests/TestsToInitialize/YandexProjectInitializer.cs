@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Connection.YandexDisk;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Connection.YandexDisk;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Tests.TestsToInitialize
+namespace Brio.Docs.Connection.YandexDisk.Tests.TestsToInitialize
 {
     /// <summary>
     /// Uncomment and run this tests to initialize standard project to test at the remote DM.

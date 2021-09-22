@@ -1,9 +1,9 @@
-﻿using System;
-using MRS.DocumentManagement.Connection.MrsPro.Services;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Connection.MrsPro.Services;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 
-namespace MRS.DocumentManagement.Connection.MrsPro
+namespace Brio.Docs.Connection.MrsPro
 {
     public class MrsProConnectionContext : AConnectionContext
     {

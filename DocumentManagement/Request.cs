@@ -1,8 +1,8 @@
-﻿using System.Threading;
+﻿using Brio.Docs.Interface;
+using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class Request
     {

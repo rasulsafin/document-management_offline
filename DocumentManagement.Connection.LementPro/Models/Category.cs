@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Models
+namespace Brio.Docs.Connection.LementPro.Models
 {
     [DataContract]
     public class Category

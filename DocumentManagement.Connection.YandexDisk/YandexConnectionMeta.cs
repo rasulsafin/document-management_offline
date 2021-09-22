@@ -1,9 +1,9 @@
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk
+namespace Brio.Docs.Connection.YandexDisk
 {
     public class YandexConnectionMeta : IConnectionMeta
     {

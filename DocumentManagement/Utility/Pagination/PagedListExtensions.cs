@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace MRS.DocumentManagement.Utility.Pagination
+namespace Brio.Docs.Utility.Pagination
 {
     internal static class PagedListExtensions
     {

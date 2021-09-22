@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Brio.Docs.Connection.MrsPro.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Converters
+namespace Brio.Docs.Connection.MrsPro.Converters
 {
     public class ProjectDtoProjectConverter : IConverter<ProjectExternalDto, Project>
     {

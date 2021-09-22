@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Utility.Mapping.Converters
+namespace Brio.Docs.Utility.Mapping.Converters
 {
     public class BimElementObjectiveTypeConverter : ITypeConverter<BimElementExternalDto, BimElementObjective>
     {

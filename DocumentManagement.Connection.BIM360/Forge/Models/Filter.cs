@@ -1,7 +1,7 @@
 using System;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connection.Bim360.Forge.Models
 {
     public class Filter : IQueryParameter
     {

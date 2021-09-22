@@ -1,16 +1,16 @@
 using System;
-using MRS.DocumentManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Synchronizers;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs;
+using Brio.Docs.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Synchronization;
+using Brio.Docs.Connection.Bim360.Synchronization.Converters;
+using Brio.Docs.Connection.Bim360.Synchronization.Factories;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connection.Bim360.Synchronizers;
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

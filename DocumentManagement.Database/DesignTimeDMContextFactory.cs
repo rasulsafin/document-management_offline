@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
-namespace MRS.DocumentManagement.Database
+namespace Brio.Docs.Database
 {
     public class DesignTimeDMContextFactory : IDesignTimeDbContextFactory<DMContext>
     {

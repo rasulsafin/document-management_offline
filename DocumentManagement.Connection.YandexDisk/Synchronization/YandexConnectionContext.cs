@@ -1,8 +1,8 @@
-﻿using MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Connection.Utils.CloudBase.Synchronizers;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.YandexDisk.Synchronization
+namespace Brio.Docs.Connection.YandexDisk.Synchronization
 {
     public class YandexConnectionContext : AConnectionContext
     {

@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Services;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization
+namespace Brio.Docs.Connection.LementPro.Synchronization
 {
     // TODO: use capture from context.
     public class LementProObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>

@@ -1,4 +1,7 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Properties;
+using Brio.Docs.Connection.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,15 +9,12 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Properties;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.Connection.Utils;
+using Brio.Docs.Connection.LementPro.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Utilities
+namespace Brio.Docs.Connection.LementPro.Utilities
 {
     /// <summary>
     /// Work with HttpConnection common for different IConnections.

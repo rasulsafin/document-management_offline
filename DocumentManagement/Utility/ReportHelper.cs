@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class ReportHelper
     {

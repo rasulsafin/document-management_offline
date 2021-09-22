@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     public class RequestResult
     {

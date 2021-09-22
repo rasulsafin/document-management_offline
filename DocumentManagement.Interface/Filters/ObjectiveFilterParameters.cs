@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Interface.Filters
+﻿namespace Brio.Docs.Interface.Filters
 {
     public class ObjectiveFilterParameters : PageParameters
     {

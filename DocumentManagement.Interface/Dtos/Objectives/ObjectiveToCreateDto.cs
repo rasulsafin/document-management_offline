@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Interface.Dtos
+namespace Brio.Docs.Interface.Dtos
 {
     public struct ObjectiveToCreateDto
     {

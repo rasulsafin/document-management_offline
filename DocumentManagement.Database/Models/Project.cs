@@ -1,37 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Database.Models
+namespace Brio.Docs.Database.Models
 {
     public class Project : ISynchronizable<Project>
     {
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int ID { get; set; }
 
         public string Title { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<Objective> Objectives { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<UserProject> Users { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public ICollection<Item> Items { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public string ExternalID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public DateTime UpdatedAt { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public bool IsSynchronized { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public int? SynchronizationMateID { get; set; }
 
-        [ForbidMergeAttribute]
+        [ForbidMerge]
         public Project SynchronizationMate { get; set; }
     }
 }

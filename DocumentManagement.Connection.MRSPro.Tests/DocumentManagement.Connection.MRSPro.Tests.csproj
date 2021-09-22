@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <RootNamespace>MRS.DocumentManagement.Connection.MrsPro.Tests</RootNamespace>
+    <RootNamespace>Brio.Docs.Connection.MrsPro.Tests</RootNamespace>
     <Version>1.0.4</Version>
   </PropertyGroup>
   

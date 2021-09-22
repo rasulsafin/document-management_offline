@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MRS.DocumentManagement.Synchronization.Extensions
+namespace Brio.Docs.Synchronization.Extensions
 {
     internal static class CollectionExtensions
     {

@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Connection;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Interface.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.General.Utils.Extensions;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Exceptions;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Utility.Extensions;
+using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Utility.Extensions;
 
-namespace MRS.DocumentManagement.Services
+namespace Brio.Docs.Services
 {
     public class ConnectionTypeService : IConnectionTypeService
     {

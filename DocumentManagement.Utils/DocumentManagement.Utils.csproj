@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Utils</RootNamespace>
+    <RootNamespace>Brio.Docs.Utils</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Utils</Product>

@@ -1,11 +1,11 @@
+using Brio.Docs.Connection;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
 using System.Linq;
 using Destructurama;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 using Serilog;
 
-namespace MRS.DocumentManagement.Utility.Extensions
+namespace Brio.Docs.Utility.Extensions
 {
     public static class DMLoggerExtensions
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Xml.Linq;
 
-namespace MRS.DocumentManagement.Utils.ReportCreator.Attributes
+namespace Brio.Docs.Utils.ReportCreator.Attributes
 {
     internal static class Style
     {

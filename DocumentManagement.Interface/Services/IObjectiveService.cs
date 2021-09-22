@@ -1,9 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Interface.Filters;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Filters;
 
-namespace MRS.DocumentManagement.Interface.Services
+namespace Brio.Docs.Interface.Services
 {
     /// <summary>
     /// Service for objectives.
@@ -15,7 +16,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="data">Data for new objective.</param>
         /// <returns>Added objective.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data);
 
         /// <summary>
@@ -23,8 +24,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
         /// <returns>True id objective was deleted.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Remove(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
@@ -32,8 +33,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="objectiveData">Objective to  update.</param>
         /// <returns>True if updated successfully.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Update(ObjectiveDto objectiveData);
 
         /// <summary>
@@ -41,8 +42,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
         /// <returns>Found objective.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
@@ -51,8 +52,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Filtration parameters.</param>
         /// <returns>Collection of objectives.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
 
         /// <summary>
@@ -63,9 +64,9 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="userID">ID of the user, who generates the report.</param>
         /// <param name="projectName">Name of the project.</param>
         /// <returns>Object representing the result of report creation process.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when one of the objectives not found.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ArgumentValidationException">Thrown when list of objectives is empty.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when one of the objectives not found.</exception>
+        /// <exception cref="ArgumentValidationException">Thrown when list of objectives is empty.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
     }
 }

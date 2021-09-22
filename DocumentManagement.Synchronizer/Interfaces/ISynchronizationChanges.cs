@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Synchronization.Interfaces
+namespace Brio.Docs.Synchronization.Interfaces
 {
     /// <summary>
     /// Represents changes of the same model for different databases.

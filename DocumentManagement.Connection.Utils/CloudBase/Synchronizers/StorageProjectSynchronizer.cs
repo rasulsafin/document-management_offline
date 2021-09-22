@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
+namespace Brio.Docs.Connection.Utils.CloudBase.Synchronizers
 {
     public class StorageProjectSynchronizer : ISynchronizer<ProjectExternalDto>
     {

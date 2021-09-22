@@ -1,13 +1,13 @@
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms
+namespace Brio.Docs.Connection.Tdms
 {
     public class TdmsStorage : IConnectionStorage
     {

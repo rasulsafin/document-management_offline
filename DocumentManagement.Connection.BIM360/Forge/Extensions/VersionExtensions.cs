@@ -1,9 +1,9 @@
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
 using System.Collections.Generic;
 using System.Linq;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connection.Bim360.Forge.Utils.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Extensions
+namespace Brio.Docs.Connection.Bim360.Forge.Extensions
 {
     public static class VersionExtensions
     {

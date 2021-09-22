@@ -1,12 +1,12 @@
+using Brio.Docs.Interface;
+using Brio.Docs.Synchronization.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Interfaces
+namespace Brio.Docs.Synchronization.Interfaces
 {
     /// <summary>
     /// The strategy to synchronize needed entity type.

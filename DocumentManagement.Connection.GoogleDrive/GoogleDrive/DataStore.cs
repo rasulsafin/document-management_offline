@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Util.Store;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.GoogleDrive
+namespace Brio.Docs.Connection.GoogleDrive
 {
 
     public class DataStore : IDataStore

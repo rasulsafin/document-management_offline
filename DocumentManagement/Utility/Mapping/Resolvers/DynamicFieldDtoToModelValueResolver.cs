@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Utility.Mapping.Resolvers
+namespace Brio.Docs.Utility.Mapping.Resolvers
 {
     public class DynamicFieldDtoToModelValueResolver : IValueResolver<DynamicFieldDto, IDynamicField, string>
     {

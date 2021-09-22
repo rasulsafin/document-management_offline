@@ -1,11 +1,11 @@
+using Brio.Docs.Connection.Bim360.Forge;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
 using Microsoft.Extensions.DependencyInjection;
-using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Factories
+namespace Brio.Docs.Connection.Bim360.Synchronization.Factories
 {
     internal class ContextFactory : IFactory<ConnectionInfoExternalDto, IConnectionContext>
     {

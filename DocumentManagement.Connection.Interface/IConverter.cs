@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     /// <summary>
     /// Represents a class that converts an object from one type to another type.

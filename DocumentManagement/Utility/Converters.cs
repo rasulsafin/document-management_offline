@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 
-namespace MRS.DocumentManagement.Utility
+namespace Brio.Docs.Utility
 {
     public class IDNullableIntTypeConverter<T> : ITypeConverter<ID<T>?, int?>
     {

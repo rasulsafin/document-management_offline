@@ -1,12 +1,12 @@
 using System;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
 
-namespace MRS.DocumentManagement.Utility.Factories
+namespace Brio.Docs.Utility.Factories
 {
     public class ConnectionHelperFactory : IFactory<IServiceScope, ConnectionHelper>
     {

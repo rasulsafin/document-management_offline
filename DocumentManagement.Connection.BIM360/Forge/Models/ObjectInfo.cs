@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connection.Bim360.Forge.Models
 {
     [DataContract]
     public class ObjectInfo

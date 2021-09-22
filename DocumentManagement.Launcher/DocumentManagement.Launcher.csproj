@@ -4,8 +4,8 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
-    <StartupObject>MRS.DocumentManagement.Launcher.Program</StartupObject>
-    <RootNamespace>MRS.DocumentManagement.Launcher</RootNamespace>
+    <StartupObject>Brio.Docs.Launcher.Program</StartupObject>
+    <RootNamespace>Brio.Docs.Launcher</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Document Management Launcher</Product>

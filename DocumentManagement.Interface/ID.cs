@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement
+namespace Brio.Docs
 {
     public struct ID<T> : IEquatable<ID<T>>
     {

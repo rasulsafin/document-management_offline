@@ -1,12 +1,12 @@
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Synchronization.Interfaces;
-using MRS.DocumentManagement.Synchronization.Models;
 
-namespace MRS.DocumentManagement.Synchronization.Utils.Linkers
+namespace Brio.Docs.Synchronization.Utils.Linkers
 {
     internal class ObjectiveDynamicFieldLinker : ILinker<DynamicField>
     {

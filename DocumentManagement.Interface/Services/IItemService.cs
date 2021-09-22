@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Exceptions;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Interface.Services
+namespace Brio.Docs.Interface.Services
 {
     /// <summary>
     /// Service for managing files/items.
@@ -14,8 +15,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="item">Data to update.</param>
         /// <returns>True if updated.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when items does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when items does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<bool> Update(ItemDto item);
 
         /// <summary>
@@ -23,8 +24,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="itemID">Id of item to find.</param>
         /// <returns>Found item.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when item does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when item does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<ItemDto> Find(ID<ItemDto> itemID);
 
         /// <summary>
@@ -32,8 +33,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="projectID">Project's id.</param>
         /// <returns>Collection of items.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when project does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ItemDto>> GetItems(ID<ProjectDto> projectID);
 
         /// <summary>
@@ -41,8 +42,8 @@ namespace MRS.DocumentManagement.Interface.Services
         /// </summary>
         /// <param name="objectiveID">Objective's id.</param>
         /// <returns>Collection of items.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.ANotFoundException">Thrown when objective does not exist.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something else went wrong.</exception>
+        /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
@@ -51,7 +52,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>Id of the created long request.</returns>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
 
         /// <summary>
@@ -60,7 +61,7 @@ namespace MRS.DocumentManagement.Interface.Services
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>True if deleted successfully.</returns>
         /// <exception cref="System.NotImplementedException">Thrown while method is not implemented.</exception>
-        /// <exception cref="MRS.DocumentManagement.Interface.Exceptions.DocumentManagementException">Thrown when something went wrong.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds);
     }
 }

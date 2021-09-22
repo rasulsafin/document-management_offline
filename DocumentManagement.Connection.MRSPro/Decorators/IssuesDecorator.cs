@@ -1,13 +1,13 @@
-﻿using System;
+﻿using Brio.Docs.Connection.MrsPro.Interfaces;
+using Brio.Docs.Connection.MrsPro.Models;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.MrsPro.Interfaces;
-using MRS.DocumentManagement.Connection.MrsPro.Models;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.MrsPro.Services
+namespace Brio.Docs.Connection.MrsPro.Services
 {
     public class IssuesDecorator : AObjectiveElementDecorator
     {

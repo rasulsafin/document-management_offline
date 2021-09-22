@@ -1,3 +1,7 @@
+using Brio.Docs.Connection.Bim360.Forge.Models.Authentication;
+using Brio.Docs.Connection.Bim360.Forge.Services;
+using Brio.Docs.Connection.Bim360.Properties;
+using Brio.Docs.Interface.Dtos;
 using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
@@ -6,14 +10,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
-using MRS.DocumentManagement.Connection.Utils.Extensions;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
+using Brio.Docs.Connection.Utils.Extensions;
+using static Brio.Docs.Connection.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connection.Bim360.Forge.Utils
 {
     internal class Authenticator : IDisposable
     {

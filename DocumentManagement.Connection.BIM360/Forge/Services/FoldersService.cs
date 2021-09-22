@@ -1,16 +1,16 @@
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Forge.Utils.Pagination;
+using Brio.Docs.Connection.Bim360.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
-using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
+using static Brio.Docs.Connection.Bim360.Forge.Constants;
+using Version = Brio.Docs.Connection.Bim360.Forge.Models.DataManagement.Version;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connection.Bim360.Forge.Services
 {
     public class FoldersService
     {
@@ -29,8 +29,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 projectId,
                 folderId);
 
-        public async Task<List<(Item item, Version version)>> GetItemsAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<(Item item, Version version), LinksStrategy>(
+        public async Task<List<(Item item, Models.DataManagement.Version version)>> GetItemsAsync(string projectId, string folderId)
+            => await PaginationHelper.GetItemsByPages<(Item item, Models.DataManagement.Version version), LinksStrategy>(
                 connection,
                 ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
@@ -38,16 +38,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 response =>
                 {
                     var items = response[DATA_PROPERTY]?.ToObject<Item[]>();
-                    var versions = response[INCLUDED_PROPERTY]?.ToObject<Version[]>() ?? Array.Empty<Version>();
+                    var versions = response[INCLUDED_PROPERTY]?.ToObject<Models.DataManagement.Version[]>() ?? Array.Empty<Models.DataManagement.Version>();
                     return items?.Select(
                             item => (item,
                                 versions.FirstOrDefault(vers => vers.Relationships.Item.Data.ID == item.ID))) ??
-                        ArraySegment<(Item item, Version version)>.Empty;
+                        ArraySegment<(Item item, Models.DataManagement.Version version)>.Empty;
                 },
                 projectId,
                 folderId);
 
-        public async Task<List<(Version version, Item item)>> SearchAsync(
+        public async Task<List<(Models.DataManagement.Version version, Item item)>> SearchAsync(
                 string projectId,
                 string folderId,
                 IEnumerable<Filter> filters = null)
@@ -58,7 +58,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 projectId,
                 folderId);
 
-            var versions = response[DATA_PROPERTY]?.ToObject<Version[]>();
+            var versions = response[DATA_PROPERTY]?.ToObject<Models.DataManagement.Version[]>();
             var items = response[INCLUDED_PROPERTY]?.ToObject<Item[]>() ?? Array.Empty<Item>();
 
             return versions?

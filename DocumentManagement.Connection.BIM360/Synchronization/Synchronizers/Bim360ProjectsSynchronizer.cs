@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
+using Brio.Docs.Connection.Bim360.Synchronization.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
+namespace Brio.Docs.Connection.Bim360.Synchronizers
 {
     internal class Bim360ProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {

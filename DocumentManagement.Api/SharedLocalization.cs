@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement.Api
+﻿namespace Brio.Docs.Api
 {
     /// <summary>
     /// Dummy class to group shared resources.

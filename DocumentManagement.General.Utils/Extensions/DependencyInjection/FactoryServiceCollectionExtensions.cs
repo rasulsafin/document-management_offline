@@ -1,5 +1,5 @@
 using System;
-using MRS.DocumentManagement.General.Utils.Factories;
+using Brio.Docs.General.Utils.Factories;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

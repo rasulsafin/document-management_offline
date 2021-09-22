@@ -1,6 +1,6 @@
 using System;
 
-namespace MRS.DocumentManagement.General.Utils.Factories
+namespace Brio.Docs.General.Utils.Factories
 {
     public class Factory<TParameter, TResult> : IFactory<TParameter, TResult>
     {

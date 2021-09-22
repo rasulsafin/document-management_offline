@@ -3,25 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Database;
+using Brio.Docs.Database.Models;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Services;
+using Brio.Docs.Services;
+using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.Database.Extensions;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Exceptions;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Tests.Utility;
-using MRS.DocumentManagement.Utility.Factories;
-using MRS.DocumentManagement.Utility.Mapping;
+using Brio.Docs.Database.Extensions;
+using Brio.Docs.Exceptions;
+using Brio.Docs.Utility.Factories;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     [TestClass]
     public class ItemServiceTests

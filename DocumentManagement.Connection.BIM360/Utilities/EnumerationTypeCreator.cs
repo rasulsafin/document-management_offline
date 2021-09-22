@@ -1,9 +1,9 @@
+using Brio.Docs.Connection.Bim360.Utilities.Snapshot;
+using Brio.Docs.Interface.Dtos;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities
+namespace Brio.Docs.Connection.Bim360.Utilities
 {
     internal class EnumerationTypeCreator
     {

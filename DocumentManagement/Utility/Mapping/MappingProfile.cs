@@ -1,13 +1,13 @@
 using System;
 using System.Linq;
 using AutoMapper;
-using MRS.DocumentManagement.Database.Models;
-using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Utility.Mapping.Converters;
-using MRS.DocumentManagement.Utility.Mapping.Resolvers;
-using MRS.DocumentManagement.Utility.Pagination;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Utility.Mapping.Converters;
+using Brio.Docs.Utility.Mapping.Resolvers;
+using Brio.Docs.Utility.Pagination;
 
-namespace MRS.DocumentManagement.Utility.Mapping
+namespace Brio.Docs.Utility.Mapping
 {
     public class MappingProfile : Profile
     {

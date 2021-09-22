@@ -1,16 +1,16 @@
-﻿using System;
+﻿using Brio.Docs.Connection.LementPro.Models;
+using Brio.Docs.Connection.LementPro.Properties;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Models;
-using MRS.DocumentManagement.Connection.LementPro.Properties;
 using Newtonsoft.Json.Linq;
-using static MRS.DocumentManagement.Connection.LementPro.LementProConstants;
+using static Brio.Docs.Connection.LementPro.LementProConstants;
 using File = System.IO.File;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Utilities
+namespace Brio.Docs.Connection.LementPro.Utilities
 {
     /// <summary>
     /// Utility with request common for services for common models as such as ObjectBase, Catetogry etc.

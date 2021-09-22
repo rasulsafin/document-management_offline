@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using MRS.DocumentManagement.Interface.Dtos;
 using TDMS;
 
-namespace MRS.DocumentManagement.Connection.Tdms
+namespace Brio.Docs.Connection.Tdms
 {
     internal class ItemHelper
     {

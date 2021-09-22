@@ -1,7 +1,7 @@
+using Brio.Docs.Interface.Dtos;
 using System;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     /// <summary>
     /// The interface for register external connection in the system.

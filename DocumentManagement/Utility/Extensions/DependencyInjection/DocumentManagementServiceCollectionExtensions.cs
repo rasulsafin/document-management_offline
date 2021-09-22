@@ -1,17 +1,17 @@
 using System;
 using System.Linq;
 using AutoMapper;
-using MRS.DocumentManagement.Connection;
-using MRS.DocumentManagement.Database;
-using MRS.DocumentManagement.General.Utils.Factories;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Services;
-using MRS.DocumentManagement.Services;
-using MRS.DocumentManagement.Synchronization;
-using MRS.DocumentManagement.Utility;
-using MRS.DocumentManagement.Utility.Factories;
-using MRS.DocumentManagement.Utility.Mapping.Converters;
-using MRS.DocumentManagement.Utility.Mapping.Resolvers;
+using Brio.Docs.Connection;
+using Brio.Docs.Database;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Services;
+using Brio.Docs.Services;
+using Brio.Docs.Synchronization;
+using Brio.Docs.Utility;
+using Brio.Docs.Utility.Factories;
+using Brio.Docs.Utility.Mapping.Converters;
+using Brio.Docs.Utility.Mapping.Resolvers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

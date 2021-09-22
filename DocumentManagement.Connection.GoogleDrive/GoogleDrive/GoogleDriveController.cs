@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Brio.Docs.Connection.Utils;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,9 +12,8 @@ using Google.Apis.Download;
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Upload;
-using MRS.DocumentManagement.Connection.Utils;
 
-namespace MRS.DocumentManagement.Connection.GoogleDrive
+namespace Brio.Docs.Connection.GoogleDrive
 {
     public class GoogleDriveController : IDisposable
     {

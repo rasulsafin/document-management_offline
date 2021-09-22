@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Interface.Dtos
+namespace Brio.Docs.Interface.Dtos
 {
     public class DynamicFieldInfoExternalDto
     {

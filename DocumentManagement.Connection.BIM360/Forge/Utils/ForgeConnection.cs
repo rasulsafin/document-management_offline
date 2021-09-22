@@ -1,3 +1,6 @@
+using Brio.Docs.Connection.Bim360.Forge.Models;
+using Brio.Docs.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connection.Utils;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -5,13 +8,10 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Utils;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge
+namespace Brio.Docs.Connection.Bim360.Forge
 {
     public class ForgeConnection : HttpConnection
     {

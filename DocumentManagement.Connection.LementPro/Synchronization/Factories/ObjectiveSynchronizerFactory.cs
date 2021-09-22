@@ -1,8 +1,8 @@
+using Brio.Docs.Connection.LementPro.Services;
+using Brio.Docs.General.Utils.Factories;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.LementPro.Services;
-using MRS.DocumentManagement.General.Utils.Factories;
 
-namespace MRS.DocumentManagement.Connection.LementPro.Synchronization.Factories
+namespace Brio.Docs.Connection.LementPro.Synchronization.Factories
 {
     public class ObjectiveSynchronizerFactory : IFactory<LementProConnectionContext, LementProObjectivesSynchronizer>
     {

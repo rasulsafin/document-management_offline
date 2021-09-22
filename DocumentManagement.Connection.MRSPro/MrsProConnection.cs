@@ -1,14 +1,14 @@
-﻿using System;
+﻿using Brio.Docs.Connection.MrsPro.Services;
+using Brio.Docs.Interface;
+using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using MRS.DocumentManagement.Connection.MrsPro.Services;
-using MRS.DocumentManagement.Interface;
-using MRS.DocumentManagement.Interface.Dtos;
-using static MRS.DocumentManagement.Connection.MrsPro.Constants;
+using static Brio.Docs.Connection.MrsPro.Constants;
 
-namespace MRS.DocumentManagement.Connection.MrsPro
+namespace Brio.Docs.Connection.MrsPro
 {
     public class MrsProConnection : IConnection
     {

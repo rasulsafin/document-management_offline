@@ -1,7 +1,7 @@
-﻿using MRS.DocumentManagement.Interface.Dtos;
-using MRS.DocumentManagement.Interface.Services;
+﻿using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Interface.Services;
 
-namespace MRS.DocumentManagement.Interface
+namespace Brio.Docs.Interface
 {
     public interface IAuthenticatedAccess
     {

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Brio.Docs.Interface.Dtos;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Tdms.Tests
+namespace Brio.Docs.Connection.Tdms.Tests
 {
     [TestClass]
     public class ProjectsTest

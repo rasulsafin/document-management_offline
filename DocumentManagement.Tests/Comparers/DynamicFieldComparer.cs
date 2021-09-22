@@ -1,7 +1,7 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using MRS.DocumentManagement.Interface.Dtos;
+﻿using Brio.Docs.Interface.Dtos;
+using System.Diagnostics.CodeAnalysis;
 
-namespace MRS.DocumentManagement.Tests
+namespace Brio.Docs.Tests
 {
     internal class DynamicFieldComparer : AbstractModelComparer<DynamicFieldDto>
     {

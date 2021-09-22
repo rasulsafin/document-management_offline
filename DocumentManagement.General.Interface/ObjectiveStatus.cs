@@ -1,4 +1,4 @@
-﻿namespace MRS.DocumentManagement
+﻿namespace Brio.Docs
 {
     public enum ObjectiveStatus
     {

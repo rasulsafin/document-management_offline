@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connection.Bim360.Utilities.Snapshot
 {
     internal abstract class AEnumVariantSnapshot<T> : ASnapshotEntity<T>
     {
