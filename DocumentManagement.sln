@@ -2,7 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs", "Brio.Docs\Brio.Docs.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F5838427-97CC-44DA-8075-49A8C7480065} = {F5838427-97CC-44DA-8075-49A8C7480065}
 		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}

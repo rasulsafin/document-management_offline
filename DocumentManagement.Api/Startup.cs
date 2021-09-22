@@ -70,7 +70,7 @@ namespace Brio.Docs.Api
                 {
                     Version = assemblyName.Version?.ToString(),
                     Title = assemblyName.Name,
-                    Description = "Documentation for DocumentManagement.API",
+                    Description = "Documentation for Brio.Docs.API",
                 });
 
                 // Set the comments path for the Swagger JSON and UI.
@@ -91,7 +91,7 @@ namespace Brio.Docs.Api
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
-                c.SwaggerEndpoint($"/swagger/{SWAGGER_DOCUMENT_ID}/swagger.json", "DocumentManagement.API");
+                c.SwaggerEndpoint($"/swagger/{SWAGGER_DOCUMENT_ID}/swagger.json", "Brio.Docs.API");
                 c.RoutePrefix = string.Empty;
             });
 

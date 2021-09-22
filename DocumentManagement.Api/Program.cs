@@ -13,13 +13,13 @@ namespace Brio.Docs.Api
     {
         public static void Main(string[] args)
         {
-            var mutexName = "Global\\DocumentManagement.Api." + GetAssemblyGuid();
+            var mutexName = "Global\\Brio.Docs.Api." + GetAssemblyGuid();
 
             using var singleAppMutex = new Mutex(true, mutexName, out bool isNew);
 
             if (!isNew)
             {
-                Console.WriteLine("DocumentManagement.Api service instance is already running, exiting.");
+                Console.WriteLine("Brio.Docs.Api service instance is already running, exiting.");
                 return;
             }
 

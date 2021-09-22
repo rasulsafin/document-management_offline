@@ -9,7 +9,7 @@ namespace Brio.Docs.Database
     {
         public DMContext CreateDbContext(string[] args)
         {
-            var configDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "DocumentManagement.Api");
+            var configDir = Path.Combine(Directory.GetCurrentDirectory(), "..", "Brio.Docs.Api");
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(configDir)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)

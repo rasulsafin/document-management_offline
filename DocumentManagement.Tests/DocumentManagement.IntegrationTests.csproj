@@ -25,7 +25,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj" />
-    <ProjectReference Include="..\DocumentManagement\DocumentManagement.csproj" />
+    <ProjectReference Include="..\Brio.Docs\Brio.Docs.csproj" />
   </ItemGroup>
 
 </Project>

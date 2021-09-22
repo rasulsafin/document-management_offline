@@ -145,7 +145,7 @@
     <value>Файл не найден: {0}</value>
   </data>
   <data name="Message_Path_not_found" xml:space="preserve">
-    <value>Необходимо указать путь к 'DocumentManagement.Api.exe'!</value>
+    <value>Необходимо указать путь к 'Brio.Docs.Api.exe'!</value>
   </data>
   <data name="Tooltip_Dm_Brio_Mrs" xml:space="preserve">
     <value>Документооборот BRIO MRS</value>

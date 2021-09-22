@@ -34,7 +34,7 @@ namespace Brio.Docs.Launcher.Properties {
         
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-        [global::System.Configuration.DefaultSettingValueAttribute("DocumentManagement.Api.exe")]
+        [global::System.Configuration.DefaultSettingValueAttribute("Brio.Docs.Api.exe")]
         public string DMExecutablePath {
             get {
                 return ((string)(this["DMExecutablePath"]));

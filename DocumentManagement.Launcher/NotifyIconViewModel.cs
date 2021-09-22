@@ -72,7 +72,7 @@ namespace Brio.Docs.Launcher
 
         private void StartDocumentManagement()
         {
-            dmProcess = Process.GetProcessesByName("DocumentManagement.Api").FirstOrDefault();
+            dmProcess = Process.GetProcessesByName("Brio.Docs.Api").FirstOrDefault();
             if (dmProcess != null)
             {
                 dmProcess.Kill();

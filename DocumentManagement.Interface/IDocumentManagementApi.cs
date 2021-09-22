@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 namespace Brio.Docs.Interface
 {
     /// <summary>
-    /// Entry point to DocumentManagement API
+    /// Entry point to Brio.Docs API
     /// </summary>
     public interface IDocumentManagementApi
     {

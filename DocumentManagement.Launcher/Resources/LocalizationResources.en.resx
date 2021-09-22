@@ -118,10 +118,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Label_DMStarted" xml:space="preserve">
-    <value>DocumentManagement started</value>
+    <value>Brio.Docs started</value>
   </data>
   <data name="Label_DMStopped" xml:space="preserve">
-    <value>DocumentManagement stopped</value>
+    <value>Brio.Docs stopped</value>
   </data>
   <data name="Label_Exit" xml:space="preserve">
     <value>Exit</value>
@@ -139,16 +139,16 @@
     <value>Open Swagger</value>
   </data>
   <data name="Label_StartDM" xml:space="preserve">
-    <value>Start DocumentManagement</value>
+    <value>Start Brio.Docs</value>
   </data>
   <data name="MessageFormat_File_not_found" xml:space="preserve">
     <value>File not found: {0}</value>
   </data>
   <data name="Message_Path_not_found" xml:space="preserve">
-    <value>You must specify the path to 'DocumentManagement.Api.exe'!</value>
+    <value>You must specify the path to 'Brio.Docs.Api.exe'!</value>
   </data>
   <data name="Tooltip_Dm_Brio_Mrs" xml:space="preserve">
-    <value>DocumentManagement BRIO MRS</value>
+    <value>Brio.Docs BRIO MRS</value>
   </data>
   <data name="Tooltip_StopDmAndExit" xml:space="preserve">
     <value>Stop document flow and close the application</value>
