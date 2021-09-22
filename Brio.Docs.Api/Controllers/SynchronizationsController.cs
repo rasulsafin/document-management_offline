@@ -1,8 +1,8 @@
 using Brio.Docs.Api.Validators;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Exceptions;
-using Brio.Docs.Interface.Services;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
+using Brio.Docs.Client.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;

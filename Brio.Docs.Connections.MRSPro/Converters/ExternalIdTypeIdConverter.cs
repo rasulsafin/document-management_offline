@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface;
+﻿using Brio.Docs.Client;
 using System;
 using System.Threading.Tasks;
 

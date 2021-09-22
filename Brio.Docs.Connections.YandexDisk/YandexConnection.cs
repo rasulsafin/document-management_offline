@@ -1,7 +1,7 @@
 using Brio.Docs.Connections.Utils.CloudBase;
 using Brio.Docs.Connections.YandexDisk.Synchronization;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading;

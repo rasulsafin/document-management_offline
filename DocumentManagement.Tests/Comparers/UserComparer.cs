@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface.Dtos;
+﻿using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Tests
 {

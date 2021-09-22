@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Database.Models;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Utility;

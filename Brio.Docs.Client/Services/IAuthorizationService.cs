@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Exceptions;
+﻿using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Interface.Services
+namespace Brio.Docs.Client.Services
 {
     /// <summary>
     /// Service for managing authorization of users.

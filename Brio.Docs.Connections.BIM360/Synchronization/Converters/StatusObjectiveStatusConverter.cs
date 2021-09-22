@@ -1,5 +1,5 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Interface;
+using Brio.Docs.Client;
 using System.Threading.Tasks;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters

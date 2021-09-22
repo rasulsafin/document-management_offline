@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Services;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility;
@@ -437,7 +437,7 @@ namespace Brio.Docs.Tests
             var existingProject = Fixture.Context.Projects.Unsynchronized().First(p => p.Objectives.Count > 0);
             var dtoId = new ID<ProjectDto>(existingProject.ID);
 
-            var result = await service.GetObjectives(dtoId, new Interface.Filters.ObjectiveFilterParameters());
+            var result = await service.GetObjectives(dtoId, new Client.Filters.ObjectiveFilterParameters());
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Items.Any());
@@ -449,7 +449,7 @@ namespace Brio.Docs.Tests
         {
             var dtoId = ID<ProjectDto>.InvalidID;
 
-            var result = await service.GetObjectives(dtoId, new Interface.Filters.ObjectiveFilterParameters());
+            var result = await service.GetObjectives(dtoId, new Client.Filters.ObjectiveFilterParameters());
 
             Assert.Fail();
         }

@@ -21,7 +21,7 @@ namespace Brio.Docs.Connections.YandexDisk
         /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
         /// </summary>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        public async Task<string> GetYandexDiskToken(Interface.Dtos.ConnectionInfoExternalDto info)
+        public async Task<string> GetYandexDiskToken(Client.Dtos.ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
             var clientId = connect.AppProperties[KEY_CLIENT_ID];

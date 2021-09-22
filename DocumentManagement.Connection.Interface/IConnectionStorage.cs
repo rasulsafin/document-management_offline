@@ -1,10 +1,10 @@
-﻿using Brio.Docs.Interface.Dtos;
+﻿using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     /// <summary>
     /// Interface for working with remote storage.

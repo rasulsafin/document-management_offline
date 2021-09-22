@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Newtonsoft.Json;
+using Brio.Docs.Common;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Client.Dtos
 {
     public struct ObjectiveToCreateDto
     {

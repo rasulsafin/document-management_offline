@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.LementPro.Tests.TestsToInitialize
 {

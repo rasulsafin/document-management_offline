@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface;
+﻿using Brio.Docs.Client;
 using System.Threading.Tasks;
 using static Brio.Docs.Connections.MrsPro.Constants;
 

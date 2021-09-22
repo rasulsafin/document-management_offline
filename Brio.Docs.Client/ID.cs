@@ -1,7 +1,7 @@
 using System;
 using Newtonsoft.Json;
 
-namespace Brio.Docs
+namespace Brio.Docs.Client
 {
     public struct ID<T> : IEquatable<ID<T>>
     {

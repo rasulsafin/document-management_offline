@@ -1,4 +1,4 @@
-using Brio.Docs.Interface;
+using Brio.Docs.Client;
 using Brio.Docs.Synchronization.Models;
 using System;
 using System.Collections.Generic;

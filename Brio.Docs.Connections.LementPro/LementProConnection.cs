@@ -2,8 +2,8 @@
 using Brio.Docs.Connections.LementPro.Synchronization;
 using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;

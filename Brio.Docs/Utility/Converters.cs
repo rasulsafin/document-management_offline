@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Brio.Docs.Client;
 
 namespace Brio.Docs.Utility
 {

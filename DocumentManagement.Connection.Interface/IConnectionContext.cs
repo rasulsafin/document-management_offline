@@ -1,6 +1,6 @@
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     /// <summary>
     /// Context of the working with external connection.

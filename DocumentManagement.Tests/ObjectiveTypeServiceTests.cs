@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using Brio.Docs.Services;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility.Mapping;

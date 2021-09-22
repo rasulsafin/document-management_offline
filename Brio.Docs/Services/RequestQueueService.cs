@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Interface;
-using Brio.Docs.Interface.Services;
+﻿using Brio.Docs.Client;
+using Brio.Docs.Client.Services;
 using Brio.Docs.Utility;
 using System;
 using System.Collections.Generic;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Brio.Docs.Client;
 
 namespace Brio.Docs.Api.Validators
 {

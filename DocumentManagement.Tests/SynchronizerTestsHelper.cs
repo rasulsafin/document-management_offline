@@ -1,7 +1,7 @@
 ﻿using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 using Brio.Docs.Tests.Utility;
 using System;
 using System.Collections.Generic;

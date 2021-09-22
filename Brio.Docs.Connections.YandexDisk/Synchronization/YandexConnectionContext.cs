@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.Utils.CloudBase.Synchronizers;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.YandexDisk.Synchronization
 {

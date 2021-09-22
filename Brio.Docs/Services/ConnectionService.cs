@@ -4,19 +4,20 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
+using Brio.Docs.Client.Services;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connection;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
+using Brio.Docs.General.Utils.Extensions;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Exceptions;
-using Brio.Docs.Interface.Services;
 using Brio.Docs.Utility;
+using Brio.Docs.Utility.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.General.Utils.Extensions;
-using Brio.Docs.Utility.Extensions;
 
 namespace Brio.Docs.Services
 {

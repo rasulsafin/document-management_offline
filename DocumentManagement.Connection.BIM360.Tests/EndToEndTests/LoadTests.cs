@@ -2,7 +2,7 @@ using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;

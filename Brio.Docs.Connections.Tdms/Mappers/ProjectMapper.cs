@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface.Dtos;
+﻿using Brio.Docs.Client.Dtos;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms.Mappers

@@ -6,8 +6,8 @@ using Brio.Docs.Connections.MrsPro.Converters;
 using Brio.Docs.Connections.MrsPro.Interfaces;
 using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

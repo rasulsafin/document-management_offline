@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Brio.Docs.Common.Dtos;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Client.Dtos
 {
     public class ConnectionTypeDto : IConnectionTypeDto
     {

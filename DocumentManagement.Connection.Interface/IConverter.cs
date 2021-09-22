@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     /// <summary>
     /// Represents a class that converts an object from one type to another type.

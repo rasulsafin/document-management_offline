@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface.Services;
+﻿using Brio.Docs.Client.Services;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;

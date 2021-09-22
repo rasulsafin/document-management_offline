@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Brio.Docs.Connections.YandexDisk;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.YandexDisk.Tests.TestsToInitialize
 {

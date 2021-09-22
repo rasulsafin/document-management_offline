@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Interface.Dtos;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Brio.Docs.Client.Dtos;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     /// <summary>
     /// Entry point to Brio.Docs API

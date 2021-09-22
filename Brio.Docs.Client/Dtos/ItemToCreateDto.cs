@@ -1,4 +1,6 @@
-﻿namespace Brio.Docs.Interface.Dtos
+﻿using Brio.Docs.Common.Dtos;
+
+namespace Brio.Docs.Client.Dtos
 {
     public struct ItemToCreateDto
     {

@@ -1,4 +1,4 @@
-using Brio.Docs.Interface.Exceptions;
+using Brio.Docs.Client.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;

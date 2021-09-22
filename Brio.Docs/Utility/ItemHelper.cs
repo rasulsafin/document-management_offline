@@ -1,13 +1,12 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Client.Dtos;
 using Brio.Docs.Database;
+using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.Database.Extensions;
 
 namespace Brio.Docs.Utility
 {

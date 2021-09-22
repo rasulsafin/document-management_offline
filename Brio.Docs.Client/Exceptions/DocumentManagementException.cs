@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Interface.Exceptions
+namespace Brio.Docs.Client.Exceptions
 {
     /// <summary>
     /// Raised on connection errors.

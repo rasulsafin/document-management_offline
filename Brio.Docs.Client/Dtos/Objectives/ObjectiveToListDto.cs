@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Brio.Docs.Common;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Client.Dtos
 {
     public struct ObjectiveToListDto
     {

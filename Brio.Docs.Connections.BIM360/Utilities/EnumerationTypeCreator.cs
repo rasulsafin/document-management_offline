@@ -1,5 +1,5 @@
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using System.Linq;
 using System.Threading.Tasks;
 

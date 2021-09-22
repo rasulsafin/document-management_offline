@@ -1,4 +1,4 @@
-﻿using Brio.Docs.Interface.Dtos;
+﻿using Brio.Docs.Client.Dtos;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;

@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Interface
+﻿namespace Brio.Docs.Client
 {
     public struct RequestID
     {

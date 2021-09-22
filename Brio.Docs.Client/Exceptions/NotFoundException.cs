@@ -1,4 +1,4 @@
-namespace Brio.Docs.Interface.Exceptions
+namespace Brio.Docs.Client.Exceptions
 {
     public class NotFoundException<T> : ANotFoundException
     {

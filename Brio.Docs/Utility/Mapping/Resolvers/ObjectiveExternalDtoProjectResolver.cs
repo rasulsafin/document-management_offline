@@ -2,7 +2,7 @@
 using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using Microsoft.Extensions.Logging;
 using Brio.Docs.Database.Extensions;
 

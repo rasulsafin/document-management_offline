@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Client.Dtos
 {
     public class ObjectiveExternalDto
     {

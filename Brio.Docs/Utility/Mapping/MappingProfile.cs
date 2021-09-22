@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 using AutoMapper;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
 using Brio.Docs.Utility.Mapping.Converters;
 using Brio.Docs.Utility.Mapping.Resolvers;
-using Brio.Docs.Utility.Pagination;
 
 namespace Brio.Docs.Utility.Mapping
 {

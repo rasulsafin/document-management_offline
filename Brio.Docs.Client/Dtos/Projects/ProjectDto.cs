@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace Brio.Docs.Interface.Dtos
+namespace Brio.Docs.Client.Dtos
 {
     public class ProjectDto
     {

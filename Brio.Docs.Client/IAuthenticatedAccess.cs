@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Services;
+﻿using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Services;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     public interface IAuthenticatedAccess
     {

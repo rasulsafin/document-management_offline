@@ -1,8 +1,8 @@
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Interface
+namespace Brio.Docs.Client
 {
     /// <summary>
     /// Interface for any type of connection.

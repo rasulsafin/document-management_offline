@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
 using AutoMapper;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 

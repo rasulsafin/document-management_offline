@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database;
-using Brio.Docs.Interface;
+using Brio.Docs.Client;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;

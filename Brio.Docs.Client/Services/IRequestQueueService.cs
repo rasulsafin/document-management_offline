@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace Brio.Docs.Interface.Services
+namespace Brio.Docs.Client.Services
 {
     /// <summary>
     /// Service for managing long tasks on client side.

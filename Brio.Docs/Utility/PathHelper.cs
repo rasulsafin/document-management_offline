@@ -1,5 +1,6 @@
 ﻿using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System;
 using System.IO;
 using System.Linq;

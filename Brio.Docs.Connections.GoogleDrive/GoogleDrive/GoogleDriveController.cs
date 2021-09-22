@@ -34,7 +34,7 @@ namespace Brio.Docs.Connections.GoogleDrive
         {
         }
 
-        public async Task InitializationAsync(Interface.Dtos.ConnectionInfoExternalDto info)
+        public async Task InitializationAsync(Client.Dtos.ConnectionInfoExternalDto info)
         {
             var cancellationTokenSource = new CancellationTokenSource();
 

@@ -1,7 +1,7 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.Authentication;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Properties;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
 using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;

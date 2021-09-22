@@ -2,7 +2,7 @@ using System;
 using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Interface;
+using Brio.Docs.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 

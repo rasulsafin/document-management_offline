@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Interface.Filters
+﻿namespace Brio.Docs.Client.Filters
 {
     public class PageParameters
     {

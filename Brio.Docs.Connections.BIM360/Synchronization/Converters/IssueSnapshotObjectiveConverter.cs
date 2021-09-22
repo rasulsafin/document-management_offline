@@ -1,8 +1,8 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;

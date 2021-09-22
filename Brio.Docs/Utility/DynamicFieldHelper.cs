@@ -4,7 +4,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 

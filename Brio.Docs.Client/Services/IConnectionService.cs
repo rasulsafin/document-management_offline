@@ -1,9 +1,10 @@
-﻿using Brio.Docs.Interface.Dtos;
-using Brio.Docs.Interface.Exceptions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
+using Brio.Docs.Common.Dtos;
 
-namespace Brio.Docs.Interface.Services
+namespace Brio.Docs.Client.Services
 {
     /// <summary>
     /// Service to manage RemoteConnections (e.g. YandexDisk, TDMS, BIM360).

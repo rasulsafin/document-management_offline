@@ -12,8 +12,8 @@ using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Utils.Extensions;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Interface;
-using Brio.Docs.Interface.Dtos;
+using Brio.Docs.Client;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.Bim360
 {
