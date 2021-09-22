@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Connections.GoogleDrive\Brio.Docs.Connections.GoogleDrive.csproj" />
   </ItemGroup>
 
   <ItemGroup>
