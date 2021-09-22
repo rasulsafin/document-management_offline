@@ -1,5 +1,5 @@
 ﻿using Brio.Docs.Connections.LementPro.Utilities;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

@@ -3,8 +3,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,8 +12,8 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connections.Bim360.Forge.Models;
-using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.BIM360.Tests.IntegrationTests
 {

@@ -1,5 +1,6 @@
 ﻿using Brio.Docs.Connections.LementPro.Services;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Integration.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;

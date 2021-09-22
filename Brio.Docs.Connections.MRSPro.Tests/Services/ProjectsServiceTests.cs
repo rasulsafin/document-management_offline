@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Client;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Mapping;

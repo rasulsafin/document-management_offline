@@ -1,5 +1,7 @@
 ﻿using Brio.Docs.Database.Models;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common;
+using Brio.Docs.Common.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Globalization;

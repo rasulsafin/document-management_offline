@@ -2,7 +2,7 @@ using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,10 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Integration.Dtos;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
-using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Tests
 {

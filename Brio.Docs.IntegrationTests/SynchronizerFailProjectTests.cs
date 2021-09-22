@@ -1,6 +1,4 @@
 ﻿using Brio.Docs.Database.Models;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Utility;
@@ -15,6 +13,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Brio.Docs.Database.Extensions;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Tests
 {

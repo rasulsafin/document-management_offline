@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Tdms.Mappers;
-using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using TDMS;

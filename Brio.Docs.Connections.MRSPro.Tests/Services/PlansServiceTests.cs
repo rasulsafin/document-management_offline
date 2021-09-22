@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.MrsPro.Models;
 using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;

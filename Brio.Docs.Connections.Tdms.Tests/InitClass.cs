@@ -1,5 +1,6 @@
-﻿using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+﻿using Brio.Docs.Common.Dtos;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using System.Collections.Generic;
 using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

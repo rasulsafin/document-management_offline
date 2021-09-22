@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Connections.GoogleDrive;
-using Brio.Docs.Client.Dtos;
 using Brio.Docs.External.CloudBase.Synchronizers;
 
 namespace Brio.Docs.Connections.GoogleDrive.Tests.ProjectInitializer

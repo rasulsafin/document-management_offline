@@ -1,10 +1,6 @@
 ﻿using Brio.Docs.Connections.LementPro.Synchronization;
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.LementPro.Tests.TestsToInitialize
 {

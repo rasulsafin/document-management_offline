@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Client;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Services;
 using Brio.Docs.Services;
 using Brio.Docs.Tests.Utility;
@@ -13,7 +15,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Brio.Docs.Exceptions;
 
 namespace Brio.Docs.Tests
 {

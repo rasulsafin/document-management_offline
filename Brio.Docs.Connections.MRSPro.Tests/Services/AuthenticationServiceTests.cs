@@ -1,5 +1,5 @@
 ﻿using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
