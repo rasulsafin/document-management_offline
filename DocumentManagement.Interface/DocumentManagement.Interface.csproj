@@ -16,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.General.Interface\DocumentManagement.General.Interface.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Common\Brio.Docs.Common.csproj" />
   </ItemGroup>
 
 </Project>
