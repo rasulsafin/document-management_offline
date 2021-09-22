@@ -1,7 +1,10 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
@@ -46,6 +49,48 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                         ? snapshot.ProjectSnapshot.AssignToVariants[snapshot.Entity.Attributes.AssignedTo].ID
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
+
+            foreach (var commentSnapshot in snapshot.Comments)
+            {
+                var comment = new DynamicFieldExternalDto()
+                {
+                    ExternalID = commentSnapshot.ID,
+                    Type = DynamicFieldType.OBJECT,
+                    Name = MrsConstants.COMMENT_FIELD_NAME,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var author = new DynamicFieldExternalDto()
+                {
+                    ExternalID = commentSnapshot.Entity.Attributes.CreatedBy,
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.AUTHOR_FIELD_NAME,
+                    Value = commentSnapshot.Author,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var date = new DynamicFieldExternalDto()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.CreatedAt),
+                    Type = DynamicFieldType.DATE,
+                    Name = MrsConstants.DATE_FIELD_NAME,
+                    Value = (commentSnapshot.Entity.Attributes.CreatedAt ?? default).ToString(),
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var text = new DynamicFieldExternalDto()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.Body),
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.COMMENT_FIELD_NAME,
+                    Value = commentSnapshot.Entity.Attributes.Body,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>() { author, date, text };
+                parsedToDto.DynamicFields.Add(comment);
+            }
+
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);
             parsedToDto.DynamicFields.Add(assignedTo);

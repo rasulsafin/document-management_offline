@@ -16,13 +16,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public class CommentAttributes
         {
             [DataMember(Name = "created_at")]
-            public DateTime CreatedAt { get; set; }
+            public DateTime? CreatedAt { get; set; }
 
             [DataMember(Name = "synced_at")]
-            public DateTime SyncedAt { get; set; }
+            public DateTime? SyncedAt { get; set; }
 
             [DataMember(Name = "updated_at")]
-            public DateTime UpdatedAt { get; set; }
+            public DateTime? UpdatedAt { get; set; }
 
             [DataMember(Name = "issue_id")]
             public string IssueId { get; set; }
