@@ -56,7 +56,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             try
             {
-                tuple.Remote.ConnectionInfoID = data.User.ConnectionInfoID;
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
 
                 if ((resultAfterChildrenSync?.Count ?? 0) > 0)
@@ -125,7 +124,6 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
 
             try
             {
-                tuple.Remote.ConnectionInfoID = data.User.ConnectionInfoID;
                 var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
                 logger.LogTrace("Children synchronized");
 
