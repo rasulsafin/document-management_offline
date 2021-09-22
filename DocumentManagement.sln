@@ -64,7 +64,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connecti
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.General.Utils", "DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj", "{B7C9A573-FADD-488C-BBA3-B24AE3787C52}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Launcher", "DocumentManagement.Launcher\DocumentManagement.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Launcher", "Brio.Docs.Launcher\Brio.Docs.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.MRSPro", "Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
 EndProject
