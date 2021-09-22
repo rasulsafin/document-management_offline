@@ -1,4 +1,4 @@
-namespace Brio.Docs.General.Utils.Factories
+namespace Brio.Docs.Integration.Factories
 {
     /// <summary>
     /// A factory for creating instances of T.

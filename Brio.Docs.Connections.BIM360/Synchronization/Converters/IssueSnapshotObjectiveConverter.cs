@@ -6,6 +6,7 @@ using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {

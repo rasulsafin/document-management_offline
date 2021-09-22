@@ -1,5 +1,6 @@
 ﻿using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms

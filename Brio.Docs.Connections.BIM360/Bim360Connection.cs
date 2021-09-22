@@ -13,8 +13,8 @@ using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Utils.Extensions;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360
 {

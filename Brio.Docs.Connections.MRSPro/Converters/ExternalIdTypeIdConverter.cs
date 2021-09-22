@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Brio.Docs.Integration;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.MrsPro.Converters
 {

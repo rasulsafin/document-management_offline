@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms

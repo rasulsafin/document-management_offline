@@ -7,7 +7,7 @@ using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.General.Utils.Extensions;
 using Brio.Docs.Integration;
-using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;

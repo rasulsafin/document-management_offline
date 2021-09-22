@@ -5,8 +5,8 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 

@@ -1,7 +1,7 @@
 using System;
 using System.Threading;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Integration
 {

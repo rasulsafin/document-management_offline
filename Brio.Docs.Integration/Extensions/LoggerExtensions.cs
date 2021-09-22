@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Logging;
 
-namespace Brio.Docs.General.Utils.Extensions
+namespace Brio.Docs.Integration.Extensions
 {
     public static class LoggerExtensions
     {

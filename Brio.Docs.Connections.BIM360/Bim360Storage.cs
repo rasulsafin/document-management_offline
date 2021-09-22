@@ -5,8 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Utilities;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360
 {

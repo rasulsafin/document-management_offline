@@ -1,7 +1,7 @@
 using System;
 using Brio.Docs.Integration.Dtos;
 
-namespace Brio.Docs.Integration.Client
+namespace Brio.Docs.Integration.Interfaces
 {
     /// <summary>
     /// The interface for register external connection in the system.

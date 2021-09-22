@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Integration.Dtos;
 
-namespace Brio.Docs.Integration.Client
+namespace Brio.Docs.Integration.Interfaces
 {
     /// <summary>
     /// Interface for working with remote storage.

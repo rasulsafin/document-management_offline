@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Brio.Docs.General.Utils.Extensions
+namespace Brio.Docs.Integration.Extensions
 {
     public static class CollectionExtensions
     {

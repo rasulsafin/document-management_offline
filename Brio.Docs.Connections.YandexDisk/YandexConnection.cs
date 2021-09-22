@@ -6,8 +6,8 @@ using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Utils.CloudBase;
 using Brio.Docs.Connections.YandexDisk.Synchronization;
 using Brio.Docs.Integration;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.YandexDisk
 {

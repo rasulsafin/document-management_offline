@@ -8,7 +8,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Services;
 using Brio.Docs.Database;
-using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
 using Microsoft.EntityFrameworkCore;

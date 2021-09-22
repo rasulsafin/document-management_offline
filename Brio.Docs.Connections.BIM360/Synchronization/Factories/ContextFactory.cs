@@ -1,8 +1,8 @@
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Factories

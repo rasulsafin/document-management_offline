@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro

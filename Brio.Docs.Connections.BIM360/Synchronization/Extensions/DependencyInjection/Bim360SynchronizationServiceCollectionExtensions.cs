@@ -10,8 +10,8 @@ using Brio.Docs.Connections.Bim360.Synchronizers;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.General.Utils.Factories;
 using Brio.Docs.Integration;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

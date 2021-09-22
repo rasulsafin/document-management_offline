@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro

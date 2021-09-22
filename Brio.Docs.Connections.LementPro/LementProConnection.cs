@@ -8,8 +8,8 @@ using Brio.Docs.Connections.LementPro.Synchronization;
 using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.Connections.Utils.Extensions;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Integration.Client;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.Logging;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 

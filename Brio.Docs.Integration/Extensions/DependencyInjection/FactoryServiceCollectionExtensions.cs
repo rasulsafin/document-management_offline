@@ -1,5 +1,5 @@
 using System;
-using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Integration.Factories;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
