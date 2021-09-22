@@ -1,5 +1,5 @@
 using System;
-using Brio.Docs;
+using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;
@@ -9,8 +9,9 @@ using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronizers;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

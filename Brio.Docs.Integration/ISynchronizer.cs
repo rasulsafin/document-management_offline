@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Client
+namespace Brio.Docs.Integration
 {
     /// <summary>
     /// Represents working with document management entities.

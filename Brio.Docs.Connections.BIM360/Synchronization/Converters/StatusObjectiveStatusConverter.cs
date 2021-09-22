@@ -1,6 +1,7 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Client;
 using System.Threading.Tasks;
+using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Integration;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {

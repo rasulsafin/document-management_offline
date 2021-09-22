@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using Brio.Docs.Common;
+using Brio.Docs.Integration.Dtos;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms.Mappers

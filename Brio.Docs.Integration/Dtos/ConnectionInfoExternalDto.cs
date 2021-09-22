@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
+using Brio.Docs.Common.Dtos;
 
-namespace Brio.Docs.Client.Dtos
+namespace Brio.Docs.Integration.Dtos
 {
     public class ConnectionInfoExternalDto : IConnectionInfoDto
     {

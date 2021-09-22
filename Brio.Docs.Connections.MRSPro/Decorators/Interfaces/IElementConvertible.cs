@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Connections.MrsPro.Interfaces
 {

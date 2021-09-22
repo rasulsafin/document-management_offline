@@ -2,7 +2,7 @@
 
 using Brio.Docs.Connections.Utils;
 using Brio.Docs.Connections.YandexDisk;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common.Dtos;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-namespace Brio.Docs.Connection
+namespace Brio.Docs.Integration
 {
     public class YandexManager : ICloudManager
     {

@@ -1,16 +1,16 @@
-﻿using Brio.Docs.Database.Models;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
-namespace Brio.Docs.Connection
+namespace Brio.Docs.Integration
 {
     public static class ConnectionCreator
     {

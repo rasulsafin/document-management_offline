@@ -1,7 +1,6 @@
 ﻿using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.MrsPro
 {

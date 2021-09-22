@@ -1,11 +1,10 @@
-﻿using Brio.Docs.Connections.Utils;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Utils;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.GoogleDrive

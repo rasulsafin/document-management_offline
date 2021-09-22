@@ -1,5 +1,6 @@
-﻿using Brio.Docs.Client;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Brio.Docs.Common;
+using Brio.Docs.Integration;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro.Converters

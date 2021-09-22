@@ -1,8 +1,8 @@
-﻿using Brio.Docs.Connections.MrsPro.Models;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.MrsPro.Models;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.MrsPro.Converters
 {

@@ -1,15 +1,16 @@
-﻿using Brio.Docs.Connections.LementPro.Services;
-using Brio.Docs.Connections.LementPro.Synchronization;
-using Brio.Docs.Connections.LementPro.Utilities;
-using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.LementPro.Services;
+using Brio.Docs.Connections.LementPro.Synchronization;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.Connections.Utils.Extensions;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
+using Microsoft.Extensions.Logging;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 
 namespace Brio.Docs.Connections.LementPro

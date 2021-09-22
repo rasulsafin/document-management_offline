@@ -1,6 +1,6 @@
-using Brio.Docs.Client.Dtos;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Models
 {

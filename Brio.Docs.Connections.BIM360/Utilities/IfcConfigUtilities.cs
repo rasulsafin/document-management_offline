@@ -1,11 +1,11 @@
-using Brio.Docs.Connections.Bim360.Synchronization.Models;
-using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Utilities

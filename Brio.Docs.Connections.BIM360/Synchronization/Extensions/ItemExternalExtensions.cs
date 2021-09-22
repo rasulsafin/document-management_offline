@@ -1,6 +1,6 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Utils;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {

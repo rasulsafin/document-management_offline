@@ -1,8 +1,9 @@
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Utilities

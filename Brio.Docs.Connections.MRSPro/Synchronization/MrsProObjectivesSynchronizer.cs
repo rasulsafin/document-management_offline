@@ -1,14 +1,14 @@
-﻿using Brio.Docs.Connections.MrsPro.Models;
-using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.MrsPro.Extensions;
+using Brio.Docs.Connections.MrsPro.Models;
+using Brio.Docs.Connections.MrsPro.Services;
 using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.MrsPro
 {

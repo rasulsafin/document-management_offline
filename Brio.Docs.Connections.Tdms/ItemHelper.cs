@@ -1,8 +1,8 @@
-﻿using Brio.Docs.Client.Dtos;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Integration.Dtos;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms

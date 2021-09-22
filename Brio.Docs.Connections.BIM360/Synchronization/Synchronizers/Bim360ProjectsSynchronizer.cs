@@ -1,14 +1,14 @@
-﻿using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Synchronizers
 {

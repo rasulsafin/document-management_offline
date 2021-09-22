@@ -1,9 +1,9 @@
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Threading;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 
-namespace Brio.Docs.Connection
+namespace Brio.Docs.Integration
 {
     public abstract class AConnectionContext : IConnectionContext
     {

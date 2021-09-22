@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Brio.Docs.Connection
+namespace Brio.Docs.Integration
 {
     public class TimeoutException : Exception
     {

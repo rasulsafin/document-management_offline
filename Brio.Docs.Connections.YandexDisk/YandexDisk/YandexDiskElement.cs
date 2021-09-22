@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Brio.Docs.Connection
+namespace Brio.Docs.Integration
 {
     public class YandexDiskElement : CloudElement
     {

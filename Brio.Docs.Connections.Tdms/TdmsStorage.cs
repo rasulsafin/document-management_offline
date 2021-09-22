@@ -1,10 +1,10 @@
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 using TDMS;
 
 namespace Brio.Docs.Connections.Tdms

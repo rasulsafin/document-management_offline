@@ -1,10 +1,10 @@
-using Brio.Docs.Client;
-using Brio.Docs.Synchronization.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Synchronization.Models;
 
 namespace Brio.Docs.Synchronization.Interfaces
 {

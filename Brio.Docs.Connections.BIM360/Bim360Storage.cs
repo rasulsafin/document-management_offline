@@ -1,13 +1,12 @@
-using Brio.Docs.Connections.Bim360.Forge.Services;
-using Brio.Docs.Connections.Bim360.Utilities;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Utilities;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360
 {

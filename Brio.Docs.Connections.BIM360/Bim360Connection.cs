@@ -1,19 +1,20 @@
-using Brio.Docs.Connections.Bim360.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Utils.Extensions;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360
 {

@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Integration.Dtos;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Util.Store;
 using Newtonsoft.Json;

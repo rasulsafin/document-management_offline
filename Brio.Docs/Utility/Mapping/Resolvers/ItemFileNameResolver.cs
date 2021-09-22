@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Utility.Mapping.Resolvers

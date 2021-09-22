@@ -1,7 +1,3 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.Authentication;
-using Brio.Docs.Connections.Bim360.Forge.Services;
-using Brio.Docs.Connections.Bim360.Properties;
-using Brio.Docs.Client.Dtos;
 using System;
 using System.Diagnostics;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,8 +5,13 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Forge.Models.Authentication;
+using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Utils.Extensions;
+using Brio.Docs.Integration.Dtos;
+using Microsoft.Extensions.Logging;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Utils

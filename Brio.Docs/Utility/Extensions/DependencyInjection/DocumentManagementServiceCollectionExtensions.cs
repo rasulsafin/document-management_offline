@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using AutoMapper;
-using Brio.Docs.Connection;
+using Brio.Docs.Integration;
 using Brio.Docs.Database;
 using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Integration.Client;
 using Brio.Docs.Services;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Utility;

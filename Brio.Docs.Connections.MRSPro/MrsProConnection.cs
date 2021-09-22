@@ -1,10 +1,11 @@
-﻿using Brio.Docs.Connections.MrsPro.Services;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.MrsPro.Services;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 using Microsoft.Extensions.Logging;
 using static Brio.Docs.Connections.MrsPro.Constants;
 

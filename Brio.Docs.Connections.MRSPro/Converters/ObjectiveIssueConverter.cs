@@ -1,8 +1,9 @@
-﻿using Brio.Docs.Connections.MrsPro.Models;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Brio.Docs.Common;
 using Brio.Docs.Connections.MrsPro.Extensions;
+using Brio.Docs.Connections.MrsPro.Models;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 using static Brio.Docs.Connections.MrsPro.Constants;
 
 namespace Brio.Docs.Connections.MrsPro.Converters

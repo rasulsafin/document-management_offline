@@ -1,6 +1,6 @@
-using Brio.Docs.Connection;
+using Brio.Docs.Integration;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Client.Dtos;
+using Brio.Docs.Integration.Dtos;
 using System.Linq;
 using Destructurama;
 using Serilog;

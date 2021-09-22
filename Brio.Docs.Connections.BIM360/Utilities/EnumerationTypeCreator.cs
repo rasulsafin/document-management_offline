@@ -1,7 +1,7 @@
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Client.Dtos;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {

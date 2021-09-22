@@ -1,4 +1,4 @@
-﻿namespace Brio.Docs.Client.Dtos
+﻿namespace Brio.Docs.Integration.Dtos
 {
     public class BimElementExternalDto
     {

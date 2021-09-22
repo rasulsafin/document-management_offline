@@ -1,11 +1,12 @@
-﻿using Brio.Docs.Connections.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Utils;
+using Brio.Docs.Integration.Dtos;
 using Google;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Download;
@@ -34,7 +35,7 @@ namespace Brio.Docs.Connections.GoogleDrive
         {
         }
 
-        public async Task InitializationAsync(Client.Dtos.ConnectionInfoExternalDto info)
+        public async Task InitializationAsync(ConnectionInfoExternalDto info)
         {
             var cancellationTokenSource = new CancellationTokenSource();
 

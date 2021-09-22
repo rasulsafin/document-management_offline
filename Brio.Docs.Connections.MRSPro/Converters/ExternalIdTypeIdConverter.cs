@@ -1,6 +1,6 @@
-﻿using Brio.Docs.Client;
-using System;
+﻿using System;
 using System.Threading.Tasks;
+using Brio.Docs.Integration;
 
 namespace Brio.Docs.Connections.MrsPro.Converters
 {

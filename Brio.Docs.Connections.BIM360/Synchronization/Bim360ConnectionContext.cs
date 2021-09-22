@@ -1,7 +1,7 @@
-﻿using Brio.Docs.General.Utils.Factories;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
+using Brio.Docs.General.Utils.Factories;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Dtos;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization

@@ -6,15 +6,16 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database;
-using Brio.Docs.Client;
+using Brio.Docs.General.Utils.Extensions;
+using Brio.Docs.Integration;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
-using Brio.Docs.General.Utils.Extensions;
-using Brio.Docs.Synchronization.Extensions;
 
 namespace Brio.Docs.Synchronization.Strategies
 {

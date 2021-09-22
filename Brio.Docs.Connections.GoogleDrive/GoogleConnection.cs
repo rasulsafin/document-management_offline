@@ -1,11 +1,12 @@
-﻿using Brio.Docs.Connections.GoogleDrive.Synchronization;
-using Brio.Docs.Connections.Utils.CloudBase;
-using Brio.Docs.Client;
-using Brio.Docs.Client.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.GoogleDrive.Synchronization;
+using Brio.Docs.Connections.Utils.CloudBase;
+using Brio.Docs.Integration.Client;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.GoogleDrive
 {

@@ -1,4 +1,5 @@
 ﻿using Brio.Docs.Connections.Utils;
+using Brio.Docs.Integration;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -6,6 +7,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using TimeoutException = System.TimeoutException;
 
 namespace Brio.Docs.Connections.YandexDisk
 {
@@ -26,7 +28,7 @@ namespace Brio.Docs.Connections.YandexDisk
         /// <param name="path">The path to the folder</param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
         /// <exception cref="FileNotFoundException"> File Not Found Exception </exception>
-        /// <exception cref="TimeoutException" > Timeout Exception </exception>
+        /// <exception cref="System.TimeoutException" > Timeout Exception </exception>
         public async Task<IEnumerable<CloudElement>> GetListAsync(string path = "/")
         {
             try
@@ -300,7 +302,7 @@ namespace Brio.Docs.Connections.YandexDisk
         /// <param name="fileName">The path to the file on the computer.</param>
         /// <param name="progressChange"> to transfer the progress </param>
         /// <returns><placeholder>A <see cref="Task"/> representing the asynchronous operation.</placeholder></returns>
-        /// <exception cref="TimeoutException">The server timeout has expired.</exception>
+        /// <exception cref="System.TimeoutException">The server timeout has expired.</exception>
         public async Task<CloudElement> LoadFileAsync(string href, string fileName, Action<ulong, ulong> progressChange = null)
         {
             try
