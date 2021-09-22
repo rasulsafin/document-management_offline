@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Integrat
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Api", "DocumentManagement.Api\DocumentManagement.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Api", "Brio.Docs.Api\Brio.Docs.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Interface", "DocumentManagement.Interface\DocumentManagement.Interface.csproj", "{4998F387-129B-4C8C-9F8B-C143D0A612BE}"
 EndProject
