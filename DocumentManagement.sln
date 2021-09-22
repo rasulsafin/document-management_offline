@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Integrat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Api", "Brio.Docs.Api\Brio.Docs.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Interface", "DocumentManagement.Interface\DocumentManagement.Interface.csproj", "{4998F387-129B-4C8C-9F8B-C143D0A612BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Client", "Brio.Docs.Client\Brio.Docs.Client.csproj", "{4998F387-129B-4C8C-9F8B-C143D0A612BE}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Database", "Brio.Docs.Database\Brio.Docs.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
 EndProject

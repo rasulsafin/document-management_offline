@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DocumentManagement.Interface\DocumentManagement.Interface.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Client\Brio.Docs.Client.csproj" />
   </ItemGroup>
 
 </Project>
