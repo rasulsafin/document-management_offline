@@ -7,7 +7,7 @@
 
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
 
-    <RootNamespace>Brio.Docs.Connections.BIM360.Tests</RootNamespace>
+    <RootNamespace>Brio.Docs.Connections.Bim360.Tests</RootNamespace>
 
     <Version>1.0.4</Version>
   </PropertyGroup>

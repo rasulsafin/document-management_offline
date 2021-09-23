@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Brio.Docs.Connections.Utils</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Product>Brio MRS Connection Utils</Product>
     <Company>Brio MRS©</Company>

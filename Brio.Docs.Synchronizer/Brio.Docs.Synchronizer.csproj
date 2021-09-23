@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>Brio.Docs.Synchronization</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>
     <Product>Brio MRS</Product>
