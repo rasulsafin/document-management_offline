@@ -11,7 +11,7 @@ using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 {
-    class LocationService
+    public class LocationService
     {
         private readonly ForgeConnection connection;
 

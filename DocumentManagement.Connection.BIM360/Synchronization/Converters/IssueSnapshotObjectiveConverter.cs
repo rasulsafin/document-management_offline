@@ -42,10 +42,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 : DynamicFieldUtilities.CreateField(
                     snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
                     rootCauseEnumCreator);
-            var locations = snapshot.Entity.Attributes.Location == null
+            var locations = snapshot.Entity.Attributes.LocationID == null
                 ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
                 : DynamicFieldUtilities.CreateField(
-                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.Location].ID,
+                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LocationID].ID,
                     locationEnumCreator);
             var assignedTo = snapshot.Entity.Attributes.AssignedTo == null
                 ? DynamicFieldUtilities.CreateField(assignToEnumCreator.NullID, assignToEnumCreator)

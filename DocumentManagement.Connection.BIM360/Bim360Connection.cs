@@ -156,6 +156,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
             {
                 typesSubtypes,
                 rootCauses,
+                location,
                 assignTo,
             };
 
