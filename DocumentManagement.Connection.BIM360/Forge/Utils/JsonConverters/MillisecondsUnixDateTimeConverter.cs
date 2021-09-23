@@ -17,8 +17,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
                 case DateTime dateTime:
                     {
-                        long seconds = (long)(dateTime.ToUniversalTime() - UNIX_EPOCH).TotalMilliseconds;
-                        writer.WriteValue(seconds);
+                        long milliseconds = new DateTimeOffset(dateTime).ToUnixTimeMilliseconds();
+                        writer.WriteValue(milliseconds);
+                        break;
+                    }
+
+                case DateTimeOffset dateTimeOffset:
+                    {
+                        long milliseconds = dateTimeOffset.ToUnixTimeMilliseconds();
+                        writer.WriteValue(milliseconds);
                         break;
                     }
 
@@ -33,7 +40,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             if (reader.TokenType == JsonToken.Integer)
             {
                 long milliseconds = (long)reader.Value!;
-                return UNIX_EPOCH.AddSeconds(milliseconds / 1000);
+
+                var d = DateTimeOffset.FromUnixTimeMilliseconds(milliseconds);
+
+                if (objectType == typeof(DateTimeOffset) || objectType == typeof(DateTimeOffset?))
+                    return d;
+
+                return d.DateTime;
             }
 
             return base.ReadJson(reader, objectType, existingValue, serializer);
