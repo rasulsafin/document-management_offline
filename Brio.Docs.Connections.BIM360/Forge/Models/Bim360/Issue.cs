@@ -1,7 +1,7 @@
-using Brio.Docs.Connections.Bim360.Forge.Utils;
 using System;
 using System.Numerics;
 using System.Runtime.Serialization;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360

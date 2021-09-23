@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Client.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Brio.Docs.Client.Dtos;
 
 namespace Brio.Docs.Tests
 {

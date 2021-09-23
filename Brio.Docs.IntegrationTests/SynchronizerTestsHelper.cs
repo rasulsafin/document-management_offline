@@ -1,12 +1,12 @@
-﻿using Brio.Docs.Database;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Tests.Utility;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 

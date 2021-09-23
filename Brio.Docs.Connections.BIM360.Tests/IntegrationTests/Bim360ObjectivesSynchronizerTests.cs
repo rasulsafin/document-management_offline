@@ -1,19 +1,19 @@
-using Brio.Docs.Connections.Bim360;
-using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Synchronization;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Common;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Synchronization;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.BIM360.Tests.IntegrationTests
 {

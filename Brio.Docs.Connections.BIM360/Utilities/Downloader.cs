@@ -1,9 +1,9 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Services;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {

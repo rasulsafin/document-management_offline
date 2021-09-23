@@ -1,5 +1,5 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using System;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {

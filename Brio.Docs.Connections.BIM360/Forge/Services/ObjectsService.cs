@@ -1,12 +1,12 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Properties;
 using Newtonsoft.Json.Linq;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services

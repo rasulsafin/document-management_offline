@@ -1,6 +1,6 @@
-﻿using Brio.Docs.Database;
-using System;
+﻿using System;
 using System.Data.Common;
+using Brio.Docs.Database;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 

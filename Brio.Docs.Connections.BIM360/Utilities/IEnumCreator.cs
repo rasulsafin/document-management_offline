@@ -1,6 +1,6 @@
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {

@@ -1,7 +1,7 @@
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Interfaces;
 using System;
 using System.Collections.Generic;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Tdms
 {

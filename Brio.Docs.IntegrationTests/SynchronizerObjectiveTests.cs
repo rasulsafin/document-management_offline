@@ -4,9 +4,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
-using Brio.Docs.Database.Models;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Database.Extensions;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Utility;
@@ -16,9 +19,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Brio.Docs.Database.Extensions;
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Tests
 {

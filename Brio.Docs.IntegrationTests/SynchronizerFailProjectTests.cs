@@ -1,20 +1,20 @@
-﻿using Brio.Docs.Database.Models;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Brio.Docs.Database.Extensions;
+using Brio.Docs.Database.Models;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility.Mapping;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Brio.Docs.Database.Extensions;
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Tests
 {

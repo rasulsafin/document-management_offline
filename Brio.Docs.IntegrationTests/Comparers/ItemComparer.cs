@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Database.Models;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
+using Brio.Docs.Database.Models;
 
 namespace Brio.Docs.Tests
 {

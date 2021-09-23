@@ -1,9 +1,9 @@
-﻿using Brio.Docs.Connections.LementPro.Models;
-using Brio.Docs.Connections.LementPro.Utilities;
-using Brio.Docs.Integration.Dtos;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.Connections.LementPro.Utilities;
+using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.LementPro.Synchronization
 {

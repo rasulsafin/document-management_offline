@@ -1,8 +1,8 @@
-﻿using Brio.Docs.Common.Dtos;
+﻿using System.Collections.Generic;
+using System.Threading;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
-using System.Collections.Generic;
-using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Brio.Docs.Connections.Tdms.Tests

@@ -1,11 +1,11 @@
-﻿using Brio.Docs.Connections.LementPro.Services;
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.LementPro.Services;
+using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Connections.LementPro.Synchronization

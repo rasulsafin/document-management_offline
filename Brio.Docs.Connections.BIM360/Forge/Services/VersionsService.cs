@@ -1,9 +1,9 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Properties;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Properties;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services

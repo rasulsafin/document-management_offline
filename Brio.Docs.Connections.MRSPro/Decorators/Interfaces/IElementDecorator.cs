@@ -1,7 +1,7 @@
-﻿using Brio.Docs.Connections.MrsPro.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.MrsPro.Models;
 
 namespace Brio.Docs.Connections.MrsPro.Interfaces
 {

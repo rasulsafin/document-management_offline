@@ -1,5 +1,5 @@
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using System.Runtime.Serialization;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Models
 {

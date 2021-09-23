@@ -1,6 +1,3 @@
-using Brio.Docs.Connections.Bim360.Forge.Models;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.External;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -8,6 +5,9 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.External;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 

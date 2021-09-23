@@ -1,7 +1,7 @@
-﻿using Brio.Docs.External.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Xml;
+using Brio.Docs.External.Utils;
 
 namespace Brio.Docs.Integration
 {

@@ -1,10 +1,10 @@
-﻿using Brio.Docs.External.CloudBase.Synchronizers;
-using Brio.Docs.Integration.Dtos;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.External.CloudBase.Synchronizers;
+using Brio.Docs.Integration.Dtos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Brio.Docs.Connections.GoogleDrive.Tests.IntegrationTests.Synchronizers

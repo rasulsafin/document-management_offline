@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Brio.Docs.External.CloudBase.Synchronizers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Brio.Docs.Connections.YandexDisk.Tests.TestsToInitialize
 {

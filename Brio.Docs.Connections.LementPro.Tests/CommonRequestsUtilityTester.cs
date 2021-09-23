@@ -1,8 +1,8 @@
-using Brio.Docs.Connections.LementPro.Models;
-using Brio.Docs.Connections.LementPro.Utilities;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
@@ -97,6 +97,5 @@ namespace Brio.Docs.Connections.LementPro.Tests
             byte[] filePart,
             string fileName)
             => base.SendUploadAsync(url, data, filePart, fileName);
-
     }
 }

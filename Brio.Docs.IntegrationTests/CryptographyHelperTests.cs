@@ -1,5 +1,5 @@
-﻿using Brio.Docs.Utility;
-using System;
+﻿using System;
+using Brio.Docs.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Brio.Docs.Tests

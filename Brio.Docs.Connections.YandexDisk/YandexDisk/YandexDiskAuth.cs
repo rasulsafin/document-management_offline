@@ -17,7 +17,6 @@ namespace Brio.Docs.Connections.YandexDisk
         public string token_type;
         public int expires_in;
 
-
         /// <summary>
         /// https://yandex.ru/dev/oauth/doc/dg/reference/auto-code-client.html.
         /// </summary>
