@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace DocumentManagement.Database.Migrations
+namespace Brio.Docs.Database.Migrations
 {
     public partial class AddItemToLocation : Migration
     {

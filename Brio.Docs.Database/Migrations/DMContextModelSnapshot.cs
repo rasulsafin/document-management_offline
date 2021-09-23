@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace DocumentManagement.Database.Migrations
+namespace Brio.Docs.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
     partial class DMContextModelSnapshot : ModelSnapshot

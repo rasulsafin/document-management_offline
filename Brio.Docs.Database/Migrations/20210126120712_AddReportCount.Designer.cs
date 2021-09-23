@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace DocumentManagement.Database.Migrations
+namespace Brio.Docs.Database.Migrations
 {
     [DbContext(typeof(DMContext))]
     [Migration("20210126120712_AddReportCount")]
