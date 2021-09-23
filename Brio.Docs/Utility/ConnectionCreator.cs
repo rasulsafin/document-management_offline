@@ -14,7 +14,7 @@ namespace Brio.Docs.Integration
 {
     public static class ConnectionCreator
     {
-        private static readonly string SEARCH_PATTERN = "*Brio.Docs.Connection.*.dll";
+        private static readonly string SEARCH_PATTERN = "*Brio.Docs.Connections.*.dll";
 
         private static readonly Lazy<IReadOnlyCollection<Assembly>> ASSEMBLIES_COLLECTION =
             new Lazy<IReadOnlyCollection<Assembly>>(
