@@ -110,18 +110,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
-                    issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
+                    issueSnapshot.Attachments = new Dictionary<string, Attachment>();
                     var attachments = await issuesService.GetAttachmentsAsync(
                         project.IssueContainer,
                         issueSnapshot.ID);
 
                     foreach (var attachment in attachments.Where(
-                        x => project.Items.ContainsKey(x.Attributes.Urn)))
-                    {
-                        issueSnapshot.Items.Add(
-                            attachment.ID,
-                            project.Items[attachment.Attributes.Urn]);
-                    }
+                        x => x.Attributes.UrnType == UrnType.Oss || project.Items.ContainsKey(x.Attributes.Urn)))
+                        issueSnapshot.Attachments.Add(attachment.ID, attachment);
                 }
             }
         }
