@@ -193,6 +193,15 @@ namespace MRS.DocumentManagement.Services
             }
         }
 
+        public async Task<bool> SetCurrent(ID<UserDto> userID)
+        {
+            if (!await Exists(userID))
+                return false;
+
+            CurrentUser.ID = (int)userID;
+            return true;
+        }
+
         public virtual async Task<bool> Update(UserDto user)
         {
             using var lScope = logger.BeginMethodScope();
