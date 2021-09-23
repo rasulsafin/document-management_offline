@@ -18,11 +18,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     [TestClass]
     public class LocationsTests
     {
-        private static readonly string TEST_ISSUE_ID = "83188de8-8fce-4eba-8b02-8a0f4aca276f";
-        private static readonly Random RANDOM = new Random();
-
         private static Project project;
-        private static IssuesService issuesService;
+        private static LocationService locationService;
         private static string issuesContainer;
         private static ForgeConnection connection;
         private static ServiceProvider serviceProvider;
@@ -39,7 +36,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             var authenticator = serviceProvider.GetService<Authenticator>();
             var hubsService = serviceProvider.GetService<HubsService>();
             var projectsService = serviceProvider.GetService<ProjectsService>();
-            issuesService = serviceProvider.GetService<IssuesService>();
+            locationService = serviceProvider.GetService<LocationService>();
 
             if (authenticator == null || hubsService == null || connection == null || projectsService == null)
                 throw new Exception("Required services are null");
@@ -100,7 +97,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         [TestMethod]
         public async Task GetLocations_HaveAccessToIssueContainer_ReturnsIssuesList()
         {
-            var locations = await issuesService.GetLocationsAsync(issuesContainer, "default");
+            var locations = await locationService.GetLocationsAsync(issuesContainer, "default");
 
             if (locations == null)
                 Assert.Fail();
