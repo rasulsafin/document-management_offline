@@ -313,24 +313,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /hq/v1/accounts/{0}/users/{1}.
-        /// </summary>
-        internal static string GetUserMethodEmea {
-            get {
-                return ResourceManager.GetString("GetUserMethodEmea", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Ищет локализованную строку, похожую на /hq/v1/regions/eu/accounts/{0}/users/{1}.
-        /// </summary>
-        internal static string GetUserMethodUS {
-            get {
-                return ResourceManager.GetString("GetUserMethodUS", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Ищет локализованную строку, похожую на /userprofile/v1/users/@me.
         /// </summary>
         internal static string GetUsersAtMeMethod {
