@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -62,12 +62,19 @@ namespace Brio.Docs.Services
 
             try
             {
-                var dbObjective = await context.ObjectiveTypes
-                   .Include(x => x.DefaultDynamicFields)
+                var dbObjectiveType = await context.ObjectiveTypes
                    .FindOrThrowAsync(x => x.ID, (int)id);
-                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
-                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+                var user = await context.Users.FindOrThrowAsync(CurrentUser.ID);
+                var connectionInfo = await context.ConnectionInfos
+                    .Where(x => x.User == user)
+                    .Include(x => x.ConnectionType)
+                    .FirstOrDefaultAsync();
+                dbObjectiveType.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, dbObjectiveType.ID);
+
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjectiveType);
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjectiveType);
             }
             catch (Exception ex)
             {
@@ -85,12 +92,20 @@ namespace Brio.Docs.Services
 
             try
             {
-                var dbObjective = await context.ObjectiveTypes
+                var dbObjectiveType = await context.ObjectiveTypes
                    .Include(x => x.DefaultDynamicFields)
                    .FindOrThrowAsync(x => x.Name, typename);
-                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjective);
 
-                return mapper.Map<ObjectiveTypeDto>(dbObjective);
+                var user = await context.Users.FindOrThrowAsync(CurrentUser.ID);
+                var connectionInfo = await context.ConnectionInfos
+                    .Where(x => x.User == user)
+                    .Include(x => x.ConnectionType)
+                    .FirstOrDefaultAsync();
+                dbObjectiveType.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, dbObjectiveType.ID);
+
+                logger.LogDebug("Found objective type: {@ObjectiveType}", dbObjectiveType);
+
+                return mapper.Map<ObjectiveTypeDto>(dbObjectiveType);
             }
             catch (Exception ex)
             {
@@ -124,16 +139,7 @@ namespace Brio.Docs.Services
 
                 foreach (var t in types)
                 {
-                    var query = context.DynamicFieldInfos
-                     .AsNoTracking()
-                     .Where(x => x.ObjectiveTypeID == t.ID);
-
-                    if (connectionInfo?.ID != null)
-                        query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
-                    else
-                        query = query.Where(x => x.ConnectionInfoID == null);
-
-                    t.DefaultDynamicFields = await query.ToListAsync();
+                    t.DefaultDynamicFields = await GetDefaultDynamicFields(connectionInfo, t.ID);
                 }
 
                 logger.LogDebug("Found objective types: {@ObjectiveTypes}", types);
@@ -146,6 +152,20 @@ namespace Brio.Docs.Services
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
+        }
+
+        private async Task<ICollection<DynamicFieldInfo>> GetDefaultDynamicFields(ConnectionInfo connectionInfo, int typeID)
+        {
+            var query = context.DynamicFieldInfos
+                                 .AsNoTracking()
+                                 .Where(x => x.ObjectiveTypeID == typeID);
+
+            if (connectionInfo?.ID != null)
+                query = query.Where(x => x.ConnectionInfoID == connectionInfo.ID);
+            else
+                query = query.Where(x => x.ConnectionInfoID == null);
+
+            return await query.ToListAsync();
         }
 
         public async Task<bool> Remove(ID<ObjectiveTypeDto> id)

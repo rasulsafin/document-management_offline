@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -192,6 +192,15 @@ namespace Brio.Docs.Services
                 logger.LogError(ex, "Can't get list of users");
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
+        }
+
+        public async Task<bool> SetCurrent(ID<UserDto> userID)
+        {
+            if (!await Exists(userID))
+                return false;
+
+            CurrentUser.ID = (int)userID;
+            return true;
         }
 
         public virtual async Task<bool> Update(UserDto user)

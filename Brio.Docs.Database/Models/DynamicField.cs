@@ -35,10 +35,8 @@ namespace Brio.Docs.Database.Models
         [ForbidMerge]
         public DateTime UpdatedAt { get; set; }
 
-        [ForbidMerge]
         public int? ConnectionInfoID { get; set; }
 
-        [ForbidMerge]
         public ConnectionInfo ConnectionInfo { get; set; }
 
         [ForbidMerge]

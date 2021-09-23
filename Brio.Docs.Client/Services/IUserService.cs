@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
@@ -99,5 +99,12 @@ namespace Brio.Docs.Client.Services
         /// <returns>True if user exists, returns false otherwise.</returns>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<bool> Exists(string login);
+
+        /// <summary>
+        /// TEMPORARY: Sets current user for later use.
+        /// </summary>
+        /// <param name="userID">User's id</param>
+        /// <returns>True, if user exists.</returns>
+        Task<bool> SetCurrent(ID<UserDto> userID);
     }
 }
