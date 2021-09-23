@@ -13,5 +13,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         public static readonly string COMMENT_FIELD_NAME = "Comment";
         public static readonly string AUTHOR_FIELD_NAME = "Author";
         public static readonly string DATE_FIELD_NAME = "Date";
+        public static readonly string DEFAULT_AUTHOR_NAME = "Unauthorized name";
     }
 }

@@ -19,6 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
     {
         private readonly Bim360Snapshot snapshot;
         private readonly IssuesService issuesService;
+        private readonly AccountAdminService accountAdminService;
         private readonly Authenticator authenticator;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly SnapshotFiller filler;
@@ -28,6 +29,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         public Bim360ObjectivesSynchronizer(
             Bim360Snapshot snapshot,
             IssuesService issuesService,
+            AccountAdminService accountAdminService,
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
             SnapshotFiller filler,
@@ -41,6 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             this.converterToDto = converterToDto;
             this.filler = filler;
             this.authenticator = authenticator;
+            this.accountAdminService = accountAdminService;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -154,6 +157,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                 found = new IssueSnapshot(received, project)
                                 {
                                     Items = new Dictionary<string, ItemSnapshot>(),
+                                    Comments = new List<CommentSnapshot>(),
                                 };
 
                                 var attachments = await issuesService.GetAttachmentsAsync(
@@ -166,6 +170,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                     found.Items.Add(
                                         attachment.ID,
                                         project.Items[attachment.Attributes.Urn]);
+                                }
+
+                                if (found.Entity.Attributes.CommentCount > 0)
+                                {
+                                    var comments = await issuesService.GetCommentsAsync(project.IssueContainer, found.ID);
+                                    foreach (var comment in comments)
+                                    {
+                                        var author = (await accountAdminService.GetAccountUsersAsync(project.HubSnapshot.Entity)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
+                                        found.Comments.Add(
+                                            new CommentSnapshot(comment)
+                                            {
+                                                Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,
+                                            });
+                                    }
                                 }
 
                                 found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);

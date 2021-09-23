@@ -147,7 +147,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                             issueSnapshot.Comments.Add(
                                 new CommentSnapshot(comment)
                                 {
-                                    Author = author == null ? "Unauthorized name" : author.Name,
+                                    Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,
                                 });
                         }
                     }

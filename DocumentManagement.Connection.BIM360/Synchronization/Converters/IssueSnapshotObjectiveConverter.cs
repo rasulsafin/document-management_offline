@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
@@ -50,7 +51,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
 
-            foreach (var commentSnapshot in snapshot.Comments)
+            foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
             {
                 var comment = new DynamicFieldExternalDto()
                 {
