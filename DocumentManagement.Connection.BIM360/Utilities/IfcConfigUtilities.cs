@@ -1,8 +1,10 @@
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface.Dtos;
@@ -53,6 +55,65 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     return ifcConfig;
                 }
             }
+
+            return default;
+        }
+
+        public async Task<StatusRelation> GetConfig()
+        {
+            var conf = new StatusRelation
+            {
+                Get = new[]
+                {
+                    new RelationRule<Status, ObjectiveStatus>
+                    {
+                        Source = Status.Draft,
+                        Destination = ObjectiveStatus.Open,
+                    },
+                    new RelationRule<Status, ObjectiveStatus>
+                    {
+                        Source = Status.Open,
+                        Destination = ObjectiveStatus.Late,
+                        Condition = new RelationCondition
+                        {
+                            PropertyName = "due_date",
+                            ComparisonType = RelationComparisonType.More,
+                            ValueType = RelationComparisonValueType.DateTime,
+                            Value = DateTimeValues.Now,
+                        },
+                    },
+                    new RelationRule<Status, ObjectiveStatus>
+                    {
+                        Source = Status.Open,
+                        Destination = ObjectiveStatus.Open,
+                    },
+                    new RelationRule<Status, ObjectiveStatus>
+                    {
+                        Source = Status.Answered,
+                        Destination = ObjectiveStatus.InProgress,
+                    },
+                },
+                Set = new[]
+                {
+                    new RelationRule<ObjectiveStatus, Status>
+                    {
+                        Source = ObjectiveStatus.Undefined,
+                        Destination = Status.Undefined,
+                        Condition = null,
+                    },
+                },
+                Priority = new[]
+                {
+                    Status.NotApproved,
+                    Status.ReadyToInspect,
+                    Status.WorkCompleted,
+                    Status.InDispute,
+                    Status.Answered,
+                    Status.Open,
+                    Status.Closed,
+                    Status.Draft,
+                },
+            };
 
             return default;
         }
