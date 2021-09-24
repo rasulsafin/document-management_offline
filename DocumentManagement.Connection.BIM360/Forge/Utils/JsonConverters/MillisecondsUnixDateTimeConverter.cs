@@ -6,8 +6,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 {
     public class MillisecondsUnixDateTimeConverter : UnixDateTimeConverter
     {
-        private static readonly DateTime UNIX_EPOCH = new (1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             switch (value)
@@ -46,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
                 if (objectType == typeof(DateTimeOffset) || objectType == typeof(DateTimeOffset?))
                     return d;
 
-                return d.DateTime;
+                return d.UtcDateTime;
             }
 
             return base.ReadJson(reader, objectType, existingValue, serializer);
