@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Properties;
@@ -118,18 +119,14 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
-                    issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
+                    issueSnapshot.Attachments = new Dictionary<string, Attachment>();
                     var attachments = await issuesService.GetAttachmentsAsync(
                         project.IssueContainer,
                         issueSnapshot.ID);
 
                     foreach (var attachment in attachments.Where(
-                        x => project.Items.ContainsKey(x.Attributes.Urn)))
-                    {
-                        issueSnapshot.Items.Add(
-                            attachment.ID,
-                            project.Items[attachment.Attributes.Urn]);
-                    }
+                        x => x.Attributes.UrnType == UrnType.Oss || project.Items.ContainsKey(x.Attributes.Urn)))
+                        issueSnapshot.Attachments.Add(attachment.ID, attachment);
                 }
             }
         }

@@ -11,7 +11,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             ProjectSnapshot = projectSnapshot;
         }
 
-        public Dictionary<string, ItemSnapshot> Items { get; set; }
+        public Dictionary<string, Attachment> Attachments { get; set; }
 
         public ProjectSnapshot ProjectSnapshot { get; }
 
