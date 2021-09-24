@@ -45,7 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var locations = snapshot.Entity.Attributes.LbsLocation == null
                 ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
                 : DynamicFieldUtilities.CreateField(
-                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LocationDescription].ID,
+                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LbsLocation].ID,
                     locationEnumCreator);
             var assignedTo = snapshot.Entity.Attributes.AssignedTo == null
                 ? DynamicFieldUtilities.CreateField(assignToEnumCreator.NullID, assignToEnumCreator)
