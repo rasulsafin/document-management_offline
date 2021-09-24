@@ -8,7 +8,7 @@
 
         public (float x, float y, float z) CameraPosition { get; set; }
 
-        public string BimElementID { get; set; }
+        public string Guid { get; set; }
 
         public ItemDto Item { get; set; }
     }
