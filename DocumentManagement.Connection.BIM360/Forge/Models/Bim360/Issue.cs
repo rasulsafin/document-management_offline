@@ -116,10 +116,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
             [DataMember(Name = "root_cause")]
             public string RootCause { get; set; }
 
-            [DataMember(Name = "location_id")]
-            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
-            public string LocationID { get; set; }
-
             [DataMember(Name = "location")]
             public string Location { get; set; }
 

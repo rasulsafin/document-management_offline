@@ -125,7 +125,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     RootCauseID =
                         GetValue(rootCauseEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
                           ?.Entity.ID,
-                    LocationID =
+                    LbsLocation =
                          GetValue(locationEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
                           ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
