@@ -9,12 +9,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.Status
         public string PropertyName { get; set; }
 
         [DataMember]
+        public ComparisonObjectType ObjectType { get; set; }
+
+        [DataMember]
         public RelationComparisonType ComparisonType { get; set; }
 
         [DataMember]
         public RelationComparisonValueType ValueType { get; set; }
 
         [DataMember]
-        public object Value { get; set; }
+        public object[] Values { get; set; }
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Runtime.Serialization;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Newtonsoft.Json;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations
 {
@@ -9,9 +11,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.Status
         where TDestination : Enum
     {
         [DataMember]
+        [JsonConverter(typeof(SafeStringEnumConverter), 0)]
         public TSource Source { get; set; }
 
         [DataMember]
+        [JsonConverter(typeof(SafeStringEnumConverter), 0)]
         public TDestination Destination { get; set; }
 
         [DataMember]

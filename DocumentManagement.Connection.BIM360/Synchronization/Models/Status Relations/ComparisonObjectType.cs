@@ -6,16 +6,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.Status
 {
     [DataContract]
     [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
-    internal enum RelationComparisonValueType
+    public enum ComparisonObjectType
     {
         Undefined,
-        [EnumMember]
-        Int,
-        [EnumMember]
-        Float,
-        [EnumMember]
-        DateTime,
-        [EnumMember]
-        String,
+        [EnumMember(Value = "BRIO MRS")]
+        BrioMrs,
+        [EnumMember(Value = "BIM 360")]
+        Bim360,
     }
 }
