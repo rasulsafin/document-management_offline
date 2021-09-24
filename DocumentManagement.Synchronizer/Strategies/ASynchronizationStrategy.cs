@@ -103,13 +103,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     }
 
                     if (needSaveOnEachTuple)
-                    {
-                        if (data.Date == default)
-                            await context.SaveChangesAsync();
-                        else
-                            await context.SynchronizationSaveAsync(data.Date);
-                        logger.LogTrace("DB updated");
-                    }
+                        await SaveDb(data);
                 }
                 catch (Exception e)
                 {
@@ -352,6 +346,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     ObjectType = ObjectType.Remote,
                 };
             }
+        }
+
+        protected async Task SaveDb(SynchronizingData data)
+        {
+            if (data.Date == default)
+                await context.SaveChangesAsync();
+            else
+                await context.SynchronizationSaveAsync(data.Date);
+            logger.LogTrace("DB updated");
         }
 
         private void RemoveFromDB(SynchronizingTuple<TDB> tuple, SynchronizingData data)
