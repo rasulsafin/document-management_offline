@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {

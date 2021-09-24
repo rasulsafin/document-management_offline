@@ -1,8 +1,8 @@
 using System;
 using System.Linq;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     internal static class ScopeUtilities
     {
