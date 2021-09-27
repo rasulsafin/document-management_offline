@@ -17,33 +17,33 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
-        private readonly AccountAdminService accountAdminService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly IssueSnapshotUtilities snapshotUtilities;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
-            AccountAdminService accountAdminService,
             IssuesService issuesService,
             FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            AssignToEnumCreator assignToEnumCreator,
+            IssueSnapshotUtilities snapshotUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
-            this.accountAdminService = accountAdminService;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.snapshotUtilities = snapshotUtilities;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -122,35 +122,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
-                    // Items
-                    issueSnapshot.Items = new Dictionary<string, ItemSnapshot>();
-                    var attachments = await issuesService.GetAttachmentsAsync(
-                        project.IssueContainer,
-                        issueSnapshot.ID);
-
-                    foreach (var attachment in attachments.Where(
-                        x => project.Items.ContainsKey(x.Attributes.Urn)))
-                    {
-                        issueSnapshot.Items.Add(
-                            attachment.ID,
-                            project.Items[attachment.Attributes.Urn]);
-                    }
-
-                    // Comments
-                    issueSnapshot.Comments = new List<CommentSnapshot>();
-                    if (issueSnapshot.Entity.Attributes.CommentCount > 0)
-                    {
-                        var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID);
-                        foreach (var comment in comments)
-                        {
-                            var author = (await accountAdminService.GetAccountUsersAsync(project.HubSnapshot.Entity)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
-                            issueSnapshot.Comments.Add(
-                                new CommentSnapshot(comment)
-                                {
-                                    Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,
-                                });
-                        }
-                    }
+                    issueSnapshot.Items = await snapshotUtilities.GetAttachments(issueSnapshot, project);
+                    issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }
             }
         }
