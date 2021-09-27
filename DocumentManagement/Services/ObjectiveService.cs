@@ -257,7 +257,9 @@ namespace MRS.DocumentManagement.Services
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .ByPages(x => x.Title, filter.PageNumber, filter.PageSize)
+                    .ByPages(x => x.CreationDate,
+                                  filter.PageNumber,
+                                  filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
                             .ThenInclude(x => x.BimElement)
