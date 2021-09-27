@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
     internal class LocationEnumCreator : IEnumCreator<Location, LocationSnapshot, string>
     {
         private static readonly string ENUM_EXTERNAL_ID =
-            DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Location);
+            DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LbsLocation);
 
         private static readonly string DISPLAY_NAME = MrsConstants.LOCATION;
 
