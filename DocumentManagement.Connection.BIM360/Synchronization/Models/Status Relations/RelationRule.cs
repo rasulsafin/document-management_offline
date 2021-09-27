@@ -19,6 +19,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.Status
         public TDestination Destination { get; set; }
 
         [DataMember]
-        public RelationCondition Condition { get; set; }
+        public RelationCondition[] Conditions { get; set; }
     }
 }

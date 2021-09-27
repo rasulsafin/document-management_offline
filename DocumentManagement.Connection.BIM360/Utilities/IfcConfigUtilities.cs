@@ -75,13 +75,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     {
                         Source = Status.Open,
                         Destination = ObjectiveStatus.Late,
-                        Condition = new RelationCondition
+                        Conditions = new[]
                         {
-                            ObjectType = ComparisonObjectType.Bim360,
-                            PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.DueDate),
-                            ComparisonType = RelationComparisonType.Greater,
-                            ValueType = RelationComparisonValueType.DateTime,
-                            Values = new object[] { DateTimeValues.Now },
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.DueDate),
+                                ComparisonType = RelationComparisonType.Greater,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { DateTimeValues.Now },
+                            },
                         },
                     },
                     new RelationRule<Status, ObjectiveStatus>
@@ -93,13 +96,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     {
                         Source = Status.NotApproved,
                         Destination = ObjectiveStatus.Late,
-                        Condition = new RelationCondition
+                        Conditions = new[]
                         {
-                            ObjectType = ComparisonObjectType.Bim360,
-                            PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.DueDate),
-                            ComparisonType = RelationComparisonType.Greater,
-                            ValueType = RelationComparisonValueType.DateTime,
-                            Values = new object[] { DateTimeValues.Now },
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.DueDate),
+                                ComparisonType = RelationComparisonType.Greater,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { DateTimeValues.Now },
+                            },
                         },
                     },
                     new RelationRule<Status, ObjectiveStatus>
@@ -144,39 +150,64 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     {
                         Source = ObjectiveStatus.Open,
                         Destination = Status.Open,
-                        Condition = new RelationCondition
+                        Conditions = new[]
                         {
-                            ObjectType = ComparisonObjectType.Bim360,
-                            PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.Status),
-                            ComparisonType = RelationComparisonType.NotEqual,
-                            ValueType = RelationComparisonValueType.String,
-                            Values = new object[] { Status.NotApproved },
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.Status),
+                                ComparisonType = RelationComparisonType.NotEqual,
+                                ValueType = RelationComparisonValueType.String,
+                                Values = new object[] { Status.NotApproved },
+                            },
                         },
                     },
                     new RelationRule<ObjectiveStatus, Status>
                     {
                         Source = ObjectiveStatus.Late,
                         Destination = Status.NotApproved,
-                        Condition = new RelationCondition
+                        Conditions = new[]
                         {
-                            ObjectType = ComparisonObjectType.Bim360,
-                            PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.Status),
-                            ComparisonType = RelationComparisonType.NotEqual,
-                            ValueType = RelationComparisonValueType.String,
-                            Values = new object[] { Status.Open },
+                            new RelationCondition
+                            {
+                                PropertyName = nameof(ObjectiveExternalDto.DueDate),
+                                ObjectType = ComparisonObjectType.BrioMrs,
+                                ComparisonType = RelationComparisonType.Less,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { DateTimeValues.Now },
+                            },
+                        },
+                    },
+                    new RelationRule<ObjectiveStatus, Status>
+                    {
+                        Source = ObjectiveStatus.Late,
+                        Destination = Status.Open,
+                        Conditions = new[]
+                        {
+                            new RelationCondition
+                            {
+                                PropertyName = nameof(ObjectiveExternalDto.DueDate),
+                                ObjectType = ComparisonObjectType.BrioMrs,
+                                ComparisonType = RelationComparisonType.Less,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { DateTimeValues.Now },
+                            },
                         },
                     },
                     new RelationRule<ObjectiveStatus, Status>
                     {
                         Source = ObjectiveStatus.InProgress,
                         Destination = Status.InDispute,
-                        Condition = new RelationCondition
+                        Conditions = new[]
                         {
-                            ObjectType = ComparisonObjectType.Bim360,
-                            PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.Status),
-                            ComparisonType = RelationComparisonType.NotEqual,
-                            ValueType = RelationComparisonValueType.String,
-                            Values = new object[] { Status.Answered, Status.WorkCompleted, Status.ReadyToInspect },
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue>(x => x.Attributes.Status),
+                                ComparisonType = RelationComparisonType.NotEqual,
+                                ValueType = RelationComparisonValueType.String,
+                                Values = new object[] { Status.Answered, Status.WorkCompleted, Status.ReadyToInspect },
+                            },
                         },
                     },
                     new RelationRule<ObjectiveStatus, Status>
