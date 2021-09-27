@@ -10,7 +10,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public string ID { get; set; }
 
         [DataMember(Name = "parentId")]
-        public object ParentID { get; set; }
+        public string ParentID { get; set; }
 
         [DataMember(Name = "type")]
         public string Type { get; set; }
@@ -22,7 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
         public string Description { get; set; }
 
         [DataMember(Name = "barcode")]
-        public object BarCode { get; set; }
+        public string BarCode { get; set; }
 
         [DataMember(Name = "order")]
         public int Order { get; set; }

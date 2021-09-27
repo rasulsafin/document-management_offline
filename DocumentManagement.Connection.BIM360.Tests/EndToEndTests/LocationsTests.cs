@@ -95,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             => await Task.Delay(5000);
 
         [TestMethod]
-        public async Task GetLocations_HaveAccessToIssueContainer_ReturnsIssuesList()
+        public async Task GetLocations_HaveAccessToIssueContainer_ReturnsLocationsList()
         {
             var locations = await locationService.GetLocationsAsync(issuesContainer, "default");
 

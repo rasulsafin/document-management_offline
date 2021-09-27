@@ -24,7 +24,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 treeID);
 
             var list = response[RESULTS_PROPERTY]?.ToObject<List<Location>>();
-            list.RemoveAt(0);
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (list[i].Type == LOCATION_TREE_ROOT)
+                    list.RemoveAt(i);
+            }
 
             return list;
         }

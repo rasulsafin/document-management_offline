@@ -7,6 +7,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
+using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
@@ -16,8 +17,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LbsLocation);
 
         private static readonly string DISPLAY_NAME = MrsConstants.LOCATION;
-
-        private static readonly string DEFAULT_TREE_ID = "default";
 
         private readonly LocationService locationService;
 
@@ -40,7 +39,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await locationService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_TREE_ID)).Select(
+            => (await locationService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_LOCATION_TREE_ID)).Select(
                     x => new LocationSnapshot(x, projectSnapshot));
 
         public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
