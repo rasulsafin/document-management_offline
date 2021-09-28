@@ -23,6 +23,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly IfcConfigUtilities configUtilities;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
@@ -32,7 +33,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            AssignToEnumCreator assignToEnumCreator,
+            IfcConfigUtilities configUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
@@ -42,6 +44,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.configUtilities = configUtilities;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -98,6 +101,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                     projectSnapshot.MrsFolderID = topFolder;
                 }
             }
+        }
+
+        public async Task UpdateStatusesConfigIfNull()
+        {
+            await UpdateProjectsIfNull();
+            foreach (var project in snapshot.ProjectEnumerable.Where(x => x.StatusesRelations == null))
+                project.StatusesRelations = await configUtilities.GetStatusesConfig(project);
         }
 
         public async Task UpdateIssuesIfNull(DateTime date = default)

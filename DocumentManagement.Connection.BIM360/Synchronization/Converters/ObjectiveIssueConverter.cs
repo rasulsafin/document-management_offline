@@ -58,9 +58,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
         {
             Issue exist = null;
-            var project = GetProjectSnapshot(objective);
-            if (objective.ExternalID != null)
-                exist = await issuesService.GetIssueAsync(project.IssueContainer, objective.ExternalID);
+            var project = snapshot.ProjectEnumerable.First(x => x.ID == objective.ProjectExternalID);
+            if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
+                exist = issueSnapshot.Entity;
 
             string type;
             string subtype;
@@ -263,11 +263,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             return creator.GetSnapshots(projectSnapshot)
                .FirstOrDefault(x => findPredicate(ids, x));
         }
-
-        private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
-            => snapshot.Hubs.SelectMany(x => x.Value.Projects)
-               .First(x => x.Key == obj.ProjectExternalID)
-               .Value;
 
         private async Task<(string item, int? version)> GetTarget(
             ObjectiveExternalDto obj,

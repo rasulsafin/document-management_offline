@@ -110,6 +110,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
+            await filler.UpdateStatusesConfigIfNull();
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
             await filler.UpdateRootCauses();

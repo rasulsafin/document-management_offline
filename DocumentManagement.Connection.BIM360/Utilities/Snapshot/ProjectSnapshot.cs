@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 {
@@ -26,5 +27,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         public string MrsFolderID { get; set; }
 
         public override string ID => Entity.ID;
+
+        public StatusesRelations StatusesRelations { get; set; }
     }
 }

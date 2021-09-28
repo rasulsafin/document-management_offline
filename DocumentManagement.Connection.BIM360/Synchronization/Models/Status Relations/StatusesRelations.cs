@@ -4,7 +4,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations
 {
     [DataContract]
-    internal class StatusRelation
+    internal class StatusesRelations
     {
         [DataMember]
         public RelationRule<Status, ObjectiveStatus>[] Get { get; set; }
