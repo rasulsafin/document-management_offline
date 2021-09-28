@@ -124,7 +124,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
         private static IComparable GetIssueValue(string propertyName, Issue issue)
         {
-            var property = typeof(Issue.IssueAttributes).GetProperties(BindingFlags.Public)
+            var property = typeof(Issue.IssueAttributes).GetProperties(BindingFlags.Public | BindingFlags.Instance)
                .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
 
             if (property == null)
@@ -139,7 +139,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
         private static IComparable GetObjectiveValue(string propertyName, ObjectiveExternalDto objective)
         {
-            var property = typeof(ObjectiveExternalDto).GetProperties(BindingFlags.Public)
+            var property = typeof(ObjectiveExternalDto).GetProperties(BindingFlags.Public | BindingFlags.Instance)
                .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
 
             if (property == null)
@@ -202,7 +202,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 return false;
 
             return Enum.GetValues<T>()
-               .Where(enumValue => enumValue.Equals(ignore))
+               .Where(enumValue => !enumValue.Equals(ignore))
                .Select(enumValue => enumValue.GetEnumMemberValue())
                .Any(name => name.Equals(value));
         }
