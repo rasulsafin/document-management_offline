@@ -15,45 +15,51 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
     {
         public static bool IsMet(this RelationCondition condition, Issue issue)
         {
+            if (issue == null)
+                return false;
+
             if (condition.ObjectType is not(ComparisonObjectType.Bim360 or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            var issueValue = GetIssueValue(condition, issue);
+            var issueValue = GetIssueValue(condition.PropertyName, issue);
             return condition.IsMet(issueValue);
         }
 
         public static bool IsMet(this RelationCondition condition, ObjectiveExternalDto objective)
         {
+            if (objective == null)
+                return false;
+
             if (condition.ObjectType is not(ComparisonObjectType.BrioMrs or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            var objectiveValue = GetObjectiveValue(condition, objective);
+            var objectiveValue = GetObjectiveValue(condition.PropertyName, objective);
             return condition.IsMet(objectiveValue);
         }
 
-        private static  bool IsMet(this RelationCondition condition, IComparable comparedValue)
+        private static bool IsMet(this RelationCondition condition, IComparable comparedValue)
         {
             CheckValues(condition);
             ReplaceValues(condition);
-            var conditionFunc = GetConditionFunc(condition);
+            var conditionFunc = GetConditionFunc(condition.ComparisonType);
             return condition.Values.All(value => conditionFunc(comparedValue, value));
         }
 
         private static void CheckValues(RelationCondition condition)
         {
-            if (!condition.Values.All(x => IsValueCorrect(condition, x)))
+            if (!condition.Values.All(x => IsValueCorrect(condition.ValueType, x)))
             {
                 throw new ConfigIncorrectException(
                     "Condition contains incorrect value",
                     DataMemberUtilities.GetPath<RelationCondition>(x => x.Values),
-                    condition.Values.IndexOfFirst(x => !IsValueCorrect(condition, x)));
+                    condition.Values.IndexOfFirst(x => !IsValueCorrect(condition.ValueType, x)));
             }
         }
 
-        private static IComparable GetIssueValue(RelationCondition condition, Issue issue)
+        private static IComparable GetIssueValue(string propertyName, Issue issue)
         {
             var property = typeof(Issue.IssueAttributes).GetProperties(BindingFlags.Public)
-               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == condition.PropertyName);
+               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
 
             if (property == null)
             {
@@ -65,10 +71,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             return (IComparable)property.GetValue(issue.Attributes);
         }
 
-        private static IComparable GetObjectiveValue(RelationCondition condition, ObjectiveExternalDto objective)
+        private static IComparable GetObjectiveValue(string propertyName, ObjectiveExternalDto objective)
         {
             var property = typeof(ObjectiveExternalDto).GetProperties(BindingFlags.Public)
-               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == condition.PropertyName);
+               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
 
             if (property == null)
             {
@@ -83,40 +89,44 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         private static void ReplaceValues(RelationCondition condition)
         {
             if (condition.ValueType == RelationComparisonValueType.DateTime)
-                ReplaceDateTimeValues(condition);
+                ReplaceDateTimeValues(condition.Values);
         }
 
-        private static void ReplaceDateTimeValues(RelationCondition condition)
+        private static void ReplaceDateTimeValues(object[] values)
         {
-            for (var i = 0; i < condition.Values.Length; i++)
+            for (var i = 0; i < values.Length; i++)
             {
-                if (Equals(condition.Values[i], DateTimeValues.Now.GetEnumMemberValue()))
-                    condition.Values[i] = DateTime.UtcNow;
+                if (Equals(values[i], DateTimeValues.Now.GetEnumMemberValue()))
+                    values[i] = DateTime.UtcNow;
             }
         }
 
-        private static Func<IComparable, object, bool> GetConditionFunc(RelationCondition condition)
-            => condition.ComparisonType switch
+        private static Func<IComparable, object, bool> GetConditionFunc(RelationComparisonType? comparisonType)
+            => comparisonType switch
             {
+                null => (comparable, o) => comparable.Equals(o),
                 RelationComparisonType.Undefined => (comparable, o) => comparable.Equals(o),
                 RelationComparisonType.Equal => (comparable, o) => comparable.Equals(o),
                 RelationComparisonType.NotEqual => (comparable, o) => !comparable.Equals(o),
                 RelationComparisonType.Greater => (comparable, o) => comparable.CompareTo(o) > 0,
                 RelationComparisonType.Less => (comparable, o) => comparable.CompareTo(o) < 0,
                 _ => throw new ArgumentOutOfRangeException(
-                    nameof(condition.ComparisonType),
+                    nameof(comparisonType),
                     "Not supported comparison type")
             };
 
-        private static bool IsValueCorrect(RelationCondition condition, object value)
-            => condition.ValueType switch
+        private static bool IsValueCorrect(RelationComparisonValueType? valueType, object value)
+            => valueType switch
             {
+                null => true,
                 RelationComparisonValueType.Undefined => true,
                 RelationComparisonValueType.Int => value is int,
                 RelationComparisonValueType.Float => value is float,
-                RelationComparisonValueType.DateTime => value is DateTime || IsReplacingValue(value, DateTimeValues.Undefined),
+                RelationComparisonValueType.DateTime => value is DateTime || IsReplacingValue(
+                    value,
+                    DateTimeValues.Undefined),
                 RelationComparisonValueType.String => value is string,
-                _ => throw new ArgumentOutOfRangeException(nameof(condition), "Condition contains incorrect value type")
+                _ => throw new ArgumentOutOfRangeException(nameof(valueType), "Condition contains incorrect value type")
             };
 
         private static bool IsReplacingValue<T>(object value, T ignore)
