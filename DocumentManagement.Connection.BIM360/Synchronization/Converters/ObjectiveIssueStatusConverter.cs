@@ -7,7 +7,6 @@ using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using System;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
@@ -25,34 +24,40 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
                 existing = issueSnapshot.Entity;
             var config = project.StatusesRelations ?? IfcConfigUtilities.GetDefaultStatusesConfig();
-            ObjectiveStatus was;
 
-            if (existing != null)
-            {
-                was = config.Get
-                   .Where(x => x.Source == existing.Attributes.Status)
-                   .FirstOrDefault(rule => IsAllMet(rule, existing))
-                  ?.Destination ?? ObjectiveStatus.Undefined;
+            if (existing != null &&
+                (ConvertByConfig(existing, config) ?? ObjectiveStatus.Undefined) == objective.Status)
+                return existing.Attributes.Status;
 
-                if (was == objective.Status)
-                    return existing.Attributes.Status;
-            }
-
-            var newStatus = config.Set.Where(x => x.Source == objective.Status)
-               .FirstOrDefault(rule => IsAllMet(rule));
+            var status = ConvertByConfig(objective, config, existing) ?? existing?.Attributes.Status ?? Status.Open;
+            if (existing != null && !existing.Attributes.PermittedStatuses.Contains(status))
+                status = existing.Attributes.Status;
+            return status;
         }
 
-        private static bool IsAllMet(RelationRule<Status, ObjectiveStatus> rule, Issue existing)
-        {
-            if (rule.Conditions.Any(x => x.ObjectType == ComparisonObjectType.BrioMrs))
-                throw new ArgumentException("Can not use Brio MRS values on get");
+        private static Status? ConvertByConfig(ObjectiveExternalDto objective, StatusesRelations config, Issue existing)
+            => config.Set
+               .Where(x => x.Source == objective.Status)
+               .FirstOrDefault(rule => IsAllMet(rule, existing, objective))
+              ?.Destination;
 
-            return rule.Conditions == null ||
+        private static ObjectiveStatus? ConvertByConfig(Issue issue, StatusesRelations config)
+            => config.Get
+               .Where(x => x.Source == issue.Attributes.Status)
+               .FirstOrDefault(rule => IsAllMet(rule, issue))
+              ?.Destination;
+
+        private static bool IsAllMet(RelationRule<Status, ObjectiveStatus> rule, Issue issue)
+            => rule.Conditions == null ||
                 rule.Conditions.Length == 0 ||
-                rule.Conditions.All(x => x.IsMet(existing));
-        }
+                rule.Conditions.All(x => x.IsMet(issue));
 
-        private static bool IsAllMet(RelationRule<ObjectiveStatus, Status> rule, Issue existing)
-            => rule.Conditions == null || rule.Conditions.Length == 0 || rule.Conditions.All(x => x. x.IsMet(existing));
+        private static bool IsAllMet(
+            RelationRule<ObjectiveStatus, Status> rule,
+            Issue issue,
+            ObjectiveExternalDto objective)
+            => rule.Conditions == null || rule.Conditions.Length == 0 ||
+                rule.Conditions.All(
+                    x => x.ObjectType == ComparisonObjectType.Bim360 ? x.IsMet(issue) : x.IsMet(objective));
     }
 }

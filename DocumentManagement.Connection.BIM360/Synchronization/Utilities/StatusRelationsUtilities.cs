@@ -4,7 +4,10 @@ using System.Reflection;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Exceptions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
+using MRS.DocumentManagement.Interface.Dtos;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 {
@@ -12,24 +15,69 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
     {
         public static bool IsMet(this RelationCondition condition, Issue issue)
         {
-            if (condition.ObjectType is not(ComparisonObjectType.Bim360 or ComparisonObjectType.Undefined))
+            if (condition.ObjectType is not(ComparisonObjectType.Bim360 or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            if (!condition.Values.All(x => IsValueCorrect(condition, x)))
-                throw new ArgumentOutOfRangeException(nameof(condition), "Condition contains incorrect values");
-
             var issueValue = GetIssueValue(condition, issue);
+            return condition.IsMet(issueValue);
+        }
+
+        public static bool IsMet(this RelationCondition condition, ObjectiveExternalDto objective)
+        {
+            if (condition.ObjectType is not(ComparisonObjectType.BrioMrs or null))
+                throw new ArgumentException("Need objective for this condition", nameof(condition));
+
+            var objectiveValue = GetObjectiveValue(condition, objective);
+            return condition.IsMet(objectiveValue);
+        }
+
+        private static  bool IsMet(this RelationCondition condition, IComparable comparedValue)
+        {
+            CheckValues(condition);
             ReplaceValues(condition);
             var conditionFunc = GetConditionFunc(condition);
-            return condition.Values.All(value => conditionFunc(issueValue, value));
+            return condition.Values.All(value => conditionFunc(comparedValue, value));
+        }
+
+        private static void CheckValues(RelationCondition condition)
+        {
+            if (!condition.Values.All(x => IsValueCorrect(condition, x)))
+            {
+                throw new ConfigIncorrectException(
+                    "Condition contains incorrect value",
+                    DataMemberUtilities.GetPath<RelationCondition>(x => x.Values),
+                    condition.Values.IndexOfFirst(x => !IsValueCorrect(condition, x)));
+            }
         }
 
         private static IComparable GetIssueValue(RelationCondition condition, Issue issue)
         {
             var property = typeof(Issue.IssueAttributes).GetProperties(BindingFlags.Public)
-               .Single(x => DataMemberUtilities.GetDataMemberName(x) == condition.PropertyName);
-            var issueValue = (IComparable)property.GetValue(issue.Attributes);
-            return issueValue;
+               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == condition.PropertyName);
+
+            if (property == null)
+            {
+                throw new ConfigIncorrectException(
+                    "Condition contains incorrect property name",
+                    DataMemberUtilities.GetPath<RelationCondition>(x => x.PropertyName));
+            }
+
+            return (IComparable)property.GetValue(issue.Attributes);
+        }
+
+        private static IComparable GetObjectiveValue(RelationCondition condition, ObjectiveExternalDto objective)
+        {
+            var property = typeof(ObjectiveExternalDto).GetProperties(BindingFlags.Public)
+               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == condition.PropertyName);
+
+            if (property == null)
+            {
+                throw new ConfigIncorrectException(
+                    "Condition contains incorrect property name",
+                    DataMemberUtilities.GetPath<RelationCondition>(x => x.PropertyName));
+            }
+
+            return (IComparable)property.GetValue(objective);
         }
 
         private static void ReplaceValues(RelationCondition condition)

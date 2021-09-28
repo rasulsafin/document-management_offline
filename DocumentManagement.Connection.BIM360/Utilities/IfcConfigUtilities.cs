@@ -194,6 +194,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                     Status.Open,
                     Status.Closed,
                     Status.Draft,
+                    Status.Void,
                 },
             };
 
