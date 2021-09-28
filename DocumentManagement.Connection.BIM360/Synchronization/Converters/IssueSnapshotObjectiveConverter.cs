@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
@@ -92,6 +91,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 parsedToDto.DynamicFields.Add(comment);
             }
 
+            var newComment = new DynamicFieldExternalDto()
+            {
+                ExternalID = MrsConstants.NEW_COMMENT_ID,
+                Type = DynamicFieldType.STRING,
+                Name = MrsConstants.NEW_COMMENT_FIELD_NAME,
+                Value = string.Empty,
+                UpdatedAt = System.DateTime.Now,
+            };
+
+            parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);
             parsedToDto.DynamicFields.Add(assignedTo);

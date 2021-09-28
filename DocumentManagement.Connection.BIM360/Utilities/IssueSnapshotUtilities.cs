@@ -45,16 +45,21 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID);
                 foreach (var comment in comments)
                 {
-                    var author = (await accountAdminService.GetAccountUsersAsync(project.HubSnapshot.Entity)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
-                    result.Add(
-                        new CommentSnapshot(comment)
-                        {
-                            Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,
-                        });
+                    var commentSnapshot = await FillCommentAuthor(comment, project.HubSnapshot.Entity);
+                    result.Add(commentSnapshot);
                 }
             }
 
             return result;
+        }
+
+        public async Task<CommentSnapshot> FillCommentAuthor(Comment comment, Hub hub)
+        {
+            var author = (await accountAdminService.GetAccountUsersAsync(hub)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
+            return new CommentSnapshot(comment)
+            {
+                Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,
+            };
         }
     }
 }

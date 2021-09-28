@@ -11,8 +11,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         public static readonly string ROOT_CAUSE_FIELD_NAME = "Root Cause";
         public static readonly string ASSIGN_TO_FIELD_NAME = "Assign To";
         public static readonly string COMMENT_FIELD_NAME = "Comment";
+        public static readonly string NEW_COMMENT_FIELD_NAME = "New Comment";
         public static readonly string AUTHOR_FIELD_NAME = "Author";
         public static readonly string DATE_FIELD_NAME = "Date";
         public static readonly string DEFAULT_AUTHOR_NAME = "Unauthorized name";
+
+        public static readonly string NEW_COMMENT_ID = "new_comment";
     }
 }

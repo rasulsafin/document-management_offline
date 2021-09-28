@@ -116,5 +116,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 issueID);
             return response[DATA_PROPERTY]?.ToObject<List<Comment>>();
         }
+
+        public async Task<Comment> PostIssuesCommentsAsync(string containerID, Comment comment)
+        {
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPost(comment),
+                    Resources.PostIssuesCommentsMethod,
+                    containerID);
+            return response[DATA_PROPERTY]?.ToObject<Comment>();
+        }
     }
 }

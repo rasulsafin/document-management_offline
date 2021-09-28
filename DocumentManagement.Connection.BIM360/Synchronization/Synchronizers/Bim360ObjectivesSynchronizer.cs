@@ -97,8 +97,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var issueSnapshot = project.Issues[obj.ExternalID];
             issueSnapshot.Entity = await converterToIssue.Convert(obj);
             issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issueSnapshot.Entity);
-            var parsedToDto = await converterToDto.Convert(issueSnapshot);
 
+            var newComment = obj.DynamicFields.FirstOrDefault(x => x.ExternalID == MrsConstants.NEW_COMMENT_ID && x.Value != string.Empty);
+            if (newComment != null)
+            {
+                var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
+                if (comment != null)
+                    issueSnapshot.Comments.Add(await snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot.Entity));
+            }
+
+            var parsedToDto = await converterToDto.Convert(issueSnapshot);
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
@@ -245,5 +253,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             => snapshot.Hubs.SelectMany(x => x.Value.Projects)
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
+
+        private async Task<Comment> PostComment(DynamicFieldExternalDto commentDto, string issueId, string containerId)
+        {
+            var comment = new Comment
+            {
+                Attributes = new Comment.CommentAttributes
+                {
+                    IssueId = issueId,
+                    Body = commentDto.Value,
+                },
+            };
+
+            try
+            {
+                return await issuesService.PostIssuesCommentsAsync(containerId, comment);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

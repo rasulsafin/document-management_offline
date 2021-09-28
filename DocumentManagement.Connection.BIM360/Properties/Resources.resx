@@ -301,4 +301,8 @@
     <value>/issues/v1/containers/{0}/quality-issues/{1}/comments</value>
     <comment>Retrieves all the comments associated with a BIM 360 issue.</comment>
   </data>
+  <data name="PostIssuesCommentsMethod" xml:space="preserve">
+    <value>/issues/v1/containers/{0}/comments</value>
+    <comment>Adds a comment to a BIM 360 issue.</comment>
+  </data>
 </root>
