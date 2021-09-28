@@ -30,8 +30,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
-            services.AddConverter<Status, ObjectiveStatus, StatusObjectiveStatusConverter>();
-            services.AddConverter<ObjectiveStatus, Status, ObjectiveStatusStatusConverter>();
+            services.AddConverter<IssueSnapshot, ObjectiveStatus, IssueSnapshotObjectiveStatusConverter>();
+            services.AddConverter<ObjectiveExternalDto, Status, ObjectiveIssueStatusConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
             return services;
         }

@@ -24,7 +24,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
         private readonly Bim360Snapshot snapshot;
-        private readonly IConverter<ObjectiveStatus, Status> statusConverter;
+        private readonly IConverter<ObjectiveExternalDto, Status> statusConverter;
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
@@ -35,7 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         public ObjectiveIssueConverter(
             Bim360Snapshot snapshot,
-            IConverter<ObjectiveStatus, Status> statusConverter,
+            IConverter<ObjectiveExternalDto, Status> statusConverter,
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
@@ -113,7 +113,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 {
                     Title = objective.Title,
                     Description = objective.Description,
-                    Status = await statusConverter.Convert(objective.Status),
+                    Status = await statusConverter.Convert(objective),
                     AssignedTo = assignToVariant?.Entity,
                     AssignedToType = assignToVariant?.Type ?? AssignToType.None,
                     CreatedAt = ConvertToNullable(objective.CreationDate),

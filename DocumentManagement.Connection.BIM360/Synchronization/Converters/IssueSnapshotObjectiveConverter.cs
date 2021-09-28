@@ -12,17 +12,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
+            IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator)
         {
             this.converterToDto = converterToDto;
+            this.statusConverter = statusConverter;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
@@ -31,6 +34,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
         {
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
+            parsedToDto.Status = await statusConverter.Convert(snapshot);
+
             var typeField = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
                 subtypeEnumCreator);
