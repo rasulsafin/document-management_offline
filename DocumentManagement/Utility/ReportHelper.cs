@@ -65,6 +65,9 @@ namespace MRS.DocumentManagement.Utility
                              TextElement("Пользователь: ", true),
                              TextElement(objective.Author)),
                     new XElement(HORIZONTAL_ELEMENT,
+                            TextElement("Название: ", true),
+                            TextElement(objective.Title)),
+                    new XElement(HORIZONTAL_ELEMENT,
                             TextElement("Описание: ", true),
                             TextElement(objective.Description))));
 
