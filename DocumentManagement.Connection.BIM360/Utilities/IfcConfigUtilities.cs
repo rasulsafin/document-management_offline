@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
@@ -42,7 +43,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
                                 ComparisonType = RelationComparisonType.Greater,
                                 ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now },
+                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -62,7 +63,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
                                 ComparisonType = RelationComparisonType.Greater,
                                 ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now },
+                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -116,7 +117,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
                                 ComparisonType = RelationComparisonType.NotEqual,
                                 ValueType = RelationComparisonValueType.String,
-                                Values = new object[] { Status.NotApproved },
+                                Values = new object[] { Status.NotApproved.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -132,7 +133,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 ObjectType = ComparisonObjectType.BrioMrs,
                                 ComparisonType = RelationComparisonType.Less,
                                 ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now },
+                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -148,7 +149,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 ObjectType = ComparisonObjectType.BrioMrs,
                                 ComparisonType = RelationComparisonType.Less,
                                 ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now },
+                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -164,7 +165,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
                                 ComparisonType = RelationComparisonType.NotEqual,
                                 ValueType = RelationComparisonValueType.String,
-                                Values = new object[] { Status.Answered, Status.WorkCompleted, Status.ReadyToInspect },
+                                Values = new object[]
+                                {
+                                    Status.Answered.GetEnumMemberValue(),
+                                    Status.WorkCompleted.GetEnumMemberValue(),
+                                    Status.ReadyToInspect.GetEnumMemberValue(),
+                                },
                             },
                         },
                     },

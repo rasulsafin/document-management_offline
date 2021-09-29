@@ -9,9 +9,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions
         public static string GetEnumMemberValue(this Enum value)
         {
             var attribute = value.GetAttribute<EnumMemberAttribute>();
-            return attribute != null
-                ? attribute.Value
-                : value.ToString();
+            return attribute != null ? attribute.Value ?? value.ToString() : value.ToString();
         }
 
         public static T GetAttribute<T>(this Enum value)
