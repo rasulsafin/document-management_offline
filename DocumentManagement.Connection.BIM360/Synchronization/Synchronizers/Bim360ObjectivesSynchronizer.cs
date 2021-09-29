@@ -1,3 +1,4 @@
+using MRS.DocumentManagement.Connection.Bim360.Forge.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,7 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
+using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 {
@@ -193,21 +195,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
 
             foreach (var item in items)
             {
-                if (item.ItemType == ItemType.Media)
-                {
-                    var uploaded = await itemsSyncHelper.Post(project, item);
-                    if (uploaded == default)
-                        continue;
-                    await Task.Delay(5000);
-                    var attached = await AttachPhoto(uploaded, item.FileName, issue.ID, project.IssueContainer);
-                    if (attached != null)
-                        resultItems.Add(attached);
-
-                    continue;
-                }
-
                 // If item with the same name already exists add existing item
-                Item itemWithSameNameExists = project.FindItemByName(item.FileName)?.Entity;
+                var itemWithSameNameExists = project.FindItemByName(item.FileName);
 
                 if (itemWithSameNameExists != null)
                 {
@@ -219,19 +208,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                         continue;
                     }
 
-                    var attached = await AttachItem(itemWithSameNameExists, issue.ID, project.IssueContainer);
+                    var attached = item.ItemType == ItemType.Media
+                        ? await AttachPhoto(itemWithSameNameExists.Version, issue.ID, project.IssueContainer)
+                        : await AttachItem(itemWithSameNameExists.Entity, issue.ID, project.IssueContainer);
                     if (attached != null)
                         resultItems.Add(attached);
                 }
                 else
                 {
-                    var uploadedItem = (await itemsSyncHelper.PostItem(project, item)).item;
+                    var uploadedItem = await itemsSyncHelper.PostItem(project, item);
 
                     if (uploadedItem == default)
                         continue;
 
                     await Task.Delay(5000);
-                    var attached = await AttachItem(uploadedItem, issue.ID, project.IssueContainer);
+                    var attached = item.ItemType == ItemType.Media
+                        ? await AttachPhoto(uploadedItem.Version, issue.ID, project.IssueContainer)
+                        : await AttachItem(uploadedItem.Entity, issue.ID, project.IssueContainer);
                     if (attached != null)
                         resultItems.Add(attached);
                 }
@@ -263,15 +256,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             }
         }
 
-        private async Task<Attachment> AttachPhoto(UploadResult posted, string fileName, string issueId, string containerId)
+        private async Task<Attachment> AttachPhoto(Version version, string issueId, string containerId)
         {
             var attachment = new Attachment
             {
                 Attributes = new Attachment.AttachmentAttributes
                 {
-                    Name = fileName,
+                    Name = version.Attributes.Name,
                     IssueId = issueId,
-                    Urn = posted.ObjectId,
+                    Urn = version.GetStorage().ID,
                     UrnType = UrnType.Oss,
                 },
             };

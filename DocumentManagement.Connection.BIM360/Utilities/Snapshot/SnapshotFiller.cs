@@ -90,7 +90,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                     {
                         if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
                             iv.version?.Attributes.Name != Resources.MrsFileName)
-                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
+                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item, iv.version));
                         else
                             topFolder = iv.item.Relationships.Parent.Data.ID;
                     }

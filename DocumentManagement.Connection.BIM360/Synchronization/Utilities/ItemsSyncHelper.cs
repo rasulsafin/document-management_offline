@@ -30,11 +30,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             this.versionsService = versionsService;
         }
 
-        internal async Task<(Item item, Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)
+        internal async Task<ItemSnapshot> PostItem(ProjectSnapshot project, ItemExternalDto item)
         {
             var posted = await PostItem(item, project.MrsFolderID, project.ID);
-            project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
-            return posted;
+            var itemSnapshot = new ItemSnapshot(posted.item, posted.version);
+            project.Items.Add(posted.item.ID, itemSnapshot);
+            return itemSnapshot;
         }
 
         internal async Task<UploadResult> Post(ProjectSnapshot project, ItemExternalDto item)
@@ -43,7 +44,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             return posted.result;
         }
 
-        internal async Task<(Item item, Version version)> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
+        internal async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
         {
             var snapshot = project.Items[item.ExternalID];
             var posted = await UpdateVersion(item, project.MrsFolderID, project.ID, snapshot.Entity);
@@ -51,7 +52,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             if (snapshot.ID != posted.item.ID)
             {
                 project.Items.Remove(snapshot.ID);
-                project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
+                snapshot = new ItemSnapshot(posted.item, posted.version);
+                project.Items.Add(posted.item.ID, snapshot);
             }
             else
             {
@@ -59,7 +61,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 snapshot.Version = posted.version;
             }
 
-            return posted;
+            return snapshot;
         }
 
         internal async Task Remove(string projectID, Item item)
