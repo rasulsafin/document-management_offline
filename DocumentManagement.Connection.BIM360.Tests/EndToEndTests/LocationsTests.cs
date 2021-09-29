@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (project == default)
                 Assert.Fail("Testing project doesn't exist");
 
-            issuesContainer = project.Relationships.IssuesContainer.Data.ID;
+            issuesContainer = project.Relationships.LocationContainer.Data.ID;
         }
 
         [ClassCleanup]

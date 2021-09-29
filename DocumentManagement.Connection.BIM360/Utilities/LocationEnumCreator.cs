@@ -39,7 +39,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await locationService.GetLocationsAsync(projectSnapshot.IssueContainer, DEFAULT_LOCATION_TREE_ID)).Select(
+            => (await locationService.GetLocationsAsync(projectSnapshot.LocationContainer, DEFAULT_LOCATION_TREE_ID)).Select(
                     x => new LocationSnapshot(x, projectSnapshot));
 
         public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
