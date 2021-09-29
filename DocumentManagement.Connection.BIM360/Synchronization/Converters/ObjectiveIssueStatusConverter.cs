@@ -41,7 +41,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 return Task.FromResult(existing.Attributes.Status);
             }
 
-            return Task.FromResult(statuses.Append(Status.Open).First());
+            return Task.FromResult(statuses.Append(Status.Open).First(x => x is Status.Draft or Status.Open));
         }
     }
 }

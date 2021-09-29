@@ -41,7 +41,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                             new RelationCondition
                             {
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.Greater,
+                                ComparisonType = RelationComparisonType.NotEqual,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { null },
+                            },
+                            new RelationCondition
+                            {
+                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
+                                ComparisonType = RelationComparisonType.Less,
                                 ValueType = RelationComparisonValueType.DateTime,
                                 Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
@@ -61,7 +68,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                             new RelationCondition
                             {
                                 PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.Greater,
+                                ComparisonType = RelationComparisonType.NotEqual,
+                                ValueType = RelationComparisonValueType.DateTime,
+                                Values = new object[] { null },
+                            },
+                            new RelationCondition
+                            {
+                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
+                                ComparisonType = RelationComparisonType.Less,
                                 ValueType = RelationComparisonValueType.DateTime,
                                 Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
@@ -129,9 +143,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                         {
                             new RelationCondition
                             {
-                                PropertyName = nameof(ObjectiveExternalDto.DueDate),
+                                PropertyName = DataMemberUtilities.GetPath<ObjectiveExternalDto>(x => x.DueDate),
                                 ObjectType = ComparisonObjectType.BrioMrs,
-                                ComparisonType = RelationComparisonType.Less,
+                                ComparisonType = RelationComparisonType.Greater,
                                 ValueType = RelationComparisonValueType.DateTime,
                                 Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
                             },
@@ -145,11 +159,43 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                         {
                             new RelationCondition
                             {
-                                PropertyName = nameof(ObjectiveExternalDto.DueDate),
+                                PropertyName = DataMemberUtilities.GetPath<ObjectiveExternalDto>(x => x.DueDate),
                                 ObjectType = ComparisonObjectType.BrioMrs,
-                                ComparisonType = RelationComparisonType.Less,
+                                ComparisonType = RelationComparisonType.Greater,
                                 ValueType = RelationComparisonValueType.DateTime,
                                 Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
+                            },
+                        },
+                    },
+                    new RelationRule<ObjectiveStatus, Status>
+                    {
+                        Source = ObjectiveStatus.Late,
+                        Destination = Status.NotApproved,
+                        Conditions = new[]
+                        {
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
+                                ComparisonType = RelationComparisonType.Equal,
+                                ValueType = RelationComparisonValueType.String,
+                                Values = new object[] { Status.Closed.GetEnumMemberValue() },
+                            },
+                        },
+                    },
+                    new RelationRule<ObjectiveStatus, Status>
+                    {
+                        Source = ObjectiveStatus.Late,
+                        Destination = Status.Open,
+                        Conditions = new[]
+                        {
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
+                                ComparisonType = RelationComparisonType.Equal,
+                                ValueType = RelationComparisonValueType.String,
+                                Values = new object[] { Status.Closed.GetEnumMemberValue() },
                             },
                         },
                     },
@@ -167,6 +213,29 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                                 ValueType = RelationComparisonValueType.String,
                                 Values = new object[]
                                 {
+                                    Status.Answered.GetEnumMemberValue(),
+                                    Status.WorkCompleted.GetEnumMemberValue(),
+                                    Status.ReadyToInspect.GetEnumMemberValue(),
+                                },
+                            },
+                        },
+                    },
+                    new RelationRule<ObjectiveStatus, Status>
+                    {
+                        Source = ObjectiveStatus.InProgress,
+                        Destination = Status.Open,
+                        Conditions = new[]
+                        {
+                            new RelationCondition
+                            {
+                                ObjectType = ComparisonObjectType.Bim360,
+                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
+                                ComparisonType = RelationComparisonType.NotEqual,
+                                ValueType = RelationComparisonValueType.String,
+                                Values = new object[]
+                                {
+                                    Status.NotApproved.GetEnumMemberValue(),
+                                    Status.InDispute.GetEnumMemberValue(),
                                     Status.Answered.GetEnumMemberValue(),
                                     Status.WorkCompleted.GetEnumMemberValue(),
                                     Status.ReadyToInspect.GetEnumMemberValue(),

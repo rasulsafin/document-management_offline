@@ -84,7 +84,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             if (condition.ObjectType is not(ComparisonObjectType.Bim360 or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            var issueValue = GetIssueValue(condition.PropertyName, issue);
+            var issueValue = GetObjectValue(condition.PropertyName, issue);
             return condition.IsMet(issueValue);
         }
 
@@ -96,7 +96,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             if (condition.ObjectType is not(ComparisonObjectType.BrioMrs or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            var objectiveValue = GetObjectiveValue(condition.PropertyName, objective);
+            var objectiveValue = GetObjectValue(condition.PropertyName, objective);
             return condition.IsMet(objectiveValue);
         }
 
@@ -119,9 +119,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             }
         }
 
-        private static IComparable GetIssueValue(string propertyName, Issue issue)
+        private static IComparable GetObjectValue<T>(string propertyName, T o)
         {
-            var property = typeof(Issue.IssueAttributes).GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            var property = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance)
                .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
 
             if (property == null)
@@ -131,22 +131,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                     DataMemberUtilities.GetPath<RelationCondition>(x => x.PropertyName));
             }
 
-            return (IComparable)property.GetValue(issue.Attributes);
-        }
-
-        private static IComparable GetObjectiveValue(string propertyName, ObjectiveExternalDto objective)
-        {
-            var property = typeof(ObjectiveExternalDto).GetProperties(BindingFlags.Public | BindingFlags.Instance)
-               .FirstOrDefault(x => DataMemberUtilities.GetDataMemberName(x) == propertyName);
-
-            if (property == null)
-            {
-                throw new ConfigIncorrectException(
-                    "Condition contains incorrect property name",
-                    DataMemberUtilities.GetPath<RelationCondition>(x => x.PropertyName));
-            }
-
-            return (IComparable)property.GetValue(objective);
+            var value = property.GetValue(o);
+            if (value is Enum enumValue)
+                value = enumValue.GetEnumMemberValue();
+            return (IComparable)value;
         }
 
         private static void ReplaceValues(RelationCondition condition)
@@ -165,30 +153,38 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         }
 
         private static Func<IComparable, object, bool> GetConditionFunc(RelationComparisonType? comparisonType)
-            => comparisonType switch
+        {
+            bool ThrowNullException()
+                => throw new ConfigIncorrectException(
+                    "Property is null. Add condition to check this",
+                    DataMemberUtilities.GetPath<RelationCondition>(x => x.PropertyName));
+
+            return comparisonType switch
             {
-                null => (comparable, o) => comparable.Equals(o),
-                RelationComparisonType.Undefined => (comparable, o) => comparable.Equals(o),
-                RelationComparisonType.Equal => (comparable, o) => comparable.Equals(o),
-                RelationComparisonType.NotEqual => (comparable, o) => !comparable.Equals(o),
-                RelationComparisonType.Greater => (comparable, o) => comparable.CompareTo(o) > 0,
-                RelationComparisonType.Less => (comparable, o) => comparable.CompareTo(o) < 0,
+                null => Equals,
+                RelationComparisonType.Undefined => Equals,
+                RelationComparisonType.Equal => Equals,
+                RelationComparisonType.NotEqual => (comparable, o) => !Equals(comparable, o),
+                RelationComparisonType.Greater => (comparable, o)
+                    => comparable != null ? comparable.CompareTo(o) > 0 : ThrowNullException(),
+                RelationComparisonType.Less => (comparable, o)
+                    => comparable != null ? comparable.CompareTo(o) < 0 : ThrowNullException(),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(comparisonType),
                     "Not supported comparison type")
             };
+        }
 
         private static bool IsValueCorrect(RelationComparisonValueType? valueType, object value)
             => valueType switch
             {
                 null => true,
                 RelationComparisonValueType.Undefined => true,
-                RelationComparisonValueType.Int => value is int,
-                RelationComparisonValueType.Float => value is float,
-                RelationComparisonValueType.DateTime => value is DateTime || IsReplacingValue(
-                    value,
-                    DateTimeValues.Undefined),
-                RelationComparisonValueType.String => value is string,
+                RelationComparisonValueType.Int => value is int or null,
+                RelationComparisonValueType.Float => value is float or double or null,
+                RelationComparisonValueType.DateTime => value is DateTime or null ||
+                    IsReplacingValue(value, DateTimeValues.Undefined),
+                RelationComparisonValueType.String => value is string or null,
                 _ => throw new ArgumentOutOfRangeException(nameof(valueType), "Condition contains incorrect value type")
             };
 
