@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
@@ -36,12 +36,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
             var itemSnapshot = new ItemSnapshot(posted.item, posted.version);
             project.Items.Add(posted.item.ID, itemSnapshot);
             return itemSnapshot;
-        }
-
-        internal async Task<UploadResult> Post(ProjectSnapshot project, ItemExternalDto item)
-        {
-            var posted = await Upload(project.ID, project.MrsFolderID, item.FullPath, Path.GetFileName(item.FullPath));
-            return posted.result;
         }
 
         internal async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
@@ -139,35 +133,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
         private async Task<Version> CreateVersion(string projectId, string folder, string filePath, string fileName)
         {
-            var (storage, uploaded) = await Upload(projectId, folder, filePath, fileName);
-            if ((storage, uploaded) == default)
-                return null;
-
-            // STEP 7. Create first version
-            var version = new Version
-            {
-                Attributes = new Version.VersionAttributes
-                {
-                    Name = fileName,
-                    Extension = new Extension
-                    {
-                        Type = AUTODESK_VERSION_FILE_TYPE,
-                    },
-                },
-                Relationships = new Version.VersionRelationships
-                {
-                    Storage = storage.ToInfo().ToDataContainer(),
-                },
-            };
-            return version;
-        }
-
-        private async Task<(StorageObject storageObject, UploadResult result)> Upload(
-            string projectId,
-            string folder,
-            string filePath,
-            string fileName)
-        {
             // STEP 5. Create a Storage Object.
             var objectToUpload = new StorageObject
             {
@@ -190,17 +155,34 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 
             var storage = await projectsService.CreateStorageAsync(projectId, objectToUpload);
             if (storage == default)
-                return default;
+                return null;
 
             // STEP 6. Upload file to storage
             if (!storage.ID.Contains(':') || !storage.ID.Contains('/'))
-                return default;
+                return null;
 
             var parsedId = storage.ParseStorageId();
             var bucketKey = parsedId.bucketKey;
             var hashedName = parsedId.hashedName;
-            var uploadResult = await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
-            return (storage, uploadResult);
+            await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
+
+            // STEP 7. Create first version
+            var version = new Version
+            {
+                Attributes = new Version.VersionAttributes
+                {
+                    Name = fileName,
+                    Extension = new Extension
+                    {
+                        Type = AUTODESK_VERSION_FILE_TYPE,
+                    },
+                },
+                Relationships = new Version.VersionRelationships
+                {
+                    Storage = storage.ToInfo().ToDataContainer(),
+                },
+            };
+            return version;
         }
     }
 }
