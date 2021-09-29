@@ -25,13 +25,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var config = project.StatusesRelations ?? IfcConfigUtilities.GetDefaultStatusesConfig();
 
             if (existing != null &&
-                (existing.ConvertStatusByConfig(config) ?? ObjectiveStatus.Undefined) == objective.Status)
+                existing.GetSuitableStatuses(config).Append(ObjectiveStatus.Undefined).First() == objective.Status)
                 return Task.FromResult(existing.Attributes.Status);
 
-            var status = objective.ConvertStatusByConfig(config, existing) ?? existing?.Attributes.Status ?? Status.Open;
-            if (existing != null && !existing.Attributes.PermittedStatuses.Contains(status))
-                status = existing.Attributes.Status;
-            return Task.FromResult(status);
+            var statuses = objective.GetSuitableStatuses(config, existing);
+
+            if (existing != null)
+            {
+                foreach (var status in statuses)
+                {
+                    if (existing.Attributes.PermittedStatuses.Contains(status))
+                        return Task.FromResult(status);
+                }
+
+                return Task.FromResult(existing.Attributes.Status);
+            }
+
+            return Task.FromResult(statuses.Append(Status.Open).First());
         }
     }
 }

@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
@@ -12,7 +13,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         {
             var project = issueSnapshot.ProjectSnapshot;
             var config = project.StatusesRelations ?? IfcConfigUtilities.GetDefaultStatusesConfig();
-            var status = issueSnapshot.Entity.ConvertStatusByConfig(config) ?? ObjectiveStatus.Undefined;
+            var status = issueSnapshot.Entity.GetSuitableStatuses(config)
+               .Append(ObjectiveStatus.Undefined)
+               .First();
             return Task.FromResult(status);
         }
     }

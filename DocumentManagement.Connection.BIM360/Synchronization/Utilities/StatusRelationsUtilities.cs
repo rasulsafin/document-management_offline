@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
@@ -14,7 +15,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
 {
     internal static class StatusRelationsUtilities
     {
-        public static Status? ConvertStatusByConfig(
+        public static IEnumerable<Status> GetSuitableStatuses(
             this ObjectiveExternalDto objective,
             StatusesRelations config,
             Issue existing = null)
@@ -42,13 +43,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 }
 
                 if (isAllMet)
-                    return relationRule.Destination;
+                    yield return relationRule.Destination;
             }
-
-            return null;
         }
 
-        public static ObjectiveStatus? ConvertStatusByConfig(this Issue issue, StatusesRelations config)
+        public static IEnumerable<ObjectiveStatus> GetSuitableStatuses(this Issue issue, StatusesRelations config)
         {
             for (var i = 0; i < config.Get.Length; i++)
             {
@@ -73,10 +72,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
                 }
 
                 if (isAllMet)
-                    return relationRule.Destination;
+                    yield return relationRule.Destination;
             }
-
-            return null;
         }
 
         private static bool IsMet(this RelationCondition condition, Issue issue)
