@@ -305,4 +305,8 @@
     <value>/issues/v1/containers/{0}/comments</value>
     <comment>Adds a comment to a BIM 360 issue.</comment>
   </data>
+  <data name="GetLocationMethod" xml:space="preserve">
+    <value>/bim360/locations/v2/containers/{0}/trees/{1}/nodes</value>
+    <comment>Get location</comment>
+  </data>
 </root>

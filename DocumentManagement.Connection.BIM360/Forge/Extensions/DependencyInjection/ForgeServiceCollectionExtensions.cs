@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<FoldersService>();
             services.AddScoped<HubsService>();
             services.AddScoped<IssuesService>();
+            services.AddScoped<LocationService>();
             services.AddScoped<ItemsService>();
             services.AddScoped<ObjectsService>();
             services.AddScoped<ProjectsService>();

@@ -9,6 +9,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         public static readonly string RESPONSE_FIELD_NAME = "Response";
         public static readonly string TYPE_FIELD_NAME = "Type";
         public static readonly string ROOT_CAUSE_FIELD_NAME = "Root Cause";
+        public static readonly string LOCATION = "Location";
         public static readonly string ASSIGN_TO_FIELD_NAME = "Assign To";
         public static readonly string COMMENT_FIELD_NAME = "Comment";
         public static readonly string NEW_COMMENT_FIELD_NAME = "New Comment";

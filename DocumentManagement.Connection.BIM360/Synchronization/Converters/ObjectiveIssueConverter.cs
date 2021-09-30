@@ -30,6 +30,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly ItemsService itemsService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IfcConfigUtilities ifcConfigUtilities;
 
@@ -41,6 +42,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             ItemsService itemsService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
+            LocationEnumCreator locationEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             IfcConfigUtilities ifcConfigUtilities)
         {
@@ -51,6 +53,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             this.itemsService = itemsService;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.ifcConfigUtilities = ifcConfigUtilities;
         }
@@ -121,6 +124,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
                     RootCauseID =
                         GetValue(rootCauseEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                          ?.Entity.ID,
+                    LbsLocation =
+                         GetValue(locationEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
                           ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes = await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
