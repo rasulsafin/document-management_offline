@@ -18,17 +18,20 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
+            LocationEnumCreator locationEnumCreator,
             AssignToEnumCreator assignToEnumCreator)
         {
             this.converterToDto = converterToDto;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
         }
 
@@ -43,6 +46,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 : DynamicFieldUtilities.CreateField(
                     snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
                     rootCauseEnumCreator);
+            var locations = snapshot.Entity.Attributes.LbsLocation == null
+                ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LbsLocation].ID,
+                    locationEnumCreator);
             var assignedTo = snapshot.Entity.Attributes.AssignedTo == null
                 ? DynamicFieldUtilities.CreateField(assignToEnumCreator.NullID, assignToEnumCreator)
                 : DynamicFieldUtilities.CreateField(
@@ -104,6 +112,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);
+            parsedToDto.DynamicFields.Add(locations);
             parsedToDto.DynamicFields.Add(assignedTo);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 

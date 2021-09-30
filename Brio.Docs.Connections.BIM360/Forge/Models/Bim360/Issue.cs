@@ -138,6 +138,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
             public SheetMetadata SheetMetadata { get; set; }
 
             [DataMember(Name = "lbs_location")]
+            [JsonProperty(NullValueHandling = NullValueHandling.Include)]
             public string LbsLocation { get; set; }
 
             [DataMember(Name = "ng_issue_subtype_id")]

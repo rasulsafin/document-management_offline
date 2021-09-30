@@ -63,6 +63,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 
             await snapshotFiller.UpdateIssueTypes();
             await snapshotFiller.UpdateRootCauses();
+            await snapshotFiller.UpdateLocations();
             await snapshotFiller.UpdateAssignTo();
             snapshotFilled = true;
         }

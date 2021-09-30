@@ -27,6 +27,7 @@ namespace Brio.Docs.Connections.Bim360
         private readonly EnumerationTypeCreator typeCreator;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly Authenticator authenticator;
 
@@ -39,6 +40,7 @@ namespace Brio.Docs.Connections.Bim360
             EnumerationTypeCreator typeCreator,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
+            LocationEnumCreator locationEnumCreator,
             AssignToEnumCreator assignToEnumCreator)
         {
             this.authenticator = authenticator;
@@ -49,6 +51,7 @@ namespace Brio.Docs.Connections.Bim360
             this.typeCreator = typeCreator;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
         }
 
@@ -147,12 +150,14 @@ namespace Brio.Docs.Connections.Bim360
                 throw new TypeAccessException("You have no access to issue types.");
 
             var rootCauses = await typeCreator.Create(rootCauseEnumCreator);
+            var location = await typeCreator.Create(locationEnumCreator);
             var assignTo = await typeCreator.Create(assignToEnumCreator);
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto>
             {
                 typesSubtypes,
                 rootCauses,
+                location,
                 assignTo,
             };
 
@@ -168,6 +173,9 @@ namespace Brio.Docs.Connections.Bim360
                     DynamicFieldUtilities.CreateField(
                         rootCauseEnumCreator.NullID,
                         rootCauseEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        locationEnumCreator.NullID,
+                        locationEnumCreator),
                     DynamicFieldUtilities.CreateField(
                         assignToEnumCreator.NullID,
                         assignToEnumCreator),

@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <RootNamespace>Brio.Docs.Connections.MrsPro.Tests</RootNamespace>
-    <Version>1.0.4</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
   
   <ItemGroup>
