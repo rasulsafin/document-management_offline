@@ -240,5 +240,13 @@ namespace Brio.Docs.Connections.Bim360.Tests
             var attachments = await issuesService.GetAttachmentsAsync(issuesContainer, TEST_ISSUE_ID);
             Assert.IsNotNull(attachments);
         }
+
+        [TestMethod]
+        public async Task GetComments_HaveAccessToTestingIssue_ReturnsCommentsList()
+        {
+            var comments = await issuesService.GetCommentsAsync(issuesContainer, TEST_ISSUE_ID);
+            Assert.IsNotNull(comments);
+            Assert.AreEqual(3, comments.Count);
+        }
     }
 }

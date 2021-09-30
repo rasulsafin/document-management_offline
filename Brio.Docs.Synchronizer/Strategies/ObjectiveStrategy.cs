@@ -200,6 +200,7 @@ namespace Brio.Docs.Synchronization.Strategies
                     throw new Exception("Exception created while Synchronizing children in Merge Objective");
 
                 var result = await base.Merge(tuple, data, connectionContext, parent, token);
+                await SaveDb(data);
 
                 resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
                 logger.LogTrace("Children synchronized");

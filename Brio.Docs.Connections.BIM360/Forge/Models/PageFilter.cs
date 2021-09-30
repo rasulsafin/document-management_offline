@@ -26,6 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models
         {
             var builder = new StringBuilder();
             builder.AppendFormat(Constants.PAGE_QUERY_PARAMETER, Constants.LIMIT_PARAMETER_NAME, limit);
+            builder.Append('&');
             if (offset >= 0)
                 builder.AppendFormat(Constants.PAGE_QUERY_PARAMETER, Constants.OFFSET_PARAMETER_NAME, offset);
             if (number >= 0)
