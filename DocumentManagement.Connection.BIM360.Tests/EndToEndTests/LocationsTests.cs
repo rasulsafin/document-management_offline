@@ -20,7 +20,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
     {
         private static Project project;
         private static LocationService locationService;
-        private static string issuesContainer;
+        private static string locationContainer;
         private static ForgeConnection connection;
         private static ServiceProvider serviceProvider;
 
@@ -83,7 +83,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             if (project == default)
                 Assert.Fail("Testing project doesn't exist");
 
-            issuesContainer = project.Relationships.LocationContainer.Data.ID;
+            locationContainer = project.Relationships.LocationContainer.Data.ID;
         }
 
         [ClassCleanup]
@@ -95,9 +95,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
             => await Task.Delay(5000);
 
         [TestMethod]
-        public async Task GetLocations_HaveAccessToIssueContainer_ReturnsLocationsList()
+        public async Task GetLocations_HaveAccessToLocationContainer_ReturnsLocationsList()
         {
-            var locations = await locationService.GetLocationsAsync(issuesContainer, "default");
+            var locations = await locationService.GetLocationsAsync(locationContainer, "default");
 
             if (locations == null)
                 Assert.Fail();
