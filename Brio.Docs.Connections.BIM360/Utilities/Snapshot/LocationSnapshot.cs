@@ -1,6 +1,6 @@
-﻿using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+﻿using Brio.Docs.Connections.Bim360.Forge.Models;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
     internal class LocationSnapshot : AEnumVariantSnapshot<Location>
     {

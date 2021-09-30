@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
-using MRS.DocumentManagement.Connection.Bim360.Properties;
-using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
+using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Pagination;
+using Brio.Docs.Connections.Bim360.Properties;
+using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
+namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
     public class LocationService
     {

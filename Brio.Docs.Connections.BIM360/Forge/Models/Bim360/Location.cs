@@ -1,7 +1,6 @@
 ﻿using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace Brio.Docs.Connections.Bim360.Forge.Models
 {
     [DataContract]
     public class Location
