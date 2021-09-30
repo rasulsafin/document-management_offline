@@ -18,7 +18,6 @@ namespace Brio.Docs.Connections.Bim360.Forge
         internal static readonly TimeSpan MIN_TOKEN_LIFE = TimeSpan.FromMinutes(3);
 
         private const string MEDIA_TYPE_JSON = "text/json";
-        private const string CONTENT_TYPE = "application/vnd.api+json";
 
         public ForgeConnection()
             => client.Timeout = TimeSpan.FromSeconds(30);
@@ -95,13 +94,10 @@ namespace Brio.Docs.Connections.Bim360.Forge
 
         private HttpRequestMessage CreateHttpRequestMessage(ForgeSettings settings, string command, object[] arguments)
         {
-            var request = CreateRequest(
-                settings.MethodType,
-                command,
-                arguments,
-                settings.IsAuthorized
-                    ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
-                    : default);
+            var authData = settings.IsAuthorized
+                ? (Constants.AUTHORIZATION_SCHEME, Token: settings.UseAppToken ? GetAppToken() : GetToken())
+                : default;
+            var request = CreateRequest(settings.MethodType, command, arguments, authData);
 
             if (settings.CreateContent != null)
             {
@@ -141,7 +137,7 @@ namespace Brio.Docs.Connections.Bim360.Forge
                     Encoding.Default,
                     MEDIA_TYPE_JSON);
 
-                request.Content.Headers.ContentType = new MediaTypeHeaderValue(CONTENT_TYPE);
+                request.Content.Headers.ContentType = new MediaTypeHeaderValue(settings.ContentType);
             }
 
             return request;

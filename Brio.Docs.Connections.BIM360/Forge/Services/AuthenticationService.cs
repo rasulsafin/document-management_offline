@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,8 +11,12 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
     public class AuthenticationService
     {
-        private static readonly string SCOPE = "data:read%20data:write%20data:create%20account:read";
-        private static readonly string APP_SCOPE = "account:read";
+        private static readonly Enum[] SCOPES =
+        {
+            DataScope.Read, DataScope.Write, DataScope.Create, AccountScope.Read,
+        };
+
+        private static readonly Enum[] APP_SCOPES = { AccountScope.Read };
 
         private readonly ForgeConnection connection;
 
@@ -23,7 +28,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
                 $"{FORGE_URL}{Resources.GetAuthorizeMethod}",
                 appPropertyClientId,
                 appPropertyCallBackUrl.Replace("/", "%2F"),
-                SCOPE);
+                ScopeUtilities.GetScopeString(SCOPES));
 
         public async Task<Token> GetTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string code, string appPropertyCallBackUrl)
         {
@@ -71,7 +76,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
                         new (AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientID),
                         new (AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD, appPropertyClientSecret),
                         new (AUTH_REQUEST_BODY_GRANT_TYPE_FIELD, AUTH_GRANT_TYPE_CLIENT_CREDENTIALS_VALUE),
-                        new (AUTH_REQUEST_BODY_SCOPE_FIELD, APP_SCOPE),
+                        new (AUTH_REQUEST_BODY_SCOPE_FIELD, ScopeUtilities.GetScopeString(APP_SCOPES)),
                     });
 
             var data = await connection.SendAsync(

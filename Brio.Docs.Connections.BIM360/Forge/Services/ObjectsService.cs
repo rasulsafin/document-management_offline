@@ -92,25 +92,5 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
                     Resources.DeleteBucketsObjectMethod,
                     bucketKey,
                     objectKey);
-
-        public async Task<JToken> GetBuckets()
-            => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketsMethod);
-
-        public async Task<JToken> GetBucketDetails(string bucketKey)
-            => await connection.SendAsync(ForgeSettings.AuthorizedGet(), Resources.GetBucketDetailsMethod, bucketKey);
-
-        public async Task<JToken> PostBucket(string bucketKeyToAdd)
-        {
-            var bucket = new
-            {
-                bucketKey = bucketKeyToAdd,
-                access = "full",
-                policyKey = "transient",
-            };
-            var response = await connection.SendAsync(
-                    ForgeSettings.AuthorizedPostWithoutKeyData(bucket),
-                    Resources.PostBucketsMethod);
-            return response;
-        }
     }
 }

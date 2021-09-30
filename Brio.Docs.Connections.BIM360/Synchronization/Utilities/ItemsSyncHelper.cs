@@ -10,14 +10,18 @@ using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
-    public class ItemsSyncHelper
+    internal class ItemsSyncHelper
     {
         private readonly ItemsService itemsService;
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
         private readonly VersionsService versionsService;
 
-        public ItemsSyncHelper(ItemsService itemsService, ProjectsService projectsService, ObjectsService objectsService, VersionsService versionsService)
+        public ItemsSyncHelper(
+            ItemsService itemsService,
+            ProjectsService projectsService,
+            ObjectsService objectsService,
+            VersionsService versionsService)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
@@ -25,14 +29,15 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             this.versionsService = versionsService;
         }
 
-        internal async Task<(Item item, Forge.Models.DataManagement.Version version)> PostItem(ProjectSnapshot project, ItemExternalDto item)
+        internal async Task<ItemSnapshot> PostItem(ProjectSnapshot project, ItemExternalDto item)
         {
             var posted = await PostItem(item, project.MrsFolderID, project.ID);
-            project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
-            return posted;
+            var itemSnapshot = new ItemSnapshot(posted.item, posted.version);
+            project.Items.Add(posted.item.ID, itemSnapshot);
+            return itemSnapshot;
         }
 
-        internal async Task<(Item item, Forge.Models.DataManagement.Version version)> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
+        internal async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
         {
             var snapshot = project.Items[item.ExternalID];
             var posted = await UpdateVersion(item, project.MrsFolderID, project.ID, snapshot.Entity);
@@ -40,7 +45,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             if (snapshot.ID != posted.item.ID)
             {
                 project.Items.Remove(snapshot.ID);
-                project.Items.Add(posted.item.ID, new ItemSnapshot(posted.item) { Version = posted.version });
+                snapshot = new ItemSnapshot(posted.item, posted.version);
+                project.Items.Add(posted.item.ID, snapshot);
             }
             else
             {
@@ -48,7 +54,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 snapshot.Version = posted.version;
             }
 
-            return posted;
+            return snapshot;
         }
 
         internal async Task Remove(string projectID, Item item)

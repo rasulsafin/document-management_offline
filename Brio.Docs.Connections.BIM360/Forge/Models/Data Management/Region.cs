@@ -9,7 +9,9 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.DataManagement
     public enum Region
     {
         Undefined,
+        [EnumMember(Value = "US")]
         US,
+        [EnumMember(Value = "EMEA")]
         Emea,
     }
 }

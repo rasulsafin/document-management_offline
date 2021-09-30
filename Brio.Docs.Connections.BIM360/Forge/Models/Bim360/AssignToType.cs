@@ -5,11 +5,10 @@ using Newtonsoft.Json;
 namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {
     [DataContract]
-    [JsonConverter(typeof(SafeStringEnumConverter), None)]
+    [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
     public enum AssignToType
     {
-        [EnumMember(Value = null)]
-        None,
+        Undefined,
         [EnumMember(Value = "user")]
         User,
         [EnumMember(Value = "role")]
