@@ -151,6 +151,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/comments.
+        /// </summary>
+        internal static string GetIssuesCommentsMethod {
+            get {
+                return ResourceManager.GetString("GetIssuesCommentsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues.
         /// </summary>
         internal static string GetIssuesMethod {
@@ -399,6 +408,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string PostIssuesAttachmentsMethod {
             get {
                 return ResourceManager.GetString("PostIssuesAttachmentsMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/comments.
+        /// </summary>
+        internal static string PostIssuesCommentsMethod {
+            get {
+                return ResourceManager.GetString("PostIssuesCommentsMethod", resourceCulture);
             }
         }
         

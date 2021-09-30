@@ -13,6 +13,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public Dictionary<string, Attachment> Attachments { get; set; }
 
+        public List<CommentSnapshot> Comments { get; set; }
+
         public ProjectSnapshot ProjectSnapshot { get; }
 
         public override string ID => Entity.ID;

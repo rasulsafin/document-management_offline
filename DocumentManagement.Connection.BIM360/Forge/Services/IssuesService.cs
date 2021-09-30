@@ -106,5 +106,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 containerID);
             return response[DATA_PROPERTY]?.ToObject<UserInfo>();
         }
+
+        public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
+            => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
+                connection,
+                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod),
+                DATA_PROPERTY,
+                containerID,
+                issueID);
+
+        public async Task<Comment> PostIssuesCommentsAsync(string containerID, Comment comment)
+        {
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPost(comment),
+                    Resources.PostIssuesCommentsMethod,
+                    containerID);
+            return response[DATA_PROPERTY]?.ToObject<Comment>();
+        }
     }
 }
