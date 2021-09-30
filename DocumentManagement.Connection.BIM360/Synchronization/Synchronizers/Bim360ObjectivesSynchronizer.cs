@@ -24,6 +24,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
         private readonly Authenticator authenticator;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly SnapshotFiller filler;
+        private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -33,6 +34,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             Authenticator authenticator,
             ItemsSyncHelper itemsSyncHelper,
             SnapshotFiller filler,
+            IssueSnapshotUtilities snapshotUtilities,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -43,6 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             this.converterToDto = converterToDto;
             this.filler = filler;
             this.authenticator = authenticator;
+            this.snapshotUtilities = snapshotUtilities;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -96,8 +99,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             var issueSnapshot = project.Issues[obj.ExternalID];
             issueSnapshot.Entity = await converterToIssue.Convert(obj);
             issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issueSnapshot.Entity);
-            var parsedToDto = await converterToDto.Convert(issueSnapshot);
 
+            var newComment = obj.DynamicFields.FirstOrDefault(x => x.ExternalID == MrsConstants.NEW_COMMENT_ID && x.Value != string.Empty);
+            if (newComment != null)
+            {
+                var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
+                if (comment != null)
+                    issueSnapshot.Comments.Add(await snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot.Entity));
+            }
+
+            var parsedToDto = await converterToDto.Convert(issueSnapshot);
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
@@ -153,22 +164,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
                                 if (IssueUtilities.IsRemoved(received))
                                     break;
 
-                                found = new IssueSnapshot(received, project)
-                                {
-                                    Attachments = new Dictionary<string, Attachment>(),
-                                };
-
-                                var attachments = await issuesService.GetAttachmentsAsync(
-                                    found.ProjectSnapshot.IssueContainer,
-                                    found.ID);
-
-                                foreach (var attachment in attachments.Where(
-                                    x => x.Attributes.UrnType == UrnType.Oss ||
-                                        project.Items.ContainsKey(x.Attributes.Urn)))
-                                    found.Attachments.Add(attachment.ID, attachment);
-
+                                found = new IssueSnapshot(received, project);
+                                found.Attachments = await snapshotUtilities.GetAttachments(found, project);
+                                found.Comments = await snapshotUtilities.GetComments(found, project);
                                 found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
-
                                 break;
                             }
                         }
@@ -283,5 +282,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             => snapshot.Hubs.SelectMany(x => x.Value.Projects)
                .First(x => x.Key == obj.ProjectExternalID)
                .Value;
+
+        private async Task<Comment> PostComment(DynamicFieldExternalDto commentDto, string issueId, string containerId)
+        {
+            var comment = new Comment
+            {
+                Attributes = new Comment.CommentAttributes
+                {
+                    IssueId = issueId,
+                    Body = commentDto.Value,
+                },
+            };
+
+            try
+            {
+                return await issuesService.PostIssuesCommentsAsync(containerId, comment);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
