@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
+namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {
     [DataContract]
     public class Comment : Object<Comment.CommentAttributes, object>
