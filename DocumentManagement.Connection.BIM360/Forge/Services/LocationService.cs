@@ -19,7 +19,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 
         public async Task<List<Location>> GetLocationsAsync(string containerID, string treeID, IEnumerable<Filter> filters = null)
         {
-            var locations = await PaginationHelper.GetItemsByPages<Location, MetaStrategy>(
+            var locations = await PaginationHelper.GetItemsByPages<Location, PaginationStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetLocationMethod, filters),
                 RESULTS_PROPERTY,
@@ -31,7 +31,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
                 for (int i = 0; i < locations.Count; i++)
                 {
                     if (locations[i].Type == LOCATION_TREE_ROOT)
+                    {
                         locations.RemoveAt(i);
+                        break;
+                    }
                 }
             }
 
