@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Properties;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Exceptions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
@@ -16,6 +18,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 {
     internal class IfcConfigUtilities
     {
+        private static readonly string DEFAULT_STATUSES_CONFIG = "statuses.mrsbc";
         private readonly Downloader downloader;
 
         public IfcConfigUtilities(Downloader downloader)
@@ -23,257 +26,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public static StatusesRelations GetDefaultStatusesConfig()
         {
-            var conf = new StatusesRelations
-            {
-                Get = new[]
-                {
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.Draft,
-                        Destination = ObjectiveStatus.Open,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.Open,
-                        Destination = ObjectiveStatus.Late,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.NotEqual,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { null },
-                            },
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.Less,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.Open,
-                        Destination = ObjectiveStatus.Open,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.NotApproved,
-                        Destination = ObjectiveStatus.Late,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.NotEqual,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { null },
-                            },
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.DueDate),
-                                ComparisonType = RelationComparisonType.Less,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.NotApproved,
-                        Destination = ObjectiveStatus.Open,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.Answered,
-                        Destination = ObjectiveStatus.InProgress,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.WorkCompleted,
-                        Destination = ObjectiveStatus.InProgress,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.ReadyToInspect,
-                        Destination = ObjectiveStatus.InProgress,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.InDispute,
-                        Destination = ObjectiveStatus.InProgress,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.InDispute,
-                        Destination = ObjectiveStatus.InProgress,
-                    },
-                    new RelationRule<Status, ObjectiveStatus>
-                    {
-                        Source = Status.Closed,
-                        Destination = ObjectiveStatus.Ready,
-                    },
-                },
-                Set = new[]
-                {
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Open,
-                        Destination = Status.Open,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                ObjectType = ComparisonObjectType.Bim360,
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
-                                ComparisonType = RelationComparisonType.NotEqual,
-                                ValueType = RelationComparisonValueType.String,
-                                Values = new object[] { Status.NotApproved.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Late,
-                        Destination = Status.NotApproved,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<ObjectiveExternalDto>(x => x.DueDate),
-                                ObjectType = ComparisonObjectType.BrioMrs,
-                                ComparisonType = RelationComparisonType.Greater,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Late,
-                        Destination = Status.Open,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                PropertyName = DataMemberUtilities.GetPath<ObjectiveExternalDto>(x => x.DueDate),
-                                ObjectType = ComparisonObjectType.BrioMrs,
-                                ComparisonType = RelationComparisonType.Greater,
-                                ValueType = RelationComparisonValueType.DateTime,
-                                Values = new object[] { DateTimeValues.Now.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Late,
-                        Destination = Status.NotApproved,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                ObjectType = ComparisonObjectType.Bim360,
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
-                                ComparisonType = RelationComparisonType.Equal,
-                                ValueType = RelationComparisonValueType.String,
-                                Values = new object[] { Status.Closed.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Late,
-                        Destination = Status.Open,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                ObjectType = ComparisonObjectType.Bim360,
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
-                                ComparisonType = RelationComparisonType.Equal,
-                                ValueType = RelationComparisonValueType.String,
-                                Values = new object[] { Status.Closed.GetEnumMemberValue() },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.InProgress,
-                        Destination = Status.InDispute,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                ObjectType = ComparisonObjectType.Bim360,
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
-                                ComparisonType = RelationComparisonType.NotEqual,
-                                ValueType = RelationComparisonValueType.String,
-                                Values = new object[]
-                                {
-                                    Status.Answered.GetEnumMemberValue(),
-                                    Status.WorkCompleted.GetEnumMemberValue(),
-                                    Status.ReadyToInspect.GetEnumMemberValue(),
-                                },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.InProgress,
-                        Destination = Status.Open,
-                        Conditions = new[]
-                        {
-                            new RelationCondition
-                            {
-                                ObjectType = ComparisonObjectType.Bim360,
-                                PropertyName = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.Status),
-                                ComparisonType = RelationComparisonType.NotEqual,
-                                ValueType = RelationComparisonValueType.String,
-                                Values = new object[]
-                                {
-                                    Status.NotApproved.GetEnumMemberValue(),
-                                    Status.InDispute.GetEnumMemberValue(),
-                                    Status.Answered.GetEnumMemberValue(),
-                                    Status.WorkCompleted.GetEnumMemberValue(),
-                                    Status.ReadyToInspect.GetEnumMemberValue(),
-                                },
-                            },
-                        },
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Ready,
-                        Destination = Status.Closed,
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Undefined,
-                        Destination = Status.Draft,
-                    },
-                    new RelationRule<ObjectiveStatus, Status>
-                    {
-                        Source = ObjectiveStatus.Undefined,
-                        Destination = Status.Open,
-                    },
-                },
-                Priority = new[]
-                {
-                    Status.NotApproved,
-                    Status.ReadyToInspect,
-                    Status.WorkCompleted,
-                    Status.InDispute,
-                    Status.Answered,
-                    Status.Open,
-                    Status.Closed,
-                    Status.Draft,
-                    Status.Void,
-                },
-            };
-
-            return conf;
+            var json = Resources.statuses;
+            if (string.IsNullOrWhiteSpace(json))
+                throw new Exception("Resource not found");
+            return JsonConvert.DeserializeObject<StatusesRelations>(json);
         }
 
         public async Task<IfcConfig> GetConfig(
