@@ -19,7 +19,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             => this.connection = connection;
 
         public string GetAuthorizationUri(string appPropertyClientId, string appPropertyCallBackUrl)
-            => string.Format($"{FORGE_URL}{Resources.GetAuthorizeMethod}", appPropertyClientId, appPropertyCallBackUrl.Replace("/", "%2F"), SCOPE);
+            => string.Format(
+                $"{FORGE_URL}{Resources.GetAuthorizeMethod}",
+                appPropertyClientId,
+                appPropertyCallBackUrl.Replace("/", "%2F"),
+                SCOPE);
 
         public async Task<Token> GetTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string code, string appPropertyCallBackUrl)
         {
