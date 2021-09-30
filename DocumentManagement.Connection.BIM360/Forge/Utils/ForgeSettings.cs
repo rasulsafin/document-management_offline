@@ -29,6 +29,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public bool UseAppToken { get; private set; } = false;
 
+        public string ContentType { get; private init; } = "application/vnd.api+json";
+
         public RangeHeaderValue RangeHeaderValue { get; private set; }
 
         public static ForgeSettings UnauthorizedPost(Func<HttpContent> createContent)
@@ -110,6 +112,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             {
                 MethodType = HttpMethod.Get,
                 UseAppToken = true,
+            };
+
+        public static ForgeSettings AppPostWithoutKeyData(object data)
+            => new ()
+            {
+                MethodType = HttpMethod.Post,
+                Data = data,
+                NeedDataKey = false,
+                UseAppToken = true,
+            };
+
+        public static ForgeSettings AppPostWithoutKeyData(object data, string contentType)
+            => new ()
+            {
+                MethodType = HttpMethod.Post,
+                Data = data,
+                NeedDataKey = false,
+                UseAppToken = true,
+                ContentType = contentType,
             };
     }
 }

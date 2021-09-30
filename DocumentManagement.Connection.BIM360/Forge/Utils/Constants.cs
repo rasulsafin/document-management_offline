@@ -35,6 +35,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
         internal static readonly string LINKS_PROPERTY = "links";
+        internal static readonly string ITEMS_PROPERTY = "items";
         internal static readonly string PAGINATION_PROPERTY = "pagination";
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";

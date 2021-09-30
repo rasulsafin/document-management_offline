@@ -6,12 +6,14 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
-    public enum Region
+    public enum OssRetentionPolicy
     {
         Undefined,
-        [EnumMember(Value = "US")]
-        US,
-        [EnumMember(Value = "EMEA")]
-        Emea,
+        [EnumMember(Value = "transient")]
+        Transient,
+        [EnumMember(Value = "temporary")]
+        Temporary,
+        [EnumMember(Value = "persistent")]
+        Persistent,
     }
 }

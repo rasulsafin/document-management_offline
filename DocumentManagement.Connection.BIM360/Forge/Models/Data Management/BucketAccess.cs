@@ -6,12 +6,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]
-    public enum Region
+    public enum BucketAccess
     {
         Undefined,
-        [EnumMember(Value = "US")]
-        US,
-        [EnumMember(Value = "EMEA")]
-        Emea,
+        [EnumMember(Value = "full")]
+        Full,
+        [EnumMember(Value = "read")]
+        Read,
     }
 }
