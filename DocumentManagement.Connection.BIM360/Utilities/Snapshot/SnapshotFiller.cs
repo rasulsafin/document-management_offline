@@ -34,9 +34,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
-            IssueSnapshotUtilities snapshotUtilities)
             LocationEnumCreator locationEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            IssueSnapshotUtilities snapshotUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
