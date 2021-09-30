@@ -11,9 +11,9 @@ using MRS.DocumentManagement.Connection.Bim360.Synchronization.Interfaces.Status
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
 using MRS.DocumentManagement.Interface.Dtos;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
+namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
 {
-    internal static class StatusRelationsUtilities
+    internal static class StatusRelationsExtensions
     {
         public static IEnumerable<Status> GetSuitableStatuses(
             this ObjectiveExternalDto objective,
