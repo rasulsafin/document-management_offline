@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -31,7 +30,7 @@ namespace MRS.DocumentManagement.Api.Controllers
         }
 
         /// <summary>
-        /// Get new objective and write in to database.
+        /// Add new objective.
         /// </summary>
         /// <param name="data">Data for new objective.</param>
         /// <returns>Added objective.</returns>
@@ -53,7 +52,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var objectiveToList = await service.Add(data);
                 return Created(string.Empty, objectiveToList);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
             }
@@ -90,7 +89,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
@@ -125,7 +124,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
             }
@@ -162,7 +161,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -199,7 +198,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -225,12 +224,14 @@ namespace MRS.DocumentManagement.Api.Controllers
         /// <returns>Object representing the result of report creation process.</returns>
         /// <response code="201">Returns objective report creation result.</response>
         /// <response code="400">Validation failed.</response>
+        /// <response code="404">One of the objectives is missing.</response>
         /// <response code="500">Something went wrong while generating report.</response>
         [HttpPost]
         [Route("report")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ObjectiveReportCreationResultDto), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GenerateReport(
             [FromBody]
@@ -251,11 +252,15 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var result = await service.GenerateReport(objectives, path, userID, projectName);
                 return Created(string.Empty, result);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(this, 400, localizer["FailedToCreateReport"], ex.Message);
             }
-            catch (Exception ex)
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["FailedToCreateReport"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["FailedToCreateReport"], ex.Message);
             }

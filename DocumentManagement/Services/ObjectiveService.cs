@@ -11,6 +11,7 @@ using MRS.DocumentManagement.Database.Extensions;
 using MRS.DocumentManagement.Database.Models;
 using MRS.DocumentManagement.General.Utils.Extensions;
 using MRS.DocumentManagement.Interface.Dtos;
+using MRS.DocumentManagement.Interface.Exceptions;
 using MRS.DocumentManagement.Interface.Services;
 using MRS.DocumentManagement.Utility;
 using MRS.DocumentManagement.Utility.Extensions;
@@ -87,10 +88,12 @@ namespace MRS.DocumentManagement.Services
                     await LinkItem(item, objective);
                 }
 
+                var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)objective.AuthorID);
+
                 objective.DynamicFields = new List<DynamicField>();
                 foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
                 {
-                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
+                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID, user.ConnectionInfoID);
                 }
 
                 if (location != null)
@@ -99,10 +102,10 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return mapper.Map<ObjectiveToListDto>(objective);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't add objective {@Data}", data);
-                throw;
+                logger.LogError(ex, "Can't add objective {@Data}", data);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -112,7 +115,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Add started with objectiveID: {@ObjectiveID}", objectiveID);
             try
             {
-                var dbObjective = await Get(objectiveID);
+                var dbObjective = await GetOrThrowAsync(objectiveID);
                 logger.LogDebug("Found: {@DBObjective}", dbObjective);
                 var objective = mapper.Map<ObjectiveDto>(dbObjective);
                 objective.DynamicFields = new List<DynamicFieldDto>();
@@ -127,10 +130,12 @@ namespace MRS.DocumentManagement.Services
                 logger.LogDebug("Created DTO: {@Objective}", objective);
                 return objective;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't get objective with key {ObjectiveID}", objectiveID);
-                throw;
+                logger.LogError(ex, "Can't get objective with key {ObjectiveID}", objectiveID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -146,7 +151,7 @@ namespace MRS.DocumentManagement.Services
             try
             {
                 if (objectiveIds == null)
-                    throw new ArgumentException("Cannot create report without objectives");
+                    throw new ArgumentValidationException("Cannot create report without objectives");
 
                 int count = 0;
                 DateTime date = DateTime.Now.Date;
@@ -174,7 +179,7 @@ namespace MRS.DocumentManagement.Services
                 var objNum = 1;
                 foreach (var objectiveId in objectiveIds)
                 {
-                    var objective = await Get(objectiveId);
+                    var objective = await GetOrThrowAsync(objectiveId);
                     var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
                     objectiveToReport.ID = $"{reportID}/{objNum++}";
 
@@ -206,7 +211,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't create report");
-                throw;
+                if (ex is ArgumentValidationException || ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -236,7 +243,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -255,7 +264,9 @@ namespace MRS.DocumentManagement.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't remove objective with key {ObjectiveID}", objectiveID);
-                throw;
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -265,7 +276,7 @@ namespace MRS.DocumentManagement.Services
             logger.LogTrace("Update started with objData: {@ObjData}", objData);
             try
             {
-                var objective = await Get(objData.ID);
+                var objective = await GetOrThrowAsync(objData.ID);
 
                 objective = mapper.Map(objData, objective);
 
@@ -348,10 +359,12 @@ namespace MRS.DocumentManagement.Services
                 await context.SaveChangesAsync();
                 return true;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.LogError(e, "Can't update objective {@ObjData}", objData);
-                throw;
+                logger.LogError(ex, "Can't update objective {@ObjData}", objData);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 
@@ -387,23 +400,24 @@ namespace MRS.DocumentManagement.Services
             return true;
         }
 
-        private async Task<Objective> Get(ID<ObjectiveDto> objectiveID)
+        private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Get started for objective {ID}", objectiveID);
             var dbObjective = await context.Objectives
-               .Include(x => x.Project)
-               .Include(x => x.Author)
-               .Include(x => x.ObjectiveType)
-               .Include(x => x.Location)
-                    .ThenInclude(x => x.Item)
-               .Include(x => x.DynamicFields)
-                    .ThenInclude(x => x.ChildrenDynamicFields)
-               .Include(x => x.Items)
-                    .ThenInclude(x => x.Item)
-               .Include(x => x.BimElements)
-                    .ThenInclude(x => x.BimElement)
-               .FindOrThrowAsync(x => x.ID, (int)objectiveID);
+                .Unsynchronized()
+                .Include(x => x.Project)
+                .Include(x => x.Author)
+                .Include(x => x.ObjectiveType)
+                .Include(x => x.Location)
+                     .ThenInclude(x => x.Item)
+                .Include(x => x.DynamicFields)
+                     .ThenInclude(x => x.ChildrenDynamicFields)
+                .Include(x => x.Items)
+                     .ThenInclude(x => x.Item)
+                .Include(x => x.BimElements)
+                     .ThenInclude(x => x.BimElement)
+                .FindOrThrowAsync(x => x.ID, (int)objectiveID);
 
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
 

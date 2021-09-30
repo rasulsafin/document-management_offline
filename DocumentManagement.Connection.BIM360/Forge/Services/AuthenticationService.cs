@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication.Scopes;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
@@ -11,7 +12,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
 {
     public class AuthenticationService
     {
-        private static readonly string SCOPE = "data:read%20data:write%20data:create";
+        private static readonly Enum[] SCOPES =
+        {
+            DataScope.Read, DataScope.Write, DataScope.Create,
+        };
 
         private readonly ForgeConnection connection;
 
@@ -19,7 +23,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             => this.connection = connection;
 
         public string GetAuthorizationUri(string appPropertyClientId, string appPropertyCallBackUrl)
-            => string.Format($"{FORGE_URL}{Resources.GetAuthorizeMethod}", appPropertyClientId, appPropertyCallBackUrl.Replace("/", "%2F"), SCOPE);
+            => string.Format(
+                $"{FORGE_URL}{Resources.GetAuthorizeMethod}",
+                appPropertyClientId,
+                appPropertyCallBackUrl.Replace("/", "%2F"),
+                ScopeUtilities.GetScopeString(SCOPES));
 
         public async Task<Token> GetTokenAsyncWithHttpInfo(string appPropertyClientId, string appPropertyClientSecret, string code, string appPropertyCallBackUrl)
         {

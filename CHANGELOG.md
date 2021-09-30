@@ -10,6 +10,29 @@
 ### Безопасность:
 
 
+## [1.1.0] - 2021-09-30
+
+### Добавлено:
+
+* Новые типы исключений;
+* Динамическое поле причины в BIM 360;
+* Динамическое поле описания местоположения в BIM 360;
+* Динамическое поле ответа в BIM 360.
+
+### Изменено:
+
+* Обработка ошибок документооборота.
+
+### Удалено:
+
+* Использование Id в папках проектов.
+
+### Исправлено:
+
+* Пользователь учитывается при выборе вариантов динамического поля;
+* Получение прикреплённых файлов BIM 360.
+
+
 ## [1.0.4] - 2021-08-20
 
 ### Добавлено:
@@ -137,6 +160,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.1.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.0
 [1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4
 [1.0.3]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.3
 [1.0.2]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.2

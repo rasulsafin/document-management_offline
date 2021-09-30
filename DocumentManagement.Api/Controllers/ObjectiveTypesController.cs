@@ -59,7 +59,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                 var typeId = await service.Add(typeName);
                 return Created(string.Empty, typeId);
             }
-            catch (ArgumentException ex)
+            catch (ArgumentValidationException ex)
             {
                 return CreateProblemResult(
                     this,
@@ -67,7 +67,7 @@ namespace MRS.DocumentManagement.Api.Controllers
                     localizer["CheckValidObjectiveTypeNameToAdd_AlreadyExists"],
                     ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Add"], ex.Message);
             }
@@ -104,7 +104,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -140,40 +140,40 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
         }
 
         /// <summary>
-        /// Get list of objective types accessible to specific Connection Type.
+        /// Get list of objective types accessible to specific User.
         /// </summary>
-        /// <param name="connectionTypeId">Connection type id.</param>
+        /// <param name="userDtoId">User id.</param>
         /// <returns>Collection of Objective Types.</returns>
         /// <response code="200">List of Objective Types found. If Connection type id was null or invalid, method will return default list of objective types. </response>
         /// <response code="404">If Connection type id was valid, but could not find its value in database.</response>
         /// <response code="500">Something went wrong while retrieving the objective type.</response>
         [HttpGet]
-        [Route("list/{connectionTypeId}")]
+        [Route("list/{userDtoId}")]
         [Produces("application/json")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetObjectiveTypes(
             [FromRoute]
-            int connectionTypeId)
+            int userDtoId)
         {
             try
             {
-                var allTypes = await service.GetObjectiveTypes(new ID<ConnectionTypeDto>(connectionTypeId));
+                var allTypes = await service.GetObjectiveTypes(new ID<UserDto>(userDtoId));
                 return Ok(allTypes);
             }
             catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidConnectionTypeID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
@@ -210,7 +210,7 @@ namespace MRS.DocumentManagement.Api.Controllers
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidObjectiveTypeID_Missing"], ex.Message);
             }
-            catch (Exception ex)
+            catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }

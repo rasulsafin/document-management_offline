@@ -9,7 +9,7 @@
 
     <RootNamespace>MRS.DocumentManagement.Connection.BIM360.Tests</RootNamespace>
 
-    <Version>1.0.4</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

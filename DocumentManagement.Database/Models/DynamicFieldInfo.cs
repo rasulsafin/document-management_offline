@@ -22,6 +22,10 @@ namespace MRS.DocumentManagement.Database.Models
 
         public DynamicFieldInfo ParentField { get; set; }
 
+        public int? ConnectionInfoID { get; set; }
+
+        public ConnectionInfo ConnectionInfo { get; set; }
+
         public ICollection<DynamicFieldInfo> ChildrenDynamicFields { get; set; }
     }
 }

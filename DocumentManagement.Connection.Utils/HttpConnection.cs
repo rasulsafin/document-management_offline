@@ -66,6 +66,15 @@ namespace MRS.DocumentManagement.Connection.Utils
             return jToken;
         }
 
+        public async Task<Uri> GetUriAsync(
+            Func<HttpRequestMessage> createRequest,
+            (string scheme, string token) authData = default)
+        {
+            using var response = await SendRequestAsync(createRequest, authData);
+            var uri = response.RequestMessage.RequestUri;
+            return uri;
+        }
+
         public async Task<HttpResponseMessage> SendRequestAsync(
             Func<HttpRequestMessage> createRequest,
             (string scheme, string token) authData = default,
