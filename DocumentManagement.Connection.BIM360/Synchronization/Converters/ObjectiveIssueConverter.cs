@@ -115,7 +115,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     Description = objective.Description,
                     Status = await statusConverter.Convert(objective),
                     AssignedTo = assignToVariant?.Entity,
-                    AssignedToType = assignToVariant?.Type ?? AssignToType.None,
+                    AssignedToType = assignToVariant?.Type,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
@@ -304,8 +304,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 if (itemSnapshot == null)
                 {
                     var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item);
-                    itemSnapshot = new ItemSnapshot(posted.item) { Version = posted.version };
-                    project.Items.Add(posted.item.ID, itemSnapshot);
+                    itemSnapshot = project.Items[posted.ID];
                 }
 
                 return itemSnapshot;

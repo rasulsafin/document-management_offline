@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
@@ -23,6 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IfcConfigUtilities configUtilities;
 
         public SnapshotFiller(
@@ -34,6 +34,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
+            IssueSnapshotUtilities snapshotUtilities,
             IfcConfigUtilities configUtilities)
         {
             this.snapshot = snapshot;
@@ -44,6 +45,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.snapshotUtilities = snapshotUtilities;
             this.configUtilities = configUtilities;
         }
 
@@ -93,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                     {
                         if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
                             iv.version?.Attributes.Name != Resources.MrsFileName)
-                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
+                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item, iv.version));
                         else
                             topFolder = iv.item.Relationships.Parent.Data.ID;
                     }
@@ -130,14 +132,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
-                    issueSnapshot.Attachments = new Dictionary<string, Attachment>();
-                    var attachments = await issuesService.GetAttachmentsAsync(
-                        project.IssueContainer,
-                        issueSnapshot.ID);
-
-                    foreach (var attachment in attachments.Where(
-                        x => x.Attributes.UrnType == UrnType.Oss || project.Items.ContainsKey(x.Attributes.Urn)))
-                        issueSnapshot.Attachments.Add(attachment.ID, attachment);
+                    issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
+                    issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }
             }
         }
