@@ -2,7 +2,7 @@ using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Utils.Extensions.JsonConverters
 {
     public class MillisecondsUnixDateTimeConverter : UnixDateTimeConverter
     {

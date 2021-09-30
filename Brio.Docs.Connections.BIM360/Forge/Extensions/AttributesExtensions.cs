@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using System.Runtime.Serialization;
 
-namespace Brio.Docs.Connections.Bim360.Forge.Utils.Extensions
+namespace Brio.Docs.Connections.Bim360.Forge.Extensions
 {
     public static class AttributesExtensions
     {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models.Authentication;
+using Brio.Docs.Connections.Bim360.Forge.Models.Authentication.Scopes;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Properties;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;

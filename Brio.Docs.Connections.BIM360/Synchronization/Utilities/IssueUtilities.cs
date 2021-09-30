@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {

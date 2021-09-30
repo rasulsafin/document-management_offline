@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
-using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Utils.Pagination;
 using Brio.Docs.Connections.Bim360.Properties;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;

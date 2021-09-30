@@ -1,5 +1,5 @@
 using System;
-using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Models
 {

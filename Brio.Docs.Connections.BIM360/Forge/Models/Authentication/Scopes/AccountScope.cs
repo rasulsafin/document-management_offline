@@ -1,6 +1,6 @@
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Authentication.Scopes
+namespace Brio.Docs.Connections.Bim360.Forge.Models.Authentication.Scopes
 {
     internal enum AccountScope
     {

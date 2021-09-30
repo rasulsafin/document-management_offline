@@ -1,9 +1,9 @@
 using System;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Utils.Extensions.JsonConverters;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
+namespace Brio.Docs.Connections.Bim360.Forge.Models.DataManagement
 {
     [DataContract]
     public class Bucket
