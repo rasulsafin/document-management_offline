@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -15,22 +17,25 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public LocationService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Location>> GetLocationsAsync(string containerID, string treeID)
+        public async Task<List<Location>> GetLocationsAsync(string containerID, string treeID, IEnumerable<Filter> filters = null)
         {
-            var response = await connection.SendAsync(
-                ForgeSettings.AuthorizedGet(),
-                Resources.GetLocationMethod,
+            var locations = await PaginationHelper.GetItemsByPages<Location, MetaStrategy>(
+                connection,
+                ForgeConnection.SetParameters(Resources.GetLocationMethod, filters),
+                RESULTS_PROPERTY,
                 containerID,
                 treeID);
 
-            var list = response[RESULTS_PROPERTY]?.ToObject<List<Location>>();
-            for (int i = 0; i < list.Count; i++)
+            if (locations != null)
             {
-                if (list[i].Type == LOCATION_TREE_ROOT)
-                    list.RemoveAt(i);
+                for (int i = 0; i < locations.Count; i++)
+                {
+                    if (locations[i].Type == LOCATION_TREE_ROOT)
+                        locations.RemoveAt(i);
+                }
             }
 
-            return list;
+            return locations;
         }
     }
 }
