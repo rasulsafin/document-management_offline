@@ -245,6 +245,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Tests
         {
             var comments = await issuesService.GetCommentsAsync(issuesContainer, TEST_ISSUE_ID);
             Assert.IsNotNull(comments);
+            Assert.AreEqual(3, comments.Count);
         }
     }
 }

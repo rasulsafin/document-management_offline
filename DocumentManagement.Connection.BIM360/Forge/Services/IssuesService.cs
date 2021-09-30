@@ -108,14 +108,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
-        {
-            var response = await connection.SendAsync(
-                ForgeSettings.AuthorizedGet(),
-                Resources.GetIssuesCommentsMethod,
+            => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
+                connection,
+                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod),
+                DATA_PROPERTY,
                 containerID,
                 issueID);
-            return response[DATA_PROPERTY]?.ToObject<List<Comment>>();
-        }
 
         public async Task<Comment> PostIssuesCommentsAsync(string containerID, Comment comment)
         {
