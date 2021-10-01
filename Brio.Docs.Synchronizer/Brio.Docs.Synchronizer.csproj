@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Authors>Brio MRS</Authors>
+    <Company>Brio MRS©</Company>
+    <Product>Brio MRS</Product>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="10.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Brio.Docs.Integration\Brio.Docs.Integration.csproj" />
+    <ProjectReference Include="..\Brio.Docs.External\Brio.Docs.External.csproj" />
+    <ProjectReference Include="..\Brio.Docs.Database\Brio.Docs.Database.csproj" />
+  </ItemGroup>
+
+</Project>
