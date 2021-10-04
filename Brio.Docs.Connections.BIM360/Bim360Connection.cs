@@ -29,6 +29,7 @@ namespace Brio.Docs.Connections.Bim360
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly StatusEnumCreator statusEnumCreator;
         private readonly Authenticator authenticator;
 
         public Bim360Connection(
@@ -41,7 +42,8 @@ namespace Brio.Docs.Connections.Bim360
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             LocationEnumCreator locationEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            AssignToEnumCreator assignToEnumCreator,
+            StatusEnumCreator statusEnumCreator)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
@@ -53,6 +55,7 @@ namespace Brio.Docs.Connections.Bim360
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.statusEnumCreator = statusEnumCreator;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -152,6 +155,7 @@ namespace Brio.Docs.Connections.Bim360
             var rootCauses = await typeCreator.Create(rootCauseEnumCreator);
             var location = await typeCreator.Create(locationEnumCreator);
             var assignTo = await typeCreator.Create(assignToEnumCreator);
+            var statuses = await typeCreator.Create(statusEnumCreator);
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto>
             {
@@ -159,6 +163,7 @@ namespace Brio.Docs.Connections.Bim360
                 rootCauses,
                 location,
                 assignTo,
+                statuses,
             };
 
             var issueType = new ObjectiveTypeExternalDto

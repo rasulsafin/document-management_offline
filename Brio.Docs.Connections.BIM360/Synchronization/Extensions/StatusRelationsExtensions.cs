@@ -84,7 +84,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
             if (condition.ObjectType is not(ComparisonObjectType.Bim360 or null))
                 throw new ArgumentException("Need objective for this condition", nameof(condition));
 
-            var issueValue = GetObjectValue(condition.PropertyName, issue);
+            var issueValue = GetObjectValue(condition.PropertyName, issue.Attributes);
             return condition.IsMet(issueValue);
         }
 

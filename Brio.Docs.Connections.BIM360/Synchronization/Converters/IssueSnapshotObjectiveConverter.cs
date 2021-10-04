@@ -70,7 +70,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     assignToEnumCreator);
             var status = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
-                subtypeEnumCreator);
+                statusEnumCreator);
 
             foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
             {

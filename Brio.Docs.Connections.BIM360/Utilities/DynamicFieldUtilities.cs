@@ -57,9 +57,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities
             where TSnapshot : AEnumVariantSnapshot<T>
         {
             deserializedIDs = null;
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
+            var dynamicField = obj.DynamicFields.FirstOrDefault(d => d.ExternalID == creator.EnumExternalID);
 
-            if (creator.CanBeNull && dynamicField.Value == creator.NullID)
+            if (dynamicField == null || (creator.CanBeNull && dynamicField.Value == creator.NullID))
                 return null;
 
             var ids = creator.DeserializeID(dynamicField.Value).ToArray();
