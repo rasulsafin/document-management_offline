@@ -131,7 +131,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                                 out _)
                           ?.Entity.ID,
                     LbsLocation =
-                         GetValue(locationEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                        DynamicFieldUtilities.GetValue(
+                                locationEnumCreator,
+                                project,
+                                objective,
+                                (ids, s) => ids.Contains(s.Entity.ID),
+                                out _)
                           ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
                     PushpinAttributes =
