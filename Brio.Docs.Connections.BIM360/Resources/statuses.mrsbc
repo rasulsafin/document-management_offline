@@ -205,16 +205,5 @@
       "Source": "Undefined",
       "Destination": "open"
     }
-  ],
-  "Priority": [
-    "not_approved",
-    "ready_to_inspect",
-    "work_completed",
-    "in_dispute",
-    "answered",
-    "open",
-    "closed",
-    "draft",
-    "void"
   ]
 }

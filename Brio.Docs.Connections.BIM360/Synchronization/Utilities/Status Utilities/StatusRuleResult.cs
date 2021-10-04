@@ -1,8 +1,8 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 
-namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Status_Utilities
+namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.StatusUtilities
 {
-    public class StatusResult
+    internal class StatusRuleResult
     {
         public bool CanUse { get; set; }
 

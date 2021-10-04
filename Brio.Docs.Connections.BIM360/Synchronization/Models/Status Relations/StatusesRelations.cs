@@ -12,8 +12,5 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations
 
         [DataMember]
         public RelationRule<ObjectiveStatus, Status>[] Set { get; set; }
-
-        [DataMember]
-        public Status[] Priority { get; set; }
     }
 }
