@@ -6,6 +6,7 @@ using MRS.DocumentManagement.Connection.Bim360.Forge;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using Version = MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement.Version;
@@ -24,6 +25,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IfcConfigUtilities configUtilities;
+        private readonly StatusEnumCreator statusEnumCreator;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
@@ -35,7 +37,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
-            IfcConfigUtilities configUtilities)
+            IfcConfigUtilities configUtilities,
+            StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
@@ -47,6 +50,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             this.assignToEnumCreator = assignToEnumCreator;
             this.snapshotUtilities = snapshotUtilities;
             this.configUtilities = configUtilities;
+            this.statusEnumCreator = statusEnumCreator;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -155,6 +159,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 p => p.AssignToVariants = new Dictionary<string, AssignToVariant>(),
                 assignToEnumCreator,
                 (project, variant) => project.AssignToVariants.Add(variant.Entity, variant));
+
+        public async Task UpdateStatuses()
+            => await UpdateProjectsEnums(
+                p => p.Statuses = new Dictionary<string, StatusSnapshot>(),
+                statusEnumCreator,
+                (project, variant) => project.Statuses.Add(variant.Entity.GetEnumMemberValue(), variant));
 
         private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
             Action<ProjectSnapshot> createEmptyEnumVariants,

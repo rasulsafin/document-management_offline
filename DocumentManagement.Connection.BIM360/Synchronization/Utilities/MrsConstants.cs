@@ -15,7 +15,17 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities
         public static readonly string NEW_COMMENT_FIELD_NAME = "New Comment";
         public static readonly string AUTHOR_FIELD_NAME = "Author";
         public static readonly string DATE_FIELD_NAME = "Date";
+        public static readonly string STATUS_FIELD_NAME = "Status";
         public static readonly string DEFAULT_AUTHOR_NAME = "Unauthorized name";
+
+        public static readonly string DRAFT_STATUS_TITLE = "Draft";
+        public static readonly string OPEN_STATUS_TITLE = "Open";
+        public static readonly string CLOSED_STATUS_TITLE = "Closed";
+        public static readonly string ANSWERED_STATUS_TITLE = "Answered";
+        public static readonly string WORK_COMPLETED_STATUS_TITLE = "Work completed";
+        public static readonly string READY_TO_INSPECT_STATUS_TITLE = "Ready to inspect";
+        public static readonly string NOT_APPROVED_STATUS_TITLE = "Not approved";
+        public static readonly string IN_DISPUTE_STATUS_TITLE = "In dispute";
 
         public static readonly string NEW_COMMENT_ID = "new_comment";
     }

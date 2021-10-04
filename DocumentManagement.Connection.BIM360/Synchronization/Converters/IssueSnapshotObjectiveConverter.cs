@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
@@ -19,19 +20,22 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly StatusEnumCreator statusEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            AssignToEnumCreator assignToEnumCreator,
+            StatusEnumCreator statusEnumCreator)
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.statusEnumCreator = statusEnumCreator;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -54,6 +58,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                         ? snapshot.ProjectSnapshot.AssignToVariants[snapshot.Entity.Attributes.AssignedTo].ID
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
+            var status = DynamicFieldUtilities.CreateField(
+                snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
+                subtypeEnumCreator);
 
             foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
             {
@@ -105,6 +112,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 UpdatedAt = System.DateTime.Now,
             };
 
+            parsedToDto.DynamicFields.Add(status);
             parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);

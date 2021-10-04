@@ -100,7 +100,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                 globalOffset = exist.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset;
             }
 
-            var assignToVariant = GetValue(
+            var assignToVariant = DynamicFieldUtilities.GetValue(
                 assignToEnumCreator,
                 project,
                 objective,
@@ -120,10 +120,16 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
                     RootCauseID =
-                        GetValue(rootCauseEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                        DynamicFieldUtilities.GetValue(
+                                rootCauseEnumCreator,
+                                project,
+                                objective,
+                                (ids, s) => ids.Contains(s.Entity.ID),
+                                out _)
                           ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
-                    PushpinAttributes = await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
+                    PushpinAttributes =
+                        await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
                     NgIssueTypeID = type,
                     NgIssueSubtypeID = subtype,
                     PermittedAttributes = permittedAttributes,
@@ -222,7 +228,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var type = GetValue(
+            var type = DynamicFieldUtilities.GetValue(
                 subtypeEnumCreator,
                 projectSnapshot,
                 obj,
@@ -242,26 +248,6 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             }
 
             return type;
-        }
-
-        private TSnapshot GetValue<T, TSnapshot, TID>(
-            IEnumCreator<T, TSnapshot, TID> creator,
-            ProjectSnapshot projectSnapshot,
-            ObjectiveExternalDto obj,
-            Func<IEnumerable<TID>, TSnapshot, bool> findPredicate,
-            out IEnumerable<TID> deserializedIDs)
-            where TSnapshot : AEnumVariantSnapshot<T>
-        {
-            deserializedIDs = null;
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
-
-            if (creator.CanBeNull && dynamicField.Value == creator.NullID)
-                return null;
-
-            var ids = creator.DeserializeID(dynamicField.Value).ToArray();
-            deserializedIDs = ids;
-            return creator.GetSnapshots(projectSnapshot)
-               .FirstOrDefault(x => findPredicate(ids, x));
         }
 
         private async Task<(string item, int? version)> GetTarget(

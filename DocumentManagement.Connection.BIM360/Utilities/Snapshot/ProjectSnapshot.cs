@@ -22,6 +22,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public Dictionary<string, AssignToVariant> AssignToVariants { get; set; }
 
+        public Dictionary<string, StatusSnapshot> Statuses { get; set; }
+
         public Dictionary<string, ItemSnapshot> Items { get; set; }
 
         public string MrsFolderID { get; set; }
