@@ -2,26 +2,26 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs", "Brio.Docs\Brio.Docs.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F5838427-97CC-44DA-8075-49A8C7480065} = {F5838427-97CC-44DA-8075-49A8C7480065}
 		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.IntegrationTests", "DocumentManagement.Tests\DocumentManagement.IntegrationTests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.IntegrationTests", "Brio.Docs.IntegrationTests\Brio.Docs.IntegrationTests.csproj", "{4FCADB27-F8FB-45BF-9380-C9C5770C225E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4C808E57-40B4-408B-84FC-DD05B3CCA35C}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Api", "DocumentManagement.Api\DocumentManagement.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Api", "Brio.Docs.Api\Brio.Docs.Api.csproj", "{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Interface", "DocumentManagement.Interface\DocumentManagement.Interface.csproj", "{4998F387-129B-4C8C-9F8B-C143D0A612BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Client", "Brio.Docs.Client\Brio.Docs.Client.csproj", "{4998F387-129B-4C8C-9F8B-C143D0A612BE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Database", "DocumentManagement.Database\DocumentManagement.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Database", "Brio.Docs.Database\Brio.Docs.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Utils", "DocumentManagement.Utils\DocumentManagement.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Utils", "Brio.Docs.Utils\Brio.Docs.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk", "DocumentManagement.Connection.YandexDisk\DocumentManagement.Connection.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.YandexDisk", "Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B960B41-5CF9-49BC-9F09-792020864376}"
 	ProjectSection(SolutionItems) = preProject
@@ -29,50 +29,52 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		CHANGELOG.md = CHANGELOG.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive", "DocumentManagement.Connection.GoogleDrive\DocumentManagement.Connection.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.GoogleDrive", "Brio.Docs.Connections.GoogleDrive\Brio.Docs.Connections.GoogleDrive.csproj", "{9B5DEA4C-2247-4846-B885-B1D20B8E8480}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.BIM360", "DocumentManagement.Connection.BIM360\DocumentManagement.Connection.BIM360.csproj", "{CD3E74B2-84F3-4797-9F72-F22424021ED7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BIM360", "Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj", "{CD3E74B2-84F3-4797-9F72-F22424021ED7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.BIM360.Tests", "DocumentManagement.Connection.BIM360.Tests\DocumentManagement.Connection.BIM360.Tests.csproj", "{D1CC8DE3-3847-43F2-9088-23C5ECECF385}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BIM360.Tests", "Brio.Docs.Connections.BIM360.Tests\Brio.Docs.Connections.BIM360.Tests.csproj", "{D1CC8DE3-3847-43F2-9088-23C5ECECF385}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Utils", "DocumentManagement.Connection.Utils\DocumentManagement.Connection.Utils.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.External", "Brio.Docs.External\Brio.Docs.External.csproj", "{96C11611-4EE7-46CD-96AC-C07FBD1B85AC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Synchronizer", "DocumentManagement.Synchronizer\DocumentManagement.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Synchronizer", "Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj", "{9403459A-9860-4E63-A6A4-920441F094C4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tdms", "DocumentManagement.Connection.Tdms\DocumentManagement.Connection.Tdms.csproj", "{6B2CB931-05A8-436C-A577-0B214C6371AC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Tdms", "Brio.Docs.Connections.Tdms\Brio.Docs.Connections.Tdms.csproj", "{6B2CB931-05A8-436C-A577-0B214C6371AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {4998F387-129B-4C8C-9F8B-C143D0A612BE}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Tdms.Tests", "DocumentManagement.Connection.Tdms.Tests\DocumentManagement.Connection.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.Tdms.Tests", "Brio.Docs.Connections.Tdms.Tests\Brio.Docs.Connections.Tdms.Tests.csproj", "{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.LementPro", "DocumentManagement.Connection.LementPro\DocumentManagement.Connection.LementPro.csproj", "{4743FB4F-E042-449B-AF24-F57B2DB781A5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.LementPro", "Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj", "{4743FB4F-E042-449B-AF24-F57B2DB781A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.LementPro.Tests", "DocumentManagement.Connection.LementPro.Tests\DocumentManagement.Connection.LementPro.Tests.csproj", "{FBDF7022-111F-4369-8517-898BCCD3550C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.LementPro.Tests", "Brio.Docs.Connections.LementPro.Tests\Brio.Docs.Connections.LementPro.Tests.csproj", "{FBDF7022-111F-4369-8517-898BCCD3550C}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F0DDE61F-8B24-4933-8CD7-3B72AC61434E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Connections", "Connections", "{D6D41822-CE95-4B4A-A095-3BC461268736}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.Interface", "DocumentManagement.Connection.Interface\DocumentManagement.Connection.Interface.csproj", "{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Integration", "Brio.Docs.Integration\Brio.Docs.Integration.csproj", "{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.General.Interface", "DocumentManagement.General.Interface\DocumentManagement.General.Interface.csproj", "{B0800032-F53B-4CC8-A07F-45829DCB5C48}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Common", "Brio.Docs.Common\Brio.Docs.Common.csproj", "{B0800032-F53B-4CC8-A07F-45829DCB5C48}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Interfaces", "Interfaces", "{856587D1-4377-4816-9EBD-8C786DDBE81B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.YandexDisk.Tests", "Brio.Docs.Connections.YandexDisk.Tests\Brio.Docs.Connections.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.YandexDisk.Tests", "DocumentManagement.Connection.YandexDisk.Tests\DocumentManagement.Connection.YandexDisk.Tests.csproj", "{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.GoogleDrive.Tests", "Brio.Docs.Connections.GoogleDrive.Tests\Brio.Docs.Connections.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.GoogleDrive.Tests", "DocumentManagement.Connection.GoogleDrive.Tests\DocumentManagement.Connection.GoogleDrive.Tests.csproj", "{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Launcher", "Brio.Docs.Launcher\Brio.Docs.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utils", "Utils", "{E28CAD4D-55E4-4BBB-98C2-EB919C69407D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.MRSPro", "Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.General.Utils", "DocumentManagement.General.Utils\DocumentManagement.General.Utils.csproj", "{B7C9A573-FADD-488C-BBA3-B24AE3787C52}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.MRSPro.Tests", "Brio.Docs.Connections.MRSPro.Tests\Brio.Docs.Connections.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Launcher", "DocumentManagement.Launcher\DocumentManagement.Launcher.csproj", "{A3590C5C-349C-45DA-A451-BA004D9CC5EB}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "End To End", "End To End", "{E49AD887-E735-4526-AE80-4FD7ACA3765E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro", "DocumentManagement.Connection.MRSPro\DocumentManagement.Connection.MRSPro.csproj", "{187991B0-7D6F-41E4-AFDE-1B47620757EF}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Document Management", "Document Management", "{4F4A17E0-2620-421A-B3A7-3E325628953B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DocumentManagement.Connection.MRSPro.Tests", "DocumentManagement.Connection.MRSPro.Tests\DocumentManagement.Connection.MRSPro.Tests.csproj", "{FC59CC05-62EE-4D7B-B465-E04851330994}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared Libraries", "Shared Libraries", "{69196838-560B-4F71-8B02-66DD1C188EBB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automatic", "Automatic", "{CEB4080A-AA25-4E79-A803-7ED2A5A81846}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -160,10 +162,6 @@ Global
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B7C9A573-FADD-488C-BBA3-B24AE3787C52}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A3590C5C-349C-45DA-A451-BA004D9CC5EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -181,25 +179,31 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{4FCADB27-F8FB-45BF-9380-C9C5770C225E} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
-		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
-		{F5838427-97CC-44DA-8075-49A8C7480065} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
 		{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{9B5DEA4C-2247-4846-B885-B1D20B8E8480} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{CD3E74B2-84F3-4797-9F72-F22424021ED7} = {D6D41822-CE95-4B4A-A095-3BC461268736}
-		{D1CC8DE3-3847-43F2-9088-23C5ECECF385} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
-		{96C11611-4EE7-46CD-96AC-C07FBD1B85AC} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
 		{6B2CB931-05A8-436C-A577-0B214C6371AC} = {D6D41822-CE95-4B4A-A095-3BC461268736}
-		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
 		{4743FB4F-E042-449B-AF24-F57B2DB781A5} = {D6D41822-CE95-4B4A-A095-3BC461268736}
-		{FBDF7022-111F-4369-8517-898BCCD3550C} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
-		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
-		{B0800032-F53B-4CC8-A07F-45829DCB5C48} = {856587D1-4377-4816-9EBD-8C786DDBE81B}
-		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
-		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
-		{B7C9A573-FADD-488C-BBA3-B24AE3787C52} = {E28CAD4D-55E4-4BBB-98C2-EB919C69407D}
 		{187991B0-7D6F-41E4-AFDE-1B47620757EF} = {D6D41822-CE95-4B4A-A095-3BC461268736}
-		{FC59CC05-62EE-4D7B-B465-E04851330994} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{E49AD887-E735-4526-AE80-4FD7ACA3765E} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{4C808E57-40B4-408B-84FC-DD05B3CCA35C} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{6B2646CE-987F-44C1-A1CE-16EDEFD6B99D} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{100FECFA-06E2-4D4D-90A4-ADFF9B251718} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{A3590C5C-349C-45DA-A451-BA004D9CC5EB} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{9403459A-9860-4E63-A6A4-920441F094C4} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{F5838427-97CC-44DA-8075-49A8C7480065} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
+		{ABF88CD7-0F31-4DE8-85B9-02A2F3F90124} = {69196838-560B-4F71-8B02-66DD1C188EBB}
+		{B0800032-F53B-4CC8-A07F-45829DCB5C48} = {69196838-560B-4F71-8B02-66DD1C188EBB}
+		{4998F387-129B-4C8C-9F8B-C143D0A612BE} = {69196838-560B-4F71-8B02-66DD1C188EBB}
+		{96C11611-4EE7-46CD-96AC-C07FBD1B85AC} = {69196838-560B-4F71-8B02-66DD1C188EBB}
+		{CEB4080A-AA25-4E79-A803-7ED2A5A81846} = {F0DDE61F-8B24-4933-8CD7-3B72AC61434E}
+		{4FCADB27-F8FB-45BF-9380-C9C5770C225E} = {CEB4080A-AA25-4E79-A803-7ED2A5A81846}
+		{D1CC8DE3-3847-43F2-9088-23C5ECECF385} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{2C9579BA-C63F-4223-A3B4-F7A12408D8A7} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{FBDF7022-111F-4369-8517-898BCCD3550C} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{FC59CC05-62EE-4D7B-B465-E04851330994} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}

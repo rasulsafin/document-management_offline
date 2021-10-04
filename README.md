@@ -54,7 +54,7 @@
 ```xml
  <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
-    <RootNamespace>MRS.DocumentManagement.Connection.НазваниеСистемы</RootNamespace>
+    <RootNamespace>Brio.Docs.Connections.НазваниеСистемы</RootNamespace>
     <Authors>Brio MRS</Authors>
     <Product>Brio MRS Connection</Product>
     <Company>Brio MRS©</Company>
@@ -105,7 +105,7 @@ public static IServiceCollection AddНазваниеСистемы(this IService
  <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
     <IsPackable>false</IsPackable>
-    <RootNamespace>MRS.DocumentManagement.Connection.НазваниеСистемы.Tests</RootNamespace>
+    <RootNamespace>Brio.Docs.Connections.НазваниеСистемы.Tests</RootNamespace>
     <Version>x.x.x</Version>
   </PropertyGroup>
 ```
