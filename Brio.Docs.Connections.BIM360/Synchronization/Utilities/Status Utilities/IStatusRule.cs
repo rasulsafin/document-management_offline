@@ -1,4 +1,4 @@
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities.Status_Utilities
+namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.StatusUtilities
 {
     public interface IStatusRule 
     {

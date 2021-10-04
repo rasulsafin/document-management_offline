@@ -1,7 +1,8 @@
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations
+namespace Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations
 {
     [DataContract]
     internal class StatusesRelations

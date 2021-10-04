@@ -1,6 +1,6 @@
 using System;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Exceptions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Exceptions
 {
     public class ConfigIncorrectException : Exception
     {

@@ -1,7 +1,7 @@
 using System;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations;
+using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Interfaces.StatusRelations
+namespace Brio.Docs.Connections.Bim360.Synchronization.Interfaces.StatusRelations
 {
     /// <summary>
     /// Represents a rule for converting one enumeration value to another enumeration value.

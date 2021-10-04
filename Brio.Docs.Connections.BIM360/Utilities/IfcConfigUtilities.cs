@@ -2,7 +2,9 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
+using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
@@ -12,7 +14,6 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 {
     internal class IfcConfigUtilities
     {
-        private static readonly string DEFAULT_STATUSES_CONFIG = "statuses.mrsbc";
         private readonly Downloader downloader;
 
         public IfcConfigUtilities(Downloader downloader)

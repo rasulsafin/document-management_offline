@@ -1,11 +1,12 @@
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
-using MRS.DocumentManagement.Connection.Bim360.Utilities;
-using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
-using MRS.DocumentManagement.Interface;
+using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Integration.Interfaces;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
+namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class IssueSnapshotObjectiveStatusConverter : IConverter<IssueSnapshot, ObjectiveStatus>
     {

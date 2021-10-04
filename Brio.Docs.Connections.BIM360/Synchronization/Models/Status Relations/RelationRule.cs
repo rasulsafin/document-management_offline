@@ -1,10 +1,10 @@
 using System;
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
-using MRS.DocumentManagement.Connection.Bim360.Synchronization.Interfaces.StatusRelations;
+using Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces.StatusRelations;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations
+namespace Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations
 {
     [DataContract]
     internal class RelationRule<TSource, TDestination> : IRelationRule

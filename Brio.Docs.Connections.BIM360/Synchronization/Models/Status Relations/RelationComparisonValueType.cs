@@ -1,8 +1,8 @@
 using System.Runtime.Serialization;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters;
 using Newtonsoft.Json;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Models.StatusRelations
+namespace Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations
 {
     [DataContract]
     [JsonConverter(typeof(SafeStringEnumConverter), Undefined)]

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions
+namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     internal static class EnumerableExtensions
     {
