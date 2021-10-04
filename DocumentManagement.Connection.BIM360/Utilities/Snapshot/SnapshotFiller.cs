@@ -22,6 +22,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IfcConfigUtilities configUtilities;
@@ -36,6 +37,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
+            LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
             IfcConfigUtilities configUtilities,
             StatusEnumCreator statusEnumCreator)
@@ -47,6 +49,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
             this.foldersService = foldersService;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.snapshotUtilities = snapshotUtilities;
             this.configUtilities = configUtilities;
@@ -153,6 +156,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
                 rootCauseEnumCreator,
                 (project, variant) => project.RootCauses.Add(variant.Entity.ID, variant));
+
+        public async Task UpdateLocations()
+            => await UpdateProjectsEnums(
+                p => p.Locations = new Dictionary<string, LocationSnapshot>(),
+                locationEnumCreator,
+                (project, variant) => project.Locations.Add(variant.Entity.ID, variant));
 
         public async Task UpdateAssignTo()
             => await UpdateProjectsEnums(

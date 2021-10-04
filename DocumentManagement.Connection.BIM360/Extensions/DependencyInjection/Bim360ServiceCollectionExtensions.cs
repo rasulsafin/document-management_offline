@@ -13,6 +13,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<EnumerationTypeCreator>();
             services.AddScoped<TypeSubtypeEnumCreator>();
             services.AddScoped<RootCauseEnumCreator>();
+            services.AddScoped<LocationEnumCreator>();
             services.AddScoped<AssignToEnumCreator>();
             services.AddScoped<StatusEnumCreator>();
             services.AddScoped<SnapshotFiller>();

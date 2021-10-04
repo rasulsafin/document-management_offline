@@ -14,11 +14,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
         public string IssueContainer => Entity.Relationships.IssuesContainer.Data.ID;
 
+        public string LocationContainer => Entity.Relationships.LocationContainer.Data.ID;
+
         public Dictionary<string, IssueSnapshot> Issues { get; set; }
 
         public Dictionary<string, IssueTypeSnapshot> IssueTypes { get; set; }
 
         public Dictionary<string, RootCauseSnapshot> RootCauses { get; set; }
+
+        public Dictionary<string, LocationSnapshot> Locations { get; set; }
 
         public Dictionary<string, AssignToVariant> AssignToVariants { get; set; }
 

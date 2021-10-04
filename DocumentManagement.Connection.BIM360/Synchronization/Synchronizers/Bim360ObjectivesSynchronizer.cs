@@ -127,6 +127,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronizers
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
             await filler.UpdateRootCauses();
+            await filler.UpdateLocations();
             await filler.UpdateAssignTo();
             await filler.UpdateStatuses();
             return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)

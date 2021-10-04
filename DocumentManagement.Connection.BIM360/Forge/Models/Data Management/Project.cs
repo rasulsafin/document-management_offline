@@ -26,6 +26,9 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.DataManagement
 
             [DataMember(Name = "issues")]
             public DataContainer<ObjectInfo> IssuesContainer { get; set; }
+
+            [DataMember(Name = "locations")]
+            public DataContainer<ObjectInfo> LocationContainer { get; set; }
         }
     }
 }
