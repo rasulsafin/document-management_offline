@@ -3,6 +3,16 @@
 ## [Unreleased]
 
 ### Добавлено:
+### Изменено:
+### Устарело:
+### Удалено:
+### Исправлено:
+### Безопасность:
+
+
+## [1.1.1] - xxxx-xx-xx
+
+### Добавлено:
 
 * Пагинация для запроса списка задач;
 * Фильтрация списка задач;
@@ -10,17 +20,12 @@
 * Динамическое поле ответственного за нарушение в BIM 360;
 * Поле "Название" в отчетах;
 * Динамическое поле для комментария в BIM 360;
-* Динамическое поле Location в BIM 360;
+* Динамическое поле Location в BIM 360.
 
-### Изменено:
-### Устарело:
-### Удалено:
 ### Исправлено:
 
 * Дублирование новых динамических полей;
 * Фото, прикреплённые к нарушениям BIM 360, видны в разделе "Photo";
-
-### Безопасность:
 
 
 ## [1.1.0] - 2021-09-30
@@ -173,6 +178,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.1.1]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.1
 [1.1.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.0
 [1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4
 [1.0.3]: http://mrs-it-services.nur.briogroup.ru:6080/mrs/unity/document-management/-/releases/1.0.3
