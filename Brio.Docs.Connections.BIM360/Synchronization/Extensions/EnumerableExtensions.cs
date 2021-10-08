@@ -16,7 +16,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
                 i++;
             }
 
-            throw new InvalidOperationException("Sequence contains no matching element");
+            return -1;
         }
     }
 }

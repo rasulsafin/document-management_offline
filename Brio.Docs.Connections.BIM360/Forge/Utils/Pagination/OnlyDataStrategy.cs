@@ -22,9 +22,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.Pagination
                     new QueryParameter(Constants.LIMIT_PARAMETER_NAME, Constants.ITEMS_ON_PAGE.ToString()),
                     new QueryParameter(Constants.OFFSET_PARAMETER_NAME, i.ToString()),
                 };
-                yield return ForgeConnection.SetParameters(
-                    command,
-                    filters);
+                yield return ForgeConnection.SetParameters(command, filters);
 
                 all = !lastResponse.HasValues;
             }
