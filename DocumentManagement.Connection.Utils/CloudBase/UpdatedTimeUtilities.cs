@@ -13,7 +13,7 @@ namespace MRS.DocumentManagement.Connection.Utils
             if (project.Items != null)
             {
                 foreach (var item in project.Items)
-                    UpdateTime(item, time);
+                    UpdateTime(item, now);
             }
         }
 
@@ -25,17 +25,17 @@ namespace MRS.DocumentManagement.Connection.Utils
             if (objective.Items != null)
             {
                 foreach (var item in objective.Items)
-                    UpdateTime(item, time);
+                    UpdateTime(item, now);
             }
 
             if (objective.DynamicFields != null)
             {
                 foreach (var dynamicField in objective.DynamicFields)
-                    UpdateTime(dynamicField, time);
+                    UpdateTime(dynamicField, now);
             }
 
             if (objective.Location?.Item != null)
-                UpdateTime(objective.Location.Item, time);
+                UpdateTime(objective.Location.Item, now);
         }
 
         private static void UpdateTime(ItemExternalDto item, DateTime time)
