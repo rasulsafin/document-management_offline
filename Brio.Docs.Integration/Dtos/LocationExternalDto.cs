@@ -2,9 +2,9 @@
 {
     public class LocationExternalDto
     {
-        public (float x, float y, float z) Location { get; set; }
+        public (double x, double y, double z) Location { get; set; }
 
-        public (float x, float y, float z) CameraPosition { get; set; }
+        public (double x, double y, double z) CameraPosition { get; set; }
 
         public string Guid { get; set; }
 

@@ -4,9 +4,9 @@
     {
         public int ID { get; set; }
 
-        public (float x, float y, float z) Position { get; set; }
+        public (double x, double y, double z) Position { get; set; }
 
-        public (float x, float y, float z) CameraPosition { get; set; }
+        public (double x, double y, double z) CameraPosition { get; set; }
 
         public string Guid { get; set; }
 

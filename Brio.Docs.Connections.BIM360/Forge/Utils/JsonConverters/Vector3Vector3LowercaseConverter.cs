@@ -1,4 +1,4 @@
-using System.Numerics;
+using Brio.Docs.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -11,10 +11,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
         {
         }
 
-        protected override Vector3 ConvertTokenToVector3(JToken token)
-            => new Vector3(token.Value<float>("x"), token.Value<float>("y"), token.Value<float>("z"));
+        protected override Vector3d ConvertTokenToVector3(JToken token)
+            => new Vector3d(token.Value<double>("x"), token.Value<double>("y"), token.Value<double>("z"));
 
-        protected override object ConvertVector3ToSerializingObject(Vector3 vector)
+        protected override object ConvertVector3ToSerializingObject(Vector3d vector)
             => new
             {
                 x = vector.X,

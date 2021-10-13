@@ -1,5 +1,5 @@
-using System.Numerics;
 using System.Runtime.Serialization;
+using Brio.Docs.Common;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Models
 {
@@ -13,6 +13,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Models
         public int Version { get; set; }
 
         [DataMember]
-        public Vector3 Offset { get; set; }
+        public Vector3d Offset { get; set; }
     }
 }

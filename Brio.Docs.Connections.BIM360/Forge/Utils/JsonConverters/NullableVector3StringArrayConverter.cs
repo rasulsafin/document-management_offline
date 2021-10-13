@@ -1,6 +1,6 @@
 using System;
 using System.Globalization;
-using System.Numerics;
+using Brio.Docs.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -13,7 +13,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
         {
         }
 
-        protected override Vector3 ConvertTokenToVector3(JToken token)
+        protected override Vector3d ConvertTokenToVector3(JToken token)
         {
             var items = token.ToObject<string[]>();
 
@@ -23,15 +23,15 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
                     "Supports three-dimensional vectors represented only by the string array");
             }
 
-            if (float.TryParse(items[0], NumberStyles.Any, CultureInfo.InvariantCulture, out var x) &&
-                float.TryParse(items[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var y) &&
-                float.TryParse(items[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var z))
-                return new Vector3(x, y, z);
+            if (double.TryParse(items[0], NumberStyles.Any, CultureInfo.InvariantCulture, out var x) &&
+                double.TryParse(items[1], NumberStyles.Any, CultureInfo.InvariantCulture, out var y) &&
+                double.TryParse(items[2], NumberStyles.Any, CultureInfo.InvariantCulture, out var z))
+                return new Vector3d(x, y, z);
 
-            return Vector3.Zero;
+            return Vector3d.Zero;
         }
 
-        protected override object ConvertVector3ToSerializingObject(Vector3 vector)
+        protected override object ConvertVector3ToSerializingObject(Vector3d vector)
             => new[]
             {
                 vector.X.ToString(CultureInfo.InvariantCulture),

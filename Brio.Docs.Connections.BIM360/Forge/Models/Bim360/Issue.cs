@@ -1,6 +1,6 @@
 using System;
-using System.Numerics;
 using System.Runtime.Serialization;
+using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters;
 using Newtonsoft.Json;
 
@@ -190,7 +190,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 
             [DataMember(Name = "location")]
             [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
-            public Vector3? Location { get; set; }
+            public Vector3d? Location { get; set; }
 
             [DataMember(Name = "object_id")]
             public string ObjectID { get; set; }
@@ -234,7 +234,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 
             [DataMember(Name = "globalOffset")]
             [JsonConverter(typeof(Vector3Vector3LowercaseConverter))]
-            public Vector3? GlobalOffset { get; set; }
+            public Vector3d? GlobalOffset { get; set; }
 
             [DataMember(Name = "renderOptions")]
             public object RenderOptions { get; set; }
@@ -267,22 +267,22 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
         {
             [DataMember(Name = "up")]
             [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
-            public Vector3? Up { get; set; }
+            public Vector3d? Up { get; set; }
 
             [DataMember(Name = "eye")]
             [JsonConverter(typeof(NullableVector3StringArrayConverter))]
-            public Vector3? Eye { get; set; }
+            public Vector3d? Eye { get; set; }
 
             [DataMember(Name = "name")]
             public string Name { get; set; }
 
             [DataMember(Name = "target")]
             [JsonConverter(typeof(NullableVector3StringArrayConverter))]
-            public Vector3? Target { get; set; }
+            public Vector3d? Target { get; set; }
 
             [DataMember(Name = "pivotPoint")]
             [JsonConverter(typeof(NullableVector3StringArrayConverter))]
-            public Vector3? PivotPoint { get; set; }
+            public Vector3d? PivotPoint { get; set; }
 
             [DataMember(Name = "projection")]
             public string Projection { get; set; }
@@ -295,7 +295,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 
             [DataMember(Name = "worldUpVector")]
             [JsonConverter(typeof(NullableVector3FloatArrayConverter))]
-            public Vector3? WorldUpVector { get; set; }
+            public Vector3d? WorldUpVector { get; set; }
 
             [DataMember(Name = "isOrthographic")]
             public bool? IsOrthographic { get; set; }
