@@ -4,7 +4,7 @@ using System.Runtime.Serialization;
 namespace Brio.Docs.Connections.Bim360.Synchronization.Models
 {
     [DataContract]
-    public class LinkedInfo
+    internal class LinkedInfo
     {
         [DataMember]
         public string Urn { get; set; }

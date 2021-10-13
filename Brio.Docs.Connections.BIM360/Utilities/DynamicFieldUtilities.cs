@@ -47,5 +47,25 @@ namespace Brio.Docs.Connections.Bim360.Utilities
                 Type = DynamicFieldType.ENUM,
                 Value = valueID,
             };
+
+        internal static TSnapshot GetValue<T, TSnapshot, TID>(
+            IEnumCreator<T, TSnapshot, TID> creator,
+            ProjectSnapshot projectSnapshot,
+            ObjectiveExternalDto obj,
+            Func<IEnumerable<TID>, TSnapshot, bool> findPredicate,
+            out IEnumerable<TID> deserializedIDs)
+            where TSnapshot : AEnumVariantSnapshot<T>
+        {
+            deserializedIDs = null;
+            var dynamicField = obj.DynamicFields.FirstOrDefault(d => d.ExternalID == creator.EnumExternalID);
+
+            if (dynamicField == null || (creator.CanBeNull && dynamicField.Value == creator.NullID))
+                return null;
+
+            var ids = creator.DeserializeID(dynamicField.Value).ToArray();
+            deserializedIDs = ids;
+            return creator.GetSnapshots(projectSnapshot)
+               .FirstOrDefault(x => findPredicate(ids, x));
+        }
     }
 }

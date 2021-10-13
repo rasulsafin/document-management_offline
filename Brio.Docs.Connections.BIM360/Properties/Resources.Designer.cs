@@ -484,6 +484,38 @@ namespace Brio.Docs.Connections.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на {
+        ///  &quot;Get&quot;: [
+        ///    {
+        ///      &quot;Source&quot;: &quot;draft&quot;,
+        ///      &quot;Destination&quot;: &quot;Open&quot;
+        ///    },
+        ///    {
+        ///      &quot;Source&quot;: &quot;open&quot;,
+        ///      &quot;Destination&quot;: &quot;Late&quot;,
+        ///      &quot;Conditions&quot;: [
+        ///        {
+        ///          &quot;PropertyName&quot;: &quot;due_date&quot;,
+        ///          &quot;ComparisonType&quot;: &quot;NotEqual&quot;,
+        ///          &quot;ValueType&quot;: &quot;DateTime&quot;,
+        ///          &quot;Values&quot;: [
+        ///            null
+        ///          ]
+        ///        },
+        ///        {
+        ///          &quot;PropertyName&quot;: &quot;due_date&quot;,
+        ///          &quot;ComparisonType&quot;: &quot;Less&quot;,
+        ///          &quot;ValueType&quot;: &quot;DateTime&quot;,
+        ///          &quot;Values&quot;: [
+        ///    [остаток строки не уместился]&quot;;.
+        /// </summary>
+        internal static string statuses {
+            get {
+                return ResourceManager.GetString("statuses", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на &lt;!DOCTYPE html&gt;
         ///&lt;html lang=&quot;en&quot;&gt;
         ///    &lt;body&gt;You can now close this window!&lt;/body&gt;

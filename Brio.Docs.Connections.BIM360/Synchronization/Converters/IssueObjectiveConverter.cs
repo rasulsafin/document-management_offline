@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
@@ -15,14 +14,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class IssueObjectiveConverter : IConverter<Issue, ObjectiveExternalDto>
     {
-        private readonly IConverter<Status, ObjectiveStatus> statusConverter;
-
-        public IssueObjectiveConverter(IConverter<Status, ObjectiveStatus> statusConverter)
-        {
-            this.statusConverter = statusConverter;
-        }
-
-        public async Task<ObjectiveExternalDto> Convert(Issue issue)
+        public Task<ObjectiveExternalDto> Convert(Issue issue)
         {
             var resultDto = new ObjectiveExternalDto
             {
@@ -31,7 +23,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 ObjectiveType = new ObjectiveTypeExternalDto { ExternalId = issue.Type },
                 Title = issue.Attributes.Title,
                 Description = issue.Attributes.Description,
-                Status = await statusConverter.Convert(issue.Attributes.Status),
                 DynamicFields = GetDynamicFields(issue),
                 Items = new List<ItemExternalDto>(),
                 BimElements = GetBimElements(issue),
@@ -49,7 +40,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             if (issue.Attributes.UpdatedAt.HasValue)
                 resultDto.UpdatedAt = issue.Attributes.UpdatedAt.Value;
 
-            return resultDto;
+            return Task.FromResult(resultDto);
         }
 
         private static ICollection<DynamicFieldExternalDto> GetDynamicFields(Issue issue)

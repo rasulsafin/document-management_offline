@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Numerics;
 using System.Threading.Tasks;
-using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
@@ -24,7 +23,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
         private readonly Bim360Snapshot snapshot;
-        private readonly IConverter<ObjectiveStatus, Status> statusConverter;
+        private readonly IConverter<ObjectiveExternalDto, Status> statusConverter;
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
@@ -36,7 +35,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
         public ObjectiveIssueConverter(
             Bim360Snapshot snapshot,
-            IConverter<ObjectiveStatus, Status> statusConverter,
+            IConverter<ObjectiveExternalDto, Status> statusConverter,
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
@@ -61,9 +60,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
         {
             Issue exist = null;
-            var project = GetProjectSnapshot(objective);
-            if (objective.ExternalID != null)
-                exist = await issuesService.GetIssueAsync(project.IssueContainer, objective.ExternalID);
+            var project = snapshot.ProjectEnumerable.First(x => x.ID == objective.ProjectExternalID);
+            if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
+                exist = issueSnapshot.Entity;
 
             string type;
             string subtype;
@@ -103,7 +102,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 globalOffset = exist.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset;
             }
 
-            var assignToVariant = GetValue(
+            var assignToVariant = DynamicFieldUtilities.GetValue(
                 assignToEnumCreator,
                 project,
                 objective,
@@ -116,20 +115,31 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 {
                     Title = objective.Title,
                     Description = objective.Description,
-                    Status = await statusConverter.Convert(objective.Status),
+                    Status = await statusConverter.Convert(objective),
                     AssignedTo = assignToVariant?.Entity,
                     AssignedToType = assignToVariant?.Type,
                     CreatedAt = ConvertToNullable(objective.CreationDate),
                     DueDate = ConvertToNullable(objective.DueDate),
                     LocationDescription = GetDynamicField(objective.DynamicFields, x => x.LocationDescription),
                     RootCauseID =
-                        GetValue(rootCauseEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                        DynamicFieldUtilities.GetValue(
+                                rootCauseEnumCreator,
+                                project,
+                                objective,
+                                (ids, s) => ids.Contains(s.Entity.ID),
+                                out _)
                           ?.Entity.ID,
                     LbsLocation =
-                         GetValue(locationEnumCreator, project, objective, (ids, s) => ids.Contains(s.Entity.ID), out _)
+                        DynamicFieldUtilities.GetValue(
+                                locationEnumCreator,
+                                project,
+                                objective,
+                                (ids, s) => ids.Contains(s.Entity.ID),
+                                out _)
                           ?.Entity.ID,
                     Answer = GetDynamicField(objective.DynamicFields, x => x.Answer),
-                    PushpinAttributes = await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
+                    PushpinAttributes =
+                        await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config),
                     NgIssueTypeID = type,
                     NgIssueSubtypeID = subtype,
                     PermittedAttributes = permittedAttributes,
@@ -228,7 +238,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
         private IssueTypeSnapshot GetIssueTypes(ProjectSnapshot projectSnapshot, ObjectiveExternalDto obj)
         {
-            var type = GetValue(
+            var type = DynamicFieldUtilities.GetValue(
                 subtypeEnumCreator,
                 projectSnapshot,
                 obj,
@@ -249,31 +259,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             return type;
         }
-
-        private TSnapshot GetValue<T, TSnapshot, TID>(
-            IEnumCreator<T, TSnapshot, TID> creator,
-            ProjectSnapshot projectSnapshot,
-            ObjectiveExternalDto obj,
-            Func<IEnumerable<TID>, TSnapshot, bool> findPredicate,
-            out IEnumerable<TID> deserializedIDs)
-            where TSnapshot : AEnumVariantSnapshot<T>
-        {
-            deserializedIDs = null;
-            var dynamicField = obj.DynamicFields.First(d => d.ExternalID == creator.EnumExternalID);
-
-            if (creator.CanBeNull && dynamicField.Value == creator.NullID)
-                return null;
-
-            var ids = creator.DeserializeID(dynamicField.Value).ToArray();
-            deserializedIDs = ids;
-            return creator.GetSnapshots(projectSnapshot)
-               .FirstOrDefault(x => findPredicate(ids, x));
-        }
-
-        private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
-            => snapshot.Hubs.SelectMany(x => x.Value.Projects)
-               .First(x => x.Key == obj.ProjectExternalID)
-               .Value;
 
         private async Task<(string item, int? version)> GetTarget(
             ObjectiveExternalDto obj,

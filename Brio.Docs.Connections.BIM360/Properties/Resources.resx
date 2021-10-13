@@ -309,4 +309,7 @@
     <value>/bim360/locations/v2/containers/{0}/trees/{1}/nodes</value>
     <comment>Get location</comment>
   </data>
+  <data name="statuses" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\statuses.mrsbc;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
 </root>

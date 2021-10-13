@@ -9,9 +9,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Extensions
         public static string GetEnumMemberValue(this Enum value)
         {
             var attribute = value.GetAttribute<EnumMemberAttribute>();
-            return attribute != null
-                ? attribute.Value
-                : value.ToString();
+            return attribute?.Value ?? value.ToString();
         }
 
         public static T GetAttribute<T>(this Enum value)

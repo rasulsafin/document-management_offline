@@ -15,6 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<RootCauseEnumCreator>();
             services.AddScoped<LocationEnumCreator>();
             services.AddScoped<AssignToEnumCreator>();
+            services.AddScoped<StatusEnumCreator>();
             services.AddScoped<SnapshotFiller>();
             services.AddScoped<Bim360Snapshot>();
             services.AddScoped<Bim360Storage>();
