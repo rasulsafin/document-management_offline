@@ -55,6 +55,7 @@ namespace MRS.DocumentManagement.Connection.Utils.CloudBase.Synchronizers
         {
             newId ??= project.ExternalID;
             await ItemsSyncHelper.UploadFiles(project.Items, manager, project.Title);
+            UpdatedTimeUtilities.UpdateTime(project);
             var createSuccess = await manager.Push(project, newId);
             if (!createSuccess)
                 return null;
