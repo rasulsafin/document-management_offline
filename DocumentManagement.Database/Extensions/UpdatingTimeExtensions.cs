@@ -36,29 +36,31 @@ namespace MRS.DocumentManagement.Database.Extensions
 
         private static IEnumerable<object> GetParents(DbContext context, object entity)
         {
-            object parent = null;
-
-            switch (entity)
+            while (entity != null)
             {
-                case Item item:
-                    parent = GetParent(context, item.Project, item.ProjectID);
-                    break;
-                case DynamicField dynamicField:
-                    parent = GetParent(context, dynamicField.ParentField, dynamicField.ParentFieldID);
-                    parent ??= GetParent(context, dynamicField.Objective, dynamicField.ObjectiveID);
-                    break;
-                case ObjectiveItem objectiveItem:
-                    parent = GetParent(context, objectiveItem.Objective, objectiveItem.ObjectiveID);
-                    break;
-                case BimElementObjective bimElementObjective:
-                    parent = GetParent(context, bimElementObjective.Objective, bimElementObjective.ObjectiveID);
-                    break;
-            }
+                object parent = null;
 
-            if (parent != null)
-            {
-                yield return parent;
-                yield return GetParents(context, entity);
+                switch (entity)
+                {
+                    case Item item:
+                        parent = GetParent(context, item.Project, item.ProjectID);
+                        break;
+                    case DynamicField dynamicField:
+                        parent = GetParent(context, dynamicField.ParentField, dynamicField.ParentFieldID);
+                        parent ??= GetParent(context, dynamicField.Objective, dynamicField.ObjectiveID);
+                        break;
+                    case ObjectiveItem objectiveItem:
+                        parent = GetParent(context, objectiveItem.Objective, objectiveItem.ObjectiveID);
+                        break;
+                    case BimElementObjective bimElementObjective:
+                        parent = GetParent(context, bimElementObjective.Objective, bimElementObjective.ObjectiveID);
+                        break;
+                }
+
+                if (parent != null)
+                    yield return parent;
+
+                entity = parent;
             }
         }
 
