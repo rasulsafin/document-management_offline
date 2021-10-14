@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -11,78 +12,58 @@ namespace MRS.DocumentManagement.Database.Extensions
         public static void UpdateDateTime(this ChangeTracker changeTracker, DateTime dateTime = default)
         {
             dateTime = dateTime == default ? DateTime.UtcNow : dateTime;
-            var hasChanges = true;
-            var changed = Enumerable.Empty<EntityEntry>();
-            var comparer = new EntityEntryEqualityComparer();
+            var hashset = new HashSet<ISynchronizableBase>();
+            var entries = changeTracker.Entries().ToArray();
 
-            while (hasChanges)
+            foreach (var entry in entries)
             {
-                hasChanges = false;
-                var entries = changeTracker.Entries().ToArray();
-                var changes = entries.Except(changed, comparer);
-                changed = entries;
+                if (entry.Entity is ISynchronizableBase synchronizable &&
+                    entry.State is EntityState.Added or EntityState.Modified)
+                    hashset.Add(synchronizable);
 
-                foreach (var entityEntry in changes)
+                if (entry.State is EntityState.Added or EntityState.Modified or EntityState.Deleted)
                 {
-                    if (entityEntry.Entity is ISynchronizableBase synchronizable &&
-                        entityEntry.State is EntityState.Added or EntityState.Modified)
-                        synchronizable.UpdatedAt = dateTime;
-
-                    hasChanges |= TryUpdateParent(changeTracker.Context, entityEntry, dateTime);
+                    foreach (ISynchronizableBase parent in GetParents(changeTracker.Context, entry.Entity)
+                       .Where(parent => parent is ISynchronizableBase)
+                       .TakeWhile(parent => !hashset.Contains(parent)))
+                        hashset.Add(parent);
                 }
             }
+
+            foreach (var synchronizable in hashset)
+                synchronizable.UpdatedAt = dateTime;
         }
 
-        private static bool TryUpdateParent(DbContext context, EntityEntry entityEntry, DateTime dateTime)
+        private static IEnumerable<object> GetParents(DbContext context, object entity)
         {
-            var hasChanges = false;
+            object parent = null;
 
-            switch (entityEntry.Entity)
+            switch (entity)
             {
-                case Item item
-                    when entityEntry.State is EntityState.Added or EntityState.Deleted or EntityState.Modified:
-                    UpdateParentDateTime(context, item.Project, item.ProjectID, dateTime);
-                    hasChanges = true;
+                case Item item:
+                    parent = GetParent(context, item.Project, item.ProjectID);
                     break;
-                case DynamicField dynamicField
-                    when entityEntry.State is EntityState.Added or EntityState.Deleted or EntityState.Modified:
-                    UpdateParentDateTime(context, dynamicField.Objective, dynamicField.ObjectiveID, dateTime);
-                    hasChanges = true;
+                case DynamicField dynamicField:
+                    parent = GetParent(context, dynamicField.ParentField, dynamicField.ParentFieldID);
+                    parent ??= GetParent(context, dynamicField.Objective, dynamicField.ObjectiveID);
                     break;
-                case DynamicField dynamicField
-                    when entityEntry.State is EntityState.Added or EntityState.Deleted or EntityState.Modified:
-                    UpdateParentDateTime(context, dynamicField.ParentField, dynamicField.ParentFieldID, dateTime);
-                    hasChanges = true;
+                case ObjectiveItem objectiveItem:
+                    parent = GetParent(context, objectiveItem.Objective, objectiveItem.ObjectiveID);
                     break;
-                case ObjectiveItem objectiveItem
-                    when entityEntry.State is EntityState.Added or EntityState.Deleted or EntityState.Modified:
-                    UpdateParentDateTime(context, objectiveItem.Objective, objectiveItem.ObjectiveID, dateTime);
-                    hasChanges = true;
-                    break;
-                case BimElementObjective bimElementObjective
-                    when entityEntry.State is EntityState.Added or EntityState.Deleted or EntityState.Modified:
-                    UpdateParentDateTime(
-                        context,
-                        bimElementObjective.Objective,
-                        bimElementObjective.ObjectiveID,
-                        dateTime);
-                    hasChanges = true;
+                case BimElementObjective bimElementObjective:
+                    parent = GetParent(context, bimElementObjective.Objective, bimElementObjective.ObjectiveID);
                     break;
             }
 
-            return hasChanges;
-        }
-
-        private static void UpdateParentDateTime<T>(DbContext context, T parent, int? parentID, DateTime dateTime)
-            where T : class, ISynchronizableBase
-        {
-            if (parent == null && !parentID.HasValue)
-                return;
-
             if (parent != null)
-                parent.UpdatedAt = dateTime;
-            else
-                context.Find<T>(parentID.Value).UpdatedAt = dateTime;
+            {
+                yield return parent;
+                yield return GetParents(context, entity);
+            }
         }
+
+        private static T GetParent<T>(DbContext context, T parent, int? parentID)
+            where T : class
+            => parent ?? (parentID.HasValue ? context.Find<T>(parentID.Value) : null);
     }
 }
