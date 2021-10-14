@@ -59,6 +59,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
         {
             newId ??= obj.ExternalID;
             await ItemsSyncHelper.UploadFiles(obj.Items, manager);
+            UpdatedTimeUtilities.UpdateTime(obj);
             var createSuccess = await manager.Push(obj, newId);
             if (!createSuccess)
                 return null;

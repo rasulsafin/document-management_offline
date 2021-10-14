@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -310,25 +311,13 @@ namespace Brio.Docs.Database
         }
 
         private void UpdateDateTime(DateTime dateTime = default)
-        {
-            foreach (var entityEntry in ChangeTracker
-               .Entries()
-               .Where(
-                    e => e.Entity is ISynchronizableBase &&
-                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
-            {
-                var synchronizable = (ISynchronizableBase)entityEntry.Entity;
-                synchronizable.UpdatedAt = dateTime == default ? DateTime.UtcNow : dateTime;
-            }
-        }
+            => ChangeTracker.UpdateDateTime(dateTime);
 
         private void UpdateObjective()
         {
             foreach (var entityEntry in ChangeTracker
                .Entries()
-               .Where(
-                    e => e.Entity is Objective &&
-                        (e.State == EntityState.Added || e.State == EntityState.Modified)))
+               .Where(e => e.Entity is Objective && e.State is EntityState.Added or EntityState.Modified))
             {
                 var objective = (Objective)entityEntry.Entity;
                 objective.TitleToLower = objective.Title.ToLowerInvariant();
