@@ -4,7 +4,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     public static class Vector3Extensions
     {
-        private const double FOOT = 0.304800609601219;
+        private const double FOOT = 0.3048;
 
         public static (double x, double y, double z) ToTuple(this Vector3d vector3)
             => (vector3.X, vector3.Y, vector3.Z);
