@@ -55,7 +55,7 @@ namespace MRS.DocumentManagement.Services
         public async Task<RequestID> Synchronize(ID<UserDto> userID)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogInformation("Synchronize started for user: {UserID}", userID);
+            logger.LogInformation("Synchronization started for user: {UserID}", userID);
             try
             {
                 var iUserID = (int)userID;
@@ -87,7 +87,7 @@ namespace MRS.DocumentManagement.Services
                 logger.LogTrace("Mapped info {@Info}", info);
 
                 var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
                 var src = new CancellationTokenSource();
                 var task = Task.Factory.StartNew(
                     async () =>
@@ -99,6 +99,7 @@ namespace MRS.DocumentManagement.Services
                             logger.LogDebug(
                                 "Synchronization ends with result: {@SynchronizationResult}",
                                 synchronizationResult);
+                            logger.LogInformation("Synchronization finished for user: {UserID}", userID);
                             return new RequestResult(
                                 synchronizationResult.Count == 0,
                                 synchronizationResult.FirstOrDefault()?.Exception.ConvertToBase());
