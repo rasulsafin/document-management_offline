@@ -60,14 +60,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         internal async Task Remove(string projectID, Item item)
         {
             // Delete uploaded item by marking version as "deleted"
-            var deletedVersion = new Forge.Models.DataManagement.Version
+            var deletedVersion = new Version
             {
-                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
+                Attributes = new Version.VersionAttributes
                 {
                     Name = item.Attributes.DisplayName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
-                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
+                Relationships = new Version.VersionRelationships
                 {
                     Item = new ObjectInfo
                     {
@@ -94,7 +94,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         }
 
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        private async Task<(Item item, Forge.Models.DataManagement.Version version)> PostItem(ItemExternalDto item, string folder, string projectId)
+        private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, string folder, string projectId)
         {
             var fileName = Path.GetFileName(item.FullPath);
             var version = await CreateVersion(projectId, folder, item.FullPath, fileName);
@@ -166,9 +166,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             await objectsService.PutObjectAsync(bucketKey, hashedName, filePath);
 
             // STEP 7. Create first version
-            var version = new Forge.Models.DataManagement.Version
+            var version = new Version
             {
-                Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
+                Attributes = new Version.VersionAttributes
                 {
                     Name = fileName,
                     Extension = new Extension
@@ -176,7 +176,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                         Type = AUTODESK_VERSION_FILE_TYPE,
                     },
                 },
-                Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
+                Relationships = new Version.VersionRelationships
                 {
                     Storage = storage.ToInfo().ToDataContainer(),
                 },

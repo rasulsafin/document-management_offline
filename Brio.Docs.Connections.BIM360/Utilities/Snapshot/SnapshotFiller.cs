@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -23,6 +24,8 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
+        private readonly IfcConfigUtilities configUtilities;
+        private readonly StatusEnumCreator statusEnumCreator;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
@@ -34,7 +37,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
-            IssueSnapshotUtilities snapshotUtilities)
+            IssueSnapshotUtilities snapshotUtilities,
+            IfcConfigUtilities configUtilities,
+            StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
@@ -46,6 +51,8 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.snapshotUtilities = snapshotUtilities;
+            this.configUtilities = configUtilities;
+            this.statusEnumCreator = statusEnumCreator;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -104,6 +111,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             }
         }
 
+        public async Task UpdateStatusesConfigIfNull()
+        {
+            await UpdateProjectsIfNull();
+            foreach (var project in snapshot.ProjectEnumerable.Where(x => x.StatusesRelations == null))
+                project.StatusesRelations = await configUtilities.GetStatusesConfig(project);
+        }
+
         public async Task UpdateIssuesIfNull(DateTime date = default)
         {
             await UpdateProjectsIfNull();
@@ -153,6 +167,12 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 p => p.AssignToVariants = new Dictionary<string, AssignToVariant>(),
                 assignToEnumCreator,
                 (project, variant) => project.AssignToVariants.Add(variant.Entity, variant));
+
+        public async Task UpdateStatuses()
+            => await UpdateProjectsEnums(
+                p => p.Statuses = new Dictionary<string, StatusSnapshot>(),
+                statusEnumCreator,
+                (project, variant) => project.Statuses.Add(variant.Entity.GetEnumMemberValue(), variant));
 
         private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
             Action<ProjectSnapshot> createEmptyEnumVariants,

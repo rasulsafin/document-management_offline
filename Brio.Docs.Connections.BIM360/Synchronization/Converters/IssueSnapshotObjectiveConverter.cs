@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
@@ -16,28 +18,36 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly StatusEnumCreator statusEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
+            IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             LocationEnumCreator locationEnumCreator,
-            AssignToEnumCreator assignToEnumCreator)
+            AssignToEnumCreator assignToEnumCreator,
+            StatusEnumCreator statusEnumCreator)
         {
             this.converterToDto = converterToDto;
+            this.statusConverter = statusConverter;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
+            this.statusEnumCreator = statusEnumCreator;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
         {
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
+            parsedToDto.Status = await statusConverter.Convert(snapshot);
+
             var typeField = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
                 subtypeEnumCreator);
@@ -58,6 +68,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                         ? snapshot.ProjectSnapshot.AssignToVariants[snapshot.Entity.Attributes.AssignedTo].ID
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
+            var status = DynamicFieldUtilities.CreateField(
+                snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
+                statusEnumCreator);
 
             foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
             {
@@ -109,6 +122,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 UpdatedAt = System.DateTime.Now,
             };
 
+            parsedToDto.DynamicFields.Add(status);
             parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);

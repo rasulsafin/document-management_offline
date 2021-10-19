@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
@@ -25,10 +26,14 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
         public Dictionary<string, AssignToVariant> AssignToVariants { get; set; }
 
+        public Dictionary<string, StatusSnapshot> Statuses { get; set; }
+
         public Dictionary<string, ItemSnapshot> Items { get; set; }
 
         public string MrsFolderID { get; set; }
 
         public override string ID => Entity.ID;
+
+        public StatusesRelations StatusesRelations { get; set; }
     }
 }

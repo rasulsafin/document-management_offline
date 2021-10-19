@@ -125,11 +125,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
+            await filler.UpdateStatusesConfigIfNull();
             await filler.UpdateIssuesIfNull(date);
             await filler.UpdateIssueTypes();
             await filler.UpdateRootCauses();
             await filler.UpdateLocations();
             await filler.UpdateAssignTo();
+            await filler.UpdateStatuses();
             return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.ID)
                .ToList();
