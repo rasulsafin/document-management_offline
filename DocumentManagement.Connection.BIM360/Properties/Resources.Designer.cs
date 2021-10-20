@@ -142,7 +142,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/attachments?&amp;page[limit]={2}&amp;page[offset]={3}.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues/{1}/attachments.
         /// </summary>
         internal static string GetIssuesAttachmentMethod {
             get {
@@ -151,7 +151,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues?&amp;page[limit]={1}&amp;page[offset]={2}.
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/quality-issues.
         /// </summary>
         internal static string GetIssuesMethod {
             get {
@@ -178,6 +178,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/regions/eu/accounts/{0}/projects/{1}/companies.
+        /// </summary>
+        internal static string GetProjectsCompaniesMethodEmea {
+            get {
+                return ResourceManager.GetString("GetProjectsCompaniesMethodEmea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/accounts/{0}/projects/{1}/companies.
+        /// </summary>
+        internal static string GetProjectsCompaniesMethodUS {
+            get {
+                return ResourceManager.GetString("GetProjectsCompaniesMethodUS", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/downloads/{1}.
         /// </summary>
         internal static string GetProjectsDownloadInfoMethod {
@@ -187,7 +205,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/contents?filter[type]={2}.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/contents.
         /// </summary>
         internal static string GetProjectsFoldersContentsMethod {
             get {
@@ -196,7 +214,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
-        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/search?.
+        ///   Ищет локализованную строку, похожую на /data/v1/projects/{0}/folders/{1}/search.
         /// </summary>
         internal static string GetProjectsFoldersSearchMethod {
             get {
@@ -210,6 +228,24 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string GetProjectsHubMethod {
             get {
                 return ResourceManager.GetString("GetProjectsHubMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v2/regions/eu/accounts/{0}/projects/{1}/industry_roles.
+        /// </summary>
+        internal static string GetProjectsIndustryRolesMethodEmea {
+            get {
+                return ResourceManager.GetString("GetProjectsIndustryRolesMethodEmea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v2/accounts/{0}/projects/{1}/industry_roles.
+        /// </summary>
+        internal static string GetProjectsIndustryRolesMethodUS {
+            get {
+                return ResourceManager.GetString("GetProjectsIndustryRolesMethodUS", resourceCulture);
             }
         }
         
@@ -241,6 +277,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         }
         
         /// <summary>
+        ///   Ищет локализованную строку, похожую на /bim360/admin/v1/projects/{0}/users.
+        /// </summary>
+        internal static string GetProjectsUsersMethod {
+            get {
+                return ResourceManager.GetString("GetProjectsUsersMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/root-causes.
         /// </summary>
         internal static string GetRootCausesMethod {
@@ -261,9 +306,36 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         /// <summary>
         ///   Ищет локализованную строку, похожую на /userprofile/v1/users/@me.
         /// </summary>
+        internal static string GetUsersAtMeMethod {
+            get {
+                return ResourceManager.GetString("GetUsersAtMeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /issues/v1/containers/{0}/users/me.
+        /// </summary>
         internal static string GetUsersMeMethod {
             get {
                 return ResourceManager.GetString("GetUsersMeMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/regions/eu/accounts/{0}/users.
+        /// </summary>
+        internal static string GetUsersMethodEmea {
+            get {
+                return ResourceManager.GetString("GetUsersMethodEmea", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /hq/v1/accounts/{0}/users.
+        /// </summary>
+        internal static string GetUsersMethodUS {
+            get {
+                return ResourceManager.GetString("GetUsersMethodUS", resourceCulture);
             }
         }
         
@@ -282,6 +354,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Properties {
         internal static string PatchIssuesMethod {
             get {
                 return ResourceManager.GetString("PatchIssuesMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Ищет локализованную строку, похожую на /authentication/v1/authenticate.
+        /// </summary>
+        internal static string PostAuthenticateMethod {
+            get {
+                return ResourceManager.GetString("PostAuthenticateMethod", resourceCulture);
             }
         }
         

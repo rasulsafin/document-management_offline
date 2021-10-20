@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
+namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360
 {
     [DataContract]
     public class IssueSubtype

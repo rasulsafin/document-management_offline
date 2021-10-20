@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
@@ -18,6 +18,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         private static readonly string DISPLAY_NAME = MrsConstants.TYPE_FIELD_NAME;
 
+        private readonly IssuesService issuesService;
+
+        public TypeSubtypeEnumCreator(IssuesService issuesService)
+            => this.issuesService = issuesService;
+
         public string EnumExternalID => ENUM_EXTERNAL_ID;
 
         public string EnumDisplayName => DISPLAY_NAME;
@@ -26,7 +31,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
         public string NullID => throw new NotSupportedException();
 
-        public IOrderedEnumerable<(string parentTypeID, string subtypeID)> GetOrderedIDs(
+        public IEnumerable<(string parentTypeID, string subtypeID)> GetOrderedIDs(
             IEnumerable<IssueTypeSnapshot> variants)
             => variants
                .Select(x => (type: x.ParentType.ID, subtype: x.Subtype.ID))
@@ -43,14 +48,12 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
                 ? snapshot.ParentType.Title
                 : $"{snapshot.ParentType.Title}: {snapshot.Subtype.Title}";
 
-        public async Task<IEnumerable<IssueTypeSnapshot>> GetVariantsFromRemote(
-            IssuesService issuesService,
-            ProjectSnapshot projectSnapshot)
+        public async Task<IEnumerable<IssueTypeSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
             => (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer)).SelectMany(
                 x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
 
-        public IEnumerable<IssueTypeSnapshot> GetSnapshots(IEnumerable<ProjectSnapshot> projects)
-            => projects.SelectMany(x => x.IssueTypes.Values);
+        public IEnumerable<IssueTypeSnapshot> GetSnapshots(ProjectSnapshot project)
+            => project.IssueTypes.Values;
 
         public IEnumerable<(string parentTypeID, string subtypeID)> DeserializeID(string externalID)
             => DynamicFieldUtilities.DeserializeID<(string parentTypeID, string subtypeID)>(externalID);

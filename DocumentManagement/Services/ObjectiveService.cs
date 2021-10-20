@@ -90,10 +90,12 @@ namespace MRS.DocumentManagement.Services
                     await LinkItem(item, objective);
                 }
 
+                var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)objective.AuthorID);
+
                 objective.DynamicFields = new List<DynamicField>();
                 foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
                 {
-                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID);
+                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID, user.ConnectionInfoID);
                 }
 
                 if (location != null)
@@ -255,7 +257,9 @@ namespace MRS.DocumentManagement.Services
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .ByPages(x => x.Title, filter.PageNumber, filter.PageSize)
+                    .ByPages(x => x.CreationDate,
+                                  filter.PageNumber,
+                                  filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
                             .ThenInclude(x => x.BimElement)
