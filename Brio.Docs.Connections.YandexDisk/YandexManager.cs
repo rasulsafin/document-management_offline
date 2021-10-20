@@ -219,7 +219,10 @@ namespace Brio.Docs.Integration
             if (directoryExists)
                 return true;
 
-            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetRootDirectory());
+            var directory = PathManager.GetNestedDirectory(directoryName);
+            directoryName = directory.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
+            var list = await controller.GetListAsync(directory);
+
             foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
@@ -234,7 +237,7 @@ namespace Brio.Docs.Integration
                 return createdFolder != null;
             }
 
-            return directoryExists;
+            return true;
         }
     }
 }

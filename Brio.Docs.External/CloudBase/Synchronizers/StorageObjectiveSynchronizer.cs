@@ -12,6 +12,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
     {
         private readonly ICloudManager manager;
         private List<ObjectiveExternalDto> objectives;
+        private List<ProjectExternalDto> projects;
 
         public StorageObjectiveSynchronizer(ICloudManager manager)
             => this.manager = manager;
@@ -58,7 +59,11 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
         private async Task<ObjectiveExternalDto> PushObjective(ObjectiveExternalDto obj, string newId = null)
         {
             newId ??= obj.ExternalID;
-            await ItemsSyncHelper.UploadFiles(obj.Items, manager);
+            await ItemsSyncHelper.UploadFiles(
+                obj.Items,
+                manager,
+                projects.FirstOrDefault(x => x.ExternalID == obj.ProjectExternalID)?.Title);
+            obj.Items = obj.Items.Where(x => !string.IsNullOrWhiteSpace(x.ExternalID)).ToList();
             UpdatedTimeUtilities.UpdateTime(obj);
             var createSuccess = await manager.Push(obj, newId);
             if (!createSuccess)
@@ -70,8 +75,8 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
         private async Task CheckCashedElements()
         {
-            if (objectives == null)
-                objectives = await manager.PullAll<ObjectiveExternalDto>(PathManager.GetTableDir(nameof(ObjectiveExternalDto)));
+            objectives ??= await manager.PullAll<ObjectiveExternalDto>(PathManager.GetTableDir(nameof(ObjectiveExternalDto)));
+            projects ??= await manager.PullAll<ProjectExternalDto>(PathManager.GetTableDir(nameof(ProjectExternalDto)));
         }
     }
 }
