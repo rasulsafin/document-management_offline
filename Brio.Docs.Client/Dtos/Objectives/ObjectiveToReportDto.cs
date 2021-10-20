@@ -20,5 +20,7 @@ namespace Brio.Docs.Client.Dtos
         public IEnumerable<ItemDto> Items { get; set; }
 
         public LocationDto Location { get; set; }
+
+        public string Status { get; set; }
     }
 }
