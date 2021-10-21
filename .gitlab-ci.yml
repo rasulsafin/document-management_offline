@@ -1,6 +1,6 @@
 variables:
   MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
-  API_PATH: '\'
+  API_PATH: 'DocumentManagement.Api\bin\Release\Publish'
 
 stages:
   - build
@@ -11,6 +11,7 @@ build_job:
     - branches
   script:
     - 'nuget restore'
+    - '"%MSBUILD_PATH%" /property:Configuration=Release'
     - '"%MSBUILD_PATH%" /t:Restore;Rebuild;Publish /p:SelfContained=True /p:PublishProtocol=FileSystem /p:Configuration=Release /p:PublishDir=bin\Release\Publish /p:RuntimeIdentifier=win-x64'
   artifacts:
     expire_in: 2 days
