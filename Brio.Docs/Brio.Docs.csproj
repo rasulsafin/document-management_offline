@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <Authors>Brio MRS</Authors>
+    <Company>Brio MRS©</Company>
+    <Product>Brio MRS</Product>
+    <Version>1.1.0</Version>
+  </PropertyGroup>
+  
+    <ItemGroup>
+      <PackageReference Include="AutoMapper" Version="10.1.1" />
+      <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+      <PackageReference Include="Destructurama.ByIgnoring" Version="1.1.0" />
+      <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.GoogleDrive\Brio.Docs.Connections.GoogleDrive.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.LementPro\Brio.Docs.Connections.LementPro.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.MRSPro\Brio.Docs.Connections.MRSPro.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.Tdms\Brio.Docs.Connections.Tdms.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Database\Brio.Docs.Database.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Client\Brio.Docs.Client.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Utils\Brio.Docs.Utils.csproj" />
+    </ItemGroup>
+
+</Project>
