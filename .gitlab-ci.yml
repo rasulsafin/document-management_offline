@@ -14,7 +14,7 @@ build_job:
   script:
     - 'nuget restore'
     - '"%MSBUILD_PATH%" /property:Configuration=Release'
-    - '"%MSBUILD_PATH%" /t:Restore;Rebuild;Publish /p:SelfContained=True /p:PublishProtocol=FileSystem /p:Configuration=Release /p:PublishDir=bin\Release\Publish /p:RuntimeIdentifier=win-x64'
+    - '"%MSBUILD_PATH%" /t:Restore;Rebuild;Publish /p:SelfContained=True /p:PublishProtocol=FileSystem /p:Configuration=Release /p:PublishDir=bin\Release\Publish /p:RuntimeIdentifier=win-x64 /p:AllowedReferenceRelatedFileExtensions=*.pdb /p:DebugSymbols=false /p:DebugType=none'
     - mkdir "%ARTIFACTS_PATH%
     - xcopy /E "%API_PATH%" "%ARTIFACTS_PATH%"
     - mkdir "%ARTIFACTS_PATH%\Launcher"
