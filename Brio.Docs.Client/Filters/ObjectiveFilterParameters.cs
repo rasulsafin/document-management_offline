@@ -11,5 +11,7 @@
         public string TitlePart { get; set; }
 
         public int? ExceptChildrenOf { get; set; }
+
+        public int? Status { get; set; }
     }
 }
