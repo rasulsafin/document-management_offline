@@ -81,8 +81,8 @@ namespace Brio.Docs.Utility.Mapping
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)
                                                                     .Where(x => x.ItemType == (int)ItemType.Media
                                                                                 && !x.RelativePath.EndsWith(".mp4"))))
-                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
-
+                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
+                .ForMember(d => d.Status, o => o.MapFrom<StatusToStringResolver>());
             CreateMap<Objective, ObjectiveToLocationDto>();
         }
 
