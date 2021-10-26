@@ -57,6 +57,16 @@ namespace Brio.Docs.Client.Services
         Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
 
         /// <summary>
+        /// Return list of objectives with locations, linked to specific project.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <param name="itemName">Name of the item in location.</param>
+        /// <returns>Collection of objectives.</returns>
+        /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
+        Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName);
+
+        /// <summary>
         /// Generate report about selected objectives.
         /// </summary>
         /// <param name="objectives">List of objective id's.</param>

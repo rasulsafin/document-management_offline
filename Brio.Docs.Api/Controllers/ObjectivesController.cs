@@ -210,6 +210,45 @@ namespace Brio.Docs.Api.Controllers
         }
 
         /// <summary>
+        /// Return list of objectives with locations, linked to specific project and bound to given item.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <param name="itemName">Parameters for location filtration.</param>
+        /// <returns>Collection of objectives.</returns>
+        /// <response code="200">Collection of objectives linked to project with locations bound to given item.</response>
+        /// <response code="400">Invalid project id.</response>
+        /// <response code="404">Could not find project to retrieve objective list.</response>
+        /// <response code="500">Something went wrong while retrieving the objective list.</response>
+        [HttpGet]
+        [Route("locations")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(IEnumerable<ObjectiveToLocationDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectivesWithLocations(
+            [FromQuery]
+            [CheckValidID]
+            int projectID,
+            [FromQuery]
+            string itemName)
+        {
+            try
+            {
+                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName);
+                return Ok(objectives);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Generate report about selected objectives.
         /// </summary>
         /// <remarks>

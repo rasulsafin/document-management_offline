@@ -10,6 +10,9 @@ namespace Brio.Docs.Database.Models
 
         public string RelativePath { get; set; }
 
+        [ForbidMerge]
+        public string Name { get; set; }
+
         public int ItemType { get; set; }
 
         [ForbidMerge]
