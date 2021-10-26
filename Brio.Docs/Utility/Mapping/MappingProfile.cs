@@ -83,6 +83,7 @@ namespace Brio.Docs.Utility.Mapping
                                                                                 && !x.RelativePath.EndsWith(".mp4"))))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
                 .ForMember(d => d.Status, o => o.MapFrom<StatusToStringResolver>());
+            CreateMap<Objective, ObjectiveToLocationDto>();
         }
 
         private void CreateMapToModel()

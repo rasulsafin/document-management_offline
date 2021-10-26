@@ -235,9 +235,9 @@ namespace Brio.Docs.Services
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID)
                                     .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementParentName) || x.BimElements.Any(e => e.BimElement.ParentName == filter.BimElementParentName))
                                     .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
-                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart));
+                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
+                                    .Where(x => filter.Status == null || x.Status == filter.Status);
 
                 if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
                 {
@@ -280,6 +280,37 @@ namespace Brio.Docs.Services
                         TotalPages = totalPages,
                     },
                 };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
+        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectivesWithLocation started with projectID: {@ProjectID}", projectID);
+            try
+            {
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
+
+                var objectivesWithLocations = await context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ProjectID == dbProject.ID)
+                                    .Include(x => x.Location)
+                                        .ThenInclude(x => x.Item)
+                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName)
+                                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
+                                    .ToListAsync();
+
+                return objectivesWithLocations;
             }
             catch (Exception ex)
             {

@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -74,22 +75,19 @@ namespace Brio.Docs.Database
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
         {
-            UpdateDateTime();
-            UpdateObjective();
+            UpdateEntities();
             return base.SaveChanges(acceptAllChangesOnSuccess);
         }
 
         public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = new CancellationToken())
         {
-            UpdateDateTime();
-            UpdateObjective();
+            UpdateEntities();
             return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
         }
 
         public Task<int> SynchronizationSaveAsync(DateTime dateTime, CancellationToken cancellationToken = new CancellationToken())
         {
-            UpdateDateTime(dateTime);
-            UpdateObjective();
+            UpdateEntities(dateTime);
             return base.SaveChangesAsync(true, cancellationToken);
         }
 
@@ -310,6 +308,13 @@ namespace Brio.Docs.Database
                     .HasDefaultValue(DEFAULT_DATE_TIME);
         }
 
+        private void UpdateEntities(DateTime dateTime = default)
+        {
+            UpdateDateTime(dateTime);
+            UpdateObjective();
+            UpdateItem();
+        }
+
         private void UpdateDateTime(DateTime dateTime = default)
             => ChangeTracker.UpdateDateTime(dateTime);
 
@@ -321,6 +326,17 @@ namespace Brio.Docs.Database
             {
                 var objective = (Objective)entityEntry.Entity;
                 objective.TitleToLower = objective.Title.ToLowerInvariant();
+            }
+        }
+
+        private void UpdateItem()
+        {
+            foreach (var entityEntry in ChangeTracker
+               .Entries()
+               .Where(e => e.Entity is Item && e.State is EntityState.Added or EntityState.Modified))
+            {
+                var item = (Item)entityEntry.Entity;
+                item.Name = Path.GetFileNameWithoutExtension(item.RelativePath);
             }
         }
     }
