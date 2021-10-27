@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Numerics;
 using System.Threading.Tasks;
+using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
@@ -78,9 +78,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 pushpinAttributes?.ViewerState?.Viewport?.Eye == null)
                 return null;
 
-            var location = pushpinAttributes.Location ?? Vector3.Zero;
-            var offset = pushpinAttributes.ViewerState?.GlobalOffset ?? Vector3.Zero;
-            var eye = pushpinAttributes.ViewerState?.Viewport?.Eye ?? Vector3.Zero;
+            var location = pushpinAttributes.Location ?? Vector3d.Zero;
+            var offset = pushpinAttributes.ViewerState?.GlobalOffset ?? Vector3d.Zero;
+            var eye = pushpinAttributes.ViewerState?.Viewport?.Eye ?? Vector3d.Zero;
 
             return new LocationExternalDto
             {

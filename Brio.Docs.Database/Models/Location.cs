@@ -6,17 +6,17 @@
         [ForbidMerge]
         public int ID { get; set; }
 
-        public float PositionX { get; set; }
+        public double PositionX { get; set; }
 
-        public float PositionY { get; set; }
+        public double PositionY { get; set; }
 
-        public float PositionZ { get; set; }
+        public double PositionZ { get; set; }
 
-        public float CameraPositionX { get; set; }
+        public double CameraPositionX { get; set; }
 
-        public float CameraPositionY { get; set; }
+        public double CameraPositionY { get; set; }
 
-        public float CameraPositionZ { get; set; }
+        public double CameraPositionZ { get; set; }
 
         public string Guid { get; set; }
 

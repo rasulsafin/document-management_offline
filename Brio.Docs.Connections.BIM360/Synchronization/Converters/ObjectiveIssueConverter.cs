@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Numerics;
 using System.Threading.Tasks;
+using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
@@ -71,7 +71,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             string[] permittedAttributes = null;
             Status[] permittedStatuses = null;
             int? startingVersion, originalStartingVersion = null;
-            Vector3? globalOffset = null;
+            Vector3d? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
             var itemSnapshot = await GetTargetSnapshot(objective, project);
             var config = await ifcConfigUtilities.GetConfig(objective, project, itemSnapshot);
@@ -200,7 +200,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             LocationExternalDto locationDto,
             ProjectSnapshot projectSnapshot,
             string targetUrn,
-            Vector3? globalOffset = default,
+            Vector3d? globalOffset = default,
             IfcConfig config = null)
         {
             if (locationDto == null)
@@ -318,10 +318,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             return default;
         }
 
-        private async Task<Vector3> GetGlobalOffsetOrZeroVector(ProjectSnapshot projectSnapshot, string targetUrn)
+        private async Task<Vector3d> GetGlobalOffsetOrZeroVector(ProjectSnapshot projectSnapshot, string targetUrn)
         {
             if (string.IsNullOrWhiteSpace(targetUrn))
-                return Vector3.Zero;
+                return Vector3d.Zero;
 
             var found = projectSnapshot.Issues.Values
                .Select(issueSnapshot => issueSnapshot.Entity)
@@ -343,9 +343,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         }
 
         private bool IsNotZeroOffset(Issue issue)
-            => GetGlobalOffsetOrZeroVector(issue) != Vector3.Zero;
+            => GetGlobalOffsetOrZeroVector(issue) != Vector3d.Zero;
 
-        private Vector3 GetGlobalOffsetOrZeroVector(Issue issue)
-            => issue?.Attributes?.PushpinAttributes?.ViewerState?.GlobalOffset ?? Vector3.Zero;
+        private Vector3d GetGlobalOffsetOrZeroVector(Issue issue)
+            => issue?.Attributes?.PushpinAttributes?.ViewerState?.GlobalOffset ?? Vector3d.Zero;
     }
 }

@@ -59,11 +59,11 @@ namespace Brio.Docs.Utility.Mapping
                .ForMember(
                     d => d.Position,
                     o => o.MapFrom(
-                        s => new Tuple<float, float, float>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
+                        s => new Tuple<double, double, double>(s.PositionX, s.PositionY, s.PositionZ).ToValueTuple()))
                .ForMember(
                     d => d.CameraPosition,
                     o => o.MapFrom(
-                        s => new Tuple<float, float, float>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
+                        s => new Tuple<double, double, double>(s.CameraPositionX, s.CameraPositionY, s.CameraPositionZ)
                            .ToValueTuple()));
         }
 
@@ -227,11 +227,11 @@ namespace Brio.Docs.Utility.Mapping
                .ForMember(
                     d => d.Location,
                     o => o.MapFrom(
-                        e => new Tuple<float, float, float>(e.PositionX, e.PositionY, e.PositionZ).ToValueTuple()))
+                        e => new Tuple<double, double, double>(e.PositionX, e.PositionY, e.PositionZ).ToValueTuple()))
                .ForMember(
                     d => d.CameraPosition,
                     o => o.MapFrom(
-                        e => new Tuple<float, float, float>(e.CameraPositionX, e.CameraPositionY, e.CameraPositionZ)
+                        e => new Tuple<double, double, double>(e.CameraPositionX, e.CameraPositionY, e.CameraPositionZ)
                            .ToValueTuple()))
                .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
             CreateMap<LocationExternalDto, Location>()

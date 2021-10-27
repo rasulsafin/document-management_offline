@@ -1,5 +1,5 @@
 using System;
-using System.Numerics;
+using Brio.Docs.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,7 +14,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var vector = (Vector3?)value;
+            var vector = (Vector3d?)value;
             if (!vector.HasValue)
                 return;
 
@@ -28,7 +28,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
             object existingValue,
             JsonSerializer serializer)
         {
-            Vector3? result = null;
+            Vector3d? result = null;
 
             if (reader.TokenType != JsonToken.Null)
             {
@@ -43,10 +43,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
         }
 
         public override bool CanConvert(Type objectType)
-            => objectType == typeof(Vector3?);
+            => objectType == typeof(Vector3d?);
 
-        protected abstract Vector3 ConvertTokenToVector3(JToken token);
+        protected abstract Vector3d ConvertTokenToVector3(JToken token);
 
-        protected abstract object ConvertVector3ToSerializingObject(Vector3 vector);
+        protected abstract object ConvertVector3ToSerializingObject(Vector3d vector);
     }
 }

@@ -1,5 +1,5 @@
 using System;
-using System.Numerics;
+using Brio.Docs.Common;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -12,9 +12,9 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
         {
         }
 
-        protected override Vector3 ConvertTokenToVector3(JToken token)
+        protected override Vector3d ConvertTokenToVector3(JToken token)
         {
-            var items = token.ToObject<float[]>();
+            var items = token.ToObject<double[]>();
 
             if (items == null || items.Length != 3)
             {
@@ -22,10 +22,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils.JsonConverters
                     "Supports three-dimensional vectors represented only by the float array");
             }
 
-            return new Vector3(items[0], items[1], items[2]);
+            return new Vector3d(items[0], items[1], items[2]);
         }
 
-        protected override object ConvertVector3ToSerializingObject(Vector3 vector)
+        protected override object ConvertVector3ToSerializingObject(Vector3d vector)
             => new[] { vector.X, vector.Y, vector.Z };
     }
 }

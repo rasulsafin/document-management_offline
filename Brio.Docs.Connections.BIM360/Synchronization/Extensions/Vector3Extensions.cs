@@ -1,39 +1,41 @@
-using System;
-using System.Numerics;
+using Brio.Docs.Common;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {
     public static class Vector3Extensions
     {
-        private const float FOOT = 0.3048f;
-        private static readonly float EPSILON = 5.4211e-20f;
+        private const double FOOT = 0.3048;
 
-        public static (float x, float y, float z) ToTuple(this Vector3 vector3)
+        public static (double x, double y, double z) ToTuple(this Vector3d vector3)
             => (vector3.X, vector3.Y, vector3.Z);
 
-        public static Vector3 ToVector(this (float x, float y, float z) tuple)
-            => new Vector3(tuple.x, tuple.y, tuple.z);
+        public static Vector3d ToVector(this (double x, double y, double z) tuple)
+            => new Vector3d(tuple.x, tuple.y, tuple.z);
 
-        public static Vector3 GetUpwardVector(this Vector3 vector)
+        public static Vector3d GetUpwardVector(this Vector3d vector)
         {
-            vector = Vector3.Normalize(vector);
-            var worldUp = Vector3.UnitZ;
-            var cos = Vector3.Dot(vector, worldUp) / vector.Length() / worldUp.Length();
-            var angle = (float)Math.Acos(cos);
-            if (angle < EPSILON)
-                return -Vector3.UnitY;
+            const double EPSILON = 1e-15;
 
-            var up = ((float)(-1.0 / Math.Tan(angle)) * vector) + (worldUp / (float)Math.Sin(angle));
-            return Vector3.Normalize(up);
+            var forward = vector.Normalized;
+            var worldUp = Vector3d.UnitZ;
+            var dot = Vector3d.Dot(forward, worldUp);
+
+            if (dot > 0 && (1 - dot) < EPSILON)
+                return -Vector3d.UnitY;
+            else if (dot < 0 && (1 + dot) < EPSILON)
+                return Vector3d.UnitY;
+
+            var left = Vector3d.Cross(worldUp, forward).Normalized;
+            return Vector3d.Cross(forward, left).Normalized;
         }
 
-        public static Vector3 ToXZY(this Vector3 vector)
-            => new Vector3(vector.X, vector.Z, vector.Y);
+        public static Vector3d ToXZY(this Vector3d vector)
+            => new Vector3d(vector.X, vector.Z, vector.Y);
 
-        public static Vector3 ToMeters(this Vector3 vector3)
+        public static Vector3d ToMeters(this Vector3d vector3)
             => vector3 * FOOT;
 
-        public static Vector3 ToFeet(this Vector3 vector3)
+        public static Vector3d ToFeet(this Vector3d vector3)
             => vector3 / FOOT;
     }
 }
