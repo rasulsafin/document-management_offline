@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Dtos;
@@ -21,12 +23,17 @@ namespace Brio.Docs.Utility.Extensions
             var type = typeof(LoggerConfigurationIgnoreExtensions);
             var method = type.GetMethod(nameof(LoggerConfigurationIgnoreExtensions.ByIgnoringProperties));
 
-            foreach (var expression in ConnectionCreator.GetPropertiesForIgnoringByLogging())
+            foreach (var expression in ConnectionCreator.GetPropertiesForIgnoringByLogging()
+               .ToLookup(x => x.SourceType))
             {
-                var generic = method!.MakeGenericMethod(expression.SourceType);
+                var generic = method!.MakeGenericMethod(expression.Key);
+                var arrayBase = expression.Select(x => x.Expression).ToArray();
+                var array = Array.CreateInstance(arrayBase[0].GetType(), arrayBase.Length);
+                for (int i = 0; i < array.Length; i++)
+                    array.SetValue(arrayBase[i], i);
                 configuration = (LoggerConfiguration)generic.Invoke(
                     null,
-                    new object[] { configuration!.Destructure, expression.Expression });
+                    new object[] { configuration!.Destructure, array });
             }
 
             return configuration;
