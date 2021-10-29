@@ -13,7 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
-namespace MRS.DocumentManagement.Connection.Bim360.Tests
+namespace Brio.Docs.Connections.Bim360.Tests
 {
     [TestClass]
     public class LocationsTests
