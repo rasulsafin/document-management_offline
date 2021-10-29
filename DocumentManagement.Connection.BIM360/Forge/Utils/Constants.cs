@@ -12,6 +12,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         public static readonly string ATTACHMENT_TYPE = "attachments";
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
+        public static readonly string COMMENT_TYPE = "comments";
+
+        public static readonly string DEFAULT_LOCATION_TREE_ID = "default";
+        public static readonly string LOCATION_TREE_ROOT = "Root";
+
+        public static readonly string DOCUMENT_MANAGEMENT_SERVICE_NAME = "documentManagement";
+        public static readonly string SERVICE_NONE_ACCESS = "none";
 
         public static readonly string AUTODESK_ITEM_FILE_TYPE = "items:autodesk.bim360:File";
         public static readonly string AUTODESK_VERSION_FILE_TYPE = "versions:autodesk.bim360:File";
@@ -30,10 +37,20 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
 
         internal static readonly string DATA_PROPERTY = "data";
         internal static readonly string META_PROPERTY = "meta";
+        internal static readonly string LINKS_PROPERTY = "links";
+        internal static readonly string ITEMS_PROPERTY = "items";
+        internal static readonly string PAGINATION_PROPERTY = "pagination";
         internal static readonly string RESULTS_PROPERTY = "results";
         internal static readonly string INCLUDED_PROPERTY = "included";
+        internal static readonly string TYPE_PROPERTY = "type";
 
-        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}&";
+        internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}";
+        internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}";
+        internal static readonly string QUERY_PARAMETER = "{0}={1}";
+
+        internal static readonly string LIMIT_PARAMETER_NAME = "limit";
+        internal static readonly string OFFSET_PARAMETER_NAME = "offset";
+        internal static readonly string NUMBER_QUERY_PARAMETER = "number";
 
         internal static readonly int ITEMS_ON_PAGE = 100;
         internal static readonly string JSON_API_VERSION = "1.0";
@@ -49,9 +66,11 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge
         internal static readonly string AUTH_REQUEST_BODY_CODE_FIELD = "code";
         internal static readonly string AUTH_REQUEST_BODY_REDIRECT_URI_FIELD = "redirect_uri";
         internal static readonly string AUTH_REQUEST_BODY_REFRESH_TOKEN_FIELD = "refresh_token";
+        internal static readonly string AUTH_REQUEST_BODY_SCOPE_FIELD = "scope";
 
         internal static readonly string AUTH_GRANT_TYPE_AUTHORIZATION_CODE_VALUE = "authorization_code";
         internal static readonly string AUTH_GRANT_TYPE_REFRESH_TOKEN_VALUE = "refresh_token";
+        internal static readonly string AUTH_GRANT_TYPE_CLIENT_CREDENTIALS_VALUE = "client_credentials";
 
         internal static readonly string FILTER_KEY_ISSUE_UPDATED_AFTER = "synced_after";
     }

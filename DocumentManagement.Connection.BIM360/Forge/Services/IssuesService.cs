@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Pagination;
 using MRS.DocumentManagement.Connection.Bim360.Properties;
 using static MRS.DocumentManagement.Connection.Bim360.Forge.Constants;
 
@@ -19,9 +21,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         public async Task<List<Issue>> GetIssuesAsync(
             string containerID,
             IEnumerable<Filter> filters = null)
-            => await PaginationHelper.GetItemsByPages<Issue>(
+            => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
-                ForgeConnection.SetFilters(Resources.GetIssuesMethod, filters),
+                ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
+                DATA_PROPERTY,
                 containerID);
 
         public async Task<Attachment> PostIssuesAttachmentsAsync(string containerID, Attachment attachment)
@@ -79,21 +82,46 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
         }
 
         public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
-            => await PaginationHelper.GetItemsByPages<Attachment>(
+            => await PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
                 connection,
                 Resources.GetIssuesAttachmentMethod,
+                DATA_PROPERTY,
                 containerID,
                 issueID);
 
         public async Task<List<RootCause>> GetRootCausesAsync(string containerID)
-            => await PaginationHelper.GetItemsByPages<RootCause>(
-                connection,
+        {
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
                 Resources.GetRootCausesMethod,
                 containerID);
+            return response[DATA_PROPERTY]?.ToObject<List<RootCause>>();
+        }
 
-        public Task<object> GetMeAsync()
+        public async Task<UserInfo> GetMeAsync(string containerID)
         {
-            throw new NotImplementedException();
+            var response = await connection.SendAsync(
+                ForgeSettings.AuthorizedGet(),
+                Resources.GetUsersMeMethod,
+                containerID);
+            return response[DATA_PROPERTY]?.ToObject<UserInfo>();
+        }
+
+        public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
+            => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
+                connection,
+                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod),
+                DATA_PROPERTY,
+                containerID,
+                issueID);
+
+        public async Task<Comment> PostIssuesCommentsAsync(string containerID, Comment comment)
+        {
+            var response = await connection.SendAsync(
+                    ForgeSettings.AuthorizedPost(comment),
+                    Resources.PostIssuesCommentsMethod,
+                    containerID);
+            return response[DATA_PROPERTY]?.ToObject<Comment>();
         }
     }
 }

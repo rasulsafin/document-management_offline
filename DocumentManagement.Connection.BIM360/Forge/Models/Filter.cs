@@ -1,10 +1,9 @@
 using System;
-using System.Linq;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils.Extensions;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
 {
-    public readonly struct Filter
+    public class Filter : IQueryParameter
     {
         private readonly string key;
         private readonly string[] values;
@@ -60,12 +59,13 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Models
             Contains,
         }
 
-        public override string ToString()
+        /// <inheritdoc cref="IQueryParameter.ToQueryString" />
+        public string ToQueryString()
             => string.Format(
                 Constants.FILTER_QUERY_PARAMETER,
                 key,
                 comparisonType.GetAttribute<ComparisonTypeAttribute>().Command,
-                values.Aggregate((sum, s) => $"{sum},{s}"));
+                string.Join(',', values));
 
         [AttributeUsage(AttributeTargets.Field)]
         private class ComparisonTypeAttribute : Attribute

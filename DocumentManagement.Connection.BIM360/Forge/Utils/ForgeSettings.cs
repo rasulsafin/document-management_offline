@@ -21,11 +21,15 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
 
         public object Included { get; private set; }
 
-        public bool NeedJsonApi { get; private set; } = false;
+        public bool NeedJsonApi { get; private init; } = false;
 
-        public bool IsAuthorized { get; private set; } = true;
+        public bool IsAuthorized { get; private init; } = true;
 
-        public bool NeedDataKey { get; private set; } = true;
+        public bool NeedDataKey { get; private init; } = true;
+
+        public bool UseAppToken { get; private set; } = false;
+
+        public string ContentType { get; private init; } = "application/vnd.api+json";
 
         public RangeHeaderValue RangeHeaderValue { get; private set; }
 
@@ -101,6 +105,32 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Utils
             {
                 MethodType = HttpMethod.Patch,
                 Data = data,
+            };
+
+        public static ForgeSettings AppGet()
+            => new ()
+            {
+                MethodType = HttpMethod.Get,
+                UseAppToken = true,
+            };
+
+        public static ForgeSettings AppPostWithoutKeyData(object data)
+            => new ()
+            {
+                MethodType = HttpMethod.Post,
+                Data = data,
+                NeedDataKey = false,
+                UseAppToken = true,
+            };
+
+        public static ForgeSettings AppPostWithoutKeyData(object data, string contentType)
+            => new ()
+            {
+                MethodType = HttpMethod.Post,
+                Data = data,
+                NeedDataKey = false,
+                UseAppToken = true,
+                ContentType = contentType,
             };
     }
 }

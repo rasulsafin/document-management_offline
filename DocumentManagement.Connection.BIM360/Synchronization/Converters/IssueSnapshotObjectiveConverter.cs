@@ -1,7 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
+using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities;
 using MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot;
 using MRS.DocumentManagement.Interface;
@@ -12,11 +15,23 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
+        private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
+        private readonly AssignToEnumCreator assignToEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
-            IConverter<Issue, ObjectiveExternalDto> converterToDto)
+            IConverter<Issue, ObjectiveExternalDto> converterToDto,
+            TypeSubtypeEnumCreator subtypeEnumCreator,
+            RootCauseEnumCreator rootCauseEnumCreator,
+            LocationEnumCreator locationEnumCreator,
+            AssignToEnumCreator assignToEnumCreator)
         {
             this.converterToDto = converterToDto;
+            this.subtypeEnumCreator = subtypeEnumCreator;
+            this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
+            this.assignToEnumCreator = assignToEnumCreator;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -24,15 +39,80 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
             var typeField = DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
-                new TypeSubtypeEnumCreator());
-            var rootCauseEnumCreator = new RootCauseEnumCreator();
+                subtypeEnumCreator);
             var rootCause = snapshot.Entity.Attributes.RootCauseID == null
                 ? DynamicFieldUtilities.CreateField(rootCauseEnumCreator.NullID, rootCauseEnumCreator)
                 : DynamicFieldUtilities.CreateField(
                     snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
                     rootCauseEnumCreator);
+            var locations = snapshot.Entity.Attributes.LbsLocation == null
+                ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LbsLocation].ID,
+                    locationEnumCreator);
+            var assignedTo = snapshot.Entity.Attributes.AssignedTo == null
+                ? DynamicFieldUtilities.CreateField(assignToEnumCreator.NullID, assignToEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.AssignToVariants.ContainsKey(snapshot.Entity.Attributes.AssignedTo)
+                        ? snapshot.ProjectSnapshot.AssignToVariants[snapshot.Entity.Attributes.AssignedTo].ID
+                        : assignToEnumCreator.NullID,
+                    assignToEnumCreator);
+
+            foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
+            {
+                var comment = new DynamicFieldExternalDto()
+                {
+                    ExternalID = commentSnapshot.ID,
+                    Type = DynamicFieldType.OBJECT,
+                    Name = MrsConstants.COMMENT_FIELD_NAME,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var author = new DynamicFieldExternalDto()
+                {
+                    ExternalID = commentSnapshot.Entity.Attributes.CreatedBy,
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.AUTHOR_FIELD_NAME,
+                    Value = commentSnapshot.Author,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var date = new DynamicFieldExternalDto()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.CreatedAt),
+                    Type = DynamicFieldType.DATE,
+                    Name = MrsConstants.DATE_FIELD_NAME,
+                    Value = (commentSnapshot.Entity.Attributes.CreatedAt ?? default).ToString(),
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                var text = new DynamicFieldExternalDto()
+                {
+                    ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.Body),
+                    Type = DynamicFieldType.STRING,
+                    Name = MrsConstants.COMMENT_FIELD_NAME,
+                    Value = commentSnapshot.Entity.Attributes.Body,
+                    UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
+                };
+
+                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>() { author, date, text };
+                parsedToDto.DynamicFields.Add(comment);
+            }
+
+            var newComment = new DynamicFieldExternalDto()
+            {
+                ExternalID = MrsConstants.NEW_COMMENT_ID,
+                Type = DynamicFieldType.STRING,
+                Name = MrsConstants.NEW_COMMENT_FIELD_NAME,
+                Value = string.Empty,
+                UpdatedAt = System.DateTime.Now,
+            };
+
+            parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);
+            parsedToDto.DynamicFields.Add(locations);
+            parsedToDto.DynamicFields.Add(assignedTo);
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
 
             if (snapshot.Attachments != null)
@@ -46,9 +126,31 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
             if (parsedToDto.Location != null &&
                 snapshot.Entity.Attributes.TargetUrn != null &&
                 snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
-                parsedToDto.Location.Item = target.Entity.ToDto();
+            {
+                if (!TryRedirect(snapshot, parsedToDto))
+                    parsedToDto.Location.Item = target.Entity.ToDto();
+            }
 
             return parsedToDto;
+        }
+
+        private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
+        {
+            var otherInfo = snapshot.Entity.GetOtherInfo();
+            var linkedInfo = otherInfo?.OriginalModelInfo;
+
+            if (linkedInfo == null ||
+                !snapshot.ProjectSnapshot.Items.TryGetValue(otherInfo.OriginalModelInfo.Urn, out var originalTarget))
+                return false;
+
+            parsedToDto.Location.Item = originalTarget.Entity.ToDto();
+            var location = parsedToDto.Location.Location.ToVector();
+            var camera = parsedToDto.Location.CameraPosition.ToVector();
+            location += linkedInfo.Offset;
+            camera += linkedInfo.Offset;
+            parsedToDto.Location.Location = location.ToTuple();
+            parsedToDto.Location.CameraPosition = camera.ToTuple();
+            return true;
         }
     }
 }

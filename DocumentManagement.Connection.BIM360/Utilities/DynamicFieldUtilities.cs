@@ -32,7 +32,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
             => allVariants.Select(item => (displayName: helper.GetVariantDisplayName(item), tupleTypes: item))
                .GroupBy(x => x.displayName, x => x.tupleTypes, StringComparer.CurrentCultureIgnoreCase);
 
-        internal static string GetExternalID<TID>(IOrderedEnumerable<TID> types)
+        internal static string GetExternalID<TID>(IEnumerable<TID> types)
             => JsonConvert.SerializeObject(types);
 
         internal static DynamicFieldExternalDto CreateField<T, TSnapshot, TID>(

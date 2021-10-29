@@ -19,19 +19,34 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         private readonly ProjectsService projectsService;
         private readonly IssuesService issuesService;
         private readonly FoldersService foldersService;
+        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
+        private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
+        private readonly AssignToEnumCreator assignToEnumCreator;
+        private readonly IssueSnapshotUtilities snapshotUtilities;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
             IssuesService issuesService,
-            FoldersService foldersService)
+            FoldersService foldersService,
+            TypeSubtypeEnumCreator subtypeEnumCreator,
+            RootCauseEnumCreator rootCauseEnumCreator,
+            AssignToEnumCreator assignToEnumCreator,
+            LocationEnumCreator locationEnumCreator,
+            IssueSnapshotUtilities snapshotUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
             this.foldersService = foldersService;
+            this.subtypeEnumCreator = subtypeEnumCreator;
+            this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
+            this.assignToEnumCreator = assignToEnumCreator;
+            this.snapshotUtilities = snapshotUtilities;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -62,7 +77,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
-                    var projectSnapshot = new ProjectSnapshot(p);
+                    var projectSnapshot = new ProjectSnapshot(p, hub.Value);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
 
                     if (!topFolders.Any())
@@ -80,7 +95,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
                     {
                         if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
                             iv.version?.Attributes.Name != Resources.MrsFileName)
-                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item) { Version = iv.version });
+                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item, iv.version));
                         else
                             topFolder = iv.item.Relationships.Parent.Data.ID;
                     }
@@ -110,14 +125,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
                 foreach (var issueSnapshot in project.Issues.Values)
                 {
-                    issueSnapshot.Attachments = new Dictionary<string, Attachment>();
-                    var attachments = await issuesService.GetAttachmentsAsync(
-                        project.IssueContainer,
-                        issueSnapshot.ID);
-
-                    foreach (var attachment in attachments.Where(
-                        x => x.Attributes.UrnType == UrnType.Oss || project.Items.ContainsKey(x.Attributes.Urn)))
-                        issueSnapshot.Attachments.Add(attachment.ID, attachment);
+                    issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
+                    issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }
             }
         }
@@ -125,14 +134,26 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
         public async Task UpdateIssueTypes()
             => await UpdateProjectsEnums(
                 p => p.IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
-                new TypeSubtypeEnumCreator(),
-                (project, rootCauseSnapshot) => project.IssueTypes.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+                subtypeEnumCreator,
+                (project, variant) => project.IssueTypes.Add(variant.Entity.ID, variant));
 
         public async Task UpdateRootCauses()
             => await UpdateProjectsEnums(
                 p => p.RootCauses = new Dictionary<string, RootCauseSnapshot>(),
-                new RootCauseEnumCreator(),
-                (project, rootCauseSnapshot) => project.RootCauses.Add(rootCauseSnapshot.Entity.ID, rootCauseSnapshot));
+                rootCauseEnumCreator,
+                (project, variant) => project.RootCauses.Add(variant.Entity.ID, variant));
+
+        public async Task UpdateLocations()
+            => await UpdateProjectsEnums(
+                p => p.Locations = new Dictionary<string, LocationSnapshot>(),
+                locationEnumCreator,
+                (project, variant) => project.Locations.Add(variant.Entity.ID, variant));
+
+        public async Task UpdateAssignTo()
+            => await UpdateProjectsEnums(
+                p => p.AssignToVariants = new Dictionary<string, AssignToVariant>(),
+                assignToEnumCreator,
+                (project, variant) => project.AssignToVariants.Add(variant.Entity, variant));
 
         private async Task UpdateProjectsEnums<T, TSnapshot, TID>(
             Action<ProjectSnapshot> createEmptyEnumVariants,
@@ -145,7 +166,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
             foreach (var project in snapshot.ProjectEnumerable)
             {
-                var variants = await creator.GetVariantsFromRemote(issuesService, project);
+                var variants = await creator.GetVariantsFromRemote(project);
                 createEmptyEnumVariants(project);
                 dictionary.AddRange(variants);
             }
@@ -154,7 +175,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities.Snapshot
 
             foreach (var group in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group));
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group).Distinct());
 
                 foreach (var issueTypeSnapshot in group)
                 {

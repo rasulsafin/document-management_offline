@@ -11,9 +11,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddForge();
             services.AddScoped<Bim360Connection>();
             services.AddScoped<EnumerationTypeCreator>();
+            services.AddScoped<TypeSubtypeEnumCreator>();
+            services.AddScoped<RootCauseEnumCreator>();
+            services.AddScoped<LocationEnumCreator>();
+            services.AddScoped<AssignToEnumCreator>();
             services.AddScoped<SnapshotFiller>();
             services.AddScoped<Bim360Snapshot>();
             services.AddScoped<Bim360Storage>();
+            services.AddScoped<Downloader>();
+            services.AddScoped<IfcConfigUtilities>();
+            services.AddScoped<IssueSnapshotUtilities>();
             services.AddBim360Synchronization();
             return services;
         }

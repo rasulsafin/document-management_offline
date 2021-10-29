@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MRS.DocumentManagement.Connection.Bim360.Forge;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Services;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
@@ -24,6 +24,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
         private readonly IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory;
         private readonly TokenHelper tokenHelper;
         private readonly EnumerationTypeCreator typeCreator;
+        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
+        private readonly RootCauseEnumCreator rootCauseEnumCreator;
+        private readonly LocationEnumCreator locationEnumCreator;
+        private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly Authenticator authenticator;
 
         public Bim360Connection(
@@ -32,7 +36,11 @@ namespace MRS.DocumentManagement.Connection.Bim360
             Bim360Storage storage,
             IFactory<ConnectionInfoExternalDto, IConnectionContext> contextFactory,
             TokenHelper tokenHelper,
-            EnumerationTypeCreator typeCreator)
+            EnumerationTypeCreator typeCreator,
+            TypeSubtypeEnumCreator subtypeEnumCreator,
+            RootCauseEnumCreator rootCauseEnumCreator,
+            LocationEnumCreator locationEnumCreator,
+            AssignToEnumCreator assignToEnumCreator)
         {
             this.authenticator = authenticator;
             this.authenticationService = authenticationService;
@@ -40,6 +48,10 @@ namespace MRS.DocumentManagement.Connection.Bim360
             this.contextFactory = contextFactory;
             this.tokenHelper = tokenHelper;
             this.typeCreator = typeCreator;
+            this.subtypeEnumCreator = subtypeEnumCreator;
+            this.rootCauseEnumCreator = rootCauseEnumCreator;
+            this.locationEnumCreator = locationEnumCreator;
+            this.assignToEnumCreator = assignToEnumCreator;
         }
 
         public async Task<ConnectionStatusDto> Connect(ConnectionInfoExternalDto info, CancellationToken token)
@@ -75,7 +87,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 var jwt = new JwtSecurityToken(token);
 
-                if (DateTime.UtcNow.AddMinutes(1) > jwt.ValidTo)
+                if (DateTime.UtcNow.Add(ForgeConnection.MIN_TOKEN_LIFE) > jwt.ValidTo)
                 {
                     return new ConnectionStatusDto
                     {
@@ -86,7 +98,7 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
                 tokenHelper.SetInfo(info.UserExternalID, token);
 
-                if (await authenticationService.GetMe() == null)
+                if (await authenticationService.GetMeAsync() == null)
                 {
                     return new ConnectionStatusDto
                     {
@@ -116,8 +128,8 @@ namespace MRS.DocumentManagement.Connection.Bim360
         {
             await SetIssueType(info);
             tokenHelper.SetToken(info.AuthFieldValues[Constants.TOKEN_AUTH_NAME]);
-            info.UserExternalID = (await authenticationService.GetMe()).UserId;
-            tokenHelper.SetUserID(info.UserExternalID);
+            info.UserExternalID = (await authenticationService.GetMeAsync()).UserId;
+            tokenHelper.SetClientID(info.UserExternalID);
             return info;
         }
 
@@ -132,15 +144,21 @@ namespace MRS.DocumentManagement.Connection.Bim360
 
         private async Task SetIssueType(ConnectionInfoExternalDto info)
         {
-            var subtypeEnumCreator = new TypeSubtypeEnumCreator();
             var typesSubtypes = await typeCreator.Create(subtypeEnumCreator);
             if (typesSubtypes.EnumerationValues.Count == 0)
                 throw new TypeAccessException("You have no access to issue types.");
 
-            var rootCauseEnumCreator = new RootCauseEnumCreator();
             var rootCauses = await typeCreator.Create(rootCauseEnumCreator);
+            var location = await typeCreator.Create(locationEnumCreator);
+            var assignTo = await typeCreator.Create(assignToEnumCreator);
 
-            info.EnumerationTypes = new List<EnumerationTypeExternalDto> { typesSubtypes, rootCauses };
+            info.EnumerationTypes = new List<EnumerationTypeExternalDto>
+            {
+                typesSubtypes,
+                rootCauses,
+                location,
+                assignTo,
+            };
 
             var issueType = new ObjectiveTypeExternalDto
             {
@@ -154,6 +172,12 @@ namespace MRS.DocumentManagement.Connection.Bim360
                     DynamicFieldUtilities.CreateField(
                         rootCauseEnumCreator.NullID,
                         rootCauseEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        locationEnumCreator.NullID,
+                        locationEnumCreator),
+                    DynamicFieldUtilities.CreateField(
+                        assignToEnumCreator.NullID,
+                        assignToEnumCreator),
                     new ()
                     {
                         ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.LocationDescription),

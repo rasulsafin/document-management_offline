@@ -2,13 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Threading.Tasks;
-using MRS.DocumentManagement.Connection.Bim360.Forge.Models;
+using MRS.DocumentManagement.Connection.Bim360.Forge.Models.Bim360;
 using MRS.DocumentManagement.Connection.Bim360.Forge.Utils;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Extensions;
 using MRS.DocumentManagement.Connection.Bim360.Synchronization.Utilities;
 using MRS.DocumentManagement.Interface;
 using MRS.DocumentManagement.Interface.Dtos;
-using Newtonsoft.Json.Linq;
 
 namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
 {
@@ -76,18 +75,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Synchronization.Converters
         }
 
         private static ICollection<BimElementExternalDto> GetBimElements(Issue issue)
-        {
-            try
-            {
-                var viewerStateOtherInfo = (JToken)issue.Attributes.PushpinAttributes?.ViewerState?.OtherInfo;
-                return viewerStateOtherInfo?[nameof(ObjectiveExternalDto.BimElements)]
-                  ?.ToObject<ICollection<BimElementExternalDto>>() ?? ArraySegment<BimElementExternalDto>.Empty;
-            }
-            catch
-            {
-                return ArraySegment<BimElementExternalDto>.Empty;
-            }
-        }
+            => issue.GetOtherInfo()?.BimElements ?? ArraySegment<BimElementExternalDto>.Empty;
 
         private static LocationExternalDto GetLocation(Issue issue)
         {

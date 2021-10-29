@@ -103,13 +103,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
                     }
 
                     if (needSaveOnEachTuple)
-                    {
-                        if (data.Date == default)
-                            await context.SaveChangesAsync();
-                        else
-                            await context.SynchronizationSaveAsync(data.Date);
-                        logger.LogTrace("DB updated");
-                    }
+                        await SaveDb(data);
                 }
                 catch (Exception e)
                 {
@@ -354,6 +348,15 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             }
         }
 
+        protected async Task SaveDb(SynchronizingData data)
+        {
+            if (data.Date == default)
+                await context.SaveChangesAsync();
+            else
+                await context.SynchronizationSaveAsync(data.Date);
+            logger.LogTrace("DB updated");
+        }
+
         private void RemoveFromDB(SynchronizingTuple<TDB> tuple, SynchronizingData data)
         {
             logger.LogDebug("RemoveFromDB started with tuple {@Tuple}", tuple);
@@ -387,23 +390,23 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             if (tuple.Synchronized.ID == 0)
             {
                 set.Add(tuple.Synchronized);
-                logger.LogDebug("Added {ID}", tuple.Synchronized.ID);
+                logger.LogDebug("Added {ID} to DB", tuple.Synchronized.ExternalID);
             }
             else if (!tuple.SynchronizedChanged)
             {
                 set.Update(tuple.Synchronized);
-                logger.LogDebug("Updated {ID}", tuple.Synchronized.ID);
+                logger.LogDebug("Updated {ID} ({ExternalID})", tuple.Synchronized.ID, tuple.ExternalID);
             }
 
             if (tuple.Local.ID == 0)
             {
                 set.Add(tuple.Local);
-                logger.LogInformation("Added {ID}", tuple.Local.ID);
+                logger.LogInformation("Added {ID} to local", tuple.Local.ExternalID);
             }
             else if (!tuple.RemoteChanged)
             {
                 set.Update(tuple.Local);
-                logger.LogInformation("Updated {ID}", tuple.Local.ID);
+                logger.LogInformation("Updated {ID} ({ExternalID})", tuple.Local.ID, tuple.ExternalID);
             }
         }
 
@@ -420,7 +423,7 @@ namespace MRS.DocumentManagement.Synchronization.Strategies
             var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote));
             logger.LogDebug("Remote return {@Data}", result);
             tuple.Remote = mapper.Map<TDB>(result);
-            logger.LogInformation("Updated {ID}", tuple.ExternalID);
+            logger.LogInformation("Put {ID} to remote", tuple.ExternalID);
         }
     }
 }

@@ -14,8 +14,10 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
     {
         private static readonly Enum[] SCOPES =
         {
-            DataScope.Read, DataScope.Write, DataScope.Create,
+            DataScope.Read, DataScope.Write, DataScope.Create, AccountScope.Read,
         };
+
+        private static readonly Enum[] APP_SCOPES = { AccountScope.Read };
 
         private readonly ForgeConnection connection;
 
@@ -66,11 +68,29 @@ namespace MRS.DocumentManagement.Connection.Bim360.Forge.Services
             return data.ToObject<Token>();
         }
 
-        public async Task<User> GetMe()
+        public async Task<Token> AuthenticateAppAsync(string appPropertyClientID, string appPropertyClientSecret)
+        {
+            HttpContent CreateContent()
+                => new FormUrlEncodedContent(
+                    new KeyValuePair<string, string>[]
+                    {
+                        new (AUTH_REQUEST_BODY_CLIENT_ID_FIELD, appPropertyClientID),
+                        new (AUTH_REQUEST_BODY_CLIENT_SECRET_FIELD, appPropertyClientSecret),
+                        new (AUTH_REQUEST_BODY_GRANT_TYPE_FIELD, AUTH_GRANT_TYPE_CLIENT_CREDENTIALS_VALUE),
+                        new (AUTH_REQUEST_BODY_SCOPE_FIELD, ScopeUtilities.GetScopeString(APP_SCOPES)),
+                    });
+
+            var data = await connection.SendAsync(
+                ForgeSettings.UnauthorizedPost(CreateContent),
+                Resources.PostAuthenticateMethod);
+            return data.ToObject<Token>();
+        }
+
+        public async Task<User> GetMeAsync()
         {
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                Resources.GetUsersMeMethod);
+                Resources.GetUsersAtMeMethod);
             return response.ToObject<User>();
         }
     }

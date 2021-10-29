@@ -28,7 +28,7 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
             var values = DynamicFieldUtilities.GetGroupedTypes(
                     creator,
-                    creator.GetSnapshots(snapshot.ProjectEnumerable))
+                    snapshot.ProjectEnumerable.SelectMany(creator.GetSnapshots))
                .Select(
                     x => new EnumerationValueExternalDto
                     {
@@ -63,6 +63,8 @@ namespace MRS.DocumentManagement.Connection.Bim360.Utilities
 
             await snapshotFiller.UpdateIssueTypes();
             await snapshotFiller.UpdateRootCauses();
+            await snapshotFiller.UpdateLocations();
+            await snapshotFiller.UpdateAssignTo();
             snapshotFilled = true;
         }
     }

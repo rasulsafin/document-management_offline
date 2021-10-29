@@ -9,9 +9,11 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddForge(this IServiceCollection services)
         {
             services.AddScoped<AuthenticationService>();
+            services.AddScoped<AccountAdminService>();
             services.AddScoped<FoldersService>();
             services.AddScoped<HubsService>();
             services.AddScoped<IssuesService>();
+            services.AddScoped<LocationService>();
             services.AddScoped<ItemsService>();
             services.AddScoped<ObjectsService>();
             services.AddScoped<ProjectsService>();
@@ -20,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<Authenticator>();
             services.AddScoped<ForgeConnection>();
             services.AddScoped<TokenHelper>();
+            services.AddScoped<AppTokenHelper>();
             return services;
         }
     }
