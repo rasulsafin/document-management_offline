@@ -3,12 +3,22 @@
 ## [Unreleased]
 
 ### Добавлено:
+### Изменено:
+### Устарело:
+### Удалено:
+### Исправлено:
+### Безопасность:
+
+
+## [1.2.0] - xxxx-xx-xx
+
+### Добавлено:
 
 * Возможность конфигурации статусов BIM 360;
 * Динамическое поле Status для созданных нарушений в BIM 360;
 * Фильтрация списка задач по статусу;
 * Возможность получения отдельного списка задач с местоположением;
-* Поле "Статус" в отчетах;
+* Поле "Статус" в отчетах.
 
 ### Изменено:
 
@@ -16,10 +26,7 @@
 * Пространства имён изменены;
 * Работа с координатами переведена на собственный тип Vector3d точности double.
 
-### Устарело:
-### Удалено:
 ### Исправлено:
-### Безопасность:
 
 
 ## [1.1.1] - 2021-10-29
@@ -195,6 +202,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.2.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.2.0
 [1.1.1]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.1
 [1.1.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.0
 [1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4
