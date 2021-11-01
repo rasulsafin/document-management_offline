@@ -6,6 +6,7 @@ using AutoMapper;
 using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
+using Brio.Docs.Client.Filters;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Extensions;
@@ -41,14 +42,12 @@ namespace Brio.Docs.Tests.Services
                 var users = MockData.DEFAULT_USERS;
                 var projects = MockData.DEFAULT_PROJECTS;
                 var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
-                var bimElements = MockData.DEFAULT_BIM_ELEMENTS;
                 var dynamicFieldInfos = MockData.DEFAULT_DYNAMIC_FIELD_INFOS;
 
                 projects.First().Items = MockData.DEFAULT_ITEMS;
                 context.Users.AddRange(users);
                 context.Projects.AddRange(projects);
                 context.ObjectiveTypes.AddRange(objectiveTypes);
-                context.BimElements.AddRange(bimElements);
                 context.SaveChanges();
             });
 
@@ -755,6 +754,279 @@ namespace Brio.Docs.Tests.Services
 
             // Assert
             Assert.Fail();
+        }
+
+        #endregion
+
+        #region GET
+
+        [TestMethod]
+        public async Task GetObjectives_ExistingProject_ReturnListOfObjectives()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            await service.Add(objectiveToCreate);
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, new ObjectiveFilterParameters());
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NotFoundException<Project>))]
+        public async Task GetObjectives_NotExistingProject_ThrowsException()
+        {
+            // Arrange
+            var nonExistingProjectId = ID<ProjectDto>.InvalidID;
+
+            // Act
+            await service.GetObjectives(nonExistingProjectId, new ObjectiveFilterParameters());
+
+            // Assert
+            Assert.Fail();
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingBimElement_ListOfObjectivesLinkedToBimElement()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            objectiveToCreate.BimElements = new List<BimElementDto>()
+            {
+                new BimElementDto()
+                {
+                   GlobalID = $"{Guid.NewGuid()}",
+                   ParentName = "parentName",
+                   ElementName = "elementName",
+                },
+            };
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                BimElementGuid = objectiveToCreate.BimElements.First().GlobalID,
+            };
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByNotExistingBimelement_EmptyList()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 0;
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                BimElementGuid = $"{Guid.NewGuid()}",
+            };
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsFalse(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingTitlePart_ListOfObjectives()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedTitleObjective = await service.Add(objectiveToCreate);
+            var filter = new ObjectiveFilterParameters()
+            {
+                TitlePart = expectedTitleObjective.Title.ToLower(),
+            };
+
+            objectiveToCreate.Title = $"{Guid.NewGuid()}";
+            await service.Add(objectiveToCreate);
+            objectiveToCreate.Title = $"{Guid.NewGuid()}";
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByNotExistingTitlePart_EmptyList()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 0;
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                TitlePart = $"{Guid.NewGuid()}",
+            };
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsFalse(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByStatus_ListOfObjectivesWithThatStatus()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                Status = (int?)expectedStatusObjective.Status,
+            };
+
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingType_ListOfObjectivesWithType()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                TypeId = (int?)expectedStatusObjective.ObjectiveType.ID,
+            };
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectivesWithLocation_FilterByLocation_ListOfObjectivesWithLocations()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var itemName = "itemName";
+            objectiveToCreate.Location = new LocationDto()
+            {
+                Guid = Guid.NewGuid().ToString(),
+                Item = new ItemDto()
+                {
+                    ItemType = ItemType.Bim,
+                    RelativePath = $"/{itemName}.ifc",
+                },
+            };
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectivesWithLocation(existingProjectId, itemName);
+            var actualCount = result.Count();
+
+            // Assert
+            Assert.IsTrue(result.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        [DataRow(1, 3, 6, 3, DisplayName = "Page is smaller than objective count")]
+        [DataRow(1, 10, 6, 6, DisplayName = "Page is bigger than objective count")]
+        [DataRow(2, 3, 5, 2, DisplayName = "Last page is not full")]
+        [DataRow(0, 0, 5, 5, DisplayName = "No pagination data (use default values)")]
+        [DataRow(-1, -1, 5, 5, DisplayName = "Wrong pagination data (use default values)")]
+        public async Task GetObjectives_OnePageOfObjectives_ListOfExpectedObjectives(int pageNumber, int pageSize, int objectivesCount, int expectedCount)
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            for (int i = 0; i < objectivesCount; i++)
+                await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+            var filter = new ObjectiveFilterParameters()
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+            };
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
         }
 
         #endregion
