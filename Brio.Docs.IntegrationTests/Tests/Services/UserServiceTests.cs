@@ -15,7 +15,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Services
 {
     [TestClass]
     public class UserServiceTests
@@ -116,7 +116,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Add_UserWithExistingLogin_RaisesArgumentException()
         {
             var firstLogin = "login_Add_UserWithExistingLogin_ReturnsTheUser";
@@ -209,7 +209,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Update_ExistingUserAndIncorrectNewLogin_RaisesArgumentException()
         {
             var users = Fixture.Context.Users.ToList();
@@ -301,7 +301,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task VerifyPassword_ExistingUserAndIncorrectPass_RaisesArgumentException()
         {
             var pass = "pass";
