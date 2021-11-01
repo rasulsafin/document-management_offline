@@ -1,23 +1,33 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
+using Brio.Docs.Utility.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 
+[assembly: InternalsVisibleTo("Brio.Docs.IntegrationTests")]
+
 namespace Brio.Docs.Utility
 {
-    public class DynamicFieldHelper
+    public class DynamicFieldsHelper
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ILogger<DynamicFieldHelper> logger;
+        private readonly ILogger<DynamicFieldsHelper> logger;
 
-        public DynamicFieldHelper(DMContext context, IMapper mapper, ILogger<DynamicFieldHelper> logger)
+        public DynamicFieldsHelper(
+            DMContext context,
+            IMapper mapper,
+            ILogger<DynamicFieldsHelper> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -50,7 +60,21 @@ namespace Brio.Docs.Utility
             return mapper.Map<DynamicFieldDto>(dynamicField);
         }
 
-        internal async Task AddDynamicFields(DynamicFieldDto field, int objectiveID, int? connectionInfoID, int parentID = -1)
+        internal async Task<Objective> AddDynamicFieldsAsync(ICollection<DynamicFieldDto> dynamicFields, Objective objective)
+        {
+            var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)objective.AuthorID);
+            objective.DynamicFields = new List<DynamicField>();
+            foreach (var field in dynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
+            {
+                await AddDynamicField(field, objective.ID, user.ConnectionInfoID);
+            }
+
+            await context.SaveChangesAsync();
+
+            return objective;
+        }
+
+        internal async Task AddDynamicField(DynamicFieldDto field, int objectiveID, int? connectionInfoID, int parentID = -1)
         {
             logger.LogTrace(
                 "AddDynamicFields started with field: {@DynamicField}, objectiveID: {ObjectiveID}, parentID: {ParentID}",
@@ -76,8 +100,36 @@ namespace Brio.Docs.Utility
 
                 foreach (var childField in children)
                 {
-                    await AddDynamicFields(childField, objectiveID, connectionInfoID, dynamicField.ID);
+                    await AddDynamicField(childField, objectiveID, connectionInfoID, dynamicField.ID);
                 }
+            }
+        }
+
+        internal async Task<bool> UpdateDynamicFieldsAsync(ICollection<DynamicFieldDto> dynamicFieldDtos, int objectiveId)
+        {
+            try
+            {
+                var newFields = dynamicFieldDtos ?? Enumerable.Empty<DynamicFieldDto>();
+                var currentObjectiveFields = await context.DynamicFields.Where(x => x.ObjectiveID == objectiveId).ToListAsync();
+                var fieldsToRemove = currentObjectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID));
+                logger.LogDebug(
+                    "Objective's ({ID}) dynamic fields to remove: {@FieldsToRemove}",
+                    objectiveId,
+                    fieldsToRemove);
+                context.DynamicFields.RemoveRange(fieldsToRemove);
+
+                foreach (var field in newFields)
+                {
+                    await UpdateDynamicField(field, objectiveId);
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't update dynamic fields in objective {@ObjData}", objectiveId);
+
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
         }
 

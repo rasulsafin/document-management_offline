@@ -22,12 +22,12 @@ namespace Brio.Docs.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ItemHelper itemHelper;
+        private readonly ItemsHelper itemHelper;
         private readonly ILogger<ProjectService> logger;
 
         public ProjectService(DMContext context,
             IMapper mapper,
-            ItemHelper itemHelper,
+            ItemsHelper itemHelper,
             ILogger<ProjectService> logger)
         {
             this.context = context;
@@ -328,7 +328,7 @@ namespace Brio.Docs.Services
             logger.LogTrace("LinkItem started with project: {@Project} and item: {@Item}", project, item);
             try
             {
-                var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, project);
+                var dbItem = await itemHelper.CheckItemToLink(item, project);
                 logger.LogDebug("Found item: {@DBItem}", dbItem);
                 if (dbItem == null)
                     return;
