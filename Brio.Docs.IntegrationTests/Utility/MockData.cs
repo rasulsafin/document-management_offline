@@ -335,6 +335,7 @@ namespace Brio.Docs.Tests.Utility
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_STRING.Name,
+                ExternalID = $"ExternalDFId{Guid.NewGuid()}-1",
                 Type = DYNAMIC_FIELD_STRING.Type,
                 Value = DYNAMIC_FIELD_STRING.Value,
                 ChildrenDynamicFields = new List<DynamicField>(),
@@ -342,6 +343,7 @@ namespace Brio.Docs.Tests.Utility
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_DATE.Name,
+                ExternalID = $"ExternalDFId{Guid.NewGuid()}-2",
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
                 ChildrenDynamicFields = new List<DynamicField>(),
