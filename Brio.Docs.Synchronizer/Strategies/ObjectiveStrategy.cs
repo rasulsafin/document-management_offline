@@ -200,6 +200,7 @@ namespace Brio.Docs.Synchronization.Strategies
                     throw new Exception("Exception created while Synchronizing children in Merge Objective");
 
                 var result = await base.Merge(tuple, data, connectionContext, parent, token);
+                await UpdateChildrenAfterSynchronization(tuple);
                 await SaveDb(data);
 
                 resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, token);
@@ -325,6 +326,11 @@ namespace Brio.Docs.Synchronization.Strategies
                .Select(x => x.Item),
                 (tuple.Remote.Items ?? ArraySegment<ObjectiveItem>.Empty).Select(x => x.Item).ToArray());
             logger.LogTrace("External ids of items updated");
+            DynamicFieldStrategy<ObjectiveDynamicFieldLinker>.UpdateExternalIDs(
+                (tuple.Local.DynamicFields ?? ArraySegment<DynamicField>.Empty)
+               .Concat(tuple.Synchronized.DynamicFields ?? ArraySegment<DynamicField>.Empty),
+                tuple.Remote.DynamicFields ?? ArraySegment<DynamicField>.Empty);
+            logger.LogTrace("External ids of dynamic fields updated");
 
             await LinkLocationItem(tuple);
             logger.LogTrace("Location item linked");

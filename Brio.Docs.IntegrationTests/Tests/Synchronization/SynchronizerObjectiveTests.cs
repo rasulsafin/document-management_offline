@@ -83,27 +83,10 @@ namespace Brio.Docs.Tests.Synchronization
             ProjectSynchronizer.Setup(x => x.Remove(It.IsAny<ProjectExternalDto>()))
                .Returns<ProjectExternalDto>(Task.FromResult);
             ObjectiveSynchronizer.Setup(x => x.Add(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(
-                    x =>
-                    {
-                        foreach (var item in x.Items)
-                            item.ExternalID = $"new_item_{Guid.NewGuid()}";
-                        return Task.FromResult(x);
-                    })
-               .Callback<ObjectiveExternalDto>(
-                    x =>
-                    {
-                        x.ExternalID = $"new_objective_{Guid.NewGuid()}";
-                        ResultObjectiveExternalDtos.Add(x);
-                    });
+               .Returns<ObjectiveExternalDto>(AddIDs)
+               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
             ObjectiveSynchronizer.Setup(x => x.Update(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(
-                    x =>
-                    {
-                        foreach (var item in x.Items)
-                            item.ExternalID = $"new_item_{Guid.NewGuid()}";
-                        return Task.FromResult(x);
-                    })
+               .Returns<ObjectiveExternalDto>(AddIDs)
                .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
             ObjectiveSynchronizer.Setup(x => x.Remove(It.IsAny<ObjectiveExternalDto>()))
                .Returns<ObjectiveExternalDto>(Task.FromResult)
@@ -733,13 +716,13 @@ namespace Brio.Docs.Tests.Synchronization
                 new DynamicField
                 {
                     Name = "Big DF",
-                    ExternalID = "big_df_id",
+                    Type = DynamicFieldType.OBJECT.ToString(),
                     ChildrenDynamicFields = new List<DynamicField>
                     {
                         new DynamicField
                         {
-                            ExternalID = "small_df_id",
                             Name = "Small DF",
+                            Type = DynamicFieldType.STRING.ToString(),
                             Value = "value",
                         },
                     },
@@ -769,6 +752,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             var localField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
             localField.ChildrenDynamicFields.Add(MockData.DEFAULT_DYNAMIC_FIELDS[1]);
+            localField.ExternalID = null;
             objectiveLocal.DynamicFields.Add(localField);
 
             var synchronizedField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
@@ -1344,5 +1328,25 @@ namespace Brio.Docs.Tests.Synchronization
 
         private void MockRemoteObjectives(IReadOnlyCollection<ObjectiveExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(ObjectiveSynchronizer, array, x => x.ExternalID);
+
+        private Task<ObjectiveExternalDto> AddIDs(ObjectiveExternalDto x)
+        {
+            void SetID(DynamicFieldExternalDto df)
+            {
+                df.ExternalID = $"new_df_{Guid.NewGuid()}";
+
+                foreach (var child in df.ChildrenDynamicFields)
+                    SetID(child);
+            }
+
+            x.ExternalID ??= $"new_objective_{Guid.NewGuid()}";
+            foreach (var item in x.Items.Where(i => i.ExternalID == null))
+                item.ExternalID = $"new_item_{Guid.NewGuid()}";
+
+            foreach (var df in x.DynamicFields.Where(df => df.ExternalID == null))
+                SetID(df);
+
+            return Task.FromResult(x);
+        }
     }
 }
