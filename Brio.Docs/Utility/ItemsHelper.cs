@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -45,9 +45,9 @@ namespace Brio.Docs.Utility
             var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
             var itemsToUnlink = objectiveItems.Where(o => (!itemDtos?.Any(i => (int)i.ID == o.ItemID)) ?? true);
             logger.LogDebug(
-            "Objective's ({ID}) item links to remove: {@ItemsToUnlink}",
-            objective.ID,
-            itemsToUnlink);
+                "Objective's ({ID}) item links to remove: {@ItemsToUnlink}",
+                objective.ID,
+                itemsToUnlink);
 
             foreach (var itemDto in itemDtos ?? Enumerable.Empty<ItemDto>())
             {
@@ -63,7 +63,7 @@ namespace Brio.Docs.Utility
         }
 
         internal async Task<Item> CheckItemToLink<TParent>(ItemDto item, TParent parent)
-           where TParent : class
+           where TParent : IItemContainer
         {
             logger.LogTrace("CheckItemToLink started with item: {@Item}, parent: {@Parent}", item, parent);
             var dbItem = await context.Items.Unsynchronized()
@@ -82,20 +82,7 @@ namespace Brio.Docs.Utility
                 return dbItem;
             }
 
-            bool alreadyLinked = false;
-
-            switch (parent)
-            {
-                case Objective objective:
-                    var id = (int)item.ID;
-                    var parentID = objective.ID;
-                    alreadyLinked = await context.ObjectiveItems
-                       .AnyAsync(i => i.ItemID == id && i.ObjectiveID == parentID);
-                    break;
-                case Project project:
-                    alreadyLinked = dbItem.ProjectID == project.ID;
-                    break;
-            }
+            bool alreadyLinked = await parent.IsItemLinked(dbItem);
 
             logger.LogDebug("Already linked: {IsLinked}", alreadyLinked);
             return alreadyLinked ? null : dbItem;
@@ -104,7 +91,7 @@ namespace Brio.Docs.Utility
         private async Task LinkItem(ItemDto item, Objective objective)
         {
             logger.LogTrace("LinkItem started for objective {ID} with item: {@Item}", objective.ID, item);
-            var dbItem = await CheckItemToLink(item, objective);
+            var dbItem = await CheckItemToLink(item, new ObjectiveItemContainer(context, objective));
 
             logger.LogDebug("CheckItemToLink returned {@DBItem}", dbItem);
             if (dbItem == null)
@@ -138,7 +125,7 @@ namespace Brio.Docs.Utility
         }
 
         private async Task<bool> ShouldCreateNewItem<TParent>(Item dbItem, TParent parent, DMContext context)
-            where TParent : class
+            where TParent : IItemContainer
         {
             logger.LogTrace("ShouldCreateNewItem started with item: {@Item}, parent: {@Parent}", dbItem, parent);
 
@@ -146,16 +133,7 @@ namespace Brio.Docs.Utility
             if (dbItem == null)
                 return true;
 
-            int projectID = -1;
-            switch (parent)
-            {
-                case Objective objective:
-                    projectID = objective.ProjectID;
-                    break;
-                case Project project:
-                    projectID = project.ID;
-                    break;
-            }
+            int projectID = parent.ItemParentID;
 
             // Check if same item exists (linked to same project)
             var item = await context.Items

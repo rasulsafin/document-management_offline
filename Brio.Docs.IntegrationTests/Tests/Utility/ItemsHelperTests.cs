@@ -7,6 +7,7 @@ using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Utility;
@@ -84,7 +85,7 @@ namespace Brio.Docs.Tests.Utility
         {
             var context = Fixture.Context;
             var existingItem = context.Items.Unsynchronized().First();
-            var parent = context.Objectives.First();
+            var parent = new ObjectiveItemContainer(context, context.Objectives.First());
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
             var result = await helper.CheckItemToLink(item, parent);
@@ -97,8 +98,9 @@ namespace Brio.Docs.Tests.Utility
         public async Task CheckItemToLink_ExistingItemLinkedToObjectiveAndNotLinkedToProjectParent_ReturnsItem()
         {
             var context = Fixture.Context;
-            var parent = context.Projects.First();
-            var existingItem = context.Items.First(x => x.ProjectID == parent.ID);
+            var project = context.Projects.First();
+            var parent = new ProjectItemContainer(project);
+            var existingItem = context.Items.First(x => x.ProjectID == project.ID);
             existingItem.ProjectID = null;
             context.Update(existingItem);
             await context.SaveChangesAsync();
@@ -115,7 +117,7 @@ namespace Brio.Docs.Tests.Utility
         {
             var context = Fixture.Context;
             var existingItem = context.Items.Unsynchronized().First(i => context.ObjectiveItems.Any(oi => oi.ItemID == i.ID));
-            var parent = existingItem.Objectives.First().Objective;
+            var parent = new ObjectiveItemContainer(context, existingItem.Objectives.First().Objective);
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
             var result = await helper.CheckItemToLink(item, parent);
@@ -128,7 +130,7 @@ namespace Brio.Docs.Tests.Utility
         {
             var context = Fixture.Context;
             var existingItem = context.Items.Unsynchronized().First(i => i.ProjectID != null);
-            var parent = existingItem.Project;
+            var parent = new ProjectItemContainer(existingItem.Project);
             var item = new ItemDto { ID = new ID<ItemDto>(existingItem.ID) };
 
             var result = await helper.CheckItemToLink(item, parent);
@@ -143,7 +145,7 @@ namespace Brio.Docs.Tests.Utility
             var guid = Guid.NewGuid();
             var name = $"Name{guid}";
             var itemType = ItemType.Bim;
-            var parent = context.Objectives.First();
+            var parent = new ObjectiveItemContainer(context, context.Objectives.First());
             var itemsCount = context.Items.Count();
             var item = new ItemDto { ItemType = itemType, RelativePath = name };
 
@@ -165,7 +167,7 @@ namespace Brio.Docs.Tests.Utility
             var guid = Guid.NewGuid();
             var name = $"Name{guid}";
             var itemType = ItemType.Bim;
-            var parentId = context.Projects.First();
+            var parentId = new ProjectItemContainer(context.Projects.First());
             var itemsCount = context.Items.Count();
             var item = new ItemDto { ItemType = itemType, RelativePath = name };
 

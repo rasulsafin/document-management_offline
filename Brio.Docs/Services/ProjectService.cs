@@ -328,7 +328,7 @@ namespace Brio.Docs.Services
             logger.LogTrace("LinkItem started with project: {@Project} and item: {@Item}", project, item);
             try
             {
-                var dbItem = await itemHelper.CheckItemToLink(item, project);
+                var dbItem = await itemHelper.CheckItemToLink(item, new ProjectItemContainer(project));
                 logger.LogDebug("Found item: {@DBItem}", dbItem);
                 if (dbItem == null)
                     return;

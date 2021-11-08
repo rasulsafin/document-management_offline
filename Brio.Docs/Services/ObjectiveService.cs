@@ -86,7 +86,7 @@ namespace Brio.Docs.Services
 
                     var locationItem = await itemHelper.CheckItemToLink(
                         locationItemDto,
-                        objective.Project);
+                        new ProjectItemContainer(objective.Project));
 
                     if (locationItem != null)
                         objective.Project.Items.Add(locationItem);
