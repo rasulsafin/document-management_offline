@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Client.Dtos;
@@ -13,8 +12,6 @@ using Brio.Docs.Utility.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
-
-[assembly: InternalsVisibleTo("Brio.Docs.IntegrationTests")]
 
 namespace Brio.Docs.Utility
 {
