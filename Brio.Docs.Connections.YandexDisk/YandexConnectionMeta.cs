@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Integration.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Brio.Docs.Connections.YandexDisk
 {
@@ -28,5 +31,11 @@ namespace Brio.Docs.Connections.YandexDisk
 
         public Type GetIConnectionType()
             => typeof(YandexConnection);
+
+        public Action<IServiceCollection> AddToDependencyInjectionMethod()
+            => collection => collection.AddYandexDisk();
+
+        public IEnumerable<GettingPropertyExpression> GetPropertiesForIgnoringByLogging()
+            => Enumerable.Empty<GettingPropertyExpression>();
     }
 }

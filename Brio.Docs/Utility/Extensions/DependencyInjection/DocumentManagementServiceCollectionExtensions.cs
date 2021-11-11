@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using AutoMapper;
 using Brio.Docs.Client.Services;
 using Brio.Docs.Database;
@@ -96,9 +95,10 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         private static IServiceCollection AddExternal(this IServiceCollection services)
-            => ConnectionCreator.GetDependencyInjectionMethods()
-               .Aggregate(
-                    services,
-                    (aggregated, method) => (IServiceCollection)method.Invoke(null, new object[] { aggregated }));
+        {
+            foreach (var action in ConnectionCreator.GetDependencyInjectionMethods())
+                action?.Invoke(services);
+            return services;
+        }
     }
 }

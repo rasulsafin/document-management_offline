@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Integration.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Brio.Docs.Connections.GoogleDrive
 {
@@ -35,5 +38,11 @@ namespace Brio.Docs.Connections.GoogleDrive
 
         public Type GetIConnectionType()
             => typeof(GoogleConnection);
+
+        public Action<IServiceCollection> AddToDependencyInjectionMethod()
+            => collection => collection.AddGoogleDrive();
+
+        public IEnumerable<GettingPropertyExpression> GetPropertiesForIgnoringByLogging()
+            => Enumerable.Empty<GettingPropertyExpression>();
     }
 }
