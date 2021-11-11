@@ -15,6 +15,8 @@ using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronizers
@@ -69,6 +71,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
 
+            if (obj.BimElements?.Any() ?? false)
+            {
+                var added = await AddBimElements(obj.BimElements, project, created);
+                parsedToDto.BimElements = added.ToList();
+            }
+
             return parsedToDto;
         }
 
@@ -116,6 +124,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
                 issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
                 parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
+            }
+
+            if (obj.BimElements?.Any() ?? false)
+            {
+                var added = await AddBimElements(obj.BimElements, project, issueSnapshot.Entity);
+                parsedToDto.BimElements = added.ToList();
             }
 
             return parsedToDto;
@@ -235,6 +249,69 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             }
 
             return resultItems;
+        }
+
+        private async Task<IEnumerable<BimElementExternalDto>> AddBimElements(
+            ICollection<BimElementExternalDto> bimElements,
+            ProjectSnapshot project,
+            Issue issue)
+        {
+            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
+            var lastComment = comments.OrderByDescending(x => x.Attributes.UpdatedAt)
+               .LastOrDefault(x => x.Attributes.Body.Contains("#mrs") && x.Attributes.Body.Contains("#be"));
+            var current = lastComment?.Attributes.Body;
+
+            IEnumerable<BimElementExternalDto> s = Enumerable.Empty<BimElementExternalDto>();
+
+            if (current != null)
+            {
+                var deserializer = new DeserializerBuilder()
+                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                   .Build();
+
+                try
+                {
+                    s = deserializer.Deserialize<IEnumerable<BimElementExternalDto>>(current);
+                }
+                catch
+                {
+                }
+
+            }
+
+            if (!s.OrderBy(x => x.GlobalID).SequenceEqual(bimElements.OrderBy(x => x.GlobalID)))
+            {
+                var serializer = new SerializerBuilder()
+                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                   .Build();
+
+                var yaml = string.Join(
+                    Environment.NewLine,
+                    "#mrs #be",
+                    current == null ? "#Added links to model elements" : "#Links to model elements changed",
+                    serializer.Serialize(bimElements));
+
+                var comment = new Comment
+                {
+                    Attributes = new Comment.CommentAttributes
+                    {
+                        IssueId = issue.ID,
+                        Body = yaml,
+                    },
+                };
+
+                try
+                {
+                    await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
+                    return bimElements;
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return bimElements;
         }
 
         private async Task<Attachment> AttachItem(Item posted, string issueId, string containerId)

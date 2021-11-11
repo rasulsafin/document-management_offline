@@ -12,6 +12,8 @@ using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
@@ -72,9 +74,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
                 statusEnumCreator);
 
-            foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
+            foreach (var commentSnapshot in snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains("#mrs")) ??
+                Enumerable.Empty<CommentSnapshot>())
             {
-                var comment = new DynamicFieldExternalDto()
+                var comment = new DynamicFieldExternalDto
                 {
                     ExternalID = commentSnapshot.ID,
                     Type = DynamicFieldType.OBJECT,
@@ -82,7 +85,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var author = new DynamicFieldExternalDto()
+                var author = new DynamicFieldExternalDto
                 {
                     ExternalID = commentSnapshot.Entity.Attributes.CreatedBy,
                     Type = DynamicFieldType.STRING,
@@ -91,7 +94,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var date = new DynamicFieldExternalDto()
+                var date = new DynamicFieldExternalDto
                 {
                     ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.CreatedAt),
                     Type = DynamicFieldType.DATE,
@@ -100,7 +103,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var text = new DynamicFieldExternalDto()
+                var text = new DynamicFieldExternalDto
                 {
                     ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.Body),
                     Type = DynamicFieldType.STRING,
@@ -109,7 +112,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>() { author, date, text };
+                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    author,
+                    date,
+                    text,
+                };
                 parsedToDto.DynamicFields.Add(comment);
             }
 
@@ -144,6 +152,26 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             {
                 if (!TryRedirect(snapshot, parsedToDto))
                     parsedToDto.Location.Item = target.Entity.ToDto();
+            }
+
+            var beComment = snapshot.Comments?.OrderByDescending(x => x.Entity.Attributes.CreatedAt)
+               .FirstOrDefault(
+                    x => x.Entity.Attributes.Body.Contains("#mrs") && x.Entity.Attributes.Body.Contains("#be"));
+
+            if (beComment != null)
+            {
+                var deserializer = new DeserializerBuilder()
+                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                   .Build();
+
+                try
+                {
+                    parsedToDto.BimElements = deserializer.Deserialize<ICollection<BimElementExternalDto>>(beComment.Entity.Attributes.Body);
+                }
+                catch
+                {
+                    throw;
+                }
             }
 
             return parsedToDto;
