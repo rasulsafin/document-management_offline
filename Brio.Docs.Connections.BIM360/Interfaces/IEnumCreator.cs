@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 
-namespace Brio.Docs.Connections.Bim360.Utilities
+namespace Brio.Docs.Connections.Bim360.Interfaces
 {
     /// <summary>
     /// Represents a class for working with BIM 360 properties as dynamic field.
@@ -10,29 +10,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities
     /// <typeparam name="T">The type that can uniquely represent a given variant of BIM 360 dependent properties.</typeparam>
     /// <typeparam name="TSnapshot">The type of snapshot for given type.</typeparam>
     /// <typeparam name="TVariantID">The identifier to find needed variant.</typeparam>
-    internal interface IEnumCreator<T, TSnapshot, out TVariantID>
+    internal interface IEnumCreator<T, TSnapshot, out TVariantID> : IEnumIdentification<TSnapshot>
         where TSnapshot : AEnumVariantSnapshot<T>
     {
-        /// <summary>
-        /// Represents the identifier for current enum.
-        /// </summary>
-        string EnumExternalID { get; }
-
-        /// <summary>
-        /// Represents the display name of this property.
-        /// </summary>
-        string EnumDisplayName { get; }
-
-        /// <summary>
-        /// Gets whether the field can contain null value.
-        /// </summary>
-        bool CanBeNull { get; }
-
-        /// <summary>
-        /// Gets identifier for a null value for the current field.
-        /// </summary>
-        string NullID { get; }
-
         /// <summary>
         /// Gets ordered identifiers of this variants.
         /// </summary>
