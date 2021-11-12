@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
@@ -261,48 +262,105 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                .LastOrDefault(x => x.Attributes.Body.Contains("#mrs") && x.Attributes.Body.Contains("#be"));
             var current = lastComment?.Attributes.Body;
 
-            IEnumerable<BimElementExternalDto> s = Enumerable.Empty<BimElementExternalDto>();
+            IEnumerable<BimElementExternalDto> currentElements = Enumerable.Empty<BimElementExternalDto>();
 
             if (current != null)
             {
+                var regex = new Regex("#be[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?");
+                var match = regex.Match(current);
+
+                if (match != Match.Empty)
+                {
+                    var commentsThread = comments.OrderBy(x => x.Attributes.CreatedAt)
+                       .Where(x => x.Attributes.Body.Contains(match.Value));
+                    current = string.Join(
+                        string.Empty,
+                        commentsThread
+                           .Select(
+                                x => string.Join(
+                                    '\n',
+                                    x.Attributes.Body
+                                       .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Skip(1)))
+                           .ToArray());
+                }
+
                 var deserializer = new DeserializerBuilder()
                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
                    .Build();
 
                 try
                 {
-                    s = deserializer.Deserialize<IEnumerable<BimElementExternalDto>>(current);
+                    currentElements = deserializer.Deserialize<IEnumerable<BimElementExternalDto>>(current);
                 }
                 catch
                 {
                 }
-
             }
 
-            if (!s.OrderBy(x => x.GlobalID).SequenceEqual(bimElements.OrderBy(x => x.GlobalID)))
+            if (!currentElements.OrderBy(x => x.GlobalID).SequenceEqual(bimElements.OrderBy(x => x.GlobalID)))
             {
                 var serializer = new SerializerBuilder()
                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
                    .Build();
 
-                var yaml = string.Join(
-                    Environment.NewLine,
-                    "#mrs #be",
-                    current == null ? "#Added links to model elements" : "#Links to model elements changed",
-                    serializer.Serialize(bimElements));
+                var yaml = serializer.Serialize(bimElements).Replace(Environment.NewLine, "\n");
+                var newComments = new List<Comment>();
 
-                var comment = new Comment
+                int length = 50;
+                var guid = Guid.NewGuid();
+
+                int steps = (int)Math.Ceiling((double)yaml.Length / length);
+
+                for (int i = 0; i < steps; i++)
                 {
-                    Attributes = new Comment.CommentAttributes
+                    var body = yaml.Substring(
+                        i * length,
+                        yaml.Length < (i + 1) * length ? yaml.Length % length : length);
+
+                    if (steps > 0)
                     {
-                        IssueId = issue.ID,
-                        Body = yaml,
-                    },
-                };
+                        if (i == 0)
+                        {
+                            body = string.Join(
+                                '\n',
+                                $"#mrs #be{{{guid}}}",
+                                current == null ? "#Added links to model elements" : "#Links to model elements changed",
+                                body);
+                        }
+                        else
+                        {
+                            body = string.Join(
+                                '\n',
+                                $"#mrs #be{{{guid}}}",
+                                body);
+                        }
+                    }
+                    else
+                    {
+                        body = string.Join(
+                            '\n',
+                            "#mrs #be",
+                            current == null ? "#Added links to model elements" : "#Links to model elements changed",
+                            body);
+                    }
+
+                    var comment = new Comment
+                    {
+                        Attributes = new Comment.CommentAttributes
+                        {
+                            IssueId = issue.ID,
+                            Body = body,
+                        },
+                    };
+
+                    newComments.Add(comment);
+                }
 
                 try
                 {
-                    await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
+                    foreach (var comment in newComments)
+                        await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
                     return bimElements;
                 }
                 catch

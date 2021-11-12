@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
@@ -167,13 +169,33 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             if (beComment != null)
             {
+                var regex = new Regex("#be[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?");
+                var yaml = beComment.Entity.Attributes.Body;
+                var match = regex.Match(yaml);
+
+                if (match != Match.Empty)
+                {
+                    var commentsThread = snapshot.Comments.OrderBy(x => x.Entity.Attributes.CreatedAt)
+                       .Where(x => x.Entity.Attributes.Body.Contains(match.Value));
+                    yaml = string.Join(
+                        string.Empty,
+                        commentsThread
+                           .Select(
+                                x => string.Join(
+                                    '\n',
+                                    x.Entity.Attributes.Body
+                                       .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
+                                       .Skip(1)))
+                           .ToArray());
+                }
+
                 var deserializer = new DeserializerBuilder()
                    .WithNamingConvention(UnderscoredNamingConvention.Instance)
                    .Build();
 
                 try
                 {
-                    parsedToDto.BimElements = deserializer.Deserialize<ICollection<BimElementExternalDto>>(beComment.Entity.Attributes.Body);
+                    parsedToDto.BimElements = deserializer.Deserialize<ICollection<BimElementExternalDto>>(yaml);
                 }
                 catch
                 {

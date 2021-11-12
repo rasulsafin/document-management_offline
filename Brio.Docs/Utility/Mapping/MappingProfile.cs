@@ -182,7 +182,9 @@ namespace Brio.Docs.Utility.Mapping
             CreateMap<BimElement, BimElementExternalDto>();
             CreateMap<BimElementExternalDto, BimElementObjective>()
                .ConvertUsing<BimElementObjectiveTypeConverter>();
-            CreateMap<BimElementExternalDto, BimElement>();
+            CreateMap<BimElementExternalDto, BimElement>()
+               .ForMember(x => x.ID, o => o.Ignore())
+               .ForMember(x => x.Objectives, o => o.Ignore());
 
             CreateMap<DynamicField, DynamicFieldExternalDto>()
                 .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldModelToExternalValueResolver>());
