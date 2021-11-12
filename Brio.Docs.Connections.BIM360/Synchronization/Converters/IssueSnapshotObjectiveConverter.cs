@@ -6,6 +6,7 @@ using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
@@ -21,20 +22,20 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
-        private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
-        private readonly RootCauseEnumCreator rootCauseEnumCreator;
-        private readonly LocationEnumCreator locationEnumCreator;
-        private readonly AssignToEnumCreator assignToEnumCreator;
-        private readonly StatusEnumCreator statusEnumCreator;
+        private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
+        private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
+        private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
+        private readonly IEnumIdentification<AssignToVariant> assignToEnumCreator;
+        private readonly IEnumIdentification<StatusSnapshot> statusEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
-            TypeSubtypeEnumCreator subtypeEnumCreator,
-            RootCauseEnumCreator rootCauseEnumCreator,
-            LocationEnumCreator locationEnumCreator,
-            AssignToEnumCreator assignToEnumCreator,
-            StatusEnumCreator statusEnumCreator)
+            IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator,
+            IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
+            IEnumIdentification<LocationSnapshot> locationEnumCreator,
+            IEnumIdentification<AssignToVariant> assignToEnumCreator,
+            IEnumIdentification<StatusSnapshot> statusEnumCreator)
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
@@ -147,11 +148,17 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             }
 
             if (parsedToDto.Location != null &&
-                snapshot.Entity.Attributes.TargetUrn != null &&
-                snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
+                snapshot.Entity.Attributes.TargetUrn != null)
             {
-                if (!TryRedirect(snapshot, parsedToDto))
-                    parsedToDto.Location.Item = target.Entity.ToDto();
+                if (snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
+                {
+                    if (!TryRedirect(snapshot, parsedToDto))
+                        parsedToDto.Location.Item = target.Entity.ToDto();
+                }
+                else
+                {
+                    parsedToDto.Location = null;
+                }
             }
 
             var beComment = snapshot.Comments?.OrderByDescending(x => x.Entity.Attributes.CreatedAt)
