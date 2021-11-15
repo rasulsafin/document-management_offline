@@ -32,6 +32,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
+        private readonly MetaCommentHelper metaCommentHelper;
 
         public Bim360ObjectivesSynchronizer(
             Bim360Snapshot snapshot,
@@ -41,7 +42,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             SnapshotFiller filler,
             IssueSnapshotUtilities snapshotUtilities,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
-            IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
+            IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto,
+            MetaCommentHelper metaCommentHelper)
         {
             this.snapshot = snapshot;
             this.itemsSyncHelper = itemsSyncHelper;
@@ -51,6 +53,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             this.filler = filler;
             this.authenticator = authenticator;
             this.snapshotUtilities = snapshotUtilities;
+            this.metaCommentHelper = metaCommentHelper;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -258,109 +261,22 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             Issue issue)
         {
             var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
-            var lastComment = comments.OrderByDescending(x => x.Attributes.UpdatedAt)
-               .LastOrDefault(x => x.Attributes.Body.Contains("#mrs") && x.Attributes.Body.Contains("#be"));
-            var current = lastComment?.Attributes.Body;
+            var currentElements = metaCommentHelper.GetBimElements(comments);
 
-            IEnumerable<BimElementExternalDto> currentElements = Enumerable.Empty<BimElementExternalDto>();
-
-            if (current != null)
+            if (!currentElements?.OrderBy(x => x.GlobalID).SequenceEqual(bimElements.OrderBy(x => x.GlobalID)) ?? true)
             {
-                var regex = new Regex("#be[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?");
-                var match = regex.Match(current);
-
-                if (match != Match.Empty)
-                {
-                    var commentsThread = comments.OrderBy(x => x.Attributes.CreatedAt)
-                       .Where(x => x.Attributes.Body.Contains(match.Value));
-                    current = string.Join(
-                        string.Empty,
-                        commentsThread
-                           .Select(
-                                x => string.Join(
-                                    '\n',
-                                    x.Attributes.Body
-                                       .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                                       .Skip(1)))
-                           .ToArray());
-                }
-
-                var deserializer = new DeserializerBuilder()
-                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                   .Build();
-
                 try
                 {
-                    currentElements = deserializer.Deserialize<IEnumerable<BimElementExternalDto>>(current);
-                }
-                catch
-                {
-                }
-            }
+                    var newComments = metaCommentHelper.CreateComments(
+                        bimElements,
+                        currentElements == null || !currentElements.Any());
 
-            if (!currentElements.OrderBy(x => x.GlobalID).SequenceEqual(bimElements.OrderBy(x => x.GlobalID)))
-            {
-                var serializer = new SerializerBuilder()
-                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                   .Build();
-
-                var yaml = serializer.Serialize(bimElements).Replace(Environment.NewLine, "\n");
-                var newComments = new List<Comment>();
-
-                int length = 50;
-                var guid = Guid.NewGuid();
-
-                int steps = (int)Math.Ceiling((double)yaml.Length / length);
-
-                for (int i = 0; i < steps; i++)
-                {
-                    var body = yaml.Substring(
-                        i * length,
-                        yaml.Length < (i + 1) * length ? yaml.Length % length : length);
-
-                    if (steps > 0)
-                    {
-                        if (i == 0)
-                        {
-                            body = string.Join(
-                                '\n',
-                                $"#mrs #be{{{guid}}}",
-                                current == null ? "#Added links to model elements" : "#Links to model elements changed",
-                                body);
-                        }
-                        else
-                        {
-                            body = string.Join(
-                                '\n',
-                                $"#mrs #be{{{guid}}}",
-                                body);
-                        }
-                    }
-                    else
-                    {
-                        body = string.Join(
-                            '\n',
-                            "#mrs #be",
-                            current == null ? "#Added links to model elements" : "#Links to model elements changed",
-                            body);
-                    }
-
-                    var comment = new Comment
-                    {
-                        Attributes = new Comment.CommentAttributes
-                        {
-                            IssueId = issue.ID,
-                            Body = body,
-                        },
-                    };
-
-                    newComments.Add(comment);
-                }
-
-                try
-                {
                     foreach (var comment in newComments)
+                    {
+                        comment.Attributes.IssueId = issue.ID;
                         await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
+                    }
+
                     return bimElements;
                 }
                 catch

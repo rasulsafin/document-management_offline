@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
@@ -15,8 +14,6 @@ using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
@@ -29,6 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
         private readonly IEnumIdentification<AssignToVariant> assignToEnumCreator;
         private readonly IEnumIdentification<StatusSnapshot> statusEnumCreator;
+        private readonly MetaCommentHelper metaCommentHelper;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
@@ -37,7 +35,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
             IEnumIdentification<LocationSnapshot> locationEnumCreator,
             IEnumIdentification<AssignToVariant> assignToEnumCreator,
-            IEnumIdentification<StatusSnapshot> statusEnumCreator)
+            IEnumIdentification<StatusSnapshot> statusEnumCreator,
+            MetaCommentHelper metaCommentHelper)
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
@@ -46,6 +45,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.statusEnumCreator = statusEnumCreator;
+            this.metaCommentHelper = metaCommentHelper;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -124,13 +124,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 parsedToDto.DynamicFields.Add(comment);
             }
 
-            var newComment = new DynamicFieldExternalDto()
+            var newComment = new DynamicFieldExternalDto
             {
                 ExternalID = MrsConstants.NEW_COMMENT_ID,
                 Type = DynamicFieldType.STRING,
                 Name = MrsConstants.NEW_COMMENT_FIELD_NAME,
                 Value = string.Empty,
-                UpdatedAt = System.DateTime.Now,
+                UpdatedAt = DateTime.Now,
             };
 
             parsedToDto.DynamicFields.Add(status);
@@ -163,44 +163,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 }
             }
 
-            var beComment = snapshot.Comments?.OrderByDescending(x => x.Entity.Attributes.CreatedAt)
-               .FirstOrDefault(
-                    x => x.Entity.Attributes.Body.Contains("#mrs") && x.Entity.Attributes.Body.Contains("#be"));
-
-            if (beComment != null)
+            if (snapshot.Comments != null)
             {
-                var regex = new Regex("#be[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?");
-                var yaml = beComment.Entity.Attributes.Body;
-                var match = regex.Match(yaml);
-
-                if (match != Match.Empty)
-                {
-                    var commentsThread = snapshot.Comments.OrderBy(x => x.Entity.Attributes.CreatedAt)
-                       .Where(x => x.Entity.Attributes.Body.Contains(match.Value));
-                    yaml = string.Join(
-                        string.Empty,
-                        commentsThread
-                           .Select(
-                                x => string.Join(
-                                    '\n',
-                                    x.Entity.Attributes.Body
-                                       .Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries)
-                                       .Skip(1)))
-                           .ToArray());
-                }
-
-                var deserializer = new DeserializerBuilder()
-                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
-                   .Build();
-
-                try
-                {
-                    parsedToDto.BimElements = deserializer.Deserialize<ICollection<BimElementExternalDto>>(yaml);
-                }
-                catch
-                {
-                    throw;
-                }
+                parsedToDto.BimElements = metaCommentHelper.GetBimElements(snapshot.Comments.Select(x => x.Entity)) ??
+                    ArraySegment<BimElementExternalDto>.Empty;
+            }
+            else
+            {
+                parsedToDto.BimElements = ArraySegment<BimElementExternalDto>.Empty;
             }
 
             return parsedToDto;

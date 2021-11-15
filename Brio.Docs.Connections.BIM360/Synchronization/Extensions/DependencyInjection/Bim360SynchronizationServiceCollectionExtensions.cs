@@ -27,6 +27,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
             services.AddScoped<ItemsSyncHelper>();
+            services.AddScoped<MetaCommentHelper>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();

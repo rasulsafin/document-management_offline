@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
@@ -26,6 +27,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private readonly Mock<IEnumIdentification<LocationSnapshot>> mockLocationEnumCreator = new ();
         private readonly Mock<IEnumIdentification<AssignToVariant>> mockAssignToEnumCreator = new ();
         private readonly Mock<IEnumIdentification<StatusSnapshot>> mockStatusEnumCreator = new ();
+        private readonly Mock<MetaCommentHelper> mock = new ();
         private IssueSnapshotObjectiveConverter converter;
         private IssueSnapshot issueSnapshot;
         private ObjectiveExternalDto dto;
@@ -40,7 +42,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 mockRootCauseEnumCreator.Object,
                 mockLocationEnumCreator.Object,
                 mockAssignToEnumCreator.Object,
-                mockStatusEnumCreator.Object);
+                mockStatusEnumCreator.Object,
+                mock.Object);
 
             dto = new ObjectiveExternalDto
             {
