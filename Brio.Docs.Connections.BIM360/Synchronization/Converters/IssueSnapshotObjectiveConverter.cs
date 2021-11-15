@@ -77,8 +77,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
                 statusEnumCreator);
 
-            foreach (var commentSnapshot in snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains("#mrs")) ??
-                Enumerable.Empty<CommentSnapshot>())
+            var comments =
+                snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains(MrsConstants.META_COMMENT_TAG)) ??
+                Enumerable.Empty<CommentSnapshot>();
+
+            foreach (var commentSnapshot in comments)
             {
                 var comment = new DynamicFieldExternalDto
                 {

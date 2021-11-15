@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
@@ -16,8 +15,6 @@ using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
-using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronizers
