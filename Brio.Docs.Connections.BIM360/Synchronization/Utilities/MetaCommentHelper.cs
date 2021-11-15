@@ -45,32 +45,31 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             where T : class
         {
             var array = comments as Comment[] ?? comments.ToArray();
-            var beComment = array.OrderByDescending(x => x.Attributes.CreatedAt)
+            var withTags = array.OrderByDescending(x => x.Attributes.CreatedAt)
                .Select(x => x.Attributes.Body)
-               .FirstOrDefault(x => x.Contains(MrsConstants.META_COMMENT_TAG) && x.Contains(tag));
+               .Where(x => x.Contains(MrsConstants.META_COMMENT_TAG) && x.Contains(tag));
 
-            if (beComment != null)
+            foreach (var tagged in withTags)
             {
                 var regex = new Regex($"{tag}{GUID_REGEX_PATTERN}");
-                var match = regex.Match(beComment);
+                var match = regex.Match(tagged);
+                var yaml = tagged;
 
                 if (match != Match.Empty)
                 {
                     var commentsThread = array.OrderBy(x => x.Attributes.CreatedAt)
                        .Select(x => x.Attributes.Body)
                        .Where(x => x.Contains(match.Value));
-                    beComment = string.Join(string.Empty, commentsThread.Select(x => SkipLine(x, 1)));
+                    yaml = string.Join(string.Empty, commentsThread.Select(x => SkipLine(x, 1)));
                 }
 
                 try
                 {
-                    result = deserializer.Value.Deserialize<T>(beComment);
+                    result = deserializer.Value.Deserialize<T>(yaml);
                     return true;
                 }
                 catch
                 {
-                    result = null;
-                    return false;
                 }
             }
 
