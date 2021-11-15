@@ -29,9 +29,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 ? result
                 : null;
 
-        public IEnumerable<Comment> CreateComments(ICollection<BimElementExternalDto> bimElements, bool isFirst)
+        public IEnumerable<Comment> CreateComments(ICollection<BimElementExternalDto> bimElements, bool isCurrentEmpty)
         {
-            var info = isFirst
+            var info = isCurrentEmpty
                 ? Comments.BimElementsAddedInfo
                 : Comments.BimElementsChangedInfo;
 
@@ -44,8 +44,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         private bool TryGet<T>(IEnumerable<Comment> comments, string tag, out T result, T empty = default)
             where T : class
         {
-            var enumerable = comments as Comment[] ?? comments.ToArray();
-            var beComment = enumerable.OrderByDescending(x => x.Attributes.CreatedAt)
+            var array = comments as Comment[] ?? comments.ToArray();
+            var beComment = array.OrderByDescending(x => x.Attributes.CreatedAt)
                .Select(x => x.Attributes.Body)
                .FirstOrDefault(x => x.Contains(MrsConstants.META_COMMENT_TAG) && x.Contains(tag));
 
@@ -56,7 +56,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
                 if (match != Match.Empty)
                 {
-                    var commentsThread = enumerable.OrderBy(x => x.Attributes.CreatedAt)
+                    var commentsThread = array.OrderBy(x => x.Attributes.CreatedAt)
                        .Select(x => x.Attributes.Body)
                        .Where(x => x.Contains(match.Value));
                     beComment = string.Join(string.Empty, commentsThread.Select(x => SkipLine(x, 1)));
@@ -102,7 +102,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 var body = yaml.Substring(i * length, currentLength);
 
                 body = i == 0
-                    ? string.Join('\n', firstLine, info, body)
+                    ? string.Join('\n', info, string.Empty, firstLine, body)
                     : string.Join('\n', firstLine, body);
 
                 var comment = new Comment
