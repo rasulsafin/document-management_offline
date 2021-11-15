@@ -6,6 +6,7 @@ using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
@@ -27,7 +28,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private readonly Mock<IEnumIdentification<LocationSnapshot>> mockLocationEnumCreator = new ();
         private readonly Mock<IEnumIdentification<AssignToVariant>> mockAssignToEnumCreator = new ();
         private readonly Mock<IEnumIdentification<StatusSnapshot>> mockStatusEnumCreator = new ();
-        private readonly Mock<MetaCommentHelper> mock = new ();
+        private readonly Mock<MetaCommentHelper> mockCommentHelper = new ();
         private IssueSnapshotObjectiveConverter converter;
         private IssueSnapshot issueSnapshot;
         private ObjectiveExternalDto dto;
@@ -43,7 +44,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 mockLocationEnumCreator.Object,
                 mockAssignToEnumCreator.Object,
                 mockStatusEnumCreator.Object,
-                mock.Object);
+                mockCommentHelper.Object);
 
             dto = new ObjectiveExternalDto
             {
@@ -109,6 +110,47 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
 
             // Assert.
             Assert.IsNull(result.Location);
+        }
+
+        [TestMethod]
+        public async Task Convert_IssueHasSimpleComment_ObjectiveHasCommentDynamicField()
+        {
+            // Arrange.
+            var comment = MockData.Commment;
+            comment.Attributes.IssueId = issueSnapshot.ID;
+            issueSnapshot.Comments = new List<CommentSnapshot> { new (comment) };
+
+            // Act.
+            var result = await converter.Convert(issueSnapshot);
+            var dfs = ObjectiveUtilities.EnumerateAll(result.DynamicFields).ToArray();
+            var commentDynamicField = dfs.FirstOrDefault(x => x.ExternalID == comment.ID);
+            var bodyDynamicField = dfs.FirstOrDefault(x => x.Value == comment.Attributes.Body);
+
+            // Assert.
+            Assert.IsNotNull(result.DynamicFields);
+            Assert.IsNotNull(commentDynamicField);
+            Assert.IsNotNull(bodyDynamicField);
+        }
+
+        [TestMethod]
+        public async Task Convert_IssueHasTaggedComment_ObjectiveHasNotCommentDynamicField()
+        {
+            // Arrange.
+            var comment = MockData.Commment;
+            comment.Attributes.Body = $"{MrsConstants.META_COMMENT_TAG} {comment.Attributes.Body}";
+            comment.Attributes.IssueId = issueSnapshot.ID;
+            issueSnapshot.Comments = new List<CommentSnapshot> { new (comment) };
+
+            // Act.
+            var result = await converter.Convert(issueSnapshot);
+            var dfs = ObjectiveUtilities.EnumerateAll(result.DynamicFields).ToArray();
+            var commentDynamicField = dfs.FirstOrDefault(x => x.ExternalID == comment.ID);
+            var bodyDynamicField = dfs.FirstOrDefault(x => x.Value == comment.Attributes.Body);
+
+            // Assert.
+            Assert.IsNotNull(result.DynamicFields);
+            Assert.IsNull(commentDynamicField);
+            Assert.IsNull(bodyDynamicField);
         }
     }
 }

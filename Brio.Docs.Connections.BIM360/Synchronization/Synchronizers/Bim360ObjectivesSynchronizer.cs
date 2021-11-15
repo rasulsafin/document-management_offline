@@ -72,11 +72,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
 
-            if (obj.BimElements?.Any() ?? false)
-            {
-                var added = await AddBimElements(obj.BimElements, project, created);
-                parsedToDto.BimElements = added.ToList();
-            }
+            var addedBimElements = await AddBimElements(obj.BimElements, project, created);
+            parsedToDto.BimElements = addedBimElements?.ToList();
 
             return parsedToDto;
         }
@@ -128,7 +125,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             }
 
             var addedBimElements = await AddBimElements(obj.BimElements, project, issueSnapshot.Entity);
-            parsedToDto.BimElements = addedBimElements.ToList();
+            parsedToDto.BimElements = addedBimElements?.ToList();
 
             return parsedToDto;
         }
