@@ -7,6 +7,7 @@ using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 

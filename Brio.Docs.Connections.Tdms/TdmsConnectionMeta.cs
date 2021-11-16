@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Integration.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Brio.Docs.Connections.Tdms
 {
@@ -27,5 +30,11 @@ namespace Brio.Docs.Connections.Tdms
 
         public Type GetIConnectionType()
             => typeof(TdmsConnection);
+
+        public Action<IServiceCollection> AddToDependencyInjectionMethod()
+            => collection => collection.AddTdms();
+
+        public IEnumerable<GettingPropertyExpression> GetPropertiesForIgnoringByLogging()
+            => Enumerable.Empty<GettingPropertyExpression>();
     }
 }

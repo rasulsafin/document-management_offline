@@ -15,7 +15,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Connections.BIM360.Tests.IntegrationTests
+namespace Brio.Docs.Connections.Bim360.Tests.IntegrationTests
 {
     [TestClass]
     public class Bim360ObjectivesSynchronizerTests

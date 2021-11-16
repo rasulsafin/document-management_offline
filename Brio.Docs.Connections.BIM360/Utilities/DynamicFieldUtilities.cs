@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
@@ -36,10 +37,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities
         internal static string GetExternalID<TID>(IEnumerable<TID> types)
             => JsonConvert.SerializeObject(types);
 
-        internal static DynamicFieldExternalDto CreateField<T, TSnapshot, TID>(
+        internal static DynamicFieldExternalDto CreateField(
             string valueID,
-            IEnumCreator<T, TSnapshot, TID> helper)
-            where TSnapshot : AEnumVariantSnapshot<T>
+            IEnumIdentification helper)
             => new ()
             {
                 ExternalID = helper.EnumExternalID,
