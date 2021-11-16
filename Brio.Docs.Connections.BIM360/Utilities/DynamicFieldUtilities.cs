@@ -4,6 +4,7 @@ using System.Linq;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 

@@ -1,7 +1,8 @@
-using Brio.Docs.Connections.Bim360.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
@@ -9,13 +10,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities
     internal class EnumerationTypeCreator
     {
         private readonly SnapshotFiller snapshotFiller;
-        private readonly Bim360Snapshot snapshot;
+        private readonly SnapshotGetter snapshot;
 
         private bool snapshotFilled = false;
 
         public EnumerationTypeCreator(
             SnapshotFiller snapshotFiller,
-            Bim360Snapshot snapshot)
+            SnapshotGetter snapshot)
         {
             this.snapshotFiller = snapshotFiller;
             this.snapshot = snapshot;
@@ -29,7 +30,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 
             var values = DynamicFieldUtilities.GetGroupedTypes(
                     creator,
-                    snapshot.ProjectEnumerable.SelectMany(creator.GetSnapshots))
+                    snapshot.GetProjects().SelectMany(creator.GetSnapshots))
                .Select(
                     x => new EnumerationValueExternalDto
                     {

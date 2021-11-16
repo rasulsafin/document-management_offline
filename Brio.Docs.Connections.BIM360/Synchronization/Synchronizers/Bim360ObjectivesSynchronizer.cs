@@ -13,6 +13,7 @@ using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
@@ -21,9 +22,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
 {
     internal class Bim360ObjectivesSynchronizer : ISynchronizer<ObjectiveExternalDto>
     {
-        private readonly Bim360Snapshot snapshot;
+        private readonly SnapshotGetter snapshot;
+        private readonly SnapshotUpdater snapshotUpdater;
         private readonly IssuesService issuesService;
-        private readonly Authenticator authenticator;
+        private readonly IAccessController accessController;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly SnapshotFiller filler;
         private readonly IssueSnapshotUtilities snapshotUtilities;
@@ -31,9 +33,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
         public Bim360ObjectivesSynchronizer(
-            Bim360Snapshot snapshot,
+            SnapshotGetter snapshot,
+            SnapshotUpdater snapshotUpdater,
             IssuesService issuesService,
-            Authenticator authenticator,
+            IAccessController accessController,
             ItemsSyncHelper itemsSyncHelper,
             SnapshotFiller filler,
             IssueSnapshotUtilities snapshotUtilities,
@@ -41,44 +44,37 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
             this.snapshot = snapshot;
+            this.snapshotUpdater = snapshotUpdater;
             this.itemsSyncHelper = itemsSyncHelper;
             this.issuesService = issuesService;
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
             this.filler = filler;
-            this.authenticator = authenticator;
+            this.accessController = accessController;
             this.snapshotUtilities = snapshotUtilities;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
         {
-            await authenticator.CheckAccessAsync(CancellationToken.None);
+            await accessController.CheckAccessAsync(CancellationToken.None);
 
             var issue = await converterToIssue.Convert(obj);
-            var project = GetProjectSnapshot(obj);
-            var issueSnapshot = new IssueSnapshot(issue, project);
+            var project = snapshot.GetProject(obj.ProjectExternalID);
             var created = await issuesService.PostIssueAsync(project.IssueContainer, issue);
-            issueSnapshot.Entity = created;
-            project.Issues.Add(created.ID, issueSnapshot);
+            var issueSnapshot = snapshotUpdater.CreateIssue(project, created);
             var parsedToDto = await converterToDto.Convert(issueSnapshot);
-
-            if (obj.Items?.Any() ?? false)
-            {
-                var added = await AddItems(obj.Items, project, created);
-                issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
-                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
-            }
+            await AddItems(obj, project, issueSnapshot, parsedToDto);
 
             return parsedToDto;
         }
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
-            await authenticator.CheckAccessAsync(CancellationToken.None);
+            await accessController.CheckAccessAsync(CancellationToken.None);
 
             var issue = await converterToIssue.Convert(obj);
-            var project = GetProjectSnapshot(obj);
-            var issueSnapshot = project.Issues[obj.ExternalID];
+            var project = snapshot.GetProject(obj.ProjectExternalID);
+            var issueSnapshot = snapshot.GetIssue(project, obj.ExternalID);
 
             if (!issue.Attributes.PermittedStatuses.Contains(Status.Void))
             {
@@ -87,20 +83,21 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             }
 
             issue.Attributes.Status = Status.Void;
-            issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
-            project.Issues.Remove(issueSnapshot.ID);
+            issue = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
+            snapshotUpdater.UpdateIssue(issueSnapshot, issue);
 
             return await converterToDto.Convert(issueSnapshot);
         }
 
         public async Task<ObjectiveExternalDto> Update(ObjectiveExternalDto obj)
         {
-            await authenticator.CheckAccessAsync(CancellationToken.None);
+            await accessController.CheckAccessAsync(CancellationToken.None);
 
-            var project = GetProjectSnapshot(obj);
-            var issueSnapshot = project.Issues[obj.ExternalID];
-            issueSnapshot.Entity = await converterToIssue.Convert(obj);
-            issueSnapshot.Entity = await issuesService.PatchIssueAsync(project.IssueContainer, issueSnapshot.Entity);
+            var project = snapshot.GetProject(obj.ProjectExternalID);
+            var issueSnapshot = snapshot.GetIssue(project, obj.ExternalID);
+            var issue = await converterToIssue.Convert(obj);
+            issue = await issuesService.PatchIssueAsync(project.IssueContainer, issue);
+            snapshotUpdater.UpdateIssue(issueSnapshot, issue);
 
             var newComment = obj.DynamicFields.FirstOrDefault(x => x.ExternalID == MrsConstants.NEW_COMMENT_ID && x.Value != string.Empty);
             if (newComment != null)
@@ -111,35 +108,23 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             }
 
             var parsedToDto = await converterToDto.Convert(issueSnapshot);
-            if (obj.Items?.Any() ?? false)
-            {
-                var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
-                issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
-                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
-            }
+            await AddItems(obj, project, issueSnapshot, parsedToDto);
 
             return parsedToDto;
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
         {
-            await authenticator.CheckAccessAsync(CancellationToken.None);
-
-            await filler.UpdateStatusesConfigIfNull();
-            await filler.UpdateIssuesIfNull(date);
-            await filler.UpdateIssueTypes();
-            await filler.UpdateRootCauses();
-            await filler.UpdateLocations();
-            await filler.UpdateAssignTo();
-            await filler.UpdateStatuses();
-            return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
+            await accessController.CheckAccessAsync(CancellationToken.None);
+            await UpdateSnapshot(date);
+            return snapshot.GetIssues().Where(x => x.Entity.Attributes.UpdatedAt > date)
                .Select(x => x.ID)
                .ToList();
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
-            await authenticator.CheckAccessAsync(CancellationToken.None);
+            await accessController.CheckAccessAsync(CancellationToken.None);
 
             var result = new List<ObjectiveExternalDto>();
 
@@ -147,11 +132,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             {
                 try
                 {
-                    var found = snapshot.IssueEnumerable.FirstOrDefault(x => x.ID == id);
+                    var found = snapshot.GetIssue(id);
 
                     if (found == null)
                     {
-                        foreach (var project in snapshot.ProjectEnumerable)
+                        foreach (var project in snapshot.GetProjects())
                         {
                             var container = project.IssueContainer;
                             Issue received = null;
@@ -169,10 +154,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                                 if (IssueUtilities.IsRemoved(received))
                                     break;
 
-                                found = new IssueSnapshot(received, project);
+                                found = snapshotUpdater.CreateIssue(project, received);
                                 found.Attachments = await snapshotUtilities.GetAttachments(found, project);
                                 found.Comments = await snapshotUtilities.GetComments(found, project);
-                                found.ProjectSnapshot.Issues.Add(found.Entity.ID, found);
                                 break;
                             }
                         }
@@ -187,6 +171,20 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             }
 
             return result;
+        }
+
+        private async Task AddItems(
+            ObjectiveExternalDto obj,
+            ProjectSnapshot project,
+            IssueSnapshot issueSnapshot,
+            ObjectiveExternalDto parsedToDto)
+        {
+            if (obj.Items?.Any() ?? false)
+            {
+                var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
+                issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
+                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
+            }
         }
 
         private async Task<IEnumerable<Attachment>> AddItems(
@@ -237,6 +235,17 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             return resultItems;
         }
 
+        private async Task UpdateSnapshot(DateTime date)
+        {
+            await filler.UpdateStatusesConfigIfNull();
+            await filler.UpdateIssuesIfNull(date);
+            await filler.UpdateIssueTypes();
+            await filler.UpdateRootCauses();
+            await filler.UpdateLocations();
+            await filler.UpdateAssignTo();
+            await filler.UpdateStatuses();
+        }
+
         private async Task<Attachment> AttachItem(Item posted, string issueId, string containerId)
         {
             var attachment = new Attachment
@@ -282,11 +291,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 return null;
             }
         }
-
-        private ProjectSnapshot GetProjectSnapshot(ObjectiveExternalDto obj)
-            => snapshot.Hubs.SelectMany(x => x.Value.Projects)
-               .First(x => x.Key == obj.ProjectExternalID)
-               .Value;
 
         private async Task<Comment> PostComment(DynamicFieldExternalDto commentDto, string issueId, string containerId)
         {

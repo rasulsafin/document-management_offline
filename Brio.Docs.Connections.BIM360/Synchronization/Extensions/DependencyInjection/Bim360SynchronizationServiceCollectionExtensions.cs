@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Synchronization.Factories;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronizers;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
@@ -20,6 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddScopedFactory<TokenHelper>();
             services.AddScopedFactory<Authenticator>();
+            services.AddScoped<IAccessController>(x => x.GetService<Authenticator>());
 
             services.AddContext();
 

@@ -7,16 +7,17 @@ using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
-    internal class IfcConfigUtilities
+    internal class ConfigurationUtilities
     {
         private readonly Downloader downloader;
 
-        public IfcConfigUtilities(Downloader downloader)
+        public ConfigurationUtilities(Downloader downloader)
             => this.downloader = downloader;
 
         public static StatusesRelations GetDefaultStatusesConfig()

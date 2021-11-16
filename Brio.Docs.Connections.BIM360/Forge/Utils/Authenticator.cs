@@ -16,7 +16,7 @@ using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
-    internal class Authenticator : IDisposable
+    internal class Authenticator : IDisposable, IAccessController
     {
         private const string RESPONSE_HTML_TYPE = "text/html";
         private static readonly string SUCCESSFUL_AUTHENTICATION_PAGE = "SuccessfulAuthentication";
@@ -80,12 +80,16 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils
             GC.SuppressFinalize(this);
         }
 
-        public async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(
+        /// <inheritdoc cref="IAccessController"/>
+        public async Task CheckAccessAsync(CancellationToken token)
+            => await CheckAccessAsync(false, token);
+
+        internal async Task<(ConnectionStatusDto authStatus, ConnectionInfoExternalDto updatedInfo)> SignInAsync(
             ConnectionInfoExternalDto connectionInfo,
             CancellationToken token = default)
         {
             this.ConnectionInfo = connectionInfo;
-            await CheckAccessAsync(token, true);
+            await CheckAccessAsync(true, token);
 
             var result = new ConnectionStatusDto
             {
@@ -99,7 +103,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils
             return (result, connectionInfo);
         }
 
-        public async Task CheckAccessAsync(CancellationToken token, bool mustUpdate = false)
+        private async Task CheckAccessAsync(bool mustUpdate, CancellationToken token)
         {
             await AuthenticateAppAsync();
 
