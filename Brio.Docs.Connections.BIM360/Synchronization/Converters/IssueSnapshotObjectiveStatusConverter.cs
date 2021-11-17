@@ -14,7 +14,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public Task<ObjectiveStatus> Convert(IssueSnapshot issueSnapshot)
         {
             var project = issueSnapshot.ProjectSnapshot;
-            var config = project.StatusesRelations ?? ConfigurationUtilities.GetDefaultStatusesConfig();
+            var config = project.StatusesRelations ?? ConfigurationsHelper.GetDefaultStatusesConfig();
             var status = issueSnapshot.Entity.GetSuitableStatuses(config)
                .Append(ObjectiveStatus.Undefined)
                .First();

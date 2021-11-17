@@ -26,7 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly ConfigurationUtilities configUtilities;
+        private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
 
         public SnapshotFiller(
@@ -40,7 +40,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
-            ConfigurationUtilities configUtilities,
+            ConfigurationsHelper configUtilities,
             StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;

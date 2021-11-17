@@ -38,7 +38,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             var project = snapshot.GetProject(objective.ProjectExternalID);
             if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
                 existing = issueSnapshot.Entity;
-            var config = project.StatusesRelations ?? ConfigurationUtilities.GetDefaultStatusesConfig();
+            var config = project.StatusesRelations ?? ConfigurationsHelper.GetDefaultStatusesConfig();
 
             var df = DynamicFieldUtilities.GetValue(
                     statusEnumCreator,

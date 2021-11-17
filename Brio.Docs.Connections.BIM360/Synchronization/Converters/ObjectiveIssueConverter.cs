@@ -32,7 +32,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
-        private readonly ConfigurationUtilities configurationUtilities;
+        private readonly ConfigurationsHelper configurationsHelper;
 
         public ObjectiveIssueConverter(
             SnapshotGetter snapshot,
@@ -44,7 +44,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             RootCauseEnumCreator rootCauseEnumCreator,
             LocationEnumCreator locationEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
-            ConfigurationUtilities configurationUtilities)
+            ConfigurationsHelper configurationsHelper)
         {
             this.snapshot = snapshot;
             this.statusConverter = statusConverter;
@@ -55,7 +55,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
-            this.configurationUtilities = configurationUtilities;
+            this.configurationsHelper = configurationsHelper;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
@@ -75,7 +75,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             Vector3d? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
             var itemSnapshot = await GetTargetSnapshot(objective, project);
-            var config = await configurationUtilities.GetConfig(objective, project, itemSnapshot);
+            var config = await configurationsHelper.GetModelConfig(
+                objective.Location?.Item?.FileName,
+                project,
+                itemSnapshot);
 
             if (exist == null)
             {
