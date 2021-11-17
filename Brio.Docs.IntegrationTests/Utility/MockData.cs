@@ -311,42 +311,22 @@ namespace Brio.Docs.Tests.Utility
         private static readonly BimElement BIM_ELEMENT_TWO = new BimElement { GlobalID = $"GlobalId{Guid.NewGuid()}", ElementName = "Window", ParentName = "House2" };
         #endregion
 
-        #region DYNAMIC_FIELDS_TO_CREATE_DTO
-        public static List<DynamicFieldDto> DEFAULT_DYNAMIC_FIELDS_TO_CREATE => new List<DynamicFieldDto>
+        #region DYNAMIC_FIELDS_INFOS
+        public static List<DynamicFieldInfo> DEFAULT_DYNAMIC_FIELD_INFOS => new List<DynamicFieldInfo>
         {
-            new DynamicFieldDto()
+            new DynamicFieldInfo()
             {
-                Name = DYNAMIC_FIELD_TO_CREATE_STRING.Name,
-                Value = DYNAMIC_FIELD_TO_CREATE_STRING.Value,
-                Type = DYNAMIC_FIELD_TO_CREATE_STRING.Type,
+                Name = "InfoField1",
+                Value = "Value",
+                Type = DynamicFieldType.STRING.ToString(),
             },
-            new DynamicFieldDto()
+            new DynamicFieldInfo()
             {
-                Name = DYNAMIC_FIELD_TO_CREATE_DATE.Name,
-                Value = DYNAMIC_FIELD_TO_CREATE_DATE.Value,
-                Type = DYNAMIC_FIELD_TO_CREATE_DATE.Type,
+                Name = "InfoField2",
+                Value = "0",
+                Type = DynamicFieldType.BOOL.ToString(),
             },
         };
-
-        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_DATE =
-            new DynamicFieldDto() { Name = "datetime", Value = DateTime.Now, Type = DynamicFieldType.DATE, };
-
-        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_STRING =
-            new DynamicFieldDto() { Name = "string", Value = "value", Type = DynamicFieldType.STRING, };
-
-        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_BOOL =
-            new DynamicFieldDto() { Name = "bool", Value = true, Type = DynamicFieldType.BOOL, };
-
-        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_FLOAT =
-            new DynamicFieldDto() { Name = "float", Value = 3.14f, Type = DynamicFieldType.FLOAT, };
-
-        private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_INT =
-            new DynamicFieldDto() { Name = "int", Value = 1, Type = DynamicFieldType.INTEGER, };
-
-        // private static readonly DynamicFieldDto DYNAMIC_FIELD_TO_CREATE_OBJECT =
-        //    new DynamicFieldDto { Name = "object", Value = new List<IDynamicFieldDto>() { DYNAMIC_FIELD_TO_CREATE_DATE, DYNAMIC_FIELD_TO_CREATE_INT } };
-
-        // TODO: Enum and Object Dynamic Fields 
         #endregion
 
         #region DYNAMIC_FIELDS
@@ -355,6 +335,7 @@ namespace Brio.Docs.Tests.Utility
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_STRING.Name,
+                ExternalID = $"ExternalDFId{Guid.NewGuid()}-1",
                 Type = DYNAMIC_FIELD_STRING.Type,
                 Value = DYNAMIC_FIELD_STRING.Value,
                 ChildrenDynamicFields = new List<DynamicField>(),
@@ -362,6 +343,7 @@ namespace Brio.Docs.Tests.Utility
             new DynamicField
             {
                 Name = DYNAMIC_FIELD_DATE.Name,
+                ExternalID = $"ExternalDFId{Guid.NewGuid()}-2",
                 Type = DYNAMIC_FIELD_DATE.Type,
                 Value = DYNAMIC_FIELD_DATE.Value,
                 ChildrenDynamicFields = new List<DynamicField>(),
@@ -385,6 +367,28 @@ namespace Brio.Docs.Tests.Utility
         {
             AuthFieldValues = new List<AuthFieldValue>() { new AuthFieldValue() { Key = "Key2", Value = "Bim Value2" } },
         };
+
+        public static IEnumerable<EnumerationType> DEFAULT_ENUM_TYPES
+            => new List<EnumerationType>()
+            {
+                new EnumerationType()
+                {
+                    Name = "1 type",
+                    EnumerationValues = new List<EnumerationValue>()
+                    {
+                        new EnumerationValue()
+                        {
+                            Value = "1",
+                            ExternalId = "1",
+                        },
+                        new EnumerationValue()
+                        {
+                            Value = "2",
+                            ExternalId = "2",
+                        },
+                    },
+                },
+            };
 
         public static IEnumerable<EnumerationType> CreateEnumDms(string prefix, int count = 3)
         {

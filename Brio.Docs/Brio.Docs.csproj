@@ -27,5 +27,12 @@
       <ProjectReference Include="..\Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj" />
       <ProjectReference Include="..\Brio.Docs.Utils\Brio.Docs.Utils.csproj" />
     </ItemGroup>
+  
+    <ItemGroup>
+      <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+        <_Parameter1>$(AssemblyName).IntegrationTests</_Parameter1>
+        <!-- We use the value of AssemblyName to declare the value of the attribute -->
+      </AssemblyAttribute>
+    </ItemGroup>
 
 </Project>
