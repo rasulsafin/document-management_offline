@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
-using Brio.Docs.Connections.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;
+using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
@@ -22,10 +23,11 @@ namespace Brio.Docs.Connections.Bim360.Tests.IntegrationTests
     {
         private static readonly string TEST_FILE_PATH = "Resources/IntegrationTestFile.txt";
         private static readonly string PROJECT_ID = "b.08616ce0-2cf7-43c3-a69e-b831e0870824";
-        private static readonly  string NG_ISSUE_TYPE_ID = "3cbbb419-62ac-476f-a115-fd57defd0ac7";
 
+        private static string ngIssueTypeID;
         private static ISynchronizer<ObjectiveExternalDto> synchronizer;
         private static ServiceProvider serviceProvider;
+        private static TypeSubtypeEnumCreator typeEnumCreator;
 
         [ClassInitialize]
         public static async Task ClassInitialize(TestContext unused)
@@ -62,12 +64,19 @@ namespace Brio.Docs.Connections.Bim360.Tests.IntegrationTests
             await connection.Connect(connectionInfo, CancellationToken.None);
 
             var context = await connection.GetContext(connectionInfo) as Bim360ConnectionContext;
-            var filler = context!.Scope.ServiceProvider.GetService<SnapshotFiller>();
+            var provider = context!.Scope.ServiceProvider;
+            var filler = provider.GetService<SnapshotFiller>();
+            var checker = provider.GetService<IAccessController>();
+            var snapshot = provider.GetService<SnapshotGetter>();
+            await checker!.CheckAccessAsync(CancellationToken.None);
+            typeEnumCreator = provider.GetService<TypeSubtypeEnumCreator>();
             filler!.IgnoreTestEntities = false;
             await filler.UpdateHubsIfNull();
             await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull();
             await filler.UpdateIssueTypes();
+            await filler.UpdateStatuses();
+            ngIssueTypeID = snapshot!.GetProject(PROJECT_ID).IssueTypes.First().Value.ID;
             synchronizer = context.ObjectivesSynchronizer;
         }
 
@@ -154,8 +163,8 @@ namespace Brio.Docs.Connections.Bim360.Tests.IntegrationTests
                 {
                     new ()
                     {
-                        ExternalID = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.NgIssueTypeID),
-                        Value = NG_ISSUE_TYPE_ID,
+                        ExternalID = typeEnumCreator.EnumExternalID,
+                        Value = ngIssueTypeID,
                     },
                 },
             };

@@ -48,8 +48,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
-            issue = await PutIssueAsync(project, issue);
-            var issueSnapshot = UpdateSnapshot(project, issue);
+            var isNew = IsNew(issue);
+            issue = await PutIssueAsync(project, issue, isNew);
+            var issueSnapshot = UpdateSnapshot(project, issue, isNew);
 
             var newComment = obj.DynamicFields.FirstOrDefault(
                 x
@@ -71,13 +72,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             return parsedToDto;
         }
 
-        private IssueSnapshot UpdateSnapshot(ProjectSnapshot project, Issue issue)
-            => IsNew(issue)
+        private IssueSnapshot UpdateSnapshot(ProjectSnapshot project, Issue issue, bool isNew)
+            => isNew
                 ? snapshotUpdater.CreateIssue(project, issue)
                 : snapshotUpdater.UpdateIssue(project, issue);
 
-        private async Task<Issue> PutIssueAsync(ProjectSnapshot project, Issue issue)
-            => IsNew(issue)
+        private async Task<Issue> PutIssueAsync(ProjectSnapshot project, Issue issue, bool isNew)
+            => isNew
                 ? await issuesService.PostIssueAsync(project.IssueContainer, issue)
                 : await issuesService.PatchIssueAsync(project.IssueContainer, issue);
 
