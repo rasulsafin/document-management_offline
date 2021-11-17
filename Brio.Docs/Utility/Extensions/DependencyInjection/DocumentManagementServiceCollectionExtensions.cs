@@ -20,10 +20,6 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddMappingResolvers();
 
-            services.AddScoped<ItemHelper>();
-            services.AddScoped<DynamicFieldHelper>();
-            services.AddScoped<ConnectionHelper>();
-
             services.AddScoped<IAuthorizationService, AuthorizationService>();
             services.AddScoped<IConnectionService, ConnectionService>();
             services.AddScoped<ISynchronizationService, SynchronizationService>();
@@ -41,13 +37,23 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddFactories();
             services.AddSynchronizer();
             services.AddExternal();
+            services.AddHelpers();
+
+            return services;
+        }
+
+        public static IServiceCollection AddHelpers(this IServiceCollection services)
+        {
+            services.AddScoped<ItemsHelper>();
+            services.AddScoped<DynamicFieldsHelper>();
+            services.AddScoped<BimElementsHelper>();
+            services.AddScoped<ConnectionHelper>();
+
             return services;
         }
 
         public static IServiceCollection AddMappingResolvers(this IServiceCollection services)
         {
-            services.AddTransient<BimElementObjectiveTypeConverter>();
-
             services.AddTransient<ConnectionTypeAppPropertiesResolver>();
             services.AddTransient<ConnectionTypeDtoAppPropertiesResolver>();
             services.AddTransient<ConnectionInfoAuthFieldValuesResolver>();
@@ -66,7 +72,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ObjectiveExternalDtoAuthorResolver>();
             services.AddTransient<ObjectiveObjectiveTypeResolver>();
             services.AddTransient<ObjectiveProjectIDResolver>();
+
             services.AddTransient<BimElementObjectiveTypeConverter>();
+            services.AddTransient<DynamicFieldModelToDtoConverter>();
 
             services.AddTransient<ItemFileNameResolver>();
             services.AddTransient<ItemFullPathResolver>();

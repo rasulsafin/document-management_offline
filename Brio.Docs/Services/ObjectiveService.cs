@@ -26,90 +26,81 @@ namespace Brio.Docs.Services
     {
         private readonly DMContext context;
         private readonly IMapper mapper;
-        private readonly ItemHelper itemHelper;
-        private readonly DynamicFieldHelper dynamicFieldHelper;
+        private readonly ItemsHelper itemHelper;
+        private readonly DynamicFieldsHelper dynamicFieldHelper;
+        private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
         private readonly ReportHelper reportHelper = new ReportHelper();
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
-            ItemHelper itemHelper,
-            DynamicFieldHelper dynamicFieldHelper,
+            ItemsHelper itemHelper,
+            DynamicFieldsHelper dynamicFieldHelper,
+            BimElementsHelper bimElementHelper,
             ILogger<ObjectiveService> logger)
         {
             this.context = context;
             this.mapper = mapper;
             this.itemHelper = itemHelper;
             this.dynamicFieldHelper = dynamicFieldHelper;
+            this.bimElementHelper = bimElementHelper;
             this.logger = logger;
             logger.LogTrace("ObjectiveService created");
         }
 
-        public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto data)
+        public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto objectiveToCreate)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("Add started with data: {@Data}", data);
+            logger.LogTrace("Add started with data: {@Data}", objectiveToCreate);
             try
             {
-                var objective = mapper.Map<Objective>(data);
-                var location = objective.Location;
-                objective.Location = null;
-                logger.LogTrace("Mapped data: {@Objective}", objective);
-                await context.Objectives.AddAsync(objective);
+                var objectiveToSave = mapper.Map<Objective>(objectiveToCreate);
+                logger.LogTrace("Mapped data: {@Objective}", objectiveToSave);
+                await context.Objectives.AddAsync(objectiveToSave);
                 await context.SaveChangesAsync();
 
-                objective.ObjectiveType = await context.ObjectiveTypes.FindAsync(objective.ObjectiveTypeID);
-                logger.LogTrace("ObjectiveType: {@ObjectiveType}", objective.ObjectiveType);
+                await bimElementHelper.AddBimElementsAsync(objectiveToCreate.BimElements, objectiveToSave);
+                await itemHelper.AddItemsAsync(objectiveToCreate.Items, objectiveToSave);
+                await dynamicFieldHelper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+                await AddLocationAsync(objectiveToCreate.Location, objectiveToSave);
 
-                objective.BimElements = new List<BimElementObjective>();
-                foreach (var bim in data.BimElements ?? Enumerable.Empty<BimElementDto>())
-                {
-                    logger.LogTrace("Bim element: {@Bim}", bim);
-                    var dbBim = await context.BimElements
-                        .Where(x => x.ParentName == bim.ParentName)
-                        .Where(x => x.GlobalID == bim.GlobalID)
-                        .FirstOrDefaultAsync();
-                    logger.LogDebug("Found BIM element: {@DBBim}", dbBim);
-
-                    if (dbBim == null)
-                    {
-                        dbBim = mapper.Map<BimElement>(bim);
-                        await context.BimElements.AddAsync(dbBim);
-                        await context.SaveChangesAsync();
-                    }
-
-                    objective.BimElements.Add(new BimElementObjective
-                    {
-                        ObjectiveID = objective.ID,
-                        BimElementID = dbBim.ID,
-                    });
-                }
-
-                objective.Items = new List<ObjectiveItem>();
-                foreach (var item in data.Items ?? Enumerable.Empty<ItemDto>())
-                {
-                    await LinkItem(item, objective);
-                }
-
-                var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)objective.AuthorID);
-
-                objective.DynamicFields = new List<DynamicField>();
-                foreach (var field in data.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
-                {
-                    await dynamicFieldHelper.AddDynamicFields(field, objective.ID, user.ConnectionInfoID);
-                }
-
-                if (location != null)
-                    await LinkLocation(data.Location?.Item, objective, location);
-
-                await context.SaveChangesAsync();
-                return mapper.Map<ObjectiveToListDto>(objective);
+                return mapper.Map<ObjectiveToListDto>(objectiveToSave);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Can't add objective {@Data}", data);
+                logger.LogError(ex, "Can't add objective {@Data}", objectiveToCreate);
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
+        }
+
+        public async Task<Objective> AddLocationAsync(LocationDto locationDto, Objective objective)
+        {
+            var location = mapper.Map<Location>(locationDto);
+            if (location != null)
+            {
+                var locationItemDto = locationDto?.Item;
+                if (locationItemDto != null)
+                {
+                    objective.Project ??= await context.Projects.Include(x => x.Items)
+                       .FindOrThrowAsync(x => x.ID, objective.ProjectID);
+
+                    var locationItem = await itemHelper.CheckItemToLink(
+                        locationItemDto,
+                        new ProjectItemContainer(objective.Project));
+
+                    if (locationItem != null)
+                        objective.Project.Items.Add(locationItem);
+                    else
+                        locationItem = await context.FindOrThrowAsync<Item>((int)locationItemDto.ID);
+
+                    objective.Location = location;
+                    objective.Location.Item = locationItem;
+                }
+
+                await context.SaveChangesAsync();
+            }
+
+            return objective;
         }
 
         public async Task<ObjectiveDto> Find(ID<ObjectiveDto> objectiveID)
@@ -121,15 +112,6 @@ namespace Brio.Docs.Services
                 var dbObjective = await GetOrThrowAsync(objectiveID);
                 logger.LogDebug("Found: {@DBObjective}", dbObjective);
                 var objective = mapper.Map<ObjectiveDto>(dbObjective);
-                objective.DynamicFields = new List<DynamicFieldDto>();
-
-                var listFromDb = dbObjective.DynamicFields;
-                foreach (var field in listFromDb)
-                {
-                    var dynamicFieldDto = await dynamicFieldHelper.BuildObjectDynamicField(field);
-                    objective.DynamicFields.Add(dynamicFieldDto);
-                }
-
                 logger.LogDebug("Created DTO: {@Objective}", objective);
                 return objective;
             }
@@ -342,134 +324,31 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<bool> Update(ObjectiveDto objData)
+        public async Task<bool> Update(ObjectiveDto objectiveDto)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("Update started with objData: {@ObjData}", objData);
+            logger.LogTrace("Update started with objData: {@ObjData}", objectiveDto);
             try
             {
-                var objective = await GetOrThrowAsync(objData.ID);
+                var objectiveFromDb = await context.Objectives.FindOrThrowAsync((int)objectiveDto.ID);
+                objectiveFromDb = mapper.Map(objectiveDto, objectiveFromDb);
 
-                objective = mapper.Map(objData, objective);
+                await dynamicFieldHelper.UpdateDynamicFieldsAsync(objectiveDto.DynamicFields, objectiveFromDb.ID);
+                await bimElementHelper.UpdateBimElementsAsync(objectiveDto.BimElements, objectiveFromDb.ID);
+                await itemHelper.UpdateItemsAsync(objectiveDto.Items, objectiveFromDb);
 
-                var newFields = objData.DynamicFields ?? Enumerable.Empty<DynamicFieldDto>();
-                var currentObjectiveFields = objective.DynamicFields.ToList();
-                var fieldsToRemove = currentObjectiveFields.Where(x => newFields.All(f => (int)f.ID != x.ID)).ToList();
-                logger.LogDebug(
-                    "Objective's ({ID}) dynamic fields to remove: {@FieldsToRemove}",
-                    objData.ID,
-                    fieldsToRemove);
-                context.DynamicFields.RemoveRange(fieldsToRemove);
-
-                foreach (var field in newFields)
-                {
-                    await dynamicFieldHelper.UpdateDynamicField(field, objective.ID);
-                }
-
-                var newBimElements = objData.BimElements ?? Enumerable.Empty<BimElementDto>();
-                var currentBimLinks = objective.BimElements.ToList();
-                var linksToRemove = currentBimLinks
-                    .Where(x => !newBimElements.Any(e =>
-                        e.ParentName == x.BimElement.ParentName
-                        && e.GlobalID == x.BimElement.GlobalID))
-                    .ToList();
-                logger.LogDebug(
-                    "Objective's ({ID}) BIM elements links to remove: {@LinksToRemove}",
-                    objData.ID,
-                    linksToRemove);
-                context.BimElementObjectives.RemoveRange(linksToRemove);
-
-                // Rebuild objective's BimElements
-                objective.BimElements.Clear();
-                foreach (var bim in newBimElements)
-                {
-                    // See if objective already had this bim element referenced
-                    var dbBim = currentBimLinks.SingleOrDefault(x => x.BimElement.ParentName == bim.ParentName && x.BimElement.GlobalID == bim.GlobalID);
-                    logger.LogDebug("Found dbBim: {@DBBim}", dbBim);
-                    if (dbBim != null)
-                    {
-                        objective.BimElements.Add(dbBim);
-                    }
-                    else
-                    {
-                        // Bim element was not referenced. Does it exist?
-                        var bimElement = await context.BimElements.FirstOrDefaultAsync(x => x.ParentName == bim.ParentName && x.GlobalID == bim.GlobalID);
-                        if (bimElement == null)
-                        {
-                            // Bim element does not exist at all - should be created
-                            bimElement = mapper.Map<BimElement>(bim);
-                            logger.LogDebug("Adding BIM element: {@BimElement}", bimElement);
-                            await context.BimElements.AddAsync(bimElement);
-                            await context.SaveChangesAsync();
-                        }
-
-                        // Add link between bim element and objective
-                        dbBim = new BimElementObjective { BimElementID = bimElement.ID, ObjectiveID = objective.ID };
-                        objective.BimElements.Add(dbBim);
-                    }
-                }
-
-                objective.Items ??= new List<ObjectiveItem>();
-                var objectiveItems = context.ObjectiveItems.Where(i => i.ObjectiveID == objective.ID).ToList();
-                var itemsToUnlink = objectiveItems.Where(o => (!objData.Items?.Any(i => (int)i.ID == o.ItemID)) ?? true);
-                logger.LogDebug(
-                "Objective's ({ID}) item links to remove: {@ItemsToUnlink}",
-                objData.ID,
-                itemsToUnlink);
-
-                foreach (var item in objData.Items ?? Enumerable.Empty<ItemDto>())
-                {
-                    await LinkItem(item, objective);
-                }
-
-                foreach (var item in itemsToUnlink)
-                {
-                    await UnlinkItem(item.ItemID, objective.ID);
-                }
-
-                context.Update(objective);
+                context.Update(objectiveFromDb);
                 await context.SaveChangesAsync();
+
                 return true;
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Can't update objective {@ObjData}", objData);
+                logger.LogError(ex, "Can't update objective {@ObjData}", objectiveDto);
                 if (ex is ANotFoundException)
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
-        }
-
-        private async Task LinkItem(ItemDto item, Objective objective)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("LinkItem started for objective {ID} with item: {@Item}", objective.ID, item);
-            var dbItem = await itemHelper.CheckItemToLink(context, mapper, item, objective);
-            logger.LogDebug("CheckItemToLink returned {@DBItem}", dbItem);
-            if (dbItem == null)
-                return;
-            objective.Items.Add(new ObjectiveItem
-            {
-                ObjectiveID = objective.ID,
-                ItemID = dbItem.ID,
-            });
-        }
-
-        private async Task<bool> UnlinkItem(int itemID, int objectiveID)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("UnlinkItem started for objective {ID} with item: {ItemID}", objectiveID, itemID);
-            var link = await context.ObjectiveItems
-                .Where(x => x.ItemID == itemID)
-                .Where(x => x.ObjectiveID == objectiveID)
-                .FirstOrDefaultAsync();
-            logger.LogDebug("Found link {@Link}", link);
-            if (link == null)
-                return false;
-            context.ObjectiveItems.Remove(link);
-            await context.SaveChangesAsync();
-
-            return true;
         }
 
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
@@ -494,29 +373,6 @@ namespace Brio.Docs.Services
             logger.LogDebug("Found objective: {@DBObjective}", dbObjective);
 
             return dbObjective;
-        }
-
-        private async Task LinkLocation(ItemDto locationItemDto, Objective objective, Location location)
-        {
-            if (locationItemDto != null)
-            {
-                objective.Project ??= await context.Projects.Include(x => x.Items)
-                   .FindOrThrowAsync(x => x.ID, objective.ProjectID);
-
-                var locationItem = await itemHelper.CheckItemToLink(
-                    context,
-                    mapper,
-                    locationItemDto,
-                    objective.Project);
-
-                if (locationItem != null)
-                    objective.Project.Items.Add(locationItem);
-                else
-                    locationItem = await context.FindOrThrowAsync<Item>((int)locationItemDto.ID);
-
-                objective.Location = location;
-                objective.Location.Item = locationItem;
-            }
         }
 
         private List<int> GetAllObjectiveIds(Objective obj, List<int> ids)

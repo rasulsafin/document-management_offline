@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Services
 {
     [TestClass]
     public class AuthorizationTests
@@ -117,7 +117,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task AddRole_UserAlreadyInRole_RaisesArgumentException()
         {
             var existingUser = await Fixture.Context.Users.FirstAsync(u => u.Roles.Count > 0);
@@ -239,7 +239,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task RemoveRole_ExistingUserWithoutRole_RaisesArgumentException()
         {
             var existingUser = Fixture.Context.Users.First(u => u.Roles.Count == 1);
@@ -288,7 +288,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Login_ExistingUserWithInvalidPassword_RaisesArgumentException()
         {
             var user = Fixture.Context.Users.First(u => u.Roles.Any());

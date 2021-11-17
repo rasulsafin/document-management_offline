@@ -4,26 +4,29 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Client;
-using Brio.Docs.Database.Models;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
+using Brio.Docs.Database.Models;
 using Brio.Docs.Services;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Services
 {
     [TestClass]
     public class ProjectServiceTests : IDisposable
     {
         private static IMapper mapper;
         private ProjectService service;
-        private SharedDatabaseFixture fixture;
+        private ServiceProvider serviceProvider;
+
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [ClassInitialize]
         public static void ClassSetup(TestContext unused)
@@ -39,7 +42,7 @@ namespace Brio.Docs.Tests
         [TestInitialize]
         public void Setup()
         {
-            fixture = new SharedDatabaseFixture(
+            Fixture = new SharedDatabaseFixture(
                 context =>
                 {
                     context.Database.EnsureDeleted();
@@ -49,10 +52,21 @@ namespace Brio.Docs.Tests
                     context.Users.AddRange(MockData.DEFAULT_USERS);
                     context.SaveChanges();
                 });
+
+            IServiceCollection services = new ServiceCollection();
+            services.AddLogging();
+            services.AddScoped<ItemsHelper>();
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddSingleton(x => Fixture.Context);
+
+            serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
+
             service = new ProjectService(
-                fixture.Context,
+                Fixture.Context,
                 mapper,
-                new ItemHelper(Mock.Of<ILogger<ItemHelper>>()),
+                serviceProvider.GetService<ItemsHelper>(),
                 Mock.Of<ILogger<ProjectService>>());
         }
 
@@ -78,7 +92,7 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task Add_CorrectInfoWithOwner_AddsProjectToOwner()
         {
-            var owner = fixture.Context.Users.Include(x => x.Projects).First();
+            var owner = Fixture.Context.Users.Include(x => x.Projects).First();
             var project = new ProjectToCreateDto
             {
                 Title = "project",
@@ -94,7 +108,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Add_InvalidTitle_RaisesArgumentException()
         {
             var project = new ProjectToCreateDto
@@ -111,7 +125,7 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task Find_ProjectExists_ReturnsProject()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var id = new ID<ProjectDto>(project.ID);
 
             var projectFound = await service.Find(id);
@@ -138,17 +152,17 @@ namespace Brio.Docs.Tests
 
             Assert.IsNotNull(projectsFound);
 
-            Assert.AreEqual(await fixture.Context.Projects.CountAsync(), projectsFound.Count());
+            Assert.AreEqual(await Fixture.Context.Projects.CountAsync(), projectsFound.Count());
         }
 
         [TestMethod]
         public async Task GetUserProjects_UserExists_ReturnsProjects()
         {
-            var user = fixture.Context.Users.Include(x => x.Projects).First();
-            var projects = await fixture.Context.Projects.ToListAsync();
+            var user = Fixture.Context.Users.Include(x => x.Projects).First();
+            var projects = await Fixture.Context.Projects.ToListAsync();
             user.Projects = projects.Select(x => new UserProject { Project = x }).ToList();
-            fixture.Context.Users.Update(user);
-            await fixture.Context.SaveChangesAsync();
+            Fixture.Context.Users.Update(user);
+            await Fixture.Context.SaveChangesAsync();
             var id = new ID<UserDto>(user.ID);
 
             var foundProjects = await service.GetUserProjects(id);
@@ -171,11 +185,11 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task GetUsers_ProjectExists_ReturnsUsers()
         {
-            var users = await fixture.Context.Users.ToListAsync();
-            var project = await fixture.Context.Projects.FirstAsync();
+            var users = await Fixture.Context.Users.ToListAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             project.Users = users.Select(x => new UserProject { User = x }).ToList();
-            fixture.Context.Projects.Update(project);
-            await fixture.Context.SaveChangesAsync();
+            Fixture.Context.Projects.Update(project);
+            await Fixture.Context.SaveChangesAsync();
             var id = new ID<ProjectDto>(project.ID);
 
             var foundUsers = await service.GetUsers(id);
@@ -196,14 +210,14 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task LinkToUsers_ProjectExistsUsersExist_LinksUsers()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var projectID = new ID<ProjectDto>(project.ID);
-            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+            var usersIDs = await Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
             var result = await service.LinkToUsers(projectID, usersIDs);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(await fixture.Context.Users.CountAsync(), project.Users.Count);
+            Assert.AreEqual(await Fixture.Context.Users.CountAsync(), project.Users.Count);
         }
 
         [TestMethod]
@@ -211,7 +225,7 @@ namespace Brio.Docs.Tests
         public async Task LinkToUsers_ProjectDoesntExists_RaisesNotFoundException()
         {
             var projectID = ID<ProjectDto>.InvalidID;
-            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+            var usersIDs = await Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
             await service.LinkToUsers(projectID, usersIDs);
 
@@ -222,9 +236,9 @@ namespace Brio.Docs.Tests
         [ExpectedException(typeof(NotFoundException<User>))]
         public async Task LinkToUsers_UserDoesntExists_RaisesNotFoundException()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var projectID = new ID<ProjectDto>(project.ID);
-            var usersIDs = fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
+            var usersIDs = Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
                .AsEnumerable()
                .Append(ID<UserDto>.InvalidID);
 
@@ -237,7 +251,7 @@ namespace Brio.Docs.Tests
         [ExpectedException(typeof(NotFoundException<User>))]
         public async Task LinkToUsers_UsersDoesntExists_RaisesNotFoundException()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var projectID = new ID<ProjectDto>(project.ID);
             var usersIDs = new[] { ID<UserDto>.InvalidID, new ID<UserDto>(int.MaxValue) };
 
@@ -249,14 +263,14 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task Remove_ProjectExists_RemovesProject()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
-            var projectsCount = await fixture.Context.Projects.CountAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
+            var projectsCount = await Fixture.Context.Projects.CountAsync();
             var id = new ID<ProjectDto>(project.ID);
 
             var result = await service.Remove(id);
 
             Assert.IsTrue(result);
-            Assert.AreEqual(projectsCount - 1, await fixture.Context.Projects.CountAsync());
+            Assert.AreEqual(projectsCount - 1, await Fixture.Context.Projects.CountAsync());
         }
 
         [TestMethod]
@@ -273,14 +287,14 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task UnlinkFromUsers_ProjectExistsUsersExist_UnlinkLinksUsers()
         {
-            var users = await fixture.Context.Users.ToListAsync();
-            var project = await fixture.Context.Projects.FirstAsync();
+            var users = await Fixture.Context.Users.ToListAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             project.Users = users.Select(x => new UserProject { User = x }).ToList();
-            fixture.Context.Projects.Update(project);
-            await fixture.Context.SaveChangesAsync();
+            Fixture.Context.Projects.Update(project);
+            await Fixture.Context.SaveChangesAsync();
 
             var projectID = new ID<ProjectDto>(project.ID);
-            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+            var usersIDs = await Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
             var result = await service.UnlinkFromUsers(projectID, usersIDs);
 
@@ -293,7 +307,7 @@ namespace Brio.Docs.Tests
         public async Task UnlinkFromUsers_ProjectDoesntExists_RaisesNotFoundException()
         {
             var projectID = ID<ProjectDto>.InvalidID;
-            var usersIDs = await fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
+            var usersIDs = await Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID)).ToArrayAsync();
 
             await service.UnlinkFromUsers(projectID, usersIDs);
 
@@ -304,9 +318,9 @@ namespace Brio.Docs.Tests
         [ExpectedException(typeof(NotFoundException<User>))]
         public async Task UnlinkFromUsers_UserDoesntExists_RaisesNotFoundException()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var projectID = new ID<ProjectDto>(project.ID);
-            var usersIDs = fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
+            var usersIDs = Fixture.Context.Users.Select(x => new ID<UserDto>(x.ID))
                .AsEnumerable()
                .Append(ID<UserDto>.InvalidID);
 
@@ -318,7 +332,7 @@ namespace Brio.Docs.Tests
         [TestMethod]
         public async Task Update_ProjectExistsTitleIsValid_UpdatesProject()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var id = new ID<ProjectDto>(project.ID);
             var newTitle = "New title";
             var projectDto = new ProjectDto
@@ -335,10 +349,10 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Update_ProjectExistsTitleIsInvalid_RaisesArgumentException()
         {
-            var project = await fixture.Context.Projects.FirstAsync();
+            var project = await Fixture.Context.Projects.FirstAsync();
             var id = new ID<ProjectDto>(project.ID);
             var projectDto = new ProjectDto
             {
@@ -371,7 +385,7 @@ namespace Brio.Docs.Tests
 
         public void Dispose()
         {
-            fixture.Dispose();
+            Fixture.Dispose();
             GC.SuppressFinalize(this);
         }
     }
