@@ -22,6 +22,14 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             return issueSnapshot;
         }
 
+        public IssueSnapshot UpdateIssue(ProjectSnapshot project, Issue issue)
+        {
+            var issueSnapshot = snapshot.GetIssue(project, issue.ID);
+            issueSnapshot.Entity = issue;
+            RemoveFromProjectIfNeeded(issueSnapshot);
+            return issueSnapshot;
+        }
+
         public IssueSnapshot UpdateIssue(IssueSnapshot issueSnapshot, Issue issue)
         {
             issueSnapshot.Entity = issue;
