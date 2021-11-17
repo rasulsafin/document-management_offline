@@ -21,7 +21,17 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
         {
             logger.LogTrace("Resolve started with source: {@Source} & destination {@Destination}", source, destination);
             if (source.Type == DynamicFieldType.ENUM)
-                return (source.Value as JObject).ToObject<Enumeration>().Value.ID.ToString();
+            {
+                switch (source.Value)
+                {
+                    case JObject value:
+                        return value.ToObject<Enumeration>().Value.ID.ToString();
+                    case Enumeration value:
+                        return value.Value.ID.ToString();
+                    default:
+                        return null;
+                }
+            }
 
             if (source.Type == DynamicFieldType.OBJECT)
                 return null;

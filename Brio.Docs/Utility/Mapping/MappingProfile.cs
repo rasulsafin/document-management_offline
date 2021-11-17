@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Brio.Docs.Client;
@@ -74,7 +75,7 @@ namespace Brio.Docs.Utility.Mapping
             CreateMap<Objective, ObjectiveDto>()
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
-                .ForMember(d => d.DynamicFields, o => o.Ignore());
+                .ForMember(d => d.DynamicFields, o => o.ConvertUsing<DynamicFieldModelToDtoConverter, ICollection<DynamicField>>());
             CreateMap<Objective, ObjectiveToReportDto>()
                 .ForMember(d => d.ID, opt => opt.Ignore())
                 .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
@@ -145,7 +146,8 @@ namespace Brio.Docs.Utility.Mapping
                .ForMember(d => d.DynamicFields, opt => opt.Ignore())
                .ForMember(d => d.BimElements, opt => opt.Ignore())
                .ForMember(d => d.Items, o => o.Ignore())
-               .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(s => (int?)s.ParentObjectiveID));
+               .ForMember(d => d.ParentObjectiveID, o => o.MapFrom(s => (int?)s.ParentObjectiveID))
+               .ForMember(d => d.Location, o => o.Ignore());
             CreateMap<ObjectiveDto, Objective>()
                .ForMember(d => d.DynamicFields, opt => opt.Ignore())
                .ForMember(d => d.BimElements, opt => opt.Ignore())
