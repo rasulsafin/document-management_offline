@@ -16,7 +16,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Services
 {
     [TestClass]
     public class ConnectionTypeServiceTests
@@ -74,7 +74,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Add_ExistingType_RaisesArgumentException()
         {
             var existingType = Fixture.Context.ConnectionTypes.First();

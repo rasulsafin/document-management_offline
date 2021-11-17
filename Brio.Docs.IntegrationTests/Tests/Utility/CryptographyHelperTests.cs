@@ -2,7 +2,7 @@
 using Brio.Docs.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Utility
 {
     [TestClass]
     public class CryptographyHelperTests
