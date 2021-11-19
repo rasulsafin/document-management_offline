@@ -30,6 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
             services.AddScoped<ItemsSyncHelper>();
+            services.AddScoped<MetaCommentHelper>();
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
             services.AddScoped<ObjectiveRemover>();

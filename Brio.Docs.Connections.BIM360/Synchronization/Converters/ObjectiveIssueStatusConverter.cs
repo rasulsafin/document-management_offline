@@ -59,8 +59,5 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             return Task.FromResult(Status.Open);
         }
-
-        private static bool CanUse(Issue existing, Status status)
-            => existing.Attributes.PermittedStatuses.Contains(status);
     }
 }
