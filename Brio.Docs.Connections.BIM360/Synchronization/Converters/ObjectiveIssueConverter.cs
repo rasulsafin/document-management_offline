@@ -173,12 +173,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             string originalUrn,
             int? originalStartingVersion)
         {
-            if (objective.BimElements is not { Count: > 0 } || objective.Location == null)
+            if (objective.Location == null)
                 return;
 
             result.Attributes.PushpinAttributes ??= new Issue.PushpinAttributes();
             result.Attributes.PushpinAttributes.ViewerState ??= new Issue.ViewerState();
-            var otherInfo = new OtherInfo { BimElements = objective.BimElements };
+            var otherInfo = new OtherInfo();
 
             if (config != null &&
                 originalUrn != null &&

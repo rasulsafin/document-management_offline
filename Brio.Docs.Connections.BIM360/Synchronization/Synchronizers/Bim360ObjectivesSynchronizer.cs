@@ -29,6 +29,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
+        private readonly MetaCommentHelper metaCommentHelper;
 
         public Bim360ObjectivesSynchronizer(
             Bim360Snapshot snapshot,
@@ -38,7 +39,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             SnapshotFiller filler,
             IssueSnapshotUtilities snapshotUtilities,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
-            IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
+            IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto,
+            MetaCommentHelper metaCommentHelper)
         {
             this.snapshot = snapshot;
             this.itemsSyncHelper = itemsSyncHelper;
@@ -48,6 +50,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             this.filler = filler;
             this.authenticator = authenticator;
             this.snapshotUtilities = snapshotUtilities;
+            this.metaCommentHelper = metaCommentHelper;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -68,6 +71,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
                 parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
+
+            var addedBimElements = await AddBimElements(obj.BimElements, project, created);
+            parsedToDto.BimElements = addedBimElements?.ToList();
 
             return parsedToDto;
         }
@@ -117,6 +123,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
                 issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
                 parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
+
+            var addedBimElements = await AddBimElements(obj.BimElements, project, issueSnapshot.Entity);
+            parsedToDto.BimElements = addedBimElements?.ToList();
 
             return parsedToDto;
         }
@@ -237,6 +246,46 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             return resultItems;
         }
 
+        private async Task<IEnumerable<BimElementExternalDto>> AddBimElements(
+            ICollection<BimElementExternalDto> bimElements,
+            ProjectSnapshot project,
+            Issue issue)
+        {
+            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
+            var currentElements = metaCommentHelper.GetBimElements(comments);
+            var isCurrentEmpty = currentElements == null || !currentElements.Any();
+            var isNewEmpty = bimElements == null || !bimElements.Any();
+
+            if (!(isCurrentEmpty && isNewEmpty) && IsCollectionChanged())
+            {
+                try
+                {
+                    var newComments = metaCommentHelper.CreateComments(bimElements, isCurrentEmpty);
+
+                    foreach (var comment in newComments)
+                    {
+                        comment.Attributes.IssueId = issue.ID;
+                        await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
+            }
+
+            return bimElements;
+
+            bool IsCollectionChanged()
+            {
+                var currentOrdered = currentElements?.OrderBy(x => x.GlobalID) ??
+                    Enumerable.Empty<BimElementExternalDto>();
+                var newOrdered = bimElements?.OrderBy(x => x.GlobalID) ??
+                    Enumerable.Empty<BimElementExternalDto>();
+                return !currentOrdered.SequenceEqual(newOrdered, new BimElementComparer());
+            }
+        }
+
         private async Task<Attachment> AttachItem(Item posted, string issueId, string containerId)
         {
             var attachment = new Attachment
@@ -306,6 +355,32 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             catch
             {
                 return null;
+            }
+        }
+
+        private class BimElementComparer : IEqualityComparer<BimElementExternalDto>
+        {
+            public bool Equals(BimElementExternalDto x, BimElementExternalDto y)
+            {
+                if (ReferenceEquals(x, y))
+                    return true;
+
+                if (ReferenceEquals(x, null))
+                    return false;
+
+                if (ReferenceEquals(y, null))
+                    return false;
+
+                return string.Equals(x.GlobalID, y.GlobalID, StringComparison.InvariantCulture) &&
+                    string.Equals(x.ParentName, y.ParentName, StringComparison.InvariantCulture);
+            }
+
+            public int GetHashCode(BimElementExternalDto obj)
+            {
+                HashCode hashCode = new ();
+                hashCode.Add(obj.GlobalID, StringComparer.InvariantCulture);
+                hashCode.Add(obj.ParentName, StringComparer.InvariantCulture);
+                return hashCode.ToHashCode();
             }
         }
     }
