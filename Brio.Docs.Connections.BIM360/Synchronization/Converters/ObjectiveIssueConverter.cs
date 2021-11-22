@@ -5,6 +5,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
@@ -25,7 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     {
         private readonly SnapshotGetter snapshot;
         private readonly IConverter<ObjectiveExternalDto, Status> statusConverter;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
@@ -37,7 +38,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public ObjectiveIssueConverter(
             SnapshotGetter snapshot,
             IConverter<ObjectiveExternalDto, Status> statusConverter,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
             TypeSubtypeEnumCreator subtypeEnumCreator,

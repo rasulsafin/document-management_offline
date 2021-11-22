@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -21,7 +22,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
     {
         private readonly SnapshotGetter snapshot;
         private readonly SnapshotUpdater snapshotUpdater;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly MetaCommentHelper metaCommentHelper;
@@ -31,7 +32,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         public ObjectiveUpdater(
             SnapshotGetter snapshot,
             SnapshotUpdater snapshotUpdater,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
             MetaCommentHelper metaCommentHelper,

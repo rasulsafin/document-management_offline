@@ -1,5 +1,6 @@
 using System;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;

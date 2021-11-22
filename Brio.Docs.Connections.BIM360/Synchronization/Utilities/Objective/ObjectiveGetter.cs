@@ -1,3 +1,4 @@
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,14 +16,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
     internal class ObjectiveGetter
     {
         private readonly SnapshotGetter snapshotGetter;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly SnapshotUpdater snapshotUpdater;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
         public ObjectiveGetter(
             SnapshotGetter snapshotGetter,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             IssueSnapshotUtilities snapshotUtilities,
             SnapshotUpdater snapshotUpdater,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Brio.Docs.Connections.Bim360.Forge.Interfaces;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -12,10 +13,10 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 {
     internal class IssueSnapshotUtilities
     {
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly AccountAdminService accountAdminService;
 
-        public IssueSnapshotUtilities(IssuesService issuesService,
+        public IssueSnapshotUtilities(IIssuesService issuesService,
             AccountAdminService accountAdminService)
         {
             this.issuesService = issuesService;
