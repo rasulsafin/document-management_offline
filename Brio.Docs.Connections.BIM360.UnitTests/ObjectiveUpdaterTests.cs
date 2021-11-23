@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -25,43 +25,54 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private Mock<IIssuesService> mockIssuesService;
         private Mock<IConverter<ObjectiveExternalDto, Issue>> stubConverterToIssue;
         private Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>> stubCoverterToDto;
+        private SnapshotUpdater snapshotUpdater;
+        private SnapshotGetter snapshotGetter;
 
         [TestInitialize]
         public void Setup()
         {
             var bim360Snapshot = DummySnapshots.Bim360Snapshot;
-            var snapshotGetter = new SnapshotGetter(bim360Snapshot);
-            var snapshotUpdater = new SnapshotUpdater(snapshotGetter);
+            var hub = DummySnapshots.Hub;
+            bim360Snapshot.Hubs.Add(hub.ID, hub);
+            var project = DummySnapshots.CreateProject(hub);
+            hub.Projects.Add(project.ID, project);
+
             mockIssuesService = new Mock<IIssuesService>();
-            var stubItemsSyncHelper = new Mock<IItemsUpdater>();
-            var stubUserReader = new Mock<IUsersGetter>();
+
             stubConverterToIssue = new Mock<IConverter<ObjectiveExternalDto, Issue>>();
             stubCoverterToDto = new Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>>();
+            var stubItemsSyncHelper = new Mock<IItemsUpdater>();
+            var stubUserReader = new Mock<IUsersGetter>();
+
+            snapshotGetter = new SnapshotGetter(bim360Snapshot);
+            snapshotUpdater = new SnapshotUpdater(snapshotGetter);
+            var metaCommentHelper = new MetaCommentHelper();
+            var issueSnapshotUtilities = new IssueSnapshotUtilities(mockIssuesService.Object, stubUserReader.Object);
+
             objectiveUpdater = new ObjectiveUpdater(
                 snapshotGetter,
                 snapshotUpdater,
                 mockIssuesService.Object,
                 stubItemsSyncHelper.Object,
-                new IssueSnapshotUtilities(mockIssuesService.Object, stubUserReader.Object),
-                new MetaCommentHelper(),
+                issueSnapshotUtilities,
+                metaCommentHelper,
                 stubConverterToIssue.Object,
                 stubCoverterToDto.Object);
         }
 
         [TestMethod]
-        public async Task Put()
+        public async Task Put_ObjectiveWithExternalIdAndBimElement_PostComment()
         {
             // Arrange.
+            var issue = DummyModels.Issue;
             var dto = DummyDtos.Objective;
+            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
             dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
-            stubConverterToIssue.Setup(x => x.Convert(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(_ => Task.FromResult(DummyModels.Issue));
+            SetupConvertingToIssue(_ => issue);
+            SetupConvertingToDto(_ => dto);
+            SetupGettingEmptyCommentsList();
             mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, issue) => Task.FromResult(issue));
-            mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
-               .Returns<string, string>((_, _) => Task.FromResult(new List<Comment>()));
-            stubCoverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
-               .Returns<IssueSnapshot>(_ => Task.FromResult(dto));
+               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -70,6 +81,55 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             mockIssuesService.Verify(
                 x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
                 Times.Once);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(1, result.BimElements.Count);
         }
+
+        [TestMethod]
+        public async Task Put_ObjectiveWithoutExternalIdAndWithBimElement_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.ExternalID = null;
+            dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
+            SetupConvertingToIssue(
+                _ =>
+                {
+                    var issue = DummyModels.Issue;
+                    issue.ID = null;
+                    return issue;
+                });
+            SetupConvertingToDto(_ => dto);
+            SetupGettingEmptyCommentsList();
+            mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
+               .Returns<string, Issue>((_, issue) =>
+                {
+                    issue.ID = DummyStrings.ISSUE_ID;
+                    return Task.FromResult(issue);
+                });
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(1, result.BimElements.Count);
+        }
+
+        private void SetupGettingEmptyCommentsList()
+            => mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
+               .Returns<string, string>((_, _) => Task.FromResult(new List<Comment>()));
+
+        private void SetupConvertingToDto(Func<IssueSnapshot, ObjectiveExternalDto> valueFunction)
+            => stubCoverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
+               .Returns<IssueSnapshot>(snapshot => Task.FromResult(valueFunction(snapshot)));
+
+        private void SetupConvertingToIssue(
+            Func<ObjectiveExternalDto, Issue> valueFunction)
+            => stubConverterToIssue.Setup(x => x.Convert(It.IsAny<ObjectiveExternalDto>()))
+               .Returns<ObjectiveExternalDto>(dto => Task.FromResult(valueFunction(dto)));
     }
 }

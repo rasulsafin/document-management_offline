@@ -9,37 +9,19 @@ namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
     internal static class DummySnapshots
     {
         public static Bim360Snapshot Bim360Snapshot
-        {
-            get
+            => new ()
             {
-                var hub = Hub;
-                return new Bim360Snapshot
-                {
-                    Hubs = new Dictionary<string, HubSnapshot>
-                    {
-                        [hub.ID] = hub,
-                    },
-                };
-            }
-        }
+                Hubs = new Dictionary<string, HubSnapshot>(),
+            };
 
         public static HubSnapshot Hub
-        {
-            get
+            => new (DummyModels.Hub)
             {
-                var hub = new HubSnapshot(DummyModels.Hub)
-                {
-                    Projects = new Dictionary<string, ProjectSnapshot>(),
-                };
-                var project = CreateProject(hub);
-                hub.Projects.Add(project.ID, project);
-                return hub;
-            }
-        }
+                Projects = new Dictionary<string, ProjectSnapshot>(),
+            };
 
         public static ProjectSnapshot CreateProject(HubSnapshot hub)
-        {
-            var project = new ProjectSnapshot(DummyModels.Project, hub)
+            => new (DummyModels.Project, hub)
             {
                 Issues = new Dictionary<string, IssueSnapshot>(),
                 IssueTypes = new Dictionary<string, IssueTypeSnapshot>(),
@@ -55,10 +37,6 @@ namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
                     Set = System.Array.Empty<RelationRule<ObjectiveStatus, Status>>(),
                 },
             };
-            var issue = CreateIssue(project);
-            project.Issues.Add(issue.ID, issue);
-            return project;
-        }
 
         public static IssueSnapshot CreateIssue(ProjectSnapshot project)
             => new (DummyModels.Issue, project)
