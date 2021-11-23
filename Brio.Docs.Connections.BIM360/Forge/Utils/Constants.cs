@@ -13,6 +13,9 @@ namespace Brio.Docs.Connections.Bim360.Forge
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
         public static readonly string COMMENT_TYPE = "comments";
+        public static readonly string HUB_TYPE = "hubs";
+        public static readonly string ISSUE_CONTAINER_TYPE = "issueContainerId";
+        public static readonly string LOCATION_CONTAINER_TYPE = "locationsContainerId";
 
         public static readonly string DEFAULT_LOCATION_TREE_ID = "default";
         public static readonly string LOCATION_TREE_ROOT = "Root";
