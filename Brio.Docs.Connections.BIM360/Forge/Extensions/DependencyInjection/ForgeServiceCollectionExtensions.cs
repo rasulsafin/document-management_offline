@@ -11,6 +11,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddScoped<AuthenticationService>();
             services.AddScoped<AccountAdminService>();
+            services.AddScoped<IUsersGetter>(x => x.GetService<AccountAdminService>());
             services.AddScoped<FoldersService>();
             services.AddScoped<HubsService>();
             services.AddScoped<IIssuesService, IssuesService>();

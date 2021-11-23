@@ -13,10 +13,11 @@ namespace Brio.Docs.Connections.Bim360.Utilities
     internal class IssueSnapshotUtilities
     {
         private readonly IIssuesService issuesService;
-        private readonly AccountAdminService accountAdminService;
+        private readonly IUsersGetter accountAdminService;
 
-        public IssueSnapshotUtilities(IIssuesService issuesService,
-            AccountAdminService accountAdminService)
+        public IssueSnapshotUtilities(
+            IIssuesService issuesService,
+            IUsersGetter accountAdminService)
         {
             this.issuesService = issuesService;
             this.accountAdminService = accountAdminService;
