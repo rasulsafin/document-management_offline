@@ -167,6 +167,69 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             Assert.AreEqual(0, result.BimElements.Count);
         }
 
+        [TestMethod]
+        public async Task Put_ObjectiveBimElementsCollectionDoesNotChangedAndCollectionIsEmpty_DoNotPostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.BimElements = Array.Empty<BimElementExternalDto>();
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, Array.Empty<BimElementExternalDto>());
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Never);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(0, result.BimElements.Count);
+        }
+
+        [TestMethod]
+        public async Task Put_ObjectiveBimElementsCollectionDoesNotChangedAndCollectionIsNotEmpty_DoNotPostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var collection = CreateBimElements(2).ToArray();
+            dto.BimElements = collection;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, collection);
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Never);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(2, result.BimElements.Count);
+        }
+
+        [TestMethod]
+        public async Task Put_ObjectiveWithoutExternalIdAndWithoutBimElement_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.ExternalID = null;
+            dto.BimElements = Array.Empty<BimElementExternalDto>();
+            var convertedObjectiveToIssue = DummyModels.Issue;
+            convertedObjectiveToIssue.ID = null;
+            SetupStubs(convertedObjectiveToIssue, dto);
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Never);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(0, result.BimElements.Count);
+        }
+
         private void SetupStubs(
             Issue postingIssue = null,
             ObjectiveExternalDto gottenDto = null,
