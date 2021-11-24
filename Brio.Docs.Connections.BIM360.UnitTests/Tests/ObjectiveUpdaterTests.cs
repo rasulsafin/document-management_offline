@@ -64,11 +64,14 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveWithExternalIdAndBimElement_PostComment()
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_ObjectiveWithExternalIdAndBimElements_PostComment(int bimElementsCount)
         {
             // Arrange.
             var dto = DummyDtos.Objective;
-            dto.BimElements = CreateBimElements(1).ToArray();
+            dto.BimElements = CreateBimElements(bimElementsCount).ToArray();
             var convertedObjectiveToIssue = CreateExistingIssue();
             SetupStubs(convertedObjectiveToIssue, dto);
 
@@ -80,16 +83,19 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
                 Times.Once);
             Assert.IsNotNull(result.BimElements);
-            Assert.AreEqual(1, result.BimElements.Count);
+            Assert.AreEqual(bimElementsCount, result.BimElements.Count);
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveWithoutExternalIdAndWithBimElement_PostComment()
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_ObjectiveWithoutExternalIdAndWithBimElements_PostComment(int bimElementsCount)
         {
             // Arrange.
             var dto = DummyDtos.Objective;
             dto.ExternalID = null;
-            dto.BimElements = new[] { DummyDtos.BimElement };
+            dto.BimElements = CreateBimElements(bimElementsCount).ToArray();
             var convertedObjectiveToIssue = DummyModels.Issue;
             convertedObjectiveToIssue.ID = null;
             SetupStubs(convertedObjectiveToIssue, dto);
@@ -102,15 +108,18 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
                 Times.Once);
             Assert.IsNotNull(result.BimElements);
-            Assert.AreEqual(1, result.BimElements.Count);
+            Assert.AreEqual(bimElementsCount, result.BimElements.Count);
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveHasNewBimElement_PostComment()
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_ObjectiveHasNewBimElements_PostComment(int newBimElementsCount)
         {
             // Arrange.
             var dto = DummyDtos.Objective;
-            var bimElements = CreateBimElements(2).ToArray();
+            var bimElements = CreateBimElements(newBimElementsCount + 1).ToArray();
             dto.BimElements = bimElements;
             var convertedObjectiveToIssue = CreateExistingIssue();
             SetupStubs(convertedObjectiveToIssue, dto, new[] { bimElements[0] });
@@ -123,7 +132,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
                 Times.Once);
             Assert.IsNotNull(result.BimElements);
-            Assert.AreEqual(2, result.BimElements.Count);
+            Assert.AreEqual(newBimElementsCount + 1, result.BimElements.Count);
         }
 
         [TestMethod]
@@ -148,13 +157,16 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveRemovedBimElement_PostComment()
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_ObjectiveRemovedBimElements_PostComment(int wasBimElementsCount)
         {
             // Arrange.
             var dto = DummyDtos.Objective;
             dto.BimElements = Array.Empty<BimElementExternalDto>();
             var convertedObjectiveToIssue = CreateExistingIssue();
-            SetupStubs(convertedObjectiveToIssue, dto, new[] { DummyDtos.BimElement });
+            SetupStubs(convertedObjectiveToIssue, dto, CreateBimElements(wasBimElementsCount).ToArray());
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -168,31 +180,15 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveBimElementsCollectionDoesNotChangedAndCollectionIsEmpty_DoNotPostComment()
+        [DataRow(0)]
+        [DataRow(1)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_ObjectiveBimElementsCollectionDoesNotChanged_DoNotPostComment(int bimElementsCount)
         {
             // Arrange.
             var dto = DummyDtos.Objective;
-            dto.BimElements = Array.Empty<BimElementExternalDto>();
-            var convertedObjectiveToIssue = CreateExistingIssue();
-            SetupStubs(convertedObjectiveToIssue, dto, Array.Empty<BimElementExternalDto>());
-
-            // Act.
-            var result = await objectiveUpdater.Put(dto);
-
-            // Assert.
-            mockIssuesService.Verify(
-                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
-                Times.Never);
-            Assert.IsNotNull(result.BimElements);
-            Assert.AreEqual(0, result.BimElements.Count);
-        }
-
-        [TestMethod]
-        public async Task Put_ObjectiveBimElementsCollectionDoesNotChangedAndCollectionIsNotEmpty_DoNotPostComment()
-        {
-            // Arrange.
-            var dto = DummyDtos.Objective;
-            var collection = CreateBimElements(2).ToArray();
+            var collection = CreateBimElements(bimElementsCount).ToArray();
             dto.BimElements = collection;
             var convertedObjectiveToIssue = CreateExistingIssue();
             SetupStubs(convertedObjectiveToIssue, dto, collection);
@@ -205,7 +201,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
                 Times.Never);
             Assert.IsNotNull(result.BimElements);
-            Assert.AreEqual(2, result.BimElements.Count);
+            Assert.AreEqual(bimElementsCount, result.BimElements.Count);
         }
 
         [TestMethod]
@@ -232,7 +228,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Put_ObjectiveWithoutExternalIdAndWithoutBimElement_PostComment()
+        public async Task Put_ObjectiveWithoutExternalIdAndWithoutBimElements_DoNotPostComment()
         {
             // Arrange.
             var dto = DummyDtos.Objective;
