@@ -23,13 +23,16 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
     [TestClass]
     public class IssueSnapshotObjectiveConverterTests
     {
-        private readonly Mock<IConverter<Issue, ObjectiveExternalDto>> mockConverterToDto = new ();
-        private readonly Mock<IConverter<IssueSnapshot, ObjectiveStatus>> mockStatusConverter = new ();
-        private readonly Mock<IEnumIdentification<IssueTypeSnapshot>> mockSubtypeEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<RootCauseSnapshot>> mockRootCauseEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<LocationSnapshot>> mockLocationEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<AssignToVariant>> mockAssignToEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<StatusSnapshot>> mockStatusEnumCreator = new ();
+        private readonly Mock<IConverter<Issue, ObjectiveExternalDto>> stubConverterToDto = new ();
+        private readonly Mock<IConverter<IssueSnapshot, ObjectiveStatus>> stubStatusConverter = new ();
+        private readonly Mock<IEnumIdentification<IssueTypeSnapshot>> stubSubtypeEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<RootCauseSnapshot>> stubRootCauseEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<LocationSnapshot>> stubLocationEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<AssignToVariant>> stubAssignToEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<StatusSnapshot>> stubStatusEnumCreator = new ();
+        private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>
+            stubConverterCommentsToBimElements = new ();
+
         private readonly Mock<MetaCommentHelper> mockCommentHelper = new ();
         private IssueSnapshotObjectiveConverter converter;
         private IssueSnapshot issueSnapshot;
@@ -39,20 +42,20 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public void Setup()
         {
             converter = new IssueSnapshotObjectiveConverter(
-                mockConverterToDto.Object,
-                mockStatusConverter.Object,
-                mockSubtypeEnumCreator.Object,
-                mockRootCauseEnumCreator.Object,
-                mockLocationEnumCreator.Object,
-                mockAssignToEnumCreator.Object,
-                mockStatusEnumCreator.Object,
-                mockCommentHelper.Object);
+                stubConverterToDto.Object,
+                stubStatusConverter.Object,
+                stubConverterCommentsToBimElements.Object,
+                stubSubtypeEnumCreator.Object,
+                stubRootCauseEnumCreator.Object,
+                stubLocationEnumCreator.Object,
+                stubAssignToEnumCreator.Object,
+                stubStatusEnumCreator.Object);
 
             dto = new ObjectiveExternalDto
             {
                 DynamicFields = new List<DynamicFieldExternalDto>(),
             };
-            mockConverterToDto
+            stubConverterToDto
                .Setup(x => x.Convert(It.IsAny<Issue>()))
                .Returns<Issue>(_ => Task.FromResult(dto));
 

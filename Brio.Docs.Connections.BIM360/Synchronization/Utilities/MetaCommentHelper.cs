@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connections.Bim360.Properties;
-using Brio.Docs.Integration.Dtos;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -12,7 +10,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
     internal class MetaCommentHelper
     {
-        private static readonly string GUID_REGEX_PATTERN = "[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?";
+        private static readonly string GUID_REGEX_PATTERN =
+            "[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?";
 
         private readonly Lazy<ISerializer> serializer = new (
             () => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
@@ -20,28 +19,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         private readonly Lazy<IDeserializer> deserializer = new (
             () => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
 
-        public ICollection<BimElementExternalDto> GetBimElements(IEnumerable<Comment> comments)
-            => TryGet(
-                comments,
-                MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG,
-                out ICollection<BimElementExternalDto> result,
-                ArraySegment<BimElementExternalDto>.Empty)
-                ? result
-                : null;
-
-        public IEnumerable<Comment> CreateComments(ICollection<BimElementExternalDto> bimElements, bool isCurrentEmpty)
-        {
-            var info = isCurrentEmpty
-                ? Comments.BimElementsAddedInfo
-                : Comments.BimElementsChangedInfo;
-
-            return CreateComments(bimElements, MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG, info);
-        }
-
-        private static string SkipLine(string x, int count)
-            => string.Join('\n', x.Split('\n').Skip(count));
-
-        private bool TryGet<T>(IEnumerable<Comment> comments, string tag, out T result, T empty = default)
+        public bool TryGet<T>(IEnumerable<Comment> comments, string tag, out T result, T empty = default)
             where T : class
         {
             var array = comments as Comment[] ?? comments.ToArray();
@@ -77,7 +55,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             return true;
         }
 
-        private IEnumerable<Comment> CreateComments<T>(T data,  string tag, string info)
+        public IEnumerable<Comment> CreateComments<T>(T data, string tag, string info)
         {
             var yaml = serializer.Value.Serialize(data).Replace(Environment.NewLine, "\n");
 
@@ -115,5 +93,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 yield return comment;
             }
         }
+
+        private static string SkipLine(string x, int count)
+            => string.Join('\n', x.Split('\n').Skip(count));
     }
 }

@@ -7,7 +7,6 @@ using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities;
@@ -26,7 +25,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly IIssuesService issuesService;
         private readonly IItemsUpdater itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly MetaCommentHelper metaCommentHelper;
+        private readonly IConverter<CommentCreatingData, IEnumerable<Comment>> converterBimElementsToComments;
+        private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -36,7 +36,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IIssuesService issuesService,
             IItemsUpdater itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
-            MetaCommentHelper metaCommentHelper,
+            IConverter<CommentCreatingData, IEnumerable<Comment>> converterBimElementsToComments,
+            IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -45,7 +46,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.snapshotUtilities = snapshotUtilities;
-            this.metaCommentHelper = metaCommentHelper;
+            this.converterBimElementsToComments = converterBimElementsToComments;
+            this.converterCommentsToBimElements = converterCommentsToBimElements;
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
         }
@@ -167,7 +169,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             Issue issue)
         {
             var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
-            var currentElements = metaCommentHelper.GetBimElements(comments);
+            var currentElements = await converterCommentsToBimElements.Convert(comments);
             var isCurrentEmpty = currentElements == null || !currentElements.Any();
             var isNewEmpty = bimElements == null || !bimElements.Any();
 
@@ -175,7 +177,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             {
                 try
                 {
-                    var newComments = metaCommentHelper.CreateComments(bimElements, isCurrentEmpty);
+                    var newComments = await converterBimElementsToComments.Convert(
+                        new CommentCreatingData
+                        {
+                            Data = bimElements,
+                            IsPreviousDataEmpty = isCurrentEmpty,
+                        });
 
                     foreach (var comment in newComments)
                     {

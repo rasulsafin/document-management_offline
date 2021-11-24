@@ -22,31 +22,31 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
+        private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements;
         private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
         private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
         private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
         private readonly IEnumIdentification<AssignToVariant> assignToEnumCreator;
         private readonly IEnumIdentification<StatusSnapshot> statusEnumCreator;
-        private readonly MetaCommentHelper metaCommentHelper;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
+            IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements,
             IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator,
             IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
             IEnumIdentification<LocationSnapshot> locationEnumCreator,
             IEnumIdentification<AssignToVariant> assignToEnumCreator,
-            IEnumIdentification<StatusSnapshot> statusEnumCreator,
-            MetaCommentHelper metaCommentHelper)
+            IEnumIdentification<StatusSnapshot> statusEnumCreator)
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
+            this.convertToBimElements = convertToBimElements;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.statusEnumCreator = statusEnumCreator;
-            this.metaCommentHelper = metaCommentHelper;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -169,8 +169,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             if (snapshot.Comments != null)
             {
-                parsedToDto.BimElements = metaCommentHelper.GetBimElements(snapshot.Comments.Select(x => x.Entity)) ??
+                var elements = await convertToBimElements.Convert(snapshot.Comments.Select(x => x.Entity)) ??
                     ArraySegment<BimElementExternalDto>.Empty;
+                parsedToDto.BimElements = elements.ToArray();
             }
             else
             {

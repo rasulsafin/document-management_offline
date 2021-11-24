@@ -21,10 +21,13 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
     [TestClass]
     public class ObjectiveUpdaterTests
     {
+        private readonly Mock<IIssuesService> mockIssuesService = new ();
+        private readonly Mock<IConverter<ObjectiveExternalDto, Issue>> stubConverterToIssue = new ();
+        private readonly Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>> stubConverterToDto = new ();
+        private readonly Mock<IConverter<CommentCreatingData, IEnumerable<Comment>>>
+            stubConverterBimElementsToComments = new ();
+
         private ObjectiveUpdater objectiveUpdater;
-        private Mock<IIssuesService> mockIssuesService;
-        private Mock<IConverter<ObjectiveExternalDto, Issue>> stubConverterToIssue;
-        private Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>> stubCoverterToDto;
         private SnapshotUpdater snapshotUpdater;
         private SnapshotGetter snapshotGetter;
 
@@ -37,16 +40,12 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             var project = DummySnapshots.CreateProject(hub);
             hub.Projects.Add(project.ID, project);
 
-            mockIssuesService = new Mock<IIssuesService>();
-
-            stubConverterToIssue = new Mock<IConverter<ObjectiveExternalDto, Issue>>();
-            stubCoverterToDto = new Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>>();
+            var stubConverterCommentsToBimElements = new Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>();
             var stubItemsSyncHelper = new Mock<IItemsUpdater>();
             var stubUserReader = new Mock<IUsersGetter>();
 
             snapshotGetter = new SnapshotGetter(bim360Snapshot);
             snapshotUpdater = new SnapshotUpdater(snapshotGetter);
-            var metaCommentHelper = new MetaCommentHelper();
             var issueSnapshotUtilities = new IssueSnapshotUtilities(mockIssuesService.Object, stubUserReader.Object);
 
             objectiveUpdater = new ObjectiveUpdater(
@@ -55,9 +54,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 mockIssuesService.Object,
                 stubItemsSyncHelper.Object,
                 issueSnapshotUtilities,
-                metaCommentHelper,
+                stubConverterBimElementsToComments.Object,
+                stubConverterCommentsToBimElements.Object,
                 stubConverterToIssue.Object,
-                stubCoverterToDto.Object);
+                stubConverterToDto.Object);
         }
 
         [TestMethod]
@@ -71,6 +71,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             SetupConvertingToIssue(_ => issue);
             SetupConvertingToDto(_ => dto);
             SetupGettingEmptyCommentsList();
+            stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
+               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
             mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
@@ -101,6 +103,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 });
             SetupConvertingToDto(_ => dto);
             SetupGettingEmptyCommentsList();
+            stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
+               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
             mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, issue) =>
                 {
@@ -124,7 +128,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                .Returns<string, string>((_, _) => Task.FromResult(new List<Comment>()));
 
         private void SetupConvertingToDto(Func<IssueSnapshot, ObjectiveExternalDto> valueFunction)
-            => stubCoverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
+            => stubConverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
                .Returns<IssueSnapshot>(snapshot => Task.FromResult(valueFunction(snapshot)));
 
         private void SetupConvertingToIssue(
