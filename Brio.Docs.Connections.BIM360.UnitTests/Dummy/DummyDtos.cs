@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Brio.Docs.Common;
 using Brio.Docs.Integration.Dtos;
-using System.Collections.Generic;
 
 namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
 {

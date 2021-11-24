@@ -27,10 +27,12 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private readonly Mock<IConverter<CommentCreatingData, IEnumerable<Comment>>>
             stubConverterBimElementsToComments = new ();
 
+        private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>
+            stubConverterCommentsToBimElements = new ();
+
         private ObjectiveUpdater objectiveUpdater;
         private SnapshotUpdater snapshotUpdater;
         private SnapshotGetter snapshotGetter;
-        private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>> stubConverterCommentsToBimElements = new Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>();
 
         [TestInitialize]
         public void Setup()
@@ -64,16 +66,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveWithExternalIdAndBimElement_PostComment()
         {
             // Arrange.
-            var issue = DummyModels.Issue;
+            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
             dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
-            SetupConvertingToIssue(_ => issue);
-            SetupConvertingToDto(_ => dto);
-            SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
-            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+            SetupStubs(issue, dto);
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -93,22 +89,9 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             var dto = DummyDtos.Objective;
             dto.ExternalID = null;
             dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
-            SetupConvertingToIssue(
-                _ =>
-                {
-                    var issue = DummyModels.Issue;
-                    issue.ID = null;
-                    return issue;
-                });
-            SetupConvertingToDto(_ => dto);
-            SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
-            mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, issue) =>
-                {
-                    issue.ID = DummyStrings.ISSUE_ID;
-                    return Task.FromResult(issue);
-                });
+            var issue = DummyModels.Issue;
+            issue.ID = null;
+            SetupStubs(issue, dto);
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -125,24 +108,13 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveHasNewBimElement_PostComment()
         {
             // Arrange.
-            var issue = DummyModels.Issue;
+            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
             var bimElementFirst = DummyDtos.BimElement;
             var bimElementNew = DummyDtos.BimElement;
             bimElementNew.GlobalID = DummyStrings.GetBimElementGlobalId();
             dto.BimElements = new List<BimElementExternalDto> { bimElementFirst, bimElementNew };
-            SetupConvertingToIssue(_ => issue);
-            SetupConvertingToDto(_ => dto);
-            SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
-
-            stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
-               .Returns<IEnumerable<Comment>>(
-                    _ => Task.FromResult<IEnumerable<BimElementExternalDto>>(new[] { bimElementFirst }));
-
-            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+            SetupStubs(issue, dto, new[] { bimElementFirst });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -159,26 +131,15 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveHasChangedBimElement_PostComment()
         {
             // Arrange.
-            var issue = DummyModels.Issue;
+            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
             var bimElementFirst = DummyDtos.BimElement;
             var bimElementSecond = DummyDtos.BimElement;
             var bimElementNew = DummyDtos.BimElement;
             bimElementSecond.GlobalID = DummyStrings.GetBimElementGlobalId();
             bimElementNew.GlobalID = DummyStrings.GetBimElementGlobalId();
             dto.BimElements = new List<BimElementExternalDto> { bimElementFirst, bimElementNew };
-            SetupConvertingToIssue(_ => issue);
-            SetupConvertingToDto(_ => dto);
-            SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
-
-            stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
-               .Returns<IEnumerable<Comment>>(
-                    _ => Task.FromResult<IEnumerable<BimElementExternalDto>>(new[] { bimElementFirst, bimElementSecond }));
-
-            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+            SetupStubs(issue, dto, new[] { bimElementFirst, bimElementSecond });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -195,21 +156,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveRemovedBimElement_PostComment()
         {
             // Arrange.
-            var issue = DummyModels.Issue;
+            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
             dto.BimElements = new List<BimElementExternalDto>();
-            SetupConvertingToIssue(_ => issue);
-            SetupConvertingToDto(_ => dto);
-            SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
-
-            stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
-               .Returns<IEnumerable<Comment>>(
-                    _ => Task.FromResult<IEnumerable<BimElementExternalDto>>(new[] { DummyDtos.BimElement }));
-
-            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
-               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+            SetupStubs(issue, dto, new[] { DummyDtos.BimElement });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -221,6 +171,33 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             Assert.IsNotNull(result.BimElements);
             Assert.AreEqual(0, result.BimElements.Count);
         }
+
+        private void SetupStubs(
+            Issue postingIssue = null,
+            ObjectiveExternalDto gottenDto = null,
+            BimElementExternalDto[] currentBimElements = null)
+        {
+            SetupConvertingToIssue(_ => postingIssue);
+            SetupConvertingToDto(_ => gottenDto);
+            SetupGettingEmptyCommentsList();
+            SetupConvertingBimElementsToComments();
+            SetupConvertingCommentsToBimElements(currentBimElements);
+            SetupPatchingIssue();
+            SetupPostingIssue();
+        }
+
+        private void SetupPostingIssue()
+            => mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
+               .Returns<string, Issue>(
+                    (_, posting) =>
+                    {
+                        posting.ID = DummyStrings.ISSUE_ID;
+                        return Task.FromResult(posting);
+                    });
+
+        private void SetupPatchingIssue()
+            => mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
+               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
         private void SetupConvertingBimElementsToComments()
             => stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
@@ -234,9 +211,21 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             => stubConverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
                .Returns<IssueSnapshot>(snapshot => Task.FromResult(valueFunction(snapshot)));
 
-        private void SetupConvertingToIssue(
-            Func<ObjectiveExternalDto, Issue> valueFunction)
+        private void SetupConvertingToIssue(Func<ObjectiveExternalDto, Issue> valueFunction)
             => stubConverterToIssue.Setup(x => x.Convert(It.IsAny<ObjectiveExternalDto>()))
                .Returns<ObjectiveExternalDto>(dto => Task.FromResult(valueFunction(dto)));
+
+        private void SetupConvertingCommentsToBimElements(params BimElementExternalDto[] bimElements)
+            => stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
+               .Returns<IEnumerable<Comment>>(_ => Task.FromResult<IEnumerable<BimElementExternalDto>>(bimElements));
+
+        private Issue CreateExistingIssue(string projectId = null)
+        {
+            projectId ??= DummyStrings.PROJECT_ID;
+            var issue = DummyModels.Issue;
+            var project = snapshotGetter.GetProject(projectId);
+            snapshotUpdater.CreateIssue(project, issue);
+            return issue;
+        }
     }
 }
