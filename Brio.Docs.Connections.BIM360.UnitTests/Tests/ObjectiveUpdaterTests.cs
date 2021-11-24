@@ -209,6 +209,29 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_BimElementsConvertedToMultipleComments_PostMultipleComment(int createdCommentsCount)
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.BimElements = CreateBimElements(1).ToArray();
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, createdCommentsCount: createdCommentsCount);
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Exactly(createdCommentsCount));
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(1, result.BimElements.Count);
+        }
+
+        [TestMethod]
         public async Task Put_ObjectiveWithoutExternalIdAndWithoutBimElement_PostComment()
         {
             // Arrange.
@@ -233,12 +256,13 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private void SetupStubs(
             Issue postingIssue = null,
             ObjectiveExternalDto gottenDto = null,
-            BimElementExternalDto[] currentBimElements = null)
+            BimElementExternalDto[] currentBimElements = null,
+            int createdCommentsCount = 1)
         {
             SetupConvertingToIssue(_ => postingIssue);
             SetupConvertingToDto(_ => gottenDto);
             SetupGettingEmptyCommentsList();
-            SetupConvertingBimElementsToComments();
+            SetupConvertingBimElementsToComments(createdCommentsCount);
             SetupConvertingCommentsToBimElements(currentBimElements);
             SetupPatchingIssue();
             SetupPostingIssue();
@@ -257,9 +281,9 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             => mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
-        private void SetupConvertingBimElementsToComments()
+        private void SetupConvertingBimElementsToComments(int count)
             => stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
-               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
+               .Returns<CommentCreatingData>(_ => Task.FromResult(Enumerable.Repeat(DummyModels.Comment, count)));
 
         private void SetupGettingEmptyCommentsList()
             => mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
