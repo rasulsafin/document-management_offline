@@ -30,6 +30,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private ObjectiveUpdater objectiveUpdater;
         private SnapshotUpdater snapshotUpdater;
         private SnapshotGetter snapshotGetter;
+        private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>> stubConverterCommentsToBimElements = new Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>();
 
         [TestInitialize]
         public void Setup()
@@ -40,7 +41,6 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             var project = DummySnapshots.CreateProject(hub);
             hub.Projects.Add(project.ID, project);
 
-            var stubConverterCommentsToBimElements = new Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>();
             var stubItemsSyncHelper = new Mock<IItemsUpdater>();
             var stubUserReader = new Mock<IUsersGetter>();
 
@@ -71,8 +71,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             SetupConvertingToIssue(_ => issue);
             SetupConvertingToDto(_ => dto);
             SetupGettingEmptyCommentsList();
-            stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
-               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
+            SetupConvertingBimElementsToComments();
             mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
@@ -103,8 +102,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 });
             SetupConvertingToDto(_ => dto);
             SetupGettingEmptyCommentsList();
-            stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
-               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
+            SetupConvertingBimElementsToComments();
             mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, issue) =>
                 {
@@ -122,6 +120,44 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             Assert.IsNotNull(result.BimElements);
             Assert.AreEqual(1, result.BimElements.Count);
         }
+
+        [TestMethod]
+        public async Task Put_ObjectiveHasNewBimElement_PostComment()
+        {
+            // Arrange.
+            var issue = DummyModels.Issue;
+            var dto = DummyDtos.Objective;
+            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
+            var bimElementFirst = DummyDtos.BimElement;
+            var bimElementNew = DummyDtos.BimElement;
+            bimElementNew.GlobalID = DummyStrings.GetBimElementGlobalId();
+            dto.BimElements = new List<BimElementExternalDto> { bimElementFirst, bimElementNew };
+            SetupConvertingToIssue(_ => issue);
+            SetupConvertingToDto(_ => dto);
+            SetupGettingEmptyCommentsList();
+            SetupConvertingBimElementsToComments();
+
+            stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
+               .Returns<IEnumerable<Comment>>(
+                    _ => Task.FromResult<IEnumerable<BimElementExternalDto>>(new[] { bimElementFirst }));
+
+            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
+               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(2, result.BimElements.Count);
+        }
+
+        private void SetupConvertingBimElementsToComments()
+            => stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
+               .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
 
         private void SetupGettingEmptyCommentsList()
             => mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
