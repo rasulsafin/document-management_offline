@@ -191,6 +191,37 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             Assert.AreEqual(2, result.BimElements.Count);
         }
 
+        [TestMethod]
+        public async Task Put_ObjectiveRemovedBimElement_PostComment()
+        {
+            // Arrange.
+            var issue = DummyModels.Issue;
+            var dto = DummyDtos.Objective;
+            snapshotUpdater.CreateIssue(snapshotGetter.GetProject(dto.ProjectExternalID), issue);
+            dto.BimElements = new List<BimElementExternalDto>();
+            SetupConvertingToIssue(_ => issue);
+            SetupConvertingToDto(_ => dto);
+            SetupGettingEmptyCommentsList();
+            SetupConvertingBimElementsToComments();
+
+            stubConverterCommentsToBimElements.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
+               .Returns<IEnumerable<Comment>>(
+                    _ => Task.FromResult<IEnumerable<BimElementExternalDto>>(new[] { DummyDtos.BimElement }));
+
+            mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
+               .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
+
+            // Act.
+            var result = await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+            Assert.IsNotNull(result.BimElements);
+            Assert.AreEqual(0, result.BimElements.Count);
+        }
+
         private void SetupConvertingBimElementsToComments()
             => stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
                .Returns<CommentCreatingData>(_ => Task.FromResult<IEnumerable<Comment>>(new[] { DummyModels.Comment }));
