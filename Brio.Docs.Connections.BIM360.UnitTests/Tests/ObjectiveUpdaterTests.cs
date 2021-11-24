@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -66,10 +67,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveWithExternalIdAndBimElement_PostComment()
         {
             // Arrange.
-            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
-            SetupStubs(issue, dto);
+            dto.BimElements = CreateBimElements(1).ToArray();
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto);
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -88,10 +89,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             // Arrange.
             var dto = DummyDtos.Objective;
             dto.ExternalID = null;
-            dto.BimElements = new List<BimElementExternalDto> { DummyDtos.BimElement };
-            var issue = DummyModels.Issue;
-            issue.ID = null;
-            SetupStubs(issue, dto);
+            dto.BimElements = new[] { DummyDtos.BimElement };
+            var convertedObjectiveToIssue = DummyModels.Issue;
+            convertedObjectiveToIssue.ID = null;
+            SetupStubs(convertedObjectiveToIssue, dto);
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -108,13 +109,11 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveHasNewBimElement_PostComment()
         {
             // Arrange.
-            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            var bimElementFirst = DummyDtos.BimElement;
-            var bimElementNew = DummyDtos.BimElement;
-            bimElementNew.GlobalID = DummyStrings.GetBimElementGlobalId();
-            dto.BimElements = new List<BimElementExternalDto> { bimElementFirst, bimElementNew };
-            SetupStubs(issue, dto, new[] { bimElementFirst });
+            var bimElements = CreateBimElements(2).ToArray();
+            dto.BimElements = bimElements;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, new[] { bimElements[0] });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -131,15 +130,11 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveHasChangedBimElement_PostComment()
         {
             // Arrange.
-            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            var bimElementFirst = DummyDtos.BimElement;
-            var bimElementSecond = DummyDtos.BimElement;
-            var bimElementNew = DummyDtos.BimElement;
-            bimElementSecond.GlobalID = DummyStrings.GetBimElementGlobalId();
-            bimElementNew.GlobalID = DummyStrings.GetBimElementGlobalId();
-            dto.BimElements = new List<BimElementExternalDto> { bimElementFirst, bimElementNew };
-            SetupStubs(issue, dto, new[] { bimElementFirst, bimElementSecond });
+            var bimElements = CreateBimElements(3).ToArray();
+            dto.BimElements = new List<BimElementExternalDto> { bimElements[0], bimElements[2] };
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, new[] { bimElements[0], bimElements[1] });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -156,10 +151,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Put_ObjectiveRemovedBimElement_PostComment()
         {
             // Arrange.
-            var issue = CreateExistingIssue();
             var dto = DummyDtos.Objective;
-            dto.BimElements = new List<BimElementExternalDto>();
-            SetupStubs(issue, dto, new[] { DummyDtos.BimElement });
+            dto.BimElements = Array.Empty<BimElementExternalDto>();
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            SetupStubs(convertedObjectiveToIssue, dto, new[] { DummyDtos.BimElement });
 
             // Act.
             var result = await objectiveUpdater.Put(dto);
@@ -226,6 +221,16 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             var project = snapshotGetter.GetProject(projectId);
             snapshotUpdater.CreateIssue(project, issue);
             return issue;
+        }
+
+        private IEnumerable<BimElementExternalDto> CreateBimElements(int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                var element = DummyDtos.BimElement;
+                element.GlobalID = DummyStrings.GetBimElementGlobalId();
+                yield return element;
+            }
         }
     }
 }
