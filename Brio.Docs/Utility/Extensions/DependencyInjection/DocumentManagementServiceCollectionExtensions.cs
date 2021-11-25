@@ -34,6 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
+            services.AddScoped<IBimElementService, BimElementService>();
 
             services.AddSingleton<IRequestService, RequestQueueService>();
             services.AddSingleton<IRequestQueueService, RequestQueueService>();
