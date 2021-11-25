@@ -15,6 +15,8 @@ using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -36,6 +38,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
             services.AddScoped<ObjectiveRemover>();
+
+            services.AddScoped(
+                _ => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
+            services.AddScoped(
+                _ => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();

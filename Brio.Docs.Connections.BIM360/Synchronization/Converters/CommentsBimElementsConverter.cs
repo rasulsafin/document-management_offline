@@ -19,9 +19,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             => metaCommentHelper.TryGet(
                 comments,
                 MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG,
-                out IEnumerable<BimElementExternalDto> result,
-                ArraySegment<BimElementExternalDto>.Empty)
+                out IEnumerable<BimElementExternalDto> result)
                 ? Task.FromResult(result)
-                : null;
+                : Task.FromResult<IEnumerable<BimElementExternalDto>>(Array.Empty<BimElementExternalDto>());
     }
 }
