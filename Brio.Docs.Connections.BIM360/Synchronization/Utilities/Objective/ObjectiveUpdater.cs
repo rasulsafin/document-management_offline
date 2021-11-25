@@ -9,6 +9,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
@@ -23,7 +24,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly SnapshotGetter snapshot;
         private readonly SnapshotUpdater snapshotUpdater;
         private readonly IIssuesService issuesService;
-        private readonly ItemsSyncHelper itemsSyncHelper;
+        private readonly IItemsUpdater itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly MetaCommentHelper metaCommentHelper;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
@@ -33,7 +34,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             SnapshotGetter snapshot,
             SnapshotUpdater snapshotUpdater,
             IIssuesService issuesService,
-            ItemsSyncHelper itemsSyncHelper,
+            IItemsUpdater itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
             MetaCommentHelper metaCommentHelper,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
@@ -143,7 +144,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 }
                 else
                 {
-                    var uploadedItem = await itemsSyncHelper.PostItem(project, item);
+                    var uploadedItem = await itemsSyncHelper.PostItem(project, item.FullPath);
 
                     if (uploadedItem == default)
                         continue;

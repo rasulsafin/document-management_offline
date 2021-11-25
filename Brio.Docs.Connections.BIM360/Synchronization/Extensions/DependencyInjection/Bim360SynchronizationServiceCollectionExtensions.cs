@@ -6,6 +6,7 @@ using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Factories;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.Synchronizers;
@@ -30,7 +31,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSynchronizer<Bim360ObjectivesSynchronizer, ObjectiveExternalDto>();
             services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
-            services.AddScoped<ItemsSyncHelper>();
+            services.AddScoped<IItemsUpdater, ItemsSyncHelper>();
             services.AddScoped<MetaCommentHelper>();
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
