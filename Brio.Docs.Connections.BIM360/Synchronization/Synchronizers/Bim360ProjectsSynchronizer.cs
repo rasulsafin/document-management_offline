@@ -42,21 +42,21 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            var cashed = snapshot.GetProject(project.ExternalID);
-            var toRemove = cashed.Items.Where(a => project.Items.All(b => b.ExternalID != a.Value.Entity.ID))
+            var cached = snapshot.GetProject(project.ExternalID);
+            var toRemove = cached.Items.Where(a => project.Items.All(b => b.ExternalID != a.Value.Entity.ID))
                .ToArray();
-            var toAdd = project.Items.Where(a => cashed.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
+            var toAdd = project.Items.Where(a => cached.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
 
             foreach (var item in toAdd)
-                await itemsSyncHelper.PostItem(cashed, item);
+                await itemsSyncHelper.PostItem(cached, item);
 
             foreach (var dto in toRemove)
             {
-                cashed.Items.Remove(dto.Key);
+                cached.Items.Remove(dto.Key);
                 await itemsSyncHelper.Remove(project.ExternalID, dto.Value.Entity);
             }
 
-            return GetFullProject(cashed);
+            return GetFullProject(cached);
         }
 
         public async Task<IReadOnlyCollection<string>> GetUpdatedIDs(DateTime date)
