@@ -1,4 +1,4 @@
-namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models
 {
     internal abstract class AEnumVariantSnapshot<T> : ASnapshotEntity<T>
     {
@@ -6,16 +6,11 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
         protected AEnumVariantSnapshot(T entity, ProjectSnapshot projectSnapshot)
             : base(entity)
-        {
-            ProjectSnapshot = projectSnapshot;
-        }
+            => ProjectSnapshot = projectSnapshot;
 
         public ProjectSnapshot ProjectSnapshot { get; }
 
-        public override string ID
-        {
-            get => id;
-        }
+        public override string ID => id;
 
         public void SetExternalID(string externalID)
             => id = externalID;

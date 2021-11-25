@@ -10,6 +10,7 @@ using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
@@ -25,7 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly IfcConfigUtilities configUtilities;
+        private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
 
         public SnapshotFiller(
@@ -39,7 +40,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
-            IfcConfigUtilities configUtilities,
+            ConfigurationsHelper configUtilities,
             StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;

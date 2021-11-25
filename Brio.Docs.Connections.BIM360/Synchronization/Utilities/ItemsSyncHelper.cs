@@ -5,6 +5,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
@@ -16,44 +17,37 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
         private readonly VersionsService versionsService;
+        private readonly SnapshotGetter snapshotGetter;
+        private readonly SnapshotUpdater snapshotUpdater;
 
         public ItemsSyncHelper(
             ItemsService itemsService,
             ProjectsService projectsService,
             ObjectsService objectsService,
-            VersionsService versionsService)
+            VersionsService versionsService,
+            SnapshotGetter snapshotGetter,
+            SnapshotUpdater snapshotUpdater)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
             this.objectsService = objectsService;
             this.versionsService = versionsService;
+            this.snapshotGetter = snapshotGetter;
+            this.snapshotUpdater = snapshotUpdater;
         }
 
         internal async Task<ItemSnapshot> PostItem(ProjectSnapshot project, ItemExternalDto item)
         {
             var posted = await PostItem(item, project.MrsFolderID, project.ID);
-            var itemSnapshot = new ItemSnapshot(posted.item, posted.version);
-            project.Items.Add(posted.item.ID, itemSnapshot);
+            var itemSnapshot = snapshotUpdater.CreateItem(project, posted.item, posted.version);
             return itemSnapshot;
         }
 
         internal async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
         {
-            var snapshot = project.Items[item.ExternalID];
+            var snapshot = snapshotGetter.GetItem(project, item.ExternalID);
             var posted = await UpdateVersion(item, project.MrsFolderID, project.ID, snapshot.Entity);
-
-            if (snapshot.ID != posted.item.ID)
-            {
-                project.Items.Remove(snapshot.ID);
-                snapshot = new ItemSnapshot(posted.item, posted.version);
-                project.Items.Add(posted.item.ID, snapshot);
-            }
-            else
-            {
-                snapshot.Entity = posted.item;
-                snapshot.Version = posted.version;
-            }
-
+            snapshotUpdater.UpdateItem(project, snapshot, posted.item, posted.version);
             return snapshot;
         }
 

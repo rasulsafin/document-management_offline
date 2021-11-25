@@ -6,8 +6,10 @@ using Brio.Docs.Connections.Bim360.Synchronization;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Factories;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.Synchronizers;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
@@ -20,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddScopedFactory<TokenHelper>();
             services.AddScopedFactory<Authenticator>();
+            services.AddScoped<IAccessController>(x => x.GetService<Authenticator>());
 
             services.AddContext();
 
@@ -28,6 +31,9 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<ItemsSyncHelper>();
             services.AddScoped<MetaCommentHelper>();
+            services.AddScoped<ObjectiveGetter>();
+            services.AddScoped<ObjectiveUpdater>();
+            services.AddScoped<ObjectiveRemover>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();

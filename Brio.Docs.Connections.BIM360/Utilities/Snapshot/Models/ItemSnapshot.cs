@@ -1,6 +1,6 @@
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 
-namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models
 {
     internal class ItemSnapshot : ASnapshotEntity<Item>
     {

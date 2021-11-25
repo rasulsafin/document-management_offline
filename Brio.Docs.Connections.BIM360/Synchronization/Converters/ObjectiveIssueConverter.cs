@@ -15,6 +15,7 @@ using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 
@@ -22,7 +23,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class ObjectiveIssueConverter : IConverter<ObjectiveExternalDto, Issue>
     {
-        private readonly Bim360Snapshot snapshot;
+        private readonly SnapshotGetter snapshot;
         private readonly IConverter<ObjectiveExternalDto, Status> statusConverter;
         private readonly IssuesService issuesService;
         private readonly ItemsSyncHelper itemsSyncHelper;
@@ -31,10 +32,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
-        private readonly IfcConfigUtilities ifcConfigUtilities;
+        private readonly ConfigurationsHelper configurationsHelper;
 
         public ObjectiveIssueConverter(
-            Bim360Snapshot snapshot,
+            SnapshotGetter snapshot,
             IConverter<ObjectiveExternalDto, Status> statusConverter,
             IssuesService issuesService,
             ItemsSyncHelper itemsSyncHelper,
@@ -43,7 +44,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             RootCauseEnumCreator rootCauseEnumCreator,
             LocationEnumCreator locationEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
-            IfcConfigUtilities ifcConfigUtilities)
+            ConfigurationsHelper configurationsHelper)
         {
             this.snapshot = snapshot;
             this.statusConverter = statusConverter;
@@ -54,13 +55,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
-            this.ifcConfigUtilities = ifcConfigUtilities;
+            this.configurationsHelper = configurationsHelper;
         }
 
         public async Task<Issue> Convert(ObjectiveExternalDto objective)
         {
             Issue exist = null;
-            var project = snapshot.ProjectEnumerable.First(x => x.ID == objective.ProjectExternalID);
+            var project = snapshot.GetProject(objective.ProjectExternalID);
             if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
                 exist = issueSnapshot.Entity;
 
@@ -74,7 +75,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             Vector3d? globalOffset = null;
             var typeSnapshot = GetIssueTypes(project, objective);
             var itemSnapshot = await GetTargetSnapshot(objective, project);
-            var config = await ifcConfigUtilities.GetConfig(objective, project, itemSnapshot);
+            var config = await configurationsHelper.GetModelConfig(
+                objective.Location?.Item?.FileName,
+                project,
+                itemSnapshot);
 
             if (exist == null)
             {
