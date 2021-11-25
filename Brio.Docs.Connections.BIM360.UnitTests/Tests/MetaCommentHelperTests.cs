@@ -189,8 +189,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        [DataRow(0, 0, "$t", "Add 0")]
-        [DataRow(null, 10, "$tag", "Add null")]
+        [DataRow(0, 0, "$t", "Add 0 symbols")]
+        [DataRow(null, 10, "$tag", "Add 10 symbols")]
         [DataRow("text", 1000, "#tag", "Add 1000 symbols")]
         [DataRow("text", 1899, "#tag", "Add 1899 symbols")]
         [DataRow("text", 1900, "#tag", "Add 1900 symbols")]
