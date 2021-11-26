@@ -10,6 +10,28 @@
 ### Безопасность:
 
 
+## [1.2.0] - 2021-11-26
+
+### Добавлено:
+
+* Возможность конфигурации статусов BIM 360;
+* Динамическое поле Status для созданных нарушений в BIM 360;
+* Фильтрация списка задач по статусу;
+* Возможность получения отдельного списка задач с местоположением;
+* Поле "Статус" в отчетах;
+* API для работы с бим элементами.
+
+### Изменено:
+
+* Проект переименован в Brio.Docs;
+* Пространства имён изменены;
+* Работа с координатами переведена на собственный тип Vector3d точности double.
+
+### Исправлено:
+
+* Получение нарушений из BIM 360 при недоступном связанном документе.
+
+
 ## [1.1.1] - 2021-10-29
 
 ### Добавлено:
@@ -183,6 +205,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.2.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.2.0
 [1.1.1]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.1
 [1.1.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.0
 [1.0.4]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.0.4

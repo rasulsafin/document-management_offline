@@ -1,0 +1,25 @@
+variables:
+  MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
+  ARTIFACTS_PATH: 'Document Management'
+  API_PATH: 'Brio.Docs.Api\bin\Release\Publish'
+  LAUNCHER_PATH: 'Brio.Docs.Launcher\bin\Release\net5.0-windows'
+
+stages:
+  - build
+
+build:
+  stage: build
+  only:
+    - branches
+  script:
+    - 'nuget restore'
+    - mkdir "%ARTIFACTS_PATH%
+    - mkdir "%ARTIFACTS_PATH%\Launcher"
+    - '"%MSBUILD_PATH%" /property:Configuration=Release'
+    - xcopy /E "%LAUNCHER_PATH%" "%ARTIFACTS_PATH%\Launcher"
+    - '"%MSBUILD_PATH%" /t:Restore;Rebuild;Publish /p:SelfContained=True /p:PublishProtocol=FileSystem /p:Configuration=Release /p:PublishDir=bin\Release\Publish /p:RuntimeIdentifier=win-x64 /p:AllowedReferenceRelatedFileExtensions=*.pdb /p:DebugSymbols=false /p:DebugType=none'
+    - xcopy /E "%API_PATH%" "%ARTIFACTS_PATH%"
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - '%ARTIFACTS_PATH%'
