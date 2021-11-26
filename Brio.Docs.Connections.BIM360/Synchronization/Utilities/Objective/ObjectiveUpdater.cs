@@ -30,6 +30,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
+        private readonly LinkedInfoComparer linkedInfoComparer = new ();
+        private readonly BimElementComparer bimElementComparer = new ();
+
         public ObjectiveUpdater(
             SnapshotGetter snapshot,
             SnapshotUpdater snapshotUpdater,
@@ -56,7 +59,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
-            var pushpin = await CreatePushpin(project, obj, issue);
+            var pushpin = await Pushpin(project, obj, issue);
             issue = pushpin.issue;
             var isNew = IsNew(issue);
             issue = await PutIssueAsync(project, issue, isNew);
@@ -81,15 +84,15 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             await AddBimElements(obj, project, issueSnapshot, parsedToDto);
 
             if (pushpin.linkedInfo != null)
-                await AddLinkedInfo(pushpin.linkedInfo, project, issueSnapshot.Entity);
+                await AddLinkedInfo(pushpin.linkedInfo, project, issueSnapshot);
 
             return parsedToDto;
         }
 
-        private async Task<(Issue issue, LinkedInfo linkedInfo)> CreatePushpin(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
+        private async Task<(Issue issue, LinkedInfo linkedInfo)> Pushpin(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
         {
             var target = await GetTargetSnapshot(obj, project);
-            var pushpin = await pushpinHelper.ConvertToPushpin(issue, obj, target);
+            var pushpin = await pushpinHelper.Pushpin(issue, obj, target);
             return pushpin;
         }
 
@@ -123,7 +126,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IssueSnapshot issueSnapshot,
             ObjectiveExternalDto parsedToDto)
         {
-            var addedBimElements = await AddBimElements(obj.BimElements, project, issueSnapshot.Entity);
+            var addedBimElements = await AddBimElements(obj.BimElements, project, issueSnapshot);
             parsedToDto.BimElements = addedBimElements?.ToList();
         }
 
@@ -178,24 +181,25 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private async Task<IEnumerable<BimElementExternalDto>> AddBimElements(
             ICollection<BimElementExternalDto> bimElements,
             ProjectSnapshot project,
-            Issue issue)
+            IssueSnapshot issue)
         {
-            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
+            var comments = issue.Comments.Select(x => x.Entity);
             var currentElements = metaCommentHelper.GetBimElements(comments);
             var isCurrentEmpty = currentElements == null || !currentElements.Any();
-            var isNewEmpty = bimElements == null || !bimElements.Any();
 
-            if (!(isCurrentEmpty && isNewEmpty) && IsCollectionChanged())
+            if (IsCollectionChanged(
+                currentElements,
+                bimElements,
+                dtos => dtos.OrderBy(x => x.GlobalID),
+                bimElementComparer))
             {
                 try
                 {
                     var newComments = metaCommentHelper.CreateComments(bimElements, isCurrentEmpty);
+                    newComments = AddIssueId(newComments, issue.ID);
 
                     foreach (var comment in newComments)
-                    {
-                        comment.Attributes.IssueId = issue.ID;
                         await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
-                    }
                 }
                 catch
                 {
@@ -204,43 +208,39 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             }
 
             return bimElements;
-
-            bool IsCollectionChanged()
-            {
-                var currentOrdered = currentElements?.OrderBy(x => x.GlobalID) ??
-                    Enumerable.Empty<BimElementExternalDto>();
-                var newOrdered = bimElements?.OrderBy(x => x.GlobalID) ??
-                    Enumerable.Empty<BimElementExternalDto>();
-                return !currentOrdered.SequenceEqual(newOrdered, new BimElementComparer());
-            }
         }
 
         private async Task AddLinkedInfo(
             LinkedInfo linkedInfo,
             ProjectSnapshot project,
-            Issue issue)
+            IssueSnapshot issue)
         {
-            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
-            var currentElements = metaCommentHelper.GetLinkedInfo(comments);
-            var isCurrentEmpty = currentElements == null;
-            var isNewEmpty = linkedInfo == null;
+            var comments = issue.Comments.Select(x => x.Entity);
+            var currentData = metaCommentHelper.GetLinkedInfo(comments);
 
-            if (!(isCurrentEmpty && isNewEmpty))
+            if (!linkedInfoComparer.Equals(currentData, linkedInfo))
             {
                 try
                 {
-                    var newComments = metaCommentHelper.CreateComments(linkedInfo, isCurrentEmpty);
+                    var newComments = metaCommentHelper.CreateComments(linkedInfo, currentData == null);
+                    newComments = AddIssueId(newComments, issue.ID);
 
                     foreach (var comment in newComments)
-                    {
-                        comment.Attributes.IssueId = issue.ID;
                         await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
-                    }
                 }
                 catch
                 {
                     throw;
                 }
+            }
+        }
+
+        private IEnumerable<Comment> AddIssueId(IEnumerable<Comment> comments, string issueId)
+        {
+            foreach (var comment in comments)
+            {
+                comment.Attributes.IssueId = issueId;
+                yield return comment;
             }
         }
 
@@ -342,30 +342,19 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private bool IsNew(Issue issue)
             => issue.ID == null;
 
-        private class BimElementComparer : IEqualityComparer<BimElementExternalDto>
+        private bool IsCollectionChanged<T>(
+            ICollection<T> oldCollection,
+            ICollection<T> newCollection,
+            Func<IEnumerable<T>, IOrderedEnumerable<T>> orderingFunc,
+            IEqualityComparer<T> comparer)
         {
-            public bool Equals(BimElementExternalDto x, BimElementExternalDto y)
-            {
-                if (ReferenceEquals(x, y))
-                    return true;
-
-                if (ReferenceEquals(x, null))
-                    return false;
-
-                if (ReferenceEquals(y, null))
-                    return false;
-
-                return string.Equals(x.GlobalID, y.GlobalID, StringComparison.InvariantCulture) &&
-                    string.Equals(x.ParentName, y.ParentName, StringComparison.InvariantCulture);
-            }
-
-            public int GetHashCode(BimElementExternalDto obj)
-            {
-                HashCode hashCode = new ();
-                hashCode.Add(obj.GlobalID, StringComparer.InvariantCulture);
-                hashCode.Add(obj.ParentName, StringComparer.InvariantCulture);
-                return hashCode.ToHashCode();
-            }
+            var currentOrdered = oldCollection != null
+                ? orderingFunc(oldCollection)
+                : Enumerable.Empty<T>();
+            var newOrdered = newCollection != null
+                ? orderingFunc(oldCollection)
+                : Enumerable.Empty<T>();
+            return !currentOrdered.SequenceEqual(newOrdered, comparer);
         }
     }
 }
