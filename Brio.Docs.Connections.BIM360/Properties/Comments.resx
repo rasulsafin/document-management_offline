@@ -123,4 +123,10 @@
   <data name="BimElementsChangedInfo" xml:space="preserve">
     <value>Links to model elements changed</value>
   </data>
+  <data name="OriginalModelChangedInfo" xml:space="preserve">
+    <value>Issue was redirected from</value>
+  </data>
+  <data name="OriginalModelAddedInfo" xml:space="preserve">
+    <value>Issue was redirected from</value>
+  </data>
 </root>

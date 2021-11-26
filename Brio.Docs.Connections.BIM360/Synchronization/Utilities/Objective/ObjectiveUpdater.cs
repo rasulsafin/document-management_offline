@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
@@ -25,6 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly MetaCommentHelper metaCommentHelper;
+        private readonly PushpinHelper pushpinHelper;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -35,6 +37,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             ItemsSyncHelper itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
             MetaCommentHelper metaCommentHelper,
+            PushpinHelper pushpinHelper,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -44,6 +47,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             this.itemsSyncHelper = itemsSyncHelper;
             this.snapshotUtilities = snapshotUtilities;
             this.metaCommentHelper = metaCommentHelper;
+            this.pushpinHelper = pushpinHelper;
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
         }
@@ -52,6 +56,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
+            (Issue, LinkedInfo) pushpin = await CreatePushpin(obj, issue);
+            issue = pushpin.Item1;
             var isNew = IsNew(issue);
             issue = await PutIssueAsync(project, issue, isNew);
             var issueSnapshot = UpdateSnapshot(project, issue, isNew);
@@ -74,7 +80,18 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             await AddItems(obj, project, issueSnapshot, parsedToDto);
             await AddBimElements(obj, project, issueSnapshot, parsedToDto);
 
+            if (pushpin.Item2 != null)
+            {
+                await AddLinkedInfo(pushpin.Item2, project, issueSnapshot.Entity);
+            }
+
             return parsedToDto;
+        }
+
+        private async Task<(Issue, LinkedInfo)> CreatePushpin(ObjectiveExternalDto obj, Issue issue)
+        {
+            var pushpin = await pushpinHelper.ConvertToPushpin(issue, obj);
+            return pushpin;
         }
 
         private IssueSnapshot UpdateSnapshot(ProjectSnapshot project, Issue issue, bool isNew)
@@ -196,6 +213,35 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 var newOrdered = bimElements?.OrderBy(x => x.GlobalID) ??
                     Enumerable.Empty<BimElementExternalDto>();
                 return !currentOrdered.SequenceEqual(newOrdered, new BimElementComparer());
+            }
+        }
+
+        private async Task AddLinkedInfo(
+            LinkedInfo linkedInfo,
+            ProjectSnapshot project,
+            Issue issue)
+        {
+            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
+            var currentElements = metaCommentHelper.GetLinkedInfo(comments);
+            var isCurrentEmpty = currentElements == null;
+            var isNewEmpty = linkedInfo == null;
+
+            if (!(isCurrentEmpty && isNewEmpty))
+            {
+                try
+                {
+                    var newComments = metaCommentHelper.CreateComments(linkedInfo, isCurrentEmpty);
+
+                    foreach (var comment in newComments)
+                    {
+                        comment.Attributes.IssueId = issue.ID;
+                        await issuesService.PostIssuesCommentsAsync(project.IssueContainer, comment);
+                    }
+                }
+                catch
+                {
+                    throw;
+                }
             }
         }
 

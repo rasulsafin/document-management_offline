@@ -11,7 +11,6 @@ using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
@@ -182,11 +181,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
         private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
         {
-            var otherInfo = snapshot.Entity.GetOtherInfo();
-            var linkedInfo = otherInfo?.OriginalModelInfo;
+            if (snapshot.Comments == null)
+                return false;
+
+            var linkedInfo = metaCommentHelper.GetLinkedInfo(snapshot.Comments.Select(x => x.Entity));
 
             if (linkedInfo == null ||
-                !snapshot.ProjectSnapshot.Items.TryGetValue(otherInfo.OriginalModelInfo.Urn, out var originalTarget))
+                !snapshot.ProjectSnapshot.Items.TryGetValue(linkedInfo.Urn, out var originalTarget))
                 return false;
 
             parsedToDto.Location.Item = originalTarget.Entity.ToDto();

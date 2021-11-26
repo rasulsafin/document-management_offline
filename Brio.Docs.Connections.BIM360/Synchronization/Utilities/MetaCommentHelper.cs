@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Properties;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Integration.Dtos;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -29,6 +30,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 ? result
                 : null;
 
+        public LinkedInfo GetLinkedInfo(IEnumerable<Comment> comments)
+            => TryGet(comments, MrsConstants.LINKED_INFO_META_COMMENT_TAG, out LinkedInfo result)
+                ? result
+                : null;
+
         public IEnumerable<Comment> CreateComments(ICollection<BimElementExternalDto> bimElements, bool isCurrentEmpty)
         {
             var info = isCurrentEmpty
@@ -36,6 +42,15 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 : Comments.BimElementsChangedInfo;
 
             return CreateComments(bimElements, MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG, info);
+        }
+
+        public IEnumerable<Comment> CreateComments(LinkedInfo linkedInfo, bool isCurrentEmpty)
+        {
+            var info = isCurrentEmpty
+                ? Comments.OriginalModelAddedInfo
+                : Comments.OriginalModelChangedInfo;
+
+            return CreateComments(linkedInfo, MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG, info);
         }
 
         private static string SkipLine(string x, int count)

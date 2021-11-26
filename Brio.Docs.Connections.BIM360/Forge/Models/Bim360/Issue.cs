@@ -241,12 +241,6 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 
             [DataMember(Name = "attributesVersion")]
             public object AttributesVersion { get; set; }
-
-            /// <summary>
-            /// Our property to save our additional info.
-            /// </summary>
-            [DataMember]
-            public object OtherInfo { get; set; }
         }
 
         [DataContract]
