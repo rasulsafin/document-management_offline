@@ -20,24 +20,21 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
     {
         private readonly SnapshotGetter snapshot;
         private readonly IssuesService issuesService;
-        private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly ItemsService itemsService;
         private readonly ConfigurationsHelper configurationsHelper;
 
         public PushpinHelper(SnapshotGetter snapshot,
             IssuesService issuesService,
-            ItemsSyncHelper itemsSyncHelper,
             ItemsService itemsService,
             ConfigurationsHelper configurationsHelper)
         {
             this.snapshot = snapshot;
             this.issuesService = issuesService;
-            this.itemsSyncHelper = itemsSyncHelper;
             this.itemsService = itemsService;
             this.configurationsHelper = configurationsHelper;
         }
 
-        public async Task<(Issue, LinkedInfo)> ConvertToPushpin(Issue issue, ObjectiveExternalDto objective)
+        public async Task<(Issue, LinkedInfo)> ConvertToPushpin(Issue issueToChange, ObjectiveExternalDto objective, ItemSnapshot target)
         {
             Issue exist = null;
             var project = snapshot.GetProject(objective.ProjectExternalID);
@@ -48,20 +45,19 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             string originalUrn = null;
             int? startingVersion, originalStartingVersion = null;
             Vector3d? globalOffset = null;
-            var itemSnapshot = await GetTargetSnapshot(objective, project);
-            var config = await configurationsHelper.GetModelConfig(
+            target.Config ??= await configurationsHelper.GetModelConfig(
                 objective.Location?.Item?.FileName,
                 project,
-                itemSnapshot);
+                target);
 
             if (exist == null)
             {
-                (targetUrn, startingVersion) = await GetTarget(objective, project, itemSnapshot);
+                (targetUrn, startingVersion) = await GetTargetUrnAndVersion(objective, project, target);
 
-                if (config != null)
+                if (target.Config?.RedirectTo != null)
                 {
-                    (targetUrn, originalUrn) = (config.RedirectTo.Urn, targetUrn);
-                    (startingVersion, originalStartingVersion) = (config.RedirectTo.Version, startingVersion);
+                    (targetUrn, originalUrn) = (target.Config.RedirectTo.Urn, targetUrn);
+                    (startingVersion, originalStartingVersion) = (target.Config.RedirectTo.Version, startingVersion);
                 }
             }
             else
@@ -71,16 +67,26 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 globalOffset = exist.Attributes.PushpinAttributes?.ViewerState?.GlobalOffset;
             }
 
-            var result = issue;
+            var result = issueToChange;
             result.Attributes.StartingVersion = startingVersion;
             result.Attributes.TargetUrn = targetUrn;
-            result.Attributes.PushpinAttributes = await GetPushpinAttributes(objective.Location, project, targetUrn, globalOffset, config);
+            result.Attributes.PushpinAttributes = await GetPushpinAttributes(
+                objective.Location,
+                project,
+                targetUrn,
+                globalOffset,
+                target.Config?.RedirectTo);
 
-            var linkedInfo = SetOtherInfo(objective, result, config, originalUrn, originalStartingVersion);
+            var linkedInfo = GetLinkedResultInfo(
+                objective,
+                result,
+                target.Config,
+                originalUrn,
+                originalStartingVersion);
             return (result, linkedInfo);
         }
 
-        private static LinkedInfo SetOtherInfo(
+        private static LinkedInfo GetLinkedResultInfo(
             ObjectiveExternalDto objective,
             Issue result,
             IfcConfig config,
@@ -116,7 +122,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             ProjectSnapshot projectSnapshot,
             string targetUrn,
             Vector3d? globalOffset = default,
-            IfcConfig config = null)
+            LinkedInfo redirectInfo = null)
         {
             if (locationDto == null)
                 return null;
@@ -125,10 +131,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             var location = locationDto.Location.ToVector();
             var camera = locationDto.CameraPosition.ToVector();
 
-            if (config != null)
+            if (redirectInfo != null)
             {
-                location -= config.RedirectTo.Offset;
-                camera -= config.RedirectTo.Offset;
+                location -= redirectInfo.Offset;
+                camera -= redirectInfo.Offset;
             }
 
             var target = location.ToFeet().ToXZY();
@@ -151,7 +157,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             };
         }
 
-        private async Task<(string item, int? version)> GetTarget(
+        private async Task<(string item, int? version)> GetTargetUrnAndVersion(
             ObjectiveExternalDto obj,
             ProjectSnapshot project,
             ItemSnapshot itemSnapshot)
@@ -181,38 +187,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             return default;
         }
 
-        private async Task<ItemSnapshot> GetTargetSnapshot(ObjectiveExternalDto obj, ProjectSnapshot project)
-        {
-            if (obj.Location != null)
-            {
-                if (!project.Items.TryGetValue(obj.Location.Item.ExternalID, out var itemSnapshot))
-                    itemSnapshot = project.FindItemByName(obj.Location.Item.FileName);
-
-                if (itemSnapshot == null)
-                {
-                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item);
-                    itemSnapshot = project.Items[posted.ID];
-                }
-
-                return itemSnapshot;
-            }
-
-            if (obj.BimElements is { Count: > 0 })
-            {
-                return obj.BimElements.GroupBy(x => x.ParentName, (name, elements) => (name, count: elements.Count()))
-                       .OrderByDescending(x => x.count)
-                       .Select(x => x.name)
-                       .Select(file => project.FindItemByName(file, true))
-                       .FirstOrDefault(itemSnapshot => itemSnapshot != null);
-            }
-
-            return default;
-        }
-
         private async Task<Vector3d> GetGlobalOffsetOrZeroVector(ProjectSnapshot projectSnapshot, string targetUrn)
         {
             if (string.IsNullOrWhiteSpace(targetUrn))
                 return Vector3d.Zero;
+
+            var targetSnapshot = projectSnapshot.Items.TryGetValue(targetUrn, out var value) ? value : null;
+            if (targetSnapshot?.GlobalOffset != null)
+                return targetSnapshot.GlobalOffset.Value;
 
             var found = projectSnapshot.Issues.Values
                .Select(issueSnapshot => issueSnapshot.Entity)
@@ -230,7 +212,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 found = issuesOnTarget.FirstOrDefault(IsNotZeroOffset);
             }
 
-            return GetGlobalOffsetOrZeroVector(found);
+            var vector = GetGlobalOffsetOrZeroVector(found);
+
+            if (vector != Vector3d.Zero && targetSnapshot != null)
+                targetSnapshot.GlobalOffset = vector;
+
+            return vector;
         }
 
         private bool IsNotZeroOffset(Issue issue)

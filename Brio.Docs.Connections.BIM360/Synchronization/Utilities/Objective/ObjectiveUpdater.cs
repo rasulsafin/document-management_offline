@@ -56,8 +56,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
-            (Issue, LinkedInfo) pushpin = await CreatePushpin(obj, issue);
-            issue = pushpin.Item1;
+            var pushpin = await CreatePushpin(project, obj, issue);
+            issue = pushpin.issue;
             var isNew = IsNew(issue);
             issue = await PutIssueAsync(project, issue, isNew);
             var issueSnapshot = UpdateSnapshot(project, issue, isNew);
@@ -80,17 +80,16 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             await AddItems(obj, project, issueSnapshot, parsedToDto);
             await AddBimElements(obj, project, issueSnapshot, parsedToDto);
 
-            if (pushpin.Item2 != null)
-            {
-                await AddLinkedInfo(pushpin.Item2, project, issueSnapshot.Entity);
-            }
+            if (pushpin.linkedInfo != null)
+                await AddLinkedInfo(pushpin.linkedInfo, project, issueSnapshot.Entity);
 
             return parsedToDto;
         }
 
-        private async Task<(Issue, LinkedInfo)> CreatePushpin(ObjectiveExternalDto obj, Issue issue)
+        private async Task<(Issue issue, LinkedInfo linkedInfo)> CreatePushpin(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
         {
-            var pushpin = await pushpinHelper.ConvertToPushpin(issue, obj);
+            var target = await GetTargetSnapshot(obj, project);
+            var pushpin = await pushpinHelper.ConvertToPushpin(issue, obj, target);
             return pushpin;
         }
 
@@ -243,6 +242,34 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                     throw;
                 }
             }
+        }
+
+        private async Task<ItemSnapshot> GetTargetSnapshot(ObjectiveExternalDto obj, ProjectSnapshot project)
+        {
+            if (obj.Location != null)
+            {
+                if (!project.Items.TryGetValue(obj.Location.Item.ExternalID, out var itemSnapshot))
+                    itemSnapshot = project.FindItemByName(obj.Location.Item.FileName);
+
+                if (itemSnapshot == null)
+                {
+                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item);
+                    itemSnapshot = project.Items[posted.ID];
+                }
+
+                return itemSnapshot;
+            }
+
+            if (obj.BimElements is { Count: > 0 })
+            {
+                return obj.BimElements.GroupBy(x => x.ParentName, (name, elements) => (name, count: elements.Count()))
+                   .OrderByDescending(x => x.count)
+                   .Select(x => x.name)
+                   .Select(file => project.FindItemByName(file, true))
+                   .FirstOrDefault(itemSnapshot => itemSnapshot != null);
+            }
+
+            return default;
         }
 
         private async Task<Attachment> AttachItem(Item posted, string issueId, string containerId)
