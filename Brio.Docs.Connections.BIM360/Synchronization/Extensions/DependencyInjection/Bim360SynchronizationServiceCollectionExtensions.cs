@@ -34,6 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
             services.AddScoped<ObjectiveRemover>();
+            services.AddScoped<PushpinHelper>();
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
