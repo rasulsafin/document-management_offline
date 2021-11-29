@@ -348,13 +348,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             Func<IEnumerable<T>, IOrderedEnumerable<T>> orderingFunc,
             IEqualityComparer<T> comparer)
         {
-            var currentOrdered = oldCollection != null
+            var oldOrdered = oldCollection != null
                 ? orderingFunc(oldCollection)
                 : Enumerable.Empty<T>();
             var newOrdered = newCollection != null
-                ? orderingFunc(oldCollection)
+                ? orderingFunc(newCollection)
                 : Enumerable.Empty<T>();
-            return !currentOrdered.SequenceEqual(newOrdered, comparer);
+            return !oldOrdered.SequenceEqual(newOrdered, comparer);
         }
     }
 }

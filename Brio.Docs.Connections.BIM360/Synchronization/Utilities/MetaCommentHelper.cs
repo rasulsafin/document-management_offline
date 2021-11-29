@@ -16,7 +16,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         private static readonly string GUID_REGEX_PATTERN = "[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?";
 
         private readonly Lazy<ISerializer> serializer = new (
-            () => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
+            () => new SerializerBuilder().WithTypeConverter(new Vector3dTypeConverter())
+               .WithNamingConvention(UnderscoredNamingConvention.Instance)
+               .Build());
 
         private readonly Lazy<IDeserializer> deserializer = new (
             () => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
@@ -50,7 +52,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 ? Comments.OriginalModelAddedInfo
                 : Comments.OriginalModelChangedInfo;
 
-            return CreateComments(linkedInfo, MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG, info);
+            return CreateComments(linkedInfo, MrsConstants.LINKED_INFO_META_COMMENT_TAG, info);
         }
 
         private static string SkipLine(string x, int count)
