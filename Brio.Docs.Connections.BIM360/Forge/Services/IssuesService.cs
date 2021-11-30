@@ -20,7 +20,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
 
         public async Task<List<Issue>> GetIssuesAsync(
             string containerID,
-            IEnumerable<Filter> filters = null)
+            IEnumerable<IQueryParameter> filters = null)
             => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
@@ -81,10 +81,13 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
-        public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
+        public async Task<List<Attachment>> GetAttachmentsAsync(
+            string containerID,
+            string issueID,
+            IEnumerable<IQueryParameter> parameters = null)
             => await PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
                 connection,
-                Resources.GetIssuesAttachmentMethod,
+                ForgeConnection.SetParameters(Resources.GetIssuesAttachmentMethod, parameters),
                 DATA_PROPERTY,
                 containerID,
                 issueID);
@@ -107,10 +110,13 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<UserInfo>();
         }
 
-        public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
+        public async Task<List<Comment>> GetCommentsAsync(
+            string containerID,
+            string issueID,
+            IEnumerable<IQueryParameter> parameters = null)
             => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
                 connection,
-                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod),
+                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod, parameters),
                 DATA_PROPERTY,
                 containerID,
                 issueID);
