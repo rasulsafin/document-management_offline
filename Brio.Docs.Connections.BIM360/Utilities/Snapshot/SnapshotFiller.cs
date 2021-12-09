@@ -136,10 +136,12 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
                 var issues = issuesService.GetIssuesAsync(project.IssueContainer, filters);
-                project.Issues = await issues.ToDictionaryAsync(x => x.ID, x => new IssueSnapshot(x, project));
+                project.Issues = new Dictionary<string, IssueSnapshot>();
 
-                foreach (var issueSnapshot in project.Issues.Values)
+                await foreach (var issue in issues)
                 {
+                    var issueSnapshot = new IssueSnapshot(issue, project);
+                    project.Issues.Add(issue.ID, issueSnapshot);
                     issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
                     issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }

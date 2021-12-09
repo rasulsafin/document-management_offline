@@ -30,9 +30,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
             CancellationToken cancellationToken = default)
         {
             await foreach (TSource unused in source.WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
                 return true;
-            }
 
             return false;
         }
@@ -53,9 +51,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
             CancellationToken cancellationToken = default)
         {
             await foreach (TSource element in source.WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
                 return element;
-            }
 
             return default;
         }
@@ -81,9 +77,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
             await foreach (TSource element in source.WithCancellation(cancellationToken).ConfigureAwait(false))
             {
                 if (predicate(element))
-                {
                     return element;
-                }
             }
 
             return default;
@@ -152,8 +146,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
 
             await foreach (TSource item in source.WithCancellation(cancellationToken).ConfigureAwait(false))
             {
-                TKey key = keySelector(item);
-
+                var key = keySelector(item);
                 d.Add(key, item);
             }
 
@@ -227,7 +220,6 @@ namespace Brio.Docs.Connections.Bim360.Extensions
             {
                 var key = keySelector(item);
                 var value = elementSelector(item);
-
                 d.Add(key, value);
             }
 
@@ -256,9 +248,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
             List<TSource> list = new ();
 
             await foreach (TSource item in source.WithCancellation(cancellationToken).ConfigureAwait(false))
-            {
                 list.Add(item);
-            }
 
             return list;
         }

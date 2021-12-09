@@ -16,38 +16,53 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils
             => this.issuesService = issuesService;
 
         // Deleting an attachment is not defined as a change.
-        public async IAsyncEnumerable<string> GetUpdatedIssueIds(string containerID, DateTime updatedAfter, IEnumerable<IQueryParameter> parameters)
+        public async IAsyncEnumerable<string> GetUpdatedIssueIds(
+            string containerID,
+            DateTime updatedAfter,
+            IEnumerable<IQueryParameter> parameters)
         {
-            var closedAtField = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.ClosedAt);
-            var commentCountField = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.CommentCount);
-            var attachmentCountField = DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.AttachmentCount);
-            var fieldsParameter = new QueryParameter(
-                "fields[quality_issues]",
-                $"{closedAtField},{commentCountField},{attachmentCountField}");
+            var fieldsParameter = new FieldsFilter<Issue, Issue.IssueAttributes, Issue.IssueRelationships>(
+                x => x.ClosedAt,
+                x => x.CommentCount,
+                x => x.AttachmentCount,
+                x => x.UpdatedAt);
 
             var allIssues = issuesService.GetIssuesAsync(
                 containerID,
                 parameters.Append(fieldsParameter));
-            var filters = new IQueryParameter[]
+
+            var filter = new Filter(Constants.FILTER_KEY_ISSUE_UPDATED_AFTER, updatedAfter.ToString("O"));
+
+            var commentParameters = new IQueryParameter[]
             {
-                new Filter(Constants.FILTER_KEY_ISSUE_UPDATED_AFTER, updatedAfter.ToString("O")),
+                filter, new FieldsFilter<Comment, Comment.CommentAttributes, object>(x => x.CreatedAt),
+            };
+
+            var attachmentParameters = new IQueryParameter[]
+            {
+                filter,
+                new FieldsFilter<Attachment, Attachment.AttachmentAttributes, Attachment.AttachmentRelationships>(
+                    x => x.CreatedAt),
             };
 
             await foreach (var issue in allIssues)
             {
+                if (issue.Attributes.UpdatedAt > updatedAfter)
+                    yield return issue.ID;
+
                 if (issue.Attributes.ClosedAt < updatedAfter)
                     continue;
 
                 if (issue.Attributes.AttachmentCount != 0)
                 {
-                    var comments = issuesService.GetCommentsAsync(containerID, issue.ID, filters);
+                    var comments = issuesService.GetCommentsAsync(containerID, issue.ID, commentParameters);
                     if (await comments.AnyAsync())
                         yield return issue.ID;
                 }
 
                 if (issue.Attributes.AttachmentCount != 0)
                 {
-                    var attachments = issuesService.GetAttachmentsAsync(containerID, issue.ID, filters);
+                    var attachments = issuesService.GetAttachmentsAsync(containerID, issue.ID, attachmentParameters);
                     if (await attachments.AnyAsync())
                         yield return issue.ID;
                 }
