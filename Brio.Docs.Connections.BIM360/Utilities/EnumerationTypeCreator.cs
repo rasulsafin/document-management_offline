@@ -1,6 +1,6 @@
-using Brio.Docs.Connections.Bim360.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
 
@@ -27,7 +27,8 @@ namespace Brio.Docs.Connections.Bim360.Utilities
         {
             await FillSnapshotIfNotFilled();
 
-            var values = DynamicFieldUtilities.GetGroupedTypes(
+            var values = DynamicFieldUtilities
+               .GetGroupedVariants(
                     creator,
                     snapshot.ProjectEnumerable.SelectMany(creator.GetSnapshots))
                .Select(

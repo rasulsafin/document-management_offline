@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -37,39 +37,35 @@ namespace Brio.Docs.Connections.Bim360.Utilities
         public string GetVariantDisplayName(AssignToVariant variant)
             => variant.Title;
 
-        public async Task<IEnumerable<AssignToVariant>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
+        public async IAsyncEnumerable<AssignToVariant> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
         {
-            var users = (await accountAdminService.GetProjectUsersAsync(projectSnapshot.ID)).Where(
-                    user => (user.Services
-                       .FirstOrDefault(service => service.ServiceName == Constants.DOCUMENT_MANAGEMENT_SERVICE_NAME)
+            var users = await accountAdminService.GetProjectUsersAsync(projectSnapshot.ID)
+               .Where(
+                    user => (user.Services.FirstOrDefault(
+                            service => service.ServiceName == Constants.DOCUMENT_MANAGEMENT_SERVICE_NAME)
                       ?.Access ?? Constants.SERVICE_NONE_ACCESS) != Constants.SERVICE_NONE_ACCESS)
-               .ToArray();
+               .ToListAsync();
 
-            var result = users.Select(
-                    user => new AssignToVariant(user.AutodeskID, AssignToType.User, user.Name, projectSnapshot))
-               .ToList();
+            foreach (var user in users)
+                yield return new AssignToVariant(user.AutodeskID, AssignToType.User, user.Name, projectSnapshot);
 
             var hub = projectSnapshot.HubSnapshot.Entity;
 
             var roles = await accountAdminService.GetRolesAsync(hub, projectSnapshot.ID);
-            result.AddRange(
-                roles.Where(role => users.Any(y => y.RoleIds.Contains(role.ID)))
-                   .Select(
-                        role => new AssignToVariant(
-                            role.MemberGroupID,
-                            AssignToType.Role,
-                            role.Name,
-                            projectSnapshot)));
 
-            var companies = await accountAdminService.GetCompaniesAsync(hub, projectSnapshot.ID);
-            result.AddRange(
-                companies.Select(
-                    company => new AssignToVariant(
-                        company.MemberGroupID,
-                        AssignToType.Company,
-                        company.Name,
-                        projectSnapshot)));
-            return result;
+            foreach (var role in roles)
+                yield return new AssignToVariant(role.MemberGroupID, AssignToType.Role, role.Name, projectSnapshot);
+
+            var companies = accountAdminService.GetCompaniesAsync(hub, projectSnapshot.ID);
+
+            await foreach (var company in companies)
+            {
+                yield return new AssignToVariant(
+                    company.MemberGroupID,
+                    AssignToType.Company,
+                    company.Name,
+                    projectSnapshot);
+            }
         }
 
         public IEnumerable<AssignToVariant> GetSnapshots(ProjectSnapshot project)

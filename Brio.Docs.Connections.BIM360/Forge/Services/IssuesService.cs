@@ -18,10 +18,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
         public IssuesService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Issue>> GetIssuesAsync(
+        public IAsyncEnumerable<Issue> GetIssuesAsync(
             string containerID,
             IEnumerable<IQueryParameter> filters = null)
-            => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
+            => PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
                 DATA_PROPERTY,
@@ -81,11 +81,11 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
-        public async Task<List<Attachment>> GetAttachmentsAsync(
+        public IAsyncEnumerable<Attachment> GetAttachmentsAsync(
             string containerID,
             string issueID,
             IEnumerable<IQueryParameter> parameters = null)
-            => await PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
+            => PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetIssuesAttachmentMethod, parameters),
                 DATA_PROPERTY,
@@ -110,11 +110,11 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<UserInfo>();
         }
 
-        public async Task<List<Comment>> GetCommentsAsync(
+        public IAsyncEnumerable<Comment> GetCommentsAsync(
             string containerID,
             string issueID,
             IEnumerable<IQueryParameter> parameters = null)
-            => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
+            => PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod, parameters),
                 DATA_PROPERTY,

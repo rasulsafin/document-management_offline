@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
@@ -195,7 +196,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             Issue issue)
         {
             var resultItems = new List<Attachment>();
-            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
+            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID).ToListAsync();
 
             foreach (var item in items)
             {
