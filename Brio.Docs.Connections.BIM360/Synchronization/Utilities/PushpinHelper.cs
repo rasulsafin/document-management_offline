@@ -34,7 +34,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
             this.configurationsHelper = configurationsHelper;
         }
 
-        public async Task<(Issue, LinkedInfo)> Pushpin(Issue issueToChange, ObjectiveExternalDto objective, ItemSnapshot target)
+        public async Task<(Issue, LinkedInfo)> LinkToModel(Issue issueToChange, ObjectiveExternalDto objective, ItemSnapshot target)
         {
             Issue exist = null;
             var project = snapshot.GetProject(objective.ProjectExternalID);

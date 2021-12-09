@@ -59,7 +59,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
-            var pushpin = await Pushpin(project, obj, issue);
+            var pushpin = await LinkToModel(project, obj, issue);
             issue = pushpin.issue;
             var isNew = IsNew(issue);
             issue = await PutIssueAsync(project, issue, isNew);
@@ -89,10 +89,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             return parsedToDto;
         }
 
-        private async Task<(Issue issue, LinkedInfo linkedInfo)> Pushpin(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
+        private async Task<(Issue issue, LinkedInfo linkedInfo)> LinkToModel(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
         {
             var target = await GetTargetSnapshot(obj, project);
-            var pushpin = await pushpinHelper.Pushpin(issue, obj, target);
+            var pushpin = await pushpinHelper.LinkToModel(issue, obj, target);
             return pushpin;
         }
 
