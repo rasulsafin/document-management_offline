@@ -91,6 +91,7 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("Attached");
             LinkParent(tuple, parent);
             logger.LogTrace("Parent linked");
+            merger.Merge(tuple);
             return await base.AddToLocal(tuple, data, connectionContext, parent, token);
         }
 
