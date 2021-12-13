@@ -396,8 +396,22 @@ namespace Brio.Docs.Synchronization.Strategies
                 await itemStrategy.FindAndAttachExists(
                     itemTuple,
                     null,
-                    tuple,
-                    (string)itemTuple.GetPropertyValue(nameof(Item.RelativePath)));
+                    tuple);
+
+                if (itemTuple.Synchronized != null && itemTuple.Remote == null)
+                {
+                    logger.LogDebug("Creating remote");
+
+                    itemTuple.Remote = new Item
+                    {
+                        ExternalID = itemTuple.Synchronized.ExternalID,
+                        ItemType = itemTuple.Synchronized.ItemType,
+                        RelativePath = itemTuple.Synchronized.RelativePath,
+                        ProjectID = itemTuple.Synchronized.ProjectID,
+                    };
+                    logger.LogDebug("Created item: {@Object}", tuple.Local);
+                    itemTuple.RemoteChanged = true;
+                }
 
                 tuple.Local.Location.Item = itemTuple.Local;
                 tuple.Synchronized.Location.Item = itemTuple.Synchronized ?? itemTuple.Local?.SynchronizationMate;

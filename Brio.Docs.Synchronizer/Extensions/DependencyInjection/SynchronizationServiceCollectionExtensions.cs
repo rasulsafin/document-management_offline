@@ -4,6 +4,8 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Strategies;
+using Brio.Docs.Synchronization.Utilities.Finders;
+using Brio.Docs.Synchronization.Utilities.Mergers;
 using Brio.Docs.Synchronization.Utils.Linkers;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -20,6 +22,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ItemStrategy<ObjectiveItemLinker>>();
             services.AddScoped<DynamicFieldStrategy<ObjectiveDynamicFieldLinker>>();
             services.AddScoped<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>>();
+
+            services.AddScoped<IMerger<Item>, ItemMerger>();
+
+            services.AddScoped<IFinder<Item>, ItemFinder>();
 
             services.AddScoped<ProjectItemLinker>();
             services.AddScoped<ObjectiveItemLinker>();
