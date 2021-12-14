@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,6 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
+    [Obsolete]
     internal class ItemStrategy<TLinker> : ALinkingStrategy<Item, ItemExternalDto>
         where TLinker : ILinker<Item>
     {
