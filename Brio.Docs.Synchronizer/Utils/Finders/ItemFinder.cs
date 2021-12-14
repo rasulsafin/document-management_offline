@@ -106,7 +106,9 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
         private async Task<(Project localProject, Project syncProject)> GetProjectsByRemote(int? remoteProjectId)
         {
             logger.LogTrace("GetProjectsByRemote started for project {@Project}", remoteProjectId);
-            var remoteProject = await context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.ID == remoteProjectId);
+            var remoteProject = await context.Projects.AsNoTracking()
+               .Include(x => x.SynchronizationMate)
+               .FirstOrDefaultAsync(x => x.ID == remoteProjectId);
             Project localProject;
             Project syncProject;
 
