@@ -43,13 +43,19 @@ tag:
   tags:
     - bash
     - docker
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+      when: always
+    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - when: never
   image: ubuntu
   before_script:
     - DEBIAN_FRONTEND=noninteractive apt-get update
     - DEBIAN_FRONTEND=noninteractive apt-get -y install php php-json git git-lfs openssh-client curl
     - DAY_OF_MONTH=$(date +%-d)
     - WEEK_TAG=""
-    - WEEK_TAG="w$((DAY_OF_MONTH / 7 + 1))"
+    - if [ $CI_COMMIT_REF_NAME == "development" ] && [ $CI_PIPELINE_SOURCE == "schedule" ]; then WEEK_TAG="-w$((DAY_OF_MONTH / 7 + 1))"; fi
   script:
     - VERSION="${BUILD_VERSION_COMMON}${WEEK_TAG}"
     - git config --global user.email "$GIT_EMAIL"
