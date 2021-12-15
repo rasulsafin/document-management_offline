@@ -6,6 +6,7 @@ variables:
 
 stages:
   - build
+  - deploy
 
 build:
   stage: build
@@ -25,3 +26,29 @@ build:
     expire_in: 2 days
     paths:
       - '%ARTIFACTS_PATH%'
+
+tag:
+  stage: deploy
+  tags:
+    - bash
+    - docker
+  rules:
+    - if: '$CI_COMMIT_REF_NAME == "master"'
+      when: always
+    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - when: never
+  image: ubuntu
+  before_script:
+    - DEBIAN_FRONTEND=noninteractive apt-get update
+    - DEBIAN_FRONTEND=noninteractive apt-get -y install php php-json git git-lfs openssh-client curl
+    - DAY_OF_MONTH=$(date +%-d)
+    - WEEK_TAG=""
+    - if [ $CI_COMMIT_REF_NAME == "development" ] && [ $CI_PIPELINE_SOURCE == "schedule" ]; then WEEK_TAG="w$((DAY_OF_MONTH / 7 + 1))"; fi
+  script:
+    - VERSION="${BUILD_VERSION_COMMON}${WEEK_TAG}"
+    - git config --global user.email "$GIT_EMAIL"
+    - git config --global user.name "$GIT_NAME"
+    - git remote add $CI_PIPELINE_ID http://oauth2:${GIT_TOKEN}@gitlab.briogroup.ru/mrs/unity/mrs
+    - git tag -a $VERSION -m "Version $VERSION"
+    - git push $CI_PIPELINE_ID $VERSION
