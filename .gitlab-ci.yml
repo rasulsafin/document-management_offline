@@ -43,6 +43,6 @@ tag:
     - VERSION="${BUILD_VERSION_COMMON}${WEEK_TAG}"
     - git config --global user.email "$GIT_EMAIL"
     - git config --global user.name "$GIT_NAME"
-    - git remote add $CI_PIPELINE_ID http://oauth2:${GIT_TOKEN}@gitlab.briogroup.ru/mrs/unity/mrs
+    - git remote add $CI_PIPELINE_ID http://oauth2:${GIT_TOKEN}@gitlab.briogroup.ru/mrs/unity/document-management
     - git tag -a $VERSION -m "Version $VERSION"
     - git push $CI_PIPELINE_ID $VERSION
