@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
@@ -11,7 +12,7 @@ using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
-    public class IssuesService
+    public class IssuesService : IIssuesService
     {
         private readonly ForgeConnection connection;
 

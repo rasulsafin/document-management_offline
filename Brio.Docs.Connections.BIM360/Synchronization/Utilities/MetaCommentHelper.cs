@@ -3,46 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connections.Bim360.Properties;
-using Brio.Docs.Integration.Dtos;
 using YamlDotNet.Serialization;
-using YamlDotNet.Serialization.NamingConventions;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
     internal class MetaCommentHelper
     {
-        private static readonly string GUID_REGEX_PATTERN = "[{(]?[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]?";
+        private static readonly string GUID_REGEX_PATTERN =
+            "[{(][0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[)}]";
 
-        private readonly Lazy<ISerializer> serializer = new (
-            () => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
+        private readonly ISerializer serializer;
+        private readonly IDeserializer deserializer;
 
-        private readonly Lazy<IDeserializer> deserializer = new (
-            () => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
-
-        public ICollection<BimElementExternalDto> GetBimElements(IEnumerable<Comment> comments)
-            => TryGet(
-                comments,
-                MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG,
-                out ICollection<BimElementExternalDto> result,
-                ArraySegment<BimElementExternalDto>.Empty)
-                ? result
-                : null;
-
-        public IEnumerable<Comment> CreateComments(ICollection<BimElementExternalDto> bimElements, bool isCurrentEmpty)
+        public MetaCommentHelper(ISerializer serializer, IDeserializer deserializer)
         {
-            var info = isCurrentEmpty
-                ? Comments.BimElementsAddedInfo
-                : Comments.BimElementsChangedInfo;
-
-            return CreateComments(bimElements, MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG, info);
+            this.serializer = serializer;
+            this.deserializer = deserializer;
         }
 
-        private static string SkipLine(string x, int count)
-            => string.Join('\n', x.Split('\n').Skip(count));
-
-        private bool TryGet<T>(IEnumerable<Comment> comments, string tag, out T result, T empty = default)
-            where T : class
+        public bool TryGet<T>(IEnumerable<Comment> comments, string tag, out T result)
         {
             var array = comments as Comment[] ?? comments.ToArray();
             var withTags = array.OrderByDescending(x => x.Attributes.CreatedAt)
@@ -51,7 +30,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
             foreach (var tagged in withTags)
             {
-                var regex = new Regex($"{tag}{GUID_REGEX_PATTERN}");
+                var regex = new Regex($"{Regex.Escape(tag)}{GUID_REGEX_PATTERN}");
                 var match = regex.Match(tagged);
                 var yaml = tagged;
 
@@ -65,7 +44,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
                 try
                 {
-                    result = deserializer.Value.Deserialize<T>(yaml);
+                    result = deserializer.Deserialize<T>(yaml);
                     return true;
                 }
                 catch
@@ -73,18 +52,19 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 }
             }
 
-            result = empty;
-            return true;
+            result = default;
+            return false;
         }
 
-        private IEnumerable<Comment> CreateComments<T>(T data,  string tag, string info)
+        public IEnumerable<Comment> CreateComments<T>(T data, string tag, string info)
         {
-            var yaml = serializer.Value.Serialize(data).Replace(Environment.NewLine, "\n");
+            var yaml = ReplaceNewLines(serializer.Serialize(data));
 
             int length = MrsConstants.MAX_COMMENT_LENGTH;
             var guid = Guid.NewGuid();
 
             int steps = (int)Math.Ceiling((double)yaml.Length / length);
+            info = ReplaceNewLines(info);
             info = $"#{info}";
             var firstLine = $"{MrsConstants.META_COMMENT_TAG} {tag}";
 
@@ -115,5 +95,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 yield return comment;
             }
         }
+
+        private static string SkipLine(string x, int count)
+            => string.Join('\n', x.Split('\n').Skip(count));
+
+        private static string ReplaceNewLines(string text)
+            => text.Replace("\r\n", "\n");
     }
 }

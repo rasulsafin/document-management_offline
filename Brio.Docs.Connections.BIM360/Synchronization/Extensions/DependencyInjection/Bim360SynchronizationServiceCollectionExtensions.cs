@@ -1,18 +1,22 @@
 using System;
+using System.Collections.Generic;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Factories;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.Synchronizers;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -29,17 +33,24 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSynchronizer<Bim360ObjectivesSynchronizer, ObjectiveExternalDto>();
             services.AddSynchronizer<Bim360ProjectsSynchronizer, ProjectExternalDto>();
 
-            services.AddScoped<ItemsSyncHelper>();
+            services.AddScoped<IItemsUpdater, ItemsSyncHelper>();
             services.AddScoped<MetaCommentHelper>();
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
             services.AddScoped<ObjectiveRemover>();
+
+            services.AddScoped(
+                _ => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
+            services.AddScoped(
+                _ => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
 
             services.AddConverter<Issue, ObjectiveExternalDto, IssueObjectiveConverter>();
             services.AddConverter<ObjectiveExternalDto, Issue, ObjectiveIssueConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveStatus, IssueSnapshotObjectiveStatusConverter>();
             services.AddConverter<ObjectiveExternalDto, Status, ObjectiveIssueStatusConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
+            services.AddConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>, CommentsBimElementsConverter>();
+            services.AddConverter<CommentCreatingData, IEnumerable<Comment>, BimElementsCommentsConverter>();
             return services;
         }
 

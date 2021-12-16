@@ -5,12 +5,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
@@ -25,8 +27,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     {
         private readonly SnapshotGetter snapshot;
         private readonly IConverter<ObjectiveExternalDto, Status> statusConverter;
-        private readonly IssuesService issuesService;
-        private readonly ItemsSyncHelper itemsSyncHelper;
+        private readonly IIssuesService issuesService;
+        private readonly IItemsUpdater itemsSyncHelper;
         private readonly ItemsService itemsService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
@@ -37,8 +39,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public ObjectiveIssueConverter(
             SnapshotGetter snapshot,
             IConverter<ObjectiveExternalDto, Status> statusConverter,
-            IssuesService issuesService,
-            ItemsSyncHelper itemsSyncHelper,
+            IIssuesService issuesService,
+            IItemsUpdater itemsSyncHelper,
             ItemsService itemsService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
@@ -303,7 +305,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
                 if (itemSnapshot == null)
                 {
-                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item);
+                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item.FullPath);
                     itemSnapshot = project.Items[posted.ID];
                 }
 

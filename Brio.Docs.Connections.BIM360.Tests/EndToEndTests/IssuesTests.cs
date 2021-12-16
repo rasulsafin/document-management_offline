@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -40,7 +41,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
             var authenticator = serviceProvider.GetService<Authenticator>();
             var hubsService = serviceProvider.GetService<HubsService>();
             var projectsService = serviceProvider.GetService<ProjectsService>();
-            issuesService = serviceProvider.GetService<IssuesService>();
+            issuesService = (IssuesService)serviceProvider.GetService<IIssuesService>();
 
             if (authenticator == null || hubsService == null || connection == null || projectsService == null)
                 throw new Exception("Required services are null");

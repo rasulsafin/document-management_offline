@@ -1,3 +1,4 @@
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -13,14 +14,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
     {
         private readonly SnapshotGetter snapshot;
         private readonly SnapshotUpdater snapshotUpdater;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
         public ObjectiveRemover(
             SnapshotGetter snapshot,
             SnapshotUpdater snapshotUpdater,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {

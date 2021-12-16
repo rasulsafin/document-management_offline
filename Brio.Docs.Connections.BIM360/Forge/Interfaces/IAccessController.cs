@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Brio.Docs.Connections.Bim360.Forge.Utils
+namespace Brio.Docs.Connections.Bim360.Forge.Interfaces
 {
     /// <summary>
     /// Represents a class that can check if a user has access.

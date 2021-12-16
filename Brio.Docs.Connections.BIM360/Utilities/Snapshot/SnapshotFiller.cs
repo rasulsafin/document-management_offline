@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -19,7 +20,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
@@ -33,7 +34,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
