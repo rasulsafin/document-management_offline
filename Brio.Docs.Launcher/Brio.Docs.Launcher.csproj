@@ -11,7 +11,7 @@
     <Product>Brio MRS Document Management Launcher</Product>
     <Copyright>Brio MRS©</Copyright>
     <PackageIcon>logo64.ico</PackageIcon>
-    <Version>1.1.1</Version>
+    <Version>1.2.0</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
