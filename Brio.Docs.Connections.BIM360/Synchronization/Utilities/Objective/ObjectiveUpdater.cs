@@ -26,9 +26,17 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly IIssuesService issuesService;
         private readonly IItemsUpdater itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly IConverter<CommentCreatingData, IEnumerable<Comment>> converterBimElementsToComments;
+
+        private readonly IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>>
+            converterBimElementsToComments;
+
         private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements;
-        private readonly PushpinHelper pushpinHelper;
+
+        private readonly IConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>>
+            converterLinkedInfoToComments;
+
+        private readonly IConverter<IEnumerable<Comment>, LinkedInfo> converterCommentsToLinkedInfo;
+        private readonly IIssueToModelLinker pushpinHelper;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -41,9 +49,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IIssuesService issuesService,
             IItemsUpdater itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
-            IConverter<CommentCreatingData, IEnumerable<Comment>> converterBimElementsToComments,
+            IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>> converterBimElementsToComments,
             IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements,
-            PushpinHelper pushpinHelper,
+            IConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>> converterLinkedInfoToComments,
+            IConverter<IEnumerable<Comment>, LinkedInfo> converterCommentsToLinkedInfo,
+            IIssueToModelLinker pushpinHelper,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -54,6 +64,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             this.snapshotUtilities = snapshotUtilities;
             this.converterBimElementsToComments = converterBimElementsToComments;
             this.converterCommentsToBimElements = converterCommentsToBimElements;
+            this.converterLinkedInfoToComments = converterLinkedInfoToComments;
+            this.converterCommentsToLinkedInfo = converterCommentsToLinkedInfo;
             this.pushpinHelper = pushpinHelper;
             this.converterToIssue = converterToIssue;
             this.converterToDto = converterToDto;
@@ -63,8 +75,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         {
             var project = snapshot.GetProject(obj.ProjectExternalID);
             var issue = await converterToIssue.Convert(obj);
-            var pushpin = await LinkToModel(project, obj, issue);
-            issue = pushpin.issue;
+
+            LinkedInfo linkedInfo = null;
+
+            if (obj.Location != null)
+                (issue, linkedInfo) = await LinkToModel(project, obj, issue);
+
             var isNew = IsNew(issue);
             issue = await PutIssueAsync(project, issue, isNew);
             var issueSnapshot = UpdateSnapshot(project, issue, isNew);
@@ -87,8 +103,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             await AddItems(obj, project, issueSnapshot, parsedToDto);
             await AddBimElements(obj, project, issueSnapshot, parsedToDto);
 
-            if (pushpin.linkedInfo != null)
-                await AddLinkedInfo(pushpin.linkedInfo, project, issueSnapshot);
+            if (linkedInfo != null)
+                await AddLinkedInfo(linkedInfo, project, issueSnapshot);
 
             return parsedToDto;
         }
@@ -188,7 +204,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IssueSnapshot issue)
         {
             var comments = issue.Comments.Select(x => x.Entity);
-            var currentElements = await converterCommentsToBimElements.Convert(comments);
+            var currentElements = (await converterCommentsToBimElements.Convert(comments))?.ToArray();
             var isCurrentEmpty = currentElements == null || !currentElements.Any();
 
             if (IsCollectionChanged(
@@ -200,7 +216,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 try
                 {
                     var newComments = await converterBimElementsToComments.Convert(
-                        new CommentCreatingData
+                        new CommentCreatingData<IEnumerable<BimElementExternalDto>>
                         {
                             Data = bimElements,
                             IsPreviousDataEmpty = isCurrentEmpty,
@@ -225,13 +241,18 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IssueSnapshot issue)
         {
             var comments = issue.Comments.Select(x => x.Entity);
-            var currentData = metaCommentHelper.GetLinkedInfo(comments);
+            var currentData = await converterCommentsToLinkedInfo.Convert(comments);
 
             if (!linkedInfoComparer.Equals(currentData, linkedInfo))
             {
                 try
                 {
-                    var newComments = metaCommentHelper.CreateComments(linkedInfo, currentData == null);
+                    var newComments = await converterLinkedInfoToComments.Convert(
+                        new CommentCreatingData<LinkedInfo>
+                        {
+                            Data = linkedInfo,
+                            IsPreviousDataEmpty = currentData == null,
+                        });
                     newComments = AddIssueId(newComments, issue.ID);
 
                     foreach (var comment in newComments)
@@ -262,7 +283,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
                 if (itemSnapshot == null)
                 {
-                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item);
+                    var posted = await itemsSyncHelper.PostItem(project, obj.Location.Item.FullPath);
                     itemSnapshot = project.Items[posted.ID];
                 }
 
@@ -352,8 +373,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             => issue.ID == null;
 
         private bool IsCollectionChanged<T>(
-            ICollection<T> oldCollection,
-            ICollection<T> newCollection,
+            IEnumerable<T> oldCollection,
+            IEnumerable<T> newCollection,
             Func<IEnumerable<T>, IOrderedEnumerable<T>> orderingFunc,
             IEqualityComparer<T> comparer)
         {

@@ -2,12 +2,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
@@ -16,15 +18,15 @@ using Brio.Docs.Integration.Dtos;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
-    internal class PushpinHelper
+    internal class PushpinHelper : IIssueToModelLinker
     {
         private readonly SnapshotGetter snapshot;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly ItemsService itemsService;
         private readonly ConfigurationsHelper configurationsHelper;
 
         public PushpinHelper(SnapshotGetter snapshot,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             ItemsService itemsService,
             ConfigurationsHelper configurationsHelper)
         {

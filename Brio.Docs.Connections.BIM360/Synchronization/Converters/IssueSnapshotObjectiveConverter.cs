@@ -9,6 +9,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
@@ -22,6 +23,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
         private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements;
+        private readonly IConverter<IEnumerable<Comment>, LinkedInfo> convertToLinkedInfo;
         private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
         private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
         private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
@@ -32,6 +34,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
             IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements,
+            IConverter<IEnumerable<Comment>, LinkedInfo> convertToLinkedInfo,
             IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator,
             IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
             IEnumIdentification<LocationSnapshot> locationEnumCreator,
@@ -41,6 +44,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
             this.convertToBimElements = convertToBimElements;
+            this.convertToLinkedInfo = convertToLinkedInfo;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
@@ -157,7 +161,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             {
                 if (snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
                 {
-                    if (!TryRedirect(snapshot, parsedToDto))
+                    if (!await TryRedirect(snapshot, parsedToDto))
                         parsedToDto.Location.Item = target.Entity.ToDto();
                 }
                 else
@@ -180,12 +184,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             return parsedToDto;
         }
 
-        private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
+        private async Task<bool> TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
         {
             if (snapshot.Comments == null)
                 return false;
 
-            var linkedInfo = metaCommentHelper.GetLinkedInfo(snapshot.Comments.Select(x => x.Entity));
+            var linkedInfo = await convertToLinkedInfo.Convert(snapshot.Comments.Select(x => x.Entity));
 
             if (linkedInfo == null ||
                 !snapshot.ProjectSnapshot.Items.TryGetValue(linkedInfo.Urn, out var originalTarget))

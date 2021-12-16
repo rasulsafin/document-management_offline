@@ -6,6 +6,7 @@ using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.UnitTests.Dummy;
@@ -23,17 +24,25 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
     public class ObjectiveUpdaterTests
     {
         private readonly Mock<IIssuesService> mockIssuesService = new ();
-        private readonly Mock<IConverter<ObjectiveExternalDto, Issue>> stubConverterToIssue = new ();
-        private readonly Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>> stubConverterToDto = new ();
-        private readonly Mock<IConverter<CommentCreatingData, IEnumerable<Comment>>>
+
+        private readonly Mock<IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>>>
             stubConverterBimElementsToComments = new ();
 
         private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>
             stubConverterCommentsToBimElements = new ();
 
+        private readonly Mock<IConverter<IEnumerable<Comment>, LinkedInfo>>
+            stubConverterCommentsToLinkedInfo = new ();
+
+        private readonly Mock<IConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>>>
+            stubConverterLinkedInfoToComments = new ();
+        private readonly Mock<IConverter<IssueSnapshot, ObjectiveExternalDto>> stubConverterToDto = new ();
+        private readonly Mock<IConverter<ObjectiveExternalDto, Issue>> stubConverterToIssue = new ();
+        private readonly Mock<IIssueToModelLinker> stubPushpinHelper = new ();
+
         private ObjectiveUpdater objectiveUpdater;
-        private SnapshotUpdater snapshotUpdater;
         private SnapshotGetter snapshotGetter;
+        private SnapshotUpdater snapshotUpdater;
 
         [TestInitialize]
         public void Setup()
@@ -59,6 +68,9 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 issueSnapshotUtilities,
                 stubConverterBimElementsToComments.Object,
                 stubConverterCommentsToBimElements.Object,
+                stubConverterLinkedInfoToComments.Object,
+                stubConverterCommentsToLinkedInfo.Object,
+                stubPushpinHelper.Object,
                 stubConverterToIssue.Object,
                 stubConverterToDto.Object);
         }
@@ -262,7 +274,14 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             SetupConvertingCommentsToBimElements(currentBimElements);
             SetupPatchingIssue();
             SetupPostingIssue();
+            SetupLinkToModel();
         }
+
+        private void SetupConvertingBimElementsToComments(int count)
+            => stubConverterBimElementsToComments
+               .Setup(x => x.Convert(It.IsAny<CommentCreatingData<IEnumerable<BimElementExternalDto>>>()))
+               .Returns<CommentCreatingData<IEnumerable<BimElementExternalDto>>>(
+                    _ => Task.FromResult(Enumerable.Repeat(DummyModels.Comment, count)));
 
         private void SetupPostingIssue()
             => mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
@@ -277,13 +296,15 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             => mockIssuesService.Setup(x => x.PatchIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
                .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
-        private void SetupConvertingBimElementsToComments(int count)
-            => stubConverterBimElementsToComments.Setup(x => x.Convert(It.IsAny<CommentCreatingData>()))
-               .Returns<CommentCreatingData>(_ => Task.FromResult(Enumerable.Repeat(DummyModels.Comment, count)));
-
         private void SetupGettingEmptyCommentsList()
             => mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
                .Returns<string, string>((_, _) => Task.FromResult(new List<Comment>()));
+
+        private void SetupLinkToModel()
+            => stubPushpinHelper
+               .Setup(x => x.LinkToModel(It.IsAny<Issue>(), It.IsAny<ObjectiveExternalDto>(), It.IsAny<ItemSnapshot>()))
+               .Returns<Issue, ObjectiveExternalDto, ItemSnapshot>(
+                    (issue, _, _) => Task.FromResult<(Issue, LinkedInfo)>((issue, null)));
 
         private void SetupConvertingToDto(Func<IssueSnapshot, ObjectiveExternalDto> valueFunction)
             => stubConverterToDto.Setup(x => x.Convert(It.IsAny<IssueSnapshot>()))
