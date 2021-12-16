@@ -138,7 +138,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Convert_IssueHasTaggedComment_ObjectiveHasNotCommentDynamicField()
+        public async Task Convert_IssueHasTaggedComment_ObjectiveHasNoCommentDynamicField()
         {
             // Arrange.
             var comment = DummyModels.Comment;
