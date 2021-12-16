@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
@@ -95,10 +96,10 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                             x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
                                 x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
                         topFolders.First()).ID;
-                    var items = await GetAllItems(p.ID, topFolders);
+                    var items = GetAllItems(p.ID, topFolders.ToAsyncEnumerable());
                     projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
 
-                    foreach (var iv in items)
+                    await foreach (var iv in items)
                     {
                         if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
                             iv.version?.Attributes.Name != Resources.MrsFileName)
@@ -134,11 +135,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 }
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
-                var issues = await issuesService.GetIssuesAsync(project.IssueContainer, filters);
-                project.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project));
+                var issues = issuesService.GetIssuesAsync(project.IssueContainer, filters);
+                project.Issues = new Dictionary<string, IssueSnapshot>();
 
-                foreach (var issueSnapshot in project.Issues.Values)
+                await foreach (var issue in issues)
                 {
+                    var issueSnapshot = new IssueSnapshot(issue, project);
+                    project.Issues.Add(issue.ID, issueSnapshot);
                     issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
                     issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }
@@ -182,22 +185,26 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             where TSnapshot : AEnumVariantSnapshot<T>
         {
             await UpdateProjectsIfNull();
-            var dictionary = new List<TSnapshot>();
 
             foreach (var project in snapshot.ProjectEnumerable)
-            {
-                var variants = await creator.GetVariantsFromRemote(project);
                 createEmptyEnumVariants(project);
-                dictionary.AddRange(variants);
+
+            var variants = new List<TSnapshot>();
+
+            foreach (var projectSnapshot in snapshot.ProjectEnumerable)
+            {
+                await foreach (var element in  creator.GetVariantsFromRemote(projectSnapshot))
+                    variants.Add(element);
             }
 
-            var groups = DynamicFieldUtilities.GetGroupedTypes(creator, dictionary);
+            var groups = DynamicFieldUtilities.GetGroupedVariants(creator, variants);
 
             foreach (var group in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group).Distinct());
+                var groupArray = group.ToArray();
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(groupArray).Distinct());
 
-                foreach (var issueTypeSnapshot in group)
+                foreach (var issueTypeSnapshot in groupArray)
                 {
                     issueTypeSnapshot.SetExternalID(externalID);
                     addSnapshot(issueTypeSnapshot.ProjectSnapshot, issueTypeSnapshot);
@@ -205,20 +212,17 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             }
         }
 
-        private async Task<IEnumerable<(Item item, Forge.Models.DataManagement.Version version)>> GetAllItems(
+        private async IAsyncEnumerable<(Item item, Forge.Models.DataManagement.Version version)> GetAllItems(
             string projectID,
-            IEnumerable<Folder> folders)
+            IAsyncEnumerable<Folder> folders)
         {
-            var result = Enumerable.Empty<(Item, Forge.Models.DataManagement.Version)>();
-
-            foreach (var folder in folders)
+            await foreach (var folder in folders)
             {
-                result = result
-                   .Concat(await GetAllItems(projectID, await foldersService.GetFoldersAsync(projectID, folder.ID)))
-                   .Concat(await foldersService.GetItemsAsync(projectID, folder.ID));
+                await foreach (var item in GetAllItems(projectID, foldersService.GetFoldersAsync(projectID, folder.ID)))
+                    yield return item;
+                await foreach (var item in foldersService.GetItemsAsync(projectID, folder.ID))
+                    yield return item;
             }
-
-            return result;
         }
     }
 }

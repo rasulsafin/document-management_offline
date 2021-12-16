@@ -25,8 +25,8 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response.ToObject<List<User>>();
         }
 
-        public async Task<List<ProjectUser>> GetProjectUsersAsync(string projectID)
-            => await PaginationHelper.GetItemsByPages<ProjectUser, PaginationStrategy>(
+        public IAsyncEnumerable<ProjectUser> GetProjectUsersAsync(string projectID)
+            => PaginationHelper.GetItemsByPages<ProjectUser, PaginationStrategy>(
                 connection,
                 Resources.GetProjectsUsersMethod,
                 Constants.RESULTS_PROPERTY,
@@ -44,8 +44,8 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response.ToObject<List<Role>>();
         }
 
-        public async Task<List<Company>> GetCompaniesAsync(Hub hub, string projectID)
-            => await PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
+        public IAsyncEnumerable<Company> GetCompaniesAsync(Hub hub, string projectID)
+            => PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
                 connection,
                 ForgeSettings.AppGet(),
                 hub.IsEmea()
