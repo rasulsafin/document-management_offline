@@ -1,10 +1,12 @@
-﻿using System;
+﻿using Brio.Docs.Connections.Bim360.Forge.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
@@ -16,13 +18,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
     internal class Bim360ProjectsSynchronizer : ISynchronizer<ProjectExternalDto>
     {
         private readonly SnapshotGetter snapshot;
-        private readonly ItemsSyncHelper itemsSyncHelper;
+        private readonly IItemsUpdater itemsSyncHelper;
         private readonly SnapshotFiller filler;
         private readonly IAccessController authenticator;
 
         public Bim360ProjectsSynchronizer(
             SnapshotGetter snapshot,
-            ItemsSyncHelper itemsSyncHelper,
+            IItemsUpdater itemsSyncHelper,
             SnapshotFiller filler,
             IAccessController authenticator)
         {
@@ -48,13 +50,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             var toAdd = project.Items.Where(a => cached.Items.All(b => b.Value.Entity.ID != a.ExternalID)).ToArray();
 
             foreach (var item in toAdd)
-                await itemsSyncHelper.PostItem(cached, item);
+                await itemsSyncHelper.PostItem(cached, item.FullPath);
 
-            foreach (var dto in toRemove)
-            {
-                cached.Items.Remove(dto.Key);
-                await itemsSyncHelper.Remove(project.ExternalID, dto.Value.Entity);
-            }
+            foreach (var itemSnapshot in toRemove.Select(x => x.Value))
+                await itemsSyncHelper.Remove(cached, itemSnapshot.ID);
 
             return GetFullProject(cached);
         }

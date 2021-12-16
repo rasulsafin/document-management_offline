@@ -10,6 +10,7 @@ using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.UnitTests.Dummy;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
@@ -22,13 +23,16 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
     [TestClass]
     public class IssueSnapshotObjectiveConverterTests
     {
-        private readonly Mock<IConverter<Issue, ObjectiveExternalDto>> mockConverterToDto = new ();
-        private readonly Mock<IConverter<IssueSnapshot, ObjectiveStatus>> mockStatusConverter = new ();
-        private readonly Mock<IEnumIdentification<IssueTypeSnapshot>> mockSubtypeEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<RootCauseSnapshot>> mockRootCauseEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<LocationSnapshot>> mockLocationEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<AssignToVariant>> mockAssignToEnumCreator = new ();
-        private readonly Mock<IEnumIdentification<StatusSnapshot>> mockStatusEnumCreator = new ();
+        private readonly Mock<IConverter<Issue, ObjectiveExternalDto>> stubConverterToDto = new ();
+        private readonly Mock<IConverter<IssueSnapshot, ObjectiveStatus>> stubStatusConverter = new ();
+        private readonly Mock<IEnumIdentification<IssueTypeSnapshot>> stubSubtypeEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<RootCauseSnapshot>> stubRootCauseEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<LocationSnapshot>> stubLocationEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<AssignToVariant>> stubAssignToEnumCreator = new ();
+        private readonly Mock<IEnumIdentification<StatusSnapshot>> stubStatusEnumCreator = new ();
+        private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>
+            stubConverterCommentsToBimElements = new ();
+
         private readonly Mock<MetaCommentHelper> mockCommentHelper = new ();
         private IssueSnapshotObjectiveConverter converter;
         private IssueSnapshot issueSnapshot;
@@ -38,20 +42,20 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public void Setup()
         {
             converter = new IssueSnapshotObjectiveConverter(
-                mockConverterToDto.Object,
-                mockStatusConverter.Object,
-                mockSubtypeEnumCreator.Object,
-                mockRootCauseEnumCreator.Object,
-                mockLocationEnumCreator.Object,
-                mockAssignToEnumCreator.Object,
-                mockStatusEnumCreator.Object,
-                mockCommentHelper.Object);
+                stubConverterToDto.Object,
+                stubStatusConverter.Object,
+                stubConverterCommentsToBimElements.Object,
+                stubSubtypeEnumCreator.Object,
+                stubRootCauseEnumCreator.Object,
+                stubLocationEnumCreator.Object,
+                stubAssignToEnumCreator.Object,
+                stubStatusEnumCreator.Object);
 
             dto = new ObjectiveExternalDto
             {
                 DynamicFields = new List<DynamicFieldExternalDto>(),
             };
-            mockConverterToDto
+            stubConverterToDto
                .Setup(x => x.Convert(It.IsAny<Issue>()))
                .Returns<Issue>(_ => Task.FromResult(dto));
 
@@ -117,7 +121,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         public async Task Convert_IssueHasSimpleComment_ObjectiveHasCommentDynamicField()
         {
             // Arrange.
-            var comment = MockData.Commment;
+            var comment = DummyModels.Comment;
             comment.Attributes.IssueId = issueSnapshot.ID;
             issueSnapshot.Comments = new List<CommentSnapshot> { new (comment) };
 
@@ -134,10 +138,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         }
 
         [TestMethod]
-        public async Task Convert_IssueHasTaggedComment_ObjectiveHasNotCommentDynamicField()
+        public async Task Convert_IssueHasTaggedComment_ObjectiveHasNoCommentDynamicField()
         {
             // Arrange.
-            var comment = MockData.Commment;
+            var comment = DummyModels.Comment;
             comment.Attributes.Body = $"{MrsConstants.META_COMMENT_TAG} {comment.Attributes.Body}";
             comment.Attributes.IssueId = issueSnapshot.ID;
             issueSnapshot.Comments = new List<CommentSnapshot> { new (comment) };

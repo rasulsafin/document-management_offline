@@ -9,7 +9,7 @@ using Brio.Docs.Connections.Bim360.Properties;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
-    public class AccountAdminService
+    public class AccountAdminService : IUsersGetter
     {
         private readonly ForgeConnection connection;
 
@@ -34,25 +34,29 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
 
         public async Task<List<Role>> GetRolesAsync(Hub hub, string projectID)
         {
+            var projectsIndustryRolesMethod = hub.IsEmea()
+                ? Resources.GetProjectsIndustryRolesMethodEmea
+                : Resources.GetProjectsIndustryRolesMethodUS;
             var response = await connection.SendAsync(
                 ForgeSettings.AuthorizedGet(),
-                hub.IsEmea()
-                    ? Resources.GetProjectsIndustryRolesMethodEmea
-                    : Resources.GetProjectsIndustryRolesMethodUS,
+                projectsIndustryRolesMethod,
                 hub.GetAccountID(),
                 projectID);
             return response.ToObject<List<Role>>();
         }
 
         public async Task<List<Company>> GetCompaniesAsync(Hub hub, string projectID)
-            => await PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
+        {
+            var projectsCompaniesMethod = hub.IsEmea()
+                ? Resources.GetProjectsCompaniesMethodEmea
+                : Resources.GetProjectsCompaniesMethodUS;
+            return await PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
                 connection,
                 ForgeSettings.AppGet(),
-                hub.IsEmea()
-                    ? Resources.GetProjectsCompaniesMethodEmea
-                    : Resources.GetProjectsCompaniesMethodUS,
+                projectsCompaniesMethod,
                 token => token.ToObject<List<Company>>(),
                 hub.GetAccountID(),
                 projectID);
+        }
     }
 }

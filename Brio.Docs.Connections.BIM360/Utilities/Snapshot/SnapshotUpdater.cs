@@ -71,6 +71,16 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             return itemSnapshot;
         }
 
+        public ItemSnapshot RemoveItem(ProjectSnapshot projectSnapshot, string itemID)
+        {
+            var itemSnapshot = snapshot.GetItem(projectSnapshot, itemID);
+
+            if (projectSnapshot.Items.ContainsKey(itemID))
+                projectSnapshot.Items.Remove(itemID);
+
+            return itemSnapshot;
+        }
+
         private void RemoveFromProjectIfNeeded(IssueSnapshot issueSnapshot)
         {
             var dictionary = issueSnapshot.ProjectSnapshot.Issues;
