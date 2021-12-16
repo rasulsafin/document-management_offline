@@ -74,9 +74,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                         ? snapshot.ProjectSnapshot.AssignToVariants[snapshot.Entity.Attributes.AssignedTo].ID
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
-            var status = DynamicFieldUtilities.CreateField(
-                snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
-                statusEnumCreator);
+
+            if (snapshot.Entity.Attributes.Status != Status.Void)
+            {
+                var status = DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
+                    statusEnumCreator);
+                parsedToDto.DynamicFields.Add(status);
+            }
 
             var comments =
                 snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains(MrsConstants.META_COMMENT_TAG)) ??
@@ -137,7 +142,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 UpdatedAt = DateTime.Now,
             };
 
-            parsedToDto.DynamicFields.Add(status);
             parsedToDto.DynamicFields.Add(newComment);
             parsedToDto.DynamicFields.Add(typeField);
             parsedToDto.DynamicFields.Add(rootCause);

@@ -6,6 +6,8 @@
         <IsPackable>false</IsPackable>
 
         <RootNamespace>Brio.Docs.Connections.Bim360.UnitTests</RootNamespace>
+
+        <Version>1.2.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
