@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IMerger<Item>, ItemMerger>();
 
-            services.AddScoped<IFinder<Item>, ItemFinder>();
+            services.AddScoped<IAttacher<Item>, ItemAttacher>();
 
             services.AddScoped<ProjectItemLinker>();
             services.AddScoped<ObjectiveItemLinker>();

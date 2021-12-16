@@ -7,7 +7,7 @@ namespace Brio.Docs.Synchronization.Interfaces
     /// Represents a search tool for finding existing entities in a database.
     /// </summary>
     /// <typeparam name="T">The type of searching.</typeparam>
-    internal interface IFinder<T>
+    internal interface IAttacher<T>
     {
         /// <summary>
         /// Searches and attaches existing entities to a synchronising tuple.

@@ -12,12 +12,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Utilities.Finders
 {
-    internal class ItemFinder : IFinder<Item>
+    internal class ItemAttacher : IAttacher<Item>
     {
-        private readonly ILogger<ItemFinder> logger;
+        private readonly ILogger<ItemAttacher> logger;
         private readonly DMContext context;
 
-        public ItemFinder(ILogger<ItemFinder> logger, DMContext context)
+        public ItemAttacher(ILogger<ItemAttacher> logger, DMContext context)
         {
             this.logger = logger;
             this.context = context;

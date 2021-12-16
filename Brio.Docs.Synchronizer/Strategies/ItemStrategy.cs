@@ -23,7 +23,7 @@ namespace Brio.Docs.Synchronization.Strategies
         where TLinker : ILinker<Item>
     {
         private readonly IMerger<Item> merger;
-        private readonly IFinder<Item> itemFinder;
+        private readonly IAttacher<Item> itemAttacher;
         private readonly ILogger<ItemStrategy<TLinker>> logger;
 
         public ItemStrategy(
@@ -31,12 +31,12 @@ namespace Brio.Docs.Synchronization.Strategies
             DMContext context,
             IMapper mapper,
             TLinker linker,
-            IFinder<Item> itemFinder,
+            IAttacher<Item> itemAttacher,
             ILogger<ItemStrategy<TLinker>> logger)
             : base(context, mapper, linker, logger)
         {
             this.merger = merger;
-            this.itemFinder = itemFinder;
+            this.itemAttacher = itemAttacher;
             this.logger = logger;
             logger.LogTrace("ItemStrategy created");
         }
@@ -76,7 +76,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 }
             }
 
-            await itemFinder.AttachExisting(tuple);
+            await itemAttacher.AttachExisting(tuple);
         }
 
         protected override async Task<SynchronizingResult> AddToLocal(
