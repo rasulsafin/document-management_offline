@@ -229,6 +229,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 }
                 catch
                 {
+                    // TODO: add exception handling.
                     throw;
                 }
             }
@@ -261,6 +262,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 }
                 catch
                 {
+                    // TODO: add exception handling.
                     throw;
                 }
             }
