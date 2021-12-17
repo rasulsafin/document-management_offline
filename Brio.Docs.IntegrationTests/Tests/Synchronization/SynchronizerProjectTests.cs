@@ -358,6 +358,59 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
+        public async Task Synchronize_ItemLinkedToRemoteProjectAndItemRemovedFromLocalObjective_LinkItemToLocalAndSynchronize()
+        {
+            // Arrange.
+            var (_, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+
+            var itemLocal = MockData.DEFAULT_ITEMS[0];
+            var itemSynchronized = MockData.DEFAULT_ITEMS[0];
+            var objective = MockData.DEFAULT_OBJECTIVES[0];
+            var objectiveType = MockData.DEFAULT_OBJECTIVE_TYPES[0];
+
+            itemSynchronized.IsSynchronized = true;
+            objective.IsSynchronized = true;
+
+            itemLocal.SynchronizationMate = itemSynchronized;
+            objective.Project = projectSynchronized;
+            objective.ObjectiveType = objectiveType;
+            itemSynchronized.Objectives = new List<ObjectiveItem>
+            {
+                new ObjectiveItem
+                {
+                    Objective = objective,
+                },
+            };
+
+            projectRemote.Items = new List<ItemExternalDto>
+            {
+                new ItemExternalDto
+                {
+                    ExternalID = itemLocal.ExternalID,
+                    FileName = "item_name",
+                    ItemType = ItemType.File,
+                    UpdatedAt = DateTime.UtcNow,
+                },
+            };
+
+            await Fixture.Context.Objectives.AddAsync(objective);
+            await Fixture.Context.Items.AddRangeAsync(itemLocal, itemSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize(true);
+
+            // Assert.
+            Assert.AreEqual(0, synchronizationResult.Count);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+            Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            Assert.AreEqual(1, local.Items.Count);
+            Assert.AreEqual(1, synchronized.Items.Count);
+            CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
+        }
+
+        [TestMethod]
         public async Task Synchronize_LocalAndRemoteProjectsHaveNewItems_AddItemsAndSynchronize()
         {
             // Arrange.
