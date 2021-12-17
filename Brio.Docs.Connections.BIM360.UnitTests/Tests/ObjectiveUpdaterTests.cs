@@ -6,6 +6,7 @@ using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
+using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
@@ -251,20 +252,209 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             Assert.AreEqual(0, result.BimElements.Count);
         }
 
+        [TestMethod]
+        public async Task Put_ObjectiveWithExternalIdAndMustRedirect_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            SetupStubs(convertedObjectiveToIssue, dto, createdLinkedInfo: DummySynchronizationModels.LinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Put_ObjectiveWithoutExternalIdAndMustRedirect_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.ExternalID = null;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            SetupStubs(convertedObjectiveToIssue, dto, createdLinkedInfo: DummySynchronizationModels.LinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Put_PushpinCreatedWithNewLinkedInfo_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            var remoteLinkedInfo = DummySynchronizationModels.LinkedInfo;
+            remoteLinkedInfo.Urn = DummyStrings.GetItemId();
+            SetupStubs(convertedObjectiveToIssue, dto, createdLinkedInfo: DummySynchronizationModels.LinkedInfo, remoteLinkedInfo: remoteLinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+        }
+
+        [TestMethod]
+        public async Task Put_PushpinCreatedWithSameLinkedInfo_DoNotPostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            SetupStubs(
+                convertedObjectiveToIssue,
+                dto,
+                createdLinkedInfo: DummySynchronizationModels.LinkedInfo,
+                remoteLinkedInfo: DummySynchronizationModels.LinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Never);
+        }
+
+        [TestMethod]
+        public async Task Put_PushpinCreatedWithEmptyLinkedInfo_PostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            var remoteLinkedInfo = DummySynchronizationModels.LinkedInfo;
+            SetupStubs(convertedObjectiveToIssue, dto, createdLinkedInfo: null, remoteLinkedInfo: remoteLinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Once);
+        }
+
+        [TestMethod]
+        [DataRow(2)]
+        [DataRow(3)]
+        [DataRow(10)]
+        public async Task Put_LinkedInfoConvertedToMultipleComments_PostMultipleComment(int createdCommentsCount)
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            SetupStubs(
+                convertedObjectiveToIssue,
+                dto,
+                createdCommentsCount: createdCommentsCount,
+                createdLinkedInfo: DummySynchronizationModels.LinkedInfo);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Exactly(createdCommentsCount));
+        }
+
+        [TestMethod]
+        public async Task Put_ObjectiveWithoutExternalIdAndPushpinCreatedWithEmptyLinkedInfo_DoNotPostComment()
+        {
+            // Arrange.
+            var dto = DummyDtos.Objective;
+            dto.ExternalID = null;
+            var location = DummyDtos.Location;
+            location.Item = DummyDtos.Item;
+            dto.Location = location;
+            var convertedObjectiveToIssue = CreateExistingIssue();
+            CreateExistingItem();
+            SetupStubs(convertedObjectiveToIssue, dto, createdLinkedInfo: null);
+
+            // Act.
+            await objectiveUpdater.Put(dto);
+
+            // Assert.
+            mockIssuesService.Verify(
+                x => x.PostIssuesCommentsAsync(It.IsAny<string>(), It.IsAny<Comment>()),
+                Times.Never);
+        }
+
         private void SetupStubs(
             Issue postingIssue = null,
             ObjectiveExternalDto gottenDto = null,
             BimElementExternalDto[] currentBimElements = null,
-            int createdCommentsCount = 1)
+            int createdCommentsCount = 1,
+            LinkedInfo createdLinkedInfo = null,
+            LinkedInfo remoteLinkedInfo = null,
+            Func<Issue, ObjectiveExternalDto, ItemSnapshot, Issue> createPushpin = null)
         {
             SetupConvertingToIssue(_ => postingIssue);
             SetupConvertingToDto(_ => gottenDto);
             SetupGettingEmptyCommentsList();
             SetupConvertingBimElementsToComments(createdCommentsCount);
             SetupConvertingCommentsToBimElements(currentBimElements);
+            SetupConvertingLinkedInfoToComments(createdCommentsCount);
+            SetupConvertingCommentsToLinkedInfo(remoteLinkedInfo);
             SetupPatchingIssue();
             SetupPostingIssue();
+            SetupLinkToModel(createPushpin ?? ((issue, _, _) => issue), createdLinkedInfo);
         }
+
+        private void SetupConvertingCommentsToLinkedInfo(LinkedInfo linkedInfo)
+            => stubConverterCommentsToLinkedInfo.Setup(x => x.Convert(It.IsAny<IEnumerable<Comment>>()))
+               .Returns<IEnumerable<Comment>>(_ => Task.FromResult(linkedInfo));
+
+        private void SetupConvertingLinkedInfoToComments(int count)
+            => stubConverterLinkedInfoToComments
+               .Setup(x => x.Convert(It.IsAny<CommentCreatingData<LinkedInfo>>()))
+               .Returns<CommentCreatingData<LinkedInfo>>(
+                    _ => Task.FromResult(Enumerable.Repeat(DummyModels.Comment, count)));
+
+        private void SetupLinkToModel(
+            Func<Issue, ObjectiveExternalDto, ItemSnapshot, Issue> createPushpin,
+            LinkedInfo linkedInfo)
+            => stubPushpinHelper
+               .Setup(x => x.LinkToModel(It.IsAny<Issue>(), It.IsAny<ObjectiveExternalDto>(), It.IsAny<ItemSnapshot>()))
+               .Returns<Issue, ObjectiveExternalDto, ItemSnapshot>(
+                    (issue, objective, itemSnapshot)
+                        => Task.FromResult<(Issue, LinkedInfo)>(
+                            (createPushpin(issue, objective, itemSnapshot), linkedInfo)));
 
         private void SetupPostingIssue()
             => mockIssuesService.Setup(x => x.PostIssueAsync(It.IsAny<string>(), It.IsAny<Issue>()))
@@ -311,6 +501,15 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             var project = snapshotGetter.GetProject(projectId);
             snapshotUpdater.CreateIssue(project, issue);
             return issue;
+        }
+
+        private Item CreateExistingItem(string projectId = null)
+        {
+            projectId ??= DummyStrings.PROJECT_ID;
+            var item = DummyModels.Item;
+            var project = snapshotGetter.GetProject(projectId);
+            snapshotUpdater.CreateItem(project, item, null);
+            return item;
         }
 
         private IEnumerable<BimElementExternalDto> CreateBimElements(int count)

@@ -78,6 +78,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             var parsedToDto = await converterToDto.Convert(issueSnapshot);
             await AddItems(obj, project, issueSnapshot, parsedToDto);
             await AddBimElements(obj, project, issueSnapshot, parsedToDto);
+            await AddLinkedInfo(linkedInfo, project, issueSnapshot);
 
             return parsedToDto;
         }
