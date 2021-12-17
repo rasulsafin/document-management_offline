@@ -2,7 +2,6 @@ using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
@@ -51,9 +50,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities
                 ? snapshot.ParentType.Title
                 : $"{snapshot.ParentType.Title}: {snapshot.Subtype.Title}";
 
-        public async Task<IEnumerable<IssueTypeSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
-            => (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer)).SelectMany(
-                x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
+        public async IAsyncEnumerable<IssueTypeSnapshot> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
+        {
+            var enumerable = (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer))
+               .SelectMany(x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
+            foreach (var snapshot in enumerable)
+                yield return snapshot;
+        }
 
         public IEnumerable<IssueTypeSnapshot> GetSnapshots(ProjectSnapshot project)
             => project.IssueTypes.Values;

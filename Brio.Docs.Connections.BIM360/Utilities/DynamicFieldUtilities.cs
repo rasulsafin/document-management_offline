@@ -28,7 +28,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities
             }
         }
 
-        internal static IEnumerable<IGrouping<string, TSnapshot>> GetGroupedTypes<T, TSnapshot, TID>(
+        internal static IEnumerable<IGrouping<string, TSnapshot>> GetGroupedVariants<T, TSnapshot, TID>(
             IEnumCreator<T, TSnapshot, TID> helper,
             IEnumerable<TSnapshot> allVariants)
             where TSnapshot : AEnumVariantSnapshot<T>

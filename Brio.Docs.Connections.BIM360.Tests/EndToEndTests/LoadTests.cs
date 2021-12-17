@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
@@ -107,7 +108,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
                 Assert.Fail("Top folders in project are empty");
 
             // STEP 4. Find the nested Folder ID
-            var folder = (await foldersService.GetFoldersAsync(project.ID, topFolder.ID)).FirstOrDefault();
+            var folder = await foldersService.GetFoldersAsync(project.ID, topFolder.ID).FirstOrDefaultAsync();
             if (folder == default)
                 Assert.Fail("Top folder is empty");
 
@@ -278,7 +279,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
                 Assert.Fail("Top folders in project are empty");
 
             // STEP 4. Find the nested Folder ID
-            var folder = (await foldersService.GetFoldersAsync(project.ID, topFolder.ID)).FirstOrDefault();
+            var folder = await foldersService.GetFoldersAsync(project.ID, topFolder.ID).FirstOrDefaultAsync();
             if (folder == default)
                 Assert.Fail("Top folder is empty");
 
