@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -37,10 +36,15 @@ namespace Brio.Docs.Connections.Bim360.Utilities
         public string GetVariantDisplayName(RootCauseSnapshot variant)
             => variant.Entity.Attributes.Title;
 
-        public async Task<IEnumerable<RootCauseSnapshot>> GetVariantsFromRemote(
+        public async IAsyncEnumerable<RootCauseSnapshot> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await issuesService.GetRootCausesAsync(projectSnapshot.IssueContainer)).Select(
-                x => new RootCauseSnapshot(x, projectSnapshot));
+        {
+            var enumerable = (await issuesService.GetRootCausesAsync(projectSnapshot.IssueContainer))
+               .Select(x => new RootCauseSnapshot(x, projectSnapshot));
+
+            foreach (var snapshot in enumerable)
+                yield return snapshot;
+        }
 
         public IEnumerable<RootCauseSnapshot> GetSnapshots(ProjectSnapshot project)
             => project.RootCauses.Values;

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,8 +10,10 @@ using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
@@ -25,6 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         private readonly MetaCommentHelper metaCommentHelper;
         private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
+        private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements;
         private readonly IEnumIdentification<StatusSnapshot> statusEnumCreator;
         private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
 
@@ -35,8 +37,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
             IEnumIdentification<LocationSnapshot> locationEnumCreator,
             IEnumIdentification<AssignToVariant> assignToEnumCreator,
-            IEnumIdentification<StatusSnapshot> statusEnumCreator,
-            MetaCommentHelper metaCommentHelper)
+            IEnumIdentification<StatusSnapshot> statusEnumCreator)
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
@@ -45,7 +46,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             this.locationEnumCreator = locationEnumCreator;
             this.assignToEnumCreator = assignToEnumCreator;
             this.statusEnumCreator = statusEnumCreator;
-            this.metaCommentHelper = metaCommentHelper;
         }
 
         public async Task<ObjectiveExternalDto> Convert(IssueSnapshot snapshot)
@@ -56,12 +56,12 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             foreach (var comment in GetComments(snapshot))
                 parsedToDto.DynamicFields.Add(comment);
 
-            parsedToDto.DynamicFields.Add(GetStatus(snapshot));
-            parsedToDto.DynamicFields.Add(GetNewComment());
-            parsedToDto.DynamicFields.Add(GetType(snapshot));
-            parsedToDto.DynamicFields.Add(GetRootCause(snapshot));
-            parsedToDto.DynamicFields.Add(GetLocation(snapshot));
-            parsedToDto.DynamicFields.Add(GetAssignedTo(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetStatus(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetNewComment());
+            parsedToDto.DynamicFields.AddIsNotNull(GetType(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetRootCause(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetLocation(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetAssignedTo(snapshot));
 
             parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
             parsedToDto.Items ??= new List<ItemExternalDto>();
@@ -83,7 +83,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 }
             }
 
-            parsedToDto.BimElements = GetBimElements(snapshot);
+            parsedToDto.BimElements = await GetBimElements(snapshot);
 
             return parsedToDto;
         }
@@ -97,11 +97,18 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
 
-        private ICollection<BimElementExternalDto> GetBimElements(IssueSnapshot snapshot)
-            => snapshot.BimElements?.ToList() ?? (snapshot.Comments != null
-                ? metaCommentHelper.GetBimElements(snapshot.Comments.Select(x => x.Entity)) ??
-                ArraySegment<BimElementExternalDto>.Empty
-                : ArraySegment<BimElementExternalDto>.Empty);
+        private async Task<ICollection<BimElementExternalDto>> GetBimElements(IssueSnapshot snapshot)
+        {
+            var listFromSnapshot = snapshot.BimElements?.ToList();
+
+            if (listFromSnapshot != null)
+                return listFromSnapshot;
+
+            var converted = snapshot.Comments != null
+                ? await convertToBimElements.Convert(snapshot.Comments.Select(x => x.Entity)) ?? Array.Empty<BimElementExternalDto>()
+                : Array.Empty<BimElementExternalDto>();
+            return converted.ToList();
+        }
 
         private IEnumerable<DynamicFieldExternalDto> GetComments(IssueSnapshot snapshot)
         {
@@ -191,9 +198,14 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     rootCauseEnumCreator);
 
         private DynamicFieldExternalDto GetStatus(IssueSnapshot snapshot)
-            => DynamicFieldUtilities.CreateField(
+        {
+            if (snapshot.Entity.Attributes.Status == Status.Void)
+                return null;
+
+            return DynamicFieldUtilities.CreateField(
                 snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
                 statusEnumCreator);
+        }
 
         private DynamicFieldExternalDto GetType(IssueSnapshot snapshot)
             => DynamicFieldUtilities.CreateField(

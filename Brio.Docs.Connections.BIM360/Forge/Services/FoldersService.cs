@@ -18,8 +18,8 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
         public FoldersService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Folder>> GetFoldersAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<Folder, LinksStrategy>(
+        public IAsyncEnumerable<Folder> GetFoldersAsync(string projectId, string folderId)
+            => PaginationHelper.GetItemsByPages<Folder, LinksStrategy>(
                 connection,
                 ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
@@ -28,8 +28,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
                 projectId,
                 folderId);
 
-        public async Task<List<(Item item, Models.DataManagement.Version version)>> GetItemsAsync(string projectId, string folderId)
-            => await PaginationHelper.GetItemsByPages<(Item item, Models.DataManagement.Version version), LinksStrategy>(
+        public IAsyncEnumerable<(Item item, Models.DataManagement.Version version)> GetItemsAsync(
+            string projectId,
+            string folderId)
+            => PaginationHelper.GetItemsByPages<(Item item, Models.DataManagement.Version version), LinksStrategy>(
                 connection,
                 ForgeConnection.SetParameter(
                     Resources.GetProjectsFoldersContentsMethod,
@@ -37,7 +39,8 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
                 response =>
                 {
                     var items = response[DATA_PROPERTY]?.ToObject<Item[]>();
-                    var versions = response[INCLUDED_PROPERTY]?.ToObject<Models.DataManagement.Version[]>() ?? Array.Empty<Models.DataManagement.Version>();
+                    var versions = response[INCLUDED_PROPERTY]?.ToObject<Models.DataManagement.Version[]>() ??
+                        Array.Empty<Models.DataManagement.Version>();
                     return items?.Select(
                             item => (item,
                                 versions.FirstOrDefault(vers => vers.Relationships.Item.Data.ID == item.ID))) ??
