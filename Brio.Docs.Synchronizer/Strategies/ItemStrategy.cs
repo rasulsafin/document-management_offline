@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -19,14 +18,25 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
+    [Obsolete]
     internal class ItemStrategy<TLinker> : ALinkingStrategy<Item, ItemExternalDto>
         where TLinker : ILinker<Item>
     {
+        private readonly IMerger<Item> merger;
+        private readonly IAttacher<Item> itemAttacher;
         private readonly ILogger<ItemStrategy<TLinker>> logger;
 
-        public ItemStrategy(DMContext context, IMapper mapper, TLinker linker, ILogger<ItemStrategy<TLinker>> logger)
+        public ItemStrategy(
+            IMerger<Item> merger,
+            DMContext context,
+            IMapper mapper,
+            TLinker linker,
+            IAttacher<Item> itemAttacher,
+            ILogger<ItemStrategy<TLinker>> logger)
             : base(context, mapper, linker, logger)
         {
+            this.merger = merger;
+            this.itemAttacher = itemAttacher;
             this.logger = logger;
             logger.LogTrace("ItemStrategy created");
         }
@@ -40,79 +50,33 @@ namespace Brio.Docs.Synchronization.Strategies
         public async Task FindAndAttachExists(
             SynchronizingTuple<Item> tuple,
             SynchronizingData data,
-            object parent,
-            string path)
+            object parent)
         {
             logger.LogStartAction(tuple, data, parent);
 
-            (int project, int objective) GetParents(bool local)
+            if (tuple.Remote != null)
             {
-                var i = 0;
-                var objective1 = 0;
-
-                switch (parent)
+                if (tuple.Remote.ProjectID == null && tuple.Remote.Objectives == null)
                 {
-                    case SynchronizingTuple<Objective> objectiveTuple:
-                        logger.LogDebug("Parent is a objective");
-                        var obj = local ? objectiveTuple.Local : objectiveTuple.Synchronized;
-                        i = obj.ProjectID;
-                        objective1 = obj.ID;
-                        break;
-                    case SynchronizingTuple<Project> projectTuple:
-                        logger.LogDebug("Parent is a project");
-                        i = (local ? projectTuple.Local : projectTuple.Synchronized).ID;
-                        break;
+                    switch (parent)
+                    {
+                        case SynchronizingTuple<Project> projects:
+                            tuple.Remote.ProjectID = (int)projects.GetPropertyValue(nameof(Project.ID));
+                            break;
+                        case SynchronizingTuple<Objective> objectives:
+                            tuple.Remote.Objectives = new List<ObjectiveItem>
+                            {
+                                new ()
+                                {
+                                    Objective = objectives.Remote ?? objectives.Synchronized ?? objectives.Local,
+                                },
+                            };
+                            break;
+                    }
                 }
-
-                return (i, objective1);
             }
 
-            var external = tuple.ExternalID;
-            int project = 0;
-            int objective = 0;
-
-            Expression<Func<Item, bool>> predicate =
-                x => ((x.Objectives != null &&
-                            x.Objectives.Any(oi => oi.ObjectiveID == objective || oi.Objective.ProjectID == project)) ||
-                        x.ProjectID == project) &&
-                    ((x.ExternalID != null && x.ExternalID == external) || x.RelativePath == path);
-
-            if ((tuple.Local?.ID ?? 0) == 0)
-            {
-                logger.LogDebug("Local searching");
-                (project, objective) = GetParents(true);
-                logger.LogDebug("Project {@Project}, Objective {@Objective}", project, objective);
-                tuple.Local = await context.Items.FirstOrDefaultAsync(predicate);
-                logger.LogDebug("Found item: {@Object}", tuple.Local);
-                tuple.LocalChanged = true;
-            }
-
-            if ((tuple.Synchronized?.ID ?? 0) == 0)
-            {
-                logger.LogDebug("Synchronized searching");
-                (project, objective) = GetParents(false);
-                logger.LogDebug("Project {@Project}, Objective {@Objective}", project, objective);
-                tuple.Synchronized = await context.Items.FirstOrDefaultAsync(predicate);
-                logger.LogDebug("Found item: {@Object}", tuple.Local);
-                tuple.SynchronizedChanged = true;
-            }
-
-            var synced = tuple.Synchronized;
-
-            if (synced != null && tuple.Remote == null)
-            {
-                logger.LogDebug("Creating remote");
-
-                tuple.Remote = new Item
-                {
-                    ExternalID = synced.ExternalID,
-                    ItemType = synced.ItemType,
-                    RelativePath = synced.RelativePath,
-                    ProjectID = synced.ProjectID,
-                };
-                logger.LogDebug("Created item: {@Object}", tuple.Local);
-                tuple.RemoteChanged = true;
-            }
+            await itemAttacher.AttachExisting(tuple);
         }
 
         protected override async Task<SynchronizingResult> AddToLocal(
@@ -125,10 +89,11 @@ namespace Brio.Docs.Synchronization.Strategies
             using var lScope = logger.BeginMethodScope();
             logger.LogStartAction(tuple, data, parent);
 
-            await FindAndAttachExists(tuple, data, parent, tuple.Remote.RelativePath);
+            await FindAndAttachExists(tuple, data, parent);
             logger.LogTrace("Attached");
             LinkParent(tuple, parent);
             logger.LogTrace("Parent linked");
+            merger.Merge(tuple);
             return await base.AddToLocal(tuple, data, connectionContext, parent, token);
         }
 
@@ -142,10 +107,11 @@ namespace Brio.Docs.Synchronization.Strategies
             using var lScope = logger.BeginMethodScope();
             logger.LogStartAction(tuple, data, parent);
 
-            await FindAndAttachExists(tuple, data, parent, tuple.Local.RelativePath);
+            await FindAndAttachExists(tuple, data, parent);
             logger.LogTrace("Attached");
             LinkParent(tuple, parent);
             logger.LogTrace("Parent linked");
+            merger.Merge(tuple);
             return await base.AddToRemote(tuple, data, connectionContext, parent, token);
         }
 
@@ -166,14 +132,7 @@ namespace Brio.Docs.Synchronization.Strategies
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogStartAction(tuple, data, parent);
-
-            if (tuple.Synchronized == null)
-            {
-                tuple.Merge();
-                tuple.Synchronized.Project = tuple.Local.Project.SynchronizationMate;
-            }
-
-            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
+            merger.Merge(tuple);
             LinkParent(tuple, parent);
             logger.LogTrace("Parent linked");
             return Task.FromResult<SynchronizingResult>(null);
