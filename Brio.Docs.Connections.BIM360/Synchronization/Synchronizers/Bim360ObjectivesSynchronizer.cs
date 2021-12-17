@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -27,6 +29,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         private readonly ItemsSyncHelper itemsSyncHelper;
         private readonly SnapshotFiller filler;
         private readonly IssueSnapshotUtilities snapshotUtilities;
+        private readonly IssueUpdatesFinder issueUpdatesFinder;
         private readonly IConverter<ObjectiveExternalDto, Issue> converterToIssue;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -37,6 +40,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             ItemsSyncHelper itemsSyncHelper,
             SnapshotFiller filler,
             IssueSnapshotUtilities snapshotUtilities,
+            IssueUpdatesFinder issueUpdatesFinder,
             IConverter<ObjectiveExternalDto, Issue> converterToIssue,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
@@ -48,6 +52,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             this.filler = filler;
             this.authenticator = authenticator;
             this.snapshotUtilities = snapshotUtilities;
+            this.issueUpdatesFinder = issueUpdatesFinder;
         }
 
         public async Task<ObjectiveExternalDto> Add(ObjectiveExternalDto obj)
@@ -125,21 +130,33 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
-            await filler.UpdateStatusesConfigIfNull();
+            await filler.UpdateProjectsIfNull();
             await filler.UpdateIssuesIfNull(date);
-            await filler.UpdateIssueTypes();
-            await filler.UpdateRootCauses();
-            await filler.UpdateLocations();
-            await filler.UpdateAssignTo();
-            await filler.UpdateStatuses();
-            return snapshot.IssueEnumerable.Where(x => x.Entity.Attributes.UpdatedAt > date)
-               .Select(x => x.ID)
-               .ToList();
+
+            var result = new List<string>();
+
+            foreach (var projectSnapshot in snapshot.ProjectEnumerable)
+            {
+                await foreach (var id in issueUpdatesFinder.GetUpdatedIssueIds(
+                    projectSnapshot.IssueContainer,
+                    date,
+                    Enumerable.Empty<IQueryParameter>()))
+                    result.Add(id);
+            }
+
+            return result;
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)
         {
             await authenticator.CheckAccessAsync(CancellationToken.None);
+
+            await filler.UpdateStatusesConfigIfNull();
+            await filler.UpdateIssueTypes();
+            await filler.UpdateRootCauses();
+            await filler.UpdateLocations();
+            await filler.UpdateAssignTo();
+            await filler.UpdateStatuses();
 
             var result = new List<ObjectiveExternalDto>();
 
@@ -195,7 +212,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             Issue issue)
         {
             var resultItems = new List<Attachment>();
-            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
+            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID).ToListAsync();
 
             foreach (var item in items)
             {

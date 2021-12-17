@@ -23,6 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ForgeConnection>();
             services.AddScoped<TokenHelper>();
             services.AddScoped<AppTokenHelper>();
+            services.AddScoped<IssueUpdatesFinder>();
             return services;
         }
     }
