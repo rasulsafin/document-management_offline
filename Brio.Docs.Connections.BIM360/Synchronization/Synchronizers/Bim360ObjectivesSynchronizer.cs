@@ -1,9 +1,9 @@
-using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
+using Brio.Docs.Connections.Bim360.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Integration.Dtos;
@@ -58,7 +58,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
         {
             await accessController.CheckAccessAsync(CancellationToken.None);
             await UpdateSnapshot(date);
-            return objectiveGetter.GetUpdatedIDs(date);
+            return await objectiveGetter.GetUpdatedIDs(date).ToListAsync();
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IReadOnlyCollection<string> ids)

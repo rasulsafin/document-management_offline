@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -121,7 +122,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             Issue issue)
         {
             var resultItems = new List<Attachment>();
-            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID);
+            var attachments = await issuesService.GetAttachmentsAsync(project.IssueContainer, issue.ID).ToListAsync();
 
             foreach (var item in items)
             {
@@ -168,7 +169,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             ProjectSnapshot project,
             Issue issue)
         {
-            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID);
+            var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issue.ID).ToListAsync();
             var currentElements = await converterCommentsToBimElements.Convert(comments);
             var isCurrentEmpty = currentElements == null || !currentElements.Any();
             var isNewEmpty = bimElements == null || !bimElements.Any();

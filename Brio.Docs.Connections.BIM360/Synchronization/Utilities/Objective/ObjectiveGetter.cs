@@ -1,10 +1,11 @@
-using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
-using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
@@ -18,6 +19,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly SnapshotGetter snapshotGetter;
         private readonly IIssuesService issuesService;
         private readonly IssueSnapshotUtilities snapshotUtilities;
+        private readonly IssueUpdatesFinder issueUpdatesFinder;
         private readonly SnapshotUpdater snapshotUpdater;
         private readonly IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto;
 
@@ -25,21 +27,28 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             SnapshotGetter snapshotGetter,
             IIssuesService issuesService,
             IssueSnapshotUtilities snapshotUtilities,
+            IssueUpdatesFinder issueUpdatesFinder,
             SnapshotUpdater snapshotUpdater,
             IConverter<IssueSnapshot, ObjectiveExternalDto> converterToDto)
         {
             this.snapshotGetter = snapshotGetter;
             this.issuesService = issuesService;
             this.snapshotUtilities = snapshotUtilities;
+            this.issueUpdatesFinder = issueUpdatesFinder;
             this.snapshotUpdater = snapshotUpdater;
             this.converterToDto = converterToDto;
         }
 
-        public IReadOnlyCollection<string> GetUpdatedIDs(DateTime date)
+        public async IAsyncEnumerable<string> GetUpdatedIDs(DateTime date)
         {
-            return snapshotGetter.GetIssues().Where(x => x.Entity.Attributes.UpdatedAt > date)
-               .Select(x => x.ID)
-               .ToList();
+            foreach (var projectSnapshot in snapshotGetter.GetProjects())
+            {
+                await foreach (var id in issueUpdatesFinder.GetUpdatedIssueIds(
+                                   projectSnapshot.IssueContainer,
+                                   date,
+                                   Enumerable.Empty<IQueryParameter>()))
+                    yield return id;
+            }
         }
 
         public async Task<IReadOnlyCollection<ObjectiveExternalDto>> Get(IEnumerable<string> ids)
