@@ -25,10 +25,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Interfaces
         /// Each project is assigned a container that stores all the issues for the project.
         /// To find the ID, see the <a href="https://forge.autodesk.com/en/docs/bim360/v1/tutorials/retrieve-container-id/">Retrieve a Container ID</a> tutorial.
         /// </param>
-        /// <param name="filters">The filters to configure the response payload.</param>
+        /// <param name="parameters">The parameters to configure the response payload.</param>
         /// <returns>The information about all the BIM 360 issues in a project.</returns>
         /// <footer><a href="https://forge.autodesk.com/en/docs/bim360/v1/reference/http/field-issues-GET/">`<b>GET</b> issues` on forge.autodesk.com</a></footer>
-        Task<List<Issue>> GetIssuesAsync(string containerID, IEnumerable<Filter> filters = null);
+        IAsyncEnumerable<Issue> GetIssuesAsync(string containerID, IEnumerable<IQueryParameter> parameters = null);
 
         /// <summary>
         /// Adds a BIM 360 Document Management file to a BIM 360 issue.
@@ -138,9 +138,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Interfaces
         /// To find the ID, see the <a href="https://forge.autodesk.com/en/docs/bim360/v1/tutorials/retrieve-container-id/">Retrieve a Container ID</a> tutorial.
         /// </param>
         /// <param name="issueID">The ID of the issue.</param>
+        /// <param name="parameters">The parameters to configure the response payload.</param>
         /// <returns>The information about all the attachments associated with a specific BIM 360 issue in a project.</returns>
         /// <footer><a href="https://forge.autodesk.com/en/docs/bim360/v1/reference/http/field-issues-attachments-GET/">`<b>GET</b> issues/:id/attachments` on forge.autodesk.com</a></footer>
-        Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID);
+        IAsyncEnumerable<Attachment> GetAttachmentsAsync(string containerID, string issueID, IEnumerable<IQueryParameter> parameters = null);
 
         /// <summary>
         /// Retrieves a list of supported root causes that you can allocate to an issue. For example, communication and coordination.
@@ -178,9 +179,10 @@ namespace Brio.Docs.Connections.Bim360.Forge.Interfaces
         /// To find the ID, see the <a href="https://forge.autodesk.com/en/docs/bim360/v1/tutorials/retrieve-container-id/">Retrieve a Container ID</a> tutorial.
         /// </param>
         /// <param name="issueID">The ID of the issue.</param>
+        /// <param name="parameters">The parameters to configure the response payload.</param>
         /// <returns>The all the comments associated with a BIM 360 issue</returns>
         /// <footer><a href="https://forge.autodesk.com/en/docs/bim360/v1/reference/http/field-issues-:id-comments-GET/">`<b>GET</b> issues/:id/comments` on forge.autodesk.com</a></footer>
-        Task<List<Comment>> GetCommentsAsync(string containerID, string issueID);
+        IAsyncEnumerable<Comment> GetCommentsAsync(string containerID, string issueID, IEnumerable<IQueryParameter> parameters = null);
 
         /// <summary>
         /// Adds a comment to a BIM 360 issue.

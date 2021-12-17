@@ -292,10 +292,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 connectionContext,
                 tuple.Remote?.Items?.Select(x => x.Item).ToList() ?? new List<Item>(), // new list
                 token,
-                item
-                    => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2) ||
-                    (item.SynchronizationMate != null &&
-                        item.SynchronizationMate.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2)),
+                item => item.Objectives.Any(x => x.ObjectiveID == id1 || x.ObjectiveID == id2),
                 null,
                 tuple);
             logger.LogTrace("Items of objective synchronized");
@@ -304,9 +301,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 connectionContext,
                 tuple.Remote?.DynamicFields?.ToList() ?? new List<DynamicField>(),
                 token,
-                field => field.ObjectiveID == id1 || field.ObjectiveID == id2 ||
-                    (field.SynchronizationMate != null &&
-                        (field.SynchronizationMate.ObjectiveID == id1 || field.SynchronizationMate.ObjectiveID == id2)),
+                field => field.ObjectiveID == id1 || field.ObjectiveID == id2,
                 null,
                 tuple);
             logger.LogTrace("Dynamic fields synchronized");
@@ -396,8 +391,22 @@ namespace Brio.Docs.Synchronization.Strategies
                 await itemStrategy.FindAndAttachExists(
                     itemTuple,
                     null,
-                    tuple,
-                    (string)itemTuple.GetPropertyValue(nameof(Item.RelativePath)));
+                    tuple);
+
+                if (itemTuple.Synchronized != null && itemTuple.Remote == null)
+                {
+                    logger.LogDebug("Creating remote");
+
+                    itemTuple.Remote = new Item
+                    {
+                        ExternalID = itemTuple.Synchronized.ExternalID,
+                        ItemType = itemTuple.Synchronized.ItemType,
+                        RelativePath = itemTuple.Synchronized.RelativePath,
+                        ProjectID = itemTuple.Synchronized.ProjectID,
+                    };
+                    logger.LogDebug("Created item: {@Object}", tuple.Local);
+                    itemTuple.RemoteChanged = true;
+                }
 
                 tuple.Local.Location.Item = itemTuple.Local;
                 tuple.Synchronized.Location.Item = itemTuple.Synchronized ?? itemTuple.Local?.SynchronizationMate;

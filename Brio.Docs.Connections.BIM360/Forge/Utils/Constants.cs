@@ -48,6 +48,7 @@ namespace Brio.Docs.Connections.Bim360.Forge
         internal static readonly string TYPE_PROPERTY = "type";
 
         internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}";
+        internal static readonly string FIELDS_FILTER_QUERY_PARAMETER = "fields[{0}]={1}";
         internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}";
         internal static readonly string QUERY_PARAMETER = "{0}={1}";
 

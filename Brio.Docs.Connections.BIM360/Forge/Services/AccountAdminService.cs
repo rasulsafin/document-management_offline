@@ -18,15 +18,17 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
 
         public async Task<List<User>> GetAccountUsersAsync(Hub hub)
         {
+            var command = hub.IsEmea() ? Resources.GetUsersMethodEmea : Resources.GetUsersMethodUS;
+
             var response = await connection.SendAsync(
                 ForgeSettings.AppGet(),
-                hub.IsEmea() ? Resources.GetUsersMethodEmea : Resources.GetUsersMethodUS,
+                command,
                 hub.GetAccountID());
             return response.ToObject<List<User>>();
         }
 
-        public async Task<List<ProjectUser>> GetProjectUsersAsync(string projectID)
-            => await PaginationHelper.GetItemsByPages<ProjectUser, PaginationStrategy>(
+        public IAsyncEnumerable<ProjectUser> GetProjectUsersAsync(string projectID)
+            => PaginationHelper.GetItemsByPages<ProjectUser, PaginationStrategy>(
                 connection,
                 Resources.GetProjectsUsersMethod,
                 Constants.RESULTS_PROPERTY,
@@ -45,15 +47,16 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response.ToObject<List<Role>>();
         }
 
-        public async Task<List<Company>> GetCompaniesAsync(Hub hub, string projectID)
+        public IAsyncEnumerable<Company> GetCompaniesAsync(Hub hub, string projectID)
         {
-            var projectsCompaniesMethod = hub.IsEmea()
+            var command = hub.IsEmea()
                 ? Resources.GetProjectsCompaniesMethodEmea
                 : Resources.GetProjectsCompaniesMethodUS;
-            return await PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
+
+            return PaginationHelper.GetItemsByPages<Company, OnlyDataStrategy>(
                 connection,
                 ForgeSettings.AppGet(),
-                projectsCompaniesMethod,
+                command,
                 token => token.ToObject<List<Company>>(),
                 hub.GetAccountID(),
                 projectID);

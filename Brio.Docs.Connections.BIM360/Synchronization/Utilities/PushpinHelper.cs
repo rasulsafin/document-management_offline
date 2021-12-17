@@ -2,6 +2,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
@@ -208,10 +209,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 var filter = new Filter(
                     DataMemberUtilities.GetPath<Issue.IssueAttributes>(x => x.TargetUrn),
                     targetUrn);
-                var issuesOnTarget = await issuesService.GetIssuesAsync(
+                var issuesOnTarget = issuesService.GetIssuesAsync(
                     projectSnapshot.IssueContainer,
                     new[] { filter });
-                found = issuesOnTarget.FirstOrDefault(IsNotZeroOffset);
+                found = await issuesOnTarget.FirstOrDefaultAsync(IsNotZeroOffset);
             }
 
             var vector = GetGlobalOffsetOrZeroVector(found);

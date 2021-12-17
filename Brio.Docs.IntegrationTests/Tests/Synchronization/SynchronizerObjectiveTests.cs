@@ -414,14 +414,14 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveItemFromRemoteAndSynchronize()
+        public async Task Synchronize_ItemRemovedFromLocal_RemoveItemFromRemoteAndSynchronize()
         {
             // Arrange.
             var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
             var item = MockData.DEFAULT_ITEMS[0];
             var externalItem = new ItemExternalDto
             {
-                ExternalID = "new_external_item_id",
+                ExternalID = item.ExternalID,
                 FileName = "1.txt",
                 ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
@@ -447,6 +447,46 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
             Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveSynchronizedItemAndFromRemote()
+        {
+            // Arrange.
+            var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var syncedItem = MockData.DEFAULT_ITEMS[0];
+            var localItem = MockData.DEFAULT_ITEMS[0];
+            var externalItem = new ItemExternalDto
+            {
+                ExternalID = syncedItem.ExternalID,
+                FileName = "1.txt",
+                ItemType = ItemType.File,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            localItem.SynchronizationMate = syncedItem;
+            objectiveRemote.Items.Add(externalItem);
+            syncedItem.Objectives ??= new List<ObjectiveItem>();
+            syncedItem.IsSynchronized = true;
+            syncedItem.ExternalID = externalItem.ExternalID;
+            syncedItem.Objectives.Add(
+                new ObjectiveItem
+                {
+                    Item = syncedItem,
+                    Objective = objectiveSynchronized,
+                });
+            await Fixture.Context.Items.AddRangeAsync(syncedItem, localItem);
+            await Fixture.Context.SaveChangesAsync();
+
+            // Act.
+            var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
+
+            // Assert.
+            Assert.AreEqual(0, synchronizationResult.Count);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+            Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
+            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }

@@ -25,6 +25,6 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
         /// <param name="projectID">The project ID of the users.</param>
         /// <returns>The information about all the users in a project</returns>
         /// <footer><a href="https://forge.autodesk.com/en/docs/bim360/v1/reference/http/admin-v1-projects-projectId-users-GET/">`<b>GET</b> projects/:projectId/users` on forge.autodesk.com</a></footer>
-        Task<List<ProjectUser>> GetProjectUsersAsync(string projectID);
+        IAsyncEnumerable<ProjectUser> GetProjectUsersAsync(string projectID);
     }
 }

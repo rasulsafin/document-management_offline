@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
@@ -297,8 +299,13 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                .Returns<string, Issue>((_, patchingIssue) => Task.FromResult(patchingIssue));
 
         private void SetupGettingEmptyCommentsList()
-            => mockIssuesService.Setup(x => x.GetCommentsAsync(It.IsAny<string>(), It.IsAny<string>()))
-               .Returns<string, string>((_, _) => Task.FromResult(new List<Comment>()));
+            => mockIssuesService.Setup(
+                    x => x.GetCommentsAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
+                        It.IsAny<IEnumerable<IQueryParameter>>()))
+               .Returns<string, string, IEnumerable<IQueryParameter>>(
+                    (_, _, _) => Enumerable.Empty<Comment>().ToAsyncEnumerable());
 
         private void SetupLinkToModel()
             => stubPushpinHelper
