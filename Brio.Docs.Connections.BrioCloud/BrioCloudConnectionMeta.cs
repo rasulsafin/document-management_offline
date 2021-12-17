@@ -17,6 +17,7 @@ namespace Brio.Docs.Connections.BrioCloud
             var type = new ConnectionTypeExternalDto
             {
                 Name = NAME_CONNECTION,
+                AuthFieldNames = new List<string>() { BrioCloudAuth.KEY_CLIENT_ID, BrioCloudAuth.KEY_CLIENT_SECRET },
             };
 
             return type;

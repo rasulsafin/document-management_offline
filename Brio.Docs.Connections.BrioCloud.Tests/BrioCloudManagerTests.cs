@@ -41,6 +41,34 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
+        [DataRow("/" + DOWNLOAD_SUBFOLDER)]
+        public async Task GetRemoteDirectoryFiles_DirectoryNotEmpty_NotEmpty(string path)
+        {
+            var result = await manager.GetRemoteDirectoryFiles(path);
+
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("/")]
+        public async Task GetRemoteDirectoryFiles_DirectoryIsEmpty_IsEmpty(string path)
+        {
+            var result = await manager.GetRemoteDirectoryFiles(path);
+
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        [DataRow("/NotExistedpath")]
+        public async Task GetRemoteDirectoryFiles_DirectoryNotExists_IsEmpty(string path)
+        {
+            var result = await manager.GetRemoteDirectoryFiles(path);
+
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
         public async Task PullFile_FileExistsValidPath_True()
         {
             foreach (var element in elements)
@@ -117,6 +145,87 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
             var result = await manager.DeleteFile(href);
 
             Assert.IsFalse(result);
+        }
+
+        [TestMethod]
+        public async Task Pull_FileExists_IsNotDefault()
+        {
+            string id = "testfile";
+
+            BrioCloudElement unexpectedResult = default;
+            var result = await PullHelper<BrioCloudElement>(id);
+
+            Assert.AreNotEqual(unexpectedResult, result);
+        }
+
+        [TestMethod]
+        public async Task Push_ValidObject_True()
+        {
+            string id = "testfile";
+            var brioCloudElement = new BrioCloudElement();
+
+            var result = await PushHelper<BrioCloudElement>(brioCloudElement, id);
+
+            Assert.IsTrue(result);
+        }
+
+        [TestMethod]
+        public async Task Delete_FileExists_True()
+        {
+            string id = "testfile";
+
+            var result = await DeleteHelper<BrioCloudElement>(id);
+
+            Assert.IsTrue(result);
+        }
+
+
+        [TestMethod]
+        [DataRow("/" + DOWNLOAD_SUBFOLDER)]
+        public async Task PulAll_DirectoryNotEmpty_NotEmpty(string path)
+        {
+            var result = await PullAllHelper<BrioCloudElement>(path);
+
+            Assert.IsTrue(result.Any());
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("/")]
+        public async Task PulAll_DirectoryIsEmpty_IsEmpty(string path)
+        {
+            var result = await PullAllHelper<BrioCloudElement>(path);
+
+            Assert.IsFalse(result.Any());
+        }
+
+        [TestMethod]
+        [DataRow("/NotExistedpath")]
+        public async Task PulAll_DirectoryNotExists_IsEmpty(string path)
+        {
+            var result = await PullAllHelper<BrioCloudElement>(path);
+
+            Assert.IsFalse(result.Any());
+        }
+
+        private async Task<T> PullHelper<T>(string id)
+        {
+            return await manager.Pull<T>(id);
+        }
+
+        private async Task<bool> PushHelper<T>(T obj, string id)
+        {
+            return await manager.Push<T>(obj, id);
+        }
+
+        private async Task<bool> DeleteHelper<T>(string id)
+        {
+            return await manager.Delete<T>(id);
+        }
+
+        private async Task<List<T>> PullAllHelper<T>(string path)
+        {
+            return await manager.PullAll<T>(path);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
             if (!response.IsSuccessful)
             {
-                throw new WebException(response.Description);
+                throw new FileNotFoundException(response.Description);
             }
 
             List<BrioCloudElement> items = BrioCloudElement.GetElements(response.Resources);
@@ -80,13 +80,11 @@ namespace Brio.Docs.Connections.BrioCloud
                     using (var reader = response.Stream)
                     {
                         const int BUFFER_LENGTH = 4096;
-                        ulong current = 0;
                         var buffer = new byte[BUFFER_LENGTH];
                         var count = reader.Read(buffer, 0, BUFFER_LENGTH);
                         while (count > 0)
                         {
                             writer.Write(buffer, 0, count);
-                            current += (ulong)count;
                             count = reader.Read(buffer, 0, BUFFER_LENGTH);
                         }
                     }
@@ -98,24 +96,17 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> UploadFileAsync(string href, string fileName)
         {
-            try
-            {
-                FileInfo fileInfo = new FileInfo(fileName);
-                string cloudName = PathManager.FileName(href, fileInfo.Name);
+            FileInfo fileInfo = new FileInfo(fileName);
+            string cloudName = PathManager.FileName(href, fileInfo.Name);
 
-                using (var reader = fileInfo.OpenRead())
+            using (var reader = fileInfo.OpenRead())
+            {
+                var response = await client.PutFile($"{RootPath}{cloudName}", reader);
+
+                if (response.IsSuccessful)
                 {
-                    var response = await client.PutFile($"{RootPath}{cloudName}", reader);
-
-                    if (response.IsSuccessful)
-                    {
-                        return cloudName;
-                    }
+                    return cloudName;
                 }
-            }
-            catch (Exception)
-            {
-                throw;
             }
 
             return null;
@@ -132,6 +123,56 @@ namespace Brio.Docs.Connections.BrioCloud
             else
             {
                 return false;
+            }
+        }
+
+        public async Task<string> GetContentAsync(string href)
+        {
+            var result = await client.Propfind(RootPath + href);
+
+            if (!result.IsSuccessful)
+            {
+                throw new FileNotFoundException();
+            }
+
+            using (var response = await client.GetRawFile(RootPath + href))
+            {
+                if (!response.IsSuccessful)
+                {
+                    throw new WebException(response.Description);
+                }
+
+                StringBuilder sb = new StringBuilder();
+                using (var reader = response.Stream)
+                {
+                    const int BUFFER_LENGTH = 4096;
+                    var buffer = new byte[BUFFER_LENGTH];
+                    var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                    while (count > 0)
+                    {
+                        sb.Append(Encoding.UTF8.GetString(buffer, 0, count));
+                        count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                    }
+                }
+
+                return sb.ToString();
+            }
+        }
+
+        public async Task<bool> SetContentAsync(string path, string content)
+        {
+            using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
+            {
+                var response = await client.PutFile($"{RootPath}{path}", reader);
+
+                if (response.IsSuccessful)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
         }
 

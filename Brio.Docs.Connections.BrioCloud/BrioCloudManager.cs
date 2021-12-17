@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.External;
 using Brio.Docs.External.Utils;
+using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.BrioCloud
 {
@@ -19,6 +21,18 @@ namespace Brio.Docs.Connections.BrioCloud
         }
 
         public string RootDirectoryHref { get; private set; }
+
+        public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        {
+            try
+            {
+                return await controller.GetListAsync(directoryPath);
+            }
+            catch (FileNotFoundException)
+            {
+                return Enumerable.Empty<CloudElement>();
+            }
+        }
 
         public async Task<bool> PullFile(string href, string fileName)
         {
@@ -54,31 +68,73 @@ namespace Brio.Docs.Connections.BrioCloud
             return await controller.DeleteAsync(href);
         }
 
-        public Task<bool> Push<T>(T @object, string id)
+        public async Task<T> Pull<T>(string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                if (await CheckTableDir<T>())
+                {
+                    string tableName = typeof(T).Name;
+                    string path = PathManager.GetRecordFile(tableName, id);
+                    string json = await controller.GetContentAsync(path);
+                    T @object = JsonConvert.DeserializeObject<T>(json);
+                    return @object;
+                }
+            }
+            catch (FileNotFoundException)
+            {
+            }
+
+            return default;
         }
 
-        public Task<bool> Delete<T>(string id)
+        public async Task<bool> Push<T>(T @object, string id)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await CheckTableDir<T>();
+                string tableName = typeof(T).Name;
+                string path = PathManager.GetRecordFile(tableName, id);
+                string json = JsonConvert.SerializeObject(@object);
+                return await controller.SetContentAsync(path, json);
+            }
+            catch (Exception)
+            {
+            }
+
+            return false;
         }
 
-        public Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
+        public async Task<bool> Delete<T>(string id)
         {
-            throw new NotImplementedException();
+            if (await CheckTableDir<T>())
+            {
+                string tableName = typeof(T).Name;
+                string path = PathManager.GetRecordFile(tableName, id);
+                return await controller.DeleteAsync(path);
+            }
+
+            return false;
         }
 
-        public Task<T> Pull<T>(string id)
+        public async Task<List<T>> PullAll<T>(string path)
         {
-            throw new NotImplementedException();
-        }
+            var resultCollection = new List<T>();
+            try
+            {
+                var elements = await GetRemoteDirectoryFiles(path);
+                foreach (var item in elements.Where(e => !e.IsDirectory))
+                {
+                    var remoteItem = await Pull<T>(Path.GetFileNameWithoutExtension(item.Href));
+                    resultCollection.Add(remoteItem);
+                }
+            }
+            catch (FileNotFoundException)
+            {
+            }
 
-        public Task<List<T>> PullAll<T>(string path)
-        {
-            throw new NotImplementedException();
+            return resultCollection;
         }
-
 
         public async Task<ConnectionStatusDto> GetStatusAsync()
         {
@@ -111,6 +167,11 @@ namespace Brio.Docs.Connections.BrioCloud
         }
 
         private async Task<bool> CheckDirectory(string directoryName)
+        {
+            return true;
+        }
+
+        private async Task<bool> CheckTableDir<T>()
         {
             return true;
         }

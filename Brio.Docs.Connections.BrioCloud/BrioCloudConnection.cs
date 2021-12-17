@@ -16,7 +16,7 @@ namespace Brio.Docs.Connections.BrioCloud
     {
         private const string NAME_CONNECTION = "Brio-Cloud";
 
-        private BrioCloudManager manager;
+        private static BrioCloudManager manager;
 
         public BrioCloudConnection()
         {
@@ -28,22 +28,7 @@ namespace Brio.Docs.Connections.BrioCloud
             {
                 if (await IsAuthDataCorrect(info))
                 {
-                    if (info.AuthFieldValues == null)
-                    {
-                        info.AuthFieldValues = new Dictionary<string, string>();
-                    }
-
-                    if (!info.AuthFieldValues.ContainsKey(BrioCloudAuth.KEY_CLIENT_ID))
-                    {
-                        info.AuthFieldValues.Add(BrioCloudAuth.KEY_CLIENT_ID, info.ConnectionType.AppProperties[BrioCloudAuth.KEY_CLIENT_ID]);
-                    }
-
-                    if (!info.AuthFieldValues.ContainsKey(BrioCloudAuth.KEY_CLIENT_SECRET))
-                    {
-                        info.AuthFieldValues.Add(BrioCloudAuth.KEY_CLIENT_SECRET, info.ConnectionType.AppProperties[BrioCloudAuth.KEY_CLIENT_SECRET]);
-                    }
-
-                    InitiateManager(info);
+                    await InitiateManager(info);
                 }
 
                 return await GetStatus(info);
@@ -88,13 +73,13 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
-            await InitiateManagerForSynchronization(info);
+            await InitiateManager(info);
             return BrioCloudConnectionContext.CreateContext(manager);
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
         {
-            await InitiateManagerForSynchronization(info);
+            await InitiateManager(info);
             return new CommonConnectionStorage(manager);
         }
 
@@ -103,33 +88,20 @@ namespace Brio.Docs.Connections.BrioCloud
             var connect = info.ConnectionType;
             if (connect.Name == NAME_CONNECTION)
             {
-                if (connect.AppProperties.ContainsKey(BrioCloudAuth.KEY_CLIENT_ID) &&
-                    connect.AppProperties.ContainsKey(BrioCloudAuth.KEY_CLIENT_SECRET))
-                {
-                    return Task.FromResult(true);
-                }
+                return Task.FromResult(true);
             }
 
             return Task.FromResult(false);
         }
 
-        private async Task InitiateManagerForSynchronization(ConnectionInfoExternalDto info)
-        {
-            if (info.AuthFieldValues == null || !info.AuthFieldValues.ContainsKey(BrioCloudAuth.KEY_CLIENT_ID) || !info.AuthFieldValues.ContainsKey(BrioCloudAuth.KEY_CLIENT_SECRET))
-            {
-                await Connect(info, default);
-                return;
-            }
-
-            InitiateManager(info);
-        }
-
-        private void InitiateManager(ConnectionInfoExternalDto info)
+        private Task InitiateManager(ConnectionInfoExternalDto info)
         {
             string username = info.AuthFieldValues[BrioCloudAuth.KEY_CLIENT_ID];
             string password = info.AuthFieldValues[BrioCloudAuth.KEY_CLIENT_SECRET];
 
             manager = new BrioCloudManager(new BrioCloudController(username, password));
+
+            return Task.FromResult(true);
         }
     }
 }
