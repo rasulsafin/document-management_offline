@@ -22,7 +22,7 @@ namespace Brio.Docs.Connections.BrioCloud
             this.controller = controller;
         }
 
-        public string RootDirectoryHref { get; private set; }
+        public string RootDirectoryHref { get; private set; } = "/";
 
         public async Task<IEnumerable<CloudElement>> GetRemoteDirectoryFiles(string directoryPath = "/")
         {
@@ -174,12 +174,13 @@ namespace Brio.Docs.Connections.BrioCloud
             var folderToCheck = new StringBuilder();
             foreach (var pathPart in foldersInPath)
             {
-                folderToCheck.Append('/').Append(pathPart);
-                var createResult = await CreateDirectoryIfNecessary(folderToCheck.ToString().Trim('/'));
+                var createResult = await CreateDirectoryIfNecessary(folderToCheck.ToString(), pathPart);
                 if (!createResult)
                 {
                     return false;
                 }
+
+                folderToCheck.Append('/').Append(pathPart);
             }
 
             return true;
@@ -190,20 +191,28 @@ namespace Brio.Docs.Connections.BrioCloud
             string tableName = typeof(T).Name;
             bool result = tables.Any(x => x == tableName);
             if (result)
-                return true;
-
-            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
-            foreach (CloudElement element in list)
             {
-                if (element.IsDirectory)
-                {
-                    tables.Add(element.DisplayName);
-                }
+                return true;
+            }
 
-                if (element.DisplayName == tableName)
+            try
+            {
+                IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
+                foreach (CloudElement element in list)
                 {
-                    result = true;
+                    if (element.IsDirectory)
+                    {
+                        tables.Add(element.DisplayName);
+                    }
+
+                    if (element.DisplayName == tableName)
+                    {
+                        result = true;
+                    }
                 }
+            }
+            catch (FileNotFoundException)
+            {
             }
 
             if (!result)
@@ -214,23 +223,25 @@ namespace Brio.Docs.Connections.BrioCloud
             return result;
         }
 
-        private async Task<bool> CreateDirectoryIfNecessary(string directoryName)
+        private async Task<bool> CreateDirectoryIfNecessary(string folderToCheck, string directoryName)
         {
-            bool directoryExists = directories.Any(x => x == directoryName);
+            string fullPath = Path.Combine(folderToCheck, directoryName);
+
+            bool directoryExists = directories.Any(x => x == fullPath);
             if (directoryExists)
             {
                 return true;
             }
 
-            var directory = PathManager.GetNestedDirectory(directoryName);
-            directoryName = directory.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
-            var list = await controller.GetListAsync(directory);
+            folderToCheck = PathManager.GetNestedDirectory(folderToCheck);
+
+            var list = await controller.GetListAsync(folderToCheck);
 
             foreach (CloudElement element in list)
             {
                 if (element.IsDirectory)
                 {
-                    directories.Add(element.DisplayName);
+                    directories.Add(fullPath);
                 }
 
                 if (element.DisplayName == directoryName)
@@ -241,7 +252,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
             if (!directoryExists)
             {
-                var createdFolder = await controller.CreateDirAsync(PathManager.GetRootDirectory(), directoryName);
+                var createdFolder = await controller.CreateDirAsync(folderToCheck, directoryName);
                 return createdFolder != null;
             }
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebDav;
 
@@ -49,7 +50,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
             collection.AddRange(validCollection);
             collection.AddRange(invalidCollection);
 
-            var result = BrioCloudElement.GetElements(collection);
+            var result = BrioCloudElement.GetElements(collection, string.Empty);
 
             Assert.AreEqual(validCollection.Count, result.Count);
         }

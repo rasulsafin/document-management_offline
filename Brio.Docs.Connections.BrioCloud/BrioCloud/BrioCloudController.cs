@@ -42,21 +42,40 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             get
             {
-                return $"remote.php/dav/files/{username}";
+                return $"/remote.php/dav/files/{username}";
             }
         }
 
         public async Task<IEnumerable<CloudElement>> GetListAsync(string path = "/")
         {
-            var response = await client.Propfind(RootPath + path);
+            var result = new List<CloudElement>();
+
+            if (!path.Contains(RootPath))
+            {
+                path = RootPath + path;
+            }
+
+            var response = await client.Propfind(path);
 
             if (!response.IsSuccessful)
             {
                 throw new FileNotFoundException(response.Description);
             }
 
-            List<BrioCloudElement> items = BrioCloudElement.GetElements(response.Resources);
-            return items;
+            var items = BrioCloudElement.GetElements(response.Resources, path);
+            result.AddRange(items);
+
+            //foreach (var item in items)
+            //{
+            //    if (item.IsDirectory)
+            //    {
+            //        var directoryItems = await GetListAsync(item.Href);
+
+            //        result.AddRange(directoryItems);
+            //    }
+            //}
+
+            return result;
         }
 
         public async Task<bool> DownloadFileAsync(string href, string fileName)
@@ -187,7 +206,6 @@ namespace Brio.Docs.Connections.BrioCloud
             }
 
             return null;
-
         }
 
         public void Dispose()
