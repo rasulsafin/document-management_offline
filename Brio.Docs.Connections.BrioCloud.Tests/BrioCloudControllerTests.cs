@@ -36,9 +36,18 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         [TestMethod]
         [DataRow("абырвалг")]
         [ExpectedException(typeof(WebException))]
-        public async Task GetListAsync_InvalidPath_IsNotNull(string path)
+        public async Task GetListAsync_InvalidPath_IsNull(string path)
         {
             var result = await controller.GetListAsync(path);
+
+            Assert.IsNull(result);
+        }
+
+        [TestMethod]
+        [DataRow("/", "TEST_PATH")]
+        public async Task CreateDirAsync_ValidPath_IsNotNull(string path, string dir)
+        {
+            var result = await controller.CreateDirAsync(path, dir);
 
             Assert.IsNotNull(result);
         }

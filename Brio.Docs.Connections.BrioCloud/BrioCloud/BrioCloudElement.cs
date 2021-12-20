@@ -13,11 +13,6 @@ namespace Brio.Docs.Connections.BrioCloud
             var result = new List<BrioCloudElement>();
             foreach (var element in collection)
             {
-                if (element.ContentType == null)
-                {
-                    continue;
-                }
-
                 BrioCloudElement item = GetElement(element);
                 result.Add(item);
             }
@@ -31,6 +26,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
             result.Href = Uri.UnescapeDataString(element.Uri);
             result.DisplayName = Path.GetFileName(result.Href);
+            result.IsDirectory = element.IsCollection;
 
             return result;
         }

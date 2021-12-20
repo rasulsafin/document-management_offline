@@ -14,6 +14,8 @@ namespace Brio.Docs.Connections.BrioCloud
     public class BrioCloudManager : ICloudManager
     {
         private BrioCloudController controller;
+        private List<string> tables = new List<string>();
+        private List<string> directories = new List<string>();
 
         public BrioCloudManager(BrioCloudController controller)
         {
@@ -168,11 +170,81 @@ namespace Brio.Docs.Connections.BrioCloud
 
         private async Task<bool> CheckDirectory(string directoryName)
         {
+            var foldersInPath = directoryName.Split('/');
+            var folderToCheck = new StringBuilder();
+            foreach (var pathPart in foldersInPath)
+            {
+                folderToCheck.Append('/').Append(pathPart);
+                var createResult = await CreateDirectoryIfNecessary(folderToCheck.ToString().Trim('/'));
+                if (!createResult)
+                {
+                    return false;
+                }
+            }
+
             return true;
         }
 
         private async Task<bool> CheckTableDir<T>()
         {
+            string tableName = typeof(T).Name;
+            bool result = tables.Any(x => x == tableName);
+            if (result)
+                return true;
+
+            IEnumerable<CloudElement> list = await controller.GetListAsync(PathManager.GetTablesDir());
+            foreach (CloudElement element in list)
+            {
+                if (element.IsDirectory)
+                {
+                    tables.Add(element.DisplayName);
+                }
+
+                if (element.DisplayName == tableName)
+                {
+                    result = true;
+                }
+            }
+
+            if (!result)
+            {
+                await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
+            }
+
+            return result;
+        }
+
+        private async Task<bool> CreateDirectoryIfNecessary(string directoryName)
+        {
+            bool directoryExists = directories.Any(x => x == directoryName);
+            if (directoryExists)
+            {
+                return true;
+            }
+
+            var directory = PathManager.GetNestedDirectory(directoryName);
+            directoryName = directory.Split('/', StringSplitOptions.RemoveEmptyEntries).Last();
+            var list = await controller.GetListAsync(directory);
+
+            foreach (CloudElement element in list)
+            {
+                if (element.IsDirectory)
+                {
+                    directories.Add(element.DisplayName);
+                }
+
+                if (element.DisplayName == directoryName)
+                {
+                    directoryExists = true;
+                }
+            }
+
+            if (!directoryExists)
+            {
+                var createdFolder = await controller.CreateDirAsync(PathManager.GetRootDirectory(), directoryName);
+                return createdFolder != null;
+            }
+
             return true;
         }
     }

@@ -176,6 +176,20 @@ namespace Brio.Docs.Connections.BrioCloud
             }
         }
 
+        public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
+        {
+            string newPath = PathManager.DirectoryName(path, nameDir);
+            var response = await client.Mkcol($"{RootPath}{newPath}");
+
+            if (response.IsSuccessful)
+            {
+                return new BrioCloudElement();
+            }
+
+            return null;
+
+        }
+
         public void Dispose()
         {
             client.Dispose();
