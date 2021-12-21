@@ -24,6 +24,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
 
         public static readonly string ITEM_ID = GetItemId();
 
+        public static readonly string USER_NAME = "Dummy user";
+
         public static string GetCommentId()
             => $"comment-{Guid.NewGuid()}";
 

@@ -1,6 +1,6 @@
+using System;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models;
-using System;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 
@@ -31,6 +31,24 @@ namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
                 {
                     Name = "Dummy hub",
                     Region = Region.US,
+                },
+            };
+
+        public static Item Item
+            => new ()
+            {
+                ID = DummyStrings.ITEM_ID,
+                Attributes = new Item.ItemAttributes
+                {
+                    DisplayName = "Dummy item",
+                    CreateTime = DateTime.UtcNow.Subtract(TimeSpan.FromDays(2)),
+                    CreateUserId = DummyStrings.USER_ID,
+                    CreateUserName = DummyStrings.USER_NAME,
+                    LastModifiedTime = DateTime.UtcNow.Subtract(TimeSpan.FromDays(1)),
+                    LastModifiedUserId = DummyStrings.USER_ID,
+                    LastModifiedUserName = DummyStrings.USER_NAME,
+                    Hidden = false,
+                    Reserved = null,
                 },
             };
 
