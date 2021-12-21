@@ -57,9 +57,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>, CommentsBimElementsConverter>();
             services.AddConverter<IEnumerable<Comment>, LinkedInfo, CommentsLinkedInfoConverter>();
 
-            services
-               .AddConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>,
-                    BimElementsCommentsConverter>();
+            services.AddConverter<
+                CommentCreatingData<IEnumerable<BimElementExternalDto>>,
+                IEnumerable<Comment>,
+                BimElementsCommentsConverter>();
 
             services.AddConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>, LinkedInfoCommentsConverter>();
             return services;
