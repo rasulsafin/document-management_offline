@@ -6,12 +6,11 @@ using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.UnitTests.Dummy;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
@@ -33,6 +32,8 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
         private readonly Mock<IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>>>
             stubConverterCommentsToBimElements = new ();
 
+        private readonly Mock<IConverter<IEnumerable<Comment>, LinkedInfo>> stubConvertToLinkedInfo = new ();
+
         private readonly Mock<MetaCommentHelper> mockCommentHelper = new ();
         private IssueSnapshotObjectiveConverter converter;
         private IssueSnapshot issueSnapshot;
@@ -45,6 +46,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
                 stubConverterToDto.Object,
                 stubStatusConverter.Object,
                 stubConverterCommentsToBimElements.Object,
+                stubConvertToLinkedInfo.Object,
                 stubSubtypeEnumCreator.Object,
                 stubRootCauseEnumCreator.Object,
                 stubLocationEnumCreator.Object,

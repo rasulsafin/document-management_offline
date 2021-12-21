@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Synchronization;
 using Brio.Docs.Connections.Bim360.Synchronization.Converters;
 using Brio.Docs.Connections.Bim360.Synchronization.Factories;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective;
 using Brio.Docs.Connections.Bim360.Synchronizers;
@@ -38,9 +39,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ObjectiveGetter>();
             services.AddScoped<ObjectiveUpdater>();
             services.AddScoped<ObjectiveRemover>();
+            services.AddScoped<IIssueToModelLinker, PushpinHelper>();
 
             services.AddScoped(
-                _ => new SerializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
+                _ => new SerializerBuilder().WithTypeConverter(new Vector3dTypeConverter())
+                   .WithNamingConvention(UnderscoredNamingConvention.Instance)
+                   .Build());
             services.AddScoped(
                 _ => new DeserializerBuilder().WithNamingConvention(UnderscoredNamingConvention.Instance).Build());
 
@@ -49,8 +53,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddConverter<IssueSnapshot, ObjectiveStatus, IssueSnapshotObjectiveStatusConverter>();
             services.AddConverter<ObjectiveExternalDto, Status, ObjectiveIssueStatusConverter>();
             services.AddConverter<IssueSnapshot, ObjectiveExternalDto, IssueSnapshotObjectiveConverter>();
+
             services.AddConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>, CommentsBimElementsConverter>();
-            services.AddConverter<CommentCreatingData, IEnumerable<Comment>, BimElementsCommentsConverter>();
+            services.AddConverter<IEnumerable<Comment>, LinkedInfo, CommentsLinkedInfoConverter>();
+
+            services.AddConverter<
+                CommentCreatingData<IEnumerable<BimElementExternalDto>>,
+                IEnumerable<Comment>,
+                BimElementsCommentsConverter>();
+
+            services.AddConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>, LinkedInfoCommentsConverter>();
             return services;
         }
 
