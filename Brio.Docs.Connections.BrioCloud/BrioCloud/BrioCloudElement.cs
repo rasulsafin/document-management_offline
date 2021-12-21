@@ -8,6 +8,8 @@ namespace Brio.Docs.Connections.BrioCloud
 {
     public class BrioCloudElement : CloudElement
     {
+        public string ETag { get; private set; }
+
         public static List<CloudElement> GetElements(IReadOnlyCollection<WebDavResource> collection, string uri)
         {
             var result = new List<CloudElement>();
@@ -25,11 +27,20 @@ namespace Brio.Docs.Connections.BrioCloud
 
         private static BrioCloudElement GetElement(WebDavResource element)
         {
-            var result = new BrioCloudElement();
+            var result = new BrioCloudElement
+            {
+                Href = Uri.UnescapeDataString(element.Uri),
+                IsDirectory = element.IsCollection,
+                DisplayName = Path.GetFileName(element.Uri.TrimEnd('/')),
+                ContentType = element.ContentType,
+                ETag = element.ETag,
+            };
 
-            result.Href = Uri.UnescapeDataString(element.Uri);
-            result.IsDirectory = element.IsCollection;
-            result.DisplayName = Path.GetFileName(result.Href.TrimEnd('/'));
+            result.CreationDate = element.CreationDate ?? default;
+            result.ContentLength = (ulong?)element.ContentLength ?? default;
+            result.LastModified = element.LastModifiedDate ?? default;
+
+            result.Status = element.PropertyStatuses.ToString();
 
             return result;
         }

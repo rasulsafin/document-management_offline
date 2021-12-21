@@ -44,9 +44,8 @@ namespace Brio.Docs.Connections.BrioCloud
             }
             catch (FileNotFoundException)
             {
+                return false;
             }
-
-            return false;
         }
 
         public async Task<string> PushFile(string remoteDirName, string fullPath)
@@ -80,6 +79,7 @@ namespace Brio.Docs.Connections.BrioCloud
                     string path = PathManager.GetRecordFile(tableName, id);
                     string json = await controller.GetContentAsync(path);
                     T @object = JsonConvert.DeserializeObject<T>(json);
+
                     return @object;
                 }
             }
@@ -94,11 +94,14 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             try
             {
-                await CheckTableDir<T>();
-                string tableName = typeof(T).Name;
-                string path = PathManager.GetRecordFile(tableName, id);
-                string json = JsonConvert.SerializeObject(@object);
-                return await controller.SetContentAsync(path, json);
+                if (await CheckTableDir<T>())
+                {
+                    string tableName = typeof(T).Name;
+                    string path = PathManager.GetRecordFile(tableName, id);
+                    string json = JsonConvert.SerializeObject(@object);
+
+                    return await controller.SetContentAsync(path, json);
+                }
             }
             catch (Exception)
             {
@@ -143,12 +146,21 @@ namespace Brio.Docs.Connections.BrioCloud
             try
             {
                 var list = await controller.GetListAsync(RootDirectoryHref);
+
                 if (list != null)
                 {
                     return new ConnectionStatusDto()
                     {
                         Status = RemoteConnectionStatus.OK,
                         Message = "Good",
+                    };
+                }
+                else
+                {
+                    return new ConnectionStatusDto()
+                    {
+                        Status = RemoteConnectionStatus.NeedReconnect,
+                        Message = "Not connect",
                     };
                 }
             }
@@ -160,18 +172,13 @@ namespace Brio.Docs.Connections.BrioCloud
                     Message = ex.Message,
                 };
             }
-
-            return new ConnectionStatusDto()
-            {
-                Status = RemoteConnectionStatus.NeedReconnect,
-                Message = "Not connect",
-            };
         }
 
         private async Task<bool> CheckDirectory(string directoryName)
         {
             var foldersInPath = directoryName.Split('/');
             var folderToCheck = new StringBuilder();
+
             foreach (var pathPart in foldersInPath)
             {
                 var createResult = await CreateDirectoryIfNecessary(folderToCheck.ToString(), pathPart);
@@ -189,8 +196,9 @@ namespace Brio.Docs.Connections.BrioCloud
         private async Task<bool> CheckTableDir<T>()
         {
             string tableName = typeof(T).Name;
-            bool result = tables.Any(x => x == tableName);
-            if (result)
+            bool directoryExists = tables.Any(x => x == tableName);
+
+            if (directoryExists)
             {
                 return true;
             }
@@ -207,7 +215,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
                     if (element.DisplayName == tableName)
                     {
-                        result = true;
+                        directoryExists = true;
                     }
                 }
             }
@@ -215,12 +223,13 @@ namespace Brio.Docs.Connections.BrioCloud
             {
             }
 
-            if (!result)
+            if (!directoryExists)
             {
-                await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
+                var createdFolder = await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
+                return createdFolder != null;
             }
 
-            return result;
+            return directoryExists;
         }
 
         private async Task<bool> CreateDirectoryIfNecessary(string folderToCheck, string directoryName)

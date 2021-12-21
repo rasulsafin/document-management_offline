@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Brio.Docs.External;
 using Brio.Docs.External.Utils;
-using Brio.Docs.Integration.Dtos;
 using WebDav;
 
 namespace Brio.Docs.Connections.BrioCloud
@@ -23,13 +21,13 @@ namespace Brio.Docs.Connections.BrioCloud
         public BrioCloudController(string username, string password)
         {
             this.username = username;
-
             string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(username + ":" + password));
 
             var httpClient = new HttpClient()
             {
                 BaseAddress = new Uri(BASE_URI),
             };
+
             httpClient.DefaultRequestHeaders.Add("OCS-APIRequest", "true");
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", encoded);
 
@@ -57,23 +55,17 @@ namespace Brio.Docs.Connections.BrioCloud
 
             var response = await client.Propfind(path);
 
-            if (!response.IsSuccessful)
+            if (response.StatusCode == 401)
+            {
+                throw new UnauthorizedAccessException(response.Description);
+            }
+            else if (!response.IsSuccessful)
             {
                 throw new FileNotFoundException(response.Description);
             }
 
             var items = BrioCloudElement.GetElements(response.Resources, path);
             result.AddRange(items);
-
-            //foreach (var item in items)
-            //{
-            //    if (item.IsDirectory)
-            //    {
-            //        var directoryItems = await GetListAsync(item.Href);
-
-            //        result.AddRange(directoryItems);
-            //    }
-            //}
 
             return result;
         }
@@ -115,12 +107,12 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> UploadFileAsync(string href, string fileName)
         {
-            FileInfo fileInfo = new FileInfo(fileName);
+            var fileInfo = new FileInfo(fileName);
             string cloudName = PathManager.FileName(href, fileInfo.Name);
 
             using (var reader = fileInfo.OpenRead())
             {
-                var response = await client.PutFile($"{RootPath}{cloudName}", reader);
+                var response = await client.PutFile(RootPath + cloudName, reader);
 
                 if (response.IsSuccessful)
                 {
@@ -161,7 +153,7 @@ namespace Brio.Docs.Connections.BrioCloud
                     throw new WebException(response.Description);
                 }
 
-                StringBuilder sb = new StringBuilder();
+                var sb = new StringBuilder();
                 using (var reader = response.Stream)
                 {
                     const int BUFFER_LENGTH = 4096;
@@ -182,7 +174,7 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
-                var response = await client.PutFile($"{RootPath}{path}", reader);
+                var response = await client.PutFile(RootPath + path, reader);
 
                 if (response.IsSuccessful)
                 {
@@ -198,7 +190,7 @@ namespace Brio.Docs.Connections.BrioCloud
         public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
         {
             string newPath = PathManager.DirectoryName(path, nameDir);
-            var response = await client.Mkcol($"{RootPath}{newPath}");
+            var response = await client.Mkcol(RootPath + newPath);
 
             if (response.IsSuccessful)
             {

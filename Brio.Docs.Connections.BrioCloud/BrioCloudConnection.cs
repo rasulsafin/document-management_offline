@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
@@ -83,10 +81,10 @@ namespace Brio.Docs.Connections.BrioCloud
             return new CommonConnectionStorage(manager);
         }
 
-        private Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
+        private static Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
-            if (connect.Name == NAME_CONNECTION)
+            if (connect.Name == NAME_CONNECTION && info.AuthFieldValues.ContainsKey(BrioCloudAuth.USERNAME) && info.AuthFieldValues.ContainsKey(BrioCloudAuth.PASSWORD))
             {
                 return Task.FromResult(true);
             }
@@ -94,10 +92,10 @@ namespace Brio.Docs.Connections.BrioCloud
             return Task.FromResult(false);
         }
 
-        private Task InitiateManager(ConnectionInfoExternalDto info)
+        private static Task InitiateManager(ConnectionInfoExternalDto info)
         {
-            string username = info.AuthFieldValues[BrioCloudAuth.KEY_CLIENT_ID];
-            string password = info.AuthFieldValues[BrioCloudAuth.KEY_CLIENT_SECRET];
+            string username = info.AuthFieldValues[BrioCloudAuth.USERNAME];
+            string password = info.AuthFieldValues[BrioCloudAuth.PASSWORD];
 
             manager = new BrioCloudManager(new BrioCloudController(username, password));
 
