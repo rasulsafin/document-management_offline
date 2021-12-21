@@ -27,7 +27,8 @@ namespace Brio.Docs.Synchronization.Extensions
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
             where T : class, ISynchronizable<T>, new()
         {
-            if (typeof(T) == typeof(Item))
+            if (typeof(T) == typeof(Item) ||
+                typeof(T) == typeof(DynamicField))
                 return;
 
             MergePrivate(tuple, tuple.Local?.UpdatedAt ?? default, tuple.Remote?.UpdatedAt ?? default);
@@ -171,7 +172,7 @@ namespace Brio.Docs.Synchronization.Extensions
             where T : class, ISynchronizable<T>, new()
         {
             tuple.Synchronized.IsSynchronized = true;
-            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
+            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
             tuple.Local.SynchronizationMate = tuple.Synchronized;
         }
 

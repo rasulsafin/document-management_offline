@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Brio.Docs.Synchronization.Models;
 
 namespace Brio.Docs.Synchronization.Interfaces
@@ -12,6 +13,7 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// Merges all data for the tuple.
         /// </summary>
         /// <param name="tuple">The tuple to synchronize.</param>
-        void Merge(SynchronizingTuple<T> tuple);
+        /// <returns>The task of the operation.</returns>
+        Task Merge(SynchronizingTuple<T> tuple);
     }
 }

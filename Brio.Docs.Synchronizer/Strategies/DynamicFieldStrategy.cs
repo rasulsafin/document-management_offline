@@ -19,21 +19,22 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
+    [Obsolete]
     internal class DynamicFieldStrategy<TLinker> : ALinkingStrategy<DynamicField, DynamicFieldExternalDto>
         where TLinker : ILinker<DynamicField>
     {
-        private readonly Func<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>> getSubstrategy;
         private readonly ILogger<DynamicFieldStrategy<TLinker>> logger;
+        private readonly IMerger<DynamicField> merger;
 
         public DynamicFieldStrategy(
             DMContext context,
             IMapper mapper,
             TLinker linker,
-            Func<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>> getSubstrategy,
+            IMerger<DynamicField> merger,
             ILogger<DynamicFieldStrategy<TLinker>> logger)
             : base(context, mapper, linker, logger)
         {
-            this.getSubstrategy = getSubstrategy;
+            this.merger = merger;
             this.logger = logger;
             logger.LogTrace("DynamicFieldStrategy created");
         }
@@ -66,11 +67,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 tuple.Remote.ConnectionInfoID = data.User.ConnectionInfoID;
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
-
-                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
-                    throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Local");
-
+                await merger.Merge(tuple).ConfigureAwait(false);
                 return await base.AddToLocal(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
@@ -98,16 +95,8 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 logger.LogBeforeMerge(tuple);
-                tuple.Merge();
+                await merger.Merge(tuple).ConfigureAwait(false);
                 logger.LogAfterMerge(tuple);
-                tuple.Remote.ExternalID = tuple.Local.ExternalID;
-
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
-                logger.LogTrace("Children synchronized");
-
-                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
-                    throw new Exception("Exception created while Synchronizing children in Add Dynamic Field To Remote");
-
                 return await base.AddToRemote(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
@@ -135,12 +124,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 tuple.Remote.ConnectionInfoID = data.User.ConnectionInfoID;
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
-                logger.LogTrace("Children synchronized");
-
-                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
-                    throw new Exception("Exception created while Synchronizing children in Merge Dynamic Field");
-
+                await merger.Merge(tuple).ConfigureAwait(false);
                 return await base.Merge(tuple, data, connectionContext, parent, token);
             }
             catch (Exception e)
@@ -167,13 +151,13 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
-                logger.LogTrace("Children synchronized");
-
-                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
-                    throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Local");
-
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
+                var removeFromLocal = await base.RemoveFromLocal(tuple, data, connectionContext, parent, token)
+                   .ConfigureAwait(false);
+                if (tuple.Local != null && await context.DynamicFields.ContainsAsync(tuple.Local).ConfigureAwait(false))
+                    context.DynamicFields.Remove(tuple.Local);
+                if (tuple.Synchronized != null && await context.DynamicFields.ContainsAsync(tuple.Synchronized).ConfigureAwait(false))
+                    context.DynamicFields.Remove(tuple.Synchronized);
+                return removeFromLocal;
             }
             catch (Exception e)
             {
@@ -199,13 +183,13 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                var resultAfterChildrenSync = await SynchronizeChildren(tuple, data, connectionContext, parent, token);
-                logger.LogTrace("Children synchronized");
-
-                if ((resultAfterChildrenSync?.Count ?? 0) > 0)
-                    throw new Exception("Exception created while Synchronizing children in Remove Dynamic Field From Remote");
-
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
+                var removeFromRemote = await base.RemoveFromRemote(tuple, data, connectionContext, parent, token)
+                   .ConfigureAwait(false);
+                if (tuple.Local != null && await context.DynamicFields.ContainsAsync(tuple.Local).ConfigureAwait(false))
+                    context.DynamicFields.Remove(tuple.Local);
+                if (tuple.Synchronized != null && await context.DynamicFields.ContainsAsync(tuple.Synchronized).ConfigureAwait(false))
+                    context.DynamicFields.Remove(tuple.Synchronized);
+                return removeFromRemote;
             }
             catch (Exception e)
             {
@@ -231,43 +215,6 @@ namespace Brio.Docs.Synchronization.Strategies
             dynamicField.ExternalID = found.ExternalID;
             foreach (var child in dynamicField.ChildrenDynamicFields ?? Enumerable.Empty<DynamicField>())
                 UpdateExternalIDs(found.ChildrenDynamicFields.ToList(), child, comparer);
-        }
-
-        private async Task<List<SynchronizingResult>> SynchronizeChildren(
-            SynchronizingTuple<DynamicField> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
-            CancellationToken token)
-        {
-            logger.LogStartAction(tuple, data, parent);
-
-            if (HasChildren(tuple.Local) || HasChildren(tuple.Remote) || HasChildren(tuple.Synchronized))
-            {
-                logger.LogTrace("Dynamic field has children");
-                logger.LogBeforeMerge(tuple);
-                tuple.Merge();
-                logger.LogAfterMerge(tuple);
-                var id1 = tuple.Local?.ID ?? 0;
-                var id2 = tuple.Synchronized?.ID ?? 0;
-                logger.LogDebug("Local id = {@Local}, Synchronized id = {@Synchronized}", id1, id2);
-                var results = await getSubstrategy().Synchronize(
-                    data,
-                    connectionContext,
-                    tuple.Remote?.ChildrenDynamicFields?.ToList() ?? new List<DynamicField>(),
-                    token,
-                    field => field.ParentFieldID == id1 || field.ParentFieldID == id2 ||
-                        (field.SynchronizationMate != null &&
-                            (field.SynchronizationMate.ParentFieldID == id1 ||
-                                field.SynchronizationMate.ParentFieldID == id2)),
-                    null,
-                    tuple);
-                logger.LogTrace("Children synchronized by substrategy");
-                ((ISynchronizationChanges)parent).SynchronizeChanges(tuple);
-                return results;
-            }
-
-            return null;
         }
 
         private bool HasChildren(DynamicField field)

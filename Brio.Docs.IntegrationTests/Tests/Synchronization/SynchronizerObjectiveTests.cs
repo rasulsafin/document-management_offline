@@ -1373,7 +1373,7 @@ namespace Brio.Docs.Tests.Synchronization
         {
             void SetID(DynamicFieldExternalDto df)
             {
-                df.ExternalID = $"new_df_{Guid.NewGuid()}";
+                df.ExternalID ??= $"new_df_{Guid.NewGuid()}";
 
                 foreach (var child in df.ChildrenDynamicFields)
                     SetID(child);
@@ -1383,7 +1383,7 @@ namespace Brio.Docs.Tests.Synchronization
             foreach (var item in x.Items.Where(i => i.ExternalID == null))
                 item.ExternalID = $"new_item_{Guid.NewGuid()}";
 
-            foreach (var df in x.DynamicFields.Where(df => df.ExternalID == null))
+            foreach (var df in x.DynamicFields)
                 SetID(df);
 
             return Task.FromResult(x);

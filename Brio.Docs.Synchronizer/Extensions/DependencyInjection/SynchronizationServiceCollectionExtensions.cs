@@ -21,20 +21,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ItemStrategy<ProjectItemLinker>>();
             services.AddScoped<ItemStrategy<ObjectiveItemLinker>>();
             services.AddScoped<DynamicFieldStrategy<ObjectiveDynamicFieldLinker>>();
-            services.AddScoped<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>>();
 
             services.AddScoped<IMerger<Item>, ItemMerger>();
+            services.AddScoped<IMerger<DynamicField>, DynamicFieldMerger>();
 
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
 
             services.AddScoped<ProjectItemLinker>();
             services.AddScoped<ObjectiveItemLinker>();
             services.AddScoped<ObjectiveDynamicFieldLinker>();
-            services.AddScoped<DynamicFieldDynamicFieldLinker>();
-
-            // TODO: Replace with factory.
-            services.AddScoped<Func<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>>>(
-                x => x.GetService<DynamicFieldStrategy<DynamicFieldDynamicFieldLinker>>);
             return services;
         }
     }

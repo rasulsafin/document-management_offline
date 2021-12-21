@@ -8,6 +8,7 @@ namespace Brio.Docs.Synchronization.Utils
 {
     internal static class TuplesUtils
     {
+        [Obsolete]
         internal static List<SynchronizingTuple<T>> CreateSynchronizingTuples<T>(
                 IEnumerable<T> dbList,
                 IEnumerable<T> remoteList,
@@ -38,6 +39,40 @@ namespace Brio.Docs.Synchronization.Utils
 
             AddToList(dbList, (tuple, item) => tuple.Local = item);
             AddToList(remoteList, (tuple, item) => tuple.Remote = item);
+
+            return result;
+        }
+
+        internal static List<SynchronizingTuple<T>> CreateSynchronizingTuples<T>(
+            IEnumerable<T> local,
+            IEnumerable<T> synchronized,
+            IEnumerable<T> remote,
+            Func<T, SynchronizingTuple<T>, bool> isEqualsFunc)
+            where T : ISynchronizable<T>
+        {
+            var result = new List<SynchronizingTuple<T>>();
+
+            void AddToList(IEnumerable<T> list, Action<SynchronizingTuple<T>, T> set)
+            {
+                foreach (var element in list)
+                {
+                    if (string.IsNullOrEmpty(element.ExternalID))
+                    {
+                        result.Add(new SynchronizingTuple<T>(local: element));
+                        continue;
+                    }
+
+                    var containsItem = result.FirstOrDefault(x => isEqualsFunc(element, x));
+                    if (containsItem == null)
+                        result.Add(containsItem = new SynchronizingTuple<T>(element.ExternalID));
+
+                    set(containsItem, element);
+                }
+            }
+
+            AddToList(local, (tuple, item) => tuple.Local = item);
+            AddToList(synchronized, (tuple, item) => tuple.Synchronized = item);
+            AddToList(remote, (tuple, item) => tuple.Remote = item);
 
             return result;
         }
