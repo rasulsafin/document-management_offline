@@ -2,6 +2,7 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
+using System.Collections.Generic;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
@@ -42,6 +43,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             var issueSnapshot = new IssueSnapshot(issue, project);
             if (!IssueUtilities.IsRemoved(issueSnapshot.Entity))
                 project.Issues.Add(issue.ID, issueSnapshot);
+            issueSnapshot.Comments = new List<CommentSnapshot>();
             return issueSnapshot;
         }
 

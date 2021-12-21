@@ -32,6 +32,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
         public static readonly string META_COMMENT_TAG = "#mrs";
         public static readonly string BIM_ELEMENTS_META_COMMENT_TAG = "#be";
+        public static readonly string LINKED_INFO_META_COMMENT_TAG = "#li";
         public static readonly int MAX_COMMENT_LENGTH = 1900;
     }
 }
