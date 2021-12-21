@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
-using Brio.Docs.Connections.BrioCloud.Synchronization;
 using Brio.Docs.Integration.Dtos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -18,11 +14,11 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
     public class BrioCloudConnectionTests
     {
         private const string NAME_CONNECTION = "Brio-Cloud";
-        private const string CLIENT_ID = "CLIENT_ID";
-        private const string CLIENT_SECRET = "CLIENT_SECRET";
+        private const string USERNAME = "Username";
+        private const string PASSWORD = "Password";
 
-        private const string VALID_USERNAME = "avsingaevskiy";
-        private const string VALID_PASSWORD = "AndreyS186";
+        private const string VALID_USERNAME = "briomrs";
+        private const string VALID_PASSWORD = "BrioMRS2021";
 
         private static ConnectionInfoExternalDto validInfo;
 
@@ -34,11 +30,11 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
                     Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, VALID_USERNAME },
-                        { CLIENT_SECRET, VALID_PASSWORD },
-                    },
+                },
+                AuthFieldValues = new Dictionary<string, string>
+                {
+                    { USERNAME, VALID_USERNAME },
+                    { PASSWORD, VALID_PASSWORD },
                 },
             };
         }
@@ -46,7 +42,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         [TestMethod]
         public async Task Connect_ValidCredentials_OK()
         {
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
 
             var expectedResult = RemoteConnectionStatus.OK;
             var result = await connection.Connect(validInfo, default);
@@ -55,20 +51,19 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
-        [DataRow("avsingaevskiy", "AndreyS187")]
-        [DataRow("avsingaevskij", "AndreyS186")]
+        [DataRow("briomrs", "BrioMRS2020")]
         public async Task Connect_InvalidCredentials_Error(string username, string password)
         {
-            ConnectionInfoExternalDto info = new ConnectionInfoExternalDto()
+            var info = new ConnectionInfoExternalDto()
             {
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
                     Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, username },
-                        { CLIENT_SECRET, password },
-                    },
+                },
+                AuthFieldValues = new Dictionary<string, string>
+                {
+                    { USERNAME, username },
+                    { PASSWORD, password },
                 },
             };
 
@@ -81,9 +76,28 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
+        public async Task Connect_WithoutCredentials_Error()
+        {
+            var info = new ConnectionInfoExternalDto()
+            {
+                ConnectionType = new ConnectionTypeExternalDto()
+                {
+                    Name = NAME_CONNECTION,
+                },
+            };
+
+            var connection = new BrioCloudConnection();
+            var expectedResult = RemoteConnectionStatus.Error;
+
+            var result = await connection.Connect(info, default);
+
+            Assert.AreEqual(expectedResult, result.Status);
+        }
+
+        [TestMethod]
         public async Task GetStatus_ManagerInitiated_OK()
         {
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
             await connection.Connect(validInfo, default);
 
             var expectedResult = RemoteConnectionStatus.OK;
@@ -95,7 +109,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         [TestMethod]
         public async Task GetStatus_ManagerNotInitiated_NeedReconnect()
         {
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
 
             var expectedResult = RemoteConnectionStatus.NeedReconnect;
             var result = await connection.GetStatus(validInfo);
@@ -107,24 +121,17 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         public async Task UpdateConnectionInfo_WrongObjectiveTypeWithoutGuid_NewObjectiveTypeNewGuid()
         {
             string objectiveType = "WrongObjectiveType";
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
             var info = new ConnectionInfoExternalDto()
             {
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
-                    Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, VALID_USERNAME },
-                        { CLIENT_SECRET, VALID_PASSWORD },
-                    },
                     ObjectiveTypes = new List<ObjectiveTypeExternalDto>
                     {
                         new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
                     },
                 },
             };
-            await connection.Connect(info, default);
 
             var expectedResult = "BrioCloudIssue";
             var connectionInfo = await connection.UpdateConnectionInfo(info);
@@ -142,17 +149,11 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         {
             string objectiveType = "WrongObjectiveType";
             var userExternalId = Guid.NewGuid().ToString();
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
             var info = new ConnectionInfoExternalDto()
             {
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
-                    Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, VALID_USERNAME },
-                        { CLIENT_SECRET, VALID_PASSWORD },
-                    },
                     ObjectiveTypes = new List<ObjectiveTypeExternalDto>
                     {
                         new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
@@ -160,7 +161,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
                 },
                 UserExternalID = userExternalId,
             };
-            await connection.Connect(info, default);
 
             var expectedResult = "BrioCloudIssue";
             var connectionInfo = await connection.UpdateConnectionInfo(info);
@@ -178,17 +178,11 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         {
             string objectiveType = "BrioCloudIssue";
             var userExternalId = Guid.NewGuid().ToString();
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
             var info = new ConnectionInfoExternalDto()
             {
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
-                    Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, VALID_USERNAME },
-                        { CLIENT_SECRET, VALID_PASSWORD },
-                    },
                     ObjectiveTypes = new List<ObjectiveTypeExternalDto>
                     {
                         new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
@@ -196,7 +190,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
                 },
                 UserExternalID = userExternalId,
             };
-            await connection.Connect(info, default);
 
             var connectionInfo = await connection.UpdateConnectionInfo(info);
 
@@ -212,17 +205,11 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         public async Task UpdateConnectionInfo_RightObjectiveTypeWithoutGuid_OldObjectiveTypeNewGuid()
         {
             string objectiveType = "BrioCloudIssue";
-            BrioCloudConnection connection = new BrioCloudConnection();
+            var connection = new BrioCloudConnection();
             var info = new ConnectionInfoExternalDto()
             {
                 ConnectionType = new ConnectionTypeExternalDto()
                 {
-                    Name = NAME_CONNECTION,
-                    AppProperties = new Dictionary<string, string>
-                    {
-                        { CLIENT_ID, VALID_USERNAME },
-                        { CLIENT_SECRET, VALID_PASSWORD },
-                    },
                     ObjectiveTypes = new List<ObjectiveTypeExternalDto>
                     {
                         new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
@@ -239,6 +226,84 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
 
             Assert.AreEqual(objectiveType, result.Name);
             Assert.AreEqual(objectiveType, result.ExternalId);
+        }
+
+        [TestMethod]
+        public async Task GetContext_ValidConnectionInfo_NotNull()
+        {
+            var connection = new BrioCloudConnection();
+            var info = new ConnectionInfoExternalDto()
+            {
+                AuthFieldValues = new Dictionary<string, string>
+                {
+                    { USERNAME, VALID_USERNAME },
+                    { PASSWORD, VALID_PASSWORD },
+                },
+            };
+
+            var result = await connection.GetContext(info);
+
+            Assert.IsNotNull(result);
+        }
+
+        [TestMethod]
+        [DataRow("briomrs", "BrioMRS2020")]
+        public void GetContext_InvalidCredentials_Error(string username, string password)
+        {
+            var connection = new BrioCloudConnection();
+            var info = new ConnectionInfoExternalDto()
+            {
+                AuthFieldValues = new Dictionary<string, string>
+                {
+                    { USERNAME, username },
+                    { PASSWORD, password },
+                },
+            };
+
+            var result = Assert.ThrowsException<AggregateException>(() => connection.GetContext(info).Wait()).InnerException;
+            Assert.IsInstanceOfType(result.InnerException, typeof(UnauthorizedAccessException));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task GetContext_InvalidConnectionInfo_NotNull()
+        {
+            var connection = new BrioCloudConnection();
+            var info = new ConnectionInfoExternalDto()
+            {
+            };
+
+            await connection.GetContext(info);
+        }
+
+        [TestMethod]
+        [DataRow("briomrs", "BrioMRS2020")]
+        public void GetStorage_InvalidCredentials_Error(string username, string password)
+        {
+            var connection = new BrioCloudConnection();
+            var info = new ConnectionInfoExternalDto()
+            {
+                AuthFieldValues = new Dictionary<string, string>
+                {
+                    { USERNAME, username },
+                    { PASSWORD, password },
+                },
+            };
+
+            var result = Assert.ThrowsException<AggregateException>(() => connection.GetStorage(info).Wait()).InnerException;
+            Assert.IsInstanceOfType(result.InnerException, typeof(UnauthorizedAccessException));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(NullReferenceException))]
+        public async Task GetStorage_InvalidConnectionInfo_NotNull()
+        {
+            var connection = new BrioCloudConnection();
+            var info = new ConnectionInfoExternalDto()
+            {
+            };
+
+            await connection.GetStorage(info);
         }
     }
 }

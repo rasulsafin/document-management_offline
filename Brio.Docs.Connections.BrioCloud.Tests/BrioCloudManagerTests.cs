@@ -179,7 +179,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
             Assert.IsTrue(result);
         }
 
-
         [TestMethod]
         [DataRow("/" + DOWNLOAD_SUBFOLDER)]
         public async Task PulAll_DirectoryNotEmpty_NotEmpty(string path)

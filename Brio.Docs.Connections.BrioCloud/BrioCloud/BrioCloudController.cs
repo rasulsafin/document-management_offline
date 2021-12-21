@@ -70,8 +70,13 @@ namespace Brio.Docs.Connections.BrioCloud
             return result;
         }
 
-        public async Task<bool> DownloadFileAsync(string href, string fileName)
+        public async Task<bool> DownloadFileAsync(string href, string saveFilePath)
         {
+            if (!href.Contains(RootPath))
+            {
+                href = RootPath + href;
+            }
+
             var result = await client.Propfind(href);
 
             if (!result.IsSuccessful)
@@ -86,7 +91,7 @@ namespace Brio.Docs.Connections.BrioCloud
                     throw new WebException(response.Description);
                 }
 
-                using (var writer = File.OpenWrite(fileName))
+                using (var writer = File.OpenWrite(saveFilePath))
                 {
                     using (var reader = response.Stream)
                     {
@@ -105,10 +110,10 @@ namespace Brio.Docs.Connections.BrioCloud
             }
         }
 
-        public async Task<string> UploadFileAsync(string href, string fileName)
+        public async Task<string> UploadFileAsync(string directoryHref, string filePath)
         {
-            var fileInfo = new FileInfo(fileName);
-            string cloudName = PathManager.FileName(href, fileInfo.Name);
+            var fileInfo = new FileInfo(filePath);
+            string cloudName = PathManager.FileName(directoryHref, fileInfo.Name);
 
             using (var reader = fileInfo.OpenRead())
             {
@@ -125,7 +130,12 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<bool> DeleteAsync(string href)
         {
-            var response = await client.Delete(RootPath + href);
+            if (!href.Contains(RootPath))
+            {
+                href = RootPath + href;
+            }
+
+            var response = await client.Delete(href);
 
             if (response.IsSuccessful)
             {
@@ -139,7 +149,12 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> GetContentAsync(string href)
         {
-            var result = await client.Propfind(RootPath + href);
+            if (!href.Contains(RootPath))
+            {
+                href = RootPath + href;
+            }
+
+            var result = await client.Propfind(href);
 
             if (!result.IsSuccessful)
             {
@@ -172,9 +187,14 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<bool> SetContentAsync(string path, string content)
         {
+            if (!path.Contains(RootPath))
+            {
+                path = RootPath + path;
+            }
+
             using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
-                var response = await client.PutFile(RootPath + path, reader);
+                var response = await client.PutFile(path, reader);
 
                 if (response.IsSuccessful)
                 {
