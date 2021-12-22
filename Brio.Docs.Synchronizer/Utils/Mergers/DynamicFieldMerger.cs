@@ -29,9 +29,9 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
         {
             logger.LogTrace(
                 "Merge started for the tuple ({Local}, {Synchronized}, {Remote})",
-                tuple.Local.ID,
-                tuple.Synchronized.ID,
-                tuple.Remote.ExternalID);
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.Remote?.ExternalID);
             tuple.Merge(
                 field => field.Type,
                 field => field.Name,
@@ -39,10 +39,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 x => x.ConnectionInfo,
                 x => x.ConnectionInfoID);
             logger.LogDebug("Tuple merged: {@Result}", tuple);
-            await tuple.ForEachAsync(LoadChildren).ConfigureAwait(false);
-            logger.LogTrace("Children loaded");
-            if (tuple.Any(HasChildren))
-                await MergeChildren(tuple).ConfigureAwait(false);
+            await MergeChildren(tuple).ConfigureAwait(false);
         }
 
         private bool AddChild(DynamicField parent, DynamicField child)
@@ -65,10 +62,20 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             return false;
         }
 
-        private bool HasChildren(DynamicField field)
-            => (field.ChildrenDynamicFields?.Count ?? 0) > 0;
+        private async Task<bool> HasChildren(DynamicField field)
+        {
+            if (field.ChildrenDynamicFields == null && field.ID != 0)
+            {
+                return await context.DynamicFields.Where(x => x.ID == field.ID)
+                   .Select(x => x.ChildrenDynamicFields.Any())
+                   .FirstAsync()
+                   .ConfigureAwait(false);
+            }
 
-        private bool IsEntitiesEquals(DynamicField element, SynchronizingTuple<DynamicField> tuple)
+            return (field.ChildrenDynamicFields?.Count ?? 0) > 0;
+        }
+
+        private bool IsEntitiesEqual(DynamicField element, SynchronizingTuple<DynamicField> tuple)
             => tuple.DoesNeed(element);
 
         private async Task LoadChildren(DynamicField field)
@@ -88,7 +95,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             }
         }
 
-        private async Task MergeChildren(SynchronizingTuple<DynamicField> tuple)
+        private async ValueTask MergeChildren(SynchronizingTuple<DynamicField> tuple)
         {
             logger.LogTrace(
                 "MergeChildren started for the tuple ({Local}, {Synchronized}, {Remote})",
@@ -96,46 +103,24 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 tuple.Synchronized.ID,
                 tuple.Remote.ExternalID);
 
+            if (!await tuple.AnyAsync(HasChildren).ConfigureAwait(false))
+                return;
+
+            await tuple.ForEachAsync(LoadChildren).ConfigureAwait(false);
+            logger.LogTrace("Children loaded");
+
             tuple.ForEach(x => x.ChildrenDynamicFields ??= new List<DynamicField>());
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 tuple.Local.ChildrenDynamicFields,
                 tuple.Synchronized.ChildrenDynamicFields,
                 tuple.Remote.ChildrenDynamicFields,
-                IsEntitiesEquals);
+                IsEntitiesEqual);
 
             logger.LogDebug("Created {Count}", tuples.Count);
 
             foreach (var childTuple in tuples)
-            {
-                var action = childTuple.DetermineAction();
-                await Merge(childTuple).ConfigureAwait(false);
-                logger.LogDebug("Need {Action} action", action);
-
-                switch (action)
-                {
-                    case SynchronizingAction.Nothing:
-                    case SynchronizingAction.Merge:
-                        break;
-                    case SynchronizingAction.AddToLocal:
-                    case SynchronizingAction.AddToRemote:
-                        tuple.ForEachChange(childTuple, AddChild);
-                        break;
-                    case SynchronizingAction.RemoveFromLocal:
-                    case SynchronizingAction.RemoveFromRemote:
-                        await tuple.ForEachChangeAsync(childTuple, RemoveChild).ConfigureAwait(false);
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(action), "Incorrect action");
-                }
-
-                logger.LogDebug(
-                    "Local changed: {Local}, Synchronized changed:{Synchronized}, Remote changed: {Remote}",
-                    tuple.LocalChanged,
-                    tuple.SynchronizedChanged,
-                    tuple.RemoteChanged);
-                tuple.SynchronizeChanges(childTuple);
-            }
+                await SynchronizeChild(tuple, childTuple).ConfigureAwait(false);
         }
 
         private async Task<bool> RemoveChild(DynamicField parent, DynamicField child)
@@ -152,6 +137,37 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 context.DynamicFields.Remove(child);
 
             return result;
+        }
+
+        private async Task SynchronizeChild(SynchronizingTuple<DynamicField> tuple, SynchronizingTuple<DynamicField> childTuple)
+        {
+            var action = childTuple.DetermineAction();
+            await Merge(childTuple).ConfigureAwait(false);
+            logger.LogDebug("Need {Action} action", action);
+
+            switch (action)
+            {
+                case SynchronizingAction.Nothing:
+                case SynchronizingAction.Merge:
+                    break;
+                case SynchronizingAction.AddToLocal:
+                case SynchronizingAction.AddToRemote:
+                    tuple.ForEachChange(childTuple, AddChild);
+                    break;
+                case SynchronizingAction.RemoveFromLocal:
+                case SynchronizingAction.RemoveFromRemote:
+                    await tuple.ForEachChangeAsync(childTuple, RemoveChild).ConfigureAwait(false);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(action), "Incorrect action");
+            }
+
+            logger.LogDebug(
+                "Local changed: {Local}, Synchronized changed:{Synchronized}, Remote changed: {Remote}",
+                tuple.LocalChanged,
+                tuple.SynchronizedChanged,
+                tuple.RemoteChanged);
+            tuple.SynchronizeChanges(childTuple);
         }
 
         private bool TryGetChild(DynamicField parent, DynamicField child, out DynamicField found)
