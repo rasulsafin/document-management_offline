@@ -112,12 +112,17 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> UploadFileAsync(string directoryHref, string filePath)
         {
+            if (!directoryHref.Contains(RootPath))
+            {
+                directoryHref = RootPath + directoryHref;
+            }
+
             var fileInfo = new FileInfo(filePath);
             string cloudName = PathManager.FileName(directoryHref, fileInfo.Name);
 
             using (var reader = fileInfo.OpenRead())
             {
-                var response = await client.PutFile(RootPath + cloudName, reader);
+                var response = await client.PutFile(cloudName, reader);
 
                 if (response.IsSuccessful)
                 {
@@ -161,7 +166,7 @@ namespace Brio.Docs.Connections.BrioCloud
                 throw new FileNotFoundException();
             }
 
-            using (var response = await client.GetRawFile(RootPath + href))
+            using (var response = await client.GetRawFile(href))
             {
                 if (!response.IsSuccessful)
                 {
@@ -209,8 +214,13 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
         {
+            if (!path.Contains(RootPath))
+            {
+                path = RootPath + path;
+            }
+
             string newPath = PathManager.DirectoryName(path, nameDir);
-            var response = await client.Mkcol(RootPath + newPath);
+            var response = await client.Mkcol(newPath);
 
             if (response.IsSuccessful)
             {
