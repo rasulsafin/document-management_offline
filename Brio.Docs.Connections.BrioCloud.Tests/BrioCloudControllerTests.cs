@@ -12,7 +12,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         private const string VALID_PASSWORD = "BrioMRS2021";
 
         private const string ROOT_PATH = "/";
-        private const string TEST_FOLDER_PATH = "/TESTS";
+        private const string TEST_FOLDER_PATH = "/BRIO MRS/TESTS";
         private const string TEST_EXISTENT_FOLDER = "TestExistentfolder";
         private const string TEST_NOT_EXISTENT_FOLDER = "TestNotExistentfolder";
         private const string TEST_FOLDER_FOR_CREATE_NAME = "Testfolder";
@@ -97,7 +97,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
-        [DataRow("/NotExistantFile")]
+        [DataRow("/NotExistentFile")]
         public async Task UploadFileAsync_NotExistentFile_IsNull(string href)
         {
             var result = await controller.UploadFileAsync(href, TempFilePath);
@@ -167,7 +167,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
-        [DataRow("/NotExistentFolder")]
+        [DataRow(TEST_FOLDER_PATH + "/NotExistentFolder")]
         public async Task SetContentAsync_NotExistentFolder_IsTrue(string href)
         {
             var result = await controller.SetContentAsync(href, TEST_CONTENT);
