@@ -10,8 +10,28 @@ namespace Brio.Docs.Synchronization.Extensions
         public static bool All<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
             => predicate(tuple.Local) && predicate(tuple.Synchronized) && predicate(tuple.Remote);
 
+        public static async Task<bool> AllAsync<T>(this SynchronizingTuple<T> tuple, Func<T, Task<bool>> predicate)
+            => await predicate(tuple.Local).ConfigureAwait(false) &&
+                await predicate(tuple.Synchronized).ConfigureAwait(false) &&
+                await predicate(tuple.Remote).ConfigureAwait(false);
+
+        public static async ValueTask<bool> AllAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask<bool>> predicate)
+            => await predicate(tuple.Local).ConfigureAwait(false) &&
+                await predicate(tuple.Synchronized).ConfigureAwait(false) &&
+                await predicate(tuple.Remote).ConfigureAwait(false);
+
         public static bool Any<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
             => predicate(tuple.Local) || predicate(tuple.Synchronized) || predicate(tuple.Remote);
+
+        public static async Task<bool> AnyAsync<T>(this SynchronizingTuple<T> tuple, Func<T, Task<bool>> predicate)
+            => await predicate(tuple.Local).ConfigureAwait(false) ||
+                await predicate(tuple.Synchronized).ConfigureAwait(false) ||
+                await predicate(tuple.Remote).ConfigureAwait(false);
+
+        public static async ValueTask<bool> AnyAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask<bool>> predicate)
+            => await predicate(tuple.Local).ConfigureAwait(false) ||
+                await predicate(tuple.Synchronized).ConfigureAwait(false) ||
+                await predicate(tuple.Remote).ConfigureAwait(false);
 
         public static bool DoesNeed<T>(this SynchronizingTuple<T> tuple, T element)
             where T : ISynchronizable<T>
@@ -59,7 +79,7 @@ namespace Brio.Docs.Synchronization.Extensions
             parentTuple.RemoteChanged |= await actionAsync(parentTuple.Remote, childTuple.Remote).ConfigureAwait(false);
         }
 
-        public static async Task ForEachChangeAsync<TParent, TChild>(
+        public static async ValueTask ForEachChangeAsync<TParent, TChild>(
             this SynchronizingTuple<TParent> parentTuple,
             SynchronizingTuple<TChild> childTuple,
             Func<TParent, TChild, ValueTask<bool>> actionAsync)
