@@ -6,8 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
 using Brio.Docs.Database;
-using Brio.Docs.Integration.Dtos;
-using Brio.Docs.Integration.Exceptions.Synchronization;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
@@ -368,7 +366,7 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private async Task RemoveFromRemote(SynchronizingTuple<TDB> tuple, Func<TDto, Task<SynchronizationResultDto<TDto>>> remoteFunc)
+        private async Task RemoveFromRemote(SynchronizingTuple<TDB> tuple, Func<TDto, Task<TDto>> remoteFunc)
         {
             var dto = mapper.Map<TDto>(tuple.Remote);
             logger.LogDebug("Created dto: {@Dto}", dto);
@@ -405,21 +403,20 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private async Task<IEnumerable<SynchronizationException>> UpdateRemote(
+        private async Task UpdateRemote(
             SynchronizingTuple<TDB> tuple,
-            Func<TDto, Task<SynchronizationResultDto<TDto>>> remoteFunc)
+            Func<TDto, Task<TDto>> remoteFunc)
         {
             logger.LogBeforeMerge(tuple);
             tuple.Merge();
             logger.LogAfterMerge(tuple);
             if (!tuple.RemoteChanged)
-                return null;
+                return;
 
             var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote));
             logger.LogDebug("Remote return {@Data}", result);
-            tuple.Remote = mapper.Map<TDB>(result.Result);
+            tuple.Remote = mapper.Map<TDB>(result);
             logger.LogInformation("Put {ID} to remote", tuple.ExternalID);
-            return result.SynchronizationExceptions;
         }
     }
 }
