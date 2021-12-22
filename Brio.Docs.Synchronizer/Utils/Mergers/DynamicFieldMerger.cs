@@ -39,10 +39,9 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 x => x.ConnectionInfo,
                 x => x.ConnectionInfoID);
             logger.LogDebug("Tuple merged: {@Result}", tuple);
-            await LoadChildren(tuple.Local).ConfigureAwait(false);
-            await LoadChildren(tuple.Synchronized).ConfigureAwait(false);
+            await tuple.ForEachAsync(LoadChildren).ConfigureAwait(false);
             logger.LogTrace("Children loaded");
-            if (HasChildren(tuple.Local) || HasChildren(tuple.Synchronized) || HasChildren(tuple.Remote))
+            if (tuple.Any(HasChildren))
                 await MergeChildren(tuple).ConfigureAwait(false);
         }
 
@@ -70,14 +69,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             => (field.ChildrenDynamicFields?.Count ?? 0) > 0;
 
         private bool IsEntitiesEquals(DynamicField element, SynchronizingTuple<DynamicField> tuple)
-        {
-            var hasID = element.ID > 0;
-            var isLocalsMate = tuple.Local != null && element.ID == tuple.Local.SynchronizationMateID;
-            var isSynchronizedsMate = tuple.Synchronized != null &&
-                element.SynchronizationMateID == tuple.Synchronized.ID;
-            var externalIDEquals = element.ExternalID != null && element.ExternalID == tuple.ExternalID;
-            return (hasID && (isLocalsMate || isSynchronizedsMate)) || externalIDEquals;
-        }
+            => tuple.DoesNeed(element);
 
         private async Task LoadChildren(DynamicField field)
         {
@@ -103,9 +95,8 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 tuple.Local.ID,
                 tuple.Synchronized.ID,
                 tuple.Remote.ExternalID);
-            tuple.Local.ChildrenDynamicFields ??= new List<DynamicField>();
-            tuple.Synchronized.ChildrenDynamicFields ??= new List<DynamicField>();
-            tuple.Remote.ChildrenDynamicFields ??= new List<DynamicField>();
+
+            tuple.ForEach(x => x.ChildrenDynamicFields ??= new List<DynamicField>());
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 tuple.Local.ChildrenDynamicFields,
@@ -124,27 +115,15 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 switch (action)
                 {
                     case SynchronizingAction.Nothing:
-                        break;
                     case SynchronizingAction.Merge:
                         break;
                     case SynchronizingAction.AddToLocal:
-                        tuple.LocalChanged |= AddChild(tuple.Local, childTuple.Local);
-                        tuple.SynchronizedChanged |= AddChild(tuple.Synchronized, childTuple.Synchronized);
-                        break;
                     case SynchronizingAction.AddToRemote:
-                        tuple.SynchronizedChanged |= AddChild(tuple.Synchronized, childTuple.Synchronized);
-                        tuple.RemoteChanged |= AddChild(tuple.Remote, childTuple.Remote);
+                        tuple.ForEachChange(childTuple, AddChild);
                         break;
                     case SynchronizingAction.RemoveFromLocal:
-                        tuple.LocalChanged |=
-                            await RemoveChild(tuple.Local, childTuple.Local).ConfigureAwait(false);
-                        tuple.SynchronizedChanged |= await RemoveChild(tuple.Synchronized, childTuple.Synchronized)
-                           .ConfigureAwait(false);
-                        break;
                     case SynchronizingAction.RemoveFromRemote:
-                        tuple.SynchronizedChanged |= await RemoveChild(tuple.Synchronized, childTuple.Synchronized)
-                           .ConfigureAwait(false);
-                        tuple.RemoteChanged |= UnlinkChild(tuple.Remote, childTuple.Remote);
+                        await tuple.ForEachChangeAsync(childTuple, RemoveChild).ConfigureAwait(false);
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(action), "Incorrect action");
@@ -169,7 +148,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 child.ID);
             var result = UnlinkChild(parent, child);
 
-            if (await context.DynamicFields.ContainsAsync(child).ConfigureAwait(false))
+            if (child.ID != 0 && await context.DynamicFields.ContainsAsync(child).ConfigureAwait(false))
                 context.DynamicFields.Remove(child);
 
             return result;
