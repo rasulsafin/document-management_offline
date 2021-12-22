@@ -40,8 +40,6 @@ namespace Brio.Docs.Connections.BrioCloud
             result.ContentLength = (ulong?)element.ContentLength ?? default;
             result.LastModified = element.LastModifiedDate ?? default;
 
-            result.Status = element.PropertyStatuses.ToString();
-
             return result;
         }
     }
