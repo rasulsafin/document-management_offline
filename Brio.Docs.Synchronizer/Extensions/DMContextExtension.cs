@@ -10,6 +10,7 @@ namespace Brio.Docs.Synchronization.Extensions
             {
                 DynamicField dynamicField => dynamicField.ID,
                 Objective objective => objective.ID,
+                Item item => item.ID,
                 _ => throw new NotSupportedException()
             };
     }

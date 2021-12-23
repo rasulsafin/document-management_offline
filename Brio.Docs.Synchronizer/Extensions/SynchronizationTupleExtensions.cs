@@ -58,6 +58,13 @@ namespace Brio.Docs.Synchronization.Extensions
             await actionAsync(tuple.Remote).ConfigureAwait(false);
         }
 
+        public static async ValueTask ForEachAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask> actionAsync)
+        {
+            await actionAsync(tuple.Local).ConfigureAwait(false);
+            await actionAsync(tuple.Synchronized).ConfigureAwait(false);
+            await actionAsync(tuple.Remote).ConfigureAwait(false);
+        }
+
         public static void ForEachChange<TParent, TChild>(
             this SynchronizingTuple<TParent> parentTuple,
             SynchronizingTuple<TChild> childTuple,

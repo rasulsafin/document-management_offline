@@ -12,21 +12,20 @@ using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace Brio.Docs.Synchronization.Utilities
+namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
 {
-    internal class ChildrenHelper<TParent, TChild>
+    internal class LinkedChildrenHelper<TParent, TChild> : IChildrenMerger<TParent, TChild>
         where TParent : class
         where TChild : class, ISynchronizable<TChild>
     {
         private readonly IMerger<TChild> childMerger;
         private readonly DbContext context;
-        private readonly Expression<Func<TParent, ICollection<TChild>>> getCollectionExpression;
         private readonly Func<TParent, ICollection<TChild>> getCollectionFunc;
         private readonly Expression<Func<TParent, IEnumerable<TChild>>> getEnumerableExpression;
         private readonly Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc;
         private readonly PropertyInfo propertyInfo;
 
-        public ChildrenHelper(
+        public LinkedChildrenHelper(
             DbContext context,
             IMerger<TChild> childMerger,
             Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
@@ -34,7 +33,6 @@ namespace Brio.Docs.Synchronization.Utilities
         {
             this.context = context;
             this.childMerger = childMerger;
-            this.getCollectionExpression = getChildrenCollection;
             this.needInTupleFunc = needInTupleFunc;
             getEnumerableExpression = Expression.Lambda<Func<TParent, IEnumerable<TChild>>>(
                 getChildrenCollection.Body,
@@ -87,18 +85,17 @@ namespace Brio.Docs.Synchronization.Utilities
         {
             if (getCollectionFunc(parent) == null && parent.GetId() != 0)
             {
-                return await context.Set<TParent>()
-                   .Where(x => x == parent)
-                   .Select(getCollectionExpression)
-                   .Select(x => x.Any())
-                   .FirstAsync()
+                return await context.Entry(parent)
+                   .Collection(getEnumerableExpression)
+                   .Query()
+                   .AnyAsync()
                    .ConfigureAwait(false);
             }
 
             return (getCollectionFunc(parent)?.Count ?? 0) > 0;
         }
 
-        private async Task LoadChildren(TParent parent)
+        private async ValueTask LoadChildren(TParent parent)
         {
             if (getCollectionFunc(parent) == null)
             {

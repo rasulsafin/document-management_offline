@@ -9,12 +9,12 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
 {
     internal class DynamicFieldMerger : IMerger<DynamicField>
     {
-        private readonly ChildrenHelper<DynamicField, DynamicField> childrenHelper;
+        private readonly IChildrenMerger<DynamicField, DynamicField> childrenHelper;
         private readonly ILogger<DynamicFieldMerger> logger;
 
         public DynamicFieldMerger(
             ILogger<DynamicFieldMerger> logger,
-            ChildrenHelper<DynamicField, DynamicField> childrenHelper)
+            IChildrenMerger<DynamicField, DynamicField> childrenHelper)
         {
             this.logger = logger;
             this.childrenHelper = childrenHelper;

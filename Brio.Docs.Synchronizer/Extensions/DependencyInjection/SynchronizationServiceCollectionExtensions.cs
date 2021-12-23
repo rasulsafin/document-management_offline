@@ -45,8 +45,9 @@ namespace Microsoft.Extensions.DependencyInjection
             Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection)
             where TParent : class
             where TChild : class, ISynchronizable<TChild>
-            => services.AddScoped(
-                provider => new ChildrenHelper<TParent, TChild>(
+            => services.AddScoped
+                <IChildrenMerger<TParent, TChild>, LinkedChildrenHelper<TParent, TChild>>(
+                    provider => new LinkedChildrenHelper<TParent, TChild>(
                     provider.GetService<DMContext>(),
                     provider.GetService<IMerger<TChild>>(),
                     getChildrenCollection,
