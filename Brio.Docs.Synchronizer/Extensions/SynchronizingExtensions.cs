@@ -12,7 +12,6 @@ namespace Brio.Docs.Synchronization.Extensions
     internal static class SynchronizingExtensions
     {
         public static SynchronizingAction DetermineAction<T>(this SynchronizingTuple<T> tuple)
-                where T : ISynchronizable<T>
             => DetermineAction((tuple.Local, tuple.Synchronized, tuple.Remote));
 
         public static SynchronizingAction DetermineAction<T>(this (T local, T synchronized, T remote) tuple)
