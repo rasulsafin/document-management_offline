@@ -29,13 +29,15 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
         private readonly Func<TChild, TSynchronizableChild> getSynchronizableChildFunc;
         private readonly Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc;
         private readonly PropertyInfo synchronizableChildProperty;
+        private readonly Func<TSynchronizableChild, bool> needRemove;
 
         public ChildrenMerger(
             DbContext context,
             IMerger<TSynchronizableChild> childMerger,
             Expression<Func<TParent, ICollection<TChild>>> getCollectionExpression,
             Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChild,
-            Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc)
+            Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc,
+            Func<TSynchronizableChild, bool> needRemove)
         {
             this.context = context;
             this.childMerger = childMerger;
@@ -46,6 +48,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
                 getCollectionExpression.Parameters);
             getCollectionFunc = getCollectionExpression.Compile();
             collectionPropertyInfo = getCollectionExpression.ToPropertyInfo();
+            this.needRemove = needRemove;
 
             var expression = getSynchronizableChild.Body;
 
@@ -161,7 +164,8 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             var result = UnlinkChild(parent, child);
 
             if (child.GetId() != 0 &&
-                await context.Set<TSynchronizableChild>().ContainsAsync(child).ConfigureAwait(false))
+                await context.Set<TSynchronizableChild>().ContainsAsync(child).ConfigureAwait(false) &&
+                needRemove(child))
                 context.Set<TSynchronizableChild>().Remove(child);
 
             return result;

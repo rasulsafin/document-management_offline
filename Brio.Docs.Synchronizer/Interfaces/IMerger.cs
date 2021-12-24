@@ -14,6 +14,6 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// </summary>
         /// <param name="tuple">The tuple to synchronize.</param>
         /// <returns>The task of the operation.</returns>
-        Task Merge(SynchronizingTuple<T> tuple);
+        ValueTask Merge(SynchronizingTuple<T> tuple);
     }
 }

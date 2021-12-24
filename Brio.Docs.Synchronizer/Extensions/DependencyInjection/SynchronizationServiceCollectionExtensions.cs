@@ -36,13 +36,47 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ObjectiveItemLinker>();
             services.AddScoped<ObjectiveDynamicFieldLinker>();
 
-            services.AddSimpleChildrenMerger<DynamicField, DynamicField>(x => x.ChildrenDynamicFields);
+            services.AddObjectiveChildrenMergers();
+            services.AddDynamicFieldChildrenMergers();
+
+            return services;
+        }
+
+        private static IServiceCollection AddDynamicFieldChildrenMergers(this IServiceCollection services)
+            => services.AddSimpleChildrenMerger<DynamicField, DynamicField>(x => x.ChildrenDynamicFields, _ => true);
+
+        private static IServiceCollection AddLinkedChildrenMerger<TParent, TLink, TChild>(
+            this IServiceCollection services,
+            Expression<Func<TParent, ICollection<TLink>>> getChildrenCollection,
+            Expression<Func<TLink, TChild>> getChild,
+            Func<TChild, bool> needRemove)
+            where TParent : class
+            where TLink : class, new()
+            where TChild : class, ISynchronizable<TChild>
+            => services.AddScoped<IChildrenMerger<TParent, TChild>, ChildrenMerger<TParent, TLink, TChild>>(
+                provider => new ChildrenMerger<TParent, TLink, TChild>(
+                    provider.GetService<DMContext>(),
+                    provider.GetService<IMerger<TChild>>(),
+                    getChildrenCollection,
+                    getChild,
+                    (child, tuple) => tuple.DoesNeed(child),
+                    needRemove));
+
+        private static IServiceCollection AddObjectiveChildrenMergers(this IServiceCollection services)
+        {
+            services.AddLinkedChildrenMerger<Objective, ObjectiveItem, Item>(
+                parent => parent.Items,
+                link => link.Item,
+                item => item.Objectives.Count == 0 && item.Project == null && item.ProjectID == null);
+            services.AddSimpleChildrenMerger<DynamicField, DynamicField>(x => x.ChildrenDynamicFields, _ => true);
+            services = services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
             return services;
         }
 
         private static IServiceCollection AddSimpleChildrenMerger<TParent, TChild>(
             this IServiceCollection services,
-            Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection)
+            Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
+            Func<TChild, bool> needRemove)
             where TParent : class
             where TChild : class, ISynchronizable<TChild>, new()
             => services.AddScoped<IChildrenMerger<TParent, TChild>, SimpleChildrenMerger<TParent, TChild>>(
@@ -50,6 +84,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     provider.GetService<DMContext>(),
                     provider.GetService<IMerger<TChild>>(),
                     getChildrenCollection,
-                    (child, tuple) => tuple.DoesNeed(child)));
+                    (child, tuple) => tuple.DoesNeed(child),
+                    needRemove));
     }
 }

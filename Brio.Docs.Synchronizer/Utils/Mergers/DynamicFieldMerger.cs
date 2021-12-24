@@ -21,7 +21,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             logger.LogTrace("DynamicFieldMerger created");
         }
 
-        public async Task Merge(SynchronizingTuple<DynamicField> tuple)
+        public async ValueTask Merge(SynchronizingTuple<DynamicField> tuple)
         {
             logger.LogTrace(
                 "Merge started for the tuple ({Local}, {Synchronized}, {Remote})",

@@ -17,14 +17,14 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             logger.LogTrace("ItemMerger created");
         }
 
-        public Task Merge(SynchronizingTuple<Item> tuple)
+        public ValueTask Merge(SynchronizingTuple<Item> tuple)
         {
             logger.LogTrace("Merge started for tuple {@Object}", tuple);
             tuple.Merge(
                 item => item.RelativePath,
                 item => item.ItemType);
             logger.LogDebug("Tuple merged: {@Result}", tuple);
-            return Task.CompletedTask;
+            return ValueTask.CompletedTask;
         }
     }
 }

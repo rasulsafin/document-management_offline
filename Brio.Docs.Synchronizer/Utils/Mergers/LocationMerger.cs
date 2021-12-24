@@ -27,7 +27,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
             this.itemAttacher = itemAttacher;
         }
 
-        public async Task Merge(SynchronizingTuple<Location> tuple)
+        public async ValueTask Merge(SynchronizingTuple<Location> tuple)
         {
             tuple.Merge(
                 await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
