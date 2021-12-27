@@ -92,19 +92,7 @@ namespace Brio.Docs.Connections.BrioCloud
                 }
 
                 using (var writer = File.OpenWrite(saveFilePath))
-                {
-                    using (var reader = response.Stream)
-                    {
-                        const int BUFFER_LENGTH = 4096;
-                        var buffer = new byte[BUFFER_LENGTH];
-                        var count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        while (count > 0)
-                        {
-                            writer.Write(buffer, 0, count);
-                            count = reader.Read(buffer, 0, BUFFER_LENGTH);
-                        }
-                    }
-                }
+                    response.Stream.CopyTo(writer);
 
                 return true;
             }
