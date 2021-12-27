@@ -12,9 +12,9 @@ namespace Brio.Docs.Connections.BrioCloud
 {
     public class BrioCloudConnection : IConnection
     {
-        private const string NAME_CONNECTION = "Brio-Cloud";
+        public static readonly string NAME_CONNECTION = "Brio-Cloud";
 
-        private static BrioCloudManager manager;
+        private BrioCloudManager manager;
 
         public BrioCloudConnection()
         {
@@ -92,7 +92,7 @@ namespace Brio.Docs.Connections.BrioCloud
             return Task.FromResult(false);
         }
 
-        private static Task InitiateManager(ConnectionInfoExternalDto info)
+        private Task InitiateManager(ConnectionInfoExternalDto info)
         {
             string username = info.AuthFieldValues[BrioCloudAuth.USERNAME];
             string password = info.AuthFieldValues[BrioCloudAuth.PASSWORD];

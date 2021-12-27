@@ -7,7 +7,7 @@ namespace Brio.Docs.Connections.BrioCloud.Synchronization
 {
     public class BrioCloudConnectionContext : AConnectionContext
     {
-        private BrioCloudManager manager;
+        private readonly BrioCloudManager manager;
 
         private BrioCloudConnectionContext(BrioCloudManager manager)
         {

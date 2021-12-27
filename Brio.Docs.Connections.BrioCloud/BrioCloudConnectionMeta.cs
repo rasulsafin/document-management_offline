@@ -10,13 +10,11 @@ namespace Brio.Docs.Connections.BrioCloud
 {
     public class BrioCloudConnectionMeta : IConnectionMeta
     {
-        private const string NAME_CONNECTION = "Brio-Cloud";
-
         public ConnectionTypeExternalDto GetConnectionTypeInfo()
         {
             var type = new ConnectionTypeExternalDto
             {
-                Name = NAME_CONNECTION,
+                Name = BrioCloudConnection.NAME_CONNECTION,
                 AuthFieldNames = new List<string>() { BrioCloudAuth.USERNAME, BrioCloudAuth.PASSWORD },
             };
 

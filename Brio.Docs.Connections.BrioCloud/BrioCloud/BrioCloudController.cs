@@ -32,8 +32,6 @@ namespace Brio.Docs.Connections.BrioCloud
             httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", encoded);
 
             client = new WebDavClient(httpClient);
-
-            GetListAsync().Wait();
         }
 
         private string RootPath
@@ -46,12 +44,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<IEnumerable<CloudElement>> GetListAsync(string path = "/")
         {
-            var result = new List<CloudElement>();
-
-            if (!path.Contains(RootPath))
-            {
-                path = RootPath + path;
-            }
+            path = NormalizePath(path);
 
             var response = await client.Propfind(path);
 
@@ -65,17 +58,20 @@ namespace Brio.Docs.Connections.BrioCloud
             }
 
             var items = BrioCloudElement.GetElements(response.Resources, path);
-            result.AddRange(items);
 
-            return result;
+            return items;
+        }
+
+        public async Task<bool> CheckConnectionAsync()
+        {
+            var response = await client.Propfind(RootPath);
+
+            return response.IsSuccessful;
         }
 
         public async Task<bool> DownloadFileAsync(string href, string saveFilePath)
         {
-            if (!href.Contains(RootPath))
-            {
-                href = RootPath + href;
-            }
+            href = NormalizePath(href);
 
             var result = await client.Propfind(href);
 
@@ -91,8 +87,8 @@ namespace Brio.Docs.Connections.BrioCloud
                     throw new WebException(response.Description);
                 }
 
-                using (var writer = File.OpenWrite(saveFilePath))
-                    response.Stream.CopyTo(writer);
+                await using var writer = File.OpenWrite(saveFilePath);
+                await response.Stream.CopyToAsync(writer);
 
                 return true;
             }
@@ -100,10 +96,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> UploadFileAsync(string directoryHref, string filePath)
         {
-            if (!directoryHref.Contains(RootPath))
-            {
-                directoryHref = RootPath + directoryHref;
-            }
+            directoryHref = NormalizePath(directoryHref);
 
             var fileInfo = new FileInfo(filePath);
             string cloudName = PathManager.FileName(directoryHref, fileInfo.Name);
@@ -116,17 +109,16 @@ namespace Brio.Docs.Connections.BrioCloud
                 {
                     return cloudName;
                 }
+                else
+                {
+                    throw new WebException(response.Description);
+                }
             }
-
-            return null;
         }
 
         public async Task<bool> DeleteAsync(string href)
         {
-            if (!href.Contains(RootPath))
-            {
-                href = RootPath + href;
-            }
+            href = NormalizePath(href);
 
             var response = await client.Delete(href);
 
@@ -142,10 +134,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> GetContentAsync(string href)
         {
-            if (!href.Contains(RootPath))
-            {
-                href = RootPath + href;
-            }
+            href = NormalizePath(href);
 
             var result = await client.Propfind(href);
 
@@ -162,15 +151,16 @@ namespace Brio.Docs.Connections.BrioCloud
                 }
 
                 var sb = new StringBuilder();
-                using (var reader = response.Stream)
+
+                await using (var reader = response.Stream)
                 {
                     const int BUFFER_LENGTH = 4096;
                     var buffer = new byte[BUFFER_LENGTH];
-                    var count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                    var count = await reader.ReadAsync(buffer.AsMemory());
                     while (count > 0)
                     {
                         sb.Append(Encoding.UTF8.GetString(buffer, 0, count));
-                        count = reader.Read(buffer, 0, BUFFER_LENGTH);
+                        count = await reader.ReadAsync(buffer.AsMemory());
                     }
                 }
 
@@ -180,10 +170,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<bool> SetContentAsync(string path, string content)
         {
-            if (!path.Contains(RootPath))
-            {
-                path = RootPath + path;
-            }
+            path = NormalizePath(path);
 
             using (var reader = new MemoryStream(Encoding.UTF8.GetBytes(content)))
             {
@@ -202,10 +189,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<CloudElement> CreateDirAsync(string path, string nameDir)
         {
-            if (!path.Contains(RootPath))
-            {
-                path = RootPath + path;
-            }
+            path = NormalizePath(path);
 
             string newPath = PathManager.DirectoryName(path, nameDir);
             var response = await client.Mkcol(newPath);
@@ -214,13 +198,25 @@ namespace Brio.Docs.Connections.BrioCloud
             {
                 return new BrioCloudElement();
             }
-
-            return null;
+            else
+            {
+                throw new WebException(response.Description);
+            }
         }
 
         public void Dispose()
         {
             client.Dispose();
+        }
+
+        private string NormalizePath(string path)
+        {
+            if (!path.Contains(RootPath))
+            {
+                path = RootPath + path;
+            }
+
+            return path;
         }
     }
 }

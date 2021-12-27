@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -47,10 +48,29 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
 
             testFileUri = await controller.UploadFileAsync(TEST_FOLDER_PATH, TempFilePath);
             await controller.SetContentAsync(TEST_CONTENT_FILE_URI, TEST_CONTENT);
+            try
+            {
+                await controller.CreateDirAsync(TEST_FOLDER_PATH, TEST_EXISTENT_FOLDER);
+            }
+            catch
+            {
+            }
 
-            await controller.CreateDirAsync(TEST_FOLDER_PATH, TEST_EXISTENT_FOLDER);
-            await controller.DeleteAsync($"{TEST_FOLDER_PATH}/{TEST_FOLDER_FOR_CREATE_NAME}");
-            await controller.DeleteAsync($"{TEST_FOLDER_PATH}/{TEST_NOT_EXISTENT_FOLDER}");
+            try
+            {
+                await controller.DeleteAsync($"{TEST_FOLDER_PATH}/{TEST_FOLDER_FOR_CREATE_NAME}");
+            }
+            catch
+            {
+            }
+
+            try
+            {
+                await controller.DeleteAsync($"{TEST_FOLDER_PATH}/{TEST_NOT_EXISTENT_FOLDER}");
+            }
+            catch
+            {
+            }
         }
 
         [TestMethod]
@@ -82,7 +102,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         [TestMethod]
         [DataRow("/NotExistentFile")]
         [ExpectedException(typeof(FileNotFoundException))]
-        public async Task DownloadFileAsync_NotExistentFile_IsFalse(string href)
+        public async Task DownloadFileAsync_NotExistentFile_FileNotFoundException(string href)
         {
             await controller.DownloadFileAsync(href, TempFilePath);
         }
@@ -98,26 +118,40 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
 
         [TestMethod]
         [DataRow("/NotExistentFile")]
-        public async Task UploadFileAsync_NotExistentFile_IsNull(string href)
+        [ExpectedException(typeof(WebException))]
+        public async Task UploadFileAsync_NotExistentFile_WebException(string href)
         {
-            var result = await controller.UploadFileAsync(href, TempFilePath);
+            try
+            {
+                await controller.DeleteAsync(href);
+            }
+            catch
+            {
+            }
 
-            Assert.IsNull(result);
+            await controller.UploadFileAsync(href, TempFilePath);
         }
 
         [TestMethod]
         [DataRow(TEST_FOLDER_PATH, TEST_EXISTENT_FOLDER)]
-        public async Task CreateDirAsync_ValidPathExistentFolder_IsNull(string path, string dir)
+        [ExpectedException(typeof(WebException))]
+        public async Task CreateDirAsync_ValidPathExistentFolder_WebException(string path, string dir)
         {
-            var result = await controller.CreateDirAsync(path, dir);
-
-            Assert.IsNull(result);
+            await controller.CreateDirAsync(path, dir);
         }
 
         [TestMethod]
         [DataRow(TEST_FOLDER_PATH, TEST_FOLDER_FOR_CREATE_NAME)]
         public async Task CreateDirAsync_ValidPathNotExistentFolder_IsNotNull(string path, string dir)
         {
+            try
+            {
+                await controller.DeleteAsync($"{path}/{dir}");
+            }
+            catch
+            {
+            }
+
             var result = await controller.CreateDirAsync(path, dir);
 
             Assert.IsNotNull(result);

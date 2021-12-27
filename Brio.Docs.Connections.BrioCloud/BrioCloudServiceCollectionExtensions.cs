@@ -6,7 +6,8 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static IServiceCollection AddBrioCloud(this IServiceCollection services)
         {
-            services.AddScoped<BrioCloudConnection>();
+            services.AddSingleton<BrioCloudConnection>();
+
             return services;
         }
     }

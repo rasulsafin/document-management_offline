@@ -50,18 +50,11 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
-            try
-            {
-                await CheckDirectory(remoteDirName);
-                string path = PathManager.GetNestedDirectory(remoteDirName);
-                var created = await controller.UploadFileAsync(path, fullPath);
+            await CheckDirectory(remoteDirName);
+            string path = PathManager.GetNestedDirectory(remoteDirName);
+            var created = await controller.UploadFileAsync(path, fullPath);
 
-                return created;
-            }
-            catch (Exception)
-            {
-                return null;
-            }
+            return created;
         }
 
         public async Task<bool> DeleteFile(string href)
@@ -145,9 +138,7 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             try
             {
-                var list = await controller.GetListAsync(RootDirectoryHref);
-
-                if (list != null)
+                if (await controller.CheckConnectionAsync())
                 {
                     return new ConnectionStatusDto()
                     {
@@ -160,7 +151,7 @@ namespace Brio.Docs.Connections.BrioCloud
                     return new ConnectionStatusDto()
                     {
                         Status = RemoteConnectionStatus.NeedReconnect,
-                        Message = "Not connect",
+                        Message = "Not connected",
                     };
                 }
             }

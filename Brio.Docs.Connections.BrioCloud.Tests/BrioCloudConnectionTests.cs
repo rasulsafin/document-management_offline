@@ -13,12 +13,13 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
     [TestClass]
     public class BrioCloudConnectionTests
     {
-        private const string NAME_CONNECTION = "Brio-Cloud";
         private const string USERNAME = "Username";
         private const string PASSWORD = "Password";
 
         private const string VALID_USERNAME = "briomrs";
         private const string VALID_PASSWORD = "BrioMRS2021";
+
+        private static readonly string NAME_CONNECTION = BrioCloudConnection.NAME_CONNECTION;
 
         private static ConnectionInfoExternalDto validInfo;
 
@@ -67,8 +68,8 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
                 },
             };
 
-            BrioCloudConnection connection = new BrioCloudConnection();
-            var expectedResult = RemoteConnectionStatus.Error;
+            var connection = new BrioCloudConnection();
+            var expectedResult = RemoteConnectionStatus.NeedReconnect;
 
             var result = await connection.Connect(info, default);
 
@@ -247,24 +248,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
-        [DataRow("briomrs", "BrioMRS2020")]
-        public void GetContext_InvalidCredentials_Error(string username, string password)
-        {
-            var connection = new BrioCloudConnection();
-            var info = new ConnectionInfoExternalDto()
-            {
-                AuthFieldValues = new Dictionary<string, string>
-                {
-                    { USERNAME, username },
-                    { PASSWORD, password },
-                },
-            };
-
-            var result = Assert.ThrowsException<AggregateException>(() => connection.GetContext(info).Wait()).InnerException;
-            Assert.IsInstanceOfType(result.InnerException, typeof(UnauthorizedAccessException));
-        }
-
-        [TestMethod]
         [ExpectedException(typeof(NullReferenceException))]
         public async Task GetContext_InvalidConnectionInfo_NotNull()
         {
@@ -274,24 +257,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
             };
 
             await connection.GetContext(info);
-        }
-
-        [TestMethod]
-        [DataRow("briomrs", "BrioMRS2020")]
-        public void GetStorage_InvalidCredentials_Error(string username, string password)
-        {
-            var connection = new BrioCloudConnection();
-            var info = new ConnectionInfoExternalDto()
-            {
-                AuthFieldValues = new Dictionary<string, string>
-                {
-                    { USERNAME, username },
-                    { PASSWORD, password },
-                },
-            };
-
-            var result = Assert.ThrowsException<AggregateException>(() => connection.GetStorage(info).Wait()).InnerException;
-            Assert.IsInstanceOfType(result.InnerException, typeof(UnauthorizedAccessException));
         }
 
         [TestMethod]
