@@ -17,7 +17,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             IMerger<TChild> childMerger,
             Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
             Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc,
-            Func<TChild, bool> needRemove)
+            Func<TParent, TChild, bool> needRemove)
             : base(context, childMerger, getChildrenCollection, child => child, needInTupleFunc, needRemove)
         {
         }

@@ -12,6 +12,7 @@ using Brio.Docs.Synchronization.Utilities.Finders;
 using Brio.Docs.Synchronization.Utilities.Mergers;
 using Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Utils.Linkers;
+using System.Linq;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -48,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddSimpleChildrenMerger<DynamicField, DynamicField>(
                 x => x.ChildrenDynamicFields,
-                _ => true);
+                (_, _) => true);
 
             services.AddFactory<IChildrenMerger<DynamicField, DynamicField>>();
 
@@ -59,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Expression<Func<TParent, ICollection<TLink>>> getChildrenCollection,
             Expression<Func<TLink, TChild>> getChild,
-            Func<TChild, bool> needRemove)
+            Func<TParent, TChild, bool> needRemove)
             where TParent : class
             where TLink : class, new()
             where TChild : class, ISynchronizable<TChild>
@@ -77,8 +78,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddLinkedChildrenMerger<Objective, ObjectiveItem, Item>(
                 parent => parent.Items,
                 link => link.Item,
-                item => item.Objectives.Count == 0 && item.Project == null && item.ProjectID == null);
-            services.AddSimpleChildrenMerger<Objective, DynamicField>(objective => objective.DynamicFields, _ => true);
+                (objective, item)
+                    => item.Objectives.All(x => x.Objective == objective) &&
+                    item.Project == null &&
+                    item.ProjectID == null);
+            services.AddSimpleChildrenMerger<Objective, DynamicField>(objective => objective.DynamicFields, (_, _) => true);
             services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
 
             services.AddFactory<IChildrenMerger<Objective, Item>>();
@@ -90,7 +94,7 @@ namespace Microsoft.Extensions.DependencyInjection
         private static IServiceCollection AddSimpleChildrenMerger<TParent, TChild>(
             this IServiceCollection services,
             Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
-            Func<TChild, bool> needRemove)
+            Func<TParent, TChild, bool> needRemove)
             where TParent : class
             where TChild : class, ISynchronizable<TChild>, new()
             => services.AddScoped<IChildrenMerger<TParent, TChild>>(

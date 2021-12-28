@@ -29,7 +29,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
         private readonly Func<TChild, TSynchronizableChild> getSynchronizableChildFunc;
         private readonly Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc;
         private readonly PropertyInfo synchronizableChildProperty;
-        private readonly Func<TSynchronizableChild, bool> needRemove;
+        private readonly Func<TParent, TSynchronizableChild, bool> needRemove;
 
         public ChildrenMerger(
             DbContext context,
@@ -37,7 +37,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             Expression<Func<TParent, ICollection<TChild>>> getCollectionExpression,
             Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChild,
             Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc,
-            Func<TSynchronizableChild, bool> needRemove)
+            Func<TParent, TSynchronizableChild, bool> needRemove)
         {
             this.context = context;
             this.childMerger = childMerger;
@@ -59,7 +59,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             {
                 getSynchronizableChildExpression = null;
                 getSynchronizableChildFunc = getSynchronizableChild.Compile();
-                synchronizableChildProperty = collectionPropertyInfo;
+                synchronizableChildProperty = null;
             }
             else
             {
@@ -92,9 +92,15 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
         {
             if (!HasChild(parent, child))
             {
-                var link = new TChild();
-                synchronizableChildProperty.SetValue(link, child);
-                getCollectionFunc(parent).Add(link);
+                if (synchronizableChildProperty != null)
+                {
+                    var link = new TChild();
+                    synchronizableChildProperty.SetValue(link, child);
+                    getCollectionFunc(parent).Add(link);
+                    return true;
+                }
+
+                getCollectionFunc(parent).Add(child as TChild);
                 return true;
             }
 
@@ -161,12 +167,19 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             TParent parent,
             TSynchronizableChild child)
         {
+            if (child == null)
+                return false;
+
             var result = UnlinkChild(parent, child);
 
-            if (child.GetId() != 0 &&
-                await context.Set<TSynchronizableChild>().ContainsAsync(child).ConfigureAwait(false) &&
-                needRemove(child))
-                context.Set<TSynchronizableChild>().Remove(child);
+            if (child.GetId() != 0)
+            {
+                if (await context.Set<TSynchronizableChild>().ContainsAsync(child).ConfigureAwait(false))
+                {
+                    if (needRemove(parent, child))
+                        context.Set<TSynchronizableChild>().Remove(child);
+                }
+            }
 
             return result;
         }
@@ -176,7 +189,11 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
             SynchronizingTuple<TSynchronizableChild> childTuple)
         {
             var action = childTuple.DetermineAction();
-            await childMerger.Merge(childTuple).ConfigureAwait(false);
+
+            if (action is SynchronizingAction.Merge
+                or SynchronizingAction.AddToLocal
+                or SynchronizingAction.AddToRemote)
+                await childMerger.Merge(childTuple).ConfigureAwait(false);
 
             switch (action)
             {

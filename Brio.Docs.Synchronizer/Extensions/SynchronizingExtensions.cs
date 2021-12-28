@@ -181,7 +181,9 @@ namespace Brio.Docs.Synchronization.Extensions
             where T : class, ISynchronizable<T>
         {
             tuple.Synchronized.IsSynchronized = true;
-            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.Remote?.ExternalID ?? tuple.ExternalID;
+            var externalID = tuple.Remote.ExternalID ?? tuple.ExternalID;
+            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = externalID;
+            tuple.Remote.ExternalID ??= externalID;
             tuple.Local.SynchronizationMate = tuple.Synchronized;
         }
 
