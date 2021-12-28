@@ -1,5 +1,7 @@
+using System;
 using System.Threading.Tasks;
 using Brio.Docs.Database.Models;
+using Brio.Docs.Integration.Factories;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
@@ -9,15 +11,15 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
 {
     internal class DynamicFieldMerger : IMerger<DynamicField>
     {
-        private readonly IChildrenMerger<DynamicField, DynamicField> childrenHelper;
+        private readonly Lazy<IChildrenMerger<DynamicField, DynamicField>> childrenHelper;
         private readonly ILogger<DynamicFieldMerger> logger;
 
         public DynamicFieldMerger(
             ILogger<DynamicFieldMerger> logger,
-            IChildrenMerger<DynamicField, DynamicField> childrenHelper)
+            IFactory<IChildrenMerger<DynamicField, DynamicField>> childrenHelper)
         {
             this.logger = logger;
-            this.childrenHelper = childrenHelper;
+            this.childrenHelper = new Lazy<IChildrenMerger<DynamicField, DynamicField>>(childrenHelper.Create);
             logger.LogTrace("DynamicFieldMerger created");
         }
 
@@ -35,7 +37,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 x => x.ConnectionInfo,
                 x => x.ConnectionInfoID);
             logger.LogDebug("Tuple merged: {@Result}", tuple);
-            await childrenHelper.MergeChildren(tuple).ConfigureAwait(false);
+            await childrenHelper.Value.MergeChildren(tuple).ConfigureAwait(false);
         }
     }
 }

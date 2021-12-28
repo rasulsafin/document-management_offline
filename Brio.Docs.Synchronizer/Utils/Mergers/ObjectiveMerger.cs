@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Database.Models;
+using Brio.Docs.Integration.Factories;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
@@ -10,24 +12,25 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
 {
     internal class ObjectiveMerger : IMerger<Objective>
     {
-        private readonly IChildrenMerger<Objective, BimElement> bimElementChildrenMerger;
-        private readonly IChildrenMerger<Objective, DynamicField> dynamicFieldChildrenMerger;
-        private readonly IChildrenMerger<Objective, Item> itemChildrenMerger;
+        private readonly Lazy<IChildrenMerger<Objective, BimElement>> bimElementChildrenMerger;
+        private readonly Lazy<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMerger;
+        private readonly Lazy<IChildrenMerger<Objective, Item>> itemChildrenMerger;
         private readonly IMerger<Location> locationMerger;
         private readonly ILogger<ObjectiveMerger> logger;
 
         public ObjectiveMerger(
             ILogger<ObjectiveMerger> logger,
             IMerger<Location> locationMerger,
-            IChildrenMerger<Objective, DynamicField> dynamicFieldChildrenMerger,
-            IChildrenMerger<Objective, Item> itemChildrenMerger,
-            IChildrenMerger<Objective, BimElement> bimElementChildrenMerger)
+            IFactory<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMerger,
+            IFactory<IChildrenMerger<Objective, Item>> itemChildrenMerger,
+            IFactory<IChildrenMerger<Objective, BimElement>> bimElementChildrenMerger)
         {
             this.logger = logger;
             this.locationMerger = locationMerger;
-            this.dynamicFieldChildrenMerger = dynamicFieldChildrenMerger;
-            this.itemChildrenMerger = itemChildrenMerger;
-            this.bimElementChildrenMerger = bimElementChildrenMerger;
+            this.dynamicFieldChildrenMerger = new Lazy<IChildrenMerger<Objective, DynamicField>>(dynamicFieldChildrenMerger.Create);
+            this.itemChildrenMerger = new Lazy<IChildrenMerger<Objective, Item>>(itemChildrenMerger.Create);
+            this.bimElementChildrenMerger =
+                new Lazy<IChildrenMerger<Objective, BimElement>>(bimElementChildrenMerger.Create);
         }
 
         public async ValueTask Merge(SynchronizingTuple<Objective> tuple)
@@ -43,9 +46,9 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 objective => objective.Status);
 
             await MergeLocation(tuple).ConfigureAwait(false);
-            await dynamicFieldChildrenMerger.MergeChildren(tuple).ConfigureAwait(false);
-            await itemChildrenMerger.MergeChildren(tuple).ConfigureAwait(false);
-            await bimElementChildrenMerger.MergeChildren(tuple).ConfigureAwait(false);
+            await dynamicFieldChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            await bimElementChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
         }
 
         private async ValueTask MergeLocation(SynchronizingTuple<Objective> tuple)
