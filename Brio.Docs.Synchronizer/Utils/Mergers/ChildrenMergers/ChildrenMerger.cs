@@ -174,7 +174,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
 
             if (child.GetId() != 0)
             {
-                if (await context.Set<TSynchronizableChild>().ContainsAsync(child).ConfigureAwait(false))
+                if (await context.Set<TSynchronizableChild>().AsNoTracking().ContainsAsync(child).ConfigureAwait(false))
                 {
                     if (needRemove(parent, child))
                         context.Set<TSynchronizableChild>().Remove(child);

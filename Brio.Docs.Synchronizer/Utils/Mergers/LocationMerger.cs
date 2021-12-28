@@ -39,6 +39,8 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
                 location => location.CameraPositionY,
                 location => location.CameraPositionZ,
                 location => location.Guid);
+
+            await LinkLocationItem(tuple).ConfigureAwait(false);
         }
 
         public async ValueTask<DateTime> GetUpdatedTime(Location location)

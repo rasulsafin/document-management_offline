@@ -21,16 +21,17 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
         public ObjectiveMerger(
             ILogger<ObjectiveMerger> logger,
             IMerger<Location> locationMerger,
-            IFactory<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMerger,
-            IFactory<IChildrenMerger<Objective, Item>> itemChildrenMerger,
-            IFactory<IChildrenMerger<Objective, BimElement>> bimElementChildrenMerger)
+            IFactory<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMergerFactory,
+            IFactory<IChildrenMerger<Objective, Item>> itemChildrenMergerFactory,
+            IFactory<IChildrenMerger<Objective, BimElement>> bimElementChildrenMergerFactory)
         {
             this.logger = logger;
             this.locationMerger = locationMerger;
-            this.dynamicFieldChildrenMerger = new Lazy<IChildrenMerger<Objective, DynamicField>>(dynamicFieldChildrenMerger.Create);
-            this.itemChildrenMerger = new Lazy<IChildrenMerger<Objective, Item>>(itemChildrenMerger.Create);
+            this.dynamicFieldChildrenMerger =
+                new Lazy<IChildrenMerger<Objective, DynamicField>>(dynamicFieldChildrenMergerFactory.Create);
+            this.itemChildrenMerger = new Lazy<IChildrenMerger<Objective, Item>>(itemChildrenMergerFactory.Create);
             this.bimElementChildrenMerger =
-                new Lazy<IChildrenMerger<Objective, BimElement>>(bimElementChildrenMerger.Create);
+                new Lazy<IChildrenMerger<Objective, BimElement>>(bimElementChildrenMergerFactory.Create);
         }
 
         public async ValueTask Merge(SynchronizingTuple<Objective> tuple)
@@ -53,26 +54,54 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
 
         private async ValueTask MergeLocation(SynchronizingTuple<Objective> tuple)
         {
+            if (tuple.All(x => x.Location == null))
+                return;
+
             var locationTuple = new SynchronizingTuple<Location>(
                 null,
                 tuple.Local.Location,
                 tuple.Synchronized.Location,
                 tuple.Remote.Location);
 
-            var item = locationTuple.Remote?.Item;
+            var action = locationTuple.DetermineAction();
 
-            if (item is { ProjectID: null, Objectives: null })
+
+            switch (action)
             {
-                item.Objectives = new List<ObjectiveItem>
-                {
-                    new ()
-                    {
-                        Objective = tuple.Remote ?? tuple.Synchronized ?? tuple.Local,
-                    },
-                };
-            }
+                case SynchronizingAction.Nothing:
+                    break;
+                case SynchronizingAction.Merge:
+                case SynchronizingAction.AddToLocal:
+                case SynchronizingAction.AddToRemote:
+                    var item = locationTuple.Remote?.Item;
 
-            await locationMerger.Merge(locationTuple).ConfigureAwait(false);
+                    if (item is { ProjectID: null, Objectives: null })
+                    {
+                        item.Objectives = new List<ObjectiveItem>
+                        {
+                            new ()
+                            {
+                                Objective = tuple.Remote ?? tuple.Synchronized ?? tuple.Local,
+                            },
+                        };
+                    }
+
+                    await locationMerger.Merge(locationTuple).ConfigureAwait(false);
+                    break;
+                case SynchronizingAction.RemoveFromLocal:
+                case SynchronizingAction.RemoveFromRemote:
+                    tuple.ForEachChange(locationTuple, (objective, location) =>
+                    {
+                        if (objective.Location == null)
+                            return false;
+
+                        objective.Location = null;
+                        return true;
+                    });
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
         }
     }
 }

@@ -16,10 +16,10 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers
 
         public DynamicFieldMerger(
             ILogger<DynamicFieldMerger> logger,
-            IFactory<IChildrenMerger<DynamicField, DynamicField>> childrenHelper)
+            IFactory<IChildrenMerger<DynamicField, DynamicField>> childrenHelperFactory)
         {
             this.logger = logger;
-            this.childrenHelper = new Lazy<IChildrenMerger<DynamicField, DynamicField>>(childrenHelper.Create);
+            this.childrenHelper = new Lazy<IChildrenMerger<DynamicField, DynamicField>>(childrenHelperFactory.Create);
             logger.LogTrace("DynamicFieldMerger created");
         }
 
