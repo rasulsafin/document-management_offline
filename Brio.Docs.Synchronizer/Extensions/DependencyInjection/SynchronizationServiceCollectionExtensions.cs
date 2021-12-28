@@ -7,6 +7,7 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
 using Brio.Docs.Synchronization.Utilities.Mergers;
@@ -60,7 +61,8 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Expression<Func<TParent, ICollection<TLink>>> getChildrenCollection,
             Expression<Func<TLink, TChild>> getChild,
-            Func<TParent, TChild, bool> needRemove)
+            Func<TParent, TChild, bool> needRemove,
+            Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc = null)
             where TParent : class
             where TLink : class, new()
             where TChild : class, ISynchronizable<TChild>
@@ -70,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     provider.GetService<IMerger<TChild>>(),
                     getChildrenCollection,
                     getChild,
-                    (child, tuple) => tuple.DoesNeed(child),
+                    needInTupleFunc ?? ((child, tuple) => tuple.DoesNeed(child)),
                     needRemove));
 
         private static IServiceCollection AddObjectiveChildrenMergers(this IServiceCollection services)
@@ -81,7 +83,10 @@ namespace Microsoft.Extensions.DependencyInjection
                 (objective, item)
                     => item.Objectives.All(x => x.Objective == objective) &&
                     item.Project == null &&
-                    item.ProjectID == null);
+                    item.ProjectID == null,
+                (item, tuple)
+                    => tuple.DoesNeed(item) ||
+                    item.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath)));
             services.AddSimpleChildrenMerger<Objective, DynamicField>(objective => objective.DynamicFields, (_, _) => true);
             services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
 
