@@ -138,9 +138,9 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             foreach (var projectSnapshot in snapshot.ProjectEnumerable)
             {
                 await foreach (var id in issueUpdatesFinder.GetUpdatedIssueIds(
-                    projectSnapshot.IssueContainer,
-                    date,
-                    Enumerable.Empty<IQueryParameter>()))
+                                   projectSnapshot.IssueContainer,
+                                   date,
+                                   new[] { IssueUtilities.GetFilterForUnremoved() }))
                     result.Add(id);
             }
 
