@@ -110,7 +110,7 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
         private void CreateEmptyChildrenList(TParent x)
         {
             if (getCollectionFunc(x) == null)
-                collectionPropertyInfo.SetValue(x, new List<TSynchronizableChild>());
+                collectionPropertyInfo.SetValue(x, new List<TChild>());
         }
 
         private bool HasChild(TParent parent, TSynchronizableChild child)
@@ -128,9 +128,10 @@ namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
         {
             if (getCollectionFunc(parent) == null && parent.GetId() != 0)
             {
-                return await context.Entry(parent)
-                   .Collection(getEnumerableExpression)
-                   .Query()
+                return await context.Set<TParent>()
+                   .AsNoTracking()
+                   .Where(x => x == parent)
+                   .Select(getEnumerableExpression)
                    .AnyAsync()
                    .ConfigureAwait(false);
             }
