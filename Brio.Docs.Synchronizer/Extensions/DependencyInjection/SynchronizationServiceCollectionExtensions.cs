@@ -8,11 +8,11 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Mergers;
+using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
-using Brio.Docs.Synchronization.Mergers;
-using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Utils.Linkers;
 
 namespace Microsoft.Extensions.DependencyInjection

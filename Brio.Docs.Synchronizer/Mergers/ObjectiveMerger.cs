@@ -90,7 +90,7 @@ namespace Brio.Docs.Synchronization.Mergers
                     break;
                 case SynchronizingAction.RemoveFromLocal:
                 case SynchronizingAction.RemoveFromRemote:
-                    tuple.ForEachChange(locationTuple, (objective, location) =>
+                    tuple.ForEachChange(locationTuple, (objective, _) =>
                     {
                         if (objective.Location == null)
                             return false;

@@ -14,8 +14,8 @@ namespace Brio.Docs.Synchronization.Mergers
     internal class LocationMerger : IMerger<Location>
     {
         private readonly DMContext context;
-        private readonly ILogger<LocationMerger> logger;
         private readonly IAttacher<Item> itemAttacher;
+        private readonly ILogger<LocationMerger> logger;
 
         public LocationMerger(
             DMContext context,
@@ -43,7 +43,22 @@ namespace Brio.Docs.Synchronization.Mergers
             await LinkLocationItem(tuple).ConfigureAwait(false);
         }
 
-        public async ValueTask<DateTime> GetUpdatedTime(Location location)
+        private void CreateRemoteLocationItem(SynchronizingTuple<Location> tuple, SynchronizingTuple<Item> itemTuple)
+        {
+            logger.LogDebug("Creating remote");
+
+            itemTuple.Remote = new Item
+            {
+                ExternalID = itemTuple.Synchronized.ExternalID,
+                ItemType = itemTuple.Synchronized.ItemType,
+                RelativePath = itemTuple.Synchronized.RelativePath,
+                ProjectID = itemTuple.Synchronized.ProjectID,
+            };
+            logger.LogDebug("Created item: {@Object}", tuple.Local);
+            itemTuple.RemoteChanged = true;
+        }
+
+        private async ValueTask<DateTime> GetUpdatedTime(Location location)
         {
             if (location == null)
                 return default;
@@ -90,21 +105,6 @@ namespace Brio.Docs.Synchronization.Mergers
 
                     return false;
                 });
-        }
-
-        private void CreateRemoteLocationItem(SynchronizingTuple<Location> tuple, SynchronizingTuple<Item> itemTuple)
-        {
-            logger.LogDebug("Creating remote");
-
-            itemTuple.Remote = new Item
-            {
-                ExternalID = itemTuple.Synchronized.ExternalID,
-                ItemType = itemTuple.Synchronized.ItemType,
-                RelativePath = itemTuple.Synchronized.RelativePath,
-                ProjectID = itemTuple.Synchronized.ProjectID,
-            };
-            logger.LogDebug("Created item: {@Object}", tuple.Local);
-            itemTuple.RemoteChanged = true;
         }
     }
 }

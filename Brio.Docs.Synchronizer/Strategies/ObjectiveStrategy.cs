@@ -60,8 +60,8 @@ namespace Brio.Docs.Synchronization.Strategies
         protected override DbSet<Objective> GetDBSet(DMContext source)
             => source.Objectives;
 
-        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(IConnectionContext context)
-            => context.ObjectivesSynchronizer;
+        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(IConnectionContext connectionContext)
+            => connectionContext.ObjectivesSynchronizer;
 
         protected override Expression<Func<Objective, bool>> GetDefaultFilter(SynchronizingData data)
             => data.ObjectivesFilter;
@@ -83,7 +83,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
-                CreateObjectiveParentLink(data, tuple);
+                CreateObjectiveParentLink(tuple);
                 var projectID = tuple.Local.ProjectID;
                 var projectMateId = await context.Projects
                    .AsNoTracking()
@@ -126,7 +126,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 await merger.Merge(tuple).ConfigureAwait(false);
 
                 UpdateChildrenBeforeSynchronization(tuple, data);
-                CreateObjectiveParentLink(data, tuple);
+                CreateObjectiveParentLink(tuple);
                 tuple.Synchronized.ProjectID = tuple.Remote.ProjectID;
                 var id = tuple.Synchronized.ProjectID;
                 tuple.Local.ProjectID = await context.Projects
@@ -198,7 +198,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -224,7 +224,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -238,7 +238,7 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private async Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
+        private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
             ItemStrategy<AItemLinker>.UpdateExternalIDs(
@@ -254,6 +254,7 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("External ids of dynamic fields updated");
 
             logger.LogTrace("Location item linked");
+            return Task.CompletedTask;
         }
 
         private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
@@ -275,7 +276,7 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private void CreateObjectiveParentLink(SynchronizingData data, SynchronizingTuple<Objective> tuple)
+        private void CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("CreateObjectiveParentLink started with {@Tuple}", tuple);
             if (tuple.Local.ParentObjective != null)
