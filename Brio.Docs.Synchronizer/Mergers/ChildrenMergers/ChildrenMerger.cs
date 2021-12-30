@@ -12,7 +12,7 @@ using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
+namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class
         ChildrenMerger<TParent, TChild, TSynchronizableChild> : IChildrenMerger<TParent, TSynchronizableChild>

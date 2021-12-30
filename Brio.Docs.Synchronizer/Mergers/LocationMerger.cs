@@ -9,7 +9,7 @@ using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace Brio.Docs.Synchronization.Utilities.Mergers
+namespace Brio.Docs.Synchronization.Mergers
 {
     internal class LocationMerger : IMerger<Location>
     {

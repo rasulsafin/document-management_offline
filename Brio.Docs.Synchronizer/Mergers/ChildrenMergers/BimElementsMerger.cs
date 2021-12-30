@@ -7,7 +7,7 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 
-namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
+namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class BimElementsMerger : IChildrenMerger<Objective, BimElement>
     {

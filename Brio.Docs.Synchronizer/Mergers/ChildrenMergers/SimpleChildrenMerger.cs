@@ -6,7 +6,7 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers
+namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class SimpleChildrenMerger<TParent, TChild> : ChildrenMerger<TParent, TChild, TChild>
         where TParent : class

@@ -5,7 +5,7 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Brio.Docs.Synchronization.Utilities.Mergers
+namespace Brio.Docs.Synchronization.Mergers
 {
     internal class ItemMerger : IMerger<Item>
     {
