@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 
-namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models
 {
     internal class ProjectSnapshot : ASnapshotEntity<Project>
     {

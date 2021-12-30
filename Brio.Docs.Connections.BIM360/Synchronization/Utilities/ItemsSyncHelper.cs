@@ -4,87 +4,84 @@ using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
+using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
-using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 {
-    internal class ItemsSyncHelper
+    internal class ItemsSyncHelper : IItemsUpdater
     {
         private readonly ItemsService itemsService;
         private readonly ProjectsService projectsService;
         private readonly ObjectsService objectsService;
         private readonly VersionsService versionsService;
+        private readonly SnapshotGetter snapshotGetter;
+        private readonly SnapshotUpdater snapshotUpdater;
 
         public ItemsSyncHelper(
             ItemsService itemsService,
             ProjectsService projectsService,
             ObjectsService objectsService,
-            VersionsService versionsService)
+            VersionsService versionsService,
+            SnapshotGetter snapshotGetter,
+            SnapshotUpdater snapshotUpdater)
         {
             this.itemsService = itemsService;
             this.projectsService = projectsService;
             this.objectsService = objectsService;
             this.versionsService = versionsService;
+            this.snapshotGetter = snapshotGetter;
+            this.snapshotUpdater = snapshotUpdater;
         }
 
-        internal async Task<ItemSnapshot> PostItem(ProjectSnapshot project, ItemExternalDto item)
+        public async Task<ItemSnapshot> PostItem(ProjectSnapshot project, string fullPath)
         {
-            var posted = await PostItem(item, project.MrsFolderID, project.ID);
-            var itemSnapshot = new ItemSnapshot(posted.item, posted.version);
-            project.Items.Add(posted.item.ID, itemSnapshot);
+            var posted = await PostItem(fullPath, project.MrsFolderID, project.ID);
+            var itemSnapshot = snapshotUpdater.CreateItem(project, posted.item, posted.version);
             return itemSnapshot;
         }
 
-        internal async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, ItemExternalDto item)
+        public async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, string itemID, string fullPath)
         {
-            var snapshot = project.Items[item.ExternalID];
-            var posted = await UpdateVersion(item, project.MrsFolderID, project.ID, snapshot.Entity);
-
-            if (snapshot.ID != posted.item.ID)
-            {
-                project.Items.Remove(snapshot.ID);
-                snapshot = new ItemSnapshot(posted.item, posted.version);
-                project.Items.Add(posted.item.ID, snapshot);
-            }
-            else
-            {
-                snapshot.Entity = posted.item;
-                snapshot.Version = posted.version;
-            }
-
+            var snapshot = snapshotGetter.GetItem(project, itemID);
+            var posted = await UpdateVersion(fullPath, project.MrsFolderID, project.ID, snapshot.Entity);
+            snapshotUpdater.UpdateItem(project, snapshot, posted.item, posted.version);
             return snapshot;
         }
 
-        internal async Task Remove(string projectID, Item item)
+        public async Task Remove(ProjectSnapshot project, string itemID)
         {
+            var itemSnapshot = snapshotGetter.GetItem(project, itemID);
+
             // Delete uploaded item by marking version as "deleted"
             var deletedVersion = new Version
             {
                 Attributes = new Version.VersionAttributes
                 {
-                    Name = item.Attributes.DisplayName,
+                    Name = itemSnapshot.Entity.Attributes.DisplayName,
                     Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                 },
                 Relationships = new Version.VersionRelationships
                 {
                     Item = new ObjectInfo
                     {
-                        ID = item.ID,
+                        ID = itemID,
                         Type = ITEM_TYPE,
                     }.ToDataContainer(),
                 },
             };
 
-            await versionsService.PostVersionAsync(projectID, deletedVersion);
+            await versionsService.PostVersionAsync(project.ID, deletedVersion);
+            snapshotUpdater.RemoveItem(project, itemID);
         }
 
         // Replication for steps 5, 6, 8 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        private async Task<(Item item, Forge.Models.DataManagement.Version version)> UpdateVersion(ItemExternalDto item, string folder, string projectId, Item existingItem)
+        private async Task<(Item item, Forge.Models.DataManagement.Version version)> UpdateVersion(string fullPath, string folder, string projectId, Item existingItem)
         {
-            var fileName = Path.GetFileName(item.FullPath);
-            var version = await CreateVersion(projectId, folder, item.FullPath, fileName);
+            var fileName = Path.GetFileName(fullPath);
+            var version = await CreateVersion(projectId, folder, fullPath, fileName);
 
             if (version == null)
                 return default;
@@ -94,10 +91,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         }
 
         // Replication for steps 5-7 from https://forge.autodesk.com/en/docs/bim360/v1/tutorials/upload-document/
-        private async Task<(Item item, Version version)> PostItem(ItemExternalDto item, string folder, string projectId)
+        private async Task<(Item item, Version version)> PostItem(string fullPath, string folder, string projectId)
         {
-            var fileName = Path.GetFileName(item.FullPath);
-            var version = await CreateVersion(projectId, folder, item.FullPath, fileName);
+            var fileName = Path.GetFileName(fullPath);
+            var version = await CreateVersion(projectId, folder, fullPath, fileName);
 
             if (version == null)
                 return default;

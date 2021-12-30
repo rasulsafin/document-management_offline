@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -8,9 +9,10 @@ using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
+using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 
@@ -20,6 +22,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
     {
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
+        private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements;
+        private readonly IConverter<IEnumerable<Comment>, LinkedInfo> convertToLinkedInfo;
         private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
         private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
         private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
@@ -29,6 +33,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
             IConverter<IssueSnapshot, ObjectiveStatus> statusConverter,
+            IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements,
+            IConverter<IEnumerable<Comment>, LinkedInfo> convertToLinkedInfo,
             IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator,
             IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator,
             IEnumIdentification<LocationSnapshot> locationEnumCreator,
@@ -37,6 +43,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         {
             this.converterToDto = converterToDto;
             this.statusConverter = statusConverter;
+            this.convertToBimElements = convertToBimElements;
+            this.convertToLinkedInfo = convertToLinkedInfo;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
@@ -78,9 +86,13 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 parsedToDto.DynamicFields.Add(status);
             }
 
-            foreach (var commentSnapshot in snapshot?.Comments ?? Enumerable.Empty<CommentSnapshot>())
+            var comments =
+                snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains(MrsConstants.META_COMMENT_TAG)) ??
+                Enumerable.Empty<CommentSnapshot>();
+
+            foreach (var commentSnapshot in comments)
             {
-                var comment = new DynamicFieldExternalDto()
+                var comment = new DynamicFieldExternalDto
                 {
                     ExternalID = commentSnapshot.ID,
                     Type = DynamicFieldType.OBJECT,
@@ -88,7 +100,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var author = new DynamicFieldExternalDto()
+                var author = new DynamicFieldExternalDto
                 {
                     ExternalID = commentSnapshot.Entity.Attributes.CreatedBy,
                     Type = DynamicFieldType.STRING,
@@ -97,7 +109,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var date = new DynamicFieldExternalDto()
+                var date = new DynamicFieldExternalDto
                 {
                     ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.CreatedAt),
                     Type = DynamicFieldType.DATE,
@@ -106,7 +118,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                var text = new DynamicFieldExternalDto()
+                var text = new DynamicFieldExternalDto
                 {
                     ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.Body),
                     Type = DynamicFieldType.STRING,
@@ -115,17 +127,22 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
-                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>() { author, date, text };
+                comment.ChildrenDynamicFields = new List<DynamicFieldExternalDto>
+                {
+                    author,
+                    date,
+                    text,
+                };
                 parsedToDto.DynamicFields.Add(comment);
             }
 
-            var newComment = new DynamicFieldExternalDto()
+            var newComment = new DynamicFieldExternalDto
             {
                 ExternalID = MrsConstants.NEW_COMMENT_ID,
                 Type = DynamicFieldType.STRING,
                 Name = MrsConstants.NEW_COMMENT_FIELD_NAME,
                 Value = string.Empty,
-                UpdatedAt = System.DateTime.Now,
+                UpdatedAt = DateTime.Now,
             };
 
             parsedToDto.DynamicFields.Add(newComment);
@@ -148,7 +165,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             {
                 if (snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
                 {
-                    if (!TryRedirect(snapshot, parsedToDto))
+                    if (!await TryRedirect(snapshot, parsedToDto))
                         parsedToDto.Location.Item = target.Entity.ToDto();
                 }
                 else
@@ -157,16 +174,29 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 }
             }
 
+            if (snapshot.Comments != null)
+            {
+                var elements = await convertToBimElements.Convert(snapshot.Comments.Select(x => x.Entity)) ??
+                    ArraySegment<BimElementExternalDto>.Empty;
+                parsedToDto.BimElements = elements.ToArray();
+            }
+            else
+            {
+                parsedToDto.BimElements = ArraySegment<BimElementExternalDto>.Empty;
+            }
+
             return parsedToDto;
         }
 
-        private bool TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
+        private async Task<bool> TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
         {
-            var otherInfo = snapshot.Entity.GetOtherInfo();
-            var linkedInfo = otherInfo?.OriginalModelInfo;
+            if (snapshot.Comments == null)
+                return false;
+
+            var linkedInfo = await convertToLinkedInfo.Convert(snapshot.Comments.Select(x => x.Entity));
 
             if (linkedInfo == null ||
-                !snapshot.ProjectSnapshot.Items.TryGetValue(otherInfo.OriginalModelInfo.Urn, out var originalTarget))
+                !snapshot.ProjectSnapshot.Items.TryGetValue(linkedInfo.Urn, out var originalTarget))
                 return false;
 
             parsedToDto.Location.Item = originalTarget.Entity.ToDto();
