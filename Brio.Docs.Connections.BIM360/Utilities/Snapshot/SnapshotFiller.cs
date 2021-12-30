@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
@@ -19,28 +21,28 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
         private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly IfcConfigUtilities configUtilities;
+        private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
-            IssuesService issuesService,
+            IIssuesService issuesService,
             FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
-            IfcConfigUtilities configUtilities,
+            ConfigurationsHelper configUtilities,
             StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;
