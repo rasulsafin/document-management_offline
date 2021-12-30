@@ -22,16 +22,19 @@ namespace Brio.Docs.Synchronization.Strategies
     internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
         private readonly IMerger<Objective> merger;
+        private readonly IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater;
         private readonly ILogger<ObjectiveStrategy> logger;
 
         public ObjectiveStrategy(
             DMContext context,
             IMapper mapper,
             IMerger<Objective> merger,
+            IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater,
             ILogger<ObjectiveStrategy> logger)
             : base(context, mapper, logger)
         {
             this.merger = merger;
+            this.dynamicFieldIdUpdater = dynamicFieldIdUpdater;
             this.logger = logger;
             logger.LogTrace("ObjectiveStrategy created");
         }
@@ -244,7 +247,7 @@ namespace Brio.Docs.Synchronization.Strategies
                .Select(x => x.Item),
                 (tuple.Remote.Items ?? ArraySegment<ObjectiveItem>.Empty).Select(x => x.Item).ToArray());
             logger.LogTrace("External ids of items updated");
-            DynamicFieldStrategy.UpdateExternalIDs(
+            dynamicFieldIdUpdater.UpdateExternalIds(
                 (tuple.Local.DynamicFields ?? ArraySegment<DynamicField>.Empty)
                .Concat(tuple.Synchronized.DynamicFields ?? ArraySegment<DynamicField>.Empty),
                 tuple.Remote.DynamicFields ?? ArraySegment<DynamicField>.Empty);

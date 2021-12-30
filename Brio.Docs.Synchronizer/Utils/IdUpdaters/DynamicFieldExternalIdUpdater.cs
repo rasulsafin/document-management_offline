@@ -1,18 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using Brio.Docs.Database.Models;
+using Brio.Docs.Synchronization.Interfaces;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal static class DynamicFieldStrategy
+    internal class DynamicFieldExternalIdUpdater : IExternalIdUpdater<DynamicField>
     {
-        public static void UpdateExternalIDs(IEnumerable<DynamicField> local, IEnumerable<DynamicField> remote)
+        private readonly IEqualityComparer<DynamicField> comparer;
+
+        public DynamicFieldExternalIdUpdater()
+            => comparer = new DynamicFieldComparer();
+
+        public void UpdateExternalIds(IEnumerable<DynamicField> local, IEnumerable<DynamicField> remote)
         {
             var remotes = remote.ToList();
-            var dfComparer = new DynamicFieldComparer();
 
             foreach (var dynamicField in local)
-                UpdateExternalIDs(remotes, dynamicField, dfComparer);
+                UpdateExternalIDs(remotes, dynamicField, comparer);
         }
 
         private static void UpdateExternalIDs(IEnumerable<DynamicField> remote, DynamicField dynamicField, IEqualityComparer<DynamicField> comparer)
@@ -42,11 +47,8 @@ namespace Brio.Docs.Synchronization.Strategies
                 if (x.GetType() != y.GetType())
                     return false;
 
-                if (x.ExternalID == y.ExternalID)
-                    return true;
-
                 if (!string.IsNullOrWhiteSpace(x.ExternalID) && !string.IsNullOrWhiteSpace(y.ExternalID))
-                    return false;
+                    return x.ExternalID == y.ExternalID;
 
                 var xFields = x.ChildrenDynamicFields ?? Enumerable.Empty<DynamicField>();
                 var yFields = y.ChildrenDynamicFields ?? Enumerable.Empty<DynamicField>();
@@ -55,7 +57,7 @@ namespace Brio.Docs.Synchronization.Strategies
                     x.Name == y.Name &&
                     x.Value == y.Value &&
                     (x.ChildrenDynamicFields?.Count ?? 0) == (y.ChildrenDynamicFields?.Count ?? 0) &&
-                    xFields.All(xc => yFields.Any(yc => this.Equals(xc, yc)));
+                    xFields.All(xc => yFields.Any(yc => Equals(xc, yc)));
             }
 
             public int GetHashCode(DynamicField obj)
