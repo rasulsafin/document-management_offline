@@ -25,7 +25,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 Description = issue.Attributes.Description,
                 DynamicFields = GetDynamicFields(issue),
                 Items = new List<ItemExternalDto>(),
-                BimElements = GetBimElements(issue),
             };
 
             if (issue.Attributes.PushpinAttributes != null)
@@ -66,9 +65,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             };
             return result;
         }
-
-        private static ICollection<BimElementExternalDto> GetBimElements(Issue issue)
-            => issue.GetOtherInfo()?.BimElements ?? ArraySegment<BimElementExternalDto>.Empty;
 
         private static LocationExternalDto GetLocation(Issue issue)
         {

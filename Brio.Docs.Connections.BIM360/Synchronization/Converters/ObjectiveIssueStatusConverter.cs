@@ -14,7 +14,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class ObjectiveIssueStatusConverter : IConverter<ObjectiveExternalDto, Status>
     {
-        private readonly Bim360Snapshot snapshot;
+        private readonly SnapshotGetter snapshot;
         private readonly StatusEnumCreator statusEnumCreator;
 
         private readonly IEnumerable<IStatusRule> rules = new IStatusRule[]
@@ -26,7 +26,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             new DynamicFieldNotChangedRule(),
         };
 
-        public ObjectiveIssueStatusConverter(Bim360Snapshot snapshot, StatusEnumCreator statusEnumCreator)
+        public ObjectiveIssueStatusConverter(SnapshotGetter snapshot, StatusEnumCreator statusEnumCreator)
         {
             this.snapshot = snapshot;
             this.statusEnumCreator = statusEnumCreator;
@@ -35,10 +35,10 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public Task<Status> Convert(ObjectiveExternalDto objective)
         {
             Issue existing = null;
-            var project = snapshot.ProjectEnumerable.First(x => x.ID == objective.ProjectExternalID);
+            var project = snapshot.GetProject(objective.ProjectExternalID);
             if (objective.ExternalID != null && project.Issues.TryGetValue(objective.ExternalID, out var issueSnapshot))
                 existing = issueSnapshot.Entity;
-            var config = project.StatusesRelations ?? IfcConfigUtilities.GetDefaultStatusesConfig();
+            var config = project.StatusesRelations ?? ConfigurationsHelper.GetDefaultStatusesConfig();
 
             var df = DynamicFieldUtilities.GetValue(
                     statusEnumCreator,
@@ -59,8 +59,5 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             return Task.FromResult(Status.Open);
         }
-
-        private static bool CanUse(Issue existing, Status status)
-            => existing.Attributes.PermittedStatuses.Contains(status);
     }
 }
