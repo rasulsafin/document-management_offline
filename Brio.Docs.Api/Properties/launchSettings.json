@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "DocumentManagement.Api": {
+    "Brio.Docs.Api": {
       "commandName": "Project",
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5000",

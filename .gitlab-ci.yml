@@ -19,6 +19,8 @@ build:
     - xcopy /E "%LAUNCHER_PATH%" "%ARTIFACTS_PATH%\Launcher"
     - '"%MSBUILD_PATH%" /t:Restore;Rebuild;Publish /p:SelfContained=True /p:PublishProtocol=FileSystem /p:Configuration=Release /p:PublishDir=bin\Release\Publish /p:RuntimeIdentifier=win-x64 /p:AllowedReferenceRelatedFileExtensions=*.pdb /p:DebugSymbols=false /p:DebugType=none'
     - xcopy /E "%API_PATH%" "%ARTIFACTS_PATH%"
+    - copy CHANGELOG.md "%ARTIFACTS_PATH%\CHANGELOG.md"
+    - del /S "%ARTIFACTS_PATH%\*.pdb"
   artifacts:
     expire_in: 2 days
     paths:

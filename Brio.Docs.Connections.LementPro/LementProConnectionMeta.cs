@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using Brio.Docs.Connections.LementPro.Utilities;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Integration.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 
 namespace Brio.Docs.Connections.LementPro
@@ -28,5 +31,11 @@ namespace Brio.Docs.Connections.LementPro
 
         public Type GetIConnectionType()
             => typeof(LementProConnection);
+
+        public Action<IServiceCollection> AddToDependencyInjectionMethod()
+            => collection => collection.AddLementPro();
+
+        public IEnumerable<GettingPropertyExpression> GetPropertiesForIgnoringByLogging()
+            => LoggerUtilities.GetSensitiveProperties();
     }
 }

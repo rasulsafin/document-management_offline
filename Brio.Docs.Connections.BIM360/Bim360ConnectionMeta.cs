@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Integration.Utilities;
+using Microsoft.Extensions.DependencyInjection;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360
@@ -31,5 +34,11 @@ namespace Brio.Docs.Connections.Bim360
 
         public Type GetIConnectionType()
             => typeof(Bim360Connection);
+
+        public Action<IServiceCollection> AddToDependencyInjectionMethod()
+            => collection => collection.AddBim360();
+
+        public IEnumerable<GettingPropertyExpression> GetPropertiesForIgnoringByLogging()
+            => Enumerable.Empty<GettingPropertyExpression>();
     }
 }

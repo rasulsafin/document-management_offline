@@ -8,12 +8,14 @@ using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Services;
 using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility;
 using Brio.Docs.Utility.Mapping;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests
+namespace Brio.Docs.Tests.Services
 {
     [TestClass]
     public class ObjectiveTypeServiceTests
@@ -21,17 +23,9 @@ namespace Brio.Docs.Tests
         private static ObjectiveTypeService service;
         private static IMapper mapper;
 
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private ServiceProvider serviceProvider;
 
-        [ClassInitialize]
-        public static void ClassSetup(TestContext unused)
-        {
-            var mapperConfig = new MapperConfiguration(mc =>
-            {
-                mc.AddProfile(new MappingProfile());
-            });
-            mapper = mapperConfig.CreateMapper();
-        }
+        private static SharedDatabaseFixture Fixture { get; set; }
 
         [TestInitialize]
         public void Setup()
@@ -41,11 +35,35 @@ namespace Brio.Docs.Tests
                 context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
 
-                var types = MockData.DEFAULT_OBJECTIVE_TYPES;
-                context.ObjectiveTypes.AddRange(types);
+                context.Users.AddRange(MockData.DEFAULT_USERS);
+                context.ObjectiveTypes.AddRange(MockData.DEFAULT_OBJECTIVE_TYPES);
                 context.SaveChanges();
             });
-            service = new ObjectiveTypeService(Fixture.Context, mapper, Mock.Of<ILogger<ObjectiveTypeService>>());
+
+            IServiceCollection services = new ServiceCollection();
+            services.AddLogging();
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            services.AddSingleton(x => Fixture.Context);
+            serviceProvider = services.BuildServiceProvider();
+            mapper = serviceProvider.GetService<IMapper>();
+
+            service = new ObjectiveTypeService(
+                Fixture.Context,
+                mapper,
+                Mock.Of<ILogger<ObjectiveTypeService>>());
+            var userService = new UserService(
+             Fixture.Context,
+             mapper,
+             new CryptographyHelper(),
+             Mock.Of<ILogger<UserService>>());
+
+            var userDtoId = mapper.Map<ID<UserDto>>(Fixture.Context.Users.First().ID);
+            var setCurrentUserTask = userService.SetCurrent(userDtoId);
+            setCurrentUserTask.Wait();
+            var result = setCurrentUserTask.Result;
+            if (!result)
+                Assert.Fail("Authorization failed");
         }
 
         [TestCleanup]
@@ -65,7 +83,7 @@ namespace Brio.Docs.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof(ArgumentException))]
+        [ExpectedException(typeof(ArgumentValidationException))]
         public async Task Add_ExistingType_RaisesArgumentException()
         {
             var existingType = Fixture.Context.ObjectiveTypes.First();

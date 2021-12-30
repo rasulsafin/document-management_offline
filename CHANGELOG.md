@@ -1,13 +1,19 @@
 # Changelog
 
-## [Unreleased]
+## [1.2.1] - 2021-12-30
 
-### Добавлено:
 ### Изменено:
-### Устарело:
-### Удалено:
+
+* Интерфейс IConnectionMeta определяет метод получения действий для внедрения в контейнер зависимостей стороннего подключения;
+* Интерфейс IConnectionMeta определяет метод получения списка свойств, которые необходимо игнорировать в логировании.
+
+### Изменено:
+
+* Запуск приложения из другой директории останавливает остальные запущенные экземпляры.
+
 ### Исправлено:
-### Безопасность:
+
+* Удаление задач из BIM 360;
 
 
 ## [1.2.0] - 2021-11-26
@@ -205,6 +211,7 @@
 * Синхронизация с Bim 360.
 
 [Unreleased]: http://gitlab.briogroup.ru/mrs/unity/document-management/activity
+[1.2.1]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.2.1
 [1.2.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.2.0
 [1.1.1]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.1
 [1.1.0]: http://gitlab.briogroup.ru/mrs/unity/document-management/-/releases/1.1.0
