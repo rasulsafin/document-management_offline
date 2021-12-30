@@ -46,7 +46,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 await foreach (var id in issueUpdatesFinder.GetUpdatedIssueIds(
                                    projectSnapshot.IssueContainer,
                                    date,
-                                   Enumerable.Empty<IQueryParameter>()))
+                                   new[] { IssueUtilities.GetFilterForUnremoved() }))
                     yield return id;
             }
         }

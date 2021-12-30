@@ -54,7 +54,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 
             var roles = await accountAdminService.GetRolesAsync(hub, projectSnapshot.ID);
 
-            foreach (var role in roles)
+            foreach (var role in roles.Where(role => users.Any(y => y.RoleIds.Contains(role.ID))))
                 yield return new AssignToVariant(role.MemberGroupID, AssignToType.Role, role.Name, projectSnapshot);
 
             var companies = accountAdminService.GetCompaniesAsync(hub, projectSnapshot.ID);
