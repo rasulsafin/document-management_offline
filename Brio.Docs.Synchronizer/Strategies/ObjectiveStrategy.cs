@@ -238,13 +238,13 @@ namespace Brio.Docs.Synchronization.Strategies
         private async Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
-            ItemStrategy<ObjectiveItemLinker>.UpdateExternalIDs(
+            ItemStrategy<AItemLinker>.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Concat(tuple.Synchronized.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Select(x => x.Item),
                 (tuple.Remote.Items ?? ArraySegment<ObjectiveItem>.Empty).Select(x => x.Item).ToArray());
             logger.LogTrace("External ids of items updated");
-            DynamicFieldStrategy<ObjectiveDynamicFieldLinker>.UpdateExternalIDs(
+            DynamicFieldStrategy.UpdateExternalIDs(
                 (tuple.Local.DynamicFields ?? ArraySegment<DynamicField>.Empty)
                .Concat(tuple.Synchronized.DynamicFields ?? ArraySegment<DynamicField>.Empty),
                 tuple.Remote.DynamicFields ?? ArraySegment<DynamicField>.Empty);

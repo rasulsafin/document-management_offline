@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
@@ -13,7 +14,6 @@ using Brio.Docs.Synchronization.Utilities.Finders;
 using Brio.Docs.Synchronization.Utilities.Mergers;
 using Brio.Docs.Synchronization.Utilities.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Utils.Linkers;
-using System.Linq;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -26,8 +26,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
 
             services.AddScoped<ItemStrategy<ProjectItemLinker>>();
-            services.AddScoped<ItemStrategy<ObjectiveItemLinker>>();
-            services.AddScoped<DynamicFieldStrategy<ObjectiveDynamicFieldLinker>>();
 
             services.AddScoped<IMerger<Objective>, ObjectiveMerger>();
             services.AddScoped<IMerger<Item>, ItemMerger>();
@@ -37,8 +35,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
 
             services.AddScoped<ProjectItemLinker>();
-            services.AddScoped<ObjectiveItemLinker>();
-            services.AddScoped<ObjectiveDynamicFieldLinker>();
 
             services.AddObjectiveChildrenMergers();
             services.AddDynamicFieldChildrenMergers();
