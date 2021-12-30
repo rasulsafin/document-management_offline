@@ -122,6 +122,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
+                UpdateChildrenBeforeSynchronization(tuple, data);
                 CreateObjectiveParentLink(data, tuple);
                 tuple.Synchronized.ProjectID = tuple.Remote.ProjectID;
                 var id = tuple.Synchronized.ProjectID;
@@ -164,6 +165,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
+                UpdateChildrenBeforeSynchronization(tuple, data);
                 var result = await base.Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -249,6 +251,25 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("External ids of dynamic fields updated");
 
             logger.LogTrace("Location item linked");
+        }
+
+        private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
+        {
+            if (tuple.Remote == null)
+                return;
+
+            var remoteObjective = tuple.Remote;
+
+            foreach (var df in remoteObjective.DynamicFields)
+                AddConnectionInfoTo(df);
+
+            void AddConnectionInfoTo(DynamicField df)
+            {
+                df.ConnectionInfoID = data.User.ConnectionInfoID;
+
+                foreach (var child in df.ChildrenDynamicFields)
+                    AddConnectionInfoTo(child);
+            }
         }
 
         private void CreateObjectiveParentLink(SynchronizingData data, SynchronizingTuple<Objective> tuple)
