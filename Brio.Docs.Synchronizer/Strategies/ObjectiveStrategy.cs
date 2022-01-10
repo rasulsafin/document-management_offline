@@ -271,6 +271,9 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 df.ConnectionInfoID = data.User.ConnectionInfoID;
 
+                if (df.ChildrenDynamicFields == null)
+                    return;
+
                 foreach (var child in df.ChildrenDynamicFields)
                     AddConnectionInfoTo(child);
             }
