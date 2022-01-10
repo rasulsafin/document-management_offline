@@ -32,40 +32,18 @@ namespace Brio.Docs.Tests.Synchronization
 
         private static Mock<IConnection> Connection { get; set; }
 
-        private static Mock<IConnectionContext> Context { get; set; }
-
         [TestInitialize]
         public void Setup()
         {
-            Fixture = new SharedDatabaseFixture(
-                context =>
-                {
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
-                    var users = MockData.DEFAULT_USERS;
-                    var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
-                    context.Users.AddRange(users);
-                    context.ObjectiveTypes.AddRange(objectiveTypes);
-                    context.SaveChanges();
-                });
-
-            var services = new ServiceCollection();
-            services.AddSingleton(Fixture.Context);
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            serviceProvider = services.BuildServiceProvider();
+            Fixture = SynchronizerTestsHelper.CreateFixture();
+            serviceProvider = SynchronizerTestsHelper.CreateServiceProvider(Fixture.Context);
             synchronizer = serviceProvider.GetService<Synchronizer>();
 
             Connection = new Mock<IConnection>();
-            Context = new Mock<IConnectionContext>();
 
             ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
             ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
 
-            Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
-            Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
             ObjectiveSynchronizer.Setup(x => x.Get(It.IsAny<List<string>>()))
                .ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
         }
