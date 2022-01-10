@@ -59,8 +59,8 @@ namespace Brio.Docs.Synchronization.Mergers
 
             var locationTuple = new SynchronizingTuple<Location>(
                 null,
-                tuple.Local.Location,
                 tuple.Synchronized.Location,
+                tuple.Local.Location,
                 tuple.Remote.Location);
 
             var action = locationTuple.DetermineAction();
@@ -87,6 +87,14 @@ namespace Brio.Docs.Synchronization.Mergers
                     }
 
                     await locationMerger.Merge(locationTuple).ConfigureAwait(false);
+                    tuple.ForEachChange(locationTuple, (objective, location) =>
+                    {
+                        if (objective.Location == location)
+                            return false;
+
+                        objective.Location = location;
+                        return true;
+                    });
                     break;
                 case SynchronizingAction.RemoveFromLocal:
                 case SynchronizingAction.RemoveFromRemote:
