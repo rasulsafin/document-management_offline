@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Brio.Docs.Connections.Bim360.Extensions;
+using Brio.Docs.Common;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
@@ -51,11 +51,30 @@ namespace Brio.Docs.Tests.Synchronization
             var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
             objectiveLocal.Project = projects.local;
             objectiveLocal.ObjectiveType =
-                await fixture.Context.ObjectiveTypes.AsAsyncEnumerable().FirstOrDefaultAsync();
+                await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
 
             MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await fixture.Context.Objectives.AddAsync(objectiveLocal);
             await fixture.Context.SaveChangesAsync();
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+
+            // Assert.
+            Assert.AreEqual(0, synchronizationResult.Count);
+            Assert.IsNotNull(synchronized);
+            Assert.IsNotNull(remote);
+            Assert.AreEqual(null, synchronized.Location);
+            Assert.AreEqual(null, remote.Location);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_NewRemoteObjectiveWithoutLocation_AddObjectiveToLocalWithoutLocation()
+        {
+            // Arrange.
+            ObjectiveExternalDto objectiveRemote = await GetDummyRemoteObjective();
+            MockRemoteObjectives(new[] { objectiveRemote });
 
             // Act.
             var synchronizationResult = await Synchronize();
@@ -66,16 +85,8 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(0, synchronizationResult.Count);
             Assert.IsNotNull(local);
             Assert.IsNotNull(synchronized);
-            Assert.IsNotNull(remote);
             Assert.AreEqual(null, local.Location);
             Assert.AreEqual(null, synchronized.Location);
-            Assert.AreEqual(null, remote.Location);
-        }
-
-        [TestMethod]
-        public async Task Synchronize_NewRemoteObjectiveWithoutLocation_AddObjectiveToLocalWithoutLocation()
-        {
-
         }
 
         [TestCleanup]
@@ -92,6 +103,26 @@ namespace Brio.Docs.Tests.Synchronization
         private void CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall call, Times times = default)
             => SynchronizerTestsHelper.CheckSynchronizerCalls(objectiveSynchronizer, call, times);
 
+        private async Task<ObjectiveExternalDto> GetDummyRemoteObjective()
+        {
+            var objectiveType = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+
+            var objectiveRemote = new ObjectiveExternalDto
+            {
+                ExternalID = "external_id",
+                ProjectExternalID = projects.remote.ExternalID,
+                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
+                CreationDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow,
+                Title = "Title",
+                Description = "Description",
+                BimElements = new List<BimElementExternalDto>(),
+                Status = ObjectiveStatus.Open,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            return objectiveRemote;
+        }
+
         private void MockRemoteObjectives(IReadOnlyCollection<ObjectiveExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(objectiveSynchronizer, array, x => x.ExternalID);
 
@@ -99,7 +130,7 @@ namespace Brio.Docs.Tests.Synchronization
             => await synchronizer.Synchronize(
                 new SynchronizingData
                 {
-                    User = await fixture.Context.Users.AsAsyncEnumerable().FirstOrDefaultAsync(),
+                    User = await fixture.Context.Users.FirstOrDefaultAsync(),
                 },
                 connection.Object,
                 new ConnectionInfoExternalDto(),
