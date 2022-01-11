@@ -96,5 +96,15 @@ namespace Brio.Docs.Synchronization.Extensions
                .ConfigureAwait(false);
             parentTuple.RemoteChanged |= await actionAsync(parentTuple.Remote, childTuple.Remote).ConfigureAwait(false);
         }
+
+        public static void RemoveWhere<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
+        {
+            if (predicate(tuple.Local))
+                tuple.Local = default;
+            if (predicate(tuple.Synchronized))
+                tuple.Synchronized = default;
+            if (predicate(tuple.Remote))
+                tuple.Remote = default;
+        }
     }
 }

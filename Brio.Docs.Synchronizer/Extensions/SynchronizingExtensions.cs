@@ -22,6 +22,13 @@ namespace Brio.Docs.Synchronization.Extensions
                 : tuple.remote == null                               ? SynchronizingAction.RemoveFromLocal
                                                                        : SynchronizingAction.Merge;
 
+        public static T GetRelevant<T>(
+            this SynchronizingTuple<T> tuple,
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt)
+            where T : class
+            => GetRelevantValue(localUpdatedAt, remoteUpdatedAt, tuple.Local, tuple.Remote, tuple.Synchronized);
+
         [Obsolete]
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
             where T : class, ISynchronizable<T>, new()
@@ -97,6 +104,24 @@ namespace Brio.Docs.Synchronization.Extensions
             return propertyInfo;
         }
 
+        private static T GetRelevantValue<T>(
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt,
+            T localValue,
+            T remoteValue,
+            T synchronizedValue)
+        {
+            var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
+            var localNotChanged = Equals(synchronizedValue, localValue);
+            var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
+
+            var value = localSynchronizedAndNotChanged ? localValue
+                : localNotChanged                      ? remoteValue
+                : localMoreRelevant                    ? localValue
+                                                         : remoteValue;
+            return value;
+        }
+
         private static void UpdateValue<T>(T obj, PropertyInfo property, object oldValue, object newValue, Action action)
         {
             if (!Equals(oldValue, newValue))
@@ -164,14 +189,12 @@ namespace Brio.Docs.Synchronization.Extensions
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
 
-                var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
-                var localNotChanged = Equals(synchronizedValue, localValue);
-                var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
-
-                var value = localSynchronizedAndNotChanged ? localValue
-                    : localNotChanged                      ? remoteValue
-                    : localMoreRelevant                    ? localValue
-                                                             : remoteValue;
+                var value = GetRelevantValue(
+                    localUpdatedAt,
+                    remoteUpdatedAt,
+                    localValue,
+                    remoteValue,
+                    synchronizedValue);
 
                 UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
             }

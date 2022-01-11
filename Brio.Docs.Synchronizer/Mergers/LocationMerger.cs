@@ -86,8 +86,24 @@ namespace Brio.Docs.Synchronization.Mergers
                 synchronized: tuple.Synchronized.Item,
                 remote: tuple.Remote.Item);
 
-            await itemAttacher.AttachExisting(itemTuple).ConfigureAwait(false);
+            var idsTuple = new SynchronizingTuple<string>(
+                local: itemTuple.Local?.ExternalID,
+                synchronized: itemTuple.Synchronized?.ExternalID,
+                remote: itemTuple.Remote?.ExternalID);
 
+            var action = idsTuple.DetermineAction();
+
+            if (action == SynchronizingAction.Merge)
+            {
+                var relevantId = idsTuple.GetRelevant(
+                    await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
+                    await GetUpdatedTime(tuple.Remote).ConfigureAwait(false));
+
+                itemTuple.RemoveWhere(x => x?.ExternalID != relevantId);
+                itemTuple.ExternalID = relevantId;
+            }
+
+            await itemAttacher.AttachExisting(itemTuple).ConfigureAwait(false);
             itemTuple.Synchronized ??= itemTuple.Local?.SynchronizationMate;
 
             if (itemTuple.Synchronized != null && itemTuple.Remote == null)
@@ -97,7 +113,7 @@ namespace Brio.Docs.Synchronization.Mergers
                 itemTuple,
                 (location, item) =>
                 {
-                    if (location.Item == null)
+                    if (location.Item != item)
                     {
                         location.Item = item;
                         return true;
