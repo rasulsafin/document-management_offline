@@ -13,7 +13,6 @@ using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
-using Brio.Docs.Synchronization.Utils.Linkers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -241,7 +240,7 @@ namespace Brio.Docs.Synchronization.Strategies
         private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
-            ItemStrategy<AItemLinker>.UpdateExternalIDs(
+            ItemStrategy.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Concat(tuple.Synchronized.Items ?? ArraySegment<ObjectiveItem>.Empty)
                .Select(x => x.Item),

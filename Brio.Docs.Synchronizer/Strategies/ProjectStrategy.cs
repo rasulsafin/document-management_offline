@@ -13,9 +13,7 @@ using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
-using Brio.Docs.Synchronization.Utils.Linkers;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
@@ -29,7 +27,6 @@ namespace Brio.Docs.Synchronization.Strategies
             DMContext context,
             IMerger<Project> merger,
             IMapper mapper,
-            ItemStrategy<ProjectItemLinker> itemStrategy,
             ILogger<ProjectStrategy> logger)
             : base(context, mapper, logger)
         {
@@ -46,12 +43,6 @@ namespace Brio.Docs.Synchronization.Strategies
 
         protected override Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
             => data.ProjectsFilter;
-
-        protected override IIncludableQueryable<Project, Project> Include(IQueryable<Project> set)
-            => base.Include(
-                set
-                   .Include(x => x.Users)
-                   .Include(x => x.Items));
 
         protected override async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Project> tuple,
@@ -206,32 +197,10 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private async Task<List<SynchronizingResult>> SynchronizeItems(
-            SynchronizingTuple<Project> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            CancellationToken token)
-        {
-            logger.LogTrace("SynchronizeItems started with tuple: {@Tuple}, data: {@Data}", tuple, data);
-            var id1 = tuple.Local?.ID ?? 0;
-            var id2 = tuple.Synchronized?.ID ?? 0;
-            logger.LogDebug("Local id = {@Local}, Synchronized id = {@Synchronized}", id1, id2);
-            return await itemStrategy.Synchronize(
-                data,
-                connectionContext,
-                tuple.Remote?.Items?.ToList() ?? new List<Item>(),
-                token,
-                item => item.ProjectID == id1 || item.ProjectID == id2 ||
-                    (item.SynchronizationMate != null &&
-                        (item.SynchronizationMate.ProjectID == id1 || item.SynchronizationMate.ProjectID == id2)),
-                null,
-                tuple);
-        }
-
         private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with tuple: {@Tuple}", tuple);
-            ItemStrategy<ProjectItemLinker>.UpdateExternalIDs(
+            ItemStrategy.UpdateExternalIDs(
                 (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
                     tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
                 tuple.Remote.Items ?? ArraySegment<Item>.Empty);
