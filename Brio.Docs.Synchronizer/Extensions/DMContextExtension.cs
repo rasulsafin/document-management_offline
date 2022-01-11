@@ -8,6 +8,7 @@ namespace Brio.Docs.Synchronization.Extensions
         public static int GetId(this object entity)
             => entity switch
             {
+                Project project => project.ID,
                 DynamicField dynamicField => dynamicField.ID,
                 Objective objective => objective.ID,
                 Item item => item.ID,

@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -60,7 +59,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
-                AddUser(tuple, data);
+                await AddUser(tuple, data).ConfigureAwait(false);
                 var result = await base.AddToRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
@@ -92,7 +91,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
-                AddUser(tuple, data);
+                await AddUser(tuple, data).ConfigureAwait(false);
 
                 var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 if (resultAfterBase != null)
@@ -127,7 +126,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
-                AddUser(tuple, data);
+                await AddUser(tuple, data).ConfigureAwait(false);
                 logger.LogTrace("User linked");
 
                 var result = await base.Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
@@ -209,29 +208,35 @@ namespace Brio.Docs.Synchronization.Strategies
                 tuple.Remote.Items ?? ArraySegment<Item>.Empty);
         }
 
-        private void AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
+        private async ValueTask AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
         {
             logger.LogTrace("SynchronizeItems started with tuple: {@Tuple}, data: {@Data}", tuple, data);
 
-            void AddUserLocal(Project project)
+            async ValueTask AddUserLocal(Project project)
             {
-                project.Users ??= new List<UserProject>();
+                var hasUser = await context.UserProjects
+                   .AsNoTracking()
+                   .AnyAsync(x => x.Project == project && x.UserID == data.User.ID)
+                   .ConfigureAwait(false);
 
-                if (project.Users.All(x => x.UserID != data.User.ID))
+                if (hasUser)
                 {
-                    project.Users.Add(
-                        new UserProject
-                        {
-                            Project = project,
-                            UserID = data.User.ID,
-                        });
+                    await context.Set<UserProject>()
+                       .AddAsync(
+                            new UserProject
+                            {
+                                Project = project,
+                                UserID = data.User.ID,
+                            })
+                       .ConfigureAwait(false);
+
                     logger.LogDebug("Added user {ID} to project: {@Project}", data.User.ID, project);
                 }
             }
 
-            AddUserLocal(tuple.Local);
+            await AddUserLocal(tuple.Local).ConfigureAwait(false);
             logger.LogTrace("Added user to local");
-            AddUserLocal(tuple.Synchronized);
+            await AddUserLocal(tuple.Synchronized).ConfigureAwait(false);
             logger.LogTrace("Added user to synchronized");
         }
     }
