@@ -13,7 +13,6 @@ using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
-using Brio.Docs.Synchronization.Utils.Linkers;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -35,8 +34,6 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IExternalIdUpdater<Item>, ItemExternalIdUpdater>();
             services.AddScoped<IExternalIdUpdater<DynamicField>, DynamicFieldExternalIdUpdater>();
-
-            services.AddScoped<ProjectItemLinker>();
 
             services.AddProjectChildrenMergers();
             services.AddObjectiveChildrenMergers();
