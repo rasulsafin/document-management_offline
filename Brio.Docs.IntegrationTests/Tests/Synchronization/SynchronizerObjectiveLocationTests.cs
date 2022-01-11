@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common;
+using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
@@ -128,12 +130,9 @@ namespace Brio.Docs.Tests.Synchronization
             // Arrange.
             var objectiveRemote = await GetDummyRemoteObjective();
             var type = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-            var item1Local = GetItemExistingItem();
-            var item1Synchronized = GetItemExistingItem();
+            var item1Local = GetItemExistingItem(isSynchronized: true);
+            var item1Synchronized = item1Local.SynchronizationMate;
             var item2 = GetItemExistingItem(1);
-
-            item1Synchronized.IsSynchronized = true;
-            item1Local.SynchronizationMate = item1Synchronized;
 
             var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
             objectiveSynchronized.Project = projects.synchronized;
@@ -152,7 +151,54 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveRemote.Location = CreateLocationDto(item2);
 
             MockRemoteObjectives(new[] { objectiveRemote });
-            await fixture.Context.Objectives.AddAsync(objectiveLocal);
+            await fixture.Context.Items.AddRangeAsync(item1Local, item1Synchronized, item2);
+            await fixture.Context.Objectives.AddRangeAsync(objectiveLocal, objectiveSynchronized);
+            await fixture.Context.SaveChangesAsync();
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
+            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+
+            // Assert.
+            Assert.AreEqual(0, synchronizationResult.Count);
+            Assert.IsNotNull(local);
+            Assert.IsNotNull(synchronized);
+            Assert.IsNotNull(local.Location);
+            Assert.IsNotNull(synchronized.Location);
+            AssertLocationItem(objectiveRemote.Location, local.Location);
+            AssertLocationItem(objectiveRemote.Location, synchronized.Location);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_LocationItemChangedFromLocal_ChangeLocationItemOnRemote()
+        {
+            // Arrange.
+            var objectiveRemote = await GetDummyRemoteObjective();
+            var type = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var item1Local = GetItemExistingItem(isSynchronized: true);
+            var item1Synchronized = item1Local.SynchronizationMate;
+            var item2 = GetItemExistingItem(1);
+
+            var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
+            objectiveSynchronized.Project = projects.synchronized;
+            objectiveSynchronized.ObjectiveType = type;
+            objectiveSynchronized.Location = CreateLocation(item1Synchronized);
+            objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
+            objectiveSynchronized.IsSynchronized = true;
+
+            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
+            objectiveLocal.Project = projects.local;
+            objectiveLocal.ObjectiveType = type;
+            objectiveLocal.Location = CreateLocation(item2);
+            objectiveLocal.ExternalID = objectiveRemote.ExternalID;
+            objectiveLocal.SynchronizationMate = objectiveSynchronized;
+
+            objectiveRemote.Location = CreateLocationDto(item1Local);
+
+            MockRemoteObjectives(new[] { objectiveRemote });
+            await fixture.Context.Items.AddRangeAsync(item1Local, item1Synchronized, item2);
+            await fixture.Context.Objectives.AddRangeAsync(objectiveLocal, objectiveSynchronized);
             await fixture.Context.SaveChangesAsync();
 
             // Act.
@@ -168,9 +214,8 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.IsNotNull(local.Location);
             Assert.IsNotNull(synchronized.Location);
             Assert.IsNotNull(remoteResult.Location);
-            AssertLocation(objectiveRemote.Location, local.Location);
-            AssertLocation(objectiveRemote.Location, synchronized.Location);
-            AssertLocation(objectiveRemote.Location, remoteResult.Location);
+            AssertLocationItem(local.Location, synchronized.Location);
+            AssertLocationItem(local.Location, remoteResult.Location);
         }
 
         [TestMethod]
@@ -214,8 +259,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(expected.CameraPositionX, actual.CameraPositionX);
             Assert.AreEqual(expected.CameraPositionY, actual.CameraPositionY);
             Assert.AreEqual(expected.CameraPositionZ, actual.CameraPositionZ);
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(Location expected, LocationExternalDto actual)
@@ -227,8 +271,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(expected.CameraPositionX, actual.CameraPosition.x);
             Assert.AreEqual(expected.CameraPositionY, actual.CameraPosition.y);
             Assert.AreEqual(expected.CameraPositionZ, actual.CameraPosition.z);
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(LocationExternalDto expected, Location actual)
@@ -240,8 +283,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(expected.CameraPosition.x, actual.CameraPositionX);
             Assert.AreEqual(expected.CameraPosition.y, actual.CameraPositionY);
             Assert.AreEqual(expected.CameraPosition.z, actual.CameraPositionZ);
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(LocationExternalDto expected, LocationExternalDto actual)
@@ -253,6 +295,29 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(expected.CameraPosition.x, actual.CameraPosition.x);
             Assert.AreEqual(expected.CameraPosition.y, actual.CameraPosition.y);
             Assert.AreEqual(expected.CameraPosition.z, actual.CameraPosition.z);
+            AssertLocationItem(expected, actual);
+        }
+
+        private static void AssertLocationItem(Location expected, Location actual)
+        {
+            Assert.IsNotNull(actual.Item);
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+        }
+
+        private static void AssertLocationItem(Location expected, LocationExternalDto actual)
+        {
+            Assert.IsNotNull(actual.Item);
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+        }
+
+        private static void AssertLocationItem(LocationExternalDto expected, Location actual)
+        {
+            Assert.IsNotNull(actual.Item);
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+        }
+
+        private static void AssertLocationItem(LocationExternalDto expected, LocationExternalDto actual)
+        {
             Assert.IsNotNull(actual.Item);
             Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
         }
@@ -306,11 +371,32 @@ namespace Brio.Docs.Tests.Synchronization
             return objectiveRemote;
         }
 
-        private Item GetItemExistingItem(int index = 0)
+        private Item GetItemExistingItem(int index = 0, bool isSynchronized = false)
         {
             projects.local.Items ??= new List<Item>();
             var item = MockData.DEFAULT_ITEMS[index];
             projects.local.Items.Add(item);
+
+            if (isSynchronized)
+            {
+                projects.synchronized.Items ??= new List<Item>();
+                var itemSynchronized = MockData.DEFAULT_ITEMS[index];
+                projects.synchronized.Items.Add(itemSynchronized);
+                itemSynchronized.IsSynchronized = true;
+                item.SynchronizationMate = itemSynchronized;
+
+                projects.remote.Items ??= new List<ItemExternalDto>();
+                projects.remote.Items.Add(
+                    new ItemExternalDto
+                    {
+                        ExternalID = itemSynchronized.ExternalID,
+                        FileName = itemSynchronized.Name,
+                        FullPath = Path.GetFullPath(itemSynchronized.RelativePath),
+                        ItemType = ItemType.File,
+                        UpdatedAt = itemSynchronized.UpdatedAt,
+                    });
+            }
+
             return item;
         }
 
