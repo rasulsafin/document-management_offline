@@ -20,17 +20,20 @@ namespace Brio.Docs.Synchronization.Strategies
 {
     internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
     {
+        private readonly IExternalIdUpdater<Item> itemIdUpdater;
         private readonly IMerger<Project> merger;
         private readonly ILogger<ProjectStrategy> logger;
 
         public ProjectStrategy(
             DMContext context,
             IMerger<Project> merger,
+            IExternalIdUpdater<Item> itemIdUpdater,
             IMapper mapper,
             ILogger<ProjectStrategy> logger)
             : base(context, mapper, logger)
         {
             this.merger = merger;
+            this.itemIdUpdater = itemIdUpdater;
             this.logger = logger;
             logger.LogTrace("ProjectStrategy created");
         }
@@ -200,7 +203,7 @@ namespace Brio.Docs.Synchronization.Strategies
         private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with tuple: {@Tuple}", tuple);
-            ItemStrategy.UpdateExternalIDs(
+            itemIdUpdater.UpdateExternalIds(
                 (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
                     tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
                 tuple.Remote.Items ?? ArraySegment<Item>.Empty);
