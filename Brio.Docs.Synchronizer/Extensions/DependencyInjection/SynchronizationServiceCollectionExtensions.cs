@@ -25,8 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISynchronizationStrategy<Project, ProjectExternalDto>, ProjectStrategy>();
             services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
 
-            services.AddScoped<ItemStrategy<ProjectItemLinker>>();
-
+            services.AddScoped<IMerger<Project>, ProjectMerger>();
             services.AddScoped<IMerger<Objective>, ObjectiveMerger>();
             services.AddScoped<IMerger<Item>, ItemMerger>();
             services.AddScoped<IMerger<DynamicField>, DynamicFieldMerger>();
@@ -38,6 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<ProjectItemLinker>();
 
+            services.AddProjectChildrenMergers();
             services.AddObjectiveChildrenMergers();
             services.AddDynamicFieldChildrenMergers();
 
@@ -91,6 +91,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddFactory<IChildrenMerger<Objective, Item>>();
             services.AddFactory<IChildrenMerger<Objective, DynamicField>>();
             services.AddFactory<IChildrenMerger<Objective, BimElement>>();
+            return services;
+        }
+
+        private static IServiceCollection AddProjectChildrenMergers(this IServiceCollection services)
+        {
+            services.AddSimpleChildrenMerger<Project, Item>(
+                project => project.Items,
+                (_, item) => !item.Objectives.Any());
+
+            services.AddFactory<IChildrenMerger<Project, Item>>();
             return services;
         }
 

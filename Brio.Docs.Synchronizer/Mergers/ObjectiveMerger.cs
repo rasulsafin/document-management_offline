@@ -85,7 +85,6 @@ namespace Brio.Docs.Synchronization.Mergers
 
             var action = locationTuple.DetermineAction();
 
-
             switch (action)
             {
                 case SynchronizingAction.Nothing:

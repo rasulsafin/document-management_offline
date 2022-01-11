@@ -11,6 +11,7 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
+using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils.Linkers;
 using Microsoft.EntityFrameworkCore;
@@ -21,17 +22,18 @@ namespace Brio.Docs.Synchronization.Strategies
 {
     internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
     {
-        private readonly ItemStrategy<ProjectItemLinker> itemStrategy;
+        private readonly IMerger<Project> merger;
         private readonly ILogger<ProjectStrategy> logger;
 
         public ProjectStrategy(
             DMContext context,
+            IMerger<Project> merger,
             IMapper mapper,
             ItemStrategy<ProjectItemLinker> itemStrategy,
             ILogger<ProjectStrategy> logger)
             : base(context, mapper, logger)
         {
-            this.itemStrategy = itemStrategy;
+            this.merger = merger;
             this.logger = logger;
             logger.LogTrace("ProjectStrategy created");
         }
@@ -63,19 +65,12 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                logger.LogBeforeMerge(tuple);
-                tuple.Merge();
-                logger.LogAfterMerge(tuple);
+                await merger.Merge(tuple).ConfigureAwait(false);
                 AddUser(tuple, data);
-                logger.LogTrace("User linked");
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
-                logger.LogTrace("Items synchronized");
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception("Exception created while Synchronizing Items in Add Project To Remote");
-
                 var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
+                await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
             }
             catch (Exception e)
@@ -102,20 +97,14 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                logger.LogBeforeMerge(tuple);
-                tuple.Merge();
-                logger.LogAfterMerge(tuple);
+                await merger.Merge(tuple).ConfigureAwait(false);
                 AddUser(tuple, data);
 
                 var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
-                logger.LogTrace("Items synchronized");
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception("Exception created while Synchronizing Items in Add Project To Local");
-
+                await merger.Merge(tuple).ConfigureAwait(false);
                 return null;
             }
             catch (Exception e)
@@ -142,10 +131,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                var resultAfterItemSync = await SynchronizeItems(tuple, data, connectionContext, token);
-                logger.LogTrace("Items synchronized");
-                if (resultAfterItemSync.Count > 0)
-                    throw new Exception("Exception created while Synchronizing Items in Merge Project");
+                await merger.Merge(tuple).ConfigureAwait(false);
 
                 AddUser(tuple, data);
                 logger.LogTrace("User linked");
@@ -153,6 +139,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 var result = await base.Merge(tuple, data, connectionContext, parent, token);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
+                await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
             }
             catch (Exception e)
