@@ -29,18 +29,6 @@ namespace Brio.Docs.Synchronization.Extensions
             where T : class
             => GetRelevantValue(localUpdatedAt, remoteUpdatedAt, tuple.Local, tuple.Remote, tuple.Synchronized);
 
-        [Obsolete]
-        public static void Merge<T>(this SynchronizingTuple<T> tuple)
-            where T : class, ISynchronizable<T>, new()
-        {
-            if (typeof(T) == typeof(Item) ||
-                typeof(T) == typeof(DynamicField))
-                return;
-
-            MergePrivate(tuple, tuple.Local?.UpdatedAt ?? default, tuple.Remote?.UpdatedAt ?? default);
-            tuple.LinkEntities();
-        }
-
         public static void Merge<T>(
             this SynchronizingTuple<T> tuple,
             params Expression<Func<T, object>>[] properties)

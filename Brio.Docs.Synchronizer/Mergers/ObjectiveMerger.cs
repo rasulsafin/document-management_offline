@@ -60,7 +60,7 @@ namespace Brio.Docs.Synchronization.Mergers
 
         private async ValueTask LoadLocation(Objective objective)
         {
-            if (objective.Location != null)
+            if (objective.Location != null || objective.ID == 0)
                 return;
 
             objective.Location = await context.Set<Objective>()

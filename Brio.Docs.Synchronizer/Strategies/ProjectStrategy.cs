@@ -61,7 +61,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
                 AddUser(tuple, data);
-                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token);
+                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -94,7 +94,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 await merger.Merge(tuple).ConfigureAwait(false);
                 AddUser(tuple, data);
 
-                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token);
+                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
@@ -130,7 +130,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 AddUser(tuple, data);
                 logger.LogTrace("User linked");
 
-                var result = await base.Merge(tuple, data, connectionContext, parent, token);
+                var result = await base.Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -160,7 +160,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token);
+                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -186,7 +186,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token);
+                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {

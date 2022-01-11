@@ -81,29 +81,29 @@ namespace Brio.Docs.Synchronization.Strategies
                     switch (action)
                     {
                         case SynchronizingAction.Nothing:
-                            await NothingAction(tuple, data, connectionContext, parent);
+                            await NothingAction(tuple, data, connectionContext, parent).ConfigureAwait(false);
                             break;
                         case SynchronizingAction.Merge:
-                            results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent, token));
+                            results.AddIsNotNull(await Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false));
                             break;
                         case SynchronizingAction.AddToLocal:
-                            results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent, token));
+                            results.AddIsNotNull(await AddToLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false));
                             break;
                         case SynchronizingAction.AddToRemote:
-                            results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent, token));
+                            results.AddIsNotNull(await AddToRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false));
                             break;
                         case SynchronizingAction.RemoveFromLocal:
-                            results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent, token));
+                            results.AddIsNotNull(await RemoveFromLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false));
                             break;
                         case SynchronizingAction.RemoveFromRemote:
-                            results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent, token));
+                            results.AddIsNotNull(await RemoveFromRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false));
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
                     }
 
                     if (needSaveOnEachTuple)
-                        await SaveDb(data);
+                        await SaveDb(data).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
@@ -172,7 +172,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 token.ThrowIfCancellationRequested();
 
-                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update);
+                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Update).ConfigureAwait(false);
                 logger.LogTrace("Remote updated");
                 UpdateDB(GetDBSet(context), tuple);
                 logger.LogTrace("DB entities updated");
@@ -245,7 +245,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 token.ThrowIfCancellationRequested();
 
-                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add);
+                await UpdateRemote(tuple, GetSynchronizer(connectionContext).Add).ConfigureAwait(false);
                 logger.LogTrace("Added to remote");
                 UpdateDB(GetDBSet(context), tuple);
                 logger.LogTrace("DB entities updated");
@@ -318,7 +318,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 token.ThrowIfCancellationRequested();
 
-                await RemoveFromRemote(tuple, GetSynchronizer(connectionContext).Remove);
+                await RemoveFromRemote(tuple, GetSynchronizer(connectionContext).Remove).ConfigureAwait(false);
                 logger.LogTrace("Removed from remote");
                 RemoveFromDB(tuple, data);
                 logger.LogTrace("DB entities removed");
@@ -344,9 +344,9 @@ namespace Brio.Docs.Synchronization.Strategies
         protected async Task SaveDb(SynchronizingData data)
         {
             if (data.Date == default)
-                await context.SaveChangesAsync();
+                await context.SaveChangesAsync().ConfigureAwait(false);
             else
-                await context.SynchronizationSaveAsync(data.Date);
+                await context.SynchronizationSaveAsync(data.Date).ConfigureAwait(false);
             logger.LogTrace("DB updated");
         }
 
@@ -370,16 +370,12 @@ namespace Brio.Docs.Synchronization.Strategies
         {
             var dto = mapper.Map<TDto>(tuple.Remote);
             logger.LogDebug("Created dto: {@Dto}", dto);
-            await remoteFunc(dto);
+            await remoteFunc(dto).ConfigureAwait(false);
             logger.LogInformation("Removed {ID}", tuple.ExternalID);
         }
 
         private void UpdateDB(DbSet<TDB> set, SynchronizingTuple<TDB> tuple)
         {
-            logger.LogBeforeMerge(tuple);
-            tuple.Merge();
-            logger.LogAfterMerge(tuple);
-
             if (tuple.Synchronized.ID == 0)
             {
                 set.Add(tuple.Synchronized);
@@ -407,13 +403,10 @@ namespace Brio.Docs.Synchronization.Strategies
             SynchronizingTuple<TDB> tuple,
             Func<TDto, Task<TDto>> remoteFunc)
         {
-            logger.LogBeforeMerge(tuple);
-            tuple.Merge();
-            logger.LogAfterMerge(tuple);
             if (!tuple.RemoteChanged)
                 return;
 
-            var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote));
+            var result = await remoteFunc(mapper.Map<TDto>(tuple.Remote)).ConfigureAwait(false);
             logger.LogDebug("Remote return {@Data}", result);
             tuple.Remote = mapper.Map<TDB>(result);
             logger.LogInformation("Put {ID} to remote", tuple.ExternalID);
