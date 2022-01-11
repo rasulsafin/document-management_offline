@@ -33,7 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
 
-            services.AddScoped<IExternalIdUpdater<Item>, ItemStrategy>();
+            services.AddScoped<IExternalIdUpdater<Item>, ItemExternalIdUpdater>();
             services.AddScoped<IExternalIdUpdater<DynamicField>, DynamicFieldExternalIdUpdater>();
 
             services.AddScoped<ProjectItemLinker>();

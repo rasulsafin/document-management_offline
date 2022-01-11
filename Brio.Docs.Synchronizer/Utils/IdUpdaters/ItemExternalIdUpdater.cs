@@ -5,7 +5,7 @@ using Brio.Docs.Synchronization.Interfaces;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal class ItemStrategy : IExternalIdUpdater<Item>
+    internal class ItemExternalIdUpdater : IExternalIdUpdater<Item>
     {
         public void UpdateExternalIds(IEnumerable<Item> local, IEnumerable<Item> remote)
         {
