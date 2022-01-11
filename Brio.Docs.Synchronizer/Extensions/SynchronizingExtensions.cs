@@ -160,9 +160,6 @@ namespace Brio.Docs.Synchronization.Extensions
 
             foreach (var property in properties)
             {
-                if (property.GetCustomAttribute(typeof(ForbidMergeAttribute)) != null)
-                    continue;
-
                 if (NeedMergeSubtype(tuple, property))
                 {
                     var type = typeof(SynchronizingTuple<>).MakeGenericType(property.PropertyType);
