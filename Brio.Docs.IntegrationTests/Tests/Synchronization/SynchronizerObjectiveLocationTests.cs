@@ -54,11 +54,7 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_NewLocalObjectiveWithoutLocation_AddObjectiveToRemoteWithoutLocation()
         {
             // Arrange.
-            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveLocal.Project = projects.local;
-            objectiveLocal.ObjectiveType =
-                await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-
+            var objectiveLocal = await CreateDummyLocalObjective();
             MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await fixture.Context.Objectives.AddAsync(objectiveLocal);
             await fixture.Context.SaveChangesAsync();
@@ -79,7 +75,7 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_NewRemoteObjectiveWithoutLocation_AddObjectiveToLocalWithoutLocation()
         {
             // Arrange.
-            ObjectiveExternalDto objectiveRemote = await GetDummyRemoteObjective();
+            var objectiveRemote = await CreateDummyRemoteObjective();
             MockRemoteObjectives(new[] { objectiveRemote });
 
             // Act.
@@ -99,10 +95,7 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_NewLocalObjectiveWithLocation_AddObjectiveToRemoteWithLocation()
         {
             // Arrange.
-            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveLocal.Project = projects.local;
-            objectiveLocal.ObjectiveType =
-                await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var objectiveLocal = await CreateDummyLocalObjective();
             var item = GetItemExistingItem();
             objectiveLocal.Location = CreateLocation(item);
 
@@ -128,25 +121,16 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_LocationItemChangedFromRemote_ChangeLocationItemOnLocal()
         {
             // Arrange.
-            var objectiveRemote = await GetDummyRemoteObjective();
-            var type = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var objectiveRemote = await CreateDummyRemoteObjective();
             var item1Local = GetItemExistingItem(isSynchronized: true);
             var item1Synchronized = item1Local.SynchronizationMate;
             var item2 = GetItemExistingItem(1);
 
-            var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveSynchronized.Project = projects.synchronized;
-            objectiveSynchronized.ObjectiveType = type;
-            objectiveSynchronized.Location = CreateLocation(item1Synchronized);
-            objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
-            objectiveSynchronized.IsSynchronized = true;
-
-            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveLocal.Project = projects.local;
-            objectiveLocal.ObjectiveType = type;
+            var objectiveLocal = await CreateDummyLocalObjective(true, objectiveRemote.ExternalID);
             objectiveLocal.Location = CreateLocation(item1Local);
-            objectiveLocal.ExternalID = objectiveRemote.ExternalID;
-            objectiveLocal.SynchronizationMate = objectiveSynchronized;
+
+            var objectiveSynchronized = objectiveLocal.SynchronizationMate;
+            objectiveSynchronized.Location = CreateLocation(item1Synchronized);
 
             objectiveRemote.Location = CreateLocationDto(item2);
 
@@ -174,27 +158,18 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_LocationItemChangedFromLocal_ChangeLocationItemOnRemote()
         {
             // Arrange.
-            var objectiveRemote = await GetDummyRemoteObjective();
-            var type = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var objectiveRemote = await CreateDummyRemoteObjective();
             var item1Local = GetItemExistingItem(isSynchronized: true);
             var item1Synchronized = item1Local.SynchronizationMate;
             var item2 = GetItemExistingItem(1);
 
-            var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveSynchronized.Project = projects.synchronized;
-            objectiveSynchronized.ObjectiveType = type;
-            objectiveSynchronized.Location = CreateLocation(item1Synchronized);
-            objectiveSynchronized.ExternalID = objectiveRemote.ExternalID;
-            objectiveSynchronized.IsSynchronized = true;
-
-            var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
-            objectiveLocal.Project = projects.local;
-            objectiveLocal.ObjectiveType = type;
+            var objectiveLocal = await CreateDummyLocalObjective(true, objectiveRemote.ExternalID);
             objectiveLocal.Location = CreateLocation(item2);
-            objectiveLocal.ExternalID = objectiveRemote.ExternalID;
-            objectiveLocal.SynchronizationMate = objectiveSynchronized;
 
-            objectiveRemote.Location = CreateLocationDto(item1Local);
+            var objectiveSynchronized = objectiveLocal.SynchronizationMate;
+            objectiveSynchronized.Location = CreateLocation(item1Synchronized);
+
+            objectiveRemote.Location = CreateLocationDto(item1Synchronized);
 
             MockRemoteObjectives(new[] { objectiveRemote });
             await fixture.Context.Items.AddRangeAsync(item1Local, item1Synchronized, item2);
@@ -222,7 +197,7 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_NewRemoteObjectiveWithLocation_AddObjectiveToLocalWithLocation()
         {
             // Arrange.
-            var objectiveRemote = await GetDummyRemoteObjective();
+            var objectiveRemote = await CreateDummyRemoteObjective();
             var item = GetItemExistingItem();
             objectiveRemote.Location = CreateLocationDto(item);
             await fixture.Context.SaveChangesAsync();
@@ -351,7 +326,29 @@ namespace Brio.Docs.Tests.Synchronization
         private void CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall call, Times times = default)
             => SynchronizerTestsHelper.CheckSynchronizerCalls(objectiveSynchronizer, call, times);
 
-        private async Task<ObjectiveExternalDto> GetDummyRemoteObjective()
+        private async Task<Objective> CreateDummyLocalObjective(bool isSynchronized = false, string externalId = null)
+        {
+            var objectiveLocal = await CreateDummyObjective(externalId);
+            objectiveLocal.Project = projects.local;
+
+            if (isSynchronized)
+            {
+                var synchronized = CreateDummySynchronizedObjective(externalId);
+                objectiveLocal.SynchronizationMate = await synchronized;
+            }
+
+            return objectiveLocal;
+        }
+
+        private async Task<Objective> CreateDummyObjective(string externalId)
+        {
+            var objectiveSynchronized = MockData.DEFAULT_OBJECTIVES[0];
+            objectiveSynchronized.ObjectiveType = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            objectiveSynchronized.ExternalID = externalId;
+            return objectiveSynchronized;
+        }
+
+        private async Task<ObjectiveExternalDto> CreateDummyRemoteObjective()
         {
             var objectiveType = await fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
 
@@ -369,6 +366,14 @@ namespace Brio.Docs.Tests.Synchronization
                 UpdatedAt = DateTime.UtcNow,
             };
             return objectiveRemote;
+        }
+
+        private async Task<Objective> CreateDummySynchronizedObjective(string externalId = null)
+        {
+            var objectiveSynchronized = await CreateDummyObjective(externalId);
+            objectiveSynchronized.Project = projects.synchronized;
+            objectiveSynchronized.IsSynchronized = true;
+            return objectiveSynchronized;
         }
 
         private Item GetItemExistingItem(int index = 0, bool isSynchronized = false)
