@@ -11,6 +11,7 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
@@ -230,6 +231,10 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             {
                 var first = getCollectionFunc(parent).First(x => getSynchronizableChildFunc(x) == child);
                 getCollectionFunc(parent).Remove(first);
+
+                var entry = context.Entry(first);
+                if (entry.State == EntityState.Deleted)
+                    entry.State = EntityState.Modified;
                 return true;
             }
 
