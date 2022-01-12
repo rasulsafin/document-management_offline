@@ -4,7 +4,7 @@ using Brio.Docs.Database.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Brio.Docs.Tests.Synchronization
+namespace Brio.Docs.Tests.Synchronization.Helpers
 {
     internal class AssertHelper
     {

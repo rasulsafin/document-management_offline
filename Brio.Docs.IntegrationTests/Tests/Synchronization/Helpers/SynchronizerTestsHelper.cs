@@ -10,7 +10,7 @@ using Brio.Docs.Tests.Utility;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
-namespace Brio.Docs.Tests.Synchronization
+namespace Brio.Docs.Tests.Synchronization.Helpers
 {
     internal class SynchronizerTestsHelper
     {

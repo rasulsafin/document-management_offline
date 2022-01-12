@@ -12,6 +12,7 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
+using Brio.Docs.Tests.Synchronization.Helpers;
 using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
