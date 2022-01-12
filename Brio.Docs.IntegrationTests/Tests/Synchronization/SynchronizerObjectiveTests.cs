@@ -26,25 +26,26 @@ namespace Brio.Docs.Tests.Synchronization
     [TestClass]
     public class SynchronizerObjectiveTests
     {
-        private static Synchronizer synchronizer;
-        private static IMapper mapper;
-        private static ServiceProvider serviceProvider;
+        private Synchronizer synchronizer;
+        private IMapper mapper;
+        private ServiceProvider serviceProvider;
+        private AssertHelper assertHelper;
 
-        private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
+        private Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
-        private static Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
+        private Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
 
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private SharedDatabaseFixture Fixture { get; set; }
 
-        private static Mock<IConnection> Connection { get; set; }
+        private Mock<IConnection> Connection { get; set; }
 
-        private static Mock<IConnectionContext> Context { get; set; }
+        private Mock<IConnectionContext> Context { get; set; }
 
-        private static List<ObjectiveExternalDto> ResultObjectiveExternalDtos { get; set; }
+        private List<ObjectiveExternalDto> ResultObjectiveExternalDtos { get; set; }
 
-        private static ObjectiveExternalDto ResultObjectiveExternalDto => ResultObjectiveExternalDtos.First();
+        private ObjectiveExternalDto ResultObjectiveExternalDto => ResultObjectiveExternalDtos.First();
 
-        private static (Project local, Project synchronized, ProjectExternalDto remote) Project { get; set; }
+        private (Project local, Project synchronized, ProjectExternalDto remote) Project { get; set; }
 
         [TestInitialize]
         public async Task Setup()
@@ -70,6 +71,8 @@ namespace Brio.Docs.Tests.Synchronization
             serviceProvider = services.BuildServiceProvider();
             synchronizer = serviceProvider.GetService<Synchronizer>();
             mapper = serviceProvider.GetService<IMapper>();
+
+            assertHelper = new AssertHelper(Fixture.Context);
 
             ResultObjectiveExternalDtos = new List<ObjectiveExternalDto>();
             Connection = new Mock<IConnection>();
@@ -115,7 +118,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(local, objectiveLocal);
             CheckObjectives(synchronized, objectiveSynchronized);
@@ -137,7 +140,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(local, objectiveLocal);
             CheckObjectives(synchronized, objectiveSynchronized);
@@ -177,7 +180,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
             CheckObjectives(local, objectiveLocal);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
@@ -216,7 +219,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
@@ -234,7 +237,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (_, _, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Remove);
             Assert.AreEqual(0, await Fixture.Context.Objectives.Synchronized().CountAsync());
             Assert.AreEqual(0, await Fixture.Context.Objectives.Unsynchronized().CountAsync());
@@ -251,7 +254,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (_, _, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(0, await Fixture.Context.Objectives.Synchronized().CountAsync());
             Assert.AreEqual(0, await Fixture.Context.Objectives.Unsynchronized().CountAsync());
@@ -271,7 +274,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             CheckObjectives(local, objectiveLocal);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
@@ -290,7 +293,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
             Assert.AreEqual(description, local.Description);
@@ -314,7 +317,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             Assert.AreEqual(title, synchronized.Title);
@@ -344,10 +347,10 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
-            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            await assertHelper.IsLocalItemsCount(1);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -370,10 +373,10 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(1, await Fixture.Context.Items.Synchronized().CountAsync());
-            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            await assertHelper.IsLocalItemsCount(1);
             CheckObjectives(synchronized, mapper.Map<Objective>(remoteObjective), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -406,7 +409,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(2, await Fixture.Context.Items.Synchronized().CountAsync());
             Assert.AreEqual(2, await Fixture.Context.Items.Unsynchronized().CountAsync());
@@ -444,7 +447,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
             Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
@@ -484,10 +487,10 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
-            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            await assertHelper.IsLocalItemsCount(1);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -522,10 +525,10 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize(true);
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
-            Assert.AreEqual(1, await Fixture.Context.Items.Unsynchronized().CountAsync());
+            await assertHelper.IsLocalItemsCount(1);
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -559,7 +562,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(0, await Fixture.Context.Items.Synchronized().CountAsync());
             Assert.AreEqual(0, await Fixture.Context.Items.Unsynchronized().CountAsync());
@@ -589,7 +592,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -614,7 +617,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -643,7 +646,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(1, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(2, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -679,7 +682,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(2, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(4, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -708,7 +711,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(0, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(0, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -738,7 +741,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(0, await Fixture.Context.BimElements.CountAsync());
             Assert.AreEqual(0, await Fixture.Context.BimElementObjectives.CountAsync());
@@ -775,7 +778,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(4, await Fixture.Context.DynamicFields.CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
@@ -818,7 +821,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(4, await Fixture.Context.DynamicFields.CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
@@ -840,7 +843,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(2, await Fixture.Context.DynamicFields.CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
@@ -885,7 +888,7 @@ namespace Brio.Docs.Tests.Synchronization
             var dynamicField = synchronized.DynamicFields.First();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(2, await Fixture.Context.DynamicFields.CountAsync());
             Assert.AreEqual(newName, dynamicField.Name);
@@ -925,7 +928,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             Assert.AreEqual(0, await Fixture.Context.DynamicFields.CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
@@ -956,7 +959,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(0, await Fixture.Context.DynamicFields.CountAsync());
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
@@ -988,7 +991,7 @@ namespace Brio.Docs.Tests.Synchronization
                .ToListAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add, Times.Exactly(2));
             CheckObjectives(locals.First(x => x.Description == objectivesLocal[0].Description), objectivesLocal[0]);
             Assert.AreEqual(2, synchronized.Count);
@@ -1026,7 +1029,7 @@ namespace Brio.Docs.Tests.Synchronization
                .ToListAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
             CheckObjectives(locals.First(x => x.Description == subobjective.Description), subobjective);
             Assert.AreEqual(
@@ -1075,7 +1078,7 @@ namespace Brio.Docs.Tests.Synchronization
                .ToListAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(2, synchronized.Count);
             Assert.AreEqual(2, locals.Count);
@@ -1115,7 +1118,7 @@ namespace Brio.Docs.Tests.Synchronization
                .ToListAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(2, synchronized.Count);
             Assert.AreEqual(2, locals.Count);
@@ -1162,7 +1165,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Remove);
             Assert.AreEqual(2, await Fixture.Context.Objectives.CountAsync());
             Assert.AreEqual(objectiveRemoteChild.ExternalID, ResultObjectiveExternalDto.ExternalID);
@@ -1196,7 +1199,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             Assert.AreEqual(2, await Fixture.Context.Objectives.CountAsync());
             Assert.AreNotEqual(removingID, local.ExternalID);
