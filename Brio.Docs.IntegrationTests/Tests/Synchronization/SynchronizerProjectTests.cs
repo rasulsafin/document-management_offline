@@ -558,7 +558,7 @@ namespace Brio.Docs.Tests.Synchronization
 
         private void CheckProjects(Project a, Project b, bool checkIDs = true)
         {
-            Assert.AreEqual(a.Title, b.Title);
+            Assert.AreEqual(a.Title, b.Title, "The project title does not match the expected value.");
 
             if (checkIDs)
                 SynchronizerTestsHelper.CheckIDs(a, b);
@@ -570,10 +570,19 @@ namespace Brio.Docs.Tests.Synchronization
 
             SynchronizerTestsHelper.CheckSynchronized(local, synchronized);
 
-            Assert.AreEqual(local.Items?.Count ?? 0, synchronized.Items?.Count ?? 0);
-            Assert.AreEqual(local.Objectives?.Count ?? 0, synchronized.Objectives?.Count ?? 0);
-            Assert.AreEqual(local.Users?.Count ?? 0, synchronized.Users?.Count ?? 0);
-            Assert.AreEqual(local.ExternalID, synchronized.ExternalID);
+            Assert.AreEqual(
+                local.Items?.Count ?? 0,
+                synchronized.Items?.Count ?? 0,
+                "The number of project items is not equal.");
+            Assert.AreEqual(
+                local.Objectives?.Count ?? 0,
+                synchronized.Objectives?.Count ?? 0,
+                "The number of project objectives is not equal.");
+            Assert.AreEqual(
+                local.Users?.Count ?? 0,
+                synchronized.Users?.Count ?? 0,
+                "The number of project users is not equal.");
+            Assert.AreEqual(local.ExternalID, synchronized.ExternalID, "The external IDs are not equal");
 
             foreach (var item in local.Items ?? Enumerable.Empty<Item>())
             {
