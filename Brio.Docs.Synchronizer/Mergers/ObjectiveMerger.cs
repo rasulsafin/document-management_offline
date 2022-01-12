@@ -49,7 +49,8 @@ namespace Brio.Docs.Synchronization.Mergers
                 objective => objective.Title,
                 objective => objective.TitleToLower,
                 objective => objective.Description,
-                objective => objective.Status);
+                objective => objective.Status,
+                objective => objective.ObjectiveTypeID);
 
             await MergeLocation(tuple).ConfigureAwait(false);
             await dynamicFieldChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
