@@ -11,7 +11,6 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {

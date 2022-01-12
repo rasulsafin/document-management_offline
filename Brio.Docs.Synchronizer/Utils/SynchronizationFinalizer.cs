@@ -8,14 +8,15 @@ namespace Brio.Docs.Synchronization.Utils
     internal static class SynchronizationFinalizer
     {
         public static async Task Finalize(DMContext context)
-            => await RemoveUnusedBimElements(context);
+            => await RemoveUnusedBimElements(context).ConfigureAwait(false);
 
         private static async Task RemoveUnusedBimElements(DMContext context)
         {
             var list = await context.BimElements
                .Include(x => x.Objectives)
                .Where(x => !x.Objectives.Any())
-               .ToListAsync();
+               .ToListAsync()
+               .ConfigureAwait(false);
             context.BimElements.RemoveRange(list);
         }
     }

@@ -40,16 +40,22 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             if (tuple.Local == null)
             {
                 if (tuple.Synchronized == null)
-                    (localProject, syncProject) = await GetProjectsByRemote(GetProjectId(tuple.Remote));
+                {
+                    (localProject, syncProject) =
+                        await GetProjectsByRemote(GetProjectId(tuple.Remote)).ConfigureAwait(false);
+                }
                 else
-                    (localProject, syncProject) = await GetProjectsBySynchronized(GetProjectId(tuple.Synchronized));
+                {
+                    (localProject, syncProject) = await GetProjectsBySynchronized(GetProjectId(tuple.Synchronized))
+                       .ConfigureAwait(false);
+                }
 
-                tuple.Local = await GetItem(localProject, syncProject, externalId, path, false);
+                tuple.Local = await GetItem(localProject, syncProject, externalId, path, false).ConfigureAwait(false);
                 logger.LogDebug("Local item: {@Object}", tuple.Local?.ID);
             }
             else
             {
-                (localProject, syncProject) = await GetProjectsByLocal(GetProjectId(tuple.Local));
+                (localProject, syncProject) = await GetProjectsByLocal(GetProjectId(tuple.Local)).ConfigureAwait(false);
             }
 
             logger.LogDebug("Local project {@Local}, synchronized {@Synchronized}", localProject?.ID, syncProject?.ID);
@@ -58,8 +64,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             {
                 var localItem = tuple.Local;
                 tuple.Synchronized = localItem.SynchronizationMateID == null
-                    ? await GetItem(localProject, syncProject, externalId, path, true)
-                    : await context.Items.FindAsync(localItem.SynchronizationMateID);
+                    ? await GetItem(localProject, syncProject, externalId, path, true).ConfigureAwait(false)
+                    : await context.Items.FindAsync(localItem.SynchronizationMateID).ConfigureAwait(false);
             }
 
             logger.LogDebug("Synchronized item: {@Object}", tuple.Synchronized?.ID);
@@ -72,10 +78,16 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogDebug("Project of item {@Item} - {@Project}", item.RelativePath, projectID);
             if (projectID == null)
                 throw new ArgumentException("Item does not contain project");
+
             return projectID.Value;
         }
 
-        private async Task<Item> GetItem(Project localProject, Project syncProject, string externalId, string path, bool isSynchronized)
+        private async Task<Item> GetItem(
+            Project localProject,
+            Project syncProject,
+            string externalId,
+            string path,
+            bool isSynchronized)
         {
             logger.LogTrace(
                 "GetItem started for {@Path}({@Id}), synchronized: {IsSynchronized}",
@@ -83,6 +95,7 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
                 externalId,
                 isSynchronized);
             Expression<Func<Item, bool>> predicate;
+
             if (!isSynchronized)
             {
                 int localProjectID = localProject?.ID ?? -1;
@@ -100,7 +113,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
 
             return await context.Items
                .Where(predicate)
-               .FirstOrDefaultAsync(i => i.ExternalID == externalId || i.RelativePath == path);
+               .FirstOrDefaultAsync(i => i.ExternalID == externalId || i.RelativePath == path)
+               .ConfigureAwait(false);
         }
 
         private async Task<(Project localProject, Project syncProject)> GetProjectsByRemote(int? remoteProjectId)
@@ -108,14 +122,16 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogTrace("GetProjectsByRemote started for project {@Project}", remoteProjectId);
             var remoteProject = await context.Projects.AsNoTracking()
                .Include(x => x.SynchronizationMate)
-               .FirstOrDefaultAsync(x => x.ID == remoteProjectId);
+               .FirstOrDefaultAsync(x => x.ID == remoteProjectId)
+               .ConfigureAwait(false);
             Project localProject;
             Project syncProject;
 
             if (remoteProject.IsSynchronized)
             {
                 localProject = await context.Projects.AsNoTracking()
-                   .FirstOrDefaultAsync(x => x.SynchronizationMateID == remoteProject.ID);
+                   .FirstOrDefaultAsync(x => x.SynchronizationMateID == remoteProject.ID)
+                   .ConfigureAwait(false);
                 syncProject = remoteProject;
             }
             else
@@ -131,8 +147,11 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
         {
             logger.LogTrace("GetProjectsBySynchronized started for project {@Project}", syncProjectId);
             var localProject = await context.Projects.AsNoTracking()
-               .FirstOrDefaultAsync(x => x.SynchronizationMateID == syncProjectId);
-            var syncProject = await context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.ID == syncProjectId);
+               .FirstOrDefaultAsync(x => x.SynchronizationMateID == syncProjectId)
+               .ConfigureAwait(false);
+            var syncProject = await context.Projects.AsNoTracking()
+               .FirstOrDefaultAsync(x => x.ID == syncProjectId)
+               .ConfigureAwait(false);
 
             return (localProject, syncProject);
         }
@@ -142,7 +161,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogTrace("GetProjectsByLocal started for project {@Project}", localProjectId);
             var localProject = await context.Projects.AsNoTracking()
                .Include(x => x.SynchronizationMate)
-               .FirstOrDefaultAsync(x => x.ID == localProjectId);
+               .FirstOrDefaultAsync(x => x.ID == localProjectId)
+               .ConfigureAwait(false);
             var syncProject = localProject.SynchronizationMate;
 
             return (localProject, syncProject);
