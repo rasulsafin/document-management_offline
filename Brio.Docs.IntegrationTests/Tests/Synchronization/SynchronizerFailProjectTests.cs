@@ -22,18 +22,18 @@ namespace Brio.Docs.Tests.Synchronization
     [TestClass]
     public class SynchronizerFailProjectTests
     {
-        private static Synchronizer synchronizer;
-        private static ServiceProvider serviceProvider;
+        private Synchronizer synchronizer;
+        private ServiceProvider serviceProvider;
 
-        private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
+        private Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
-        private static Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
+        private Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
 
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private SharedDatabaseFixture Fixture { get; set; }
 
-        private static Mock<IConnection> Connection { get; set; }
+        private Mock<IConnection> Connection { get; set; }
 
-        private static Mock<IConnectionContext> Context { get; set; }
+        private Mock<IConnectionContext> Context { get; set; }
 
         [TestInitialize]
         public void Setup()
@@ -147,7 +147,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
         }
 
-        private static async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
+        private async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
         {
             var result = await synchronizer.Synchronize(
                 new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() },
