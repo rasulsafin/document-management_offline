@@ -432,7 +432,7 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveSynchronizedItemAndFromRemote()
+        public async Task Synchronize_ItemRemovedFromLocalObjectiveButStillExists_RemoveSynchronizedItemAndFromRemote()
         {
             // Arrange.
             var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
@@ -466,7 +466,7 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(0);
-            await assertHelper.IsLocalItemsCount(1);
+            await assertHelper.IsLocalItemsCount(0);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
