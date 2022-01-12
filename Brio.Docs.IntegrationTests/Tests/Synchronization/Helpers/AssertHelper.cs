@@ -26,5 +26,11 @@ namespace Brio.Docs.Tests.Synchronization.Helpers
                 0,
                 synchronizingResult.Count,
                 $"The synchronization failed with {synchronizingResult.Count} exceptions");
+
+        public async ValueTask IsSynchronizedItemsCount(int count)
+            => Assert.AreEqual(
+                count,
+                await context.Items.Synchronized().CountAsync(),
+                $"The number of synchronized items is not equal to {count}");
     }
 }
