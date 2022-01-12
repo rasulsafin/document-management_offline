@@ -43,70 +43,15 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         private static IServiceCollection AddDynamicFieldChildrenMergers(this IServiceCollection services)
-        {
-            services.AddSimpleChildrenMerger<DynamicField, DynamicField>(
-                x => x.ChildrenDynamicFields,
-                _ => child => true);
-
-            services.AddFactory<IChildrenMerger<DynamicField, DynamicField>>();
-
-            return services;
-        }
-
-        private static IServiceCollection AddLinkedChildrenMerger<TParent, TLink, TChild>(
-            this IServiceCollection services,
-            Expression<Func<TParent, ICollection<TLink>>> getChildrenCollection,
-            Expression<Func<TLink, TChild>> getChild,
-            Func<TParent, Expression<Func<TChild, bool>>> needRemove,
-            Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc = null,
-            bool needAttacher = false)
-            where TParent : class
-            where TLink : class, new()
-            where TChild : class, ISynchronizable<TChild>
-            => services.AddScoped<IChildrenMerger<TParent, TChild>>(
-                provider =>
-                {
-                    var context = provider.GetService<DMContext>();
-                    var merger = provider.GetService<IMerger<TChild>>();
-                    needInTupleFunc ??= (child, tuple) => tuple.DoesNeed(child);
-
-                    if (needAttacher)
-                    {
-                        var attacher = provider.GetService<IAttacher<TChild>>();
-
-                        return new ChildrenMerger<TParent, TLink, TChild>(
-                            context,
-                            merger,
-                            getChildrenCollection,
-                            getChild,
-                            needInTupleFunc,
-                            needRemove,
-                            attacher);
-                    }
-
-                    return new ChildrenMerger<TParent, TLink, TChild>(
-                        context,
-                        merger,
-                        getChildrenCollection,
-                        getChild,
-                        needInTupleFunc,
-                        needRemove);
-                });
+            => services
+               .AddScoped<IChildrenMerger<DynamicField, DynamicField>, DynamicFieldDynamicFieldsMerger>()
+               .AddFactory<IChildrenMerger<DynamicField, DynamicField>>();
 
         private static IServiceCollection AddObjectiveChildrenMergers(this IServiceCollection services)
         {
-            services.AddLinkedChildrenMerger<Objective, ObjectiveItem, Item>(
-                parent => parent.Items,
-                link => link.Item,
-                objective => item => item.Objectives.All(x => x.Objective == objective) &&
-                    item.Project == null &&
-                    item.ProjectID == null,
-                DoesNeedItem,
-                true);
+            services.AddScoped<IChildrenMerger<Objective, Item>, ObjectiveItemsMerger>();
 
-            services.AddSimpleChildrenMerger<Objective, DynamicField>(
-                objective => objective.DynamicFields,
-                _ => field => true);
+            services.AddScoped<IChildrenMerger<Objective, DynamicField>, ObjectiveDynamicFieldsMerger>();
             services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
 
             services.AddFactory<IChildrenMerger<Objective, Item>>();
@@ -116,57 +61,12 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         private static IServiceCollection AddProjectChildrenMergers(this IServiceCollection services)
-        {
-            services.AddSimpleChildrenMerger<Project, Item>(
-                project => project.Items,
-                _ => item => !item.Objectives.Any(),
-                DoesNeedItem,
-                true);
-
-            services.AddFactory<IChildrenMerger<Project, Item>>();
-            return services;
-        }
-
-        private static IServiceCollection AddSimpleChildrenMerger<TParent, TChild>(
-            this IServiceCollection services,
-            Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
-            Func<TParent, Expression<Func<TChild, bool>>> needRemove,
-            Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc = null,
-            bool needAttacher = false)
-            where TParent : class
-            where TChild : class, ISynchronizable<TChild>, new()
-            => services.AddScoped<IChildrenMerger<TParent, TChild>>(
-                provider =>
-                {
-                    var dmContext = provider.GetService<DMContext>();
-                    var merger = provider.GetService<IMerger<TChild>>();
-                    needInTupleFunc ??= (child, tuple) => tuple.DoesNeed(child);
-
-                    if (needAttacher)
-                    {
-                        var attacher = provider.GetService<IAttacher<TChild>>();
-
-                        return new SimpleChildrenMerger<TParent, TChild>(
-                            dmContext,
-                            merger,
-                            getChildrenCollection,
-                            needInTupleFunc,
-                            needRemove,
-                            attacher);
-                    }
-
-                    return new SimpleChildrenMerger<TParent, TChild>(
-                        dmContext,
-                        merger,
-                        getChildrenCollection,
-                        needInTupleFunc,
-                        needRemove);
-                });
+            => services
+               .AddScoped<IChildrenMerger<Project, Item>, ProjectItemsMerger>()
+               .AddFactory<IChildrenMerger<Project, Item>>();
 
         private static bool DoesNeedItem(Item item, SynchronizingTuple<Item> tuple)
-        {
-            return tuple.DoesNeed(item) ||
+            => tuple.DoesNeed(item) ||
                 item.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
-        }
     }
 }

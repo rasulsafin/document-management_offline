@@ -14,63 +14,70 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
-    internal class
-        ChildrenMerger<TParent, TChild, TSynchronizableChild> : IChildrenMerger<TParent, TSynchronizableChild>
+    internal abstract class AChildrenMerger<TParent, TChild, TSynchronizableChild>
+        : IChildrenMerger<TParent, TSynchronizableChild>
         where TParent : class
         where TChild : class, new()
         where TSynchronizableChild : class, ISynchronizable<TSynchronizableChild>
     {
         private readonly IAttacher<TSynchronizableChild> attacher;
         private readonly IMerger<TSynchronizableChild> childMerger;
-        private readonly PropertyInfo collectionPropertyInfo;
         private readonly DbContext context;
-        private readonly Func<TParent, ICollection<TChild>> getCollectionFunc;
-        private readonly Expression<Func<TParent, IEnumerable<TChild>>> getEnumerableExpression;
-        private readonly Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChildExpression;
-        private readonly Func<TChild, TSynchronizableChild> getSynchronizableChildFunc;
-        private readonly Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc;
-        private readonly Func<TParent, Expression<Func<TSynchronizableChild, bool>>> needRemove;
-        private readonly PropertyInfo synchronizableChildProperty;
 
-        public ChildrenMerger(
+        protected AChildrenMerger(
             DbContext context,
             IMerger<TSynchronizableChild> childMerger,
-            Expression<Func<TParent, ICollection<TChild>>> getCollectionExpression,
-            Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChild,
-            Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc,
-            Func<TParent, Expression<Func<TSynchronizableChild, bool>>> needRemove,
             IAttacher<TSynchronizableChild> attacher = null)
         {
             this.context = context;
             this.childMerger = childMerger;
-            this.needInTupleFunc = needInTupleFunc;
-            getEnumerableExpression = Expression.Lambda<Func<TParent, IEnumerable<TChild>>>(
-                getCollectionExpression.Body,
-                getCollectionExpression.TailCall,
-                getCollectionExpression.Parameters);
-            getCollectionFunc = getCollectionExpression.Compile();
-            collectionPropertyInfo = getCollectionExpression.ToPropertyInfo();
-            this.needRemove = needRemove;
             this.attacher = attacher;
 
-            var expression = getSynchronizableChild.Body;
+            GetEnumerableExpression = new Lazy<Expression<Func<TParent, IEnumerable<TChild>>>>(
+                () =>
+                {
+                    var expression = CollectionExpression;
+                    var parameter = Expression.Parameter(typeof(TParent));
+                    var propertyInfo = expression.ToPropertyInfo();
+                    return Expression.Lambda<Func<TParent, IEnumerable<TChild>>>(
+                        Expression.Property(parameter, propertyInfo),
+                        false,
+                        parameter);
+                });
+            GetCollectionFunc = new Lazy<Func<TParent, ICollection<TChild>>>(() => CollectionExpression.Compile());
+            CollectionPropertyInfo = new Lazy<PropertyInfo>(() => CollectionExpression.ToPropertyInfo());
 
-            if (expression is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpression)
-                expression = unaryExpression.Operand;
+            IsOneToManyRelationship = new Lazy<bool>(
+                () =>
+                {
+                    var expression = SynchronizableChildExpression.Body;
 
-            if (expression is ParameterExpression)
-            {
-                getSynchronizableChildExpression = null;
-                getSynchronizableChildFunc = getSynchronizableChild.Compile();
-                synchronizableChildProperty = null;
-            }
-            else
-            {
-                getSynchronizableChildExpression = getSynchronizableChild;
-                getSynchronizableChildFunc = getSynchronizableChild.Compile();
-                synchronizableChildProperty = getSynchronizableChild.ToPropertyInfo();
-            }
+                    if (expression is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpression)
+                        expression = unaryExpression.Operand;
+
+                    return expression is ParameterExpression;
+                });
+
+            GetSynchronizableChildFunc = new Lazy<Func<TChild, TSynchronizableChild>>(
+                () => SynchronizableChildExpression.Compile());
+            SynchronizableChildProperty = new Lazy<PropertyInfo>(() => SynchronizableChildExpression.ToPropertyInfo());
         }
+
+        protected abstract Expression<Func<TParent, ICollection<TChild>>> CollectionExpression { get; }
+
+        protected abstract Expression<Func<TChild, TSynchronizableChild>> SynchronizableChildExpression { get; }
+
+        private Lazy<PropertyInfo> CollectionPropertyInfo { get; }
+
+        private Lazy<Func<TParent, ICollection<TChild>>> GetCollectionFunc { get; }
+
+        private Lazy<Expression<Func<TParent, IEnumerable<TChild>>>> GetEnumerableExpression { get; }
+
+        private Lazy<Func<TChild, TSynchronizableChild>> GetSynchronizableChildFunc { get; }
+
+        private Lazy<bool> IsOneToManyRelationship { get; }
+
+        private Lazy<PropertyInfo> SynchronizableChildProperty { get; }
 
         public async ValueTask MergeChildren(SynchronizingTuple<TParent> tuple)
         {
@@ -82,28 +89,36 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             tuple.ForEach(CreateEmptyChildrenList);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
-                getCollectionFunc(tuple.Local).Select(getSynchronizableChildFunc),
-                getCollectionFunc(tuple.Synchronized).Select(getSynchronizableChildFunc),
-                getCollectionFunc(tuple.Remote).Select(getSynchronizableChildFunc),
-                needInTupleFunc);
+                GetCollectionFunc.Value(tuple.Local).Select(GetSynchronizableChildFunc.Value),
+                GetCollectionFunc.Value(tuple.Synchronized).Select(GetSynchronizableChildFunc.Value),
+                GetCollectionFunc.Value(tuple.Remote).Select(GetSynchronizableChildFunc.Value),
+                DoesNeedInTuple);
 
             foreach (var childTuple in tuples)
                 await SynchronizeChild(tuple, childTuple).ConfigureAwait(false);
         }
 
+        protected virtual bool DoesNeedInTuple(
+            TSynchronizableChild child,
+            SynchronizingTuple<TSynchronizableChild> childTuple)
+            => childTuple.DoesNeed(child);
+
+        protected virtual Expression<Func<TSynchronizableChild, bool>> GetNeedToRemoveExpression(TParent parent)
+            => child => true;
+
         private bool AddChild(TParent parent, TSynchronizableChild child)
         {
             if (!HasChild(parent, child))
             {
-                if (synchronizableChildProperty != null)
+                if (!IsOneToManyRelationship.Value)
                 {
                     var link = new TChild();
-                    synchronizableChildProperty.SetValue(link, child);
-                    getCollectionFunc(parent).Add(link);
+                    SynchronizableChildProperty.Value.SetValue(link, child);
+                    GetCollectionFunc.Value(parent).Add(link);
                     return true;
                 }
 
-                getCollectionFunc(parent).Add(child as TChild);
+                GetCollectionFunc.Value(parent).Add(child as TChild);
                 return true;
             }
 
@@ -112,46 +127,46 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         private void CreateEmptyChildrenList(TParent x)
         {
-            if (getCollectionFunc(x) == null)
-                collectionPropertyInfo.SetValue(x, new List<TChild>());
+            if (GetCollectionFunc.Value(x) == null)
+                CollectionPropertyInfo.Value.SetValue(x, new List<TChild>());
         }
 
         private bool HasChild(TParent parent, TSynchronizableChild child)
         {
-            return getCollectionFunc(parent)
+            return GetCollectionFunc.Value(parent)
                .Any(
                     x =>
                     {
-                        var c = getSynchronizableChildFunc(x);
+                        var c = GetSynchronizableChildFunc.Value(x);
                         return (c.GetId() != 0 && c.GetId() == child.GetId()) || Equals(c, child);
                     });
         }
 
         private async ValueTask<bool> HasChildren(TParent parent)
         {
-            if (getCollectionFunc(parent) == null && parent.GetId() != 0)
+            if (GetCollectionFunc.Value(parent) == null && parent.GetId() != 0)
             {
                 return await context.Set<TParent>()
                    .AsNoTracking()
                    .Where(x => x == parent)
-                   .Select(getEnumerableExpression)
+                   .Select(GetEnumerableExpression.Value)
                    .AnyAsync()
                    .ConfigureAwait(false);
             }
 
-            return (getCollectionFunc(parent)?.Count ?? 0) > 0;
+            return (GetCollectionFunc.Value(parent)?.Count ?? 0) > 0;
         }
 
         private async ValueTask LoadChildren(TParent parent)
         {
-            if (getCollectionFunc(parent) == null)
+            if (GetCollectionFunc.Value(parent) == null)
             {
                 if (parent.GetId() != 0)
                 {
                     var collection = context.Entry(parent)
-                       .Collection(getEnumerableExpression);
+                       .Collection(GetEnumerableExpression.Value);
 
-                    if (getSynchronizableChildExpression == null)
+                    if (IsOneToManyRelationship.Value)
                     {
                         await collection.LoadAsync()
                            .ConfigureAwait(false);
@@ -159,7 +174,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
                     else
                     {
                         await collection.Query()
-                           .Include(getSynchronizableChildExpression)
+                           .Include(SynchronizableChildExpression)
                            .LoadAsync()
                            .ConfigureAwait(false);
                     }
@@ -181,7 +196,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
                 if (await context.Set<TSynchronizableChild>()
                        .AsNoTracking()
                        .Where(x => x == child)
-                       .AnyAsync(needRemove(parent))
+                       .AnyAsync(GetNeedToRemoveExpression(parent))
                        .ConfigureAwait(false))
                     context.Set<TSynchronizableChild>().Remove(child);
             }
@@ -228,8 +243,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         {
             if (HasChild(parent, child))
             {
-                var first = getCollectionFunc(parent).First(x => getSynchronizableChildFunc(x) == child);
-                getCollectionFunc(parent).Remove(first);
+                var first = GetCollectionFunc.Value(parent).First(x => GetSynchronizableChildFunc.Value(x) == child);
+                GetCollectionFunc.Value(parent).Remove(first);
 
                 var entry = context.Entry(first);
                 if (entry.State == EntityState.Deleted)
