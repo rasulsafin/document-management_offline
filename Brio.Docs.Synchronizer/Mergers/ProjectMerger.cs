@@ -18,6 +18,13 @@ namespace Brio.Docs.Synchronization.Mergers
         public async ValueTask Merge(SynchronizingTuple<Project> tuple)
         {
             tuple.Merge(project => project.Title);
+
+            if (tuple.Remote is { Items: { } })
+            {
+                foreach (var item in tuple.Remote.Items)
+                    item.ProjectID = tuple.Synchronized?.ID;
+            }
+
             await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
         }
     }

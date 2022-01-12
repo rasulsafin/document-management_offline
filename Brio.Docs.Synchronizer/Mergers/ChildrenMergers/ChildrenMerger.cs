@@ -20,6 +20,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         where TChild : class, new()
         where TSynchronizableChild : class, ISynchronizable<TSynchronizableChild>
     {
+        private readonly IAttacher<TSynchronizableChild> attacher;
         private readonly IMerger<TSynchronizableChild> childMerger;
         private readonly PropertyInfo collectionPropertyInfo;
         private readonly DbContext context;
@@ -28,8 +29,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         private readonly Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChildExpression;
         private readonly Func<TChild, TSynchronizableChild> getSynchronizableChildFunc;
         private readonly Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc;
+        private readonly Func<TParent, Expression<Func<TSynchronizableChild, bool>>> needRemove;
         private readonly PropertyInfo synchronizableChildProperty;
-        private readonly Func<TParent, TSynchronizableChild, bool> needRemove;
 
         public ChildrenMerger(
             DbContext context,
@@ -37,7 +38,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             Expression<Func<TParent, ICollection<TChild>>> getCollectionExpression,
             Expression<Func<TChild, TSynchronizableChild>> getSynchronizableChild,
             Func<TSynchronizableChild, SynchronizingTuple<TSynchronizableChild>, bool> needInTupleFunc,
-            Func<TParent, TSynchronizableChild, bool> needRemove)
+            Func<TParent, Expression<Func<TSynchronizableChild, bool>>> needRemove,
+            IAttacher<TSynchronizableChild> attacher = null)
         {
             this.context = context;
             this.childMerger = childMerger;
@@ -49,6 +51,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             getCollectionFunc = getCollectionExpression.Compile();
             collectionPropertyInfo = getCollectionExpression.ToPropertyInfo();
             this.needRemove = needRemove;
+            this.attacher = attacher;
 
             var expression = getSynchronizableChild.Body;
 
@@ -175,11 +178,12 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
             if (child.GetId() != 0)
             {
-                if (await context.Set<TSynchronizableChild>().AsNoTracking().ContainsAsync(child).ConfigureAwait(false))
-                {
-                    if (needRemove(parent, child))
-                        context.Set<TSynchronizableChild>().Remove(child);
-                }
+                if (await context.Set<TSynchronizableChild>()
+                       .AsNoTracking()
+                       .Where(x => x == child)
+                       .AnyAsync(needRemove(parent))
+                       .ConfigureAwait(false))
+                    context.Set<TSynchronizableChild>().Remove(child);
             }
 
             return result;
@@ -190,6 +194,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             SynchronizingTuple<TSynchronizableChild> childTuple)
         {
             var action = childTuple.DetermineAction();
+
+            attacher?.AttachExisting(childTuple);
 
             if (action is SynchronizingAction.Merge
                 or SynchronizingAction.AddToLocal
