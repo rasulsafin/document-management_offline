@@ -7,6 +7,7 @@ using Brio.Docs.Database.Models;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
@@ -15,8 +16,12 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         private readonly Expression<Func<Project, ICollection<Item>>> collectionExpression = project => project.Items;
         private readonly Expression<Func<Item, bool>> needToRemoveExpression = item => !item.Objectives.Any();
 
-        public ProjectItemsMerger(DMContext context, IMerger<Item> childMerger, IAttacher<Item> attacher)
-            : base(context, childMerger, attacher)
+        public ProjectItemsMerger(
+            DMContext context,
+            IMerger<Item> childMerger,
+            IAttacher<Item> attacher,
+            ILogger<ProjectItemsMerger> logger)
+            : base(context, childMerger, logger, attacher)
         {
         }
 

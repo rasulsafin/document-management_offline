@@ -11,6 +11,7 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
@@ -32,13 +33,17 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         private readonly Lazy<bool> lazyIsOneToManyRelationship;
         private readonly Lazy<PropertyInfo> lazySynchronizableChildProperty;
 
+        private readonly ILogger<AChildrenMerger<TParent, TChild, TSynchronizableChild>> logger;
+
         protected AChildrenMerger(
             DbContext context,
             IMerger<TSynchronizableChild> childMerger,
+            ILogger<AChildrenMerger<TParent, TChild, TSynchronizableChild>> logger,
             IAttacher<TSynchronizableChild> attacher = null)
         {
             this.context = context;
             this.childMerger = childMerger;
+            this.logger = logger;
             this.attacher = attacher;
 
             lazyGetChildrenCollectionFunc =
@@ -68,6 +73,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             lazyGetSynchronizableChildFunc = new Lazy<Func<TChild, TSynchronizableChild>>(
                 () => SynchronizableChildExpression.Compile());
             lazySynchronizableChildProperty = new Lazy<PropertyInfo>(() => SynchronizableChildExpression.ToPropertyInfo());
+
+            logger.LogTrace("Base initialization of children merger completed");
         }
 
         protected abstract Expression<Func<TParent, ICollection<TChild>>> CollectionExpression { get; }
@@ -88,12 +95,14 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         public async ValueTask MergeChildren(SynchronizingTuple<TParent> tuple)
         {
+            logger.LogTrace("MergeChildren started for tuple {Id}", tuple.ExternalID);
             if (!await tuple.AnyAsync(HasChildren).ConfigureAwait(false))
                 return;
 
+            logger.LogDebug("Tuple has children");
             await tuple.ForEachAsync(LoadChildren).ConfigureAwait(false);
-
             tuple.ForEach(CreateEmptyChildrenList);
+            logger.LogTrace("Children loaded");
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 GetChildrenCollectionFunc(tuple.Local).Select(GetSynchronizableChildFunc),
@@ -101,8 +110,10 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
                 GetChildrenCollectionFunc(tuple.Remote).Select(GetSynchronizableChildFunc),
                 DoesNeedInTuple);
 
+            logger.LogDebug("Created {Count} tuples", tuples.Count);
             foreach (var childTuple in tuples)
                 await SynchronizeChild(tuple, childTuple).ConfigureAwait(false);
+            logger.LogTrace("Children synchronized");
         }
 
         protected virtual bool DoesNeedInTuple(

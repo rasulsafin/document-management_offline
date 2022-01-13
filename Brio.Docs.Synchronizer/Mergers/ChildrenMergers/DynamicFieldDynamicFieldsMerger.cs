@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Synchronization.Interfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
@@ -12,8 +13,11 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         private readonly Expression<Func<DynamicField, ICollection<DynamicField>>> collectionExpression =
             field => field.ChildrenDynamicFields;
 
-        public DynamicFieldDynamicFieldsMerger(DMContext context, IMerger<DynamicField> childMerger)
-            : base(context, childMerger)
+        public DynamicFieldDynamicFieldsMerger(
+            DMContext context,
+            ILogger<DynamicFieldDynamicFieldsMerger> logger,
+            IMerger<DynamicField> childMerger)
+            : base(context, childMerger, logger)
         {
         }
 
