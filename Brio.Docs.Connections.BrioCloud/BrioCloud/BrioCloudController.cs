@@ -163,14 +163,7 @@ namespace Brio.Docs.Connections.BrioCloud
             {
                 var response = await client.PutFile(path, reader);
 
-                if (response.IsSuccessful)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return response.IsSuccessful;
             }
         }
 
