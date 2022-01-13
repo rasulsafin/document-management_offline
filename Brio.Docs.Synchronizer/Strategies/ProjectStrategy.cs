@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -17,83 +18,48 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal class ProjectStrategy : ASynchronizationStrategy<Project, ProjectExternalDto>
+    internal class ProjectStrategy : ISynchronizationStrategy<Project, ProjectExternalDto>
     {
+        private readonly DMContext context;
         private readonly IExternalIdUpdater<Item> itemIdUpdater;
-        private readonly IMerger<Project> merger;
         private readonly ILogger<ProjectStrategy> logger;
+        private readonly IMapper mapper;
+        private readonly IMerger<Project> merger;
+        private readonly StrategyHelper strategyHelper;
 
         public ProjectStrategy(
             DMContext context,
             IMerger<Project> merger,
             IExternalIdUpdater<Item> itemIdUpdater,
             IMapper mapper,
-            ILogger<ProjectStrategy> logger)
-            : base(context, mapper, logger)
+            ILogger<ProjectStrategy> logger,
+            StrategyHelper strategyHelper)
         {
+            this.context = context;
             this.merger = merger;
             this.itemIdUpdater = itemIdUpdater;
+            this.mapper = mapper;
             this.logger = logger;
+            this.strategyHelper = strategyHelper;
             logger.LogTrace("ProjectStrategy created");
         }
 
-        protected override DbSet<Project> GetDBSet(DMContext source)
+        public DbSet<Project> GetDBSet(DMContext source)
             => source.Projects;
 
-        protected override ISynchronizer<ProjectExternalDto> GetSynchronizer(IConnectionContext source)
-            => source.ProjectsSynchronizer;
-
-        protected override Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
-            => data.ProjectsFilter;
-
-        protected override async Task<SynchronizingResult> AddToRemote(
+        public async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
-
-            try
-            {
-                await merger.Merge(tuple).ConfigureAwait(false);
-                await AddUser(tuple, data).ConfigureAwait(false);
-                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
-                UpdateChildrenAfterSynchronization(tuple);
-                logger.LogTrace("Children updated");
-                await merger.Merge(tuple).ConfigureAwait(false);
-                return result;
-            }
-            catch (Exception e)
-            {
-                logger.LogExceptionOnAction(SynchronizingAction.AddToRemote, e, tuple);
-                return new SynchronizingResult
-                {
-                    Exception = e,
-                    Object = tuple.Remote,
-                    ObjectType = ObjectType.Remote,
-                };
-            }
-        }
-
-        protected override async Task<SynchronizingResult> AddToLocal(
-            SynchronizingTuple<Project> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
-            CancellationToken token)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
                 await AddUser(tuple, data).ConfigureAwait(false);
 
-                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                var resultAfterBase = await strategyHelper.AddToLocal(tuple, token).ConfigureAwait(false);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
@@ -112,15 +78,52 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> Merge(
+        public async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
+
+            try
+            {
+                await merger.Merge(tuple).ConfigureAwait(false);
+                await AddUser(tuple, data).ConfigureAwait(false);
+                var result = await strategyHelper.AddToRemote(connectionContext.ProjectsSynchronizer, tuple, token).ConfigureAwait(false);
+                UpdateChildrenAfterSynchronization(tuple);
+                logger.LogTrace("Children updated");
+                await merger.Merge(tuple).ConfigureAwait(false);
+                return result;
+            }
+            catch (Exception e)
+            {
+                logger.LogExceptionOnAction(SynchronizingAction.AddToRemote, e, tuple);
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Remote,
+                    ObjectType = ObjectType.Remote,
+                };
+            }
+        }
+
+        public Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
+            => data.ProjectsFilter;
+
+        public IReadOnlyCollection<Project> Map(IReadOnlyCollection<ProjectExternalDto> externalDtos)
+        {
+            logger.LogTrace("Map started for externalDtos: {@Dtos}", externalDtos);
+            return mapper.Map<IReadOnlyCollection<Project>>(externalDtos);
+        }
+
+        public async Task<SynchronizingResult> Merge(
+            SynchronizingTuple<Project> tuple,
+            SynchronizingData data,
+            IConnectionContext connectionContext,
+            CancellationToken token)
+        {
+            using var lScope = logger.BeginMethodScope();
 
             try
             {
@@ -129,7 +132,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 await AddUser(tuple, data).ConfigureAwait(false);
                 logger.LogTrace("User linked");
 
-                var result = await base.Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                var result = await strategyHelper.Merge(tuple, connectionContext.ProjectsSynchronizer, token).ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -147,19 +150,20 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> RemoveFromLocal(
+        public IEnumerable<Project> Order(IEnumerable<Project> objectives)
+        {
+            return objectives;
+        }
+
+        public async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<Project> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                return await strategyHelper.RemoveFromLocal(tuple, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -173,19 +177,16 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> RemoveFromRemote(
+        public async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<Project> tuple,
-            SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                return await strategyHelper.RemoveFromRemote(connectionContext.ProjectsSynchronizer, tuple, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -197,15 +198,6 @@ namespace Brio.Docs.Synchronization.Strategies
                     ObjectType = ObjectType.Remote,
                 };
             }
-        }
-
-        private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
-        {
-            logger.LogTrace("UpdateChildrenAfterSynchronization started with tuple: {@Tuple}", tuple);
-            itemIdUpdater.UpdateExternalIds(
-                (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
-                    tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
-                tuple.Remote.Items ?? ArraySegment<Item>.Empty);
         }
 
         private async ValueTask AddUser(SynchronizingTuple<Project> tuple, SynchronizingData data)
@@ -238,6 +230,15 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("Added user to local");
             await AddUserLocal(tuple.Synchronized).ConfigureAwait(false);
             logger.LogTrace("Added user to synchronized");
+        }
+
+        private void UpdateChildrenAfterSynchronization(SynchronizingTuple<Project> tuple)
+        {
+            logger.LogTrace("UpdateChildrenAfterSynchronization started with tuple: {@Tuple}", tuple);
+            itemIdUpdater.UpdateExternalIds(
+                (tuple.Local.Items ?? ArraySegment<Item>.Empty).Concat(
+                    tuple.Synchronized.Items ?? ArraySegment<Item>.Empty),
+                tuple.Remote.Items ?? ArraySegment<Item>.Empty);
         }
     }
 }

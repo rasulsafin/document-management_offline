@@ -22,6 +22,7 @@ namespace Brio.Docs.Synchronization
     {
         private readonly DMContext dbContext;
         private readonly IMapper mapper;
+        private readonly ISynchronizerProcessor processor;
         private readonly ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy;
         private readonly ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy;
         private readonly ILogger<Synchronizer> logger;
@@ -29,12 +30,14 @@ namespace Brio.Docs.Synchronization
         public Synchronizer(
             DMContext dbContext,
             IMapper mapper,
+            ISynchronizerProcessor processor,
             ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy,
             ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy,
             ILogger<Synchronizer> logger)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
+            this.processor = processor;
             this.projectStrategy = projectStrategy;
             this.objectiveStrategy = objectiveStrategy;
             this.logger = logger;
@@ -75,14 +78,16 @@ namespace Brio.Docs.Synchronization
                    .ConfigureAwait(false);
                 logger.LogDebug("Updated project ids: {@IDs}", (object)ids);
                 results.AddRange(
-                    await projectStrategy.Synchronize(
+                    await processor.Synchronize(
+                            projectStrategy,
                             data,
                             context,
                             projectStrategy.Map(await context.ProjectsSynchronizer.Get(ids).ConfigureAwait(false)),
                             token,
+                            data.ProjectsFilter,
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
                             x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            progress: projectProgress)
+                            projectProgress)
                        .ConfigureAwait(false));
                 logger.LogInformation("Projects synchronized");
                 var unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
@@ -103,11 +108,13 @@ namespace Brio.Docs.Synchronization
                    .ConfigureAwait(false);
                 logger.LogDebug("Updated objective ids: {@IDs}", (object)ids);
                 results.AddRange(
-                    await objectiveStrategy.Synchronize(
+                    await processor.Synchronize(
+                            objectiveStrategy,
                             data,
                             context,
                             objectiveStrategy.Map(await context.ObjectivesSynchronizer.Get(ids).ConfigureAwait(false)),
                             token,
+                            data.ObjectivesFilter,
                             x => (x.ExternalID == null || ids.Contains(x.ExternalID)) &&
                                 !unsyncProjectsIDs.Contains(x.ProjectID) &&
                                 !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),

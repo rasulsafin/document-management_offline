@@ -3,7 +3,7 @@ using Brio.Docs.Synchronization.Interfaces;
 
 namespace Brio.Docs.Synchronization.Models
 {
-    internal class SynchronizingTuple<T> : ISynchronizationChanges
+    public class SynchronizingTuple<T> : ISynchronizationChanges
     {
         private T local;
         private T remote;

@@ -16,6 +16,8 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddSynchronizer(this IServiceCollection services)
         {
             services.AddScoped<Synchronizer>();
+            services.AddScoped<ISynchronizerProcessor, SynchronizerProcessor>();
+            services.AddScoped<StrategyHelper>();
             services.AddScoped<ISynchronizationStrategy<Project, ProjectExternalDto>, ProjectStrategy>();
             services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
 

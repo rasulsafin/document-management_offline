@@ -18,22 +18,28 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal class ObjectiveStrategy : ASynchronizationStrategy<Objective, ObjectiveExternalDto>
+    internal class ObjectiveStrategy : ISynchronizationStrategy<Objective, ObjectiveExternalDto>
     {
-        private readonly IExternalIdUpdater<Item> itemIdUpdater;
-        private readonly IMerger<Objective> merger;
+        private readonly DMContext context;
         private readonly IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater;
+        private readonly IExternalIdUpdater<Item> itemIdUpdater;
         private readonly ILogger<ObjectiveStrategy> logger;
+        private readonly IMapper mapper;
+        private readonly IMerger<Objective> merger;
+        private readonly StrategyHelper strategyHelper;
 
         public ObjectiveStrategy(
+            StrategyHelper strategyHelper,
             DMContext context,
             IMapper mapper,
             IMerger<Objective> merger,
             IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater,
             IExternalIdUpdater<Item> itemIdUpdater,
             ILogger<ObjectiveStrategy> logger)
-            : base(context, mapper, logger)
         {
+            this.strategyHelper = strategyHelper;
+            this.context = context;
+            this.mapper = mapper;
             this.merger = merger;
             this.dynamicFieldIdUpdater = dynamicFieldIdUpdater;
             this.itemIdUpdater = itemIdUpdater;
@@ -41,87 +47,15 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("ObjectiveStrategy created");
         }
 
-        public override IReadOnlyCollection<Objective> Map(IReadOnlyCollection<ObjectiveExternalDto> externalDtos)
-        {
-            logger.LogTrace("Map started");
-            var objectives = base.Map(externalDtos);
-
-            foreach (var objective in objectives)
-            {
-                var external = externalDtos.FirstOrDefault(x => x.ExternalID == objective.ExternalID);
-                if (!string.IsNullOrEmpty(external?.ParentObjectiveExternalID))
-                {
-                    objective.ParentObjective =
-                        objectives.FirstOrDefault(x => x.ExternalID == external.ParentObjectiveExternalID);
-                }
-            }
-
-            return objectives;
-        }
-
-        protected override DbSet<Objective> GetDBSet(DMContext source)
+        public DbSet<Objective> GetDBSet(DMContext source)
             => source.Objectives;
 
-        protected override ISynchronizer<ObjectiveExternalDto> GetSynchronizer(IConnectionContext connectionContext)
-            => connectionContext.ObjectivesSynchronizer;
-
-        protected override Expression<Func<Objective, bool>> GetDefaultFilter(SynchronizingData data)
-            => data.ObjectivesFilter;
-
-        protected override IEnumerable<Objective> Order(IEnumerable<Objective> objectives)
-            => objectives.OrderByParent(x => x.ParentObjective);
-
-        protected override async Task<SynchronizingResult> AddToRemote(
+        public async Task<SynchronizingResult> AddToLocal(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
-
-            try
-            {
-                await merger.Merge(tuple).ConfigureAwait(false);
-
-                CreateObjectiveParentLink(tuple);
-                var projectID = tuple.Local.ProjectID;
-                var projectMateId = await context.Projects
-                   .AsNoTracking()
-                   .Where(x => x.ID == projectID)
-                   .Where(x => x.SynchronizationMateID != null)
-                   .Select(x => x.SynchronizationMateID)
-                   .FirstOrDefaultAsync(CancellationToken.None)
-                   .ConfigureAwait(false);
-                tuple.Remote.ProjectID = tuple.Synchronized.ProjectID = projectMateId ?? 0;
-
-                var result = await base.AddToRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
-                await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
-                await merger.Merge(tuple).ConfigureAwait(false);
-                return result;
-            }
-            catch (Exception e)
-            {
-                logger.LogExceptionOnAction(SynchronizingAction.AddToRemote, e, tuple);
-                return new SynchronizingResult
-                {
-                    Exception = e,
-                    Object = tuple.Local,
-                    ObjectType = ObjectType.Local,
-                };
-            }
-        }
-
-        protected override async Task<SynchronizingResult> AddToLocal(
-            SynchronizingTuple<Objective> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
-            CancellationToken token)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
@@ -138,7 +72,7 @@ namespace Brio.Docs.Synchronization.Strategies
                    .FirstOrDefaultAsync(CancellationToken.None)
                    .ConfigureAwait(false);
 
-                var resultAfterBase = await base.AddToLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                var resultAfterBase = await strategyHelper.AddToLocal(tuple, token).ConfigureAwait(false);
                 if (resultAfterBase != null)
                     throw resultAfterBase.Exception;
 
@@ -157,21 +91,80 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> Merge(
+        public async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
+
+            try
+            {
+                await merger.Merge(tuple).ConfigureAwait(false);
+
+                CreateObjectiveParentLink(tuple);
+                var projectID = tuple.Local.ProjectID;
+                var projectMateId = await context.Projects
+                   .AsNoTracking()
+                   .Where(x => x.ID == projectID)
+                   .Where(x => x.SynchronizationMateID != null)
+                   .Select(x => x.SynchronizationMateID)
+                   .FirstOrDefaultAsync(CancellationToken.None)
+                   .ConfigureAwait(false);
+                tuple.Remote.ProjectID = tuple.Synchronized.ProjectID = projectMateId ?? 0;
+
+                var result = await strategyHelper.AddToRemote(connectionContext.ObjectivesSynchronizer, tuple, token).ConfigureAwait(false);
+                await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
+                await merger.Merge(tuple).ConfigureAwait(false);
+                return result;
+            }
+            catch (Exception e)
+            {
+                logger.LogExceptionOnAction(SynchronizingAction.AddToRemote, e, tuple);
+                return new SynchronizingResult
+                {
+                    Exception = e,
+                    Object = tuple.Local,
+                    ObjectType = ObjectType.Local,
+                };
+            }
+        }
+
+        public Expression<Func<Objective, bool>> GetDefaultFilter(SynchronizingData data)
+            => data.ObjectivesFilter;
+
+        public IReadOnlyCollection<Objective> Map(IReadOnlyCollection<ObjectiveExternalDto> externalDtos)
+        {
+            logger.LogTrace("Map started");
+            var objectives = mapper.Map<IReadOnlyCollection<Objective>>(externalDtos);
+
+            foreach (var objective in objectives)
+            {
+                var external = externalDtos.FirstOrDefault(x => x.ExternalID == objective.ExternalID);
+                if (!string.IsNullOrEmpty(external?.ParentObjectiveExternalID))
+                {
+                    objective.ParentObjective =
+                        objectives.FirstOrDefault(x => x.ExternalID == external.ParentObjectiveExternalID);
+                }
+            }
+
+            return objectives;
+        }
+
+        public async Task<SynchronizingResult> Merge(
+            SynchronizingTuple<Objective> tuple,
+            SynchronizingData data,
+            IConnectionContext connectionContext,
+            CancellationToken token)
+        {
+            using var lScope = logger.BeginMethodScope();
 
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
                 UpdateChildrenBeforeSynchronization(tuple, data);
-                var result = await base.Merge(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                var result = await strategyHelper.Merge(tuple, connectionContext.ObjectivesSynchronizer, token).ConfigureAwait(false);
                 await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
@@ -188,19 +181,18 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> RemoveFromLocal(
+        public IEnumerable<Objective> Order(IEnumerable<Objective> enumeration)
+            => enumeration.OrderByParent(x => x.ParentObjective);
+
+        public async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<Objective> tuple,
-            SynchronizingData data,
-            IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
-                return await base.RemoveFromLocal(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                return await strategyHelper.RemoveFromLocal(tuple, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -214,19 +206,16 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        protected override async Task<SynchronizingResult> RemoveFromRemote(
+        public async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<Objective> tuple,
-            SynchronizingData data,
             IConnectionContext connectionContext,
-            object parent,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogStartAction(tuple, data, parent);
 
             try
             {
-                return await base.RemoveFromRemote(tuple, data, connectionContext, parent, token).ConfigureAwait(false);
+                return await strategyHelper.RemoveFromRemote(connectionContext.ObjectivesSynchronizer, tuple, token).ConfigureAwait(false);
             }
             catch (Exception e)
             {
@@ -237,6 +226,29 @@ namespace Brio.Docs.Synchronization.Strategies
                     Object = tuple.Remote,
                     ObjectType = ObjectType.Remote,
                 };
+            }
+        }
+
+        private void CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
+        {
+            logger.LogTrace("CreateObjectiveParentLink started with {@Tuple}", tuple);
+            if (tuple.Local.ParentObjective != null)
+            {
+                tuple.Synchronized.ParentObjective =
+                    tuple.Remote.ParentObjective = tuple.Local.ParentObjective.SynchronizationMate;
+            }
+            else if (tuple.Remote.ParentObjective != null)
+            {
+                var allObjectives = context.Objectives.Local.Concat(context.Objectives).ToList();
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                tuple.Synchronized.ParentObjective = allObjectives
+                   .First(
+                        x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && x.IsSynchronized);
+
+                // ReSharper disable once PossibleMultipleEnumeration
+                tuple.Local.ParentObjective = allObjectives
+                   .First(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && !x.IsSynchronized);
             }
         }
 
@@ -278,29 +290,6 @@ namespace Brio.Docs.Synchronization.Strategies
 
                 foreach (var child in df.ChildrenDynamicFields)
                     AddConnectionInfoTo(child);
-            }
-        }
-
-        private void CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
-        {
-            logger.LogTrace("CreateObjectiveParentLink started with {@Tuple}", tuple);
-            if (tuple.Local.ParentObjective != null)
-            {
-                tuple.Synchronized.ParentObjective =
-                    tuple.Remote.ParentObjective = tuple.Local.ParentObjective.SynchronizationMate;
-            }
-            else if (tuple.Remote.ParentObjective != null)
-            {
-                var allObjectives = context.Objectives.Local.Concat(context.Objectives).ToList();
-
-                // ReSharper disable once PossibleMultipleEnumeration
-                tuple.Synchronized.ParentObjective = allObjectives
-                   .First(
-                        x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && x.IsSynchronized);
-
-                // ReSharper disable once PossibleMultipleEnumeration
-                tuple.Local.ParentObjective = allObjectives
-                   .First(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && !x.IsSynchronized);
             }
         }
     }
