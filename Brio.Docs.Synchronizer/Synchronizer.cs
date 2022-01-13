@@ -21,11 +21,17 @@ namespace Brio.Docs.Synchronization
     public class Synchronizer
     {
         private readonly DMContext dbContext;
-        private readonly IMapper mapper;
-        private readonly ISynchronizerProcessor processor;
-        private readonly ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy;
-        private readonly ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy;
         private readonly ILogger<Synchronizer> logger;
+        private readonly IMapper mapper;
+        private readonly IConverter<IReadOnlyCollection<ObjectiveExternalDto>, IReadOnlyCollection<Objective>>
+            objectivesMapper;
+
+        private readonly ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy;
+        private readonly ISynchronizerProcessor processor;
+        private readonly IConverter<IReadOnlyCollection<ProjectExternalDto>, IReadOnlyCollection<Project>>
+            projectsMapper;
+
+        private readonly ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy;
 
         public Synchronizer(
             DMContext dbContext,
@@ -33,7 +39,9 @@ namespace Brio.Docs.Synchronization
             ISynchronizerProcessor processor,
             ISynchronizationStrategy<Project, ProjectExternalDto> projectStrategy,
             ISynchronizationStrategy<Objective, ObjectiveExternalDto> objectiveStrategy,
-            ILogger<Synchronizer> logger)
+            ILogger<Synchronizer> logger,
+            IConverter<IReadOnlyCollection<ProjectExternalDto>, IReadOnlyCollection<Project>> projectsMapper,
+            IConverter<IReadOnlyCollection<ObjectiveExternalDto>, IReadOnlyCollection<Objective>> objectivesMapper)
         {
             this.dbContext = dbContext;
             this.mapper = mapper;
@@ -41,14 +49,16 @@ namespace Brio.Docs.Synchronization
             this.projectStrategy = projectStrategy;
             this.objectiveStrategy = objectiveStrategy;
             this.logger = logger;
+            this.objectivesMapper = objectivesMapper;
+            this.projectsMapper = projectsMapper;
         }
 
         public async Task<ICollection<SynchronizingResult>> Synchronize(
-                SynchronizingData data,
-                IConnection connection,
-                ConnectionInfoExternalDto info,
-                IProgress<double> progress,
-                CancellationToken token)
+            SynchronizingData data,
+            IConnection connection,
+            ConnectionInfoExternalDto info,
+            IProgress<double> progress,
+            CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Synchronization started with {@Data}", data);
@@ -62,79 +72,32 @@ namespace Brio.Docs.Synchronization
             {
                 data.Date = DateTime.UtcNow;
                 var userID = data.User.ID;
-                var lastSynchronization =
-                    (await dbContext.Synchronizations.Where(x => x.UserID == userID)
-                       .OrderBy(x => x.Date)
-                       .LastOrDefaultAsync(CancellationToken.None)
-                       .ConfigureAwait(false))?.Date ??
-                    DateTime.MinValue;
+                var lastSynchronization = await GetLastSynchronizationDate(userID).ConfigureAwait(false);
                 context = await connection.GetContext(mapper.Map<ConnectionInfoExternalDto>(info))
                    .ConfigureAwait(false);
 
-                var ids = await GetUpdatedIDs(
-                        lastSynchronization,
-                        dbContext.Projects.Where(data.ProjectsFilter),
-                        context.ProjectsSynchronizer)
-                   .ConfigureAwait(false);
-                logger.LogDebug("Updated project ids: {@IDs}", (object)ids);
-                results.AddRange(
-                    await processor.Synchronize(
-                            projectStrategy,
-                            data,
-                            context,
-                            projectStrategy.Map(await context.ProjectsSynchronizer.Get(ids).ConfigureAwait(false)),
-                            token,
-                            data.ProjectsFilter,
-                            x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            x => x.ExternalID == null || ids.Contains(x.ExternalID),
-                            projectProgress)
-                       .ConfigureAwait(false));
-                logger.LogInformation("Projects synchronized");
-                var unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
-                   .Select(x => x.Object.ID)
-                   .ToArray();
-                logger.LogDebug("Unsynchronized projects: {@IDs}", unsyncProjectsIDs);
-                var unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
-                   .Select(x => x.Object.ExternalID)
-                   .ToArray();
-                logger.LogDebug("Unsynchronized projects: {@IDs}", (object)unsyncProjectsExternalIDs);
+                (int[] unsyncProjectsIDs, string[] unsyncProjectsExternalIDs) =
+                    await SynchronizeProjects(data, token, lastSynchronization, context, results, projectProgress)
+                       .ConfigureAwait(false);
 
                 token.ThrowIfCancellationRequested();
 
-                ids = await GetUpdatedIDs(
+                await SynchronizeObjectives(
+                        data,
+                        token,
                         lastSynchronization,
-                        dbContext.Objectives.Where(data.ObjectivesFilter),
-                        context.ObjectivesSynchronizer)
+                        context,
+                        results,
+                        unsyncProjectsIDs,
+                        unsyncProjectsExternalIDs,
+                        objectiveProgress)
                    .ConfigureAwait(false);
-                logger.LogDebug("Updated objective ids: {@IDs}", (object)ids);
-                results.AddRange(
-                    await processor.Synchronize(
-                            objectiveStrategy,
-                            data,
-                            context,
-                            objectiveStrategy.Map(await context.ObjectivesSynchronizer.Get(ids).ConfigureAwait(false)),
-                            token,
-                            data.ObjectivesFilter,
-                            x => (x.ExternalID == null || ids.Contains(x.ExternalID)) &&
-                                !unsyncProjectsIDs.Contains(x.ProjectID) &&
-                                !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            x => (x.ExternalID == null || ids.Contains(x.ExternalID)) &&
-                                !unsyncProjectsIDs.Contains(x.ProjectID) &&
-                                !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
-                            progress: objectiveProgress)
-                       .ConfigureAwait(false));
-                logger.LogInformation("Objective synchronized");
 
                 token.ThrowIfCancellationRequested();
 
-                await dbContext.Synchronizations.AddAsync(
-                        new Database.Models.Synchronization
-                        {
-                            Date = data.Date,
-                            UserID = data.User.ID,
-                        },
-                        CancellationToken.None)
+                await dbContext.Synchronizations.AddAsync(CreateNewSynchronizationData(data), CancellationToken.None)
                    .ConfigureAwait(false);
+
                 logger.LogTrace("Added synchronization date");
                 await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None).ConfigureAwait(false);
                 logger.LogDebug("DB updated");
@@ -165,7 +128,28 @@ namespace Brio.Docs.Synchronization
             return results;
         }
 
-        private async Task<string[]> GetUpdatedIDs<TDB, TDto>(DateTime date, IQueryable<TDB> set, ISynchronizer<TDto> synchronizer)
+        private static Database.Models.Synchronization CreateNewSynchronizationData(SynchronizingData data)
+        {
+            return new Database.Models.Synchronization
+            {
+                Date = data.Date,
+                UserID = data.User.ID,
+            };
+        }
+
+        private async Task<DateTime> GetLastSynchronizationDate(int userID)
+        {
+            return (await dbContext.Synchronizations.Where(x => x.UserID == userID)
+                   .OrderBy(x => x.Date)
+                   .LastOrDefaultAsync(CancellationToken.None)
+                   .ConfigureAwait(false))?.Date ??
+                DateTime.MinValue;
+        }
+
+        private async Task<string[]> GetUpdatedIDs<TDB, TDto>(
+            DateTime date,
+            IQueryable<TDB> set,
+            ISynchronizer<TDto> synchronizer)
             where TDB : class, ISynchronizable<TDB>
         {
             logger.LogTrace("GetUpdatedIDs started with date: {@Date}", date);
@@ -188,6 +172,85 @@ namespace Brio.Docs.Synchronization
                .ConfigureAwait(false);
             logger.LogDebug("Removed on local: {@IDs}", localRemoved);
             return remoteUpdated.Union(localUpdated).Union(localRemoved).ToArray();
+        }
+
+        private async Task SynchronizeObjectives(
+            SynchronizingData data,
+            CancellationToken token,
+            DateTime lastSynchronization,
+            IConnectionContext context,
+            List<SynchronizingResult> results,
+            int[] unsyncProjectsIDs,
+            string[] unsyncProjectsExternalIDs,
+            Progress<double> objectiveProgress)
+        {
+            var ids2 = await GetUpdatedIDs(
+                    lastSynchronization,
+                    dbContext.Objectives.Where(data.ObjectivesFilter),
+                    context.ObjectivesSynchronizer)
+               .ConfigureAwait(false);
+            logger.LogDebug("Updated objective ids: {@IDs}", (object)ids2);
+            var remoteObjectives = await objectivesMapper
+               .Convert(await context.ObjectivesSynchronizer.Get(ids2).ConfigureAwait(false))
+               .ConfigureAwait(false);
+            results.AddRange(
+                await processor.Synchronize(
+                        objectiveStrategy,
+                        data,
+                        context,
+                        remoteObjectives,
+                        token,
+                        data.ObjectivesFilter,
+                        x => (x.ExternalID == null || ids2.Contains(x.ExternalID)) &&
+                            !unsyncProjectsIDs.Contains(x.ProjectID) &&
+                            !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                        x => (x.ExternalID == null || ids2.Contains(x.ExternalID)) &&
+                            !unsyncProjectsIDs.Contains(x.ProjectID) &&
+                            !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                        objectiveProgress)
+                   .ConfigureAwait(false));
+            logger.LogInformation("Objective synchronized");
+        }
+
+        private async Task<(int[] unsyncProjectsIDs, string[] unsyncProjectsExternalIDs)> SynchronizeProjects(
+            SynchronizingData data,
+            CancellationToken token,
+            DateTime lastSynchronization,
+            IConnectionContext context,
+            List<SynchronizingResult> results,
+            Progress<double> projectProgress)
+        {
+            var ids = await GetUpdatedIDs(
+                    lastSynchronization,
+                    dbContext.Projects.Where(data.ProjectsFilter),
+                    context.ProjectsSynchronizer)
+               .ConfigureAwait(false);
+            logger.LogDebug("Updated project ids: {@IDs}", (object)ids);
+            var remoteProjects = await projectsMapper
+               .Convert(await context.ProjectsSynchronizer.Get(ids).ConfigureAwait(false))
+               .ConfigureAwait(false);
+            results.AddRange(
+                await processor.Synchronize(
+                        projectStrategy,
+                        data,
+                        context,
+                        remoteProjects,
+                        token,
+                        data.ProjectsFilter,
+                        x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                        x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                        projectProgress)
+                   .ConfigureAwait(false));
+            logger.LogInformation("Projects synchronized");
+            var unsyncProjectsIDs = results.Where(x => x.ObjectType == ObjectType.Local)
+               .Select(x => x.Object.ID)
+               .ToArray();
+            logger.LogDebug("Unsynchronized projects: {@IDs}", unsyncProjectsIDs);
+            var unsyncProjectsExternalIDs = results.Where(x => x.ObjectType == ObjectType.Remote)
+               .Select(x => x.Object.ExternalID)
+               .ToArray();
+            logger.LogDebug("Unsynchronized projects: {@IDs}", (object)unsyncProjectsExternalIDs);
+            return (unsyncProjectsIDs, unsyncProjectsExternalIDs);
         }
     }
 }

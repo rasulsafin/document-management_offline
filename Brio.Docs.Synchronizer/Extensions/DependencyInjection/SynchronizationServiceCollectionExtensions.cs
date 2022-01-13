@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
@@ -8,6 +10,7 @@ using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
+using Brio.Docs.Synchronization.Utils;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -20,6 +23,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<StrategyHelper>();
             services.AddScoped<ISynchronizationStrategy<Project, ProjectExternalDto>, ProjectStrategy>();
             services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
+
+            services.AddScoped<IConverter<
+                    IReadOnlyCollection<ProjectExternalDto>,
+                    IReadOnlyCollection<Project>>,
+                ProjectsMapper>();
+            services.AddScoped<IConverter<
+                    IReadOnlyCollection<ObjectiveExternalDto>,
+                    IReadOnlyCollection<Objective>>,
+                ObjectivesMapper>();
 
             services.AddScoped<IMerger<Project>, ProjectMerger>();
             services.AddScoped<IMerger<Objective>, ObjectiveMerger>();

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
@@ -23,7 +22,6 @@ namespace Brio.Docs.Synchronization.Strategies
         private readonly DMContext context;
         private readonly IExternalIdUpdater<Item> itemIdUpdater;
         private readonly ILogger<ProjectStrategy> logger;
-        private readonly IMapper mapper;
         private readonly IMerger<Project> merger;
         private readonly StrategyHelper strategyHelper;
 
@@ -31,14 +29,12 @@ namespace Brio.Docs.Synchronization.Strategies
             DMContext context,
             IMerger<Project> merger,
             IExternalIdUpdater<Item> itemIdUpdater,
-            IMapper mapper,
             ILogger<ProjectStrategy> logger,
             StrategyHelper strategyHelper)
         {
             this.context = context;
             this.merger = merger;
             this.itemIdUpdater = itemIdUpdater;
-            this.mapper = mapper;
             this.logger = logger;
             this.strategyHelper = strategyHelper;
             logger.LogTrace("ProjectStrategy created");
@@ -110,12 +106,6 @@ namespace Brio.Docs.Synchronization.Strategies
 
         public Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
             => data.ProjectsFilter;
-
-        public IReadOnlyCollection<Project> Map(IReadOnlyCollection<ProjectExternalDto> externalDtos)
-        {
-            logger.LogTrace("Map started for externalDtos: {@Dtos}", externalDtos);
-            return mapper.Map<IReadOnlyCollection<Project>>(externalDtos);
-        }
 
         public async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Project> tuple,

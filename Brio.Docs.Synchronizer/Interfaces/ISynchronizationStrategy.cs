@@ -41,13 +41,6 @@ namespace Brio.Docs.Synchronization.Interfaces
             CancellationToken token);
 
         /// <summary>
-        /// Maps remote DTOs to working type.
-        /// </summary>
-        /// <param name="externalDtos">External entities.</param>
-        /// <returns>Working entities.</returns>
-        IReadOnlyCollection<TDB> Map(IReadOnlyCollection<TDto> externalDtos);
-
-        /// <summary>
         /// Merges remote and local entities. Saves synchronized state.
         /// </summary>
         /// <param name="tuple">The synchronization tuple.</param>
@@ -60,7 +53,6 @@ namespace Brio.Docs.Synchronization.Interfaces
             SynchronizingData data,
             IConnectionContext connectionContext,
             CancellationToken token);
-
 
         /// <summary>
         /// Removes entity to local database. Removes synchronized state.

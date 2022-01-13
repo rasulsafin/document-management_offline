@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
@@ -24,14 +22,12 @@ namespace Brio.Docs.Synchronization.Strategies
         private readonly IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater;
         private readonly IExternalIdUpdater<Item> itemIdUpdater;
         private readonly ILogger<ObjectiveStrategy> logger;
-        private readonly IMapper mapper;
         private readonly IMerger<Objective> merger;
         private readonly StrategyHelper strategyHelper;
 
         public ObjectiveStrategy(
             StrategyHelper strategyHelper,
             DMContext context,
-            IMapper mapper,
             IMerger<Objective> merger,
             IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater,
             IExternalIdUpdater<Item> itemIdUpdater,
@@ -39,7 +35,6 @@ namespace Brio.Docs.Synchronization.Strategies
         {
             this.strategyHelper = strategyHelper;
             this.context = context;
-            this.mapper = mapper;
             this.merger = merger;
             this.dynamicFieldIdUpdater = dynamicFieldIdUpdater;
             this.itemIdUpdater = itemIdUpdater;
@@ -129,27 +124,6 @@ namespace Brio.Docs.Synchronization.Strategies
                     ObjectType = ObjectType.Local,
                 };
             }
-        }
-
-        public Expression<Func<Objective, bool>> GetDefaultFilter(SynchronizingData data)
-            => data.ObjectivesFilter;
-
-        public IReadOnlyCollection<Objective> Map(IReadOnlyCollection<ObjectiveExternalDto> externalDtos)
-        {
-            logger.LogTrace("Map started");
-            var objectives = mapper.Map<IReadOnlyCollection<Objective>>(externalDtos);
-
-            foreach (var objective in objectives)
-            {
-                var external = externalDtos.FirstOrDefault(x => x.ExternalID == objective.ExternalID);
-                if (!string.IsNullOrEmpty(external?.ParentObjectiveExternalID))
-                {
-                    objective.ParentObjective =
-                        objectives.FirstOrDefault(x => x.ExternalID == external.ParentObjectiveExternalID);
-                }
-            }
-
-            return objectives;
         }
 
         public async Task<SynchronizingResult> Merge(
