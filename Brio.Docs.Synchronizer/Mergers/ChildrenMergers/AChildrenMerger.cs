@@ -23,6 +23,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         private readonly IAttacher<TSynchronizableChild> attacher;
         private readonly IMerger<TSynchronizableChild> childMerger;
         private readonly DbContext context;
+        private readonly Expression<Func<TSynchronizableChild, bool>> defaultNeedToRemoveExpression = child => true;
 
         protected AChildrenMerger(
             DbContext context,
@@ -33,19 +34,18 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             this.childMerger = childMerger;
             this.attacher = attacher;
 
-            GetEnumerableExpression = new Lazy<Expression<Func<TParent, IEnumerable<TChild>>>>(
+            GetChildrenCollectionFunc =
+                new Lazy<Func<TParent, ICollection<TChild>>>(() => CollectionExpression.Compile());
+            ChildrenCollectionProperty = new Lazy<PropertyInfo>(() => CollectionExpression.ToPropertyInfo());
+            GetChildrenEnumerableExpression = new Lazy<Expression<Func<TParent, IEnumerable<TChild>>>>(
                 () =>
                 {
-                    var expression = CollectionExpression;
                     var parameter = Expression.Parameter(typeof(TParent));
-                    var propertyInfo = expression.ToPropertyInfo();
                     return Expression.Lambda<Func<TParent, IEnumerable<TChild>>>(
-                        Expression.Property(parameter, propertyInfo),
+                        Expression.Property(parameter, ChildrenCollectionProperty.Value),
                         false,
                         parameter);
                 });
-            GetCollectionFunc = new Lazy<Func<TParent, ICollection<TChild>>>(() => CollectionExpression.Compile());
-            CollectionPropertyInfo = new Lazy<PropertyInfo>(() => CollectionExpression.ToPropertyInfo());
 
             IsOneToManyRelationship = new Lazy<bool>(
                 () =>
@@ -67,11 +67,11 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         protected abstract Expression<Func<TChild, TSynchronizableChild>> SynchronizableChildExpression { get; }
 
-        private Lazy<PropertyInfo> CollectionPropertyInfo { get; }
+        private Lazy<PropertyInfo> ChildrenCollectionProperty { get; }
 
-        private Lazy<Func<TParent, ICollection<TChild>>> GetCollectionFunc { get; }
+        private Lazy<Func<TParent, ICollection<TChild>>> GetChildrenCollectionFunc { get; }
 
-        private Lazy<Expression<Func<TParent, IEnumerable<TChild>>>> GetEnumerableExpression { get; }
+        private Lazy<Expression<Func<TParent, IEnumerable<TChild>>>> GetChildrenEnumerableExpression { get; }
 
         private Lazy<Func<TChild, TSynchronizableChild>> GetSynchronizableChildFunc { get; }
 
@@ -89,9 +89,9 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             tuple.ForEach(CreateEmptyChildrenList);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
-                GetCollectionFunc.Value(tuple.Local).Select(GetSynchronizableChildFunc.Value),
-                GetCollectionFunc.Value(tuple.Synchronized).Select(GetSynchronizableChildFunc.Value),
-                GetCollectionFunc.Value(tuple.Remote).Select(GetSynchronizableChildFunc.Value),
+                GetChildrenCollectionFunc.Value(tuple.Local).Select(GetSynchronizableChildFunc.Value),
+                GetChildrenCollectionFunc.Value(tuple.Synchronized).Select(GetSynchronizableChildFunc.Value),
+                GetChildrenCollectionFunc.Value(tuple.Remote).Select(GetSynchronizableChildFunc.Value),
                 DoesNeedInTuple);
 
             foreach (var childTuple in tuples)
@@ -104,7 +104,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             => childTuple.DoesNeed(child);
 
         protected virtual Expression<Func<TSynchronizableChild, bool>> GetNeedToRemoveExpression(TParent parent)
-            => child => true;
+            => defaultNeedToRemoveExpression;
 
         private bool AddChild(TParent parent, TSynchronizableChild child)
         {
@@ -114,11 +114,11 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
                 {
                     var link = new TChild();
                     SynchronizableChildProperty.Value.SetValue(link, child);
-                    GetCollectionFunc.Value(parent).Add(link);
+                    GetChildrenCollectionFunc.Value(parent).Add(link);
                     return true;
                 }
 
-                GetCollectionFunc.Value(parent).Add(child as TChild);
+                GetChildrenCollectionFunc.Value(parent).Add(child as TChild);
                 return true;
             }
 
@@ -127,13 +127,13 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         private void CreateEmptyChildrenList(TParent x)
         {
-            if (GetCollectionFunc.Value(x) == null)
-                CollectionPropertyInfo.Value.SetValue(x, new List<TChild>());
+            if (GetChildrenCollectionFunc.Value(x) == null)
+                ChildrenCollectionProperty.Value.SetValue(x, new List<TChild>());
         }
 
         private bool HasChild(TParent parent, TSynchronizableChild child)
         {
-            return GetCollectionFunc.Value(parent)
+            return GetChildrenCollectionFunc.Value(parent)
                .Any(
                     x =>
                     {
@@ -144,27 +144,27 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         private async ValueTask<bool> HasChildren(TParent parent)
         {
-            if (GetCollectionFunc.Value(parent) == null && parent.GetId() != 0)
+            if (GetChildrenCollectionFunc.Value(parent) == null && parent.GetId() != 0)
             {
                 return await context.Set<TParent>()
                    .AsNoTracking()
                    .Where(x => x == parent)
-                   .Select(GetEnumerableExpression.Value)
+                   .Select(GetChildrenEnumerableExpression.Value)
                    .AnyAsync()
                    .ConfigureAwait(false);
             }
 
-            return (GetCollectionFunc.Value(parent)?.Count ?? 0) > 0;
+            return (GetChildrenCollectionFunc.Value(parent)?.Count ?? 0) > 0;
         }
 
         private async ValueTask LoadChildren(TParent parent)
         {
-            if (GetCollectionFunc.Value(parent) == null)
+            if (GetChildrenCollectionFunc.Value(parent) == null)
             {
                 if (parent.GetId() != 0)
                 {
                     var collection = context.Entry(parent)
-                       .Collection(GetEnumerableExpression.Value);
+                       .Collection(GetChildrenEnumerableExpression.Value);
 
                     if (IsOneToManyRelationship.Value)
                     {
@@ -243,8 +243,9 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         {
             if (HasChild(parent, child))
             {
-                var first = GetCollectionFunc.Value(parent).First(x => GetSynchronizableChildFunc.Value(x) == child);
-                GetCollectionFunc.Value(parent).Remove(first);
+                var first = GetChildrenCollectionFunc.Value(parent)
+                   .First(x => GetSynchronizableChildFunc.Value(x) == child);
+                GetChildrenCollectionFunc.Value(parent).Remove(first);
 
                 var entry = context.Entry(first);
                 if (entry.State == EntityState.Deleted)

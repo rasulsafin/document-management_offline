@@ -12,15 +12,21 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class ObjectiveItemsMerger : AChildrenMerger<Objective, ObjectiveItem, Item>
     {
+        private readonly Expression<Func<Objective, ICollection<ObjectiveItem>>> collectionExpression =
+            objective => objective.Items;
+
+        private readonly Expression<Func<ObjectiveItem, Item>> synchronizableChildExpression = link => link.Item;
+
         public ObjectiveItemsMerger(DMContext context, IMerger<Item> childMerger, IAttacher<Item> attacher)
             : base(context, childMerger, attacher)
         {
         }
 
         protected override Expression<Func<Objective, ICollection<ObjectiveItem>>> CollectionExpression
-            => objective => objective.Items;
+            => collectionExpression;
 
-        protected override Expression<Func<ObjectiveItem, Item>> SynchronizableChildExpression => link => link.Item;
+        protected override Expression<Func<ObjectiveItem, Item>> SynchronizableChildExpression
+            => synchronizableChildExpression;
 
         protected override bool DoesNeedInTuple(Item child, SynchronizingTuple<Item> childTuple)
             => childTuple.DoesNeed(child) ||

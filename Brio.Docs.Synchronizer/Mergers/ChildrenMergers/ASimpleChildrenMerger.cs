@@ -10,11 +10,13 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         where TParent : class
         where TChild : class, ISynchronizable<TChild>, new()
     {
+        private readonly Expression<Func<TChild, TChild>> synchronizableChildExpression = child => child;
+
         protected ASimpleChildrenMerger(DbContext context, IMerger<TChild> childMerger, IAttacher<TChild> attacher = null)
             : base(context, childMerger, attacher)
         {
         }
 
-        protected override Expression<Func<TChild, TChild>> SynchronizableChildExpression => child => child;
+        protected override Expression<Func<TChild, TChild>> SynchronizableChildExpression => synchronizableChildExpression;
     }
 }

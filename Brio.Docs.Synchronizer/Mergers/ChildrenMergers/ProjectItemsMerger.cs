@@ -12,19 +12,21 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class ProjectItemsMerger : ASimpleChildrenMerger<Project, Item>
     {
+        private readonly Expression<Func<Project, ICollection<Item>>> collectionExpression = project => project.Items;
+        private readonly Expression<Func<Item, bool>> needToRemoveExpression = item => !item.Objectives.Any();
+
         public ProjectItemsMerger(DMContext context, IMerger<Item> childMerger, IAttacher<Item> attacher)
             : base(context, childMerger, attacher)
         {
         }
 
-        protected override Expression<Func<Project, ICollection<Item>>> CollectionExpression
-            => project => project.Items;
+        protected override Expression<Func<Project, ICollection<Item>>> CollectionExpression => collectionExpression;
 
         protected override bool DoesNeedInTuple(Item child, SynchronizingTuple<Item> childTuple)
             => childTuple.DoesNeed(child) ||
                 child.RelativePath == (string)childTuple.GetPropertyValue(nameof(Item.RelativePath));
 
         protected override Expression<Func<Item, bool>> GetNeedToRemoveExpression(Project parent)
-            => item => !item.Objectives.Any();
+            => needToRemoveExpression;
     }
 }
