@@ -25,10 +25,16 @@ namespace Brio.Docs.Synchronization.Mergers
             this.context = context;
             this.logger = logger;
             this.itemAttacher = itemAttacher;
+            logger.LogTrace("LocationMerger created");
         }
 
         public async ValueTask Merge(SynchronizingTuple<Location> tuple)
         {
+            logger.LogTrace(
+                "Merge location started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.ExternalID);
             tuple.Merge(
                 await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
                 await GetUpdatedTime(tuple.Remote).ConfigureAwait(false),
@@ -40,7 +46,9 @@ namespace Brio.Docs.Synchronization.Mergers
                 location => location.CameraPositionZ,
                 location => location.Guid);
 
+            logger.LogAfterMerge(tuple);
             await LinkLocationItem(tuple).ConfigureAwait(false);
+            logger.LogTrace("Location item merged");
         }
 
         private void CreateRemoteLocationItem(SynchronizingTuple<Location> tuple, SynchronizingTuple<Item> itemTuple)

@@ -37,10 +37,16 @@ namespace Brio.Docs.Synchronization.Mergers
             this.itemChildrenMerger = new Lazy<IChildrenMerger<Objective, Item>>(itemChildrenMergerFactory.Create);
             this.bimElementChildrenMerger =
                 new Lazy<IChildrenMerger<Objective, BimElement>>(bimElementChildrenMergerFactory.Create);
+            logger.LogTrace("ObjectiveMerger created");
         }
 
         public async ValueTask Merge(SynchronizingTuple<Objective> tuple)
         {
+            logger.LogTrace(
+                "Merge objective started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.ExternalID);
             tuple.Merge(
                 objective => objective.Author,
                 objective => objective.AuthorID,
@@ -52,10 +58,15 @@ namespace Brio.Docs.Synchronization.Mergers
                 objective => objective.Status,
                 objective => objective.ObjectiveTypeID);
 
+            logger.LogAfterMerge(tuple);
             await MergeLocation(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective location merged");
             await dynamicFieldChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective dynamic fields merged");
             await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective items merged");
             await bimElementChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective bim elements merged");
         }
 
         private async ValueTask LoadLocation(Objective objective)

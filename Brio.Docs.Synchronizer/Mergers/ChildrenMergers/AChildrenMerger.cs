@@ -95,7 +95,11 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         public async ValueTask MergeChildren(SynchronizingTuple<TParent> tuple)
         {
-            logger.LogTrace("MergeChildren started for tuple {Id}", tuple.ExternalID);
+            logger.LogTrace(
+                "MergeChildren started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.GetId(),
+                tuple.Synchronized?.GetId(),
+                tuple.ExternalID);
             if (!await tuple.AnyAsync(HasChildren).ConfigureAwait(false))
                 return;
 
