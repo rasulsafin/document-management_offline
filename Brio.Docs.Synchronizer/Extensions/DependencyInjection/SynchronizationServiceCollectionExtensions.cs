@@ -48,7 +48,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IChildrenMerger<Objective, Item>, ObjectiveItemsMerger>();
 
             services.AddScoped<IChildrenMerger<Objective, DynamicField>, ObjectiveDynamicFieldsMerger>();
-            services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
+            services.AddScoped<IChildrenMerger<Objective, BimElement>, ObjectiveBimElementsMerger>();
 
             services.AddFactory<IChildrenMerger<Objective, Item>>();
             services.AddFactory<IChildrenMerger<Objective, DynamicField>>();

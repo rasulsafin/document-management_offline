@@ -11,16 +11,16 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
-    internal class BimElementsMerger : AChildrenMerger<Objective, BimElementObjective, BimElement>
+    internal class ObjectiveBimElementsMerger : AChildrenMerger<Objective, BimElementObjective, BimElement>
     {
         private readonly BimElementComparer bimElementComparer = new ();
         private readonly Expression<Func<BimElementObjective, BimElement>> childFromLinkExpression = link => link.BimElement;
         private readonly Expression<Func<Objective, ICollection<BimElementObjective>>> collectionExpression = objective => objective.BimElements;
 
-        public BimElementsMerger(
+        public ObjectiveBimElementsMerger(
             DMContext context,
             IMerger<BimElement> merger,
-            ILogger<BimElementsMerger> logger)
+            ILogger<ObjectiveBimElementsMerger> logger)
             : base(context, merger, logger)
         {
         }
