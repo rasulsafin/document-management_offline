@@ -150,21 +150,8 @@ namespace Brio.Docs.Connections.BrioCloud
                     throw new WebException(response.Description);
                 }
 
-                var sb = new StringBuilder();
-
-                await using (var reader = response.Stream)
-                {
-                    const int BUFFER_LENGTH = 4096;
-                    var buffer = new byte[BUFFER_LENGTH];
-                    var count = await reader.ReadAsync(buffer.AsMemory());
-                    while (count > 0)
-                    {
-                        sb.Append(Encoding.UTF8.GetString(buffer, 0, count));
-                        count = await reader.ReadAsync(buffer.AsMemory());
-                    }
-                }
-
-                return sb.ToString();
+                using var sr = new StreamReader(response.Stream, Encoding.UTF8);
+                return await sr.ReadToEndAsync();
             }
         }
 
