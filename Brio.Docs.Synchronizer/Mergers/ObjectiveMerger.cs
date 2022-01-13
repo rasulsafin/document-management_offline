@@ -15,10 +15,10 @@ namespace Brio.Docs.Synchronization.Mergers
     internal class ObjectiveMerger : IMerger<Objective>
     {
         private readonly Lazy<IChildrenMerger<Objective, BimElement>> bimElementChildrenMerger;
+        private readonly DbContext context;
         private readonly Lazy<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMerger;
         private readonly Lazy<IChildrenMerger<Objective, Item>> itemChildrenMerger;
         private readonly IMerger<Location> locationMerger;
-        private readonly DbContext context;
         private readonly ILogger<ObjectiveMerger> logger;
 
         public ObjectiveMerger(
@@ -69,6 +69,20 @@ namespace Brio.Docs.Synchronization.Mergers
             logger.LogTrace("Objective bim elements merged");
         }
 
+        private async ValueTask<bool> HasLocation(Objective objective)
+        {
+            if (objective.Location == null && objective.ID != 0)
+            {
+                return await context.Set<Objective>()
+                   .AsNoTracking()
+                   .Where(x => x == objective)
+                   .AnyAsync(x => x.Location != null)
+                   .ConfigureAwait(false);
+            }
+
+            return objective.Location != null;
+        }
+
         private async ValueTask LoadLocation(Objective objective)
         {
             if (objective.Location != null || objective.ID == 0)
@@ -83,7 +97,7 @@ namespace Brio.Docs.Synchronization.Mergers
 
         private async ValueTask MergeLocation(SynchronizingTuple<Objective> tuple)
         {
-            if (tuple.All(x => x.Location == null))
+            if (!await tuple.AnyAsync(HasLocation).ConfigureAwait(false))
                 return;
 
             await tuple.ForEachAsync(LoadLocation).ConfigureAwait(false);

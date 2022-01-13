@@ -70,6 +70,8 @@ namespace Brio.Docs.Synchronization.Strategies
 
             foreach (var tuple in tuples)
             {
+                foreach (var db in tuple.AsEnumerable().Where(x => x != null && x.ID != 0))
+                    context.Attach(db);
                 logger.LogTrace("Tuple {ID}", tuple.ExternalID);
                 token.ThrowIfCancellationRequested();
 
@@ -103,7 +105,10 @@ namespace Brio.Docs.Synchronization.Strategies
                     }
 
                     if (needSaveOnEachTuple)
+                    {
                         await SaveDb(data).ConfigureAwait(false);
+                        DBContextUtilities.ReloadContext(context);
+                    }
                 }
                 catch (Exception e)
                 {

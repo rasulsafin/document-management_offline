@@ -522,8 +522,8 @@ namespace Brio.Docs.Tests.Synchronization
                 new Progress<double>(),
                 new CancellationTokenSource().Token);
 
-            var local = await Fixture.Context.Projects.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await Fixture.Context.Projects.Synchronized().FirstOrDefaultAsync();
+            var local = await SynchronizerTestsHelper.Include(Fixture.Context.Projects.Unsynchronized()).FirstOrDefaultAsync();
+            var synchronized = await SynchronizerTestsHelper.Include(Fixture.Context.Projects.Synchronized()).FirstOrDefaultAsync();
             return (local, synchronized, synchronizationResult);
         }
 

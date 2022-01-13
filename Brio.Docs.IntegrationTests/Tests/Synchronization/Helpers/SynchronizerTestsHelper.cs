@@ -135,6 +135,27 @@ namespace Brio.Docs.Tests.Synchronization.Helpers
             return stub;
         }
 
+        public static IQueryable<Objective> Include(IQueryable<Objective> set)
+            => set
+               .Include(x => x.DynamicFields)
+               .Include(x => x.ObjectiveType)
+               .Include(x => x.Project)
+               .Include(x => x.Items)
+               .ThenInclude(x => x.Item)
+               .Include(x => x.ParentObjective)
+               .ThenInclude(x => x.SynchronizationMate)
+               .Include(x => x.Author)
+               .Include(x => x.BimElements)
+               .ThenInclude(x => x.BimElement)
+               .Include(x => x.Location)
+               .ThenInclude(x => x.Item);
+
+        public static IQueryable<Project> Include(IQueryable<Project> set)
+            => set
+               .Include(x => x.SynchronizationMate)
+               .Include(x => x.Users)
+               .Include(x => x.Items);
+
         public static void MockGetRemote<T>(Mock<ISynchronizer<T>> synchronizer, IReadOnlyCollection<T> array, Func<T, string> getIDFunc)
         {
             synchronizer

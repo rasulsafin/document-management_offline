@@ -66,7 +66,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -85,8 +85,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await GetLocal();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -111,7 +111,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -147,8 +147,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await GetLocal();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -185,8 +185,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await GetLocal();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -212,8 +212,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await GetLocal();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -250,8 +250,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             // Act.
             var synchronizationResult = await Synchronize();
-            var local = await fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await GetLocal();
+            var synchronized = await GetSynchronized();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -480,6 +480,14 @@ namespace Brio.Docs.Tests.Synchronization
 
             return item;
         }
+
+        private async Task<Objective> GetLocal()
+            => await SynchronizerTestsHelper.Include(fixture.Context.Objectives.Unsynchronized())
+               .FirstOrDefaultAsync();
+
+        private async Task<Objective> GetSynchronized()
+            => await SynchronizerTestsHelper.Include(fixture.Context.Objectives.Synchronized())
+               .FirstOrDefaultAsync();
 
         private void MockRemoteObjectives(IReadOnlyCollection<ObjectiveExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(objectiveSynchronizer, array, x => x.ExternalID);

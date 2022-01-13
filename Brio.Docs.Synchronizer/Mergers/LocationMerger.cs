@@ -88,6 +88,7 @@ namespace Brio.Docs.Synchronization.Mergers
         private async Task LinkLocationItem(SynchronizingTuple<Location> tuple)
         {
             logger.LogTrace("LinkLocationItem started with {@Tuple}", tuple);
+            await tuple.ForEachAsync(LoadItem).ConfigureAwait(false);
 
             var itemTuple = new SynchronizingTuple<Item>(
                 local: tuple.Local.Item,
@@ -140,6 +141,21 @@ namespace Brio.Docs.Synchronization.Mergers
 
                     return false;
                 });
+        }
+
+        private async ValueTask LoadItem(Location location)
+        {
+            if (location.Item != null || location.ID == 0)
+                return;
+
+            location.Item = await context.Set<Objective>()
+               .Where(x => x.Location == location)
+               .Include(x => x.Location)
+               .ThenInclude(x => x.Item)
+               .Select(x => x.Location)
+               .Select(x => x.Item)
+               .FirstOrDefaultAsync()
+               .ConfigureAwait(false);
         }
     }
 }

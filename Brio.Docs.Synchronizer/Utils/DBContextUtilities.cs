@@ -6,13 +6,7 @@ namespace Brio.Docs.Synchronization.Utils
     {
         public static void ReloadContext(DbContext context)
         {
-            foreach (var entry in context.ChangeTracker.Entries())
-            {
-                if (entry.State == EntityState.Added)
-                    entry.State = EntityState.Detached;
-
-                entry.Reload();
-            }
+            context.ChangeTracker.Clear();
         }
     }
 }
