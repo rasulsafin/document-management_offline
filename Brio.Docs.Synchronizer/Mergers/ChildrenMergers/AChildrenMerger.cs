@@ -268,7 +268,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
                 GetChildrenCollectionFunc(parent).Remove(first);
 
                 var entry = context.Entry(first);
-                if (entry.State == EntityState.Deleted)
+                if (IsOneToManyRelationship && entry.State == EntityState.Deleted)
                     entry.State = EntityState.Modified;
                 return true;
             }
