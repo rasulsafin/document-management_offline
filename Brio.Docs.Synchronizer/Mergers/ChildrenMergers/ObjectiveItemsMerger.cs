@@ -31,7 +31,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         protected override Expression<Func<Objective, ICollection<ObjectiveItem>>> CollectionExpression
             => collectionExpression;
 
-        protected override Expression<Func<ObjectiveItem, Item>> SynchronizableChildExpression
+        protected override Expression<Func<ObjectiveItem, Item>> ChildFromLinkExpression
             => synchronizableChildExpression;
 
         protected override bool DoesNeedInTuple(Item child, SynchronizingTuple<Item> childTuple)

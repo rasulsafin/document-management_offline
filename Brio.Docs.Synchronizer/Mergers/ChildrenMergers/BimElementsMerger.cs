@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
@@ -13,6 +14,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
     internal class BimElementsMerger : AChildrenMerger<Objective, BimElementObjective, BimElement>
     {
         private readonly BimElementComparer bimElementComparer = new ();
+        private readonly Expression<Func<BimElementObjective, BimElement>> childFromLinkExpression = link => link.BimElement;
+        private readonly Expression<Func<Objective, ICollection<BimElementObjective>>> collectionExpression = objective => objective.BimElements;
 
         public BimElementsMerger(
             DMContext context,
@@ -22,14 +25,17 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         {
         }
 
-        protected override Expression<Func<Objective, ICollection<BimElementObjective>>> CollectionExpression
-            => objective => objective.BimElements;
+        protected override Expression<Func<BimElementObjective, BimElement>> ChildFromLinkExpression
+            => childFromLinkExpression;
 
-        protected override Expression<Func<BimElementObjective, BimElement>> SynchronizableChildExpression
-            => link => link.BimElement;
+        protected override Expression<Func<Objective, ICollection<BimElementObjective>>> CollectionExpression
+            => collectionExpression;
 
         protected override bool DoesNeedInTuple(BimElement child, SynchronizingTuple<BimElement> childTuple)
             => childTuple.Any(element => bimElementComparer.Equals(element, child));
+
+        protected override Expression<Func<BimElement, bool>> GetNeedToRemoveExpression(Objective parent)
+            => element => element.Objectives.All(x => x.Objective == parent);
 
         private class BimElementComparer
         {

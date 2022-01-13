@@ -25,7 +25,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             logger.LogTrace("Base initialization of simple children merger completed");
         }
 
-        protected override Expression<Func<TChild, TChild>> SynchronizableChildExpression => synchronizableChildExpression;
+        protected override Expression<Func<TChild, TChild>> ChildFromLinkExpression => synchronizableChildExpression;
 
         protected override bool DoesNeedInTuple(TChild child, SynchronizingTuple<TChild> childTuple)
             => childTuple.DoesNeed(child);
