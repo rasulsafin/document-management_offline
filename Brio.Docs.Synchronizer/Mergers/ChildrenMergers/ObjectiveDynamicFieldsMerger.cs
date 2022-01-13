@@ -19,6 +19,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             ILogger<ObjectiveDynamicFieldsMerger> logger)
             : base(context, childMerger, logger)
         {
+            logger.LogTrace("ObjectiveDynamicFieldsMerger created");
         }
 
         protected override Expression<Func<Objective, ICollection<DynamicField>>> CollectionExpression

@@ -20,6 +20,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             IAttacher<TChild> attacher = null)
             : base(context, childMerger, logger, attacher)
         {
+            logger.LogTrace("Base initialization of simple children merger completed");
         }
 
         protected override Expression<Func<TChild, TChild>> SynchronizableChildExpression => synchronizableChildExpression;

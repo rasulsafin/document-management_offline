@@ -25,6 +25,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             ILogger<ObjectiveItemsMerger> logger)
             : base(context, childMerger, logger, attacher)
         {
+            logger.LogTrace("ObjectiveItemsMerger created");
         }
 
         protected override Expression<Func<Objective, ICollection<ObjectiveItem>>> CollectionExpression
