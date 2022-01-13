@@ -9,6 +9,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Sorts;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
@@ -202,7 +203,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, ObjectiveSortParameters sort = null)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -238,6 +239,11 @@ namespace Brio.Docs.Services
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
+
+                if (sort != null)
+                {
+                    allObjectives = await Sorting(allObjectives, sort);
+                }
 
                 var objectives = await allObjectives?
                     .ByPages(x => x.CreationDate,
@@ -387,6 +393,33 @@ namespace Brio.Docs.Services
                 GetAllObjectiveIds(child, ids);
 
             return ids;
+        }
+
+        private async Task<IQueryable<Objective>> Sorting(IQueryable<Objective> objectives, ObjectiveSortParameters sort)
+        {
+            if (objectives.Count() < 2)
+                return objectives;
+
+            switch (sort.Sort)
+            {
+                case ObjectiveSortParameters.Sorts.ByTitle:
+                    objectives = objectives.OrderBy(x => x.Title);
+                    break;
+                case ObjectiveSortParameters.Sorts.ByCreateDate:
+                    objectives = objectives.OrderBy(x => x.CreationDate);
+                    break;
+                case ObjectiveSortParameters.Sorts.ByEditDate:
+                    //sortObjectives.Sort(new ObjectiveCompareHelper.CompareByEditDate());
+                    break;
+                case ObjectiveSortParameters.Sorts.ByFixDate:
+                    //sortObjectives.Sort(new ObjectiveCompareHelper.CompareByFixDate());
+                    break;
+            }
+
+            if (sort.IsReverse)
+                objectives.Reverse();
+
+            return objectives;
         }
     }
 }

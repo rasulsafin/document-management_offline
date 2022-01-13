@@ -7,6 +7,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Sorts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -192,11 +193,13 @@ namespace Brio.Docs.Api.Controllers
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
             [FromQuery]
-            ObjectiveFilterParameters filter)
+            ObjectiveFilterParameters filter,
+            [FromQuery]
+            ObjectiveSortParameters sort)
         {
             try
             {
-                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter);
+                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, sort);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)
