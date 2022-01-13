@@ -240,22 +240,7 @@ namespace Brio.Docs.Services
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
-                if (sort != null)
-                {
-                    allObjectives = await Sorting(allObjectives, sort);
-                }
-
-                var objectives = await allObjectives?
-                    .ByPages(x => x.CreationDate,
-                                  filter.PageNumber,
-                                  filter.PageSize)
-                    .Include(x => x.ObjectiveType)
-                    .Include(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
-                    .Include(x => x.Location)
-                            .ThenInclude(x => x.Item)
-                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
-                    .ToListAsync();
+                var objectives = await Sorting(allObjectives, filter, sort);
 
                 return new PagedListDto<ObjectiveToListDto>()
                 {
@@ -395,29 +380,74 @@ namespace Brio.Docs.Services
             return ids;
         }
 
-        private async Task<IQueryable<Objective>> Sorting(IQueryable<Objective> objectives, ObjectiveSortParameters sort)
+        private async Task<List<ObjectiveToListDto>> Sorting(IQueryable<Objective> allObjectives, ObjectiveFilterParameters filter, ObjectiveSortParameters sort)
         {
-            if (objectives.Count() < 2)
+            var objectives = new List<ObjectiveToListDto>();
+
+            if (sort == null)
+            {
+                objectives = await allObjectives?
+                    .ByPages(x => x.CreationDate,
+                                  filter.PageNumber,
+                                  filter.PageSize)
+                    .Include(x => x.ObjectiveType)
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Location)
+                            .ThenInclude(x => x.Item)
+                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                    .ToListAsync();
+
                 return objectives;
+            }
 
             switch (sort.Sort)
             {
                 case ObjectiveSortParameters.Sorts.ByTitle:
-                    objectives = objectives.OrderBy(x => x.Title);
+                    objectives = await allObjectives?
+                        .OrderBy(x => x.Title)
+                        .ByPages(x => x.Title,
+                                    filter.PageNumber,
+                                    filter.PageSize)
+                        .Include(x => x.ObjectiveType)
+                        .Include(x => x.BimElements)
+                                .ThenInclude(x => x.BimElement)
+                        .Include(x => x.Location)
+                                .ThenInclude(x => x.Item)
+                        .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                        .ToListAsync();
                     break;
                 case ObjectiveSortParameters.Sorts.ByCreateDate:
-                    objectives = objectives.OrderBy(x => x.CreationDate);
+                    objectives = await allObjectives?
+                        .OrderBy(x => x.CreationDate)
+                        .ByPages(x => x.Title,
+                                    filter.PageNumber,
+                                    filter.PageSize)
+                        .Include(x => x.ObjectiveType)
+                        .Include(x => x.BimElements)
+                                .ThenInclude(x => x.BimElement)
+                        .Include(x => x.Location)
+                                .ThenInclude(x => x.Item)
+                        .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                        .ToListAsync();
                     break;
                 case ObjectiveSortParameters.Sorts.ByEditDate:
-                    //sortObjectives.Sort(new ObjectiveCompareHelper.CompareByEditDate());
                     break;
-                case ObjectiveSortParameters.Sorts.ByFixDate:
-                    //sortObjectives.Sort(new ObjectiveCompareHelper.CompareByFixDate());
+                case ObjectiveSortParameters.Sorts.ByDueDate:
+                    objectives = await allObjectives?
+                        .OrderBy(x => x.DueDate)
+                        .ByPages(x => x.DueDate,
+                                    filter.PageNumber,
+                                    filter.PageSize)
+                        .Include(x => x.ObjectiveType)
+                        .Include(x => x.BimElements)
+                                .ThenInclude(x => x.BimElement)
+                        .Include(x => x.Location)
+                                .ThenInclude(x => x.Item)
+                        .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                        .ToListAsync();
                     break;
             }
-
-            if (sort.IsReverse)
-                objectives.Reverse();
 
             return objectives;
         }
