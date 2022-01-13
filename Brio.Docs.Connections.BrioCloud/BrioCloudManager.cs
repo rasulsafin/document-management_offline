@@ -13,9 +13,9 @@ namespace Brio.Docs.Connections.BrioCloud
 {
     public class BrioCloudManager : ICloudManager
     {
-        private BrioCloudController controller;
-        private List<string> tables = new List<string>();
-        private List<string> directories = new List<string>();
+        private readonly BrioCloudController controller;
+        private readonly List<string> tables = new List<string>();
+        private readonly List<string> directories = new List<string>();
 
         public BrioCloudManager(BrioCloudController controller)
         {

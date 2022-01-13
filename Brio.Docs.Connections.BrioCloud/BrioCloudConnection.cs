@@ -12,7 +12,7 @@ namespace Brio.Docs.Connections.BrioCloud
 {
     public class BrioCloudConnection : IConnection
     {
-        public static readonly string NAME_CONNECTION = "Brio-Cloud";
+        public static readonly string CONNECTION_NAME = "Brio-Cloud";
 
         private BrioCloudManager manager;
 
@@ -72,7 +72,7 @@ namespace Brio.Docs.Connections.BrioCloud
         public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
             await InitiateManager(info);
-            return BrioCloudConnectionContext.CreateContext(manager);
+            return new BrioCloudConnectionContext(manager);
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)
@@ -84,7 +84,7 @@ namespace Brio.Docs.Connections.BrioCloud
         private static Task<bool> IsAuthDataCorrect(ConnectionInfoExternalDto info)
         {
             var connect = info.ConnectionType;
-            if (connect.Name == NAME_CONNECTION && info.AuthFieldValues.ContainsKey(BrioCloudAuth.USERNAME) && info.AuthFieldValues.ContainsKey(BrioCloudAuth.PASSWORD))
+            if (connect.Name == CONNECTION_NAME && info.AuthFieldValues.ContainsKey(BrioCloudAuth.USERNAME) && info.AuthFieldValues.ContainsKey(BrioCloudAuth.PASSWORD))
             {
                 return Task.FromResult(true);
             }

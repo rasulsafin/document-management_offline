@@ -122,14 +122,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
             var response = await client.Delete(href);
 
-            if (response.IsSuccessful)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return response.IsSuccessful;
         }
 
         public async Task<string> GetContentAsync(string href)
@@ -191,7 +184,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         private string NormalizePath(string path)
         {
-            if (!path.Contains(RootPath))
+            if (!path.StartsWith(RootPath))
             {
                 path = RootPath + path;
             }

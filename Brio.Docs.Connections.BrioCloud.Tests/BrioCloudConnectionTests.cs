@@ -19,7 +19,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         private const string VALID_USERNAME = "briomrs";
         private const string VALID_PASSWORD = "BrioMRS2021";
 
-        private static readonly string NAME_CONNECTION = BrioCloudConnection.NAME_CONNECTION;
+        private static readonly string NAME_CONNECTION = BrioCloudConnection.CONNECTION_NAME;
 
         private static ConnectionInfoExternalDto validInfo;
 

@@ -9,15 +9,9 @@ namespace Brio.Docs.Connections.BrioCloud.Synchronization
     {
         private readonly BrioCloudManager manager;
 
-        private BrioCloudConnectionContext(BrioCloudManager manager)
+        public BrioCloudConnectionContext(BrioCloudManager manager)
         {
             this.manager = manager;
-        }
-
-        public static BrioCloudConnectionContext CreateContext(BrioCloudManager manager)
-        {
-            var context = new BrioCloudConnectionContext(manager);
-            return context;
         }
 
         protected override ISynchronizer<ObjectiveExternalDto> CreateObjectivesSynchronizer()
