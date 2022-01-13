@@ -13,7 +13,6 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
     internal class ObjectiveBimElementsMerger : AChildrenMerger<Objective, BimElementObjective, BimElement>
     {
-        private readonly BimElementComparer bimElementComparer = new ();
         private readonly Expression<Func<BimElementObjective, BimElement>> childFromLinkExpression = link => link.BimElement;
         private readonly Expression<Func<Objective, ICollection<BimElementObjective>>> collectionExpression = objective => objective.BimElements;
 
@@ -32,27 +31,24 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             => collectionExpression;
 
         protected override bool DoesNeedInTuple(BimElement child, SynchronizingTuple<BimElement> childTuple)
-            => childTuple.Any(element => bimElementComparer.Equals(element, child));
+            => childTuple.Any(element => Equals(element, child));
 
         protected override Expression<Func<BimElement, bool>> GetNeedToRemoveExpression(Objective parent)
             => element => element.Objectives.All(x => x.Objective == parent);
 
-        private class BimElementComparer
+        private bool Equals(BimElement x, BimElement y)
         {
-            public bool Equals(BimElement x, BimElement y)
-            {
-                if (ReferenceEquals(x, null))
-                    return false;
+            if (ReferenceEquals(x, null))
+                return false;
 
-                if (ReferenceEquals(y, null))
-                    return false;
+            if (ReferenceEquals(y, null))
+                return false;
 
-                if (ReferenceEquals(x, y))
-                    return true;
+            if (ReferenceEquals(x, y))
+                return true;
 
-                return string.Equals(x.GlobalID, y.GlobalID, StringComparison.Ordinal) &&
-                    string.Equals(x.ParentName, y.ParentName, StringComparison.InvariantCultureIgnoreCase);
-            }
+            return string.Equals(x.GlobalID, y.GlobalID, StringComparison.Ordinal) &&
+                string.Equals(x.ParentName, y.ParentName, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }
