@@ -1,7 +1,9 @@
 using System;
 using System.Linq.Expressions;
 using Brio.Docs.Database;
+using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
+using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -24,5 +26,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         }
 
         protected override Expression<Func<TChild, TChild>> SynchronizableChildExpression => synchronizableChildExpression;
+
+        protected override bool DoesNeedInTuple(TChild child, SynchronizingTuple<TChild> childTuple)
+            => childTuple.DoesNeed(child);
     }
 }

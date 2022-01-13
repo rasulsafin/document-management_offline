@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Synchronization;
@@ -29,6 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IMerger<Item>, ItemMerger>();
             services.AddScoped<IMerger<DynamicField>, DynamicFieldMerger>();
             services.AddScoped<IMerger<Location>, LocationMerger>();
+            services.AddScoped<IMerger<BimElement>, BimElementMerger>();
 
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
 

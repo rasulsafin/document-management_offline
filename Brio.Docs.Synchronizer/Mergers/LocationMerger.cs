@@ -107,7 +107,18 @@ namespace Brio.Docs.Synchronization.Mergers
                     await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
                     await GetUpdatedTime(tuple.Remote).ConfigureAwait(false));
 
-                itemTuple.RemoveWhere(x => x?.ExternalID != relevantId);
+                bool Remove(ref Item item)
+                {
+                    if (item?.ExternalID != relevantId)
+                    {
+                        item = null;
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                itemTuple.ForEachChange(Remove);
                 itemTuple.ExternalID = relevantId;
             }
 

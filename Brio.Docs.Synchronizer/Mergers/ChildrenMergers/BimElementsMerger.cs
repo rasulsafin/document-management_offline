@@ -1,37 +1,52 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
+using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
-using Brio.Docs.Synchronization.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 {
-    internal class BimElementsMerger : IChildrenMerger<Objective, BimElement>
+    internal class BimElementsMerger : AChildrenMerger<Objective, BimElementObjective, BimElement>
     {
-        public ValueTask MergeChildren(SynchronizingTuple<Objective> tuple)
+        private readonly BimElementComparer bimElementComparer = new ();
+
+        public BimElementsMerger(
+            DMContext context,
+            IMerger<BimElement> merger,
+            ILogger<BimElementsMerger> logger)
+            : base(context, merger, logger)
         {
-            if (!tuple.Any(x => x.BimElements is { Count: > 0 }))
-                return ValueTask.CompletedTask;
+        }
 
-            tuple.ForEach(x => x.BimElements ??= new List<BimElementObjective>());
+        protected override Expression<Func<Objective, ICollection<BimElementObjective>>> CollectionExpression
+            => objective => objective.BimElements;
 
-            CollectionUtils.Merge(
-                tuple,
-                tuple.Local.BimElements,
-                tuple.Synchronized.BimElements,
-                tuple.Remote.BimElements,
-                (a, b) => string.Equals(a.ParentName, b.ParentName, StringComparison.InvariantCultureIgnoreCase) &&
-                    string.Equals(a.GlobalID, b.GlobalID),
-                (element, objective) => new BimElementObjective
-                {
-                    BimElement = element,
-                    Objective = objective,
-                },
-                x => x.BimElement);
-            return ValueTask.CompletedTask;
+        protected override Expression<Func<BimElementObjective, BimElement>> SynchronizableChildExpression
+            => link => link.BimElement;
+
+        protected override bool DoesNeedInTuple(BimElement child, SynchronizingTuple<BimElement> childTuple)
+            => childTuple.Any(element => bimElementComparer.Equals(element, child));
+
+        private class BimElementComparer
+        {
+            public bool Equals(BimElement x, BimElement y)
+            {
+                if (ReferenceEquals(x, null))
+                    return false;
+
+                if (ReferenceEquals(y, null))
+                    return false;
+
+                if (ReferenceEquals(x, y))
+                    return true;
+
+                return string.Equals(x.GlobalID, y.GlobalID, StringComparison.Ordinal) &&
+                    string.Equals(x.ParentName, y.ParentName, StringComparison.InvariantCultureIgnoreCase);
+            }
         }
     }
 }

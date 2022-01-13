@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Extensions;
-using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
@@ -19,7 +18,7 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         : IChildrenMerger<TParent, TSynchronizableChild>
         where TParent : class
         where TChild : class, new()
-        where TSynchronizableChild : class, ISynchronizable<TSynchronizableChild>
+        where TSynchronizableChild : class
     {
         private readonly IAttacher<TSynchronizableChild> attacher;
         private readonly IMerger<TSynchronizableChild> childMerger;
@@ -120,10 +119,9 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             logger.LogTrace("Children synchronized");
         }
 
-        protected virtual bool DoesNeedInTuple(
+        protected abstract bool DoesNeedInTuple(
             TSynchronizableChild child,
-            SynchronizingTuple<TSynchronizableChild> childTuple)
-            => childTuple.DoesNeed(child);
+            SynchronizingTuple<TSynchronizableChild> childTuple);
 
         protected virtual Expression<Func<TSynchronizableChild, bool>> GetNeedToRemoveExpression(TParent parent)
             => defaultNeedToRemoveExpression;
@@ -242,8 +240,8 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             switch (action)
             {
                 case SynchronizingAction.Nothing:
-                case SynchronizingAction.Merge:
                     break;
+                case SynchronizingAction.Merge:
                 case SynchronizingAction.AddToLocal:
                 case SynchronizingAction.AddToRemote:
                     tuple.ForEachChange(childTuple, AddChild);

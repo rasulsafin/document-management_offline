@@ -48,7 +48,6 @@ namespace Brio.Docs.Synchronization.Utils
             IEnumerable<T> synchronized,
             IEnumerable<T> remote,
             Func<T, SynchronizingTuple<T>, bool> isEqualsFunc)
-            where T : ISynchronizable<T>
         {
             var result = new List<SynchronizingTuple<T>>();
 
@@ -56,15 +55,9 @@ namespace Brio.Docs.Synchronization.Utils
             {
                 foreach (var element in list)
                 {
-                    if (string.IsNullOrEmpty(element.ExternalID))
-                    {
-                        result.Add(new SynchronizingTuple<T>(local: element));
-                        continue;
-                    }
-
                     var containsItem = result.FirstOrDefault(x => isEqualsFunc(element, x));
                     if (containsItem == null)
-                        result.Add(containsItem = new SynchronizingTuple<T>(element.ExternalID));
+                        result.Add(containsItem = new SynchronizingTuple<T>());
 
                     set(containsItem, element);
                 }
