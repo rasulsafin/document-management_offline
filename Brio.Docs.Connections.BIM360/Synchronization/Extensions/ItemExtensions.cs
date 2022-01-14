@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Extensions
 {

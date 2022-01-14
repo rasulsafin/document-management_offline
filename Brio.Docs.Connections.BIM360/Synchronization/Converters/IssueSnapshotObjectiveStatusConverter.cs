@@ -4,6 +4,7 @@ using Brio.Docs.Common;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
@@ -13,7 +14,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public Task<ObjectiveStatus> Convert(IssueSnapshot issueSnapshot)
         {
             var project = issueSnapshot.ProjectSnapshot;
-            var config = project.StatusesRelations ?? IfcConfigUtilities.GetDefaultStatusesConfig();
+            var config = project.StatusesRelations ?? ConfigurationsHelper.GetDefaultStatusesConfig();
             var status = issueSnapshot.Entity.GetSuitableStatuses(config)
                .Append(ObjectiveStatus.Undefined)
                .First();
