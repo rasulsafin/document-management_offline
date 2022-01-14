@@ -1,6 +1,6 @@
 ﻿using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 
-namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
+namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models
 {
     internal class CommentSnapshot : ASnapshotEntity<Comment>
     {
@@ -9,7 +9,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         {
         }
 
-        public string Author { get; set; }
+        public string Author { get; init; }
 
         public override string ID => Entity.ID;
     }

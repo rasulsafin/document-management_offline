@@ -7,16 +7,17 @@ using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Models.StatusRelations;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
-    internal class IfcConfigUtilities
+    internal class ConfigurationsHelper
     {
         private readonly Downloader downloader;
 
-        public IfcConfigUtilities(Downloader downloader)
+        public ConfigurationsHelper(Downloader downloader)
             => this.downloader = downloader;
 
         public static StatusesRelations GetDefaultStatusesConfig()
@@ -27,15 +28,15 @@ namespace Brio.Docs.Connections.Bim360.Utilities
             return JsonConvert.DeserializeObject<StatusesRelations>(json);
         }
 
-        public async Task<IfcConfig> GetConfig(
-            ObjectiveExternalDto obj,
+        public async Task<IfcConfig> GetModelConfig(
+            string fileName,
             ProjectSnapshot project,
             ItemSnapshot itemSnapshot)
         {
-            if (string.IsNullOrWhiteSpace(obj.Location?.Item?.FileName))
+            if (string.IsNullOrWhiteSpace(fileName))
                 return null;
 
-            var configName = obj.Location.Item.FileName + MrsConstants.CONFIG_EXTENSION;
+            var configName = fileName + MrsConstants.CONFIG_EXTENSION;
             var config = project.Items
                .Where(
                     x => x.Value.Entity.Relationships.Parent.Data.ID ==

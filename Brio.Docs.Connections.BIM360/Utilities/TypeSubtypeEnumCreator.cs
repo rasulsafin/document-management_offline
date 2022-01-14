@@ -1,3 +1,4 @@
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
@@ -18,9 +20,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 
         private static readonly string DISPLAY_NAME = MrsConstants.TYPE_FIELD_NAME;
 
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
 
-        public TypeSubtypeEnumCreator(IssuesService issuesService)
+        public TypeSubtypeEnumCreator(IIssuesService issuesService)
             => this.issuesService = issuesService;
 
         public string EnumExternalID => ENUM_EXTERNAL_ID;
