@@ -5,18 +5,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Extensions;
-using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal class ObjectiveStrategy : ISynchronizationStrategy<Objective, ObjectiveExternalDto>
+    internal class ObjectiveStrategy : ISynchronizationStrategy<Objective>
     {
         private readonly DMContext context;
         private readonly IExternalIdUpdater<DynamicField> dynamicFieldIdUpdater;
@@ -89,7 +88,6 @@ namespace Brio.Docs.Synchronization.Strategies
         public async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -109,7 +107,9 @@ namespace Brio.Docs.Synchronization.Strategies
                    .ConfigureAwait(false);
                 tuple.Remote.ProjectID = tuple.Synchronized.ProjectID = projectMateId ?? 0;
 
-                var result = await strategyHelper.AddToRemote(connectionContext.ObjectivesSynchronizer, tuple, token).ConfigureAwait(false);
+                var result = await strategyHelper
+                   .AddToRemote(data.ConnectionContext.ObjectivesSynchronizer, tuple, token)
+                   .ConfigureAwait(false);
                 await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
@@ -126,10 +126,12 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
+        public Expression<Func<Objective, bool>> GetFilter(SynchronizingData data)
+            => data.ObjectivesFilter;
+
         public async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -138,7 +140,8 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
                 UpdateChildrenBeforeSynchronization(tuple, data);
-                var result = await strategyHelper.Merge(tuple, connectionContext.ObjectivesSynchronizer, token).ConfigureAwait(false);
+                var result = await strategyHelper.Merge(tuple, data.ConnectionContext.ObjectivesSynchronizer, token)
+                   .ConfigureAwait(false);
                 await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
@@ -160,6 +163,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
         public async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<Objective> tuple,
+            SynchronizingData data,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -182,14 +186,16 @@ namespace Brio.Docs.Synchronization.Strategies
 
         public async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<Objective> tuple,
-            IConnectionContext connectionContext,
+            SynchronizingData data,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
 
             try
             {
-                return await strategyHelper.RemoveFromRemote(connectionContext.ObjectivesSynchronizer, tuple, token).ConfigureAwait(false);
+                return await strategyHelper
+                   .RemoveFromRemote(data.ConnectionContext.ObjectivesSynchronizer, tuple, token)
+                   .ConfigureAwait(false);
             }
             catch (Exception e)
             {

@@ -21,17 +21,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<Synchronizer>();
             services.AddScoped<ISynchronizerProcessor, SynchronizerProcessor>();
             services.AddScoped<StrategyHelper>();
-            services.AddScoped<ISynchronizationStrategy<Project, ProjectExternalDto>, ProjectStrategy>();
-            services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
+            services.AddScoped<ISynchronizationStrategy<Project>, ProjectStrategy>();
+            services.AddScoped<ISynchronizationStrategy<Objective>, ObjectiveStrategy>();
 
+            services.AddScoped<MapperHelper>();
             services.AddScoped<IConverter<
-                    IReadOnlyCollection<ProjectExternalDto>,
-                    IReadOnlyCollection<Project>>,
-                ProjectsMapper>();
+                IReadOnlyCollection<ProjectExternalDto>,
+                IReadOnlyCollection<Project>>>(provider => provider.GetService<MapperHelper>());
             services.AddScoped<IConverter<
-                    IReadOnlyCollection<ObjectiveExternalDto>,
-                    IReadOnlyCollection<Objective>>,
-                ObjectivesMapper>();
+                IReadOnlyCollection<ObjectiveExternalDto>,
+                IReadOnlyCollection<Objective>>>(provider => provider.GetService<MapperHelper>());
 
             services.AddScoped<IMerger<Project>, ProjectMerger>();
             services.AddScoped<IMerger<Objective>, ObjectiveMerger>();

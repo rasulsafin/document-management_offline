@@ -5,14 +5,13 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
+using Brio.Docs.Database.Extensions;
 using Brio.Docs.Integration.Extensions;
-using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization
@@ -33,14 +32,11 @@ namespace Brio.Docs.Synchronization
         }
 
         public async Task<List<SynchronizingResult>> Synchronize<TDB, TDto>(
-            ISynchronizationStrategy<TDB, TDto> strategy,
+            ISynchronizationStrategy<TDB> strategy,
             SynchronizingData data,
-            IConnectionContext connectionContext,
             IEnumerable<TDB> remoteCollection,
+            Expression<Func<TDB, bool>> filter,
             CancellationToken token,
-            Expression<Func<TDB, bool>> defaultFiler,
-            Expression<Func<TDB, bool>> dbFilter = null,
-            Func<TDB, bool> remoteFilter = null,
             IProgress<double> progress = null)
             where TDB : class, ISynchronizable<TDB>, new()
         {
@@ -48,15 +44,31 @@ namespace Brio.Docs.Synchronization
             logger.LogTrace("Synchronize started");
 
             progress?.Report(0.0);
-            var list = Include(context.Set<TDB>()).Where(defaultFiler);
 
-            if (dbFilter != null)
-                list = list.Where(dbFilter);
+            var defaultFiler = strategy.GetFilter(data);
+
+            var local = strategy.Order(
+                context.Set<TDB>()
+                   .Unsynchronized()
+                   .Include(x => x.SynchronizationMate)
+                   .Where(defaultFiler)
+                   .Where(filter));
+            var synchronized = strategy.Order(
+                context.Set<TDB>()
+                   .Synchronized()
+                   .Include(x => x.SynchronizationMate)
+                   .Where(defaultFiler)
+                   .Where(filter));
+            var remote = strategy.Order(
+                remoteCollection
+                   .Where(filter.Compile()));
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
-                strategy.Order(list),
-                strategy.Order(remoteFilter == null ? remoteCollection : remoteCollection.Where(remoteFilter)),
-                IsEntitiesEquals);
+                local,
+                synchronized,
+                remote,
+                (element, tuple) => tuple.DoesNeed(element));
+
             logger.LogDebug("{@Count} tuples created", tuples.Count);
 
             var results = new List<SynchronizingResult>();
@@ -74,36 +86,19 @@ namespace Brio.Docs.Synchronization
 
                 try
                 {
-                    switch (action)
+                    SynchronizationFunc<TDB> func = action switch
                     {
-                        case SynchronizingAction.Nothing:
-                            break;
-                        case SynchronizingAction.Merge:
-                            results.AddIsNotNull(
-                                await strategy.Merge(tuple, data, connectionContext, token).ConfigureAwait(false));
-                            break;
-                        case SynchronizingAction.AddToLocal:
-                            results.AddIsNotNull(
-                                await strategy.AddToLocal(tuple, data, token).ConfigureAwait(false));
-                            break;
-                        case SynchronizingAction.AddToRemote:
-                            results.AddIsNotNull(
-                                await strategy.AddToRemote(tuple, data, connectionContext, token)
-                                   .ConfigureAwait(false));
-                            break;
-                        case SynchronizingAction.RemoveFromLocal:
-                            results.AddIsNotNull(
-                                await strategy.RemoveFromLocal(tuple, token)
-                                   .ConfigureAwait(false));
-                            break;
-                        case SynchronizingAction.RemoveFromRemote:
-                            results.AddIsNotNull(
-                                await strategy.RemoveFromRemote(tuple, connectionContext, token)
-                                   .ConfigureAwait(false));
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(action), "Invalid action");
-                    }
+                        SynchronizingAction.Nothing => (_, _, _) => Task.FromResult(default(SynchronizingResult)),
+                        SynchronizingAction.Merge => strategy.Merge,
+                        SynchronizingAction.AddToLocal => strategy.AddToLocal,
+                        SynchronizingAction.AddToRemote => strategy.AddToRemote,
+                        SynchronizingAction.RemoveFromLocal => strategy.RemoveFromLocal,
+                        SynchronizingAction.RemoveFromRemote => strategy.RemoveFromRemote,
+                        _ => throw new ArgumentOutOfRangeException(nameof(action), "Invalid action")
+                    };
+
+                    var synchronizingResult = await func.Invoke(tuple, data, token).ConfigureAwait(false);
+                    results.AddIsNotNull(synchronizingResult);
 
                     if (needSaveOnEachTuple)
                     {
@@ -132,14 +127,6 @@ namespace Brio.Docs.Synchronization
             progress?.Report(1.0);
             return results;
         }
-
-        protected virtual IIncludableQueryable<TDB, TDB> Include<TDB>(IQueryable<TDB> set)
-            where TDB : class, ISynchronizable<TDB>, new()
-            => set.Include(x => x.SynchronizationMate);
-
-        protected virtual bool IsEntitiesEquals<TDB>(TDB element, SynchronizingTuple<TDB> tuple)
-            where TDB : class, ISynchronizable<TDB>, new()
-            => tuple.DoesNeed(element);
 
         protected async Task SaveDb(SynchronizingData data)
         {

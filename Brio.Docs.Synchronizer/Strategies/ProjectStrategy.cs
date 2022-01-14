@@ -6,9 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
-using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Extensions;
-using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
@@ -17,7 +15,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
-    internal class ProjectStrategy : ISynchronizationStrategy<Project, ProjectExternalDto>
+    internal class ProjectStrategy : ISynchronizationStrategy<Project>
     {
         private readonly DMContext context;
         private readonly IExternalIdUpdater<Item> itemIdUpdater;
@@ -77,7 +75,6 @@ namespace Brio.Docs.Synchronization.Strategies
         public async Task<SynchronizingResult> AddToRemote(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -86,7 +83,8 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
                 await AddUser(tuple, data).ConfigureAwait(false);
-                var result = await strategyHelper.AddToRemote(connectionContext.ProjectsSynchronizer, tuple, token).ConfigureAwait(false);
+                var result = await strategyHelper.AddToRemote(data.ConnectionContext.ProjectsSynchronizer, tuple, token)
+                   .ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -104,13 +102,12 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        public Expression<Func<Project, bool>> GetDefaultFilter(SynchronizingData data)
+        public Expression<Func<Project, bool>> GetFilter(SynchronizingData data)
             => data.ProjectsFilter;
 
         public async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,
-            IConnectionContext connectionContext,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -122,7 +119,8 @@ namespace Brio.Docs.Synchronization.Strategies
                 await AddUser(tuple, data).ConfigureAwait(false);
                 logger.LogTrace("User linked");
 
-                var result = await strategyHelper.Merge(tuple, connectionContext.ProjectsSynchronizer, token).ConfigureAwait(false);
+                var result = await strategyHelper.Merge(tuple, data.ConnectionContext.ProjectsSynchronizer, token)
+                   .ConfigureAwait(false);
                 UpdateChildrenAfterSynchronization(tuple);
                 logger.LogTrace("Children updated");
                 await merger.Merge(tuple).ConfigureAwait(false);
@@ -140,13 +138,12 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        public IEnumerable<Project> Order(IEnumerable<Project> objectives)
-        {
-            return objectives;
-        }
+        public IEnumerable<Project> Order(IEnumerable<Project> project)
+            => project;
 
         public async Task<SynchronizingResult> RemoveFromLocal(
             SynchronizingTuple<Project> tuple,
+            SynchronizingData data,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
@@ -169,14 +166,15 @@ namespace Brio.Docs.Synchronization.Strategies
 
         public async Task<SynchronizingResult> RemoveFromRemote(
             SynchronizingTuple<Project> tuple,
-            IConnectionContext connectionContext,
+            SynchronizingData data,
             CancellationToken token)
         {
             using var lScope = logger.BeginMethodScope();
 
             try
             {
-                return await strategyHelper.RemoveFromRemote(connectionContext.ProjectsSynchronizer, tuple, token).ConfigureAwait(false);
+                return await strategyHelper.RemoveFromRemote(data.ConnectionContext.ProjectsSynchronizer, tuple, token)
+                   .ConfigureAwait(false);
             }
             catch (Exception e)
             {

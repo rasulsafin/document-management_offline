@@ -9,12 +9,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Utils
 {
-    internal class ObjectivesMapper : IConverter<IReadOnlyCollection<ObjectiveExternalDto>, IReadOnlyCollection<Objective>>
+    internal class MapperHelper
+        : IConverter<IReadOnlyCollection<ObjectiveExternalDto>, IReadOnlyCollection<Objective>>,
+            IConverter<IReadOnlyCollection<ProjectExternalDto>, IReadOnlyCollection<Project>>
     {
-        private readonly ILogger<ObjectivesMapper> logger;
+        private readonly ILogger<MapperHelper> logger;
         private readonly IMapper mapper;
 
-        public ObjectivesMapper(ILogger<ObjectivesMapper> logger, IMapper mapper)
+        public MapperHelper(ILogger<MapperHelper> logger, IMapper mapper)
         {
             this.logger = logger;
             this.mapper = mapper;
@@ -28,6 +30,7 @@ namespace Brio.Docs.Synchronization.Utils
             foreach (var objective in objectives)
             {
                 var external = externalDtos.FirstOrDefault(x => x.ExternalID == objective.ExternalID);
+
                 if (!string.IsNullOrEmpty(external?.ParentObjectiveExternalID))
                 {
                     objective.ParentObjective =
@@ -36,6 +39,13 @@ namespace Brio.Docs.Synchronization.Utils
             }
 
             return Task.FromResult(objectives);
+        }
+
+        public Task<IReadOnlyCollection<Project>> Convert(IReadOnlyCollection<ProjectExternalDto> externalDtos)
+        {
+            logger.LogTrace("Map started for externalDtos: {@Dtos}", externalDtos);
+            var result = mapper.Map<IReadOnlyCollection<Project>>(externalDtos);
+            return Task.FromResult(result);
         }
     }
 }
