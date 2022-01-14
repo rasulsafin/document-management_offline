@@ -175,6 +175,8 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Parameters for filtration.</param>
+        /// <param name="isReverse">Parameter for reverse sorting</param>
+        /// <param name="sort">Parameter for sorting</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with the pagination info.</response>
         /// <response code="400">Invalid project id.</response>
@@ -194,12 +196,14 @@ namespace Brio.Docs.Api.Controllers
             int projectID,
             [FromQuery]
             ObjectiveFilterParameters filter,
-            [FromQuery]
-            ObjectiveSortParameters sort)
+            [FromQuery(Name = "IsReverse")]
+            bool isReverse,
+            [FromQuery(Name = "Sort")]
+            ObjectiveSortParameters.Sorts sort)
         {
             try
             {
-                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, sort);
+                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, new ObjectiveSortParameters() { IsReverse = isReverse, Sort = sort });
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)

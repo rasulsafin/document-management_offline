@@ -10,8 +10,8 @@
         {
             ByTitle,
             ByCreateDate,
-            ByDueDate,
             ByEditDate,
+            ByDueDate,
         }
     }
 }

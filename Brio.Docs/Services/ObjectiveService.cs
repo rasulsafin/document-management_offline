@@ -203,7 +203,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, ObjectiveSortParameters sort = null)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, ObjectiveSortParameters sort)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -405,24 +405,26 @@ namespace Brio.Docs.Services
             {
                 case ObjectiveSortParameters.Sorts.ByTitle:
                     objectives = await allObjectives?
-                        .OrderBy(x => x.Title)
-                        .ByPages(x => x.Title,
-                                    filter.PageNumber,
-                                    filter.PageSize)
-                        .Include(x => x.ObjectiveType)
-                        .Include(x => x.BimElements)
-                                .ThenInclude(x => x.BimElement)
-                        .Include(x => x.Location)
-                                .ThenInclude(x => x.Item)
-                        .Select(x => mapper.Map<ObjectiveToListDto>(x))
-                        .ToListAsync();
+                            .OrderBy(x => x.Title)
+                            .ByPages(x => x.Title,
+                                        filter.PageNumber,
+                                        filter.PageSize,
+                                        sort.IsReverse)
+                            .Include(x => x.ObjectiveType)
+                            .Include(x => x.BimElements)
+                                    .ThenInclude(x => x.BimElement)
+                            .Include(x => x.Location)
+                                    .ThenInclude(x => x.Item)
+                            .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                            .ToListAsync();
                     break;
                 case ObjectiveSortParameters.Sorts.ByCreateDate:
                     objectives = await allObjectives?
                         .OrderBy(x => x.CreationDate)
-                        .ByPages(x => x.Title,
+                        .ByPages(x => x.CreationDate,
                                     filter.PageNumber,
-                                    filter.PageSize)
+                                    filter.PageSize,
+                                    sort.IsReverse)
                         .Include(x => x.ObjectiveType)
                         .Include(x => x.BimElements)
                                 .ThenInclude(x => x.BimElement)
@@ -438,7 +440,8 @@ namespace Brio.Docs.Services
                         .OrderBy(x => x.DueDate)
                         .ByPages(x => x.DueDate,
                                     filter.PageNumber,
-                                    filter.PageSize)
+                                    filter.PageSize,
+                                    sort.IsReverse)
                         .Include(x => x.ObjectiveType)
                         .Include(x => x.BimElements)
                                 .ThenInclude(x => x.BimElement)
