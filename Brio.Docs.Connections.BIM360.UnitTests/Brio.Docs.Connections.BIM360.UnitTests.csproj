@@ -22,4 +22,10 @@
       <ProjectReference Include="..\Brio.Docs.Connections.BIM360\Brio.Docs.Connections.BIM360.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Resources\Lorem Ipsum.txt">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

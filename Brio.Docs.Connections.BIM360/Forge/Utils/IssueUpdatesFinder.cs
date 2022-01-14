@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Brio.Docs.Connections.Bim360.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -10,9 +11,9 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils
 {
     internal class IssueUpdatesFinder
     {
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
 
-        public IssueUpdatesFinder(IssuesService issuesService)
+        public IssueUpdatesFinder(IIssuesService issuesService)
             => this.issuesService = issuesService;
 
         // Deleting an attachment is not defined as a change.

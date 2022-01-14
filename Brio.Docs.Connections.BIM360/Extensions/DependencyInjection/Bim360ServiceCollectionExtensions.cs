@@ -2,6 +2,7 @@ using Brio.Docs.Connections.Bim360;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -20,11 +21,10 @@ namespace Microsoft.Extensions.DependencyInjection
                .AddEnumCreator<AssignToEnumCreator, AssignToVariant>()
                .AddEnumCreator<StatusEnumCreator, StatusSnapshot>();
 
-            services.AddScoped<SnapshotFiller>();
-            services.AddScoped<Bim360Snapshot>();
+            services.AddSnapshotUtilities();
             services.AddScoped<Bim360Storage>();
             services.AddScoped<Downloader>();
-            services.AddScoped<IfcConfigUtilities>();
+            services.AddScoped<ConfigurationsHelper>();
             services.AddScoped<IssueSnapshotUtilities>();
             services.AddBim360Synchronization();
             return services;
@@ -35,5 +35,14 @@ namespace Microsoft.Extensions.DependencyInjection
             => services
                .AddScoped<TCreator>()
                .AddScoped<IEnumIdentification<TSnapshot>, TCreator>(x => x.GetService<TCreator>());
+
+        private static IServiceCollection AddSnapshotUtilities(this IServiceCollection services)
+        {
+            services.AddScoped<Bim360Snapshot>();
+            services.AddScoped<SnapshotFiller>();
+            services.AddScoped<SnapshotGetter>();
+            services.AddScoped<SnapshotUpdater>();
+            return services;
+        }
     }
 }
