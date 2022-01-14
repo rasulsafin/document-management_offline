@@ -78,12 +78,12 @@ namespace Brio.Docs.Services
 
             foreach (var status in statuses)
             {
-                isDone &= status == ObjectiveStatus.Done;
-                isReady &= status == ObjectiveStatus.Done || status == ObjectiveStatus.Ready;
-                isInProgress |= status == ObjectiveStatus.Done || status == ObjectiveStatus.Ready || status == ObjectiveStatus.InProgress;
+                isDone &= status == ObjectiveStatus.Closed;
+                isReady &= status == ObjectiveStatus.Closed || status == ObjectiveStatus.Ready;
+                isInProgress |= status == ObjectiveStatus.Closed || status == ObjectiveStatus.Ready || status == ObjectiveStatus.InProgress;
             }
 
-            return isDone ? ObjectiveStatus.Done : isReady ? ObjectiveStatus.Ready : isInProgress ? ObjectiveStatus.InProgress : ObjectiveStatus.Open;
+            return isDone ? ObjectiveStatus.Closed : isReady ? ObjectiveStatus.Ready : isInProgress ? ObjectiveStatus.InProgress : ObjectiveStatus.Open;
         }
     }
 }

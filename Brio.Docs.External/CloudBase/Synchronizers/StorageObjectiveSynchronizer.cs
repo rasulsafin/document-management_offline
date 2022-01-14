@@ -46,7 +46,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
             if (!deleteResult)
                 return null;
 
-            obj.Status = ObjectiveStatus.Done;
+            obj.Status = ObjectiveStatus.Closed;
             return obj;
         }
 

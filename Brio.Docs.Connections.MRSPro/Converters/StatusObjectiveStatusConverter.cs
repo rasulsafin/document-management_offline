@@ -10,7 +10,7 @@ namespace Brio.Docs.Connections.MrsPro.Converters
         public Task<ObjectiveStatus> Convert(string status)
          => Task.FromResult(status switch
          {
-             STATE_VERIFIED => ObjectiveStatus.Done,
+             STATE_VERIFIED => ObjectiveStatus.Closed,
              STATE_OPENED => ObjectiveStatus.Open,
              STATE_COMPLETED => ObjectiveStatus.Ready,
              _ => ObjectiveStatus.Undefined,

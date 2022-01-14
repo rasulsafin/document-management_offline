@@ -86,14 +86,14 @@ namespace Brio.Docs.Connections.Tdms.Mappers
 
         private string SetStatus(ObjectiveStatus status) => status switch
         {
-            ObjectiveStatus.Done => StatusID.DEFECT_DONE,
+            ObjectiveStatus.Closed => StatusID.DEFECT_DONE,
             ObjectiveStatus.Ready => StatusID.DEFECT_INPROGRESS,
             ObjectiveStatus.InProgress => StatusID.DEFECT_INPROGRESS,
             _ => StatusID.DEFECT_CREATED,
         };
 
         private ObjectiveStatus GetStatus(string statusTDMS)
-          => statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Done :
+          => statusTDMS == StatusID.DEFECT_DONE ? ObjectiveStatus.Closed :
               statusTDMS == StatusID.DEFECT_INPROGRESS ? ObjectiveStatus.InProgress :
               statusTDMS == StatusID.DEFECT_CREATED ? ObjectiveStatus.Open :
               ObjectiveStatus.Undefined;

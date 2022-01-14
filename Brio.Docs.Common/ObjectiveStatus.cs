@@ -7,6 +7,6 @@
         InProgress,
         Ready,
         Late,
-        Done,
+        Closed,
     }
 }

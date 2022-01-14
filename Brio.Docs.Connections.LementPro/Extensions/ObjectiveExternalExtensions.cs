@@ -126,7 +126,7 @@ namespace Brio.Docs.Connections.LementPro
         private static ObjectiveStatus ParseStatus(ObjectBase model)
         {
             if (model.State.GetValueOrDefault() == STATE_ARCHIVED)
-                return ObjectiveStatus.Done;
+                return ObjectiveStatus.Closed;
 
             return model.Values.IsExpired switch
             {
