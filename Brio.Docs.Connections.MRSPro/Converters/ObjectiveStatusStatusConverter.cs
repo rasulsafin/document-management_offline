@@ -12,8 +12,9 @@ namespace Brio.Docs.Connections.MrsPro.Converters
          {
              ObjectiveStatus.Open => STATE_OPENED,
              ObjectiveStatus.Undefined => STATE_OPENED,
-             ObjectiveStatus.InProgress => STATE_COMPLETED,
-             ObjectiveStatus.Ready => STATE_VERIFIED,
+             ObjectiveStatus.InProgress => STATE_OPENED,
+             ObjectiveStatus.Ready => STATE_COMPLETED,
+             ObjectiveStatus.Done => STATE_VERIFIED,
              ObjectiveStatus.Late => STATE_OPENED,
              _ => STATE_OPENED,
          });

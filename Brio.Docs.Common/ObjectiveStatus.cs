@@ -7,5 +7,6 @@
         InProgress,
         Ready,
         Late,
+        Done,
     }
 }
