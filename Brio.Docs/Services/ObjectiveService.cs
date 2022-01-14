@@ -384,23 +384,6 @@ namespace Brio.Docs.Services
         {
             var objectives = new List<ObjectiveToListDto>();
 
-            if (sort == null)
-            {
-                objectives = await allObjectives?
-                    .ByPages(x => x.CreationDate,
-                                  filter.PageNumber,
-                                  filter.PageSize)
-                    .Include(x => x.ObjectiveType)
-                    .Include(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
-                    .Include(x => x.Location)
-                            .ThenInclude(x => x.Item)
-                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
-                    .ToListAsync();
-
-                return objectives;
-            }
-
             switch (sort.Sort)
             {
                 case ObjectiveSortParameters.Sorts.ByTitle:

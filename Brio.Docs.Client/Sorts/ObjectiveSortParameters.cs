@@ -8,8 +8,8 @@
 
         public enum Sorts
         {
-            ByTitle,
             ByCreateDate,
+            ByTitle,
             ByEditDate,
             ByDueDate,
         }
