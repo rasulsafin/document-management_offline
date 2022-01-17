@@ -97,15 +97,15 @@ namespace Brio.Docs.Synchronization.Mergers
 
         private async Task MergeItems(SynchronizingTuple<Objective> tuple)
         {
-            if (tuple.Remote.Items == null)
-                return;
-
-            foreach (var link in tuple.Remote.Items)
+            if (tuple.Remote.Items != null)
             {
-                var item = link.Item;
+                foreach (var link in tuple.Remote.Items)
+                {
+                    var item = link.Item;
 
-                if (item is { Project: null, Objectives: null })
-                    item.ProjectID = tuple.Remote.Project.ID;
+                    if (item is { Project: null, Objectives: null })
+                        item.ProjectID = tuple.Remote.Project?.ID ?? tuple.Remote.ProjectID;
+                }
             }
 
             await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);

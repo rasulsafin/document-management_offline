@@ -96,6 +96,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
+                UpdateChildrenBeforeSynchronization(tuple, data);
                 CreateObjectiveParentLink(tuple);
                 var projectID = tuple.Local.ProjectID;
                 var projectMateId = await context.Projects
@@ -221,13 +222,32 @@ namespace Brio.Docs.Synchronization.Strategies
 
             void AddConnectionInfoTo(DynamicField df)
             {
-                df.ConnectionInfoID = data.User.ConnectionInfoID;
+                df.ConnectionInfoID ??= data.User.ConnectionInfoID;
 
                 if (df.ChildrenDynamicFields == null)
                     return;
 
                 foreach (var child in df.ChildrenDynamicFields)
                     AddConnectionInfoTo(child);
+            }
+        }
+
+        private static void AddProjectToRemote(SynchronizingTuple<Objective> tuple)
+        {
+            tuple.Remote.Project ??= tuple.Synchronized.Project;
+            if (tuple.Remote.ProjectID == 0)
+                tuple.Remote.ProjectID = tuple.Synchronized.ProjectID;
+        }
+
+        private static void AddProjectToRemoteItems(SynchronizingTuple<Objective> tuple)
+        {
+            if (tuple.Remote.Items == null)
+                return;
+
+            foreach (var link in tuple.Remote.Items)
+            {
+                var item = link.Item;
+                item.ProjectID = tuple.AsEnumerable().Select(x => x.ProjectID).First(x => x != 0);
             }
         }
 
@@ -270,12 +290,14 @@ namespace Brio.Docs.Synchronization.Strategies
             logger.LogTrace("External ids of dynamic fields updated");
 
             AddConnectionInfoToDynamicFields(tuple, data);
+            AddProjectToRemote(tuple);
             return Task.CompletedTask;
         }
 
         private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             AddConnectionInfoToDynamicFields(tuple, data);
+            AddProjectToRemoteItems(tuple);
         }
     }
 }
