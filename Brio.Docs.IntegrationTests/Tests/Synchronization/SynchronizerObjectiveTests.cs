@@ -13,10 +13,8 @@ using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Utility;
-using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -30,8 +28,6 @@ namespace Brio.Docs.Tests.Synchronization
         private static ServiceProvider serviceProvider;
 
         private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
-
-        private static Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
 
         private static SharedDatabaseFixture Fixture { get; set; }
 
@@ -48,53 +44,18 @@ namespace Brio.Docs.Tests.Synchronization
         [TestInitialize]
         public async Task Setup()
         {
-            Fixture = new SharedDatabaseFixture(
-                context =>
-                {
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
-                    var users = MockData.DEFAULT_USERS;
-                    var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
-                    context.Users.AddRange(users);
-                    context.ObjectiveTypes.AddRange(objectiveTypes);
-                    context.SaveChanges();
-                });
-
-            var services = new ServiceCollection();
-            services.AddSingleton(Fixture.Context);
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            serviceProvider = services.BuildServiceProvider();
+            Fixture = SynchronizerTestsHelper.CreateFixture();
+            serviceProvider = SynchronizerTestsHelper.CreateServiceProvider(Fixture.Context);
             synchronizer = serviceProvider.GetService<Synchronizer>();
             mapper = serviceProvider.GetService<IMapper>();
 
             ResultObjectiveExternalDtos = new List<ObjectiveExternalDto>();
             Connection = new Mock<IConnection>();
-            Context = new Mock<IConnectionContext>();
+            var projectSynchronizer = SynchronizerTestsHelper.CreateSynchronizerStub<ProjectExternalDto>();
+            ObjectiveSynchronizer = SynchronizerTestsHelper.CreateSynchronizerStub<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
+            Context = SynchronizerTestsHelper.CreateConnectionContextStub(projectSynchronizer.Object, ObjectiveSynchronizer.Object);
             Connection.Setup(x => x.GetContext(It.IsAny<ConnectionInfoExternalDto>())).ReturnsAsync(Context.Object);
-            ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
-            ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
-            ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
-            ProjectSynchronizer.Setup(x => x.Update(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
-            ProjectSynchronizer.Setup(x => x.Remove(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult);
-            ObjectiveSynchronizer.Setup(x => x.Add(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(AddIDs)
-               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
-            ObjectiveSynchronizer.Setup(x => x.Update(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(AddIDs)
-               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
-            ObjectiveSynchronizer.Setup(x => x.Remove(It.IsAny<ObjectiveExternalDto>()))
-               .Returns<ObjectiveExternalDto>(Task.FromResult)
-               .Callback<ObjectiveExternalDto>(x => ResultObjectiveExternalDtos.Add(x));
-            Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
-            Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
-
-            Project = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            Project = await SynchronizerTestsHelper.ArrangeProject(projectSynchronizer, Fixture);
         }
 
         [TestCleanup]
@@ -1368,25 +1329,5 @@ namespace Brio.Docs.Tests.Synchronization
 
         private void MockRemoteObjectives(IReadOnlyCollection<ObjectiveExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(ObjectiveSynchronizer, array, x => x.ExternalID);
-
-        private Task<ObjectiveExternalDto> AddIDs(ObjectiveExternalDto x)
-        {
-            void SetID(DynamicFieldExternalDto df)
-            {
-                df.ExternalID = $"new_df_{Guid.NewGuid()}";
-
-                foreach (var child in df.ChildrenDynamicFields)
-                    SetID(child);
-            }
-
-            x.ExternalID ??= $"new_objective_{Guid.NewGuid()}";
-            foreach (var item in x.Items.Where(i => i.ExternalID == null))
-                item.ExternalID = $"new_item_{Guid.NewGuid()}";
-
-            foreach (var df in x.DynamicFields.Where(df => df.ExternalID == null))
-                SetID(df);
-
-            return Task.FromResult(x);
-        }
     }
 }
