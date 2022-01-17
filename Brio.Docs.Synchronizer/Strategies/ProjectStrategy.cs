@@ -199,7 +199,7 @@ namespace Brio.Docs.Synchronization.Strategies
                    .AnyAsync(x => x.Project == project && x.UserID == data.User.ID)
                    .ConfigureAwait(false);
 
-                if (hasUser)
+                if (!hasUser)
                 {
                     await context.Set<UserProject>()
                        .AddAsync(
