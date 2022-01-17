@@ -110,7 +110,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 var result = await strategyHelper
                    .AddToRemote(data.ConnectionContext.ObjectivesSynchronizer, tuple, token)
                    .ConfigureAwait(false);
-                await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
+                await UpdateChildrenAfterSynchronization(tuple, data).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
             }
@@ -142,7 +142,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 UpdateChildrenBeforeSynchronization(tuple, data);
                 var result = await strategyHelper.Merge(tuple, data.ConnectionContext.ObjectivesSynchronizer, token)
                    .ConfigureAwait(false);
-                await UpdateChildrenAfterSynchronization(tuple).ConfigureAwait(false);
+                await UpdateChildrenAfterSynchronization(tuple, data).ConfigureAwait(false);
                 await merger.Merge(tuple).ConfigureAwait(false);
                 return result;
             }
@@ -209,6 +209,28 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
+        private static void AddConnectionInfoToDynamicFields(SynchronizingTuple<Objective> tuple, SynchronizingData data)
+        {
+            if (tuple.Remote == null)
+                return;
+
+            var remoteObjective = tuple.Remote;
+
+            foreach (var df in remoteObjective.DynamicFields)
+                AddConnectionInfoTo(df);
+
+            void AddConnectionInfoTo(DynamicField df)
+            {
+                df.ConnectionInfoID = data.User.ConnectionInfoID;
+
+                if (df.ChildrenDynamicFields == null)
+                    return;
+
+                foreach (var child in df.ChildrenDynamicFields)
+                    AddConnectionInfoTo(child);
+            }
+        }
+
         private void CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("CreateObjectiveParentLink started with {@Tuple}", tuple);
@@ -232,7 +254,7 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple)
+        private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
             itemIdUpdater.UpdateExternalIds(
@@ -247,30 +269,13 @@ namespace Brio.Docs.Synchronization.Strategies
                 tuple.Remote.DynamicFields ?? ArraySegment<DynamicField>.Empty);
             logger.LogTrace("External ids of dynamic fields updated");
 
-            logger.LogTrace("Location item linked");
+            AddConnectionInfoToDynamicFields(tuple, data);
             return Task.CompletedTask;
         }
 
         private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
-            if (tuple.Remote == null)
-                return;
-
-            var remoteObjective = tuple.Remote;
-
-            foreach (var df in remoteObjective.DynamicFields)
-                AddConnectionInfoTo(df);
-
-            void AddConnectionInfoTo(DynamicField df)
-            {
-                df.ConnectionInfoID = data.User.ConnectionInfoID;
-
-                if (df.ChildrenDynamicFields == null)
-                    return;
-
-                foreach (var child in df.ChildrenDynamicFields)
-                    AddConnectionInfoTo(child);
-            }
+            AddConnectionInfoToDynamicFields(tuple, data);
         }
     }
 }

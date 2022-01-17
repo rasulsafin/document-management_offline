@@ -34,7 +34,6 @@ namespace Brio.Docs.Synchronization.Mergers
                 field => field.Type,
                 field => field.Name,
                 field => field.Value,
-                x => x.ConnectionInfo,
                 x => x.ConnectionInfoID);
             logger.LogAfterMerge(tuple);
             await childrenHelper.Value.MergeChildren(tuple).ConfigureAwait(false);
