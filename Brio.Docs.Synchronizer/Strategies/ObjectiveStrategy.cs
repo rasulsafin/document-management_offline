@@ -53,9 +53,6 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
-                if (tuple.Remote.Author.ID == data.User.ID && tuple.Remote.Author != data.User)
-                    tuple.Remote.Author = data.User;
-
                 await merger.Merge(tuple).ConfigureAwait(false);
 
                 UpdateChildrenBeforeSynchronization(tuple, data);

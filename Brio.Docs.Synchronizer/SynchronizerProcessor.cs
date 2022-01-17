@@ -72,13 +72,12 @@ namespace Brio.Docs.Synchronization
 
             var results = new List<SynchronizingResult>();
             var i = 0;
-            DBContextUtilities.ReloadContext(context);
 
             foreach (var tuple in tuples)
             {
-                context.Attach(data.User);
                 foreach (var db in tuple.AsEnumerable().Where(x => x != null && x.ID != 0))
                     context.Attach(db);
+
                 logger.LogTrace("Tuple {ID}", tuple.ExternalID);
                 token.ThrowIfCancellationRequested();
 
@@ -92,12 +91,12 @@ namespace Brio.Docs.Synchronization
                     results.AddIsNotNull(synchronizingResult);
 
                     await SaveDb(data).ConfigureAwait(false);
-                    DBContextUtilities.ReloadContext(context);
+                    DBContextUtilities.ReloadContext(context, data);
                 }
                 catch (Exception e)
                 {
                     logger.LogError(e, "Synchronization failed");
-                    DBContextUtilities.ReloadContext(context);
+                    DBContextUtilities.ReloadContext(context, data);
 
                     var isRemote = action == SynchronizingAction.AddToLocal;
                     results.Add(
@@ -131,7 +130,7 @@ namespace Brio.Docs.Synchronization
             };
         }
 
-        protected async Task SaveDb(SynchronizingData data)
+        private async Task SaveDb(SynchronizingData data)
         {
             if (data.Date == default)
                 await context.SaveChangesAsync().ConfigureAwait(false);
