@@ -63,7 +63,7 @@ namespace Brio.Docs.Synchronization.Mergers
             logger.LogTrace("Objective location merged");
             await dynamicFieldChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
             logger.LogTrace("Objective dynamic fields merged");
-            await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            await MergeItems(tuple).ConfigureAwait(false);
             logger.LogTrace("Objective items merged");
             await bimElementChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
             logger.LogTrace("Objective bim elements merged");
@@ -93,6 +93,22 @@ namespace Brio.Docs.Synchronization.Mergers
                .Select(x => x.Location)
                .FirstOrDefaultAsync()
                .ConfigureAwait(false);
+        }
+
+        private async Task MergeItems(SynchronizingTuple<Objective> tuple)
+        {
+            if (tuple.Remote.Items == null)
+                return;
+
+            foreach (var link in tuple.Remote.Items)
+            {
+                var item = link.Item;
+
+                if (item is { Project: null, Objectives: null })
+                    item.ProjectID = tuple.Remote.Project.ID;
+            }
+
+            await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
         }
 
         private async ValueTask MergeLocation(SynchronizingTuple<Objective> tuple)

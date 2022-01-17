@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
@@ -11,7 +12,6 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Brio.Docs.Synchronization.Strategies
 {
@@ -53,6 +53,9 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
+                if (tuple.Remote.Author.ID == data.User.ID && tuple.Remote.Author != data.User)
+                    tuple.Remote.Author = data.User;
+
                 await merger.Merge(tuple).ConfigureAwait(false);
 
                 UpdateChildrenBeforeSynchronization(tuple, data);

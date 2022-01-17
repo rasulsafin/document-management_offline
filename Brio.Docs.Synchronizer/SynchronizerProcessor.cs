@@ -20,7 +20,6 @@ namespace Brio.Docs.Synchronization
     {
         private readonly DMContext context;
         private readonly ILogger<SynchronizerProcessor> logger;
-        private readonly bool needSaveOnEachTuple = false;
 
         public SynchronizerProcessor(
             DMContext context,
@@ -73,9 +72,11 @@ namespace Brio.Docs.Synchronization
 
             var results = new List<SynchronizingResult>();
             var i = 0;
+            DBContextUtilities.ReloadContext(context);
 
             foreach (var tuple in tuples)
             {
+                context.Attach(data.User);
                 foreach (var db in tuple.AsEnumerable().Where(x => x != null && x.ID != 0))
                     context.Attach(db);
                 logger.LogTrace("Tuple {ID}", tuple.ExternalID);
@@ -100,11 +101,8 @@ namespace Brio.Docs.Synchronization
                     var synchronizingResult = await func.Invoke(tuple, data, token).ConfigureAwait(false);
                     results.AddIsNotNull(synchronizingResult);
 
-                    if (needSaveOnEachTuple)
-                    {
-                        await SaveDb(data).ConfigureAwait(false);
-                        DBContextUtilities.ReloadContext(context);
-                    }
+                    await SaveDb(data).ConfigureAwait(false);
+                    DBContextUtilities.ReloadContext(context);
                 }
                 catch (Exception e)
                 {
