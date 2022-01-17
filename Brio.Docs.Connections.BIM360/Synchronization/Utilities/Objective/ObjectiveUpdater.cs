@@ -83,9 +83,37 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                 (issue, linkedInfo) = await LinkToModel(project, obj, issue);
 
             var isNew = IsNew(issue);
-            issue = await PutIssueAsync(project, issue, isNew);
-            var issueSnapshot = UpdateSnapshot(project, issue, isNew);
 
+            IssueSnapshot issueSnapshot;
+
+            if (isNew || !IssueUtilities.ReadOnlyStatuses.Contains(issue.Attributes.Status))
+            {
+                issueSnapshot = await Put(issue, project, isNew);
+
+                await AddComment(obj, issueSnapshot, project);
+                await AddItems(obj, project, issueSnapshot);
+                await AddBimElements(obj, project, issueSnapshot);
+                await AddLinkedInfo(linkedInfo, project, issueSnapshot);
+            }
+            else
+            {
+                issueSnapshot = snapshot.GetIssue(project, obj.ExternalID);
+
+                await AddComment(obj, issueSnapshot, project);
+                await AddItems(obj, project, issueSnapshot);
+                await AddBimElements(obj, project, issueSnapshot);
+                await AddLinkedInfo(linkedInfo, project, issueSnapshot);
+
+                issueSnapshot = await Put(issue, project, false);
+            }
+
+            var parsedToDto = await converterToDto.Convert(issueSnapshot);
+
+            return parsedToDto;
+        }
+
+        private async Task AddComment(ObjectiveExternalDto obj, IssueSnapshot issueSnapshot, ProjectSnapshot project)
+        {
             var newComment = obj.DynamicFields.FirstOrDefault(
                 x
                     => x.ExternalID == MrsConstants.NEW_COMMENT_ID && !string.IsNullOrWhiteSpace(x.Value));
@@ -93,18 +121,20 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             if (newComment != null)
             {
                 var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
+
                 if (comment != null)
                 {
                     issueSnapshot.Comments.Add(
                         await snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot.Entity));
                 }
             }
+        }
 
-            var parsedToDto = await converterToDto.Convert(issueSnapshot);
-            await AddItems(obj, project, issueSnapshot, parsedToDto);
-            await AddBimElements(obj, project, issueSnapshot, parsedToDto);
-            await AddLinkedInfo(linkedInfo, project, issueSnapshot);
-            return parsedToDto;
+        private async Task<IssueSnapshot> Put(Issue issue, ProjectSnapshot project, bool isNew)
+        {
+            issue = await PutIssueAsync(project, issue, isNew);
+            var issueSnapshot = UpdateSnapshot(project, issue, isNew);
+            return issueSnapshot;
         }
 
         private async Task<(Issue issue, LinkedInfo linkedInfo)> LinkToModel(ProjectSnapshot project, ObjectiveExternalDto obj, Issue issue)
@@ -127,25 +157,23 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private async Task AddItems(
             ObjectiveExternalDto obj,
             ProjectSnapshot project,
-            IssueSnapshot issueSnapshot,
-            ObjectiveExternalDto parsedToDto)
+            IssueSnapshot issueSnapshot)
         {
             if (obj.Items?.Any() ?? false)
             {
                 var added = await AddItems(obj.Items, project, issueSnapshot.Entity);
                 issueSnapshot.Attachments = added.ToDictionary(x => x.ID);
-                parsedToDto.Items = issueSnapshot.Attachments.Values.Select(i => i.ToDto()).ToList();
             }
         }
 
         private async Task AddBimElements(
             ObjectiveExternalDto obj,
             ProjectSnapshot project,
-            IssueSnapshot issueSnapshot,
-            ObjectiveExternalDto parsedToDto)
+            IssueSnapshot issueSnapshot)
         {
             var addedBimElements = await AddBimElements(obj.BimElements, project, issueSnapshot);
-            parsedToDto.BimElements = addedBimElements?.ToList();
+            addedBimElements ??= Enumerable.Empty<BimElementExternalDto>();
+            issueSnapshot.BimElements = addedBimElements;
         }
 
         private async Task<IEnumerable<Attachment>> AddItems(
