@@ -34,7 +34,10 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             => childTuple.Any(element => Equals(element, child));
 
         protected override Expression<Func<BimElement, bool>> GetNeedToRemoveExpression(Objective parent)
-            => element => element.Objectives.All(x => x.Objective == parent);
+            => element => element.Objectives.All(
+                x => x.Objective == parent ||
+                    (x.Objective.SynchronizationMateID != null && x.Objective.SynchronizationMateID == parent.ID) ||
+                    (parent.SynchronizationMateID != null && x.Objective.ID == parent.SynchronizationMateID));
 
         private bool Equals(BimElement x, BimElement y)
         {
