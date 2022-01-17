@@ -24,6 +24,7 @@ namespace Brio.Docs.Tests.Synchronization
     public class SynchronizerObjectiveLocationTests : IDisposable
     {
         private readonly Lazy<string> locationGuidDefault = new Lazy<string>(() => Guid.NewGuid().ToString());
+        private AssertHelper assertHelper;
         private Mock<IConnection> connection;
         private SharedDatabaseFixture fixture;
         private Mock<ISynchronizer<ObjectiveExternalDto>> objectiveSynchronizer;
@@ -38,6 +39,8 @@ namespace Brio.Docs.Tests.Synchronization
             fixture = SynchronizerTestsHelper.CreateFixture();
             serviceProvider = SynchronizerTestsHelper.CreateServiceProvider(fixture.Context);
             synchronizer = serviceProvider.GetService<Synchronizer>();
+
+            assertHelper = new AssertHelper(fixture.Context);
 
             connection = new Mock<IConnection>();
             var projectSynchronizer = SynchronizerTestsHelper.CreateSynchronizerStub<ProjectExternalDto>();
@@ -66,11 +69,11 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNotNull(remoteResult);
-            Assert.IsNull(synchronized.Location);
-            Assert.IsNull(remoteResult.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemotePushed(remoteResult);
+            AssertIsSynchronizedLocationNull(synchronized);
+            AssertIsLocationNotPushed(remoteResult);
         }
 
         [TestMethod]
@@ -86,12 +89,12 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(local);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNull(remoteResult);
-            Assert.IsNull(local.Location);
-            Assert.IsNull(synchronized.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsLocalNotNull(local);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemoteNotPushed(remoteResult);
+            AssertIsLocalLocationNull(local);
+            AssertIsSynchronizedLocationNull(synchronized);
         }
 
         [TestMethod]
@@ -111,11 +114,11 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNotNull(remoteResult);
-            Assert.IsNotNull(synchronized.Location);
-            Assert.IsNotNull(remoteResult.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemotePushed(remoteResult);
+            AssertIsSynchronizedLocationNotNull(synchronized);
+            AssertIsRemoteLocationNotNull(remoteResult);
             AssertLocation(objectiveLocal.Location, remoteResult.Location);
             AssertLocation(objectiveLocal.Location, synchronized.Location);
         }
@@ -148,12 +151,12 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(local);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNull(remoteResult);
-            Assert.IsNotNull(local.Location);
-            Assert.IsNotNull(synchronized.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsLocalNotNull(local);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemoteNotPushed(remoteResult);
+            AssertIsLocalLocationNotNull(local);
+            AssertIsSynchronizedLocationNotNull(synchronized);
             AssertLocationItem(objectiveRemote.Location, local.Location);
             AssertLocationItem(objectiveRemote.Location, synchronized.Location);
         }
@@ -186,13 +189,13 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(local);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNotNull(remoteResult);
-            Assert.IsNotNull(local.Location);
-            Assert.IsNotNull(synchronized.Location);
-            Assert.IsNotNull(remoteResult.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsLocalNotNull(local);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemotePushed(remoteResult);
+            AssertIsLocalLocationNotNull(local);
+            AssertIsSynchronizedLocationNotNull(synchronized);
+            AssertIsRemoteLocationNotNull(remoteResult);
             AssertLocationItem(local.Location, synchronized.Location);
             AssertLocationItem(local.Location, remoteResult.Location);
         }
@@ -213,12 +216,12 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(local);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNull(remoteResult);
-            Assert.IsNotNull(local.Location);
-            Assert.IsNotNull(synchronized.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsLocalNotNull(local);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemoteNotPushed(remoteResult);
+            AssertIsLocalLocationNotNull(local);
+            AssertIsSynchronizedLocationNotNull(synchronized);
             AssertLocation(objectiveRemote.Location, local.Location);
             AssertLocation(objectiveRemote.Location, synchronized.Location);
         }
@@ -251,12 +254,12 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
 
             // Assert.
-            Assert.AreEqual(0, synchronizationResult.Count);
-            Assert.IsNotNull(local);
-            Assert.IsNotNull(synchronized);
-            Assert.IsNull(remoteResult);
-            Assert.IsNotNull(local.Location);
-            Assert.IsNotNull(synchronized.Location);
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            AssertIsLocalNotNull(local);
+            AssertIsSynchronizedNotNull(synchronized);
+            AssertIsRemoteNotPushed(remoteResult);
+            AssertIsLocalLocationNotNull(local);
+            AssertIsSynchronizedLocationNotNull(synchronized);
             AssertLocation(objectiveRemote.Location, local.Location);
             AssertLocation(objectiveRemote.Location, synchronized.Location);
         }
@@ -268,76 +271,106 @@ namespace Brio.Docs.Tests.Synchronization
             GC.SuppressFinalize(this);
         }
 
+        private static void AssertIsLocalLocationNotNull(Objective local)
+            => Assert.IsNotNull(local.Location, "Local location is null");
+
+        private static void AssertIsLocalLocationNull(Objective local)
+            => Assert.IsNull(local.Location, "Local location is not null");
+
+        private static void AssertIsLocalNotNull(Objective local)
+            => Assert.IsNotNull(local, "The local objective is null");
+
+        private static void AssertIsLocationNotPushed(ObjectiveExternalDto remote)
+            => Assert.IsNull(remote.Location, "Location has been pushed");
+
+        private static void AssertIsRemoteLocationNotNull(ObjectiveExternalDto objective)
+            => Assert.IsNotNull(objective.Location, "Remote location is null");
+
+        private static void AssertIsRemoteNotPushed(ObjectiveExternalDto objective)
+            => Assert.IsNull(objective, "Remote objective has been pushed");
+
+        private static void AssertIsRemotePushed(ObjectiveExternalDto objective)
+            => Assert.IsNotNull(objective, "Remote objective has not been pushed");
+
+        private static void AssertIsSynchronizedLocationNotNull(Objective synchronized)
+            => Assert.IsNotNull(synchronized.Location, "Synchronized location is null");
+
+        private static void AssertIsSynchronizedLocationNull(Objective synchronized)
+            => Assert.IsNull(synchronized.Location, "Synchronized location is not null");
+
+        private static void AssertIsSynchronizedNotNull(Objective synchronized)
+            => Assert.IsNotNull(synchronized, "The synchronized objective is null");
+
         private static void AssertLocation(Location expected, Location actual)
         {
-            Assert.AreEqual(expected.Guid, actual.Guid);
-            Assert.AreEqual(expected.PositionX, actual.PositionX);
-            Assert.AreEqual(expected.PositionY, actual.PositionY);
-            Assert.AreEqual(expected.PositionZ, actual.PositionZ);
-            Assert.AreEqual(expected.CameraPositionX, actual.CameraPositionX);
-            Assert.AreEqual(expected.CameraPositionY, actual.CameraPositionY);
-            Assert.AreEqual(expected.CameraPositionZ, actual.CameraPositionZ);
+            Assert.AreEqual(expected.Guid, actual.Guid, "The location GUID does not match the expected value.");
+            Assert.AreEqual(expected.PositionX, actual.PositionX, "The location Position X does not match the expected value.");
+            Assert.AreEqual(expected.PositionY, actual.PositionY, "The location Position Y does not match the expected value.");
+            Assert.AreEqual(expected.PositionZ, actual.PositionZ, "The location Position Z does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionX, actual.CameraPositionX, "The location Camera Position X does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionY, actual.CameraPositionY, "The location Camera Position Y does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionZ, actual.CameraPositionZ, "The location Camera Position Z does not match the expected value.");
             AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(Location expected, LocationExternalDto actual)
         {
-            Assert.AreEqual(expected.Guid, actual.Guid);
-            Assert.AreEqual(expected.PositionX, actual.Location.x);
-            Assert.AreEqual(expected.PositionY, actual.Location.y);
-            Assert.AreEqual(expected.PositionZ, actual.Location.z);
-            Assert.AreEqual(expected.CameraPositionX, actual.CameraPosition.x);
-            Assert.AreEqual(expected.CameraPositionY, actual.CameraPosition.y);
-            Assert.AreEqual(expected.CameraPositionZ, actual.CameraPosition.z);
+            Assert.AreEqual(expected.Guid, actual.Guid, "The location GUID does not match the expected value.");
+            Assert.AreEqual(expected.PositionX, actual.Location.x, "The location X does not match the expected value.");
+            Assert.AreEqual(expected.PositionY, actual.Location.y, "The location Y does not match the expected value.");
+            Assert.AreEqual(expected.PositionZ, actual.Location.z, "The location Z does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionX, actual.CameraPosition.x, "The location Camera Position X does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionY, actual.CameraPosition.y, "The location Camera Position Y does not match the expected value.");
+            Assert.AreEqual(expected.CameraPositionZ, actual.CameraPosition.z, "The location Camera Position Z does not match the expected value.");
             AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(LocationExternalDto expected, Location actual)
         {
-            Assert.AreEqual(expected.Guid, actual.Guid);
-            Assert.AreEqual(expected.Location.x, actual.PositionX);
-            Assert.AreEqual(expected.Location.y, actual.PositionY);
-            Assert.AreEqual(expected.Location.z, actual.PositionZ);
-            Assert.AreEqual(expected.CameraPosition.x, actual.CameraPositionX);
-            Assert.AreEqual(expected.CameraPosition.y, actual.CameraPositionY);
-            Assert.AreEqual(expected.CameraPosition.z, actual.CameraPositionZ);
+            Assert.AreEqual(expected.Guid, actual.Guid, "The location GUID does not match the expected value.");
+            Assert.AreEqual(expected.Location.x, actual.PositionX, "The location Position X does not match the expected value.");
+            Assert.AreEqual(expected.Location.y, actual.PositionY, "The location Position Y does not match the expected value.");
+            Assert.AreEqual(expected.Location.z, actual.PositionZ, "The location Position Z does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.x, actual.CameraPositionX, "The location Camera Position X does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.y, actual.CameraPositionY, "The location Camera Position Y does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.z, actual.CameraPositionZ, "The location Camera Position Z does not match the expected value.");
             AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocation(LocationExternalDto expected, LocationExternalDto actual)
         {
-            Assert.AreEqual(expected.Guid, actual.Guid);
-            Assert.AreEqual(expected.Location.x, actual.Location.x);
-            Assert.AreEqual(expected.Location.y, actual.Location.y);
-            Assert.AreEqual(expected.Location.z, actual.Location.z);
-            Assert.AreEqual(expected.CameraPosition.x, actual.CameraPosition.x);
-            Assert.AreEqual(expected.CameraPosition.y, actual.CameraPosition.y);
-            Assert.AreEqual(expected.CameraPosition.z, actual.CameraPosition.z);
+            Assert.AreEqual(expected.Guid, actual.Guid, "The location GUID does not match the expected value.");
+            Assert.AreEqual(expected.Location.x, actual.Location.x, "The location X does not match the expected value.");
+            Assert.AreEqual(expected.Location.y, actual.Location.y, "The location Y does not match the expected value.");
+            Assert.AreEqual(expected.Location.z, actual.Location.z, "The location Z does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.x, actual.CameraPosition.x, "The location Camera Position X does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.y, actual.CameraPosition.y, "The location Camera Position Y does not match the expected value.");
+            Assert.AreEqual(expected.CameraPosition.z, actual.CameraPosition.z, "The location Camera Position Z does not match the expected value.");
             AssertLocationItem(expected, actual);
         }
 
         private static void AssertLocationItem(Location expected, Location actual)
         {
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            Assert.IsNotNull(actual.Item, "Actual item is null");
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID, "The location item does not match the expected value.");
         }
 
         private static void AssertLocationItem(Location expected, LocationExternalDto actual)
         {
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            Assert.IsNotNull(actual.Item, "Actual item is null");
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID, "The location item does not match the expected value.");
         }
 
         private static void AssertLocationItem(LocationExternalDto expected, Location actual)
         {
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            Assert.IsNotNull(actual.Item, "Actual item is null");
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID, "The location item does not match the expected value.");
         }
 
         private static void AssertLocationItem(LocationExternalDto expected, LocationExternalDto actual)
         {
-            Assert.IsNotNull(actual.Item);
-            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID);
+            Assert.IsNotNull(actual.Item, "Actual item is null");
+            Assert.AreEqual(expected.Item.ExternalID, actual.Item.ExternalID, "The location item does not match the expected value.");
         }
 
         private void CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall call, Times times = default)
