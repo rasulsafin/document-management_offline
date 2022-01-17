@@ -101,8 +101,6 @@ namespace Brio.Docs.Synchronization
                 logger.LogTrace("Added synchronization date");
                 await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None).ConfigureAwait(false);
                 logger.LogDebug("DB updated");
-                await SynchronizationFinalizer.Finalize(dbContext).ConfigureAwait(false);
-                logger.LogTrace("Synchronization finalized");
                 await dbContext.SynchronizationSaveAsync(data.Date, CancellationToken.None).ConfigureAwait(false);
                 logger.LogDebug("DB updated");
             }

@@ -87,17 +87,7 @@ namespace Brio.Docs.Synchronization
 
                 try
                 {
-                    SynchronizationFunc<TDB> func = action switch
-                    {
-                        SynchronizingAction.Nothing => (_, _, _) => Task.FromResult(default(SynchronizingResult)),
-                        SynchronizingAction.Merge => strategy.Merge,
-                        SynchronizingAction.AddToLocal => strategy.AddToLocal,
-                        SynchronizingAction.AddToRemote => strategy.AddToRemote,
-                        SynchronizingAction.RemoveFromLocal => strategy.RemoveFromLocal,
-                        SynchronizingAction.RemoveFromRemote => strategy.RemoveFromRemote,
-                        _ => throw new ArgumentOutOfRangeException(nameof(action), "Invalid action")
-                    };
-
+                    var func = GetFunction(strategy, action);
                     var synchronizingResult = await func.Invoke(tuple, data, token).ConfigureAwait(false);
                     results.AddIsNotNull(synchronizingResult);
 
@@ -124,6 +114,21 @@ namespace Brio.Docs.Synchronization
 
             progress?.Report(1.0);
             return results;
+        }
+
+        private static SynchronizationFunc<TDB> GetFunction<TDB>(ISynchronizationStrategy<TDB> strategy, SynchronizingAction action)
+            where TDB : class, ISynchronizable<TDB>, new()
+        {
+            return action switch
+            {
+                SynchronizingAction.Nothing => (_, _, _) => Task.FromResult(default(SynchronizingResult)),
+                SynchronizingAction.Merge => strategy.Merge,
+                SynchronizingAction.AddToLocal => strategy.AddToLocal,
+                SynchronizingAction.AddToRemote => strategy.AddToRemote,
+                SynchronizingAction.RemoveFromLocal => strategy.RemoveFromLocal,
+                SynchronizingAction.RemoveFromRemote => strategy.RemoveFromRemote,
+                _ => throw new ArgumentOutOfRangeException(nameof(action), "Invalid action")
+            };
         }
 
         protected async Task SaveDb(SynchronizingData data)
