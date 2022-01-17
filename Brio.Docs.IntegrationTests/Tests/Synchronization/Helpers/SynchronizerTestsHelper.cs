@@ -16,7 +16,7 @@ using Moq;
 using Moq.Language;
 using Moq.Language.Flow;
 
-namespace Brio.Docs.Tests.Synchronization
+namespace Brio.Docs.Tests.Synchronization.Helpers
 {
     internal class SynchronizerTestsHelper
     {
