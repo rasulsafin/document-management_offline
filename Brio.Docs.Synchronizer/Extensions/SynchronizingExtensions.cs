@@ -141,6 +141,9 @@ namespace Brio.Docs.Synchronization.Extensions
             if (propertiesToMerge != null)
                 properties = propertiesToMerge.Where(x => properties.Contains(x)).ToArray();
 
+            var isLocalRelevant = tuple.Local != null && tuple.Remote == null;
+            var isRemoteRelevant = tuple.Remote != null && tuple.Local == null;
+
             tuple.Local ??= (T)Activator.CreateInstance(typeof(T));
             tuple.Remote ??= (T)Activator.CreateInstance(typeof(T));
             tuple.Synchronized ??= (T)Activator.CreateInstance(typeof(T));
@@ -173,12 +176,25 @@ namespace Brio.Docs.Synchronization.Extensions
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
 
-                var value = GetRelevantValue(
-                    localUpdatedAt,
-                    remoteUpdatedAt,
-                    localValue,
-                    remoteValue,
-                    synchronizedValue);
+                object value;
+
+                if (isLocalRelevant)
+                {
+                    value = localValue;
+                }
+                else if (isRemoteRelevant)
+                {
+                    value = remoteValue;
+                }
+                else
+                {
+                    value = GetRelevantValue(
+                        localUpdatedAt,
+                        remoteUpdatedAt,
+                        localValue,
+                        remoteValue,
+                        synchronizedValue);
+                }
 
                 UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
             }
