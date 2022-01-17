@@ -13,10 +13,8 @@ using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Tests.Synchronization.Helpers;
 using Brio.Docs.Tests.Utility;
-using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -45,50 +43,23 @@ namespace Brio.Docs.Tests.Synchronization
         [TestInitialize]
         public void Setup()
         {
-            Fixture = new SharedDatabaseFixture(
-                context =>
-                {
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
-                    var users = MockData.DEFAULT_USERS;
-                    var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
-                    context.Users.AddRange(users);
-                    context.ObjectiveTypes.AddRange(objectiveTypes);
-                    context.SaveChanges();
-                });
-
-            var services = new ServiceCollection();
-            services.AddSingleton(Fixture.Context);
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            serviceProvider = services.BuildServiceProvider();
+            Fixture = SynchronizerTestsHelper.CreateFixture();
+            serviceProvider = SynchronizerTestsHelper.CreateServiceProvider(Fixture.Context);
             synchronizer = serviceProvider.GetService<Synchronizer>();
             mapper = serviceProvider.GetService<IMapper>();
 
             assertHelper = new AssertHelper(Fixture.Context);
 
             Connection = new Mock<IConnection>();
-            Context = new Mock<IConnectionContext>();
-            Connection.Setup(x => x.GetContext(It.IsAny<ConnectionInfoExternalDto>())).ReturnsAsync(Context.Object);
-            ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
+            ProjectSynchronizer =
+                SynchronizerTestsHelper.CreateSynchronizerStub<ProjectExternalDto>(x => ResultProjectExternalDto = x);
             ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
-            ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult)
-               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
-            ProjectSynchronizer.Setup(x => x.Update(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult)
-               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
-            ProjectSynchronizer.Setup(x => x.Remove(It.IsAny<ProjectExternalDto>()))
-               .Returns<ProjectExternalDto>(Task.FromResult)
-               .Callback<ProjectExternalDto>(x => ResultProjectExternalDto = x);
             SynchronizerTestsHelper.MockGetRemote(
                 ObjectiveSynchronizer,
                 ArraySegment<ObjectiveExternalDto>.Empty,
                 x => x.ExternalID);
-            Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
-            Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
+            Context = SynchronizerTestsHelper.CreateConnectionContextStub(ProjectSynchronizer.Object, ObjectiveSynchronizer.Object);
+            Connection.Setup(x => x.GetContext(It.IsAny<ConnectionInfoExternalDto>())).ReturnsAsync(Context.Object);
         }
 
         [TestCleanup]

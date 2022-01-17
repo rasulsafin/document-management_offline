@@ -7,8 +7,14 @@ using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Tests.Utility;
+using Brio.Docs.Utility.Mapping;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Moq.Language;
+using Moq.Language.Flow;
 
 namespace Brio.Docs.Tests.Synchronization.Helpers
 {
@@ -79,6 +85,56 @@ namespace Brio.Docs.Tests.Synchronization.Helpers
             synchronizer.Verify(x => x.Update(It.IsAny<T>()), call == SynchronizerCall.Update ? times : Times.Never());
         }
 
+        public static Mock<IConnectionContext> CreateConnectionContextStub(
+            ISynchronizer<ProjectExternalDto> projectSynchronizer,
+            ISynchronizer<ObjectiveExternalDto> objectiveSynchronizer)
+        {
+            var stub = new Mock<IConnectionContext>();
+            stub.Setup(x => x.ObjectivesSynchronizer).Returns(objectiveSynchronizer);
+            stub.Setup(x => x.ProjectsSynchronizer).Returns(projectSynchronizer);
+            return stub;
+        }
+
+        public static SharedDatabaseFixture CreateFixture()
+            => new SharedDatabaseFixture(
+                context =>
+                {
+                    context.Database.EnsureDeleted();
+                    context.Database.EnsureCreated();
+                    var users = MockData.DEFAULT_USERS;
+                    var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
+                    context.Users.AddRange(users);
+                    context.ObjectiveTypes.AddRange(objectiveTypes);
+                    context.SaveChanges();
+                });
+
+        public static ServiceProvider CreateServiceProvider(DMContext context)
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton(context);
+            services.AddSynchronizer();
+            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
+            services.AddMappingResolvers();
+            services.AddAutoMapper(typeof(MappingProfile));
+            return services.BuildServiceProvider();
+        }
+
+        public static Mock<ISynchronizer<T>> CreateSynchronizerStub<T>(Action<T> callback = null)
+            where T : class
+        {
+            void AddCallback(ICallback setup)
+            {
+                if (callback != null)
+                    setup.Callback(callback);
+            }
+
+            var stub = new Mock<ISynchronizer<T>>();
+            AddCallback(stub.Setup(x => x.Add(It.IsAny<T>())).Returns<T>(AddIDs));
+            AddCallback(stub.Setup(x => x.Update(It.IsAny<T>())).Returns<T>(AddIDs));
+            AddCallback(stub.Setup(x => x.Remove(It.IsAny<T>())).Returns<T>(AddIDs));
+            return stub;
+        }
+
         public static void MockGetRemote<T>(Mock<ISynchronizer<T>> synchronizer, IReadOnlyCollection<T> array, Func<T, string> getIDFunc)
         {
             synchronizer
@@ -88,5 +144,49 @@ namespace Brio.Docs.Tests.Synchronization.Helpers
                .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
                .ReturnsAsync(array);
         }
+
+        private static async Task<T> AddIDs<T>(T arg)
+            where T : class
+        {
+            if (typeof(T) == typeof(ProjectExternalDto))
+                return (await AddIDs(arg as ProjectExternalDto)) as T;
+
+            if (typeof(T) == typeof(ObjectiveExternalDto))
+                return (await AddIDs(arg as ObjectiveExternalDto)) as T;
+
+            throw new NotSupportedException();
+        }
+
+        private static void AddIDs(DynamicFieldExternalDto df)
+        {
+            df.ExternalID ??= $"new_df_{Guid.NewGuid()}";
+
+            foreach (var child in df.ChildrenDynamicFields)
+                AddIDs(child);
+        }
+
+        private static Task<ObjectiveExternalDto> AddIDs(ObjectiveExternalDto x)
+        {
+            x.ExternalID ??= $"new_objective_{Guid.NewGuid()}";
+            foreach (var item in x.Items)
+                AddIDs(item);
+
+            foreach (var df in x.DynamicFields)
+                AddIDs(df);
+
+            return Task.FromResult(x);
+        }
+
+        private static Task<ProjectExternalDto> AddIDs(ProjectExternalDto x)
+        {
+            x.ExternalID ??= $"new_project_{Guid.NewGuid()}";
+            foreach (var item in x.Items)
+                AddIDs(item);
+
+            return Task.FromResult(x);
+        }
+
+        private static void AddIDs(ItemExternalDto x)
+            => x.ExternalID ??= $"new_item_{Guid.NewGuid()}";
     }
 }
