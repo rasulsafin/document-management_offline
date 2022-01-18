@@ -1,6 +1,5 @@
 ﻿namespace Brio.Docs.Database.Models
 {
-    [MergeContract]
     public class Location
     {
         public int ID { get; set; }

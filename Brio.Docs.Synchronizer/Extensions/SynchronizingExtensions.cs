@@ -150,28 +150,6 @@ namespace Brio.Docs.Synchronization.Extensions
 
             foreach (var property in properties)
             {
-                if (NeedMergeSubtype(tuple, property))
-                {
-                    var type = typeof(SynchronizingTuple<>).MakeGenericType(property.PropertyType);
-                    dynamic subtuple = Activator.CreateInstance(
-                        type,
-                        default(string),
-                        property.GetValue(tuple.Synchronized),
-                        property.GetValue(tuple.Local),
-                        property.GetValue(tuple.Remote));
-
-                    var merge = typeof(SynchronizingExtensions).GetMethod(nameof(MergePrivate), BindingFlags.Static | BindingFlags.NonPublic) !
-                       .MakeGenericMethod(property.PropertyType);
-
-                    var parameters = new[] { subtuple, localUpdatedAt, remoteUpdatedAt, propertiesToMerge };
-                    merge!.Invoke(null, parameters);
-                    tuple.SynchronizeChanges(subtuple as ISynchronizationChanges);
-                    property.SetValue(tuple.Local, subtuple!.Local);
-                    property.SetValue(tuple.Synchronized, subtuple.Synchronized);
-                    property.SetValue(tuple.Remote, subtuple.Remote);
-                    continue;
-                }
-
                 var synchronizedValue = property.GetValue(tuple.Synchronized);
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
@@ -209,9 +187,5 @@ namespace Brio.Docs.Synchronization.Extensions
             tuple.Remote.ExternalID ??= externalID;
             tuple.Local.SynchronizationMate = tuple.Synchronized;
         }
-
-        private static bool NeedMergeSubtype<T>(SynchronizingTuple<T> tuple, PropertyInfo property)
-            => property.PropertyType.GetCustomAttribute(typeof(MergeContractAttribute)) != null &&
-                (property.GetValue(tuple.Local) != null || property.GetValue(tuple.Remote) != null);
     }
 }
