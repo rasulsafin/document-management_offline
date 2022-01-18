@@ -12,7 +12,6 @@ namespace Brio.Docs.Synchronization.Extensions
     internal static class SynchronizingExtensions
     {
         public static SynchronizingAction DetermineAction<T>(this SynchronizingTuple<T> tuple)
-                where T : ISynchronizable<T>
             => DetermineAction((tuple.Local, tuple.Synchronized, tuple.Remote));
 
         public static SynchronizingAction DetermineAction<T>(this (T local, T synchronized, T remote) tuple)
@@ -23,40 +22,45 @@ namespace Brio.Docs.Synchronization.Extensions
                 : tuple.remote == null                               ? SynchronizingAction.RemoveFromLocal
                                                                        : SynchronizingAction.Merge;
 
+        public static T GetRelevant<T>(
+            this SynchronizingTuple<T> tuple,
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt)
+            where T : class
+            => GetRelevantValue(localUpdatedAt, remoteUpdatedAt, tuple.Local, tuple.Remote, tuple.Synchronized);
+
         [Obsolete]
         public static void Merge<T>(this SynchronizingTuple<T> tuple)
             where T : class, ISynchronizable<T>, new()
         {
-            if (typeof(T) == typeof(Item))
+            if (typeof(T) == typeof(Item) ||
+                typeof(T) == typeof(DynamicField))
                 return;
 
             MergePrivate(tuple, tuple.Local?.UpdatedAt ?? default, tuple.Remote?.UpdatedAt ?? default);
             tuple.LinkEntities();
         }
 
-        public static void Merge<T>(this SynchronizingTuple<T> tuple, params Expression<Func<T, object>>[] properties)
-            where T : class, ISynchronizable<T>, new()
+        public static void Merge<T>(
+            this SynchronizingTuple<T> tuple,
+            params Expression<Func<T, object>>[] properties)
+            where T : class, ISynchronizable<T>
         {
-            PropertyInfo GetPropertyInfo(Expression<Func<T, object>> property)
-            {
-                var expression = property.Body;
-
-                if (expression is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpression)
-                    expression = unaryExpression.Operand;
-
-                if (expression is not MemberExpression { Member: PropertyInfo propertyInfo })
-                    throw new ArgumentException("The lambda expression must use properties only", nameof(properties));
-
-                return propertyInfo;
-            }
-
             MergePrivate(
                 tuple,
                 tuple.Local?.UpdatedAt ?? default,
                 tuple.Remote?.UpdatedAt ?? default,
-                properties.Select(GetPropertyInfo).ToArray());
+                properties.Select(GetLastPropertyInfo).ToArray());
             tuple.LinkEntities();
         }
+
+        public static void Merge<T>(
+            this SynchronizingTuple<T> tuple,
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt,
+            params Expression<Func<T, object>>[] properties)
+            where T : class
+            => MergePrivate(tuple, localUpdatedAt, remoteUpdatedAt, properties.Select(GetLastPropertyInfo).ToArray());
 
         public static object GetPropertyValue<T>(this SynchronizingTuple<T> tuple, string propertyName)
             where T : class, ISynchronizable<T>, new()
@@ -85,6 +89,37 @@ namespace Brio.Docs.Synchronization.Extensions
             parentTuple.LocalChanged |= childTuple.LocalChanged;
             parentTuple.SynchronizedChanged |= childTuple.SynchronizedChanged;
             parentTuple.RemoteChanged |= childTuple.RemoteChanged;
+        }
+
+        private static PropertyInfo GetLastPropertyInfo<T>(Expression<Func<T, object>> property)
+        {
+            var expression = property.Body;
+
+            if (expression is UnaryExpression { NodeType: ExpressionType.Convert } unaryExpression)
+                expression = unaryExpression.Operand;
+
+            if (expression is not MemberExpression { Member: PropertyInfo propertyInfo })
+                throw new ArgumentException("The lambda expression must use properties only", nameof(property));
+
+            return propertyInfo;
+        }
+
+        private static T GetRelevantValue<T>(
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt,
+            T localValue,
+            T remoteValue,
+            T synchronizedValue)
+        {
+            var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
+            var localNotChanged = Equals(synchronizedValue, localValue);
+            var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
+
+            var value = localSynchronizedAndNotChanged ? localValue
+                : localNotChanged                      ? remoteValue
+                : localMoreRelevant                    ? localValue
+                                                         : remoteValue;
+            return value;
         }
 
         private static void UpdateValue<T>(T obj, PropertyInfo property, object oldValue, object newValue, Action action)
@@ -154,24 +189,24 @@ namespace Brio.Docs.Synchronization.Extensions
                 var localValue = property.GetValue(tuple.Local);
                 var remoteValue = property.GetValue(tuple.Remote);
 
-                var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
-                var localNotChanged = Equals(synchronizedValue, localValue);
-                var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
-
-                var value = localSynchronizedAndNotChanged ? localValue
-                    : localNotChanged                      ? remoteValue
-                    : localMoreRelevant                    ? localValue
-                                                             : remoteValue;
+                var value = GetRelevantValue(
+                    localUpdatedAt,
+                    remoteUpdatedAt,
+                    localValue,
+                    remoteValue,
+                    synchronizedValue);
 
                 UpdateValue(tuple, property, (localValue, synchronizedValue, remoteValue), value);
             }
         }
 
         private static void LinkEntities<T>(this SynchronizingTuple<T> tuple)
-            where T : class, ISynchronizable<T>, new()
+            where T : class, ISynchronizable<T>
         {
             tuple.Synchronized.IsSynchronized = true;
-            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = tuple.ExternalID;
+            var externalID = tuple.Remote.ExternalID ?? tuple.ExternalID;
+            tuple.Local.ExternalID = tuple.Synchronized.ExternalID = externalID;
+            tuple.Remote.ExternalID ??= externalID;
             tuple.Local.SynchronizationMate = tuple.Synchronized;
         }
 

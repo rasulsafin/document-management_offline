@@ -146,14 +146,7 @@ namespace Brio.Docs.Synchronization.Strategies
             => list;
 
         protected virtual bool IsEntitiesEquals(TDB element, SynchronizingTuple<TDB> tuple)
-        {
-            var hasID = element.ID > 0;
-            var isLocalsMate = tuple.Local != null && element.ID == tuple.Local.SynchronizationMateID;
-            var isSynchronizedsMate = tuple.Synchronized != null &&
-                element.SynchronizationMateID == tuple.Synchronized.ID;
-            var externalIDEquals = element.ExternalID != null && element.ExternalID == tuple.ExternalID;
-            return (hasID && (isLocalsMate || isSynchronizedsMate)) || externalIDEquals;
-        }
+            => tuple.DoesNeed(element);
 
         protected virtual Task NothingAction(
             SynchronizingTuple<TDB> tuple,
