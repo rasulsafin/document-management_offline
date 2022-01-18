@@ -54,7 +54,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Utils
                 if (issue.Attributes.ClosedAt < updatedAfter)
                     continue;
 
-                if (issue.Attributes.AttachmentCount != 0)
+                if (issue.Attributes.CommentCount != 0)
                 {
                     var comments = issuesService.GetCommentsAsync(containerID, issue.ID, commentParameters);
                     if (await comments.AnyAsync())
