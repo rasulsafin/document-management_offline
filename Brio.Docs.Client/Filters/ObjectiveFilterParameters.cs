@@ -1,4 +1,6 @@
-﻿namespace Brio.Docs.Client.Filters
+﻿using System.Collections.Generic;
+
+namespace Brio.Docs.Client.Filters
 {
     public class ObjectiveFilterParameters : PageParameters
     {
@@ -10,6 +12,6 @@
 
         public int? ExceptChildrenOf { get; set; }
 
-        public int? Status { get; set; }
+        public List<int> Statuses { get; set; }
     }
 }

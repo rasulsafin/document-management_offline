@@ -920,7 +920,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                Status = (int?)expectedStatusObjective.Status,
+                Statuses = new int?[] { (int?)expectedStatusObjective.Status },
             };
 
             objectiveToCreate.Status++;

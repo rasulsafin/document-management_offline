@@ -10,6 +10,7 @@ using Brio.Docs.Client.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 
 namespace Brio.Docs.Api.Controllers
@@ -179,7 +180,7 @@ namespace Brio.Docs.Api.Controllers
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("project/{projectID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
@@ -191,7 +192,7 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
-            [FromQuery]
+            [FromBody]
             ObjectiveFilterParameters filter)
         {
             try
