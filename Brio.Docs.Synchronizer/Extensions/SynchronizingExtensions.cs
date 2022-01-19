@@ -31,7 +31,7 @@ namespace Brio.Docs.Synchronization.Extensions
         public static void Merge<T>(
             this SynchronizingTuple<T> tuple,
             params Expression<Func<T, object>>[] properties)
-            where T : class, ISynchronizable<T>
+            where T : class, ISynchronizable<T>, new()
         {
             MergePrivate(
                 tuple,
@@ -46,7 +46,7 @@ namespace Brio.Docs.Synchronization.Extensions
             DateTime localUpdatedAt,
             DateTime remoteUpdatedAt,
             params Expression<Func<T, object>>[] properties)
-            where T : class
+            where T : class, new()
             => MergePrivate(tuple, localUpdatedAt, remoteUpdatedAt, properties.Select(GetLastPropertyInfo).ToArray());
 
         public static object GetPropertyValue<T>(this SynchronizingTuple<T> tuple, string propertyName)
@@ -134,7 +134,12 @@ namespace Brio.Docs.Synchronization.Extensions
             UpdateValue(tuple.Remote, property, oldValues.remote, value, () => tuple.RemoteChanged = true);
         }
 
-        private static void MergePrivate<T>(SynchronizingTuple<T> tuple, DateTime localUpdatedAt, DateTime remoteUpdatedAt, PropertyInfo[] propertiesToMerge = null)
+        private static void MergePrivate<T>(
+            SynchronizingTuple<T> tuple,
+            DateTime localUpdatedAt,
+            DateTime remoteUpdatedAt,
+            PropertyInfo[] propertiesToMerge = null)
+            where T : class, new()
         {
             var properties = typeof(T).GetProperties();
 
@@ -144,9 +149,9 @@ namespace Brio.Docs.Synchronization.Extensions
             var isLocalRelevant = tuple.Local != null && tuple.Remote == null;
             var isRemoteRelevant = tuple.Remote != null && tuple.Local == null;
 
-            tuple.Local ??= (T)Activator.CreateInstance(typeof(T));
-            tuple.Remote ??= (T)Activator.CreateInstance(typeof(T));
-            tuple.Synchronized ??= (T)Activator.CreateInstance(typeof(T));
+            tuple.Local ??= new T();
+            tuple.Remote ??= new T();
+            tuple.Synchronized ??= new T();
 
             foreach (var property in properties)
             {
