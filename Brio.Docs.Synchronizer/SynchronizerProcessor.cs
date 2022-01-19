@@ -46,18 +46,24 @@ namespace Brio.Docs.Synchronization
 
             var defaultFiler = strategy.GetFilter(data);
 
-            var local = strategy.Order(
-                context.Set<TDB>()
-                   .Unsynchronized()
-                   .Include(x => x.SynchronizationMate)
-                   .Where(defaultFiler)
-                   .Where(filter));
-            var synchronized = strategy.Order(
-                context.Set<TDB>()
-                   .Synchronized()
-                   .Include(x => x.SynchronizationMate)
-                   .Where(defaultFiler)
-                   .Where(filter));
+            var dbLocal = await context.Set<TDB>()
+               .Unsynchronized()
+               .Include(x => x.SynchronizationMate)
+               .Where(defaultFiler)
+               .Where(filter)
+               .ToListAsync()
+               .ConfigureAwait(false);
+
+            var dbSynchronized = await context.Set<TDB>()
+               .Synchronized()
+               .Include(x => x.SynchronizationMate)
+               .Where(defaultFiler)
+               .Where(filter)
+               .ToListAsync()
+               .ConfigureAwait(false);
+
+            var local = strategy.Order(dbLocal);
+            var synchronized = strategy.Order(dbSynchronized);
             var remote = strategy.Order(
                 remoteCollection
                    .Where(filter.Compile()));
