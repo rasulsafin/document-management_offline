@@ -70,7 +70,7 @@ namespace Brio.Docs.Synchronization.Interfaces
         public IEnumerable<TDB> Order(IEnumerable<TDB> enumeration);
 
         /// <summary>
-        /// Removes entity to local database. Removes synchronized state.
+        /// Removes entity from local database. Removes synchronized state.
         /// </summary>
         /// <param name="tuple">The synchronization tuple.</param>
         /// <param name="data">Synchronization parameters.</param>
