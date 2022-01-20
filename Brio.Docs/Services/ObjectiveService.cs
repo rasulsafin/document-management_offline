@@ -216,10 +216,10 @@ namespace Brio.Docs.Services
                                     .AsNoTracking()
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID)
-                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
+                                    .Where(x => filter.TypeIds.Capacity == 0 || filter.TypeIds == null || filter.TypeIds.Contains(x.ObjectiveTypeID))
                                     .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
                                     .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
-                                    .Where(x => filter.Statuses == null || filter.Statuses.Contains(x.Status));
+                                    .Where(x => filter.Statuses.Capacity == 0 || filter.Statuses.Contains(x.Status));
 
                 if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
                 {
