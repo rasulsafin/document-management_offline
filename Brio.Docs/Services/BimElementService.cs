@@ -72,16 +72,18 @@ namespace Brio.Docs.Services
 
         private ObjectiveStatus GetObjectStatus(IEnumerable<ObjectiveStatus> statuses)
         {
+            var isDone = true;
             var isReady = true;
             var isInProgress = false;
 
             foreach (var status in statuses)
             {
-                isReady &= status == ObjectiveStatus.Ready;
-                isInProgress |= status == ObjectiveStatus.Ready || status == ObjectiveStatus.InProgress;
+                isDone &= status == ObjectiveStatus.Closed;
+                isReady &= status == ObjectiveStatus.Closed || status == ObjectiveStatus.Ready;
+                isInProgress |= status == ObjectiveStatus.Closed || status == ObjectiveStatus.Ready || status == ObjectiveStatus.InProgress;
             }
 
-            return isReady ? ObjectiveStatus.Ready : isInProgress ? ObjectiveStatus.InProgress : ObjectiveStatus.Open;
+            return isDone ? ObjectiveStatus.Closed : isReady ? ObjectiveStatus.Ready : isInProgress ? ObjectiveStatus.InProgress : ObjectiveStatus.Open;
         }
     }
 }
