@@ -15,10 +15,10 @@ namespace Brio.Docs.Synchronization.Mergers
     internal class ObjectiveMerger : IMerger<Objective>
     {
         private readonly Lazy<IChildrenMerger<Objective, BimElement>> bimElementChildrenMerger;
+        private readonly DbContext context;
         private readonly Lazy<IChildrenMerger<Objective, DynamicField>> dynamicFieldChildrenMerger;
         private readonly Lazy<IChildrenMerger<Objective, Item>> itemChildrenMerger;
         private readonly IMerger<Location> locationMerger;
-        private readonly DbContext context;
         private readonly ILogger<ObjectiveMerger> logger;
 
         public ObjectiveMerger(
@@ -37,10 +37,16 @@ namespace Brio.Docs.Synchronization.Mergers
             this.itemChildrenMerger = new Lazy<IChildrenMerger<Objective, Item>>(itemChildrenMergerFactory.Create);
             this.bimElementChildrenMerger =
                 new Lazy<IChildrenMerger<Objective, BimElement>>(bimElementChildrenMergerFactory.Create);
+            logger.LogTrace("ObjectiveMerger created");
         }
 
         public async ValueTask Merge(SynchronizingTuple<Objective> tuple)
         {
+            logger.LogTrace(
+                "Merge objective started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.ExternalID);
             tuple.Merge(
                 objective => objective.Author,
                 objective => objective.AuthorID,
@@ -52,15 +58,34 @@ namespace Brio.Docs.Synchronization.Mergers
                 objective => objective.Status,
                 objective => objective.ObjectiveTypeID);
 
+            logger.LogAfterMerge(tuple);
             await MergeLocation(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective location merged");
             await dynamicFieldChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
-            await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective dynamic fields merged");
+            await MergeItems(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective items merged");
             await bimElementChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Objective bim elements merged");
+        }
+
+        private async ValueTask<bool> HasLocation(Objective objective)
+        {
+            if (objective.Location == null && objective.ID != 0)
+            {
+                return await context.Set<Objective>()
+                   .AsNoTracking()
+                   .Where(x => x == objective)
+                   .AnyAsync(x => x.Location != null)
+                   .ConfigureAwait(false);
+            }
+
+            return objective.Location != null;
         }
 
         private async ValueTask LoadLocation(Objective objective)
         {
-            if (objective.Location != null)
+            if (objective.Location != null || objective.ID == 0)
                 return;
 
             objective.Location = await context.Set<Objective>()
@@ -70,9 +95,25 @@ namespace Brio.Docs.Synchronization.Mergers
                .ConfigureAwait(false);
         }
 
+        private async Task MergeItems(SynchronizingTuple<Objective> tuple)
+        {
+            if (tuple.Remote.Items != null)
+            {
+                foreach (var link in tuple.Remote.Items)
+                {
+                    var item = link.Item;
+
+                    if (item is { Project: null, Objectives: null })
+                        item.ProjectID = tuple.Remote.Project?.ID ?? tuple.Remote.ProjectID;
+                }
+            }
+
+            await itemChildrenMerger.Value.MergeChildren(tuple).ConfigureAwait(false);
+        }
+
         private async ValueTask MergeLocation(SynchronizingTuple<Objective> tuple)
         {
-            if (tuple.All(x => x.Location == null))
+            if (!await tuple.AnyAsync(HasLocation).ConfigureAwait(false))
                 return;
 
             await tuple.ForEachAsync(LoadLocation).ConfigureAwait(false);
@@ -84,7 +125,6 @@ namespace Brio.Docs.Synchronization.Mergers
                 tuple.Remote.Location);
 
             var action = locationTuple.DetermineAction();
-
 
             switch (action)
             {

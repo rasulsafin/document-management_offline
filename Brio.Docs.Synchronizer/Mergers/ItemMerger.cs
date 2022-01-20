@@ -19,11 +19,15 @@ namespace Brio.Docs.Synchronization.Mergers
 
         public ValueTask Merge(SynchronizingTuple<Item> tuple)
         {
-            logger.LogTrace("Merge started for tuple {@Object}", tuple);
+            logger.LogTrace(
+                "Merge item started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.ExternalID);
             tuple.Merge(
                 item => item.RelativePath,
                 item => item.ItemType);
-            logger.LogDebug("Tuple merged: {@Result}", tuple);
+            logger.LogAfterMerge(tuple);
             return ValueTask.CompletedTask;
         }
     }

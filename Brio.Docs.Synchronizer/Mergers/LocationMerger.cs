@@ -25,10 +25,16 @@ namespace Brio.Docs.Synchronization.Mergers
             this.context = context;
             this.logger = logger;
             this.itemAttacher = itemAttacher;
+            logger.LogTrace("LocationMerger created");
         }
 
         public async ValueTask Merge(SynchronizingTuple<Location> tuple)
         {
+            logger.LogTrace(
+                "Merge location started for tuple ({Local}, {Synchronized}, {Remote})",
+                tuple.Local?.ID,
+                tuple.Synchronized?.ID,
+                tuple.ExternalID);
             tuple.Merge(
                 await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
                 await GetUpdatedTime(tuple.Remote).ConfigureAwait(false),
@@ -40,7 +46,9 @@ namespace Brio.Docs.Synchronization.Mergers
                 location => location.CameraPositionZ,
                 location => location.Guid);
 
+            logger.LogAfterMerge(tuple);
             await LinkLocationItem(tuple).ConfigureAwait(false);
+            logger.LogTrace("Location item merged");
         }
 
         private void CreateRemoteLocationItem(SynchronizingTuple<Location> tuple, SynchronizingTuple<Item> itemTuple)
@@ -80,6 +88,7 @@ namespace Brio.Docs.Synchronization.Mergers
         private async Task LinkLocationItem(SynchronizingTuple<Location> tuple)
         {
             logger.LogTrace("LinkLocationItem started with {@Tuple}", tuple);
+            await tuple.ForEachAsync(LoadItem).ConfigureAwait(false);
 
             var itemTuple = new SynchronizingTuple<Item>(
                 local: tuple.Local.Item,
@@ -99,7 +108,18 @@ namespace Brio.Docs.Synchronization.Mergers
                     await GetUpdatedTime(tuple.Local).ConfigureAwait(false),
                     await GetUpdatedTime(tuple.Remote).ConfigureAwait(false));
 
-                itemTuple.RemoveWhere(x => x?.ExternalID != relevantId);
+                bool Remove(ref Item item)
+                {
+                    if (item?.ExternalID != relevantId)
+                    {
+                        item = null;
+                        return true;
+                    }
+
+                    return false;
+                }
+
+                itemTuple.ForEachChange(Remove);
                 itemTuple.ExternalID = relevantId;
             }
 
@@ -121,6 +141,21 @@ namespace Brio.Docs.Synchronization.Mergers
 
                     return false;
                 });
+        }
+
+        private async ValueTask LoadItem(Location location)
+        {
+            if (location.Item != null || location.ID == 0)
+                return;
+
+            location.Item = await context.Set<Objective>()
+               .Where(x => x.Location == location)
+               .Include(x => x.Location)
+               .ThenInclude(x => x.Item)
+               .Select(x => x.Location)
+               .Select(x => x.Item)
+               .FirstOrDefaultAsync()
+               .ConfigureAwait(false);
         }
     }
 }

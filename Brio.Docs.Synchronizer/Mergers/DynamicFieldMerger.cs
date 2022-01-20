@@ -26,18 +26,18 @@ namespace Brio.Docs.Synchronization.Mergers
         public async ValueTask Merge(SynchronizingTuple<DynamicField> tuple)
         {
             logger.LogTrace(
-                "Merge started for the tuple ({Local}, {Synchronized}, {Remote})",
+                "Merge dynamic field started for tuple ({Local}, {Synchronized}, {Remote})",
                 tuple.Local?.ID,
                 tuple.Synchronized?.ID,
-                tuple.Remote?.ExternalID);
+                tuple.ExternalID);
             tuple.Merge(
                 field => field.Type,
                 field => field.Name,
                 field => field.Value,
-                x => x.ConnectionInfo,
                 x => x.ConnectionInfoID);
-            logger.LogDebug("Tuple merged: {@Result}", tuple);
+            logger.LogAfterMerge(tuple);
             await childrenHelper.Value.MergeChildren(tuple).ConfigureAwait(false);
+            logger.LogTrace("Dynamic field children merged");
         }
     }
 }

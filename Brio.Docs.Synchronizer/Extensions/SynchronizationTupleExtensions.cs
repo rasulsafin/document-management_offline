@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Models;
@@ -7,13 +8,10 @@ namespace Brio.Docs.Synchronization.Extensions
 {
     internal static class SynchronizationTupleExtensions
     {
+        public delegate bool FuncRef<T>(ref T argument);
+
         public static bool All<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
             => predicate(tuple.Local) && predicate(tuple.Synchronized) && predicate(tuple.Remote);
-
-        public static async Task<bool> AllAsync<T>(this SynchronizingTuple<T> tuple, Func<T, Task<bool>> predicate)
-            => await predicate(tuple.Local).ConfigureAwait(false) &&
-                await predicate(tuple.Synchronized).ConfigureAwait(false) &&
-                await predicate(tuple.Remote).ConfigureAwait(false);
 
         public static async ValueTask<bool> AllAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask<bool>> predicate)
             => await predicate(tuple.Local).ConfigureAwait(false) &&
@@ -23,15 +21,17 @@ namespace Brio.Docs.Synchronization.Extensions
         public static bool Any<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
             => predicate(tuple.Local) || predicate(tuple.Synchronized) || predicate(tuple.Remote);
 
-        public static async Task<bool> AnyAsync<T>(this SynchronizingTuple<T> tuple, Func<T, Task<bool>> predicate)
-            => await predicate(tuple.Local).ConfigureAwait(false) ||
-                await predicate(tuple.Synchronized).ConfigureAwait(false) ||
-                await predicate(tuple.Remote).ConfigureAwait(false);
-
         public static async ValueTask<bool> AnyAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask<bool>> predicate)
             => await predicate(tuple.Local).ConfigureAwait(false) ||
                 await predicate(tuple.Synchronized).ConfigureAwait(false) ||
                 await predicate(tuple.Remote).ConfigureAwait(false);
+
+        public static IEnumerable<T> AsEnumerable<T>(this SynchronizingTuple<T> tuple)
+        {
+            yield return tuple.Local;
+            yield return tuple.Synchronized;
+            yield return tuple.Remote;
+        }
 
         public static bool DoesNeed<T>(this SynchronizingTuple<T> tuple, T element)
             where T : ISynchronizable<T>
@@ -44,18 +44,11 @@ namespace Brio.Docs.Synchronization.Extensions
             return (hasID && (isLocalsMate || isSynchronizedsMate)) || externalIDEquals;
         }
 
-        public static void ForEach<T>(this SynchronizingTuple<T> tuple, Action<T> actionAsync)
+        public static void ForEach<T>(this SynchronizingTuple<T> tuple, Action<T> action)
         {
-            actionAsync(tuple.Local);
-            actionAsync(tuple.Synchronized);
-            actionAsync(tuple.Remote);
-        }
-
-        public static async Task ForEachAsync<T>(this SynchronizingTuple<T> tuple, Func<T, Task> actionAsync)
-        {
-            await actionAsync(tuple.Local).ConfigureAwait(false);
-            await actionAsync(tuple.Synchronized).ConfigureAwait(false);
-            await actionAsync(tuple.Remote).ConfigureAwait(false);
+            action(tuple.Local);
+            action(tuple.Synchronized);
+            action(tuple.Remote);
         }
 
         public static async ValueTask ForEachAsync<T>(this SynchronizingTuple<T> tuple, Func<T, ValueTask> actionAsync)
@@ -63,6 +56,24 @@ namespace Brio.Docs.Synchronization.Extensions
             await actionAsync(tuple.Local).ConfigureAwait(false);
             await actionAsync(tuple.Synchronized).ConfigureAwait(false);
             await actionAsync(tuple.Remote).ConfigureAwait(false);
+        }
+
+        public static void ForEachChange<T>(this SynchronizingTuple<T> tuple, FuncRef<T> action)
+        {
+            var temporaryValue = tuple.Local;
+            var change = action(ref temporaryValue);
+            tuple.Local = temporaryValue;
+            tuple.LocalChanged |= change;
+
+            temporaryValue = tuple.Synchronized;
+            change = action(ref temporaryValue);
+            tuple.Synchronized = temporaryValue;
+            tuple.SynchronizedChanged |= change;
+
+            temporaryValue = tuple.Remote;
+            change = action(ref temporaryValue);
+            tuple.Remote = temporaryValue;
+            tuple.RemoteChanged |= change;
         }
 
         public static void ForEachChange<TParent, TChild>(
@@ -75,17 +86,6 @@ namespace Brio.Docs.Synchronization.Extensions
             parentTuple.RemoteChanged |= actionAsync(parentTuple.Remote, childTuple.Remote);
         }
 
-        public static async Task ForEachChangeAsync<TParent, TChild>(
-            this SynchronizingTuple<TParent> parentTuple,
-            SynchronizingTuple<TChild> childTuple,
-            Func<TParent, TChild, Task<bool>> actionAsync)
-        {
-            parentTuple.LocalChanged |= await actionAsync(parentTuple.Local, childTuple.Local).ConfigureAwait(false);
-            parentTuple.SynchronizedChanged |= await actionAsync(parentTuple.Synchronized, childTuple.Synchronized)
-               .ConfigureAwait(false);
-            parentTuple.RemoteChanged |= await actionAsync(parentTuple.Remote, childTuple.Remote).ConfigureAwait(false);
-        }
-
         public static async ValueTask ForEachChangeAsync<TParent, TChild>(
             this SynchronizingTuple<TParent> parentTuple,
             SynchronizingTuple<TChild> childTuple,
@@ -95,16 +95,6 @@ namespace Brio.Docs.Synchronization.Extensions
             parentTuple.SynchronizedChanged |= await actionAsync(parentTuple.Synchronized, childTuple.Synchronized)
                .ConfigureAwait(false);
             parentTuple.RemoteChanged |= await actionAsync(parentTuple.Remote, childTuple.Remote).ConfigureAwait(false);
-        }
-
-        public static void RemoveWhere<T>(this SynchronizingTuple<T> tuple, Predicate<T> predicate)
-        {
-            if (predicate(tuple.Local))
-                tuple.Local = default;
-            if (predicate(tuple.Synchronized))
-                tuple.Synchronized = default;
-            if (predicate(tuple.Remote))
-                tuple.Remote = default;
         }
     }
 }

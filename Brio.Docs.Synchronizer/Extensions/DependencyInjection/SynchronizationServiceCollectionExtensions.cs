@@ -1,10 +1,7 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
@@ -13,7 +10,7 @@ using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
-using Brio.Docs.Synchronization.Utils.Linkers;
+using Brio.Docs.Synchronization.Utils;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -22,22 +19,32 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddSynchronizer(this IServiceCollection services)
         {
             services.AddScoped<Synchronizer>();
-            services.AddScoped<ISynchronizationStrategy<Project, ProjectExternalDto>, ProjectStrategy>();
-            services.AddScoped<ISynchronizationStrategy<Objective, ObjectiveExternalDto>, ObjectiveStrategy>();
+            services.AddScoped<ISynchronizerProcessor, SynchronizerProcessor>();
+            services.AddScoped<StrategyHelper>();
+            services.AddScoped<ISynchronizationStrategy<Project>, ProjectStrategy>();
+            services.AddScoped<ISynchronizationStrategy<Objective>, ObjectiveStrategy>();
 
-            services.AddScoped<ItemStrategy<ProjectItemLinker>>();
+            services.AddScoped<MapperHelper>();
+            services.AddScoped<IConverter<
+                IReadOnlyCollection<ProjectExternalDto>,
+                IReadOnlyCollection<Project>>>(provider => provider.GetService<MapperHelper>());
+            services.AddScoped<IConverter<
+                IReadOnlyCollection<ObjectiveExternalDto>,
+                IReadOnlyCollection<Objective>>>(provider => provider.GetService<MapperHelper>());
 
+            services.AddScoped<IMerger<Project>, ProjectMerger>();
             services.AddScoped<IMerger<Objective>, ObjectiveMerger>();
             services.AddScoped<IMerger<Item>, ItemMerger>();
             services.AddScoped<IMerger<DynamicField>, DynamicFieldMerger>();
             services.AddScoped<IMerger<Location>, LocationMerger>();
+            services.AddScoped<IMerger<BimElement>, BimElementMerger>();
 
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
 
+            services.AddScoped<IExternalIdUpdater<Item>, ItemExternalIdUpdater>();
             services.AddScoped<IExternalIdUpdater<DynamicField>, DynamicFieldExternalIdUpdater>();
 
-            services.AddScoped<ProjectItemLinker>();
-
+            services.AddProjectChildrenMergers();
             services.AddObjectiveChildrenMergers();
             services.AddDynamicFieldChildrenMergers();
 
@@ -45,48 +52,16 @@ namespace Microsoft.Extensions.DependencyInjection
         }
 
         private static IServiceCollection AddDynamicFieldChildrenMergers(this IServiceCollection services)
-        {
-            services.AddSimpleChildrenMerger<DynamicField, DynamicField>(
-                x => x.ChildrenDynamicFields,
-                (_, _) => true);
-
-            services.AddFactory<IChildrenMerger<DynamicField, DynamicField>>();
-
-            return services;
-        }
-
-        private static IServiceCollection AddLinkedChildrenMerger<TParent, TLink, TChild>(
-            this IServiceCollection services,
-            Expression<Func<TParent, ICollection<TLink>>> getChildrenCollection,
-            Expression<Func<TLink, TChild>> getChild,
-            Func<TParent, TChild, bool> needRemove,
-            Func<TChild, SynchronizingTuple<TChild>, bool> needInTupleFunc = null)
-            where TParent : class
-            where TLink : class, new()
-            where TChild : class, ISynchronizable<TChild>
-            => services.AddScoped<IChildrenMerger<TParent, TChild>>(
-                provider => new ChildrenMerger<TParent, TLink, TChild>(
-                    provider.GetService<DMContext>(),
-                    provider.GetService<IMerger<TChild>>(),
-                    getChildrenCollection,
-                    getChild,
-                    needInTupleFunc ?? ((child, tuple) => tuple.DoesNeed(child)),
-                    needRemove));
+            => services
+               .AddScoped<IChildrenMerger<DynamicField, DynamicField>, DynamicFieldDynamicFieldsMerger>()
+               .AddFactory<IChildrenMerger<DynamicField, DynamicField>>();
 
         private static IServiceCollection AddObjectiveChildrenMergers(this IServiceCollection services)
         {
-            services.AddLinkedChildrenMerger<Objective, ObjectiveItem, Item>(
-                parent => parent.Items,
-                link => link.Item,
-                (objective, item)
-                    => item.Objectives.All(x => x.Objective == objective) &&
-                    item.Project == null &&
-                    item.ProjectID == null,
-                (item, tuple)
-                    => tuple.DoesNeed(item) ||
-                    item.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath)));
-            services.AddSimpleChildrenMerger<Objective, DynamicField>(objective => objective.DynamicFields, (_, _) => true);
-            services.AddScoped<IChildrenMerger<Objective, BimElement>, BimElementsMerger>();
+            services.AddScoped<IChildrenMerger<Objective, Item>, ObjectiveItemsMerger>();
+
+            services.AddScoped<IChildrenMerger<Objective, DynamicField>, ObjectiveDynamicFieldsMerger>();
+            services.AddScoped<IChildrenMerger<Objective, BimElement>, ObjectiveBimElementsMerger>();
 
             services.AddFactory<IChildrenMerger<Objective, Item>>();
             services.AddFactory<IChildrenMerger<Objective, DynamicField>>();
@@ -94,18 +69,13 @@ namespace Microsoft.Extensions.DependencyInjection
             return services;
         }
 
-        private static IServiceCollection AddSimpleChildrenMerger<TParent, TChild>(
-            this IServiceCollection services,
-            Expression<Func<TParent, ICollection<TChild>>> getChildrenCollection,
-            Func<TParent, TChild, bool> needRemove)
-            where TParent : class
-            where TChild : class, ISynchronizable<TChild>, new()
-            => services.AddScoped<IChildrenMerger<TParent, TChild>>(
-                provider => new SimpleChildrenMerger<TParent, TChild>(
-                    provider.GetService<DMContext>(),
-                    provider.GetService<IMerger<TChild>>(),
-                    getChildrenCollection,
-                    (child, tuple) => tuple.DoesNeed(child),
-                    needRemove));
+        private static IServiceCollection AddProjectChildrenMergers(this IServiceCollection services)
+            => services
+               .AddScoped<IChildrenMerger<Project, Item>, ProjectItemsMerger>()
+               .AddFactory<IChildrenMerger<Project, Item>>();
+
+        private static bool DoesNeedItem(Item item, SynchronizingTuple<Item> tuple)
+            => tuple.DoesNeed(item) ||
+                item.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
     }
 }

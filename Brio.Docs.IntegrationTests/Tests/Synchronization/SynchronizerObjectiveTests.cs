@@ -104,7 +104,6 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(local, objectiveLocal);
-            CheckObjectives(synchronized, objectiveSynchronized);
             CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -133,7 +132,8 @@ namespace Brio.Docs.Tests.Synchronization
                 });
 
             var dynamicField = MockData.DEFAULT_DYNAMIC_FIELDS[0];
-            dynamicField.Objective = objectiveLocal;
+            objectiveLocal.DynamicFields ??= new List<DynamicField>();
+            objectiveLocal.DynamicFields.Add(dynamicField);
             await Fixture.Context.DynamicFields.AddAsync(dynamicField);
             await Fixture.Context.SaveChangesAsync();
 
@@ -143,7 +143,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
-            CheckObjectives(local, objectiveLocal);
+            CheckObjectives(local, objectiveLocal, false);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -432,7 +432,7 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_ItemRemovedFromLocalObjective_RemoveSynchronizedItemAndFromRemote()
+        public async Task Synchronize_ItemRemovedFromLocalObjectiveButStillExists_RemoveSynchronizedItemAndFromRemote()
         {
             // Arrange.
             var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
@@ -466,7 +466,7 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(0);
-            await assertHelper.IsLocalItemsCount(1);
+            await assertHelper.IsLocalItemsCount(0);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -964,19 +964,12 @@ namespace Brio.Docs.Tests.Synchronization
             await Fixture.Context.SaveChangesAsync();
 
             // Act.
-            var synchronizationResult = await Synchronize();
-
-            var locals = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Unsynchronized()
-               .ToListAsync();
-            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Synchronized()
-               .ToListAsync();
+            var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add, Times.Exactly(2));
-            CheckObjectives(locals.First(x => x.Description == objectivesLocal[0].Description), objectivesLocal[0]);
+            CheckObjectives(locals.First(x => x.Description == objectivesLocal[0].Description), objectivesLocal[0], false);
             await assertHelper.IsSynchronizedObjectivesCount(2);
             await assertHelper.IsLocalObjectivesCount(2);
             Assert.AreEqual(
@@ -1003,19 +996,12 @@ namespace Brio.Docs.Tests.Synchronization
             await Fixture.Context.SaveChangesAsync();
 
             // Act.
-            var synchronizationResult = await Synchronize();
-
-            var locals = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Unsynchronized()
-               .ToListAsync();
-            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Synchronized()
-               .ToListAsync();
+            var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
-            CheckObjectives(locals.First(x => x.Description == subobjective.Description), subobjective);
+            CheckObjectives(locals.First(x => x.Description == subobjective.Description), subobjective, false);
             Assert.AreEqual(
                 synchronized.First(x => x.ParentObjectiveID == null).ExternalID,
                 ResultObjectiveExternalDto.ParentObjectiveExternalID,
@@ -1053,14 +1039,7 @@ namespace Brio.Docs.Tests.Synchronization
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemoteParent });
 
             // Act.
-            var synchronizationResult = await Synchronize();
-
-            var locals = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Unsynchronized()
-               .ToListAsync();
-            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Synchronized()
-               .ToListAsync();
+            var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -1093,14 +1072,7 @@ namespace Brio.Docs.Tests.Synchronization
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
 
             // Act.
-            var synchronizationResult = await Synchronize();
-
-            var locals = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Unsynchronized()
-               .ToListAsync();
-            var synchronized = await Fixture.Context.Objectives.Include(x => x.Project)
-               .Synchronized()
-               .ToListAsync();
+            var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
@@ -1230,7 +1202,7 @@ namespace Brio.Docs.Tests.Synchronization
                 var synchronizedItem = synchronized.Items?
                    .FirstOrDefault(x => item.Item.SynchronizationMateID == x.ItemID);
                 Assert.IsNotNull(synchronizedItem, "Cannot find synchronized item");
-                SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem?.Item);
+                SynchronizerTestsHelper.CheckSynchronizedItems(item.Item, synchronizedItem.Item);
             }
 
             foreach (var item in local.DynamicFields ?? Enumerable.Empty<DynamicField>())
@@ -1348,13 +1320,29 @@ namespace Brio.Docs.Tests.Synchronization
             return (objectiveLocal, objectiveSynchronized, objectiveRemote);
         }
 
+        private async Task<
+                (List<Objective> locals,
+                List<Objective> synchronized,
+                ICollection<SynchronizingResult> synchronizationResult)>
+            GetManyObjectivesAfterSynchronize(bool ignoreProjects = false)
+        {
+            var synchronizationResult = await Synchronize(ignoreProjects);
+            var locals = await SynchronizerTestsHelper.Include(Fixture.Context.Objectives.Unsynchronized())
+               .ToListAsync();
+            var synchronized = await SynchronizerTestsHelper.Include(Fixture.Context.Objectives.Synchronized())
+               .ToListAsync();
+            return (locals, synchronized, synchronizationResult);
+        }
+
         private async
             Task<(Objective local, Objective synchronized, ICollection<SynchronizingResult> synchronizationResult)>
             GetObjectivesAfterSynchronize(bool ignoreProjects = false)
         {
             var synchronizationResult = await Synchronize(ignoreProjects);
-            var local = await Fixture.Context.Objectives.Unsynchronized().FirstOrDefaultAsync();
-            var synchronized = await Fixture.Context.Objectives.Synchronized().FirstOrDefaultAsync();
+            var local = await SynchronizerTestsHelper.Include(Fixture.Context.Objectives.Unsynchronized())
+               .FirstOrDefaultAsync();
+            var synchronized = await SynchronizerTestsHelper.Include(Fixture.Context.Objectives.Synchronized())
+               .FirstOrDefaultAsync();
             return (local, synchronized, synchronizationResult);
         }
 
