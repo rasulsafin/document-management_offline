@@ -124,6 +124,10 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
                .Include(x => x.SynchronizationMate)
                .FirstOrDefaultAsync(x => x.ID == remoteProjectId)
                .ConfigureAwait(false);
+
+            if (remoteProject == null)
+                return default;
+
             Project localProject;
             Project syncProject;
 
