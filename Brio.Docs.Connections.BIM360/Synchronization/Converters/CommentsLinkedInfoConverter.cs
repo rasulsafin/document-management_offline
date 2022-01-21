@@ -18,7 +18,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
         public Task<LinkedInfo> Convert(IEnumerable<Comment> comments)
             => metaCommentHelper.TryGet(
                 comments,
-                MrsConstants.BIM_ELEMENTS_META_COMMENT_TAG,
+                MrsConstants.LINKED_INFO_META_COMMENT_TAG,
                 out LinkedInfo result)
                 ? Task.FromResult(result)
                 : Task.FromResult<LinkedInfo>(null);

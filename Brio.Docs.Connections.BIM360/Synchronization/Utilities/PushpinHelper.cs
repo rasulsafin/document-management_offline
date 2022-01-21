@@ -150,10 +150,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
                 {
                     Viewport = new Issue.Viewport
                     {
-                        AspectRatio = 60,
                         Eye = eye,
                         Up = (target - eye).GetUpwardVector(),
                         Target = target,
+                        IsOrthographic = false,
+                        FieldOfView = 60,
                     },
                     GlobalOffset = offset,
                 },
