@@ -21,6 +21,8 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
                     return "Готов";
                 case (int)ObjectiveStatus.Late:
                     return "Просрочен";
+                case (int)ObjectiveStatus.Closed:
+                    return "Закрыт";
                 default:
                     return "-";
             }
