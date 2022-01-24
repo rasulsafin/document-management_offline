@@ -10,7 +10,6 @@ using Brio.Docs.Client.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
-using Newtonsoft.Json;
 using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 
 namespace Brio.Docs.Api.Controllers

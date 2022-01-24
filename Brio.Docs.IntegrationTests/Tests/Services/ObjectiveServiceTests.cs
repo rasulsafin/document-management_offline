@@ -920,7 +920,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                Statuses = new int?[] { (int?)expectedStatusObjective.Status },
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status },
             };
 
             objectiveToCreate.Status++;
@@ -951,7 +951,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                TypeId = (int?)expectedStatusObjective.ObjectiveType.ID,
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID },
             };
 
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();

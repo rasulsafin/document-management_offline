@@ -215,11 +215,19 @@ namespace Brio.Docs.Services
                 var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID)
-                                    .Where(x => filter.TypeIds.Capacity == 0 || filter.TypeIds == null || filter.TypeIds.Contains(x.ObjectiveTypeID))
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
-                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
-                                    .Where(x => filter.Statuses.Capacity == 0 || filter.Statuses.Contains(x.Status));
+                                    .Where(x => x.ProjectID == dbProject.ID);
+
+                if (filter.TypeIds != null && filter.TypeIds.Count > 0)
+                    allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
+
+                if (!string.IsNullOrEmpty(filter.BimElementGuid))
+                    allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+
+                if (!string.IsNullOrWhiteSpace(filter.TitlePart))
+                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart));
+
+                if (filter.Statuses != null && filter.Statuses.Count > 0)
+                    allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
 
                 if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
                 {
