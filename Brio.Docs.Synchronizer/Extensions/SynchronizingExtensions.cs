@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -98,8 +99,9 @@ namespace Brio.Docs.Synchronization.Extensions
             T remoteValue,
             T synchronizedValue)
         {
-            var localSynchronizedAndNotChanged = Equals(localValue, remoteValue) || Equals(synchronizedValue, remoteValue);
-            var localNotChanged = Equals(synchronizedValue, localValue);
+            var comparer = EqualityComparer<T>.Default;
+            var localSynchronizedAndNotChanged = comparer.Equals(localValue, remoteValue) || comparer.Equals(synchronizedValue, remoteValue);
+            var localNotChanged = comparer.Equals(synchronizedValue, localValue);
             var localMoreRelevant = localUpdatedAt > remoteUpdatedAt;
 
             var value = localSynchronizedAndNotChanged ? localValue
