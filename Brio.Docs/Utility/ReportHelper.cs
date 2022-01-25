@@ -4,12 +4,14 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common;
 
 namespace Brio.Docs.Utility
 {
     public class ReportHelper
     {
         private static readonly string HORIZONTAL_ELEMENT = "HorizontalElement";
+        private static readonly string HEADING_ELEMENT = "HeadingElement";
         private static readonly string TEXT = "Text";
         private static readonly string IMAGE = "Image";
         private static readonly string TABLE = "Table";
@@ -24,12 +26,38 @@ namespace Brio.Docs.Utility
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
                     new XAttribute("number", reportId),
-                    new XAttribute("date", date.ToShortDateString()));
+                    new XAttribute("date", date.ToString("dd.MM.yyyy")));
 
-            XElement body = new XElement(TABLE, objectives.Select(GenerateXElement));
-            xml.Add(body);
+            var objectiveTypes = objectives.OrderBy(o => GetStatus(o.Status)).GroupBy(o => o.Status);
+
+            foreach (var objectiveType in objectiveTypes)
+            {
+                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"Статус: {objectiveType.Key}"));
+                xml.Add(heading);
+                var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
+                xml.Add(body);
+            }
 
             return new XDocument(xml);
+        }
+
+        private static ObjectiveStatus GetStatus(string status)
+        {
+            switch (status)
+            {
+                case "Открыт":
+                    return ObjectiveStatus.Open;
+                case "В ходе выполнения":
+                    return ObjectiveStatus.InProgress;
+                case "Готов":
+                    return ObjectiveStatus.Ready;
+                case "Просрочен":
+                    return ObjectiveStatus.Late;
+                case "Закрыт":
+                    return ObjectiveStatus.Closed;
+                default:
+                    return ObjectiveStatus.Undefined;
+            }
         }
 
         private XElement GenerateXElement(ObjectiveToReportDto objective)
@@ -57,7 +85,7 @@ namespace Brio.Docs.Utility
                             TextElement($"{objective.Status}")),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Время: ", true),
-                             TextElement(objective.CreationDate.ToShortDateString())),
+                             TextElement(objective.CreationDate.ToString("dd.MM.yyyy HH:mm"))),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Позиция: ", true),
                              TextElement(locationTextElement)),
@@ -80,8 +108,21 @@ namespace Brio.Docs.Utility
         private XElement TextElement(string text, bool isBold = false)
         {
             var items = new List<object>();
+            items.Add(new XAttribute("fontsize", "regular"));
             if (isBold)
+            {
                 items.Add(new XAttribute("style", "bold"));
+            }
+
+            items.Add(text);
+            return new XElement(TEXT, items.ToArray());
+        }
+
+        private XElement HeadingElement(string text)
+        {
+            var items = new List<object>();
+            items.Add(new XAttribute("fontsize", "heading"));
+            items.Add(new XAttribute("style", "bold"));
             items.Add(text);
             return new XElement(TEXT, items.ToArray());
         }

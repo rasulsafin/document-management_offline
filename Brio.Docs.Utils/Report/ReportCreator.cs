@@ -18,6 +18,7 @@ namespace Brio.Docs.Utils.ReportCreator
         {
             { "VerticalElement", new VerticalElement() },
             { "HorizontalElement", new HorizontalElement() },
+            { "HeadingElement", new HeadingElement() },
             { "Text", new TextElement() },
             { "Image", new ImageElement() },
             { "Cell", new CellElement() },
@@ -63,6 +64,8 @@ namespace Brio.Docs.Utils.ReportCreator
                 Body body = MainPart.Document.Body;
 
                 Read(xml.Element(ROOT), body);
+
+                TableElement.RemoveTable();
             }
         }
 
