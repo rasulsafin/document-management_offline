@@ -224,7 +224,7 @@ namespace Brio.Docs.Services
                     allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
 
                 if (!string.IsNullOrWhiteSpace(filter.TitlePart))
-                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart));
+                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
 
                 if (filter.Statuses != null && filter.Statuses.Count > 0)
                     allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
