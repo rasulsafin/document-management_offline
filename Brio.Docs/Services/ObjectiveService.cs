@@ -221,6 +221,23 @@ namespace Brio.Docs.Services
                                     .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
                                     .Where(x => filter.Status == null || x.Status == filter.Status);
 
+                if (filter.DateSortStatus != 0)
+                {
+                    switch (filter.DateSortStatus)
+                    {
+                        case 1:
+                            allObjectives = allObjectives
+                                .Where(x => x.CreationDate >= filter.DateFrom && x.CreationDate <= filter.DateTo);
+                            break;
+                        case 2:
+                            allObjectives = allObjectives
+                                .Where(x => x.DueDate >= filter.DateFrom && x.DueDate <= filter.DateTo);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
                 if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
                 {
                     var list = new List<int>();
