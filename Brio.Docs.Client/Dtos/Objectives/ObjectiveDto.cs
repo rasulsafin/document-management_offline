@@ -22,6 +22,8 @@ namespace Brio.Docs.Client.Dtos
 
         public DateTime DueDate { get; set; }
 
+        public DateTime UpdatedAt { get; set; }
+
         [Required(ErrorMessage = "ValidationError_ObjectiveNameIsRequired")]
         public string Title { get; set; }
 
