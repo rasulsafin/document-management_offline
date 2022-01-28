@@ -233,6 +233,10 @@ namespace Brio.Docs.Services
                             allObjectives = allObjectives
                                 .Where(x => x.DueDate >= filter.DateFrom && x.DueDate <= filter.DateTo);
                             break;
+                        case 3:
+                            allObjectives = allObjectives
+                                .Where(x => x.UpdatedAt >= filter.DateFrom && x.UpdatedAt <= filter.DateTo);
+                            break;
                         default:
                             break;
                     }
