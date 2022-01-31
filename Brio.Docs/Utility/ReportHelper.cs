@@ -26,13 +26,13 @@ namespace Brio.Docs.Utility
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
                     new XAttribute("number", reportId),
-                    new XAttribute("date", date.ToString("dd.MM.yyyy")));
+                    new XAttribute("date", date.ToShortDateString()));
 
-            var objectiveTypes = objectives.OrderBy(o => GetStatus(o.Status)).GroupBy(o => o.Status);
+            var objectiveTypes = objectives.OrderBy(o => o.Status).GroupBy(o => o.Status);
 
             foreach (var objectiveType in objectiveTypes)
             {
-                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"Статус: {objectiveType.Key}"));
+                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"Статус: {StatusToString(objectiveType.Key)}"));
                 xml.Add(heading);
                 var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
                 xml.Add(body);
@@ -41,22 +41,24 @@ namespace Brio.Docs.Utility
             return new XDocument(xml);
         }
 
-        private static ObjectiveStatus GetStatus(string status)
+        private static string StatusToString(ObjectiveStatus status)
         {
             switch (status)
             {
-                case "Открыт":
-                    return ObjectiveStatus.Open;
-                case "В ходе выполнения":
-                    return ObjectiveStatus.InProgress;
-                case "Готов":
-                    return ObjectiveStatus.Ready;
-                case "Просрочен":
-                    return ObjectiveStatus.Late;
-                case "Закрыт":
-                    return ObjectiveStatus.Closed;
+                case ObjectiveStatus.Undefined:
+                    return "Не определен";
+                case ObjectiveStatus.Open:
+                    return "Открыт";
+                case ObjectiveStatus.InProgress:
+                    return "В ходе выполнения";
+                case ObjectiveStatus.Ready:
+                    return "Готов";
+                case ObjectiveStatus.Late:
+                    return "Просрочен";
+                case ObjectiveStatus.Closed:
+                    return "Закрыт";
                 default:
-                    return ObjectiveStatus.Undefined;
+                    return "-";
             }
         }
 
@@ -82,10 +84,10 @@ namespace Brio.Docs.Utility
                             TextElement($"{objective.ID}")),
                     new XElement(HORIZONTAL_ELEMENT,
                             TextElement("Статус: ", true),
-                            TextElement($"{objective.Status}")),
+                            TextElement($"{StatusToString(objective.Status)}")),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Время: ", true),
-                             TextElement(objective.CreationDate.ToString("dd.MM.yyyy HH:mm"))),
+                             TextElement(objective.CreationDate.ToString("g"))),
                     new XElement(HORIZONTAL_ELEMENT,
                              TextElement("Позиция: ", true),
                              TextElement(locationTextElement)),

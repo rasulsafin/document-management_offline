@@ -81,8 +81,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<ItemFullPathResolver>();
             services.AddTransient<ItemExternalDtoRelativePathResolver>();
 
-            services.AddTransient<StatusToStringResolver>();
-
             return services;
         }
 

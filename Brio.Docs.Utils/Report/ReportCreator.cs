@@ -65,7 +65,7 @@ namespace Brio.Docs.Utils.ReportCreator
 
                 Read(xml.Element(ROOT), body);
 
-                TableElement.RemoveTable();
+                TableElement.RemoveTablePrototype();
             }
         }
 

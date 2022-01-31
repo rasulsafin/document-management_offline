@@ -7,12 +7,12 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class TableElement : AElement
     {
-        private static Table table;
+        private static Table tablePrototype;
 
-        public static void RemoveTable()
+        public static void RemoveTablePrototype()
         {
-            table.Remove();
-            table = null;
+            tablePrototype.Remove();
+            tablePrototype = null;
         }
 
         public override void Read(XElement node, OpenXmlElement element)
@@ -20,21 +20,21 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
             if (!(element is Body))
                 return;
 
-            if (table == null)
+            if (tablePrototype == null)
             {
-                table = element.Elements<Table>().LastOrDefault();
+                tablePrototype = element.Elements<Table>().LastOrDefault();
 
-                if (table == null)
+                if (tablePrototype == null)
                 {
-                    table = new Table();
+                    tablePrototype = new Table();
                 }
             }
 
-            var newtable = table.CloneNode(true);
-            element.Append(newtable);
+            var table = tablePrototype.CloneNode(true);
+            element.Append(table);
 
             foreach (var subnode in node.Elements())
-                ReportCreator.Read(subnode, newtable);
+                ReportCreator.Read(subnode, table);
         }
     }
 }
