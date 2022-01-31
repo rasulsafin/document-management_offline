@@ -105,7 +105,7 @@ namespace Brio.Docs.Connections.YandexDisk.Tests.IntegrationTests.Synchronizers
             var result = await synchronizer.Remove(added);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(ObjectiveStatus.Ready, result.Status);
+            Assert.AreEqual(ObjectiveStatus.Closed, result.Status);
         }
 
         [TestMethod]

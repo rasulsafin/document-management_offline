@@ -163,7 +163,7 @@ namespace Brio.Docs.Connections.LementPro.Tests.IntegrationTests.Synchronization
             var result = await synchronizer.Remove(added);
 
             Assert.IsNotNull(result);
-            Assert.AreEqual(ObjectiveStatus.Ready, result.Status);
+            Assert.AreEqual(ObjectiveStatus.Closed, result.Status);
         }
 
         [TestMethod]

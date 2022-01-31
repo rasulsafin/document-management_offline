@@ -14,21 +14,23 @@ using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
+using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Interfaces;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
     internal class IssueSnapshotObjectiveConverter : IConverter<IssueSnapshot, ObjectiveExternalDto>
     {
+        private readonly IEnumIdentification<AssignToVariant> assignToEnumCreator;
         private readonly IConverter<Issue, ObjectiveExternalDto> converterToDto;
+        private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
+        private readonly MetaCommentHelper metaCommentHelper;
+        private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
         private readonly IConverter<IssueSnapshot, ObjectiveStatus> statusConverter;
         private readonly IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> convertToBimElements;
         private readonly IConverter<IEnumerable<Comment>, LinkedInfo> convertToLinkedInfo;
-        private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
-        private readonly IEnumIdentification<RootCauseSnapshot> rootCauseEnumCreator;
-        private readonly IEnumIdentification<LocationSnapshot> locationEnumCreator;
-        private readonly IEnumIdentification<AssignToVariant> assignToEnumCreator;
         private readonly IEnumIdentification<StatusSnapshot> statusEnumCreator;
+        private readonly IEnumIdentification<IssueTypeSnapshot> subtypeEnumCreator;
 
         public IssueSnapshotObjectiveConverter(
             IConverter<Issue, ObjectiveExternalDto> converterToDto,
@@ -57,20 +59,43 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             var parsedToDto = await converterToDto.Convert(snapshot.Entity);
             parsedToDto.Status = await statusConverter.Convert(snapshot);
 
-            var typeField = DynamicFieldUtilities.CreateField(
-                snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
-                subtypeEnumCreator);
-            var rootCause = snapshot.Entity.Attributes.RootCauseID == null
-                ? DynamicFieldUtilities.CreateField(rootCauseEnumCreator.NullID, rootCauseEnumCreator)
-                : DynamicFieldUtilities.CreateField(
-                    snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
-                    rootCauseEnumCreator);
-            var locations = snapshot.Entity.Attributes.LbsLocation == null
-                ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
-                : DynamicFieldUtilities.CreateField(
-                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LbsLocation].ID,
-                    locationEnumCreator);
-            var assignedTo = snapshot.Entity.Attributes.AssignedTo == null
+            foreach (var comment in GetComments(snapshot))
+                parsedToDto.DynamicFields.Add(comment);
+
+            parsedToDto.DynamicFields.AddIsNotNull(GetStatus(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetNewComment());
+            parsedToDto.DynamicFields.AddIsNotNull(GetType(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetRootCause(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetLocation(snapshot));
+            parsedToDto.DynamicFields.AddIsNotNull(GetAssignedTo(snapshot));
+
+            parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
+            parsedToDto.Items ??= new List<ItemExternalDto>();
+
+            foreach (var item in GetItems(snapshot))
+                parsedToDto.Items.Add(item);
+
+            if (parsedToDto.Location != null &&
+                snapshot.Entity.Attributes.TargetUrn != null)
+            {
+                if (snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
+                {
+                    if (!await TryRedirect(snapshot, parsedToDto))
+                        parsedToDto.Location.Item = target.Entity.ToDto();
+                }
+                else
+                {
+                    parsedToDto.Location = null;
+                }
+            }
+
+            parsedToDto.BimElements = await GetBimElements(snapshot);
+
+            return parsedToDto;
+        }
+
+        private DynamicFieldExternalDto GetAssignedTo(IssueSnapshot snapshot)
+            => snapshot.Entity.Attributes.AssignedTo == null
                 ? DynamicFieldUtilities.CreateField(assignToEnumCreator.NullID, assignToEnumCreator)
                 : DynamicFieldUtilities.CreateField(
                     snapshot.ProjectSnapshot.AssignToVariants.ContainsKey(snapshot.Entity.Attributes.AssignedTo)
@@ -78,14 +103,21 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                         : assignToEnumCreator.NullID,
                     assignToEnumCreator);
 
-            if (snapshot.Entity.Attributes.Status != Status.Void)
-            {
-                var status = DynamicFieldUtilities.CreateField(
-                    snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
-                    statusEnumCreator);
-                parsedToDto.DynamicFields.Add(status);
-            }
+        private async Task<ICollection<BimElementExternalDto>> GetBimElements(IssueSnapshot snapshot)
+        {
+            var listFromSnapshot = snapshot.BimElements?.ToList();
 
+            if (listFromSnapshot != null)
+                return listFromSnapshot;
+
+            var converted = snapshot.Comments != null
+                ? await convertToBimElements.Convert(snapshot.Comments.Select(x => x.Entity)) ?? Array.Empty<BimElementExternalDto>()
+                : Array.Empty<BimElementExternalDto>();
+            return converted.ToList();
+        }
+
+        private IEnumerable<DynamicFieldExternalDto> GetComments(IssueSnapshot snapshot)
+        {
             var comments =
                 snapshot.Comments?.Where(x => !x.Entity.Attributes.Body.Contains(MrsConstants.META_COMMENT_TAG)) ??
                 Enumerable.Empty<CommentSnapshot>();
@@ -133,10 +165,29 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     date,
                     text,
                 };
-                parsedToDto.DynamicFields.Add(comment);
-            }
 
-            var newComment = new DynamicFieldExternalDto
+                yield return comment;
+            }
+        }
+
+        private IEnumerable<ItemExternalDto> GetItems(IssueSnapshot snapshot)
+        {
+            if (snapshot.Attachments == null)
+                yield break;
+
+            foreach (var attachment in snapshot.Attachments.Values)
+                yield return attachment.ToDto();
+        }
+
+        private DynamicFieldExternalDto GetLocation(IssueSnapshot snapshot)
+            => snapshot.Entity.Attributes.LbsLocation == null
+                ? DynamicFieldUtilities.CreateField(locationEnumCreator.NullID, locationEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.Locations[snapshot.Entity.Attributes.LbsLocation].ID,
+                    locationEnumCreator);
+
+        private DynamicFieldExternalDto GetNewComment()
+            => new ()
             {
                 ExternalID = MrsConstants.NEW_COMMENT_ID,
                 Type = DynamicFieldType.STRING,
@@ -145,48 +196,27 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                 UpdatedAt = DateTime.Now,
             };
 
-            parsedToDto.DynamicFields.Add(newComment);
-            parsedToDto.DynamicFields.Add(typeField);
-            parsedToDto.DynamicFields.Add(rootCause);
-            parsedToDto.DynamicFields.Add(locations);
-            parsedToDto.DynamicFields.Add(assignedTo);
-            parsedToDto.ProjectExternalID = snapshot.ProjectSnapshot.Entity.ID;
+        private DynamicFieldExternalDto GetRootCause(IssueSnapshot snapshot)
+            => snapshot.Entity.Attributes.RootCauseID == null
+                ? DynamicFieldUtilities.CreateField(rootCauseEnumCreator.NullID, rootCauseEnumCreator)
+                : DynamicFieldUtilities.CreateField(
+                    snapshot.ProjectSnapshot.RootCauses[snapshot.Entity.Attributes.RootCauseID].ID,
+                    rootCauseEnumCreator);
 
-            if (snapshot.Attachments != null)
-            {
-                parsedToDto.Items ??= new List<ItemExternalDto>();
+        private DynamicFieldExternalDto GetStatus(IssueSnapshot snapshot)
+        {
+            if (snapshot.Entity.Attributes.Status == Status.Void)
+                return null;
 
-                foreach (var attachment in snapshot.Attachments.Values)
-                    parsedToDto.Items.Add(attachment.ToDto());
-            }
-
-            if (parsedToDto.Location != null &&
-                snapshot.Entity.Attributes.TargetUrn != null)
-            {
-                if (snapshot.ProjectSnapshot.Items.TryGetValue(snapshot.Entity.Attributes.TargetUrn, out var target))
-                {
-                    if (!await TryRedirect(snapshot, parsedToDto))
-                        parsedToDto.Location.Item = target.Entity.ToDto();
-                }
-                else
-                {
-                    parsedToDto.Location = null;
-                }
-            }
-
-            if (snapshot.Comments != null)
-            {
-                var elements = await convertToBimElements.Convert(snapshot.Comments.Select(x => x.Entity)) ??
-                    ArraySegment<BimElementExternalDto>.Empty;
-                parsedToDto.BimElements = elements.ToArray();
-            }
-            else
-            {
-                parsedToDto.BimElements = ArraySegment<BimElementExternalDto>.Empty;
-            }
-
-            return parsedToDto;
+            return DynamicFieldUtilities.CreateField(
+                snapshot.ProjectSnapshot.Statuses[snapshot.Entity.Attributes.Status.GetEnumMemberValue()].ID,
+                statusEnumCreator);
         }
+
+        private DynamicFieldExternalDto GetType(IssueSnapshot snapshot)
+            => DynamicFieldUtilities.CreateField(
+                snapshot.ProjectSnapshot.IssueTypes[snapshot.Entity.Attributes.NgIssueSubtypeID].ID,
+                subtypeEnumCreator);
 
         private async Task<bool> TryRedirect(IssueSnapshot snapshot, ObjectiveExternalDto parsedToDto)
         {
