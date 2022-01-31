@@ -8,7 +8,7 @@ namespace Brio.Docs.Connections.Bim360.Extensions
     // System.Linq.Async cannot be used in this solution.
     // Reason: https://stackoverflow.com/a/60347953/16047481
     // Reference: https://github.com/dotnet/reactive/tree/main/Ix.NET/Source/System.Linq.Async/System/Linq
-    public static class LinqAsyncExtensions
+    internal static class LinqAsyncExtensions
     {
         /// <summary>
         ///     Determines whether an async-enumerable sequence contains any elements.

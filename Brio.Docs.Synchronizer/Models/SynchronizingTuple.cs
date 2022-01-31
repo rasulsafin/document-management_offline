@@ -3,9 +3,11 @@ using Brio.Docs.Synchronization.Interfaces;
 
 namespace Brio.Docs.Synchronization.Models
 {
-    internal class SynchronizingTuple<T> : ISynchronizationChanges
+    public class SynchronizingTuple<T> : ISynchronizationChanges
     {
+        private T local;
         private T remote;
+        private T synchronized;
 
         public SynchronizingTuple(
                 string externalID = null,
@@ -23,9 +25,18 @@ namespace Brio.Docs.Synchronization.Models
 
         public string ExternalID { get; set; }
 
-        public T Synchronized { get; set; }
+        public bool HasExternalID => !string.IsNullOrEmpty(ExternalID);
 
-        public T Local { get; set; }
+        public T Local
+        {
+            get => local;
+            set
+            {
+                local = value;
+                if (ExternalID == null)
+                    UpdateExternalID();
+            }
+        }
 
         public T Remote
         {
@@ -37,13 +48,22 @@ namespace Brio.Docs.Synchronization.Models
             }
         }
 
-        public bool LocalChanged { get; set; }
+        public T Synchronized
+        {
+            get => synchronized;
+            set
+            {
+                synchronized = value;
+                if (ExternalID == null)
+                    UpdateExternalID();
+            }
+        }
 
-        public bool SynchronizedChanged { get; set; }
+        public bool LocalChanged { get; set; }
 
         public bool RemoteChanged { get; set; }
 
-        public bool HasExternalID => !string.IsNullOrEmpty(ExternalID);
+        public bool SynchronizedChanged { get; set; }
 
         private void UpdateExternalID()
         {

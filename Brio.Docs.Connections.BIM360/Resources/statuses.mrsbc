@@ -78,7 +78,7 @@
     },
     {
       "Source": "closed",
-      "Destination": "Done"
+      "Destination": "Closed"
     }
   ],
   "Set": [
@@ -198,7 +198,7 @@
       "Destination": "ready_to_inspect"
     },
     {
-      "Source": "Done",
+      "Source": "Closed",
       "Destination": "closed"
     },
     {
