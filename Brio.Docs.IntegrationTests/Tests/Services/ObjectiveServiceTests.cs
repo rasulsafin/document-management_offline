@@ -943,6 +943,37 @@ namespace Brio.Docs.Tests.Services
         }
 
         [TestMethod]
+        public async Task GetObjectives_FilterByStatuses_ListOfObjectivesWithThatStatuses()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status, (int)expectedStatusObjective.Status - 1 },
+            };
+
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
         public async Task GetObjectives_FilterByExistingType_ListOfObjectivesWithType()
         {
             // Arrange
@@ -952,6 +983,32 @@ namespace Brio.Docs.Tests.Services
             var filter = new ObjectiveFilterParameters()
             {
                 TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID },
+            };
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 1;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingTypes_ListOfObjectivesWithTypes()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID, (int)expectedStatusObjective.ObjectiveType.ID - 1},
             };
 
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();
