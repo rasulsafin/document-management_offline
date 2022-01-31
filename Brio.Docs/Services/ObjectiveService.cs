@@ -417,6 +417,19 @@ namespace Brio.Docs.Services
                         .ToListAsync();
                     break;
                 case ObjectiveSortParameters.Sorts.ByEditDate:
+                    objectives = await allObjectives?
+                       .OrderBy(x => x.UpdatedAt)
+                       .ByPages(x => x.UpdatedAt,
+                                   filter.PageNumber,
+                                   filter.PageSize,
+                                   sort.IsReverse)
+                       .Include(x => x.ObjectiveType)
+                       .Include(x => x.BimElements)
+                               .ThenInclude(x => x.BimElement)
+                       .Include(x => x.Location)
+                               .ThenInclude(x => x.Item)
+                       .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                       .ToListAsync();
                     break;
                 case ObjectiveSortParameters.Sorts.ByDueDate:
                     objectives = await allObjectives?
