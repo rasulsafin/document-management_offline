@@ -951,7 +951,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                Statuses = new List<int>() { (int)expectedStatusObjective.Status, (int)expectedStatusObjective.Status - 1 },
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status, (int)expectedStatusObjective.Status + 1 },
             };
 
             objectiveToCreate.Status++;
@@ -962,7 +962,7 @@ namespace Brio.Docs.Tests.Services
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();
             var existingProjectId = new ID<ProjectDto>(existingProject.ID);
 
-            var expectedCount = 1;
+            var expectedCount = 2;
 
             // Act
             var result = await service.GetObjectives(existingProjectId, filter);
@@ -971,6 +971,13 @@ namespace Brio.Docs.Tests.Services
             // Assert
             Assert.IsTrue(result.Items.Any());
             Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).Status;
+                var filterType = filter.Statuses.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
         }
 
         [TestMethod]
@@ -1008,13 +1015,16 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID, (int)expectedStatusObjective.ObjectiveType.ID - 1},
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID, (int)expectedStatusObjective.ObjectiveType.ID + 1 },
             };
+
+            objectiveToCreate.ObjectiveTypeID = new ID<ObjectiveTypeDto>(((int)objectiveToCreate.ObjectiveTypeID) + 1);
+            await service.Add(objectiveToCreate);
 
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();
             var existingProjectId = new ID<ProjectDto>(existingProject.ID);
 
-            var expectedCount = 1;
+            var expectedCount = 2;
 
             // Act
             var result = await service.GetObjectives(existingProjectId, filter);
@@ -1023,6 +1033,13 @@ namespace Brio.Docs.Tests.Services
             // Assert
             Assert.IsTrue(result.Items.Any());
             Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).ObjectiveType.ID;
+                var filterType = filter.TypeIds.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
         }
 
         [TestMethod]
