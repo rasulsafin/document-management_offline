@@ -196,7 +196,7 @@ namespace Brio.Docs.Api.Controllers
             int projectID,
             [FromQuery]
             ObjectiveFilterParameters filter,
-            [FromQuery(Name = "Sortings")]
+            [FromQuery]
             string sort)
         {
             try
