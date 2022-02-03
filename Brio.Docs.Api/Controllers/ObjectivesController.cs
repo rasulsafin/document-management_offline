@@ -196,14 +196,12 @@ namespace Brio.Docs.Api.Controllers
             int projectID,
             [FromQuery]
             ObjectiveFilterParameters filter,
-            [FromQuery(Name = "IsReverse")]
-            bool isReverse,
-            [FromQuery(Name = "Sort")]
-            ObjectiveSortParameters.Sorts sort)
+            [FromQuery(Name = "Sortings")]
+            string sort)
         {
             try
             {
-                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, new ObjectiveSortParameters() { IsReverse = isReverse, Sort = sort });
+                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, ParseSortQuery(sort));
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)
@@ -315,6 +313,41 @@ namespace Brio.Docs.Api.Controllers
             {
                 return CreateProblemResult(this, 500, localizer["FailedToCreateReport"], ex.Message);
             }
+        }
+
+        private SortParameters ParseSortQuery(string sort)
+        {
+            if (string.IsNullOrEmpty(sort))
+                return null;
+            var sorts = new List<SortParameter>();
+            var parts = sort.Split(',', System.StringSplitOptions.RemoveEmptyEntries);
+            foreach (var item in parts)
+            {
+                if (item.Contains(':'))
+                {
+                    var sortParts = item.Split(':');
+                    var sortName = sortParts[0];
+                    var sortDir = sortParts[1];
+                    if (sortDir.Equals("asc", System.StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        sorts.Add(new SortParameter { FieldName = sortName, IsDescending = false });
+                    }
+                    else if (sortDir.Equals("desc", System.StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        sorts.Add(new SortParameter { FieldName = sortName, IsDescending = true });
+                    }
+                    else
+                    {
+                        throw new ArgumentValidationException(nameof(sort));
+                    }
+                }
+                else
+                {
+                    sorts.Add(new SortParameter() { FieldName = item });
+                }
+            }
+
+            return new SortParameters { Sortings = sorts };
         }
     }
 }

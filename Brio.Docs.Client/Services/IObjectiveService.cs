@@ -56,7 +56,7 @@ namespace Brio.Docs.Client.Services
         /// <returns>Collection of objectives.</returns>
         /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, ObjectiveSortParameters sort);
+        Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, SortParameters sort);
 
         /// <summary>
         /// Return list of objectives with locations, linked to specific project.
