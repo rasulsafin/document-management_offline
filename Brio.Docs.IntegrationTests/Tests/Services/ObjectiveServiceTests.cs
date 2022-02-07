@@ -654,6 +654,7 @@ namespace Brio.Docs.Tests.Services
             beforeObjective.Title += "Edit";
             beforeObjective.Description += "Edit";
             beforeObjective.CreationDate = beforeObjective.CreationDate.AddDays(1);
+            beforeObjective.UpdatedAt = beforeObjective.UpdatedAt.AddDays(1);
             beforeObjective.DueDate = beforeObjective.DueDate.AddDays(1);
             beforeObjective.Status = ObjectiveStatus.Late;
             beforeObjective.ObjectiveTypeID = new ID<ObjectiveTypeDto>(
@@ -677,6 +678,7 @@ namespace Brio.Docs.Tests.Services
             var expectedDescription = beforeObjective.Description + "Edit";
             var expectedCreationDate = beforeObjective.CreationDate.AddDays(1);
             var expectedDueDate = beforeObjective.DueDate.AddDays(1);
+            var expectedLastUpdateDate = beforeObjective.UpdatedAt.AddDays(1);
             var expectedStatus = ObjectiveStatus.Late;
             var expectedType = Fixture.Context.ObjectiveTypes.First(x => x.ID != (int)beforeObjective.ObjectiveTypeID).ID;
 
@@ -684,6 +686,7 @@ namespace Brio.Docs.Tests.Services
             beforeObjective.Description = expectedDescription;
             beforeObjective.CreationDate = expectedCreationDate;
             beforeObjective.DueDate = expectedDueDate;
+            beforeObjective.UpdatedAt = expectedLastUpdateDate;
             beforeObjective.Status = expectedStatus;
             beforeObjective.ObjectiveTypeID = new ID<ObjectiveTypeDto>(expectedType);
 
@@ -696,6 +699,7 @@ namespace Brio.Docs.Tests.Services
             Assert.AreEqual(expectedDescription, afterObjective.Description);
             Assert.AreEqual(expectedCreationDate, afterObjective.CreationDate);
             Assert.AreEqual(expectedDueDate, afterObjective.DueDate);
+            Assert.AreEqual(expectedLastUpdateDate, afterObjective.UpdatedAt);
             Assert.AreEqual(expectedStatus, afterObjective.Status);
             Assert.AreEqual(expectedType, (int)afterObjective.ObjectiveTypeID);
         }

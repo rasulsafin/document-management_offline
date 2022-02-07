@@ -256,33 +256,39 @@ namespace Brio.Docs.Tests.Utility
         #endregion
 
         #region ITEMS
-        public static List<Item> DEFAULT_ITEMS => new List<Item>
-        {
-            new Item
+
+        public static List<Item> DEFAULT_ITEMS
+            => new List<Item>
             {
-                ExternalID = FILE_ITEM.ExternalID,
-                ItemType = FILE_ITEM.ItemType,
-                RelativePath = FILE_ITEM.RelativePath,
-            },
-            new Item
-            {
-                ExternalID = BIM_ITEM.ExternalID,
-                ItemType = BIM_ITEM.ItemType,
-                RelativePath = BIM_ITEM.RelativePath,
-            },
-            new Item
-            {
-                ExternalID = MEDIA_ITEM.ExternalID,
-                ItemType = MEDIA_ITEM.ItemType,
-                RelativePath = MEDIA_ITEM.RelativePath,
-            },
-        };
+                new Item
+                {
+                    ExternalID = FILE_ITEM.ExternalID,
+                    ItemType = FILE_ITEM.ItemType,
+                    RelativePath = FILE_ITEM.RelativePath,
+                    Name = FILE_ITEM.Name,
+                },
+                new Item
+                {
+                    ExternalID = BIM_ITEM.ExternalID,
+                    ItemType = BIM_ITEM.ItemType,
+                    RelativePath = BIM_ITEM.RelativePath,
+                    Name = BIM_ITEM.Name,
+                },
+                new Item
+                {
+                    ExternalID = MEDIA_ITEM.ExternalID,
+                    ItemType = MEDIA_ITEM.ItemType,
+                    RelativePath = MEDIA_ITEM.RelativePath,
+                    Name = MEDIA_ITEM.Name,
+                },
+            };
 
         private static readonly Item FILE_ITEM = new Item
         {
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 0,
             RelativePath = "File element",
+            Name = "File element",
         };
 
         private static readonly Item BIM_ITEM = new Item
@@ -290,6 +296,7 @@ namespace Brio.Docs.Tests.Utility
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 1,
             RelativePath = "Bim element",
+            Name = "Bim element",
         };
 
         private static readonly Item MEDIA_ITEM = new Item
@@ -297,6 +304,7 @@ namespace Brio.Docs.Tests.Utility
             ExternalID = $"ExternalItemId{Guid.NewGuid()}",
             ItemType = 2,
             RelativePath = "Media element",
+            Name = "Media element",
         };
         #endregion
 

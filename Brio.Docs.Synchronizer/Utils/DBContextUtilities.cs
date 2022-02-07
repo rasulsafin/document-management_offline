@@ -1,18 +1,14 @@
+using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Brio.Docs.Synchronization.Utils
 {
     public static class DBContextUtilities
     {
-        public static void ReloadContext(DbContext context)
+        public static void ReloadContext(DbContext context, SynchronizingData data)
         {
-            foreach (var entry in context.ChangeTracker.Entries())
-            {
-                if (entry.State == EntityState.Added)
-                    entry.State = EntityState.Detached;
-
-                entry.Reload();
-            }
+            context.ChangeTracker.Clear();
+            context.Attach(data.User);
         }
     }
 }
