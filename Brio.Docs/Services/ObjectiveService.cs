@@ -208,33 +208,7 @@ namespace Brio.Docs.Services
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
             try
             {
-                var dbProject = await context.Projects.Unsynchronized()
-                    .FindOrThrowAsync(x => x.ID, (int)projectID);
-                logger.LogDebug("Found project: {@DBProject}", dbProject);
-
-                var allObjectives = context.Objectives
-                                    .AsNoTracking()
-                                    .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID)
-                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
-                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
-                                    .Where(x => filter.Status == null || x.Status == filter.Status);
-
-                if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
-                {
-                    var list = new List<int>();
-                    var obj = context.Objectives
-                        .AsNoTracking()
-                        .Unsynchronized()
-                        .Where(x => x.ProjectID == dbProject.ID)
-                        .FirstOrDefault(o => o.ID == (int)filter.ExceptChildrenOf);
-
-                    if (obj != null)
-                        GetAllObjectiveIds(obj, list);
-
-                    allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
-                }
+                var allObjectives = await GetFilteredObjectives(projectID, filter);
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
@@ -262,6 +236,29 @@ namespace Brio.Docs.Services
                         TotalPages = totalPages,
                     },
                 };
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
+        public async Task<IEnumerable<ID<ObjectiveDto>>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjective IDs started with projectID: {@ProjectID}", projectID);
+            try
+            {
+                var allObjectives = await GetFilteredObjectives(projectID, filter);
+
+                var objectives = await allObjectives?
+                    .Select(x => mapper.Map<ID<ObjectiveDto>>(x.ID))
+                    .ToListAsync();
+
+                return objectives;
             }
             catch (Exception ex)
             {
@@ -387,6 +384,39 @@ namespace Brio.Docs.Services
                 GetAllObjectiveIds(child, ids);
 
             return ids;
+        }
+
+        private async Task<IQueryable<Objective>> GetFilteredObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        {
+            var dbProject = await context.Projects.Unsynchronized()
+                .FindOrThrowAsync(x => x.ID, (int)projectID);
+            logger.LogDebug("Found project: {@DBProject}", dbProject);
+
+            var allObjectives = context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ProjectID == dbProject.ID)
+                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
+                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
+                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
+                                    .Where(x => filter.Status == null || x.Status == filter.Status);
+
+            if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
+            {
+                var list = new List<int>();
+                var obj = context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Where(x => x.ProjectID == dbProject.ID)
+                    .FirstOrDefault(o => o.ID == (int)filter.ExceptChildrenOf);
+
+                if (obj != null)
+                    GetAllObjectiveIds(obj, list);
+
+                allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
+            }
+
+            return allObjectives;
         }
     }
 }
