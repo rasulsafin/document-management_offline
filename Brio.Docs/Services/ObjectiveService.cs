@@ -17,6 +17,7 @@ using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
 using Brio.Docs.Utility.Pagination;
+using Brio.Docs.Utility.Sorting;
 using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -248,7 +249,16 @@ namespace Brio.Docs.Services
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
-                var objectives = await Sort(allObjectives, filter, sort);
+                var objectives = await allObjectives?
+                    .SortWithParameters(sort, x => x.CreationDate)
+                    .ByPages(filter.PageNumber, filter.PageSize)
+                    .Include(x => x.ObjectiveType)
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Include(x => x.Location)
+                            .ThenInclude(x => x.Item)
+                    .Select(x => mapper.Map<ObjectiveToListDto>(x))
+                    .ToListAsync();
 
                 return new PagedListDto<ObjectiveToListDto>()
                 {
@@ -386,59 +396,6 @@ namespace Brio.Docs.Services
                 GetAllObjectiveIds(child, ids);
 
             return ids;
-        }
-
-        private async Task<List<ObjectiveToListDto>> Sort(IQueryable<Objective> allObjectives, ObjectiveFilterParameters filter, SortParameters sort)
-        {
-            if (sort == null || sort.Sortings == null)
-            {
-                return await allObjectives?
-                   .OrderBy(x => x.CreationDate)
-                   .ByPages(x => x.CreationDate,
-                               filter.PageNumber,
-                               filter.PageSize)
-                   .Include(x => x.ObjectiveType)
-                   .Include(x => x.BimElements)
-                           .ThenInclude(x => x.BimElement)
-                   .Include(x => x.Location)
-                           .ThenInclude(x => x.Item)
-                   .Select(x => mapper.Map<ObjectiveToListDto>(x))
-                   .ToListAsync();
-            }
-
-            var sortParameter = sort.Sortings[0];
-
-            string sortString = sortParameter.FieldName;
-            bool isDescSorting = sortParameter.IsDescending;
-
-            var fieldName = OrderingFunction(sortString);
-            if (fieldName == null)
-                throw new DocumentManagementException("Bad sort");
-
-            var objectives = await allObjectives?
-            .OrderBy(x => EF.Property<object>(x, fieldName))
-            .ByPages(x => EF.Property<object>(x, fieldName),
-                        filter.PageNumber,
-                        filter.PageSize,
-                        isDescSorting)
-            .Include(x => x.ObjectiveType)
-            .Include(x => x.BimElements)
-                    .ThenInclude(x => x.BimElement)
-            .Include(x => x.Location)
-                    .ThenInclude(x => x.Item)
-            .Select(x => mapper.Map<ObjectiveToListDto>(x))
-            .ToListAsync();
-
-            return objectives;
-        }
-
-        private string OrderingFunction(string sortString)
-        {
-            return sortString == "ByTitle" ? "Title" :
-                    sortString == "ByCreateDate" ? "CreationDate" :
-                    sortString == "ByEditDate" ? "UpdatedAt" :
-                    sortString == "ByDueDate" ? "DueDate" :
-                    null;
         }
     }
 }
