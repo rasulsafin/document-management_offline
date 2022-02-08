@@ -924,7 +924,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                Status = (int?)expectedStatusObjective.Status,
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status },
             };
 
             objectiveToCreate.Status++;
@@ -947,6 +947,44 @@ namespace Brio.Docs.Tests.Services
         }
 
         [TestMethod]
+        public async Task GetObjectives_FilterByStatuses_ListOfObjectivesWithThatStatuses()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status, (int)expectedStatusObjective.Status + 1 },
+            };
+
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 2;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).Status;
+                var filterType = filter.Statuses.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
+        }
+
+        [TestMethod]
         public async Task GetObjectives_FilterByExistingType_ListOfObjectivesWithType()
         {
             // Arrange
@@ -955,7 +993,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                TypeId = (int?)expectedStatusObjective.ObjectiveType.ID,
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID },
             };
 
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();
@@ -970,6 +1008,42 @@ namespace Brio.Docs.Tests.Services
             // Assert
             Assert.IsTrue(result.Items.Any());
             Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingTypes_ListOfObjectivesWithTypes()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID, (int)expectedStatusObjective.ObjectiveType.ID + 1 },
+            };
+
+            objectiveToCreate.ObjectiveTypeID = new ID<ObjectiveTypeDto>(((int)objectiveToCreate.ObjectiveTypeID) + 1);
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 2;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter);
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).ObjectiveType.ID;
+                var filterType = filter.TypeIds.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
         }
 
         [TestMethod]
