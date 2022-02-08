@@ -179,7 +179,7 @@ namespace Brio.Docs.Api.Controllers
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("project/{projectID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
@@ -191,7 +191,7 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
-            [FromQuery]
+            [FromBody]
             ObjectiveFilterParameters filter)
         {
             try
