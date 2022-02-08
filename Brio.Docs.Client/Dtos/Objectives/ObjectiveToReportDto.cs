@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Brio.Docs.Common;
 
 namespace Brio.Docs.Client.Dtos
 {
@@ -21,6 +22,6 @@ namespace Brio.Docs.Client.Dtos
 
         public LocationDto Location { get; set; }
 
-        public string Status { get; set; }
+        public ObjectiveStatus Status { get; set; }
     }
 }

@@ -175,14 +175,13 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Parameters for filtration.</param>
-        /// <param name="isReverse">Parameter for reverse sorting</param>
         /// <param name="sort">Parameter for sorting</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with the pagination info.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("project/{projectID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
@@ -194,7 +193,7 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
-            [FromQuery]
+            [FromBody]
             ObjectiveFilterParameters filter,
             [FromQuery]
             string sort)
