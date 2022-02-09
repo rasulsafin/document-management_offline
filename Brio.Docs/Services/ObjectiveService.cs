@@ -369,6 +369,7 @@ namespace Brio.Docs.Services
                                     .AsNoTracking()
                                     .Unsynchronized()
                                     .Where(x => x.ParentObjectiveID == (int)parentID)
+                                    .OrderBy(x => x.CreationDate)
                                     .Select(x => mapper.Map<SubobjectiveDto>(x))
                                     .ToListAsync();
 
