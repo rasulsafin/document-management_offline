@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
@@ -219,7 +219,7 @@ namespace Brio.Docs.Api.Controllers
         /// <response code="404">Could not find objective to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
         [HttpGet]
-        [Route("objective/{parentID}")]
+        [Route("subobjectives/{parentID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
