@@ -85,6 +85,7 @@ namespace Brio.Docs.Utility.Mapping
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
                 .ForMember(d => d.Status, o => o.MapFrom(s => s.Status));
             CreateMap<Objective, ObjectiveToLocationDto>();
+            CreateMap<Objective, SubobjectiveDto>();
         }
 
         private void CreateMapToModel()

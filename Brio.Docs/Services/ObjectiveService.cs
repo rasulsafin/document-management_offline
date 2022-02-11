@@ -359,6 +359,31 @@ namespace Brio.Docs.Services
             }
         }
 
+        public async Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectivesByParent started with parentID: {@parentID}", parentID);
+            try
+            {
+                var objectivesWithParent = await context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ParentObjectiveID == (int)parentID)
+                                    .OrderBy(x => x.CreationDate)
+                                    .Select(x => mapper.Map<SubobjectiveDto>(x))
+                                    .ToListAsync();
+
+                return objectivesWithParent;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by parentID key {parentID}", parentID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();

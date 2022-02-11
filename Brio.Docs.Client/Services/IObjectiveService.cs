@@ -67,6 +67,15 @@ namespace Brio.Docs.Client.Services
         Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName);
 
         /// <summary>
+        /// Return list of sub-objectives, linked to specific parent objective.
+        /// </summary>
+        /// <param name="parentID">Parent's ID.</param>
+        /// <returns>Collection of sub-objectives.</returns>
+        /// <exception cref="ANotFoundException">Thrown when parent does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
+        Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID);
+
+        /// <summary>
         /// Generate report about selected objectives.
         /// </summary>
         /// <param name="objectives">List of objective id's.</param>

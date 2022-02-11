@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
@@ -202,6 +202,43 @@ namespace Brio.Docs.Api.Controllers
             catch (ANotFoundException ex)
             {
                 return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Return list of sub-objectives, linked to specific parent objective.
+        /// </summary>
+        /// <param name="parentID">Parent's ID.</param>
+        /// <returns>Collection of sub-objectives.</returns>
+        /// <response code="200">Collection of sub-objectives linked to objective.</response>
+        /// <response code="400">Invalid parent id.</response>
+        /// <response code="404">Could not find objective to retrieve objective list.</response>
+        /// <response code="500">Something went wrong while retrieving the objective list.</response>
+        [HttpGet]
+        [Route("subobjectives/{parentID}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectivesByParent(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int parentID)
+        {
+            try
+            {
+                var objectives = await service.GetObjectivesByParent(new ID<ObjectiveDto>(parentID));
+                return Ok(objectives);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
             }
             catch (DocumentManagementException ex)
             {
