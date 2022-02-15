@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Brio.Docs.Common.Extensions;
 using Brio.Docs.Database;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
@@ -50,26 +51,20 @@ namespace Brio.Docs.Synchronization.Extensions
             where T : class, new()
             => MergePrivate(tuple, localUpdatedAt, remoteUpdatedAt, properties.Select(GetLastPropertyInfo).ToArray());
 
+        [Obsolete]
         public static object GetPropertyValue<T>(this SynchronizingTuple<T> tuple, string propertyName)
-            where T : class, ISynchronizable<T>, new()
         {
             var propertyInfo = typeof(T).GetProperty(propertyName);
             if (propertyInfo == null)
                 throw new ArgumentException(nameof(GetPropertyValue), nameof(propertyName));
 
-            bool TryGetValue(T source, out object value)
-            {
-                value = null;
-                if (source == null)
-                    return false;
+            return GetPropertyValuePrivate<T, object>(tuple, propertyInfo);
+        }
 
-                value = propertyInfo.GetValue(source);
-                return value != default;
-            }
-
-            return TryGetValue(tuple.Local, out var result1)     ? result1 :
-                TryGetValue(tuple.Remote, out var result2)       ? result2 :
-                TryGetValue(tuple.Synchronized, out var result3) ? result3 : null;
+        public static TProperty GetPropertyValue<T, TProperty>(this SynchronizingTuple<T> tuple, Expression<Func<T, TProperty>> property)
+        {
+            var propertyInfo = property.ToPropertyInfo();
+            return GetPropertyValuePrivate<T, TProperty>(tuple, propertyInfo);
         }
 
         public static void SynchronizeChanges(this ISynchronizationChanges parentTuple, ISynchronizationChanges childTuple)
@@ -91,6 +86,14 @@ namespace Brio.Docs.Synchronization.Extensions
 
             return propertyInfo;
         }
+
+        private static TProperty GetPropertyValuePrivate<T, TProperty>(
+            SynchronizingTuple<T> tuple,
+            PropertyInfo propertyInfo)
+            => tuple.AsEnumerable()
+               .Where(x => x != null)
+               .Select(x => (TProperty)propertyInfo.GetValue(x))
+               .FirstOrDefault(x => !EqualityComparer<TProperty>.Default.Equals(x, default));
 
         private static T GetRelevantValue<T>(
             DateTime localUpdatedAt,

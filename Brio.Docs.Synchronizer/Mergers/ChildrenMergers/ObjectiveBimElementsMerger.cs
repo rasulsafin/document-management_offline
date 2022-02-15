@@ -19,8 +19,9 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         public ObjectiveBimElementsMerger(
             DMContext context,
             IMerger<BimElement> merger,
+            IAttacher<BimElement> attacher,
             ILogger<ObjectiveBimElementsMerger> logger)
-            : base(context, merger, logger)
+            : base(context, merger, logger, attacher)
         {
         }
 

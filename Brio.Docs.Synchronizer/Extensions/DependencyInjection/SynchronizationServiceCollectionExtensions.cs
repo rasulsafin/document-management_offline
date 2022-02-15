@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IMerger<BimElement>, BimElementMerger>();
 
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
+            services.AddScoped<IAttacher<BimElement>, BimElementAttacher>();
 
             services.AddScoped<IExternalIdUpdater<Item>, ItemExternalIdUpdater>();
             services.AddScoped<IExternalIdUpdater<DynamicField>, DynamicFieldExternalIdUpdater>();
@@ -73,9 +74,5 @@ namespace Microsoft.Extensions.DependencyInjection
             => services
                .AddScoped<IChildrenMerger<Project, Item>, ProjectItemsMerger>()
                .AddFactory<IChildrenMerger<Project, Item>>();
-
-        private static bool DoesNeedItem(Item item, SynchronizingTuple<Item> tuple)
-            => tuple.DoesNeed(item) ||
-                item.RelativePath == (string)tuple.GetPropertyValue(nameof(Item.RelativePath));
     }
 }
