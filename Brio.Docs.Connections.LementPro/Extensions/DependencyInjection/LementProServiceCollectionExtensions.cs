@@ -24,11 +24,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<HttpRequestUtility>();
 
             services.AddTransient<LementProConnectionContext>();
-            services.AddScoped<Func<LementProConnectionContext>>(x => x.GetService<LementProConnectionContext>);
-            services.AddScoped<IFactory<LementProConnectionContext>, Factory<LementProConnectionContext>>();
-
-            services.AddScoped<Func<LementProConnectionStorage>>(x => x.GetService<LementProConnectionStorage>);
-            services.AddScoped<IFactory<LementProConnectionStorage>, Factory<LementProConnectionStorage>>();
+            services.AddFactory<LementProConnectionContext>();
+            services.AddScoped<LementProConnectionStorage>();
+            services.AddFactory<LementProConnectionStorage>();
 
             services.AddScoped<
                 IFactory<LementProConnectionContext, LementProObjectivesSynchronizer>,
