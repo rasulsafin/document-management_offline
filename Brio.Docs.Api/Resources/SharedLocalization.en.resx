@@ -228,4 +228,10 @@
   <data name="CheckValidProjectTitleToAdd_TitleRequired" xml:space="preserve">
     <value>Project title is required</value>
   </data>
+  <data name="ValidationError_PageNumberTooSmall" xml:space="preserve">
+    <value>Page number should be greater than zero</value>
+  </data>
+  <data name="ValidationError_PageSizeNotInRange" xml:space="preserve">
+    <value>Page size is not in valid range</value>
+  </data>
 </root>
