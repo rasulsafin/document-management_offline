@@ -45,6 +45,7 @@ namespace Brio.Docs.Tests
                 && x.AuthorID == y.AuthorID
                 && x.CreationDate == y.CreationDate
                 && x.DueDate == y.DueDate
+                && x.UpdatedAt == y.UpdatedAt
                 && x.Title == y.Title
                 && x.Description == y.Description
                 && x.Status == y.Status

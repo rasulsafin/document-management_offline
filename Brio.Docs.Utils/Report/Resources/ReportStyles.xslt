@@ -476,24 +476,6 @@
             </w:t>
           </w:r>
         </w:p>
-        <w:p w:rsidR="00C5707F" w:rsidRDefault="00C5707F" w:rsidP="00C5707F">
-          <w:pPr>
-            <w:spacing w:after="0" w:line="240" w:lineRule="auto"/>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-            <w:br w:type="page"/>
-          </w:r>
-        </w:p>
         <w:tbl>
           <w:tblPr>
             <w:tblStyle w:val="a7"/>
@@ -506,6 +488,9 @@
             <w:gridCol w:w="6237"/>
           </w:tblGrid>
           <w:tr w:rsidR="00C5707F" w:rsidTr="00D5249A">
+			<w:trPr>
+				<w:tblHeader/>
+			</w:trPr>
             <w:tc>
               <w:tcPr>
                 <w:tcW w:w="9356" w:type="dxa"/>
@@ -553,64 +538,6 @@
             </w:tc>
           </w:tr>
         </w:tbl>
-        <w:p w:rsidR="00C5707F" w:rsidRPr="00C5707F" w:rsidRDefault="00C5707F" w:rsidP="00C5707F">
-          <w:pPr>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-          </w:pPr>
-          <w:bookmarkStart w:id="0" w:name="_GoBack"/>
-          <w:bookmarkEnd w:id="0"/>
-        </w:p>
-        <w:p w:rsidR="00C5707F" w:rsidRPr="00C5707F" w:rsidRDefault="00C5707F" w:rsidP="00C5707F">
-          <w:pPr>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-          </w:pPr>
-        </w:p>
-        <w:p w:rsidR="00AB36EE" w:rsidRPr="00C5707F" w:rsidRDefault="00C5707F" w:rsidP="00C5707F">
-          <w:pPr>
-            <w:tabs>
-              <w:tab w:val="left" w:pos="1457"/>
-              <w:tab w:val="left" w:pos="2847"/>
-              <w:tab w:val="left" w:pos="4521"/>
-            </w:tabs>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-          </w:pPr>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-            <w:tab/>
-          </w:r>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-            <w:tab/>
-          </w:r>
-          <w:r>
-            <w:rPr>
-              <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
-              <w:sz w:val="28"/>
-              <w:szCs w:val="28"/>
-            </w:rPr>
-            <w:tab/>
-          </w:r>
-        </w:p>
         </xsl:for-each>
         <w:sectPr w:rsidR="00AB36EE" w:rsidRPr="00C5707F" w:rsidSect="00C5707F">
           <w:footerReference w:type="default" r:id="rId7"/>

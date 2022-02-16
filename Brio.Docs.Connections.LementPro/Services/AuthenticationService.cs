@@ -42,7 +42,7 @@ namespace Brio.Docs.Connections.LementPro.Services
             }
 
             info.SetAuthValue(AUTH_NAME_TOKEN, token);
-            info.SetAuthValue(AUTH_NAME_END, token);
+            info.SetAuthValue(AUTH_NAME_END, expires);
             requestUtility.Token = token;
             requestUtility.EnsureAccessValidAsync = () => EnsureAccessValidAsync(info);
             var successStatus = new ConnectionStatusDto { Status = RemoteConnectionStatus.OK };

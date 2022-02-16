@@ -215,11 +215,19 @@ namespace Brio.Docs.Services
                 var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID)
-                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
-                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
-                                    .Where(x => filter.Status == null || x.Status == filter.Status);
+                                    .Where(x => x.ProjectID == dbProject.ID);
+
+                if (filter.TypeIds != null && filter.TypeIds.Count > 0)
+                    allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
+
+                if (!string.IsNullOrEmpty(filter.BimElementGuid))
+                    allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+
+                if (!string.IsNullOrWhiteSpace(filter.TitlePart))
+                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
+
+                if (filter.Statuses != null && filter.Statuses.Count > 0)
+                    allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
 
                 if (filter.DateSortStatus != 0)
                 {
@@ -366,6 +374,31 @@ namespace Brio.Docs.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Can't update objective {@ObjData}", objectiveDto);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
+        public async Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectivesByParent started with parentID: {@parentID}", parentID);
+            try
+            {
+                var objectivesWithParent = await context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ParentObjectiveID == (int)parentID)
+                                    .OrderBy(x => x.CreationDate)
+                                    .Select(x => mapper.Map<SubobjectiveDto>(x))
+                                    .ToListAsync();
+
+                return objectivesWithParent;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by parentID key {parentID}", parentID);
                 if (ex is ANotFoundException)
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);

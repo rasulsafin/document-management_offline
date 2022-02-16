@@ -1,10 +1,10 @@
-﻿using System;
+﻿using System.Collections.Generic;
 
 namespace Brio.Docs.Client.Filters
 {
     public class ObjectiveFilterParameters : PageParameters
     {
-        public int? TypeId { get; set; }
+        public List<int> TypeIds { get; set; }
 
         public string BimElementGuid { get; set; }
 
@@ -12,7 +12,7 @@ namespace Brio.Docs.Client.Filters
 
         public int? ExceptChildrenOf { get; set; }
 
-        public int? Status { get; set; }
+        public List<int> Statuses { get; set; }
 
         public int? DateSortStatus { get; set; }
 
