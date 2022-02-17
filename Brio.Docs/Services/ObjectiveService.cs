@@ -243,19 +243,19 @@ namespace Brio.Docs.Services
                     allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
 
                 if (filter.CreatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.CreationDate <= filter.CreatedBefore.Value);
+                    allObjectives = allObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
 
                 if (filter.CreatedAfter.HasValue)
                     allObjectives = allObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
 
                 if (filter.UpdatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.UpdatedAt <= filter.UpdatedBefore.Value);
+                    allObjectives = allObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
 
                 if (filter.UpdatedAfter.HasValue)
                     allObjectives = allObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
 
                 if (filter.FinishedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.DueDate <= filter.FinishedBefore.Value);
+                    allObjectives = allObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
 
                 if (filter.FinishedAfter.HasValue)
                     allObjectives = allObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
