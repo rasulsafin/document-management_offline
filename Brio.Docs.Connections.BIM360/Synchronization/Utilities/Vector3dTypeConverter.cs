@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using Brio.Docs.Common;
 using YamlDotNet.Core;
 using YamlDotNet.Core.Events;
@@ -20,11 +21,11 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
             emitter.Emit(new MappingStart());
             emitter.Emit(new Scalar(null, "x"));
-            emitter.Emit(new Scalar(null, vector3d.X.ToString()));
+            emitter.Emit(new Scalar(null, vector3d.X.ToString(CultureInfo.InvariantCulture)));
             emitter.Emit(new Scalar(null, "y"));
-            emitter.Emit(new Scalar(null, vector3d.Y.ToString()));
+            emitter.Emit(new Scalar(null, vector3d.Y.ToString(CultureInfo.InvariantCulture)));
             emitter.Emit(new Scalar(null, "z"));
-            emitter.Emit(new Scalar(null, vector3d.Z.ToString()));
+            emitter.Emit(new Scalar(null, vector3d.Z.ToString(CultureInfo.InvariantCulture)));
             emitter.Emit(new MappingEnd());
         }
     }
