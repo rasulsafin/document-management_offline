@@ -265,9 +265,9 @@ namespace Brio.Docs.Services
                     .ByPages(filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
+                        .ThenInclude(x => x.BimElement)
                     .Include(x => x.Location)
-                            .ThenInclude(x => x.Item)
+                        .ThenInclude(x => x.Item)
                     .Select(x => mapper.Map<ObjectiveToListDto>(x))
                     .ToListAsync();
 
