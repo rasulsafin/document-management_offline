@@ -246,7 +246,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<IEnumerable<ID<ObjectiveDto>>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjective IDs started with projectID: {@ProjectID}", projectID);
@@ -255,7 +255,9 @@ namespace Brio.Docs.Services
                 var allObjectives = await GetFilteredObjectives(projectID, filter);
 
                 var objectives = await allObjectives?
-                    .Select(x => mapper.Map<ID<ObjectiveDto>>(x.ID))
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Select(x => mapper.Map<ObjectiveToSelectionDto>(x))
                     .ToListAsync();
 
                 return objectives;

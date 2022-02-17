@@ -247,16 +247,16 @@ namespace Brio.Docs.Api.Controllers
         }
 
         /// <summary>
-        /// Return list of objective IDs, linked to specific project.
+        /// Return list of objectives, included only ID and BimElements, linked to specific project.
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Parameters for filtration.</param>
-        /// <returns>Collection of objective IDs.</returns>
-        /// <response code="200">Collection of objective IDs linked to project.</response>
+        /// <returns>Collection of objectives, included only ID and BimElements.</returns>
+        /// <response code="200">Collection of objectives, included only ID and BimElements, linked to project.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("ids/{projectID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IEnumerable<ID<ObjectiveDto>>), StatusCodes.Status200OK)]
