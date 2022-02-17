@@ -9,6 +9,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Sorts;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
@@ -16,6 +17,7 @@ using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
 using Brio.Docs.Utility.Pagination;
+using Brio.Docs.Utility.Sorting;
 using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -31,6 +33,7 @@ namespace Brio.Docs.Services
         private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
         private readonly ReportHelper reportHelper = new ReportHelper();
+        private readonly QueryMapper<Objective> queryMapper;
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
@@ -46,6 +49,16 @@ namespace Brio.Docs.Services
             this.bimElementHelper = bimElementHelper;
             this.logger = logger;
             logger.LogTrace("ObjectiveService created");
+
+            queryMapper = new QueryMapper<Objective>(new QueryMapperConfiguration { IsCaseSensitive = false, IgnoreNotMappedFields = false });
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Status), x => x.Status);
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Title), x => x.TitleToLower);
+            queryMapper.AddMap(nameof(Objective.CreationDate), x => x.CreationDate);
+            queryMapper.AddMap(nameof(Objective.UpdatedAt), x => x.UpdatedAt);
+            queryMapper.AddMap(nameof(Objective.DueDate), x => x.DueDate);
+            queryMapper.AddMap("CreationDateDateOnly", x => x.CreationDate.Date);
+            queryMapper.AddMap("UpdatedAtDateOnly", x => x.UpdatedAt.Date);
+            queryMapper.AddMap("DueDateDateOnly", x => x.DueDate.Date);
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto objectiveToCreate)
@@ -202,7 +215,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, SortParameters sort)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -266,14 +279,13 @@ namespace Brio.Docs.Services
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .ByPages(x => x.CreationDate,
-                                  filter.PageNumber,
-                                  filter.PageSize)
+                    .SortWithParameters(sort, queryMapper, x => x.CreationDate)
+                    .ByPages(filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
+                        .ThenInclude(x => x.BimElement)
                     .Include(x => x.Location)
-                            .ThenInclude(x => x.Item)
+                        .ThenInclude(x => x.Item)
                     .Select(x => mapper.Map<ObjectiveToListDto>(x))
                     .ToListAsync();
 
