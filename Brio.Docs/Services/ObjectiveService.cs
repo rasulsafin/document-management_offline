@@ -249,7 +249,7 @@ namespace Brio.Docs.Services
         public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("GetObjective IDs started with projectID: {@ProjectID}", projectID);
+            logger.LogTrace("GetObjectives with IDs and BIM-elements started with projectID: {@ProjectID}", projectID);
             try
             {
                 var allObjectives = await GetFilteredObjectives(projectID, filter);
@@ -416,13 +416,13 @@ namespace Brio.Docs.Services
         private async Task<IQueryable<Objective>> GetFilteredObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             var dbProject = await context.Projects.Unsynchronized()
-                .FindOrThrowAsync(x => x.ID, (int)projectID);
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
             logger.LogDebug("Found project: {@DBProject}", dbProject);
 
             var allObjectives = context.Objectives
-                                    .AsNoTracking()
-                                    .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID);
+                                .AsNoTracking()
+                                .Unsynchronized()
+                                .Where(x => x.ProjectID == dbProject.ID);
 
             if (filter.TypeIds != null && filter.TypeIds.Count > 0)
                 allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
