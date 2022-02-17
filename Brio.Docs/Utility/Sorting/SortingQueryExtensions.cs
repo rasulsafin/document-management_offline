@@ -41,5 +41,37 @@ namespace Brio.Docs.Utility.Sorting
 
             return query;
         }
+
+        public static IOrderedQueryable<T> SortWithParameters<T, TKey>(
+            this IQueryable<T> source,
+            SortParameters sortParameters,
+            QueryMapper<T> mapper,
+            Expression<Func<T, TKey>> defaultSort,
+            bool defaultByDescending = false)
+        {
+            if (sortParameters == null || sortParameters.Sorts == null || !sortParameters.Sorts.Any())
+                return defaultByDescending ? source.OrderByDescending(defaultSort) : source.OrderBy(defaultSort);
+
+            var sorts = mapper.Config.IgnoreNotMappedFields
+                ? sortParameters.Sorts.Where(x => mapper.HasMap(x.FieldName))
+                : sortParameters.Sorts;
+
+            if (!sorts.Any())
+                return defaultByDescending ? source.OrderByDescending(defaultSort) : source.OrderBy(defaultSort);
+
+            var firstSort = sorts.ElementAt(0);
+            var query = !firstSort.IsDescending
+                ? source.OrderBy(mapper.GetExpression(firstSort.FieldName))
+                : source.OrderByDescending(mapper.GetExpression(firstSort.FieldName));
+
+            foreach (var sort in sorts.Skip(1))
+            {
+                query = !sort.IsDescending
+                    ? source.OrderBy(mapper.GetExpression(sort.FieldName))
+                    : source.OrderByDescending(mapper.GetExpression(sort.FieldName));
+            }
+
+            return query;
+        }
     }
 }

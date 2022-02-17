@@ -33,6 +33,7 @@ namespace Brio.Docs.Services
         private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
         private readonly ReportHelper reportHelper = new ReportHelper();
+        private readonly QueryMapper<Objective> queryMapper;
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
@@ -48,6 +49,16 @@ namespace Brio.Docs.Services
             this.bimElementHelper = bimElementHelper;
             this.logger = logger;
             logger.LogTrace("ObjectiveService created");
+
+            queryMapper = new QueryMapper<Objective>(new QueryMapperConfiguration { IsCaseSensitive = false, IgnoreNotMappedFields = false });
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Status), x => x.Status);
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Title), x => x.TitleToLower);
+            queryMapper.AddMap(nameof(Objective.CreationDate), x => x.CreationDate);
+            queryMapper.AddMap(nameof(Objective.UpdatedAt), x => x.UpdatedAt);
+            queryMapper.AddMap(nameof(Objective.DueDate), x => x.DueDate);
+            queryMapper.AddMap("CreationDateDateOnly", x => x.CreationDate.Date);
+            queryMapper.AddMap("UpdatedAtDateOnly", x => x.UpdatedAt.Date);
+            queryMapper.AddMap("DueDateDateOnly", x => x.DueDate.Date);
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto objectiveToCreate)
@@ -250,7 +261,7 @@ namespace Brio.Docs.Services
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .SortWithParameters(sort, x => x.CreationDate)
+                    .SortWithParameters(sort, queryMapper, x => x.CreationDate)
                     .ByPages(filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
