@@ -67,8 +67,8 @@ namespace Brio.Docs.Utility.Sorting
             foreach (var sort in sorts.Skip(1))
             {
                 query = !sort.IsDescending
-                    ? source.OrderBy(mapper.GetExpression(sort.FieldName))
-                    : source.OrderByDescending(mapper.GetExpression(sort.FieldName));
+                    ? query.ThenBy(mapper.GetExpression(sort.FieldName))
+                    : query.ThenByDescending(mapper.GetExpression(sort.FieldName));
             }
 
             return query;
