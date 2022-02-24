@@ -242,19 +242,37 @@ namespace Brio.Docs.Services
                 if (filter.Statuses != null && filter.Statuses.Count > 0)
                     allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
 
-                if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
+                if (filter.CreatedBefore.HasValue)
+                    allObjectives = allObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
+
+                if (filter.CreatedAfter.HasValue)
+                    allObjectives = allObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
+
+                if (filter.UpdatedBefore.HasValue)
+                    allObjectives = allObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
+
+                if (filter.UpdatedAfter.HasValue)
+                    allObjectives = allObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
+
+                if (filter.FinishedBefore.HasValue)
+                    allObjectives = allObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
+
+                if (filter.FinishedAfter.HasValue)
+                    allObjectives = allObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
+
+                if (filter.ExceptChildrenOf.HasValue && filter.ExceptChildrenOf.Value != 0)
                 {
-                    var list = new List<int>();
-                    var obj = context.Objectives
+                    var obj = await context.Objectives
                         .AsNoTracking()
                         .Unsynchronized()
                         .Where(x => x.ProjectID == dbProject.ID)
-                        .FirstOrDefault(o => o.ID == (int)filter.ExceptChildrenOf);
+                        .FirstOrDefaultAsync(o => o.ID == (int)filter.ExceptChildrenOf);
 
+                    var childrenIds = new List<int>();
                     if (obj != null)
-                        GetAllObjectiveIds(obj, list);
+                        await GetAllObjectiveIds(obj, childrenIds);
 
-                    allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
+                    allObjectives = allObjectives.Where(x => !childrenIds.Contains(x.ID));
                 }
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
@@ -420,18 +438,17 @@ namespace Brio.Docs.Services
             return dbObjective;
         }
 
-        private List<int> GetAllObjectiveIds(Objective obj, List<int> ids)
+        private async Task GetAllObjectiveIds(Objective obj, List<int> ids)
         {
             ids.Add(obj.ID);
 
-            var children = context.Objectives
+            var children = await context.Objectives
                 .Unsynchronized()
-                .Where(x => x.ParentObjectiveID == obj.ID);
+                .Where(x => x.ParentObjectiveID == obj.ID)
+                .ToListAsync();
 
-            foreach (var child in children ?? Enumerable.Empty<Objective>())
-                GetAllObjectiveIds(child, ids);
-
-            return ids;
+            foreach (var child in children)
+                await GetAllObjectiveIds(child, ids);
         }
     }
 }

@@ -228,4 +228,10 @@
   <data name="CheckValidProjectTitleToAdd_TitleRequired" xml:space="preserve">
     <value>Название проекта не должно быть пустым</value>
   </data>
+  <data name="ValidationError_PageNumberTooSmall" xml:space="preserve">
+    <value>Номер страницы должен быть больше нуля</value>
+  </data>
+  <data name="ValidationError_PageSizeNotInRange" xml:space="preserve">
+    <value>Недопустимый размер страницы</value>
+  </data>
 </root>
