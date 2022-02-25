@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Brio.Docs.Client.Filters
 {
@@ -13,5 +14,17 @@ namespace Brio.Docs.Client.Filters
         public int? ExceptChildrenOf { get; set; }
 
         public List<int> Statuses { get; set; }
+
+        public DateTime? CreatedBefore { get; set; }
+
+        public DateTime? CreatedAfter { get; set; }
+
+        public DateTime? UpdatedBefore { get; set; }
+
+        public DateTime? UpdatedAfter { get; set; }
+
+        public DateTime? FinishedBefore { get; set; }
+
+        public DateTime? FinishedAfter { get; set; }
     }
 }

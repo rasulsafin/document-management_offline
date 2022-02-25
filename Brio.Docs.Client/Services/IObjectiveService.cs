@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
+using Brio.Docs.Client.Sorts;
 
 namespace Brio.Docs.Client.Services
 {
@@ -51,10 +52,11 @@ namespace Brio.Docs.Client.Services
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Filtration parameters.</param>
+        /// <param name="sort">Sorting parameters.</param>
         /// <returns>Collection of objectives.</returns>
         /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
+        Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, SortParameters sort);
 
         /// <summary>
         /// Return list of objectives, included only ID and BimElements, linked to specific project.

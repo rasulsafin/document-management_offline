@@ -19,5 +19,14 @@ namespace Brio.Docs.Utility.Pagination
             source = orderByDescending ? source.OrderByDescending(orderBy) : source.OrderBy(orderBy);
             return source.Skip((pageNumber - 1) * pageSize).Take(pageSize);
         }
+
+        internal static IQueryable<T> ByPages<T>(this IOrderedQueryable<T> source, int pageNumber, int pageSize)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (pageNumber <= 0) pageNumber = 1;
+            if (pageSize <= 0) pageSize = 10;
+
+            return source.Skip((pageNumber - 1) * pageSize).Take(pageSize);
+        }
     }
 }
