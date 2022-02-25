@@ -273,7 +273,7 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
-            [FromQuery]
+            [FromBody]
             ObjectiveFilterParameters filter)
         {
             try
