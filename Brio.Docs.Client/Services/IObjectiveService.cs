@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
@@ -24,10 +24,10 @@ namespace Brio.Docs.Client.Services
         /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>True id objective was deleted.</returns>
+        /// <returns>List of deleted objective's ids.</returns>
         /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<bool> Remove(ID<ObjectiveDto> objectiveID);
+        Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
         /// Update existing objective.

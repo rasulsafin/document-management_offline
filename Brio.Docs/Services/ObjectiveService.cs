@@ -341,7 +341,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
+        public async Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
@@ -349,9 +349,14 @@ namespace Brio.Docs.Services
             {
                 var objective = await context.Objectives.FindOrThrowAsync((int)objectiveID);
                 logger.LogDebug("Found objective: {@Objective}", objective);
+
+                var deletedIds = new List<int>();
+                await GetAllObjectiveIds(objective, deletedIds);
+
                 context.Objectives.Remove(objective);
                 await context.SaveChangesAsync();
-                return true;
+
+                return deletedIds.Select(id => new ID<ObjectiveDto>(id));
             }
             catch (Exception ex)
             {

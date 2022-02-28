@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
 using Brio.Docs.Client;
@@ -65,7 +66,7 @@ namespace Brio.Docs.Api.Controllers
         /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>True id objective was deleted.</returns>
+        /// <returns>List of deleted objective's ids.</returns>
         /// <response code="200">Objective was deleted successfully.</response>
         /// <response code="400">Invalid id.</response>
         /// <response code="404">Objective was not found.</response>
@@ -85,8 +86,8 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                await service.Remove(new ID<ObjectiveDto>(objectiveID));
-                return Ok(true);
+                var removedData = await service.Remove(new ID<ObjectiveDto>(objectiveID)) ?? Enumerable.Empty<ID<ObjectiveDto>>();
+                return Ok(removedData);
             }
             catch (ANotFoundException ex)
             {
