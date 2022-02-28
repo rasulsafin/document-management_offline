@@ -230,35 +230,7 @@ namespace Brio.Docs.Services
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID);
 
-                if (filter.TypeIds != null && filter.TypeIds.Count > 0)
-                    allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
-
-                if (!string.IsNullOrEmpty(filter.BimElementGuid))
-                    allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
-
-                if (!string.IsNullOrWhiteSpace(filter.TitlePart))
-                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
-
-                if (filter.Statuses != null && filter.Statuses.Count > 0)
-                    allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
-
-                if (filter.CreatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
-
-                if (filter.CreatedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
-
-                if (filter.UpdatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
-
-                if (filter.UpdatedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
-
-                if (filter.FinishedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
-
-                if (filter.FinishedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
+                allObjectives = ApplyFilter(filter, allObjectives);
 
                 if (filter.ExceptChildrenOf.HasValue && filter.ExceptChildrenOf.Value != 0)
                 {
@@ -310,7 +282,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName)
+        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectivesWithLocation started with projectID: {@ProjectID}", projectID);
@@ -320,17 +292,19 @@ namespace Brio.Docs.Services
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var objectivesWithLocations = await context.Objectives
+                var objectivesWithLocations = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID)
                                     .Include(x => x.Location)
                                         .ThenInclude(x => x.Item)
-                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName)
-                                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
-                                    .ToListAsync();
+                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName);
 
-                return objectivesWithLocations;
+                objectivesWithLocations = ApplyFilter(filter, objectivesWithLocations);
+
+                return await objectivesWithLocations
+                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -454,6 +428,41 @@ namespace Brio.Docs.Services
 
             foreach (var child in children)
                 await GetAllObjectiveIds(child, ids);
+        }
+
+        private IQueryable<Objective> ApplyFilter(ObjectiveFilterParameters filter, IQueryable<Objective> allObjectives)
+        {
+            if (filter.TypeIds != null && filter.TypeIds.Count > 0)
+                allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
+
+            if (!string.IsNullOrEmpty(filter.BimElementGuid))
+                allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+
+            if (!string.IsNullOrWhiteSpace(filter.TitlePart))
+                allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
+
+            if (filter.Statuses != null && filter.Statuses.Count > 0)
+                allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
+
+            if (filter.CreatedBefore.HasValue)
+                allObjectives = allObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
+
+            if (filter.CreatedAfter.HasValue)
+                allObjectives = allObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
+
+            if (filter.UpdatedBefore.HasValue)
+                allObjectives = allObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
+
+            if (filter.UpdatedAfter.HasValue)
+                allObjectives = allObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
+
+            if (filter.FinishedBefore.HasValue)
+                allObjectives = allObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
+
+            if (filter.FinishedAfter.HasValue)
+                allObjectives = allObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
+
+            return allObjectives;
         }
     }
 }

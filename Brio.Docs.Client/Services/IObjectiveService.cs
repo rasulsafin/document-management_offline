@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
@@ -63,10 +63,11 @@ namespace Brio.Docs.Client.Services
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="itemName">Name of the item in location.</param>
+        /// <param name="filter">Filtration parameters.</param>
         /// <returns>Collection of objectives.</returns>
         /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName);
+        Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter);
 
         /// <summary>
         /// Return list of sub-objectives, linked to specific parent objective.

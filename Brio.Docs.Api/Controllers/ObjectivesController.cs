@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -257,12 +257,13 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="itemName">Parameters for location filtration.</param>
+        /// <param name="filter">Parameters for filtration.</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with locations bound to given item.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("locations")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IEnumerable<ObjectiveToLocationDto>), StatusCodes.Status200OK)]
@@ -274,11 +275,13 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             int projectID,
             [FromQuery]
-            string itemName)
+            string itemName,
+            [FromBody]
+            ObjectiveFilterParameters filter)
         {
             try
             {
-                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName);
+                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName, filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)
