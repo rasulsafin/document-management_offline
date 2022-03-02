@@ -66,7 +66,7 @@ namespace Brio.Docs.Client.Services
         /// <returns>Collection of objectives, included only ID and BimElements.</returns>
         /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
+        Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectivesForSelection(ID<ProjectDto> projectID, ObjectiveFilterParameters filter);
 
         /// <summary>
         /// Return list of objectives with locations, linked to specific project.

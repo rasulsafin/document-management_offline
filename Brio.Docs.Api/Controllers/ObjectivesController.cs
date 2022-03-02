@@ -264,11 +264,11 @@ namespace Brio.Docs.Api.Controllers
         [HttpPost]
         [Route("ids/{projectID}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(IEnumerable<ID<ObjectiveDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<ID<ObjectiveToSelectionDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetObjectiveIds(
+        public async Task<IActionResult> GetObjectivesForSelection(
             [FromRoute]
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
@@ -278,7 +278,7 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                var objectives = await service.GetObjectiveIds(new ID<ProjectDto>(projectID), filter);
+                var objectives = await service.GetObjectivesForSelection(new ID<ProjectDto>(projectID), filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)

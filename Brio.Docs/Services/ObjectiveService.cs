@@ -258,7 +258,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectiveIds(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectivesForSelection(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives with IDs and BIM-elements started with projectID: {@ProjectID}", projectID);
