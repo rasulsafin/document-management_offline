@@ -24,10 +24,10 @@ namespace Brio.Docs.Client.Services
         /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>True id objective was deleted.</returns>
+        /// <returns>List of deleted objective's ids.</returns>
         /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<bool> Remove(ID<ObjectiveDto> objectiveID);
+        Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
         /// Update existing objective.
@@ -63,10 +63,11 @@ namespace Brio.Docs.Client.Services
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="itemName">Name of the item in location.</param>
+        /// <param name="filter">Filtration parameters.</param>
         /// <returns>Collection of objectives.</returns>
         /// <exception cref="ANotFoundException">Thrown when project does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName);
+        Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter);
 
         /// <summary>
         /// Return list of sub-objectives, linked to specific parent objective.

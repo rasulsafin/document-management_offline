@@ -230,50 +230,7 @@ namespace Brio.Docs.Services
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID);
 
-                if (filter.TypeIds != null && filter.TypeIds.Count > 0)
-                    allObjectives = allObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
-
-                if (!string.IsNullOrEmpty(filter.BimElementGuid))
-                    allObjectives = allObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
-
-                if (!string.IsNullOrWhiteSpace(filter.TitlePart))
-                    allObjectives = allObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
-
-                if (filter.Statuses != null && filter.Statuses.Count > 0)
-                    allObjectives = allObjectives.Where(x => filter.Statuses.Contains(x.Status));
-
-                if (filter.CreatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
-
-                if (filter.CreatedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
-
-                if (filter.UpdatedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
-
-                if (filter.UpdatedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
-
-                if (filter.FinishedBefore.HasValue)
-                    allObjectives = allObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
-
-                if (filter.FinishedAfter.HasValue)
-                    allObjectives = allObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
-
-                if (filter.ExceptChildrenOf.HasValue && filter.ExceptChildrenOf.Value != 0)
-                {
-                    var obj = await context.Objectives
-                        .AsNoTracking()
-                        .Unsynchronized()
-                        .Where(x => x.ProjectID == dbProject.ID)
-                        .FirstOrDefaultAsync(o => o.ID == (int)filter.ExceptChildrenOf);
-
-                    var childrenIds = new List<int>();
-                    if (obj != null)
-                        await GetAllObjectiveIds(obj, childrenIds);
-
-                    allObjectives = allObjectives.Where(x => !childrenIds.Contains(x.ID));
-                }
+                allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
@@ -310,7 +267,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName)
+        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectivesWithLocation started with projectID: {@ProjectID}", projectID);
@@ -320,17 +277,19 @@ namespace Brio.Docs.Services
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var objectivesWithLocations = await context.Objectives
+                var objectivesWithLocations = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
                                     .Where(x => x.ProjectID == dbProject.ID)
                                     .Include(x => x.Location)
                                         .ThenInclude(x => x.Item)
-                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName)
-                                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
-                                    .ToListAsync();
+                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName);
 
-                return objectivesWithLocations;
+                objectivesWithLocations = await ApplyFilter(filter, objectivesWithLocations, dbProject.ID);
+
+                return await objectivesWithLocations
+                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
+                    .ToListAsync();
             }
             catch (Exception ex)
             {
@@ -341,7 +300,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
+        public async Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
@@ -349,9 +308,14 @@ namespace Brio.Docs.Services
             {
                 var objective = await context.Objectives.FindOrThrowAsync((int)objectiveID);
                 logger.LogDebug("Found objective: {@Objective}", objective);
+
+                var deletedIds = new List<int>();
+                await GetAllObjectiveIds(objective, deletedIds);
+
                 context.Objectives.Remove(objective);
                 await context.SaveChangesAsync();
-                return true;
+
+                return deletedIds.Select(id => new ID<ObjectiveDto>(id));
             }
             catch (Exception ex)
             {
@@ -449,6 +413,56 @@ namespace Brio.Docs.Services
 
             foreach (var child in children)
                 await GetAllObjectiveIds(child, ids);
+        }
+
+        private async Task<IQueryable<Objective>> ApplyFilter(ObjectiveFilterParameters filter, IQueryable<Objective> filterdObjectives, int projectId)
+        {
+            if (filter.TypeIds != null && filter.TypeIds.Count > 0)
+                filterdObjectives = filterdObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
+
+            if (!string.IsNullOrEmpty(filter.BimElementGuid))
+                filterdObjectives = filterdObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+
+            if (!string.IsNullOrWhiteSpace(filter.TitlePart))
+                filterdObjectives = filterdObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
+
+            if (filter.Statuses != null && filter.Statuses.Count > 0)
+                filterdObjectives = filterdObjectives.Where(x => filter.Statuses.Contains(x.Status));
+
+            if (filter.CreatedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
+
+            if (filter.CreatedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
+
+            if (filter.UpdatedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
+
+            if (filter.UpdatedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
+
+            if (filter.FinishedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
+
+            if (filter.FinishedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
+
+            if (filter.ExceptChildrenOf.HasValue && filter.ExceptChildrenOf.Value != 0)
+            {
+                var obj = await context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Where(x => x.ProjectID == projectId)
+                    .FirstOrDefaultAsync(o => o.ID == (int)filter.ExceptChildrenOf);
+
+                var childrenIds = new List<int>();
+                if (obj != null)
+                    await GetAllObjectiveIds(obj, childrenIds);
+
+                filterdObjectives = filterdObjectives.Where(x => !childrenIds.Contains(x.ID));
+            }
+
+            return filterdObjectives;
         }
     }
 }
