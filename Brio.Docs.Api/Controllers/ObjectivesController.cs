@@ -1,5 +1,6 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
 using Brio.Docs.Client;
@@ -65,7 +66,7 @@ namespace Brio.Docs.Api.Controllers
         /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>True id objective was deleted.</returns>
+        /// <returns>List of deleted objective's ids.</returns>
         /// <response code="200">Objective was deleted successfully.</response>
         /// <response code="400">Invalid id.</response>
         /// <response code="404">Objective was not found.</response>
@@ -85,8 +86,8 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                await service.Remove(new ID<ObjectiveDto>(objectiveID));
-                return Ok(true);
+                var removedData = await service.Remove(new ID<ObjectiveDto>(objectiveID)) ?? Enumerable.Empty<ID<ObjectiveDto>>();
+                return Ok(removedData);
             }
             catch (ANotFoundException ex)
             {
@@ -296,12 +297,13 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="itemName">Parameters for location filtration.</param>
+        /// <param name="filter">Parameters for filtration.</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with locations bound to given item.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("locations")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IEnumerable<ObjectiveToLocationDto>), StatusCodes.Status200OK)]
@@ -313,11 +315,13 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             int projectID,
             [FromQuery]
-            string itemName)
+            string itemName,
+            [FromBody]
+            ObjectiveFilterParameters filter)
         {
             try
             {
-                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName);
+                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName, filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)
