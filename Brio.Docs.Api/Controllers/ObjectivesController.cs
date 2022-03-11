@@ -253,6 +253,46 @@ namespace Brio.Docs.Api.Controllers
         }
 
         /// <summary>
+        /// Return list of objectives, included only ID and BimElements, linked to specific project.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <param name="filter">Parameters for filtration.</param>
+        /// <returns>Collection of objectives, included only ID and BimElements.</returns>
+        /// <response code="200">Collection of objectives, included only ID and BimElements, linked to project.</response>
+        /// <response code="400">Invalid project id.</response>
+        /// <response code="404">Could not find project to retrieve objective list.</response>
+        /// <response code="500">Something went wrong while retrieving the objective list.</response>
+        [HttpPost]
+        [Route("ids/{projectID}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(IEnumerable<ID<ObjectiveToSelectionDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectivesForSelection(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int projectID,
+            [FromBody]
+            ObjectiveFilterParameters filter)
+        {
+            try
+            {
+                var objectives = await service.GetObjectivesForSelection(new ID<ProjectDto>(projectID), filter);
+                return Ok(objectives);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Return list of objectives with locations, linked to specific project and bound to given item.
         /// </summary>
         /// <param name="projectID">Project's ID.</param>

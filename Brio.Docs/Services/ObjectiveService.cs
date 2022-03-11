@@ -267,6 +267,40 @@ namespace Brio.Docs.Services
             }
         }
 
+        public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectivesForSelection(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectives with IDs and BIM-elements started with projectID: {@ProjectID}", projectID);
+            try
+            {
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
+
+                var allObjectives = context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ProjectID == dbProject.ID);
+
+                allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
+
+                var objectives = await allObjectives?
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Select(x => mapper.Map<ObjectiveToSelectionDto>(x))
+                    .ToListAsync();
+
+                return objectives;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
         public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();

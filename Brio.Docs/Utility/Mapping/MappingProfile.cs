@@ -72,6 +72,8 @@ namespace Brio.Docs.Utility.Mapping
         {
             CreateMap<Objective, ObjectiveToListDto>()
                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
+            CreateMap<Objective, ObjectiveToSelectionDto>()
+               .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<Objective, ObjectiveDto>()
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
