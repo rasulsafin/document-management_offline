@@ -63,6 +63,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronizers
             await authenticator.CheckAccessAsync(CancellationToken.None);
 
             await filler.UpdateProjectsIfNull();
+            await filler.UpdateProjectsInfoIfNull();
             return snapshot.GetProjects().Select(x => x.ID).ToList();
         }
 

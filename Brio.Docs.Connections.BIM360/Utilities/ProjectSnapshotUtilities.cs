@@ -16,33 +16,22 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
     internal class ProjectSnapshotUtilities
     {
         private readonly FoldersService foldersService;
-        private readonly ProjectsService projectsService;
 
-        public ProjectSnapshotUtilities(ProjectsService projectsService, FoldersService foldersService)
+        public ProjectSnapshotUtilities(FoldersService foldersService)
         {
-            this.projectsService = projectsService;
             this.foldersService = foldersService;
         }
 
-        public async Task<ProjectSnapshot> GetFullProjectSnapshot(KeyValuePair<string, HubSnapshot> hub, Project p)
+        public async Task DownloadFoldersInfo(ProjectSnapshot snapshot)
         {
-            List<Folder> topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
-
-            if (!topFolders.Any())
-                return null;
-
             List<(Item item, Version version)> items = await foldersService
-               .GetAllSynchronizingItems(p.ID, topFolders.Select(x => x.ID).ToAsyncEnumerable())
+               .GetAllSynchronizingItems(snapshot.ID, snapshot.TopFolders.Select(x => x.ID).ToAsyncEnumerable())
                .ToListAsync();
 
-            ProjectSnapshot projectSnapshot = new (p, hub.Value)
-            {
-                Items = items
-                   .Where(x => !IsMetaFile(x.item) && !IsMetaFile(x.version))
-                   .ToDictionary(x => x.item.ID, x => new ItemSnapshot(x.item, x.version)),
-                MrsFolderID = GetMrsFolderId(topFolders, items),
-            };
-            return projectSnapshot;
+            snapshot.Items = items
+               .Where(x => !IsMetaFile(x.item) && !IsMetaFile(x.version))
+               .ToDictionary(x => x.item.ID, x => new ItemSnapshot(x.item, x.version));
+            snapshot.UploadFolderID = GetMrsFolderId(snapshot.TopFolders, items);
         }
 
         private static bool IsMetaFile(Item item)

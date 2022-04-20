@@ -84,10 +84,24 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
-                    var projectSnapshot = await projectSnapshotUtilities.GetFullProjectSnapshot(hub, p);
-                    if (projectSnapshot != null)
-                        hub.Value.Projects.Add(p.ID, projectSnapshot);
+                    var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
+                    if (!topFolders.Any())
+                        continue;
+
+                    var projectSnapshot = new ProjectSnapshot(p, hub.Value) { TopFolders = topFolders };
+                    hub.Value.Projects.Add(p.ID, projectSnapshot);
                 }
+            }
+        }
+
+        public async Task UpdateProjectsInfoIfNull()
+        {
+            await UpdateProjectsIfNull();
+
+            foreach (var hub in snapshot.Hubs.Values.Where(x => x.Projects != null))
+            {
+                foreach (var project in hub.Projects.Values)
+                    await projectSnapshotUtilities.DownloadFoldersInfo(project);
             }
         }
 

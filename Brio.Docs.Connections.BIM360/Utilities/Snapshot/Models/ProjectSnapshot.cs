@@ -30,10 +30,12 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models
 
         public Dictionary<string, ItemSnapshot> Items { get; set; }
 
-        public string MrsFolderID { get; set; }
+        public string UploadFolderID { get; set; }
 
         public override string ID => Entity.ID;
 
         public StatusesRelations StatusesRelations { get; set; }
+
+        public IReadOnlyCollection<Folder> TopFolders { get; set; }
     }
 }
