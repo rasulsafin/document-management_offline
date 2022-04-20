@@ -46,8 +46,8 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
         private static bool IsMetaFile(string name)
         {
-            return name == Resources.UploadMrsFileName ||
-                name == Resources.SynchronizeMrsFileName ||
+            return string.Equals(name, Resources.UploadMrsFileName, StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(name, Resources.SynchronizeMrsFileName, StringComparison.InvariantCultureIgnoreCase) ||
                 name.EndsWith(MrsConstants.CONFIG_EXTENSION, StringComparison.OrdinalIgnoreCase);
         }
 
@@ -71,8 +71,14 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 
             foreach ((Item item, Version version) iv in items)
             {
-                if (iv.item.Attributes.DisplayName == Resources.UploadMrsFileName ||
-                    iv.version.Attributes.Name == Resources.UploadMrsFileName)
+                if (string.Equals(
+                        iv.item.Attributes.DisplayName,
+                        Resources.UploadMrsFileName,
+                        StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(
+                        iv.version.Attributes.Name,
+                        Resources.UploadMrsFileName,
+                        StringComparison.OrdinalIgnoreCase))
                 {
                     return iv.item.Relationships.Parent.Data.ID;
                 }
