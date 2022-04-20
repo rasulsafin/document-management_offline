@@ -186,19 +186,19 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
             foreach (var item in items)
             {
+                var attachment = attachments.FirstOrDefault(x => x.Attributes.Name == item.FileName);
+
+                if (attachment != null)
+                {
+                    resultItems.Add(attachment);
+                    continue;
+                }
+
                 // If item with the same name already exists add existing item
                 var itemWithSameNameExists = project.FindItemByName(item.FileName);
 
                 if (itemWithSameNameExists != null)
                 {
-                    var attachment = attachments.FirstOrDefault(x => x.Attributes.Name == item.FileName);
-
-                    if (attachment != null)
-                    {
-                        resultItems.Add(attachment);
-                        continue;
-                    }
-
                     var attached = item.ItemType == ItemType.Media
                         ? await AttachPhoto(itemWithSameNameExists.Version, issue.ID, project.IssueContainer)
                         : await AttachItem(itemWithSameNameExists.Entity, issue.ID, project.IssueContainer);
