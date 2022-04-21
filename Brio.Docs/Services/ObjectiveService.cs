@@ -20,6 +20,7 @@ using Brio.Docs.Utility.Pagination;
 using Brio.Docs.Utility.Sorting;
 using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Services
@@ -32,15 +33,17 @@ namespace Brio.Docs.Services
         private readonly DynamicFieldsHelper dynamicFieldHelper;
         private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
-        private readonly ReportHelper reportHelper = new ReportHelper();
+        private readonly ReportHelper reportHelper;
         private readonly QueryMapper<Objective> queryMapper;
+        private readonly IStringLocalizer<ReportLocalization> localizer;
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
             ItemsHelper itemHelper,
             DynamicFieldsHelper dynamicFieldHelper,
             BimElementsHelper bimElementHelper,
-            ILogger<ObjectiveService> logger)
+            ILogger<ObjectiveService> logger,
+            IStringLocalizer<ReportLocalization> localizer)
         {
             this.context = context;
             this.mapper = mapper;
@@ -48,7 +51,10 @@ namespace Brio.Docs.Services
             this.dynamicFieldHelper = dynamicFieldHelper;
             this.bimElementHelper = bimElementHelper;
             this.logger = logger;
+            this.localizer = localizer;
             logger.LogTrace("ObjectiveService created");
+
+            reportHelper = new ReportHelper(localizer);
 
             queryMapper = new QueryMapper<Objective>(new QueryMapperConfiguration { IsCaseSensitive = false, IgnoreNotMappedFields = false });
             queryMapper.AddMap(nameof(ObjectiveToListDto.Status), x => x.Status);
@@ -193,7 +199,8 @@ namespace Brio.Docs.Services
                 logger.LogDebug("Objectives for report: {@Objectives}", objectives);
                 var reportDir = Path.Combine(path, "Reports");
                 Directory.CreateDirectory(reportDir);
-                path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
+                var reportName = localizer["Report"];
+                path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
                 var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 

@@ -13,6 +13,7 @@
       <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
       <PackageReference Include="Destructurama.ByIgnoring" Version="1.1.0" />
       <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+      <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" Version="6.0.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -34,6 +35,15 @@
         <_Parameter1>$(AssemblyName).IntegrationTests</_Parameter1>
         <!-- We use the value of AssemblyName to declare the value of the attribute -->
       </AssemblyAttribute>
+    </ItemGroup>
+  
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\ReportLocalization.en.resx">
+        <Generator></Generator>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\ReportLocalization.ru.resx">
+        <Generator></Generator>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

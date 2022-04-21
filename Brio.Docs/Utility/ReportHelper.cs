@@ -5,6 +5,7 @@ using System.Linq;
 using System.Xml.Linq;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Common;
+using Microsoft.Extensions.Localization;
 
 namespace Brio.Docs.Utility
 {
@@ -21,6 +22,13 @@ namespace Brio.Docs.Utility
 
         private static readonly string[] PICTURES_EXTENSIONS = { ".png", ".jpg" };
 
+        private readonly IStringLocalizer<ReportLocalization> localizer;
+
+        public ReportHelper(IStringLocalizer<ReportLocalization> localizer)
+        {
+            this.localizer = localizer;
+        }
+
         internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
             var xml = new XElement("Report",
@@ -32,7 +40,7 @@ namespace Brio.Docs.Utility
 
             foreach (var objectiveType in objectiveTypes)
             {
-                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"Статус: {StatusToString(objectiveType.Key)}"));
+                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"{localizer["Status"]}: {StatusToString(objectiveType.Key)}"));
                 xml.Add(heading);
                 var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
                 xml.Add(body);
@@ -41,22 +49,22 @@ namespace Brio.Docs.Utility
             return new XDocument(xml);
         }
 
-        private static string StatusToString(ObjectiveStatus status)
+        private string StatusToString(ObjectiveStatus status)
         {
             switch (status)
             {
                 case ObjectiveStatus.Undefined:
-                    return "Не определен";
+                    return localizer["Status_Undefined"];
                 case ObjectiveStatus.Open:
-                    return "Открыт";
+                    return localizer["Status_Open"];
                 case ObjectiveStatus.InProgress:
-                    return "В ходе выполнения";
+                    return localizer["Status_InProgress"];
                 case ObjectiveStatus.Ready:
-                    return "Готов";
+                    return localizer["Status_Ready"];
                 case ObjectiveStatus.Late:
-                    return "Просрочен";
+                    return localizer["Status_Late"];
                 case ObjectiveStatus.Closed:
-                    return "Закрыт";
+                    return localizer["Status_Closed"];
                 default:
                     return "-";
             }
@@ -83,25 +91,25 @@ namespace Brio.Docs.Utility
                             TextElement("ID: ", true),
                             TextElement($"{objective.ID}")),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Статус: ", true),
+                            TextElement($"{localizer["Status"]}: ", true),
                             TextElement($"{StatusToString(objective.Status)}")),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Время: ", true),
+                             TextElement($"{localizer["Time"]}: ", true),
                              TextElement(objective.CreationDate.ToString("g"))),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Позиция: ", true),
+                             TextElement($"{localizer["Position"]}: ", true),
                              TextElement(locationTextElement)),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Объект модели: ", true),
+                             TextElement($"{localizer["Model_Object"]}: ", true),
                              TextElement(bimElementsText)),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Пользователь: ", true),
+                             TextElement($"{localizer["User"]}: ", true),
                              TextElement(objective.Author)),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Название: ", true),
+                            TextElement($"{localizer["Title"]}: ", true),
                             TextElement(objective.Title)),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Описание: ", true),
+                            TextElement($"{localizer["Description"]}: ", true),
                             TextElement(objective.Description))));
 
             return result;
