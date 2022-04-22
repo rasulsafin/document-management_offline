@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Common;
@@ -34,7 +35,17 @@ namespace Brio.Docs.Utility
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
                     new XAttribute("number", reportId),
-                    new XAttribute("date", date.ToShortDateString()));
+                    new XAttribute("date", date.ToShortDateString()),
+                    new XAttribute("culture", Thread.CurrentThread.CurrentUICulture),
+                    new XAttribute("report_reportlist", localizer["Report_Report_List"]),
+                    new XAttribute("report_for", localizer["Report_For"]),
+                    new XAttribute("report_project", localizer["Report_Project"]),
+                    new XAttribute("report_position", localizer["Report_Position"]),
+                    new XAttribute("report_screenshot", localizer["Report_Screenshot"]),
+                    new XAttribute("report_comment", localizer["Report_Comment"]),
+                    new XAttribute("report_from", localizer["Report_From"]),
+                    new XAttribute("report_signature", localizer["Report_Signature"]),
+                    new XAttribute("report_full_name", localizer["Report_Full_Name"]));
 
             var objectiveTypes = objectives.OrderBy(o => o.Status).GroupBy(o => o.Status);
 

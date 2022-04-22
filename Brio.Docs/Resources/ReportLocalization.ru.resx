@@ -129,6 +129,33 @@
   <data name="Report" xml:space="preserve">
     <value>Отчет</value>
   </data>
+  <data name="Report_Comment" xml:space="preserve">
+    <value>Комментарий</value>
+  </data>
+  <data name="Report_For" xml:space="preserve">
+    <value>по</value>
+  </data>
+  <data name="Report_From" xml:space="preserve">
+    <value>от</value>
+  </data>
+  <data name="Report_Full_Name" xml:space="preserve">
+    <value>Расшифровка</value>
+  </data>
+  <data name="Report_Position" xml:space="preserve">
+    <value>Должность</value>
+  </data>
+  <data name="Report_Project" xml:space="preserve">
+    <value>проекту</value>
+  </data>
+  <data name="Report_Report_List" xml:space="preserve">
+    <value>ОТЧЕТНЫЙ ЛИСТ</value>
+  </data>
+  <data name="Report_Screenshot" xml:space="preserve">
+    <value>Скриншот</value>
+  </data>
+  <data name="Report_Signature" xml:space="preserve">
+    <value>Подпись</value>
+  </data>
   <data name="Status" xml:space="preserve">
     <value>Статус</value>
   </data>

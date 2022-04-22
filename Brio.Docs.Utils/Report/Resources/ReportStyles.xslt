@@ -40,8 +40,8 @@
               <w:sz w:val="36"/>
               <w:szCs w:val="36"/>
             </w:rPr>
-            <w:t>ОТЧЕТНЫЙ ЛИСТ</w:t>
-          </w:r>
+            <w:t><xsl:value-of select="@report_reportlist"/></w:t>
+			</w:r>
           <w:r w:rsidRPr="00C5707F">
             <w:rPr>
               <w:rFonts w:asciiTheme="minorHAnsi" w:hAnsiTheme="minorHAnsi" w:cstheme="minorHAnsi"/>
@@ -87,7 +87,7 @@
               <w:sz w:val="24"/>
               <w:szCs w:val="28"/>
             </w:rPr>
-            <w:t xml:space="preserve">по </w:t>
+            <w:t xml:space="preserve"><xsl:value-of select="@report_for"/> </w:t>
           </w:r>
           <w:r w:rsidR="00C70E09" w:rsidRPr="00C47584">
             <w:rPr>
@@ -95,7 +95,7 @@
               <w:sz w:val="24"/>
               <w:szCs w:val="28"/>
             </w:rPr>
-            <w:t>проекту</w:t>
+            <w:t><xsl:value-of select="@report_project"/></w:t>
           </w:r>
           <w:r w:rsidRPr="00C47584">
             <w:rPr>
@@ -315,7 +315,7 @@
                     <w:sz w:val="20"/>
                     <w:szCs w:val="28"/>
                   </w:rPr>
-                  <w:t>Должность</w:t>
+                  <w:t><xsl:value-of select="@report_position"/></w:t>
                 </w:r>
               </w:p>
             </w:tc>
@@ -358,7 +358,7 @@
                     <w:sz w:val="20"/>
                     <w:szCs w:val="28"/>
                   </w:rPr>
-                  <w:t>Подпись</w:t>
+                  <w:t><xsl:value-of select="@report_signature"/></w:t>
                 </w:r>
               </w:p>
             </w:tc>
@@ -384,7 +384,7 @@
                     <w:sz w:val="20"/>
                     <w:szCs w:val="28"/>
                   </w:rPr>
-                  <w:t>Расшифровка</w:t>
+                  <w:t><xsl:value-of select="@report_full_name"/></w:t>
                 </w:r>
               </w:p>
             </w:tc>
@@ -462,7 +462,7 @@
               <w:sz w:val="28"/>
               <w:szCs w:val="28"/>
             </w:rPr>
-            <w:t xml:space="preserve">от </w:t>
+            <w:t xml:space="preserve"><xsl:value-of select="@report_from"/> </w:t>
           </w:r>
           <w:r w:rsidR="00C70E09" w:rsidRPr="00C47584">
             <w:rPr>
@@ -510,7 +510,7 @@
                     <w:bCs/>
                   </w:rPr>
                   <w:lastRenderedPageBreak/>
-                  <w:t>Скриншот</w:t>
+                  <w:t><xsl:value-of select="@report_screenshot"/></w:t>
                 </w:r>
               </w:p>
             </w:tc>
@@ -532,7 +532,7 @@
                     <w:b/>
                     <w:bCs/>
                   </w:rPr>
-                  <w:t>Комментарий</w:t>
+                  <w:t><xsl:value-of select="@report_comment"/></w:t>
                 </w:r>
               </w:p>
             </w:tc>

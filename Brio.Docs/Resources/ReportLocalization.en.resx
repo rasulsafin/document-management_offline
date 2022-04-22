@@ -129,6 +129,33 @@
   <data name="Report" xml:space="preserve">
     <value>Report</value>
   </data>
+  <data name="Report_Comment" xml:space="preserve">
+    <value>Comment</value>
+  </data>
+  <data name="Report_For" xml:space="preserve">
+    <value>for</value>
+  </data>
+  <data name="Report_From" xml:space="preserve">
+    <value>from</value>
+  </data>
+  <data name="Report_Full_Name" xml:space="preserve">
+    <value>Full name</value>
+  </data>
+  <data name="Report_Position" xml:space="preserve">
+    <value>Position</value>
+  </data>
+  <data name="Report_Project" xml:space="preserve">
+    <value>project</value>
+  </data>
+  <data name="Report_Report_List" xml:space="preserve">
+    <value>REPORT LIST</value>
+  </data>
+  <data name="Report_Screenshot" xml:space="preserve">
+    <value>Screenshot</value>
+  </data>
+  <data name="Report_Signature" xml:space="preserve">
+    <value>Signature</value>
+  </data>
   <data name="Status" xml:space="preserve">
     <value>Status</value>
   </data>
