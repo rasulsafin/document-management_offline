@@ -136,7 +136,7 @@
     <value>for</value>
   </data>
   <data name="Report_From" xml:space="preserve">
-    <value>from</value>
+    <value>Date:</value>
   </data>
   <data name="Report_Full_Name" xml:space="preserve">
     <value>Full name</value>
