@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <None Remove="Report\Resources\ReportStyles.xslt" />
+    <None Remove="Report\Resources\FooterStyles.xslt" />
+    <None Remove="Report\Resources\ContentStyles.xslt" />
     <None Remove="Report\Resources\ReportTemplate.docx" />
   </ItemGroup>
 
@@ -19,6 +21,12 @@
     <EmbeddedResource Include="Report\Resources\ReportStyles.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\FooterStyles.xslt">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\ContentStyles.xslt">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
     <EmbeddedResource Include="Report\Resources\ReportTemplate.docx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>

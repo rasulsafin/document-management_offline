@@ -71,14 +71,17 @@ namespace Brio.Docs.Utils.ReportCreator
 
         private void CreateWithTemplate(string xsltFile, string templateDocument, string xmlData, string outputDocument)
         {
-           using (StringWriter stringWriter = new StringWriter())
-           using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
-           using (StringReader stringReader = new StringReader(xmlData))
+            using (StringWriter stringWriter = new StringWriter())
+            using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+            using (StringReader stringReader = new StringReader(xmlData))
             {
                 using (XmlReader xrt = XmlReader.Create(stringReader))
                 {
-                    XslCompiledTransform transform = new XslCompiledTransform();
-                    transform.Load(xsltFile);
+                    XsltSettings sets = new XsltSettings(true, true);
+                    var resolver = new XmlUrlResolver();
+
+                    XslCompiledTransform transform = new XslCompiledTransform(true);
+                    transform.Load(xsltFile, sets, resolver);
                     transform.Transform(xrt, xmlWriter);
 
                     XmlDocument newWordContent = new XmlDocument();
