@@ -36,12 +36,12 @@ namespace Brio.Docs.Utils.ReportCreator
 
         internal static MainDocumentPart MainPart { get; set; }
 
-        public void CreateReport(XDocument xml, string outputDocument)
+        public void CreateReport(XDocument xml, XDocument footer, string outputDocument)
         {
             if (File.Exists(XSLT_FILE.Value) && File.Exists(TEMPLATE_DOCUMENT.Value))
             {
                 var bodyDocument = GetDocument(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
-                var footerDocument = GetDocument(XSLT_FOOTER.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+                var footerDocument = GetDocument(XSLT_FOOTER.Value, TEMPLATE_DOCUMENT.Value, footer.ToString(), outputDocument);
 
                 CreateWithTemplate(bodyDocument, footerDocument, outputDocument);
                 Create(xml, outputDocument);
@@ -66,8 +66,8 @@ namespace Brio.Docs.Utils.ReportCreator
             using (WordprocessingDocument doc = WordprocessingDocument.Open(fileName, true))
             {
                 MainPart = doc.MainDocumentPart;
-                Body body = MainPart.Document.Body;
 
+                Body body = MainPart.Document.Body;
                 Read(xml.Element(ROOT), body);
 
                 TableElement.RemoveTablePrototype();

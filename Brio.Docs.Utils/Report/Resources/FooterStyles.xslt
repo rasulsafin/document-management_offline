@@ -178,7 +178,7 @@
 									<w:szCs w:val="28" />
 									<w:lang w:eastAsia="ru-RU" />
 								</w:rPr>
-								<w:t xml:space="preserve">Создано </w:t>
+								<w:t xml:space="preserve"><xsl:for-each select="Footer"><xsl:value-of select="@created_with"/></xsl:for-each> </w:t>
 							</w:r>
 							<w:r>
 								<w:rPr>

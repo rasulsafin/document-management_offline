@@ -59,6 +59,14 @@ namespace Brio.Docs.Utility
             return new XDocument(xml);
         }
 
+        internal XDocument CreateFooter()
+        {
+            var xml = new XElement("Footer",
+                    new XAttribute("created_with", localizer["Created_With"]));
+
+            return new XDocument(xml);
+        }
+
         private string StatusToString(ObjectiveStatus status)
         {
             switch (status)
