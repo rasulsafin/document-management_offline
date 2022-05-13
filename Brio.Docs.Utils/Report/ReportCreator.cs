@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Linq;
@@ -28,6 +29,7 @@ namespace Brio.Docs.Utils.ReportCreator
 
         private static readonly string ROOT_FOLDER = @"Report\Resources";
         private static readonly Lazy<string> XSLT_FILE = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "ReportStyles.xslt"));
+        private static readonly Lazy<string> XSLT_FOOTER = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "FooterStyles.xslt"));
         private static readonly Lazy<string> TEMPLATE_DOCUMENT = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "ReportTemplate.docx"));
 
         private static readonly string ROOT = "Report";
@@ -38,7 +40,10 @@ namespace Brio.Docs.Utils.ReportCreator
         {
             if (File.Exists(XSLT_FILE.Value) && File.Exists(TEMPLATE_DOCUMENT.Value))
             {
-                CreateWithTemplate(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+                var bodyDocument = GetDocument(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+                var footerDocument = GetDocument(XSLT_FOOTER.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+
+                CreateWithTemplate(bodyDocument, footerDocument, outputDocument);
                 Create(xml, outputDocument);
             }
         }
@@ -69,7 +74,34 @@ namespace Brio.Docs.Utils.ReportCreator
             }
         }
 
-        private void CreateWithTemplate(string xsltFile, string templateDocument, string xmlData, string outputDocument)
+        private void CreateWithTemplate(XmlDocument bodyDocument, XmlDocument footerDocument, string outputDocument)
+        {
+            using (WordprocessingDocument output = WordprocessingDocument.Open(outputDocument, true))
+            {
+                Body updatedBodyContent = new Body(bodyDocument.DocumentElement.InnerXml);
+                Footer footer = new Footer(footerDocument.DocumentElement.OuterXml);
+
+                var mainPart = output.MainDocumentPart;
+
+                mainPart.Document.Body = updatedBodyContent;
+
+                mainPart.DeleteParts(mainPart.FooterParts);
+                var footerPart = mainPart.AddNewPart<FooterPart>();
+                footerPart.Footer = footer;
+                var footerId = mainPart.GetIdOfPart(footerPart);
+
+                var sectPrs = mainPart.Document.Body.Elements<SectionProperties>();
+                foreach (var sectPr in sectPrs)
+                {
+                    sectPr.RemoveAllChildren<FooterReference>();
+                    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId });
+                }
+
+                mainPart.Document.Save();
+            }
+        }
+
+        private XmlDocument GetDocument(string xsltFile, string templateDocument, string xmlData, string outputDocument)
         {
             using (StringWriter stringWriter = new StringWriter())
             using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
@@ -89,12 +121,7 @@ namespace Brio.Docs.Utils.ReportCreator
 
                     File.Copy(templateDocument, outputDocument, true);
 
-                    using (WordprocessingDocument output = WordprocessingDocument.Open(outputDocument, true))
-                    {
-                        Body updatedBodyContent = new Body(newWordContent.DocumentElement.InnerXml);
-                        output.MainDocumentPart.Document.Body = updatedBodyContent;
-                        output.MainDocumentPart.Document.Save();
-                    }
+                    return newWordContent;
                 }
             }
         }
