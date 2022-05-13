@@ -117,6 +117,24 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Company_Address" xml:space="preserve">
+    <value>Юридический адрес: г. Москва, 3-й проезд Марьиной рощи, д. 40, стр. 1, оф. 18</value>
+  </data>
+  <data name="Company_Fullname" xml:space="preserve">
+    <value>Общество с ограниченной ответственностью «БРИО МРС»</value>
+  </data>
+  <data name="Company_ID" xml:space="preserve">
+    <value>ОГРН 1207700018570</value>
+  </data>
+  <data name="Company_Requisites" xml:space="preserve">
+    <value>ИНН 9715375131 КПП 771501001</value>
+  </data>
+  <data name="Company_Shortname" xml:space="preserve">
+    <value>БРИО МРС</value>
+  </data>
+  <data name="Company_Type" xml:space="preserve">
+    <value>ООО</value>
+  </data>
   <data name="Created_With" xml:space="preserve">
     <value>Сгенерировано</value>
   </data>

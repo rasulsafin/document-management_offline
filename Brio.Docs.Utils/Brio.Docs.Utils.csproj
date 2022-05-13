@@ -13,6 +13,7 @@
   <ItemGroup>
     <None Remove="Report\Resources\ReportStyles.xslt" />
     <None Remove="Report\Resources\FooterStyles.xslt" />
+    <None Remove="Report\Resources\HeaderStyles.xslt" />
     <None Remove="Report\Resources\ReportTemplate.docx" />
   </ItemGroup>
 
@@ -21,6 +22,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
 	<EmbeddedResource Include="Report\Resources\FooterStyles.xslt">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\HeaderStyles.xslt">
 		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	</EmbeddedResource>
     <EmbeddedResource Include="Report\Resources\ReportTemplate.docx">

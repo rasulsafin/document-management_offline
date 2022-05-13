@@ -67,6 +67,19 @@ namespace Brio.Docs.Utility
             return new XDocument(xml);
         }
 
+        internal XDocument CreateHeader()
+        {
+            var xml = new XElement("Header",
+                    new XAttribute("company_fullname", localizer["Company_Fullname"]),
+                    new XAttribute("company_shortname", localizer["Company_Shortname"]),
+                    new XAttribute("company_type", localizer["Company_Type"]),
+                    new XAttribute("company_requisites", localizer["Company_Requisites"]),
+                    new XAttribute("company_address", localizer["Company_Address"]),
+                    new XAttribute("company_id", localizer["Company_ID"]));
+
+            return new XDocument(xml);
+        }
+
         private string StatusToString(ObjectiveStatus status)
         {
             switch (status)

@@ -203,10 +203,11 @@ namespace Brio.Docs.Services
                 path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
                 var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
                 var xmlFooter = reportHelper.CreateFooter();
+                var xmlHeader = reportHelper.CreateHeader();
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
                 ReportCreator reportCreator = new ReportCreator();
-                reportCreator.CreateReport(xmlDoc, xmlFooter, path);
+                reportCreator.CreateReport(xmlDoc, xmlFooter, xmlHeader, path);
                 logger.LogInformation("Report created ({Path})", path);
 
                 return new ObjectiveReportCreationResultDto()
