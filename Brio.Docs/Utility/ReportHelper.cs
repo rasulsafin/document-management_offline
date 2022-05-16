@@ -34,6 +34,7 @@ namespace Brio.Docs.Utility
         {
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
+                    new XAttribute("number_character", localizer["Number_Character"]),
                     new XAttribute("number", reportId),
                     new XAttribute("date", date.ToString("d", Thread.CurrentThread.CurrentUICulture)),
                     new XAttribute("report_reportlist", localizer["Report_Report_List"]),

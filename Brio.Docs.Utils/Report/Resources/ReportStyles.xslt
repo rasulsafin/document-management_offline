@@ -60,7 +60,9 @@
 								<w:sz w:val="36"/>
 								<w:szCs w:val="36"/>
 							</w:rPr>
-							<w:t>№</w:t>
+							<w:t>
+								<xsl:value-of select="@number_character"/>
+							</w:t>
 						</w:r>
 						<w:r w:rsidR="0054352D">
 							<w:rPr>
