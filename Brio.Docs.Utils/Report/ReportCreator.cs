@@ -101,11 +101,11 @@ namespace Brio.Docs.Utils.ReportCreator
                 var sectPrs = mainPart.Document.Body.Elements<SectionProperties>();
                 foreach (var sectPr in sectPrs)
                 {
-                    sectPr.RemoveAllChildren<FooterReference>();
-                    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId });
-
                     sectPr.RemoveAllChildren<HeaderReference>();
-                    sectPr.PrependChild<HeaderReference>(new HeaderReference() { Id = headerId });
+                    sectPr.PrependChild<HeaderReference>(new HeaderReference() { Id = headerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.First) });
+
+                    sectPr.RemoveAllChildren<FooterReference>();
+                    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.Default) });
                 }
 
                 mainPart.Document.Save();
