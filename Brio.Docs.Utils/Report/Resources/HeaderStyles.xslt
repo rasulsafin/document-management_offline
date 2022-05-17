@@ -171,7 +171,7 @@
 										<w:b/>
 										<w:sz w:val="20"/>
 										<w:szCs w:val="20"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 								</w:pPr>
 								<w:r>
@@ -180,7 +180,7 @@
 										<w:b/>
 										<w:sz w:val="20"/>
 										<w:szCs w:val="20"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve"><xsl:value-of select="@company_fullname"/></w:t>
 								</w:r>
@@ -196,7 +196,7 @@
 										<w:b/>
 										<w:sz w:val="20"/>
 										<w:szCs w:val="20"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 								</w:pPr>
 								<w:r>
@@ -205,7 +205,7 @@
 										<w:b/>
 										<w:sz w:val="20"/>
 										<w:szCs w:val="20"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve">(<xsl:value-of select="@company_type"/> «</w:t>
 								</w:r>
@@ -222,7 +222,7 @@
 										<w:b/>
 										<w:sz w:val="20"/>
 										<w:szCs w:val="20"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve">»)</w:t>
 								</w:r>
@@ -237,7 +237,7 @@
 										<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
 										<w:sz w:val="16"/>
 										<w:szCs w:val="16"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 								</w:pPr>
 								<w:r>
@@ -245,7 +245,7 @@
 										<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
 										<w:sz w:val="16"/>
 										<w:szCs w:val="16"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve"><xsl:value-of select="@company_requisites"/></w:t>
 								</w:r>
@@ -260,7 +260,7 @@
 										<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
 										<w:sz w:val="16"/>
 										<w:szCs w:val="16"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 								</w:pPr>
 								<w:r>
@@ -268,7 +268,7 @@
 										<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
 										<w:sz w:val="16"/>
 										<w:szCs w:val="16"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve"><xsl:value-of select="@company_address"/></w:t>
 								</w:r>
@@ -293,7 +293,7 @@
 										<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman"/>
 										<w:sz w:val="16"/>
 										<w:szCs w:val="16"/>
-										<w:lang w:eastAsia="ar-SA"/>
+										<w:lang w:val="en-US" w:eastAsia="ru-RU" />
 									</w:rPr>
 									<w:t xml:space="preserve"><xsl:value-of select="@company_id"/></w:t>
 								</w:r>
