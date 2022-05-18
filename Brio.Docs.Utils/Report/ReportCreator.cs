@@ -28,17 +28,34 @@ namespace Brio.Docs.Utils.ReportCreator
 
         private static readonly string ROOT_FOLDER = @"Report\Resources";
         private static readonly Lazy<string> XSLT_FILE = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "ReportStyles.xslt"));
+        private static readonly Lazy<string> XSLT_FOOTER = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "FooterStyles.xslt"));
+        private static readonly Lazy<string> XSLT_HEADER = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "HeaderStyles.xslt"));
         private static readonly Lazy<string> TEMPLATE_DOCUMENT = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "ReportTemplate.docx"));
+        private static readonly Lazy<string> LOGO_BIG = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "image1.jpg"));
+        private static readonly Lazy<string> LOGO_SMALL = new Lazy<string>(() => Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), ROOT_FOLDER, "image2.png"));
 
         private static readonly string ROOT = "Report";
 
+        private static readonly string LOGO_IMAGE_ID = "rId1";
+
         internal static MainDocumentPart MainPart { get; set; }
 
-        public void CreateReport(XDocument xml, string outputDocument)
+        public void CreateReport(XDocument xml, XDocument footer, XDocument header, string outputDocument)
         {
-            if (File.Exists(XSLT_FILE.Value) && File.Exists(TEMPLATE_DOCUMENT.Value))
+            if (File.Exists(XSLT_FILE.Value) &&
+                File.Exists(XSLT_FOOTER.Value) &&
+                File.Exists(XSLT_HEADER.Value) &&
+                File.Exists(TEMPLATE_DOCUMENT.Value) &&
+                File.Exists(LOGO_BIG.Value) &&
+                File.Exists(LOGO_SMALL.Value))
             {
-                CreateWithTemplate(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+                var bodyDocument = GetDocument(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+                var footerDocument = GetDocument(XSLT_FOOTER.Value, TEMPLATE_DOCUMENT.Value, footer.ToString(), outputDocument);
+                var headerDocument = GetDocument(XSLT_HEADER.Value, TEMPLATE_DOCUMENT.Value, header.ToString(), outputDocument);
+                var logoBigStream = new FileStream(LOGO_BIG.Value, FileMode.Open);
+                var logoSmallStream = new FileStream(LOGO_SMALL.Value, FileMode.Open);
+
+                CreateWithTemplate(bodyDocument, footerDocument, headerDocument, outputDocument, logoBigStream, logoSmallStream);
                 Create(xml, outputDocument);
             }
         }
@@ -61,24 +78,78 @@ namespace Brio.Docs.Utils.ReportCreator
             using (WordprocessingDocument doc = WordprocessingDocument.Open(fileName, true))
             {
                 MainPart = doc.MainDocumentPart;
-                Body body = MainPart.Document.Body;
 
+                Body body = MainPart.Document.Body;
                 Read(xml.Element(ROOT), body);
 
                 TableElement.RemoveTablePrototype();
             }
         }
 
-        private void CreateWithTemplate(string xsltFile, string templateDocument, string xmlData, string outputDocument)
+        private void CreateWithTemplate(
+            XmlDocument bodyDocument,
+            XmlDocument footerDocument,
+            XmlDocument headerDocument,
+            string outputDocument,
+            FileStream logoBigStream,
+            FileStream logoSmallStream)
         {
-           using (StringWriter stringWriter = new StringWriter())
-           using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
-           using (StringReader stringReader = new StringReader(xmlData))
+            using (WordprocessingDocument output = WordprocessingDocument.Open(outputDocument, true))
+            {
+                Body updatedBodyContent = new Body(bodyDocument.DocumentElement.InnerXml);
+                Footer footer = new Footer(footerDocument.DocumentElement.OuterXml);
+                Header header = new Header(headerDocument.DocumentElement.OuterXml);
+
+                var mainPart = output.MainDocumentPart;
+
+                mainPart.Document.Body = updatedBodyContent;
+
+                mainPart.DeleteParts(mainPart.FooterParts);
+                var footerPart = mainPart.AddNewPart<FooterPart>();
+                footerPart.Footer = footer;
+                var footerId = mainPart.GetIdOfPart(footerPart);
+
+                mainPart.DeleteParts(mainPart.HeaderParts);
+                var headerPart = mainPart.AddNewPart<HeaderPart>();
+                headerPart.Header = header;
+                var headerId = mainPart.GetIdOfPart(headerPart);
+
+                var sectPrsMainBody = mainPart.Document.Body.Elements<SectionProperties>();
+                foreach (var sectPr in sectPrsMainBody)
+                {
+                    sectPr.RemoveAllChildren<HeaderReference>();
+                    sectPr.PrependChild<HeaderReference>(new HeaderReference() { Id = headerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.First) });
+
+                    sectPr.RemoveAllChildren<FooterReference>();
+                    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.Default) });
+                }
+
+                var bigLogoImagePart = headerPart.AddImagePart(ImagePartType.Jpeg, LOGO_IMAGE_ID);
+                bigLogoImagePart.FeedData(logoBigStream);
+
+                var smallLogoImagePart = footerPart.AddImagePart(ImagePartType.Png, LOGO_IMAGE_ID);
+                smallLogoImagePart.FeedData(logoSmallStream);
+
+                logoBigStream.Close();
+                logoSmallStream.Close();
+
+                mainPart.Document.Save();
+            }
+        }
+
+        private XmlDocument GetDocument(string xsltFile, string templateDocument, string xmlData, string outputDocument)
+        {
+            using (StringWriter stringWriter = new StringWriter())
+            using (XmlWriter xmlWriter = XmlWriter.Create(stringWriter))
+            using (StringReader stringReader = new StringReader(xmlData))
             {
                 using (XmlReader xrt = XmlReader.Create(stringReader))
                 {
-                    XslCompiledTransform transform = new XslCompiledTransform();
-                    transform.Load(xsltFile);
+                    XsltSettings sets = new XsltSettings(true, true);
+                    var resolver = new XmlUrlResolver();
+
+                    XslCompiledTransform transform = new XslCompiledTransform(true);
+                    transform.Load(xsltFile, sets, resolver);
                     transform.Transform(xrt, xmlWriter);
 
                     XmlDocument newWordContent = new XmlDocument();
@@ -86,12 +157,7 @@ namespace Brio.Docs.Utils.ReportCreator
 
                     File.Copy(templateDocument, outputDocument, true);
 
-                    using (WordprocessingDocument output = WordprocessingDocument.Open(outputDocument, true))
-                    {
-                        Body updatedBodyContent = new Body(newWordContent.DocumentElement.InnerXml);
-                        output.MainDocumentPart.Document.Body = updatedBodyContent;
-                        output.MainDocumentPart.Document.Save();
-                    }
+                    return newWordContent;
                 }
             }
         }
