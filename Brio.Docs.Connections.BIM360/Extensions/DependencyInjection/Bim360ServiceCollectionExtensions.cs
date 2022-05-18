@@ -25,7 +25,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<Bim360Storage>();
             services.AddScoped<Downloader>();
             services.AddScoped<ConfigurationsHelper>();
-            services.AddScoped<IssueSnapshotUtilities>();
             services.AddBim360Synchronization();
             return services;
         }
@@ -42,6 +41,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<SnapshotFiller>();
             services.AddScoped<SnapshotGetter>();
             services.AddScoped<SnapshotUpdater>();
+
+            services.AddScoped<ProjectSnapshotUtilities>();
+            services.AddScoped<IssueSnapshotUtilities>();
             return services;
         }
     }

@@ -38,7 +38,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
 
         public async Task<ItemSnapshot> PostItem(ProjectSnapshot project, string fullPath)
         {
-            var posted = await PostItem(fullPath, project.MrsFolderID, project.ID);
+            var posted = await PostItem(fullPath, project.UploadFolderID, project.ID);
             var itemSnapshot = snapshotUpdater.CreateItem(project, posted.item, posted.version);
             return itemSnapshot;
         }
@@ -46,7 +46,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities
         public async Task<ItemSnapshot> UpdateVersion(ProjectSnapshot project, string itemID, string fullPath)
         {
             var snapshot = snapshotGetter.GetItem(project, itemID);
-            var posted = await UpdateVersion(fullPath, project.MrsFolderID, project.ID, snapshot.Entity);
+            var posted = await UpdateVersion(fullPath, project.UploadFolderID, project.ID, snapshot.Entity);
             snapshotUpdater.UpdateItem(project, snapshot, posted.item, posted.version);
             return snapshot;
         }

@@ -30,7 +30,7 @@ namespace Brio.Docs.Connections.Bim360.UnitTests.Dummy
                 AssignToVariants = new Dictionary<string, AssignToVariant>(),
                 Statuses = new Dictionary<string, StatusSnapshot>(),
                 Items = new Dictionary<string, ItemSnapshot>(),
-                MrsFolderID = DummyStrings.FOLDER_ID,
+                UploadFolderID = DummyStrings.FOLDER_ID,
                 StatusesRelations = new StatusesRelations
                 {
                     Get = System.Array.Empty<RelationRule<Status, ObjectiveStatus>>(),

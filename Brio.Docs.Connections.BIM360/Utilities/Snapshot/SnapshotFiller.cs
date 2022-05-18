@@ -2,15 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Interfaces;
-using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
@@ -22,7 +19,6 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
         private readonly IIssuesService issuesService;
-        private readonly FoldersService foldersService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
@@ -30,26 +26,26 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly IssueSnapshotUtilities snapshotUtilities;
         private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
+        private readonly ProjectSnapshotUtilities projectSnapshotUtilities;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
             IIssuesService issuesService,
-            FoldersService foldersService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
             ConfigurationsHelper configUtilities,
-            StatusEnumCreator statusEnumCreator)
+            StatusEnumCreator statusEnumCreator,
+            ProjectSnapshotUtilities projectSnapshotUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
-            this.foldersService = foldersService;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
@@ -57,6 +53,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             this.snapshotUtilities = snapshotUtilities;
             this.configUtilities = configUtilities;
             this.statusEnumCreator = statusEnumCreator;
+            this.projectSnapshotUtilities = projectSnapshotUtilities;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -87,31 +84,24 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
-                    var projectSnapshot = new ProjectSnapshot(p, hub.Value);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
-
                     if (!topFolders.Any())
                         continue;
 
+                    var projectSnapshot = new ProjectSnapshot(p, hub.Value) { TopFolders = topFolders };
                     hub.Value.Projects.Add(p.ID, projectSnapshot);
-                    var topFolder = (topFolders.FirstOrDefault(
-                            x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
-                                x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
-                        topFolders.First()).ID;
-                    var items = GetAllItems(p.ID, topFolders.ToAsyncEnumerable());
-                    projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
-
-                    await foreach (var iv in items)
-                    {
-                        if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
-                            iv.version?.Attributes.Name != Resources.MrsFileName)
-                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item, iv.version));
-                        else
-                            topFolder = iv.item.Relationships.Parent.Data.ID;
-                    }
-
-                    projectSnapshot.MrsFolderID = topFolder;
                 }
+            }
+        }
+
+        public async Task UpdateProjectsInfoIfNull()
+        {
+            await UpdateProjectsIfNull();
+
+            foreach (var hub in snapshot.Hubs.Values.Where(x => x.Projects != null))
+            {
+                foreach (var project in hub.Projects.Values)
+                    await projectSnapshotUtilities.DownloadFoldersInfo(project);
             }
         }
 
@@ -211,19 +201,6 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                     issueTypeSnapshot.SetExternalID(externalID);
                     addSnapshot(issueTypeSnapshot.ProjectSnapshot, issueTypeSnapshot);
                 }
-            }
-        }
-
-        private async IAsyncEnumerable<(Item item, Forge.Models.DataManagement.Version version)> GetAllItems(
-            string projectID,
-            IAsyncEnumerable<Folder> folders)
-        {
-            await foreach (var folder in folders)
-            {
-                await foreach (var item in GetAllItems(projectID, foldersService.GetFoldersAsync(projectID, folder.ID)))
-                    yield return item;
-                await foreach (var item in foldersService.GetItemsAsync(projectID, folder.ID))
-                    yield return item;
             }
         }
     }
