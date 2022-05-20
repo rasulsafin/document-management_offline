@@ -47,8 +47,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private static bool IsMetaFile(string name)
         {
             return string.Equals(name, Resources.UploadMrsFileName, StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(name, Resources.SynchronizeMrsFileName, StringComparison.InvariantCultureIgnoreCase) ||
-                name.EndsWith(MrsConstants.CONFIG_EXTENSION, StringComparison.OrdinalIgnoreCase);
+                string.Equals(name, Resources.SynchronizeMrsFileName, StringComparison.InvariantCultureIgnoreCase);
         }
 
         private async IAsyncEnumerable<ItemSnapshot> GetItems(Project p, IEnumerable<string> topFolderIds)
