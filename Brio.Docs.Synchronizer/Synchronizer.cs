@@ -15,6 +15,7 @@ using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using System.Linq.Expressions;
 
 namespace Brio.Docs.Synchronization
 {
@@ -70,6 +71,8 @@ namespace Brio.Docs.Synchronization
 
             try
             {
+                if (dbContext.Users.Local.All(x => x.ID != data.User.ID))
+                    dbContext.Attach(data.User);
                 data.Date = DateTime.UtcNow;
                 var userID = data.User.ID;
                 var lastSynchronization = await GetLastSynchronizationDate(userID).ConfigureAwait(false);
@@ -191,13 +194,15 @@ namespace Brio.Docs.Synchronization
                .Convert(await data.ConnectionContext.ObjectivesSynchronizer.Get(ids).ConfigureAwait(false))
                .ConfigureAwait(false);
 
+            Expression<Func<Objective, bool>> filter = objective =>
+                (objective.ExternalID == null || ids.Contains(objective.ExternalID)) &&
+                !unsyncProjectsIDs.Contains(objective.ProjectID) &&
+                (objective.Project == null || !unsyncProjectsExternalIDs.Contains(objective.Project.ExternalID));
             var synchronizingResults = await processor.Synchronize<Objective, ObjectiveExternalDto>(
                     objectiveStrategy,
                     data,
                     remoteObjectives,
-                    x => (x.ExternalID == null || ids.Contains(x.ExternalID)) &&
-                        !unsyncProjectsIDs.Contains(x.ProjectID) &&
-                        !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID),
+                    filter,
                     token,
                     objectiveProgress)
                .ConfigureAwait(false);

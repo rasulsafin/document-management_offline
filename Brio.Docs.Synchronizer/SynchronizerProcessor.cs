@@ -97,12 +97,10 @@ namespace Brio.Docs.Synchronization
                     results.AddIsNotNull(synchronizingResult);
 
                     await SaveDb(data).ConfigureAwait(false);
-                    DBContextUtilities.ReloadContext(context, data);
                 }
                 catch (Exception e)
                 {
                     logger.LogError(e, "Synchronization failed");
-                    DBContextUtilities.ReloadContext(context, data);
 
                     var isRemote = action == SynchronizingAction.AddToLocal;
                     results.Add(
@@ -112,6 +110,10 @@ namespace Brio.Docs.Synchronization
                             Object = isRemote ? tuple.Remote : tuple.Local,
                             ObjectType = isRemote ? ObjectType.Remote : ObjectType.Local,
                         });
+                }
+                finally
+                {
+                    DBContextUtilities.ReloadContext(context, data);
                 }
 
                 progress?.Report(++i / (double)tuples.Count);
