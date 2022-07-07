@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Web;
 using Brio.Docs.External.Utils;
 using WebDav;
 
@@ -31,7 +32,7 @@ namespace Brio.Docs.Connections.BrioCloud
             {
                 Href = Uri.UnescapeDataString(element.Uri),
                 IsDirectory = element.IsCollection,
-                DisplayName = Path.GetFileName(element.Uri.TrimEnd('/')),
+                DisplayName = Path.GetFileName(HttpUtility.UrlDecode(element.Uri.TrimEnd('/'))),
                 ContentType = element.ContentType,
                 ETag = element.ETag,
             };
