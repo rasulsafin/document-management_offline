@@ -106,7 +106,13 @@ namespace Brio.Docs.Services
                         {
                             logger.LogTrace("DownloadItems task started ({ID})", id);
                             var result = await storage.DownloadFiles(project?.ExternalID, data, progress, src.Token);
+                            logger.LogDebug("Downloading is successful: {Result}", result);
                             return new RequestResult(result);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Can't download items {@ItemIds} with user key {UserID}", itemIds, userID);
+                            return new RequestResult(false);
                         }
                         finally
                         {
