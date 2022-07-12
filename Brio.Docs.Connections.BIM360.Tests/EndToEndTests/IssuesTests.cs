@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -40,7 +42,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
             var authenticator = serviceProvider.GetService<Authenticator>();
             var hubsService = serviceProvider.GetService<HubsService>();
             var projectsService = serviceProvider.GetService<ProjectsService>();
-            issuesService = serviceProvider.GetService<IssuesService>();
+            issuesService = (IssuesService)serviceProvider.GetService<IIssuesService>();
 
             if (authenticator == null || hubsService == null || connection == null || projectsService == null)
                 throw new Exception("Required services are null");
@@ -101,7 +103,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
         [TestMethod]
         public async Task GetIssues_HaveAccessToIssueContainer_ReturnsIssuesList()
         {
-            var issues = await issuesService.GetIssuesAsync(issuesContainer);
+            var issues = await issuesService.GetIssuesAsync(issuesContainer).ToListAsync();
 
             if (issues == null)
                 Assert.Fail();
@@ -110,7 +112,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
         [TestMethod]
         public async Task PatchTestingIssue_HaveAccessToTestingIssue_PatchedPropertyChanged()
         {
-            var issues = await issuesService.GetIssuesAsync(issuesContainer);
+            var issues = await issuesService.GetIssuesAsync(issuesContainer).ToListAsync();
 
             if (issues == null || issues.Count == 0)
                 Assert.Fail("Testing issue hasn't got issues");
@@ -237,14 +239,14 @@ namespace Brio.Docs.Connections.Bim360.Tests
         [TestMethod]
         public async Task GetAttachments_HaveAccessToTestingIssue_ReturnsAttachmentsList()
         {
-            var attachments = await issuesService.GetAttachmentsAsync(issuesContainer, TEST_ISSUE_ID);
+            var attachments = await issuesService.GetAttachmentsAsync(issuesContainer, TEST_ISSUE_ID).ToListAsync();
             Assert.IsNotNull(attachments);
         }
 
         [TestMethod]
         public async Task GetComments_HaveAccessToTestingIssue_ReturnsCommentsList()
         {
-            var comments = await issuesService.GetCommentsAsync(issuesContainer, TEST_ISSUE_ID);
+            var comments = await issuesService.GetCommentsAsync(issuesContainer, TEST_ISSUE_ID).ToListAsync();
             Assert.IsNotNull(comments);
             Assert.AreEqual(3, comments.Count);
         }

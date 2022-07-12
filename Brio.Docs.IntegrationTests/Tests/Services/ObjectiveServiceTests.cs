@@ -7,6 +7,7 @@ using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
+using Brio.Docs.Client.Sorts;
 using Brio.Docs.Common;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Extensions;
@@ -16,6 +17,7 @@ using Brio.Docs.Tests.Utility;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Mapping;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -68,7 +70,8 @@ namespace Brio.Docs.Tests.Services
                 serviceProvider.GetService<ItemsHelper>(),
                 serviceProvider.GetService<DynamicFieldsHelper>(),
                 serviceProvider.GetService<BimElementsHelper>(),
-                Mock.Of<ILogger<ObjectiveService>>());
+                Mock.Of<ILogger<ObjectiveService>>(),
+                Mock.Of<IStringLocalizer<ReportLocalization>>());
         }
 
         [TestCleanup]
@@ -382,7 +385,7 @@ namespace Brio.Docs.Tests.Services
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveSimple_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveSimple_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var objective = ArrangeSimpleObjective();
@@ -392,7 +395,8 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
         }
 
         [TestMethod]
@@ -411,7 +415,7 @@ namespace Brio.Docs.Tests.Services
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithBimElement_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithBimElement_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var objective = ArrangeSimpleObjective();
@@ -430,11 +434,13 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            // Assert
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithLocation_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithLocation_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var objective = ArrangeSimpleObjective();
@@ -455,11 +461,12 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithParentObjective_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithParentObjective_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var parentObjective = await service.Add(ArrangeSimpleObjective());
@@ -472,26 +479,28 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
 
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithChildObjective_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithChildObjective_ReturnsIdsOfDeletedParentAndChildren()
         {
             // Arrange
             var existingObjective = await service.Add(ArrangeSimpleObjective());
 
             var objective = ArrangeSimpleObjective();
             objective.ParentObjectiveID = existingObjective.ID;
-            await service.Add(objective);
+            var childObjective = await service.Add(objective);
 
             // Act
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
-
+            Assert.AreEqual(actualResult.Count(), 2);
+            Assert.IsTrue(actualResult.Contains(existingObjective.ID));
+            Assert.IsTrue(actualResult.Contains(childObjective.ID));
         }
 
         [TestMethod]
@@ -513,7 +522,7 @@ namespace Brio.Docs.Tests.Services
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithItem_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithItem_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var objective = ArrangeSimpleObjective();
@@ -531,11 +540,12 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
         }
 
         [TestMethod]
-        public async Task Remove_ExistingObjectiveWithDynamicField_ReturnsTrue()
+        public async Task Remove_ExistingObjectiveWithDynamicField_ReturnsIdsOfDeletedObjectived()
         {
             // Arrange
             var objective = ArrangeSimpleObjective();
@@ -555,7 +565,8 @@ namespace Brio.Docs.Tests.Services
             var actualResult = await service.Remove(existingObjective.ID);
 
             // Assert
-            Assert.IsTrue(actualResult);
+            Assert.AreEqual(actualResult.Count(), 1);
+            Assert.AreEqual(actualResult.First(), existingObjective.ID);
         }
 
         [TestMethod]
@@ -654,6 +665,7 @@ namespace Brio.Docs.Tests.Services
             beforeObjective.Title += "Edit";
             beforeObjective.Description += "Edit";
             beforeObjective.CreationDate = beforeObjective.CreationDate.AddDays(1);
+            beforeObjective.UpdatedAt = beforeObjective.UpdatedAt.AddDays(1);
             beforeObjective.DueDate = beforeObjective.DueDate.AddDays(1);
             beforeObjective.Status = ObjectiveStatus.Late;
             beforeObjective.ObjectiveTypeID = new ID<ObjectiveTypeDto>(
@@ -677,6 +689,7 @@ namespace Brio.Docs.Tests.Services
             var expectedDescription = beforeObjective.Description + "Edit";
             var expectedCreationDate = beforeObjective.CreationDate.AddDays(1);
             var expectedDueDate = beforeObjective.DueDate.AddDays(1);
+            var expectedLastUpdateDate = DateTime.UtcNow;
             var expectedStatus = ObjectiveStatus.Late;
             var expectedType = Fixture.Context.ObjectiveTypes.First(x => x.ID != (int)beforeObjective.ObjectiveTypeID).ID;
 
@@ -696,6 +709,7 @@ namespace Brio.Docs.Tests.Services
             Assert.AreEqual(expectedDescription, afterObjective.Description);
             Assert.AreEqual(expectedCreationDate, afterObjective.CreationDate);
             Assert.AreEqual(expectedDueDate, afterObjective.DueDate);
+            Assert.AreEqual(expectedLastUpdateDate.Date, afterObjective.UpdatedAt.Date);
             Assert.AreEqual(expectedStatus, afterObjective.Status);
             Assert.AreEqual(expectedType, (int)afterObjective.ObjectiveTypeID);
         }
@@ -772,7 +786,7 @@ namespace Brio.Docs.Tests.Services
             var expectedCount = 1;
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, new ObjectiveFilterParameters());
+            var result = await service.GetObjectives(existingProjectId, new ObjectiveFilterParameters(), new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
@@ -788,7 +802,7 @@ namespace Brio.Docs.Tests.Services
             var nonExistingProjectId = ID<ProjectDto>.InvalidID;
 
             // Act
-            await service.GetObjectives(nonExistingProjectId, new ObjectiveFilterParameters());
+            await service.GetObjectives(nonExistingProjectId, new ObjectiveFilterParameters(), new SortParameters());
 
             // Assert
             Assert.Fail();
@@ -821,7 +835,7 @@ namespace Brio.Docs.Tests.Services
             };
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
@@ -847,7 +861,7 @@ namespace Brio.Docs.Tests.Services
             };
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
@@ -877,7 +891,7 @@ namespace Brio.Docs.Tests.Services
             var expectedCount = 1;
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
@@ -903,7 +917,7 @@ namespace Brio.Docs.Tests.Services
             };
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
@@ -920,7 +934,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                Status = (int?)expectedStatusObjective.Status,
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status },
             };
 
             objectiveToCreate.Status++;
@@ -934,12 +948,50 @@ namespace Brio.Docs.Tests.Services
             var expectedCount = 1;
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
             Assert.IsTrue(result.Items.Any());
             Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByStatuses_ListOfObjectivesWithThatStatuses()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                Statuses = new List<int>() { (int)expectedStatusObjective.Status, (int)expectedStatusObjective.Status + 1 },
+            };
+
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+            objectiveToCreate.Status++;
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 2;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).Status;
+                var filterType = filter.Statuses.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
         }
 
         [TestMethod]
@@ -951,7 +1003,7 @@ namespace Brio.Docs.Tests.Services
 
             var filter = new ObjectiveFilterParameters()
             {
-                TypeId = (int?)expectedStatusObjective.ObjectiveType.ID,
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID },
             };
 
             var existingProject = Fixture.Context.Projects.Unsynchronized().First();
@@ -960,12 +1012,48 @@ namespace Brio.Docs.Tests.Services
             var expectedCount = 1;
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert
             Assert.IsTrue(result.Items.Any());
             Assert.AreEqual(expectedCount, actualCount);
+        }
+
+        [TestMethod]
+        public async Task GetObjectives_FilterByExistingTypes_ListOfObjectivesWithTypes()
+        {
+            // Arrange
+            var objectiveToCreate = ArrangeSimpleObjective();
+            var expectedStatusObjective = await service.Add(objectiveToCreate);
+
+            var filter = new ObjectiveFilterParameters()
+            {
+                TypeIds = new List<int>() { (int)expectedStatusObjective.ObjectiveType.ID, (int)expectedStatusObjective.ObjectiveType.ID + 1 },
+            };
+
+            objectiveToCreate.ObjectiveTypeID = new ID<ObjectiveTypeDto>(((int)objectiveToCreate.ObjectiveTypeID) + 1);
+            await service.Add(objectiveToCreate);
+
+            var existingProject = Fixture.Context.Projects.Unsynchronized().First();
+            var existingProjectId = new ID<ProjectDto>(existingProject.ID);
+
+            var expectedCount = 2;
+
+            // Act
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
+            var actualCount = result.Items.Count();
+
+            // Assert
+            Assert.IsTrue(result.Items.Any());
+            Assert.AreEqual(expectedCount, actualCount);
+
+            for (int i = 0; i < result.Items.Count(); i++)
+            {
+                var resultType = (int)result.Items.ElementAt(i).ObjectiveType.ID;
+                var filterType = filter.TypeIds.ElementAt(i);
+                Assert.AreEqual(resultType, filterType);
+            }
         }
 
         [TestMethod]
@@ -991,7 +1079,7 @@ namespace Brio.Docs.Tests.Services
             var expectedCount = 1;
 
             // Act
-            var result = await service.GetObjectivesWithLocation(existingProjectId, itemName);
+            var result = await service.GetObjectivesWithLocation(existingProjectId, itemName, new ObjectiveFilterParameters());
             var actualCount = result.Count();
 
             // Assert
@@ -1021,7 +1109,7 @@ namespace Brio.Docs.Tests.Services
             };
 
             // Act
-            var result = await service.GetObjectives(existingProjectId, filter);
+            var result = await service.GetObjectives(existingProjectId, filter, new SortParameters());
             var actualCount = result.Items.Count();
 
             // Assert

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
@@ -38,10 +39,10 @@ namespace Brio.Docs.Connections.Bim360.Utilities
         public string GetVariantDisplayName(LocationSnapshot variant)
             => variant.Entity.Name;
 
-        public async Task<IEnumerable<LocationSnapshot>> GetVariantsFromRemote(
+        public IAsyncEnumerable<LocationSnapshot> GetVariantsFromRemote(
             ProjectSnapshot projectSnapshot)
-            => (await locationService.GetLocationsAsync(projectSnapshot.LocationContainer, DEFAULT_LOCATION_TREE_ID)).Select(
-                    x => new LocationSnapshot(x, projectSnapshot));
+            => locationService.GetLocationsAsync(projectSnapshot.LocationContainer, DEFAULT_LOCATION_TREE_ID)
+               .Select(x => new LocationSnapshot(x, projectSnapshot));
 
         public IEnumerable<LocationSnapshot> GetSnapshots(ProjectSnapshot project)
             => project.Locations.Values;

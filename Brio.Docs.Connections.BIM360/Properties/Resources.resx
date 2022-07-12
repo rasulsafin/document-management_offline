@@ -253,8 +253,8 @@
     <value>/data/v1/projects/{0}/items/{1}/versions</value>
     <comment>Returns versions for the given item. Multiple versions of a resource item can be uploaded in a project.</comment>
   </data>
-  <data name="MrsFileName" xml:space="preserve">
-    <value>.mrs</value>
+  <data name="UploadMrsFileName" xml:space="preserve">
+    <value>upload.mrs</value>
     <comment>The indicator file that defines the folder for uploading.</comment>
   </data>
   <data name="GetRootCausesMethod" xml:space="preserve">
@@ -311,5 +311,8 @@
   </data>
   <data name="statuses" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\statuses.mrsbc;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="SynchronizeMrsFileName" xml:space="preserve">
+    <value>synchronize.mrs</value>
   </data>
 </root>

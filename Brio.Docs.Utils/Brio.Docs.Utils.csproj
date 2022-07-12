@@ -7,25 +7,42 @@
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Utils</Product>
     <PackageIcon></PackageIcon>
-    <Version>1.2.0</Version>
+    <Version>1.3.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <None Remove="Report\Resources\ReportStyles.xslt" />
+    <None Remove="Report\Resources\FooterStyles.xslt" />
+    <None Remove="Report\Resources\HeaderStyles.xslt" />
     <None Remove="Report\Resources\ReportTemplate.docx" />
+    <None Remove="Report\Resources\image1.jpg" />
+    <None Remove="Report\Resources\image2.png" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Report\Resources\ReportStyles.xslt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\FooterStyles.xslt">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\HeaderStyles.xslt">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
     <EmbeddedResource Include="Report\Resources\ReportTemplate.docx">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\image1.jpg">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
+	<EmbeddedResource Include="Report\Resources\image2.png">
+		<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	</EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.12.1" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
     <PackageReference Include="System.IO.FileSystem.Primitives" Version="4.3.0" />
     <PackageReference Include="System.IO.Packaging" Version="5.0.0" />
   </ItemGroup>

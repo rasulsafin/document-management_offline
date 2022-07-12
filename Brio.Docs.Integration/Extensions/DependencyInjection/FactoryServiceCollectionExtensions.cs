@@ -12,5 +12,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IFactory<IServiceScope, TResult>, Factory<IServiceScope, TResult>>();
             return services;
         }
+
+        public static IServiceCollection AddFactory<TResult>(this IServiceCollection services)
+        {
+            services.AddScoped<Func<TResult>>(x => x.GetRequiredService<TResult>);
+            services.AddScoped<IFactory<TResult>, Factory<TResult>>();
+            return services;
+        }
     }
 }

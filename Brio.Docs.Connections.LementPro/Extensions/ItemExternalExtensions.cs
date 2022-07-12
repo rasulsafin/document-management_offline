@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Brio.Docs.Connections.LementPro.Models;
+using Brio.Docs.External;
 using Brio.Docs.Integration.Dtos;
 using static Brio.Docs.Connections.LementPro.LementProConstants;
 
@@ -27,6 +28,7 @@ namespace Brio.Docs.Connections.LementPro
                 ExternalID = model.ID?.ToString(),
                 FileName = model.Values?.Name,
                 UpdatedAt = modifiedDateParsed ? modifyDate : default,
+                ItemType = ItemTypeHelper.GetTypeByName(model.Values?.Name),
             };
         }
 
@@ -43,6 +45,7 @@ namespace Brio.Docs.Connections.LementPro
                 {
                     ExternalID = externalId,
                     FileName = model.FileName,
+                    ItemType = ItemTypeHelper.GetTypeByName(model.FileName),
                 };
             }
 

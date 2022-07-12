@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Xml.Linq;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Common;
+using Microsoft.Extensions.Localization;
 
 namespace Brio.Docs.Utility
 {
     public class ReportHelper
     {
         private static readonly string HORIZONTAL_ELEMENT = "HorizontalElement";
+        private static readonly string HEADING_ELEMENT = "HeadingElement";
         private static readonly string TEXT = "Text";
         private static readonly string IMAGE = "Image";
         private static readonly string TABLE = "Table";
@@ -19,17 +23,83 @@ namespace Brio.Docs.Utility
 
         private static readonly string[] PICTURES_EXTENSIONS = { ".png", ".jpg" };
 
+        private readonly IStringLocalizer<ReportLocalization> localizer;
+
+        public ReportHelper(IStringLocalizer<ReportLocalization> localizer)
+        {
+            this.localizer = localizer;
+        }
+
         internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
             var xml = new XElement("Report",
                     new XAttribute("project", projectName),
+                    new XAttribute("number_character", localizer["Number_Character"]),
                     new XAttribute("number", reportId),
-                    new XAttribute("date", date.ToShortDateString()));
+                    new XAttribute("date", date.ToString("d", Thread.CurrentThread.CurrentUICulture)),
+                    new XAttribute("report_reportlist", localizer["Report_Report_List"]),
+                    new XAttribute("report_for", localizer["Report_For"]),
+                    new XAttribute("report_project", localizer["Report_Project"]),
+                    new XAttribute("report_position", localizer["Report_Position"]),
+                    new XAttribute("report_screenshot", localizer["Report_Screenshot"]),
+                    new XAttribute("report_comment", localizer["Report_Comment"]),
+                    new XAttribute("report_from", localizer["Report_From"]),
+                    new XAttribute("report_signature", localizer["Report_Signature"]),
+                    new XAttribute("report_full_name", localizer["Report_Full_Name"]));
 
-            XElement body = new XElement(TABLE, objectives.Select(GenerateXElement));
-            xml.Add(body);
+            var objectiveTypes = objectives.OrderBy(o => o.Status).GroupBy(o => o.Status);
+
+            foreach (var objectiveType in objectiveTypes)
+            {
+                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"{localizer["Status"]}: {StatusToString(objectiveType.Key)}"));
+                xml.Add(heading);
+                var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
+                xml.Add(body);
+            }
 
             return new XDocument(xml);
+        }
+
+        internal XDocument CreateFooter()
+        {
+            var xml = new XElement("Footer",
+                    new XAttribute("created_with", localizer["Created_With"]));
+
+            return new XDocument(xml);
+        }
+
+        internal XDocument CreateHeader()
+        {
+            var xml = new XElement("Header",
+                    new XAttribute("company_fullname", localizer["Company_Fullname"]),
+                    new XAttribute("company_shortname", localizer["Company_Shortname"]),
+                    new XAttribute("company_type", localizer["Company_Type"]),
+                    new XAttribute("company_requisites", localizer["Company_Requisites"]),
+                    new XAttribute("company_address", localizer["Company_Address"]),
+                    new XAttribute("company_id", localizer["Company_ID"]));
+
+            return new XDocument(xml);
+        }
+
+        private string StatusToString(ObjectiveStatus status)
+        {
+            switch (status)
+            {
+                case ObjectiveStatus.Undefined:
+                    return localizer["Status_Undefined"];
+                case ObjectiveStatus.Open:
+                    return localizer["Status_Open"];
+                case ObjectiveStatus.InProgress:
+                    return localizer["Status_InProgress"];
+                case ObjectiveStatus.Ready:
+                    return localizer["Status_Ready"];
+                case ObjectiveStatus.Late:
+                    return localizer["Status_Late"];
+                case ObjectiveStatus.Closed:
+                    return localizer["Status_Closed"];
+                default:
+                    return "-";
+            }
         }
 
         private XElement GenerateXElement(ObjectiveToReportDto objective)
@@ -53,25 +123,25 @@ namespace Brio.Docs.Utility
                             TextElement("ID: ", true),
                             TextElement($"{objective.ID}")),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Статус: ", true),
-                            TextElement($"{objective.Status}")),
+                            TextElement($"{localizer["Status"]}: ", true),
+                            TextElement($"{StatusToString(objective.Status)}")),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Время: ", true),
-                             TextElement(objective.CreationDate.ToShortDateString())),
+                             TextElement($"{localizer["Time"]}: ", true),
+                             TextElement(objective.CreationDate.ToString("g"))),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Позиция: ", true),
+                             TextElement($"{localizer["Position"]}: ", true),
                              TextElement(locationTextElement)),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Объект модели: ", true),
+                             TextElement($"{localizer["Model_Object"]}: ", true),
                              TextElement(bimElementsText)),
                     new XElement(HORIZONTAL_ELEMENT,
-                             TextElement("Пользователь: ", true),
+                             TextElement($"{localizer["User"]}: ", true),
                              TextElement(objective.Author)),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Название: ", true),
+                            TextElement($"{localizer["Title"]}: ", true),
                             TextElement(objective.Title)),
                     new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("Описание: ", true),
+                            TextElement($"{localizer["Description"]}: ", true),
                             TextElement(objective.Description))));
 
             return result;
@@ -80,8 +150,21 @@ namespace Brio.Docs.Utility
         private XElement TextElement(string text, bool isBold = false)
         {
             var items = new List<object>();
+            items.Add(new XAttribute("fontsize", "regular"));
             if (isBold)
+            {
                 items.Add(new XAttribute("style", "bold"));
+            }
+
+            items.Add(text);
+            return new XElement(TEXT, items.ToArray());
+        }
+
+        private XElement HeadingElement(string text)
+        {
+            var items = new List<object>();
+            items.Add(new XAttribute("fontsize", "heading"));
+            items.Add(new XAttribute("style", "bold"));
             items.Add(text);
             return new XElement(TEXT, items.ToArray());
         }

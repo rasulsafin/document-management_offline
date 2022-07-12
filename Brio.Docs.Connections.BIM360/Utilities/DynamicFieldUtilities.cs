@@ -4,6 +4,7 @@ using System.Linq;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Newtonsoft.Json;
 
@@ -27,7 +28,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities
             }
         }
 
-        internal static IEnumerable<IGrouping<string, TSnapshot>> GetGroupedTypes<T, TSnapshot, TID>(
+        internal static IEnumerable<IGrouping<string, TSnapshot>> GetGroupedVariants<T, TSnapshot, TID>(
             IEnumCreator<T, TSnapshot, TID> helper,
             IEnumerable<TSnapshot> allVariants)
             where TSnapshot : AEnumVariantSnapshot<T>

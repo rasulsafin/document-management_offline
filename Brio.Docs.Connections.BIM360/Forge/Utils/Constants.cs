@@ -13,6 +13,9 @@ namespace Brio.Docs.Connections.Bim360.Forge
         public static readonly string ROOT_CAUSE_TYPE = "root_causes";
         public static readonly string PUSHPIN_TYPE = "TwoDVectorPushpin";
         public static readonly string COMMENT_TYPE = "comments";
+        public static readonly string HUB_TYPE = "hubs";
+        public static readonly string ISSUE_CONTAINER_TYPE = "issueContainerId";
+        public static readonly string LOCATION_CONTAINER_TYPE = "locationsContainerId";
 
         public static readonly string DEFAULT_LOCATION_TREE_ID = "default";
         public static readonly string LOCATION_TREE_ROOT = "Root";
@@ -45,6 +48,7 @@ namespace Brio.Docs.Connections.Bim360.Forge
         internal static readonly string TYPE_PROPERTY = "type";
 
         internal static readonly string FILTER_QUERY_PARAMETER = "filter[{0}]{1}={2}";
+        internal static readonly string FIELDS_FILTER_QUERY_PARAMETER = "fields[{0}]={1}";
         internal static readonly string PAGE_QUERY_PARAMETER = "page[{0}]={1}";
         internal static readonly string QUERY_PARAMETER = "{0}={1}";
 

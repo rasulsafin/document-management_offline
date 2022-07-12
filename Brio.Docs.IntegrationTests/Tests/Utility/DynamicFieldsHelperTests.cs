@@ -13,6 +13,7 @@ using Brio.Docs.Services;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Mapping;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
@@ -67,7 +68,8 @@ namespace Brio.Docs.Tests.Utility
                 serviceProvider.GetService<ItemsHelper>(),
                 helper,
                 serviceProvider.GetService<BimElementsHelper>(),
-                Mock.Of<ILogger<ObjectiveService>>());
+                Mock.Of<ILogger<ObjectiveService>>(),
+                Mock.Of<IStringLocalizer<ReportLocalization>>());
         }
 
         [TestCleanup]

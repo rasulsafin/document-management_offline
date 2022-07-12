@@ -4,12 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
-using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Interfaces;
-using Brio.Docs.Connections.Bim360.Properties;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
 {
@@ -18,35 +18,34 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly Bim360Snapshot snapshot;
         private readonly HubsService hubsService;
         private readonly ProjectsService projectsService;
-        private readonly IssuesService issuesService;
-        private readonly FoldersService foldersService;
+        private readonly IIssuesService issuesService;
         private readonly TypeSubtypeEnumCreator subtypeEnumCreator;
         private readonly RootCauseEnumCreator rootCauseEnumCreator;
         private readonly LocationEnumCreator locationEnumCreator;
         private readonly AssignToEnumCreator assignToEnumCreator;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly IfcConfigUtilities configUtilities;
+        private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
+        private readonly ProjectSnapshotUtilities projectSnapshotUtilities;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
             HubsService hubsService,
             ProjectsService projectsService,
-            IssuesService issuesService,
-            FoldersService foldersService,
+            IIssuesService issuesService,
             TypeSubtypeEnumCreator subtypeEnumCreator,
             RootCauseEnumCreator rootCauseEnumCreator,
             AssignToEnumCreator assignToEnumCreator,
             LocationEnumCreator locationEnumCreator,
             IssueSnapshotUtilities snapshotUtilities,
-            IfcConfigUtilities configUtilities,
-            StatusEnumCreator statusEnumCreator)
+            ConfigurationsHelper configUtilities,
+            StatusEnumCreator statusEnumCreator,
+            ProjectSnapshotUtilities projectSnapshotUtilities)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
             this.projectsService = projectsService;
             this.issuesService = issuesService;
-            this.foldersService = foldersService;
             this.subtypeEnumCreator = subtypeEnumCreator;
             this.rootCauseEnumCreator = rootCauseEnumCreator;
             this.locationEnumCreator = locationEnumCreator;
@@ -54,6 +53,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             this.snapshotUtilities = snapshotUtilities;
             this.configUtilities = configUtilities;
             this.statusEnumCreator = statusEnumCreator;
+            this.projectSnapshotUtilities = projectSnapshotUtilities;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -84,31 +84,24 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 {
                     if (hub.Value.Projects.ContainsKey(p.ID))
                         hub.Value.Projects.Remove(p.ID);
-                    var projectSnapshot = new ProjectSnapshot(p, hub.Value);
                     var topFolders = await projectsService.GetTopFoldersAsync(hub.Key, p.ID);
-
                     if (!topFolders.Any())
                         continue;
 
+                    var projectSnapshot = new ProjectSnapshot(p, hub.Value) { TopFolders = topFolders };
                     hub.Value.Projects.Add(p.ID, projectSnapshot);
-                    var topFolder = (topFolders.FirstOrDefault(
-                            x => x.Attributes.DisplayName == Constants.DEFAULT_PROJECT_FILES_FOLDER_NAME ||
-                                x.Attributes.Extension.Data.VisibleTypes.Contains(Constants.AUTODESK_ITEM_FILE_TYPE)) ??
-                        topFolders.First()).ID;
-                    var items = await GetAllItems(p.ID, topFolders);
-                    projectSnapshot.Items = new Dictionary<string, ItemSnapshot>();
-
-                    foreach (var iv in items)
-                    {
-                        if (iv.item.Attributes.DisplayName != Resources.MrsFileName &&
-                            iv.version?.Attributes.Name != Resources.MrsFileName)
-                            projectSnapshot.Items.Add(iv.item.ID, new ItemSnapshot(iv.item, iv.version));
-                        else
-                            topFolder = iv.item.Relationships.Parent.Data.ID;
-                    }
-
-                    projectSnapshot.MrsFolderID = topFolder;
                 }
+            }
+        }
+
+        public async Task UpdateProjectsInfoIfNull()
+        {
+            await UpdateProjectsIfNull();
+
+            foreach (var hub in snapshot.Hubs.Values.Where(x => x.Projects != null))
+            {
+                foreach (var project in hub.Projects.Values)
+                    await projectSnapshotUtilities.DownloadFoldersInfo(project);
             }
         }
 
@@ -134,11 +127,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                 }
 
                 filters.Add(IssueUtilities.GetFilterForUnremoved());
-                var issues = await issuesService.GetIssuesAsync(project.IssueContainer, filters);
-                project.Issues = issues.ToDictionary(x => x.ID, x => new IssueSnapshot(x, project));
+                var issues = issuesService.GetIssuesAsync(project.IssueContainer, filters);
+                project.Issues = new Dictionary<string, IssueSnapshot>();
 
-                foreach (var issueSnapshot in project.Issues.Values)
+                await foreach (var issue in issues)
                 {
+                    var issueSnapshot = new IssueSnapshot(issue, project);
+                    project.Issues.Add(issue.ID, issueSnapshot);
                     issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
                     issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
                 }
@@ -182,43 +177,31 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             where TSnapshot : AEnumVariantSnapshot<T>
         {
             await UpdateProjectsIfNull();
-            var dictionary = new List<TSnapshot>();
 
             foreach (var project in snapshot.ProjectEnumerable)
-            {
-                var variants = await creator.GetVariantsFromRemote(project);
                 createEmptyEnumVariants(project);
-                dictionary.AddRange(variants);
+
+            var variants = new List<TSnapshot>();
+
+            foreach (var projectSnapshot in snapshot.ProjectEnumerable)
+            {
+                await foreach (var element in  creator.GetVariantsFromRemote(projectSnapshot))
+                    variants.Add(element);
             }
 
-            var groups = DynamicFieldUtilities.GetGroupedTypes(creator, dictionary);
+            var groups = DynamicFieldUtilities.GetGroupedVariants(creator, variants);
 
             foreach (var group in groups)
             {
-                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(group).Distinct());
+                var groupArray = group.ToArray();
+                var externalID = DynamicFieldUtilities.GetExternalID(creator.GetOrderedIDs(groupArray).Distinct());
 
-                foreach (var issueTypeSnapshot in group)
+                foreach (var issueTypeSnapshot in groupArray)
                 {
                     issueTypeSnapshot.SetExternalID(externalID);
                     addSnapshot(issueTypeSnapshot.ProjectSnapshot, issueTypeSnapshot);
                 }
             }
-        }
-
-        private async Task<IEnumerable<(Item item, Forge.Models.DataManagement.Version version)>> GetAllItems(
-            string projectID,
-            IEnumerable<Folder> folders)
-        {
-            var result = Enumerable.Empty<(Item, Forge.Models.DataManagement.Version)>();
-
-            foreach (var folder in folders)
-            {
-                result = result
-                   .Concat(await GetAllItems(projectID, await foldersService.GetFoldersAsync(projectID, folder.ID)))
-                   .Concat(await foldersService.GetItemsAsync(projectID, folder.ID));
-            }
-
-            return result;
         }
     }
 }

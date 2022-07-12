@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
@@ -11,17 +12,17 @@ using static Brio.Docs.Connections.Bim360.Forge.Constants;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Services
 {
-    public class IssuesService
+    public class IssuesService : IIssuesService
     {
         private readonly ForgeConnection connection;
 
         public IssuesService(ForgeConnection connection)
             => this.connection = connection;
 
-        public async Task<List<Issue>> GetIssuesAsync(
+        public IAsyncEnumerable<Issue> GetIssuesAsync(
             string containerID,
-            IEnumerable<Filter> filters = null)
-            => await PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
+            IEnumerable<IQueryParameter> filters = null)
+            => PaginationHelper.GetItemsByPages<Issue, MetaStrategy>(
                 connection,
                 ForgeConnection.SetParameters(Resources.GetIssuesMethod, filters),
                 DATA_PROPERTY,
@@ -81,10 +82,13 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<Issue>();
         }
 
-        public async Task<List<Attachment>> GetAttachmentsAsync(string containerID, string issueID)
-            => await PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
+        public IAsyncEnumerable<Attachment> GetAttachmentsAsync(
+            string containerID,
+            string issueID,
+            IEnumerable<IQueryParameter> parameters = null)
+            => PaginationHelper.GetItemsByPages<Attachment, MetaStrategy>(
                 connection,
-                Resources.GetIssuesAttachmentMethod,
+                ForgeConnection.SetParameters(Resources.GetIssuesAttachmentMethod, parameters),
                 DATA_PROPERTY,
                 containerID,
                 issueID);
@@ -107,10 +111,13 @@ namespace Brio.Docs.Connections.Bim360.Forge.Services
             return response[DATA_PROPERTY]?.ToObject<UserInfo>();
         }
 
-        public async Task<List<Comment>> GetCommentsAsync(string containerID, string issueID)
-            => await PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
+        public IAsyncEnumerable<Comment> GetCommentsAsync(
+            string containerID,
+            string issueID,
+            IEnumerable<IQueryParameter> parameters = null)
+            => PaginationHelper.GetItemsByPages<Comment, MetaStrategy>(
                 connection,
-                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod),
+                ForgeConnection.SetParameters(Resources.GetIssuesCommentsMethod, parameters),
                 DATA_PROPERTY,
                 containerID,
                 issueID);

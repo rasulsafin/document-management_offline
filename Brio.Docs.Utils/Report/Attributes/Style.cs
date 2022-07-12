@@ -8,6 +8,8 @@ namespace Brio.Docs.Utils.ReportCreator.Attributes
         private static Dictionary<string, IAttribute> attributes = new Dictionary<string, IAttribute>()
         {
             { "bold", new BoldAttribute() },
+            { "regular", new RegularAttribute() },
+            { "heading", new HeadingAttribute() },
             { "center", new CenterAttribute() },
             { "right", new RightAttribute() },
         };

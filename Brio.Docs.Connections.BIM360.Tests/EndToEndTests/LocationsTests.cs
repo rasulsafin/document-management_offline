@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
@@ -97,7 +98,7 @@ namespace Brio.Docs.Connections.Bim360.Tests
         [TestMethod]
         public async Task GetLocations_HaveAccessToLocationContainer_ReturnsLocationsList()
         {
-            var locations = await locationService.GetLocationsAsync(locationContainer, "default");
+            var locations = await locationService.GetLocationsAsync(locationContainer, "default").ToListAsync();
 
             if (locations == null)
                 Assert.Fail();

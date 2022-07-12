@@ -1,8 +1,11 @@
-﻿namespace Brio.Docs.Client.Filters
+﻿using System;
+using System.Collections.Generic;
+
+namespace Brio.Docs.Client.Filters
 {
     public class ObjectiveFilterParameters : PageParameters
     {
-        public int? TypeId { get; set; }
+        public List<int> TypeIds { get; set; }
 
         public string BimElementGuid { get; set; }
 
@@ -10,6 +13,18 @@
 
         public int? ExceptChildrenOf { get; set; }
 
-        public int? Status { get; set; }
+        public List<int> Statuses { get; set; }
+
+        public DateTime? CreatedBefore { get; set; }
+
+        public DateTime? CreatedAfter { get; set; }
+
+        public DateTime? UpdatedBefore { get; set; }
+
+        public DateTime? UpdatedAfter { get; set; }
+
+        public DateTime? FinishedBefore { get; set; }
+
+        public DateTime? FinishedAfter { get; set; }
     }
 }

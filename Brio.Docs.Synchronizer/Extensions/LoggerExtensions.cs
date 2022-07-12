@@ -10,15 +10,13 @@ namespace Brio.Docs.Synchronization.Extensions
         internal static void LogStartAction<TDB>(
             this ILogger logger,
             SynchronizingTuple<TDB> tuple,
-            SynchronizingData data,
-            object parent,
             [CallerMemberName] string method = "")
             => logger.LogTrace(
-                "{@Method} started with tuple:\r\n{@Tuple}\r\nparent:\r\n{@Parent}\r\ndata:\r\n{@SynchronizingData}",
+                "{Method} started for tuple ({Local}, {Synchronized}, {Remote})",
                 method,
-                tuple,
-                parent,
-                data);
+                tuple.Local?.GetId(),
+                tuple.Synchronized?.GetId(),
+                tuple.Remote?.GetRemoteId());
 
         internal static void LogBeforeMerge<TDB>(this ILogger logger, SynchronizingTuple<TDB> tuple)
             => logger.LogDebug("Tuple before merge: {@Tuple}", tuple);

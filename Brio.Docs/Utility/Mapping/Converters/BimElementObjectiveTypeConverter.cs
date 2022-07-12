@@ -11,11 +11,16 @@ namespace Brio.Docs.Utility.Mapping.Converters
     {
         private readonly DMContext dbContext;
         private readonly ILogger<BimElementObjectiveTypeConverter> logger;
+        private readonly IMapper mapper;
 
-        public BimElementObjectiveTypeConverter(DMContext dbContext, ILogger<BimElementObjectiveTypeConverter> logger)
+        public BimElementObjectiveTypeConverter(
+            DMContext dbContext,
+            ILogger<BimElementObjectiveTypeConverter> logger,
+            IMapper mapper)
         {
             this.dbContext = dbContext;
             this.logger = logger;
+            this.mapper = mapper;
             logger.LogTrace("BimElementObjectiveTypeConverter created");
         }
 
@@ -34,11 +39,7 @@ namespace Brio.Docs.Utility.Mapping.Converters
 
             return new BimElementObjective
             {
-                BimElement = exist ?? new BimElement
-                {
-                    ParentName = source.ParentName,
-                    GlobalID = source.GlobalID,
-                },
+                BimElement = exist ?? mapper.Map<BimElement>(source),
             };
         }
     }

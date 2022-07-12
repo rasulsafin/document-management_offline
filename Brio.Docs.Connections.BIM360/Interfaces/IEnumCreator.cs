@@ -1,6 +1,6 @@
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Interfaces
 {
@@ -32,7 +32,7 @@ namespace Brio.Docs.Connections.Bim360.Interfaces
         /// </summary>
         /// <param name="projectSnapshot">Projects Service for Forge requests.</param>
         /// <returns>All variants of the current enum for this user.</returns>
-        Task<IEnumerable<TSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot);
+        IAsyncEnumerable<TSnapshot> GetVariantsFromRemote(ProjectSnapshot projectSnapshot);
 
         /// <summary>
         /// Gets snapshots of variants from a given project snapshot.

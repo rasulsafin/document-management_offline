@@ -9,6 +9,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Sorts;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
@@ -16,8 +17,10 @@ using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
 using Brio.Docs.Utility.Pagination;
+using Brio.Docs.Utility.Sorting;
 using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Services
@@ -30,14 +33,17 @@ namespace Brio.Docs.Services
         private readonly DynamicFieldsHelper dynamicFieldHelper;
         private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
-        private readonly ReportHelper reportHelper = new ReportHelper();
+        private readonly ReportHelper reportHelper;
+        private readonly QueryMapper<Objective> queryMapper;
+        private readonly IStringLocalizer<ReportLocalization> localizer;
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
             ItemsHelper itemHelper,
             DynamicFieldsHelper dynamicFieldHelper,
             BimElementsHelper bimElementHelper,
-            ILogger<ObjectiveService> logger)
+            ILogger<ObjectiveService> logger,
+            IStringLocalizer<ReportLocalization> localizer)
         {
             this.context = context;
             this.mapper = mapper;
@@ -45,7 +51,20 @@ namespace Brio.Docs.Services
             this.dynamicFieldHelper = dynamicFieldHelper;
             this.bimElementHelper = bimElementHelper;
             this.logger = logger;
+            this.localizer = localizer;
             logger.LogTrace("ObjectiveService created");
+
+            reportHelper = new ReportHelper(localizer);
+
+            queryMapper = new QueryMapper<Objective>(new QueryMapperConfiguration { IsCaseSensitive = false, IgnoreNotMappedFields = false });
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Status), x => x.Status);
+            queryMapper.AddMap(nameof(ObjectiveToListDto.Title), x => x.TitleToLower);
+            queryMapper.AddMap(nameof(Objective.CreationDate), x => x.CreationDate);
+            queryMapper.AddMap(nameof(Objective.UpdatedAt), x => x.UpdatedAt);
+            queryMapper.AddMap(nameof(Objective.DueDate), x => x.DueDate);
+            queryMapper.AddMap("CreationDateDateOnly", x => x.CreationDate.Date);
+            queryMapper.AddMap("UpdatedAtDateOnly", x => x.UpdatedAt.Date);
+            queryMapper.AddMap("DueDateDateOnly", x => x.DueDate.Date);
         }
 
         public async Task<ObjectiveToListDto> Add(ObjectiveToCreateDto objectiveToCreate)
@@ -180,12 +199,15 @@ namespace Brio.Docs.Services
                 logger.LogDebug("Objectives for report: {@Objectives}", objectives);
                 var reportDir = Path.Combine(path, "Reports");
                 Directory.CreateDirectory(reportDir);
-                path = Path.Combine(reportDir, $"Отчет {reportID}.docx");
+                var reportName = localizer["Report"];
+                path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
                 var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+                var xmlFooter = reportHelper.CreateFooter();
+                var xmlHeader = reportHelper.CreateHeader();
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
                 ReportCreator reportCreator = new ReportCreator();
-                reportCreator.CreateReport(xmlDoc, path);
+                reportCreator.CreateReport(xmlDoc, xmlFooter, xmlHeader, path);
                 logger.LogInformation("Report created ({Path})", path);
 
                 return new ObjectiveReportCreationResultDto()
@@ -202,7 +224,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
+        public async Task<PagedListDto<ObjectiveToListDto>> GetObjectives(ID<ProjectDto> projectID, ObjectiveFilterParameters filter, SortParameters sort)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("GetObjectives started with projectID: {@ProjectID}", projectID);
@@ -215,39 +237,21 @@ namespace Brio.Docs.Services
                 var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID)
-                                    .Where(x => filter.TypeId == 0 || filter.TypeId == null || x.ObjectiveTypeID == filter.TypeId)
-                                    .Where(x => string.IsNullOrEmpty(filter.BimElementGuid) || x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid))
-                                    .Where(x => string.IsNullOrWhiteSpace(filter.TitlePart) || x.TitleToLower.Contains(filter.TitlePart))
-                                    .Where(x => filter.Status == null || x.Status == filter.Status);
+                                    .Where(x => x.ProjectID == dbProject.ID);
 
-                if (!(filter.ExceptChildrenOf == 0 || filter.ExceptChildrenOf == null))
-                {
-                    var list = new List<int>();
-                    var obj = context.Objectives
-                        .AsNoTracking()
-                        .Unsynchronized()
-                        .Where(x => x.ProjectID == dbProject.ID)
-                        .FirstOrDefault(o => o.ID == (int)filter.ExceptChildrenOf);
-
-                    if (obj != null)
-                        GetAllObjectiveIds(obj, list);
-
-                    allObjectives = allObjectives.Where(x => !list.Any(id => id == x.ID));
-                }
+                allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
 
                 var totalCount = allObjectives != null ? await allObjectives.CountAsync() : 0;
                 var totalPages = (int)Math.Ceiling(totalCount / (double)filter.PageSize);
 
                 var objectives = await allObjectives?
-                    .ByPages(x => x.CreationDate,
-                                  filter.PageNumber,
-                                  filter.PageSize)
+                    .SortWithParameters(sort, queryMapper, x => x.CreationDate)
+                    .ByPages(filter.PageNumber, filter.PageSize)
                     .Include(x => x.ObjectiveType)
                     .Include(x => x.BimElements)
-                            .ThenInclude(x => x.BimElement)
+                        .ThenInclude(x => x.BimElement)
                     .Include(x => x.Location)
-                            .ThenInclude(x => x.Item)
+                        .ThenInclude(x => x.Item)
                     .Select(x => mapper.Map<ObjectiveToListDto>(x))
                     .ToListAsync();
 
@@ -272,27 +276,30 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName)
+        public async Task<IEnumerable<ObjectiveToSelectionDto>> GetObjectivesForSelection(ID<ProjectDto> projectID, ObjectiveFilterParameters filter)
         {
             using var lScope = logger.BeginMethodScope();
-            logger.LogTrace("GetObjectivesWithLocation started with projectID: {@ProjectID}", projectID);
+            logger.LogTrace("GetObjectives with IDs and BIM-elements started with projectID: {@ProjectID}", projectID);
             try
             {
                 var dbProject = await context.Projects.Unsynchronized()
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var objectivesWithLocations = await context.Objectives
+                var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
-                                    .Where(x => x.ProjectID == dbProject.ID)
-                                    .Include(x => x.Location)
-                                        .ThenInclude(x => x.Item)
-                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName)
-                                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
-                                    .ToListAsync();
+                                    .Where(x => x.ProjectID == dbProject.ID);
 
-                return objectivesWithLocations;
+                allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
+
+                var objectives = await allObjectives?
+                    .Include(x => x.BimElements)
+                            .ThenInclude(x => x.BimElement)
+                    .Select(x => mapper.Map<ObjectiveToSelectionDto>(x))
+                    .ToListAsync();
+
+                return objectives;
             }
             catch (Exception ex)
             {
@@ -303,7 +310,40 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<bool> Remove(ID<ObjectiveDto> objectiveID)
+        public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectivesWithLocation started with projectID: {@ProjectID}", projectID);
+            try
+            {
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
+
+                var objectivesWithLocations = context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ProjectID == dbProject.ID)
+                                    .Include(x => x.Location)
+                                        .ThenInclude(x => x.Item)
+                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName);
+
+                objectivesWithLocations = await ApplyFilter(filter, objectivesWithLocations, dbProject.ID);
+
+                return await objectivesWithLocations
+                    .Select(x => mapper.Map<ObjectiveToLocationDto>(x))
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
+        public async Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("Remove started with objectiveID: {@ObjectiveID}", objectiveID);
@@ -311,9 +351,14 @@ namespace Brio.Docs.Services
             {
                 var objective = await context.Objectives.FindOrThrowAsync((int)objectiveID);
                 logger.LogDebug("Found objective: {@Objective}", objective);
+
+                var deletedIds = new List<int>();
+                await GetAllObjectiveIds(objective, deletedIds);
+
                 context.Objectives.Remove(objective);
                 await context.SaveChangesAsync();
-                return true;
+
+                return deletedIds.Select(id => new ID<ObjectiveDto>(id));
             }
             catch (Exception ex)
             {
@@ -351,6 +396,31 @@ namespace Brio.Docs.Services
             }
         }
 
+        public async Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("GetObjectivesByParent started with parentID: {@parentID}", parentID);
+            try
+            {
+                var objectivesWithParent = await context.Objectives
+                                    .AsNoTracking()
+                                    .Unsynchronized()
+                                    .Where(x => x.ParentObjectiveID == (int)parentID)
+                                    .OrderBy(x => x.CreationDate)
+                                    .Select(x => mapper.Map<SubobjectiveDto>(x))
+                                    .ToListAsync();
+
+                return objectivesWithParent;
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by parentID key {parentID}", parentID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
@@ -375,18 +445,67 @@ namespace Brio.Docs.Services
             return dbObjective;
         }
 
-        private List<int> GetAllObjectiveIds(Objective obj, List<int> ids)
+        private async Task GetAllObjectiveIds(Objective obj, List<int> ids)
         {
             ids.Add(obj.ID);
 
-            var children = context.Objectives
+            var children = await context.Objectives
                 .Unsynchronized()
-                .Where(x => x.ParentObjectiveID == obj.ID);
+                .Where(x => x.ParentObjectiveID == obj.ID)
+                .ToListAsync();
 
-            foreach (var child in children ?? Enumerable.Empty<Objective>())
-                GetAllObjectiveIds(child, ids);
+            foreach (var child in children)
+                await GetAllObjectiveIds(child, ids);
+        }
 
-            return ids;
+        private async Task<IQueryable<Objective>> ApplyFilter(ObjectiveFilterParameters filter, IQueryable<Objective> filterdObjectives, int projectId)
+        {
+            if (filter.TypeIds != null && filter.TypeIds.Count > 0)
+                filterdObjectives = filterdObjectives.Where(x => filter.TypeIds.Contains(x.ObjectiveTypeID));
+
+            if (!string.IsNullOrEmpty(filter.BimElementGuid))
+                filterdObjectives = filterdObjectives.Where(x => x.BimElements.Any(e => e.BimElement.GlobalID == filter.BimElementGuid));
+
+            if (!string.IsNullOrWhiteSpace(filter.TitlePart))
+                filterdObjectives = filterdObjectives.Where(x => x.TitleToLower.Contains(filter.TitlePart.ToLower()));
+
+            if (filter.Statuses != null && filter.Statuses.Count > 0)
+                filterdObjectives = filterdObjectives.Where(x => filter.Statuses.Contains(x.Status));
+
+            if (filter.CreatedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.CreationDate < filter.CreatedBefore.Value);
+
+            if (filter.CreatedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.CreationDate >= filter.CreatedAfter.Value);
+
+            if (filter.UpdatedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.UpdatedAt < filter.UpdatedBefore.Value);
+
+            if (filter.UpdatedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.UpdatedAt >= filter.UpdatedAfter.Value);
+
+            if (filter.FinishedBefore.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.DueDate < filter.FinishedBefore.Value);
+
+            if (filter.FinishedAfter.HasValue)
+                filterdObjectives = filterdObjectives.Where(x => x.DueDate >= filter.FinishedAfter.Value);
+
+            if (filter.ExceptChildrenOf.HasValue && filter.ExceptChildrenOf.Value != 0)
+            {
+                var obj = await context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Where(x => x.ProjectID == projectId)
+                    .FirstOrDefaultAsync(o => o.ID == (int)filter.ExceptChildrenOf);
+
+                var childrenIds = new List<int>();
+                if (obj != null)
+                    await GetAllObjectiveIds(obj, childrenIds);
+
+                filterdObjectives = filterdObjectives.Where(x => !childrenIds.Contains(x.ID));
+            }
+
+            return filterdObjectives;
         }
     }
 }

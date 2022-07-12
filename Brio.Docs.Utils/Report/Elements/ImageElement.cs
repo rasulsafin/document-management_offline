@@ -17,8 +17,8 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
     {
         private static readonly double WIDTH = 680;
         private static readonly double HEIGHT = 400;
-        private static readonly double MAP_WIDTH = 320;
-        private static readonly double MAP_HEIGHT = 200;
+        private static readonly double MAP_WIDTH = 680;
+        private static readonly double MAP_HEIGHT = 400;
 
         private static readonly string MAP_EXTENSION = ".map.png";
 

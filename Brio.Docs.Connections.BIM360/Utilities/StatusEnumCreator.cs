@@ -1,13 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
@@ -45,11 +46,11 @@ namespace Brio.Docs.Connections.Bim360.Utilities
                 _ => throw new ArgumentOutOfRangeException(nameof(variant.Entity), "Variant incorrect")
             };
 
-        public Task<IEnumerable<StatusSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
-            => Task.FromResult(
-                Enum.GetValues<Status>()
-                   .Where(x => x != Status.Undefined && x != Status.Void)
-                   .Select(x => new StatusSnapshot(x, projectSnapshot)));
+        public IAsyncEnumerable<StatusSnapshot> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
+            => Enum.GetValues<Status>()
+               .Where(x => x != Status.Undefined && x != Status.Void)
+               .Select(x => new StatusSnapshot(x, projectSnapshot))
+               .ToAsyncEnumerable();
 
         public IEnumerable<StatusSnapshot> GetSnapshots(ProjectSnapshot project)
             => project.Statuses.Values;

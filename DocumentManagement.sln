@@ -78,6 +78,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Automatic", "Automatic", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.Connections.BIM360.UnitTests", "Brio.Docs.Connections.BIM360.UnitTests\Brio.Docs.Connections.BIM360.UnitTests.csproj", "{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BrioCloud", "Brio.Docs.Connections.BrioCloud\Brio.Docs.Connections.BrioCloud.csproj", "{F4798543-0E19-4B66-AEBA-D049EEEEF3D8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.Connections.BrioCloud.Tests", "Brio.Docs.Connections.BrioCloud.Tests\Brio.Docs.Connections.BrioCloud.Tests.csproj", "{049910D1-4CF5-453B-A2B3-4DF48C237C68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -180,6 +184,14 @@ Global
 		{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,6 +223,8 @@ Global
 		{4DA75A66-0D38-4B2B-ADC1-B94FBED62B47} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
 		{BB6CA0B1-8516-4196-BFE4-F4E35512EB6A} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
 		{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF} = {CEB4080A-AA25-4E79-A803-7ED2A5A81846}
+		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8} = {D6D41822-CE95-4B4A-A095-3BC461268736}
+		{049910D1-4CF5-453B-A2B3-4DF48C237C68} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}

@@ -7,15 +7,31 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class TableElement : AElement
     {
+        private static Table tablePrototype;
+
+        public static void RemoveTablePrototype()
+        {
+            tablePrototype.Remove();
+            tablePrototype = null;
+        }
+
         public override void Read(XElement node, OpenXmlElement element)
         {
             if (!(element is Body))
                 return;
 
-            Table table =
-               element.Elements<Table>().Last();
+            if (tablePrototype == null)
+            {
+                tablePrototype = element.Elements<Table>().LastOrDefault();
 
-            ///TODO: if table == null create new one
+                if (tablePrototype == null)
+                {
+                    tablePrototype = new Table();
+                }
+            }
+
+            var table = tablePrototype.CloneNode(true);
+            element.Append(table);
 
             foreach (var subnode in node.Elements())
                 ReportCreator.Read(subnode, table);

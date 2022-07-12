@@ -10,6 +10,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
     public class StorageProjectSynchronizer : ISynchronizer<ProjectExternalDto>
     {
         private readonly ICloudManager manager;
+        private List<ObjectiveExternalDto> objectives;
         private List<ProjectExternalDto> projects;
 
         public StorageProjectSynchronizer(ICloudManager manager)
@@ -38,6 +39,12 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
         public async Task<ProjectExternalDto> Remove(ProjectExternalDto project)
         {
+            var objectivesPath = PathManager.GetTableDir(nameof(ObjectiveExternalDto));
+            objectives ??= await manager.PullAll<ObjectiveExternalDto>(objectivesPath);
+
+            foreach (var objective in objectives.Where(x => x.ProjectExternalID == project.ExternalID))
+                await manager.Delete<ObjectiveExternalDto>(objective.ExternalID);
+
             var deleteResult = await manager.Delete<ProjectExternalDto>(project.ExternalID);
             if (!deleteResult)
                 return null;

@@ -1,13 +1,14 @@
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
@@ -19,9 +20,9 @@ namespace Brio.Docs.Connections.Bim360.Utilities
 
         private static readonly string DISPLAY_NAME = MrsConstants.TYPE_FIELD_NAME;
 
-        private readonly IssuesService issuesService;
+        private readonly IIssuesService issuesService;
 
-        public TypeSubtypeEnumCreator(IssuesService issuesService)
+        public TypeSubtypeEnumCreator(IIssuesService issuesService)
             => this.issuesService = issuesService;
 
         public string EnumExternalID => ENUM_EXTERNAL_ID;
@@ -49,9 +50,13 @@ namespace Brio.Docs.Connections.Bim360.Utilities
                 ? snapshot.ParentType.Title
                 : $"{snapshot.ParentType.Title}: {snapshot.Subtype.Title}";
 
-        public async Task<IEnumerable<IssueTypeSnapshot>> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
-            => (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer)).SelectMany(
-                x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
+        public async IAsyncEnumerable<IssueTypeSnapshot> GetVariantsFromRemote(ProjectSnapshot projectSnapshot)
+        {
+            var enumerable = (await issuesService.GetIssueTypesAsync(projectSnapshot.IssueContainer))
+               .SelectMany(x => x.Subtypes.Select(y => new IssueTypeSnapshot(x, y, projectSnapshot)));
+            foreach (var snapshot in enumerable)
+                yield return snapshot;
+        }
 
         public IEnumerable<IssueTypeSnapshot> GetSnapshots(ProjectSnapshot project)
             => project.IssueTypes.Values;

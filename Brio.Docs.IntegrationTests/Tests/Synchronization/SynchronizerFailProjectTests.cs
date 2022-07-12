@@ -8,11 +8,10 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
 using Brio.Docs.Synchronization.Models;
+using Brio.Docs.Tests.Synchronization.Helpers;
 using Brio.Docs.Tests.Utility;
-using Brio.Docs.Utility.Mapping;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
@@ -21,51 +20,29 @@ namespace Brio.Docs.Tests.Synchronization
     [TestClass]
     public class SynchronizerFailProjectTests
     {
-        private static Synchronizer synchronizer;
-        private static ServiceProvider serviceProvider;
+        private Synchronizer synchronizer;
+        private ServiceProvider serviceProvider;
 
-        private static Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
+        private Mock<ISynchronizer<ObjectiveExternalDto>> ObjectiveSynchronizer { get; set; }
 
-        private static Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
+        private Mock<ISynchronizer<ProjectExternalDto>> ProjectSynchronizer { get; set; }
 
-        private static SharedDatabaseFixture Fixture { get; set; }
+        private SharedDatabaseFixture Fixture { get; set; }
 
-        private static Mock<IConnection> Connection { get; set; }
-
-        private static Mock<IConnectionContext> Context { get; set; }
+        private Mock<IConnection> Connection { get; set; }
 
         [TestInitialize]
         public void Setup()
         {
-            Fixture = new SharedDatabaseFixture(
-                context =>
-                {
-                    context.Database.EnsureDeleted();
-                    context.Database.EnsureCreated();
-                    var users = MockData.DEFAULT_USERS;
-                    var objectiveTypes = MockData.DEFAULT_OBJECTIVE_TYPES;
-                    context.Users.AddRange(users);
-                    context.ObjectiveTypes.AddRange(objectiveTypes);
-                    context.SaveChanges();
-                });
-
-            var services = new ServiceCollection();
-            services.AddSingleton(Fixture.Context);
-            services.AddSynchronizer();
-            services.AddLogging(x => x.SetMinimumLevel(LogLevel.None));
-            services.AddMappingResolvers();
-            services.AddAutoMapper(typeof(MappingProfile));
-            serviceProvider = services.BuildServiceProvider();
+            Fixture = SynchronizerTestsHelper.CreateFixture();
+            serviceProvider = SynchronizerTestsHelper.CreateServiceProvider(Fixture.Context);
             synchronizer = serviceProvider.GetService<Synchronizer>();
 
             Connection = new Mock<IConnection>();
-            Context = new Mock<IConnectionContext>();
 
             ProjectSynchronizer = new Mock<ISynchronizer<ProjectExternalDto>>();
             ObjectiveSynchronizer = new Mock<ISynchronizer<ObjectiveExternalDto>>();
 
-            Context.Setup(x => x.ObjectivesSynchronizer).Returns(ObjectiveSynchronizer.Object);
-            Context.Setup(x => x.ProjectsSynchronizer).Returns(ProjectSynchronizer.Object);
             ObjectiveSynchronizer.Setup(x => x.Get(It.IsAny<List<string>>()))
                .ReturnsAsync(ArraySegment<ObjectiveExternalDto>.Empty);
         }
@@ -146,7 +123,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreEqual(1, await Fixture.Context.Projects.Synchronized().CountAsync());
         }
 
-        private static async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
+        private async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
         {
             var result = await synchronizer.Synchronize(
                 new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() },

@@ -1,4 +1,5 @@
 using Brio.Docs.Connections.Bim360.Forge;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Forge.Utils;
 
@@ -10,9 +11,10 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             services.AddScoped<AuthenticationService>();
             services.AddScoped<AccountAdminService>();
+            services.AddScoped<IUsersGetter>(x => x.GetService<AccountAdminService>());
             services.AddScoped<FoldersService>();
             services.AddScoped<HubsService>();
-            services.AddScoped<IssuesService>();
+            services.AddScoped<IIssuesService, IssuesService>();
             services.AddScoped<LocationService>();
             services.AddScoped<ItemsService>();
             services.AddScoped<ObjectsService>();
@@ -23,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ForgeConnection>();
             services.AddScoped<TokenHelper>();
             services.AddScoped<AppTokenHelper>();
+            services.AddScoped<IssueUpdatesFinder>();
             return services;
         }
     }

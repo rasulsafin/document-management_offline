@@ -85,11 +85,12 @@ namespace Brio.Docs.Connections.LementPro
             return Task.FromResult(status);
         }
 
-        public Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
+        public async Task<IConnectionContext> GetContext(ConnectionInfoExternalDto info)
         {
             logger.LogTrace("GetContext started with info: {@ConnectionInfo}", info);
             SetToken(info);
-            return Task.FromResult<IConnectionContext>(contextFactory.Create());
+            await Connect(info, default);
+            return contextFactory.Create();
         }
 
         public async Task<IConnectionStorage> GetStorage(ConnectionInfoExternalDto info)

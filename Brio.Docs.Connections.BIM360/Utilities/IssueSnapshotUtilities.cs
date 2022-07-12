@@ -1,55 +1,46 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Brio.Docs.Connections.Bim360.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
-using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
+using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 
 namespace Brio.Docs.Connections.Bim360.Utilities
 {
     internal class IssueSnapshotUtilities
     {
-        private readonly IssuesService issuesService;
-        private readonly AccountAdminService accountAdminService;
+        private readonly IIssuesService issuesService;
+        private readonly IUsersGetter accountAdminService;
 
-        public IssueSnapshotUtilities(IssuesService issuesService,
-            AccountAdminService accountAdminService)
+        public IssueSnapshotUtilities(
+            IIssuesService issuesService,
+            IUsersGetter accountAdminService)
         {
             this.issuesService = issuesService;
             this.accountAdminService = accountAdminService;
         }
 
-        public async Task<Dictionary<string, Attachment>> GetAttachments(IssueSnapshot issueSnapshot,
+        public async Task<Dictionary<string, Attachment>> GetAttachments(
+            IssueSnapshot issueSnapshot,
             ProjectSnapshot project)
-        {
-            var result = new Dictionary<string, Attachment>();
-            var attachments = await issuesService.GetAttachmentsAsync(
-                project.IssueContainer,
-                issueSnapshot.ID);
-
-            foreach (var attachment in attachments.Where(
-                                    x => x.Attributes.UrnType == UrnType.Oss ||
-                                        project.Items.ContainsKey(x.Attributes.Urn)))
-               result.Add(attachment.ID, attachment);
-
-            return result;
-        }
+            => await issuesService.GetAttachmentsAsync(project.IssueContainer, issueSnapshot.ID)
+               .Where(x => x.Attributes.UrnType == UrnType.Oss || project.Items.ContainsKey(x.Attributes.Urn))
+               .ToDictionaryAsync(attachment => attachment.ID);
 
         public async Task<List<CommentSnapshot>> GetComments(IssueSnapshot issueSnapshot,
            ProjectSnapshot project)
         {
+            if (issueSnapshot.Entity.Attributes.CommentCount == 0)
+                return new List<CommentSnapshot>();
+
             var result = new List<CommentSnapshot>();
-            if (issueSnapshot.Entity.Attributes.CommentCount > 0)
-            {
-                var comments = await issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID);
-                foreach (var comment in comments)
-                {
-                    var commentSnapshot = await FillCommentAuthor(comment, project.HubSnapshot.Entity);
-                    result.Add(commentSnapshot);
-                }
-            }
+
+            await foreach (var comment in issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID))
+                result.Add(await FillCommentAuthor(comment, project.HubSnapshot.Entity));
 
             return result;
         }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
 using Brio.Docs.Client;
@@ -7,6 +8,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Sorts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -64,7 +66,7 @@ namespace Brio.Docs.Api.Controllers
         /// Delete objectives from database by its id.
         /// </summary>
         /// <param name="objectiveID">Objective's ID.</param>
-        /// <returns>True id objective was deleted.</returns>
+        /// <returns>List of deleted objective's ids.</returns>
         /// <response code="200">Objective was deleted successfully.</response>
         /// <response code="400">Invalid id.</response>
         /// <response code="404">Objective was not found.</response>
@@ -84,8 +86,8 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                await service.Remove(new ID<ObjectiveDto>(objectiveID));
-                return Ok(true);
+                var removedData = await service.Remove(new ID<ObjectiveDto>(objectiveID)) ?? Enumerable.Empty<ID<ObjectiveDto>>();
+                return Ok(removedData);
             }
             catch (ANotFoundException ex)
             {
@@ -174,12 +176,13 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="filter">Parameters for filtration.</param>
+        /// <param name="sort">Parameter for sorting</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with the pagination info.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("project/{projectID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
@@ -191,12 +194,92 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
             int projectID,
+            [FromBody]
+            ObjectiveFilterParameters filter,
             [FromQuery]
+            string sort)
+        {
+            try
+            {
+                var sortParameters = SortParametersUtils.FromQueryString(sort);
+                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter, sortParameters);
+                return Ok(objectives);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Return list of sub-objectives, linked to specific parent objective.
+        /// </summary>
+        /// <param name="parentID">Parent's ID.</param>
+        /// <returns>Collection of sub-objectives.</returns>
+        /// <response code="200">Collection of sub-objectives linked to objective.</response>
+        /// <response code="400">Invalid parent id.</response>
+        /// <response code="404">Could not find objective to retrieve objective list.</response>
+        /// <response code="500">Something went wrong while retrieving the objective list.</response>
+        [HttpGet]
+        [Route("subobjectives/{parentID}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(PagedListDto<ObjectiveToListDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectivesByParent(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int parentID)
+        {
+            try
+            {
+                var objectives = await service.GetObjectivesByParent(new ID<ObjectiveDto>(parentID));
+                return Ok(objectives);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidObjectiveID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Return list of objectives, included only ID and BimElements, linked to specific project.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <param name="filter">Parameters for filtration.</param>
+        /// <returns>Collection of objectives, included only ID and BimElements.</returns>
+        /// <response code="200">Collection of objectives, included only ID and BimElements, linked to project.</response>
+        /// <response code="400">Invalid project id.</response>
+        /// <response code="404">Could not find project to retrieve objective list.</response>
+        /// <response code="500">Something went wrong while retrieving the objective list.</response>
+        [HttpPost]
+        [Route("ids/{projectID}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(IEnumerable<ID<ObjectiveToSelectionDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectivesForSelection(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int projectID,
+            [FromBody]
             ObjectiveFilterParameters filter)
         {
             try
             {
-                var objectives = await service.GetObjectives(new ID<ProjectDto>(projectID), filter);
+                var objectives = await service.GetObjectivesForSelection(new ID<ProjectDto>(projectID), filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)
@@ -214,12 +297,13 @@ namespace Brio.Docs.Api.Controllers
         /// </summary>
         /// <param name="projectID">Project's ID.</param>
         /// <param name="itemName">Parameters for location filtration.</param>
+        /// <param name="filter">Parameters for filtration.</param>
         /// <returns>Collection of objectives.</returns>
         /// <response code="200">Collection of objectives linked to project with locations bound to given item.</response>
         /// <response code="400">Invalid project id.</response>
         /// <response code="404">Could not find project to retrieve objective list.</response>
         /// <response code="500">Something went wrong while retrieving the objective list.</response>
-        [HttpGet]
+        [HttpPost]
         [Route("locations")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(IEnumerable<ObjectiveToLocationDto>), StatusCodes.Status200OK)]
@@ -231,11 +315,13 @@ namespace Brio.Docs.Api.Controllers
             [CheckValidID]
             int projectID,
             [FromQuery]
-            string itemName)
+            string itemName,
+            [FromBody]
+            ObjectiveFilterParameters filter)
         {
             try
             {
-                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName);
+                var objectives = await service.GetObjectivesWithLocation(new ID<ProjectDto>(projectID), itemName, filter);
                 return Ok(objectives);
             }
             catch (ANotFoundException ex)

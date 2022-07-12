@@ -72,6 +72,8 @@ namespace Brio.Docs.Utility.Mapping
         {
             CreateMap<Objective, ObjectiveToListDto>()
                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
+            CreateMap<Objective, ObjectiveToSelectionDto>()
+               .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)));
             CreateMap<Objective, ObjectiveDto>()
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
@@ -83,8 +85,9 @@ namespace Brio.Docs.Utility.Mapping
                                                                     .Where(x => x.ItemType == (int)ItemType.Media
                                                                                 && !x.RelativePath.EndsWith(".mp4"))))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
-                .ForMember(d => d.Status, o => o.MapFrom<StatusToStringResolver>());
+                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status));
             CreateMap<Objective, ObjectiveToLocationDto>();
+            CreateMap<Objective, SubobjectiveDto>();
         }
 
         private void CreateMapToModel()
@@ -184,7 +187,9 @@ namespace Brio.Docs.Utility.Mapping
             CreateMap<BimElement, BimElementExternalDto>();
             CreateMap<BimElementExternalDto, BimElementObjective>()
                .ConvertUsing<BimElementObjectiveTypeConverter>();
-            CreateMap<BimElementExternalDto, BimElement>();
+            CreateMap<BimElementExternalDto, BimElement>()
+               .ForMember(x => x.ID, o => o.Ignore())
+               .ForMember(x => x.Objectives, o => o.Ignore());
 
             CreateMap<DynamicField, DynamicFieldExternalDto>()
                 .ForMember(x => x.Value, o => o.MapFrom<DynamicFieldModelToExternalValueResolver>());

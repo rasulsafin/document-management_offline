@@ -31,7 +31,7 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
             public object CloseVersion { get; set; }
 
             [DataMember(Name = "closed_at")]
-            public object ClosedAt { get; set; }
+            public DateTime? ClosedAt { get; set; }
 
             [DataMember(Name = "closed_by")]
             public object ClosedBy { get; set; }
@@ -241,12 +241,6 @@ namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 
             [DataMember(Name = "attributesVersion")]
             public object AttributesVersion { get; set; }
-
-            /// <summary>
-            /// Our property to save our additional info.
-            /// </summary>
-            [DataMember]
-            public object OtherInfo { get; set; }
         }
 
         [DataContract]
