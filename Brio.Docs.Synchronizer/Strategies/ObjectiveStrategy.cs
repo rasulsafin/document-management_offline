@@ -278,6 +278,9 @@ namespace Brio.Docs.Synchronization.Strategies
         private void StartTrackAuthor(SynchronizingTuple<Objective> synchronizingTuple)
         {
             var author = synchronizingTuple.Local.Author;
+            if (author == null)
+                return;
+
             if (context.Entry(author).State == EntityState.Detached)
                 context.Attach(author);
         }

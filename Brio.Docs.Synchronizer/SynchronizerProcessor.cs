@@ -76,6 +76,7 @@ namespace Brio.Docs.Synchronization
 
             logger.LogDebug("{@Count} tuples created", tuples.Count);
 
+            DBContextUtilities.ReloadContext(context, data);
             var results = new List<SynchronizingResult>();
             var i = 0;
 
