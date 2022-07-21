@@ -11,6 +11,7 @@ using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
@@ -274,6 +275,13 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
+        private void StartTrackAuthor(SynchronizingTuple<Objective> synchronizingTuple)
+        {
+            var author = synchronizingTuple.Local.Author;
+            if (context.Entry(author).State == EntityState.Detached)
+                context.Attach(author);
+        }
+
         private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
@@ -296,6 +304,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
         private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
+            StartTrackAuthor(tuple);
             AddConnectionInfoToDynamicFields(tuple, data);
             AddProjectToRemoteItems(tuple);
         }
