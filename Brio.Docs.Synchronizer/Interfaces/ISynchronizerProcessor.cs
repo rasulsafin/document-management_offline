@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
@@ -19,7 +19,7 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// <param name="strategy">Strategy for performing actions on each synchronization tuple.</param>
         /// <param name="data">Synchronization parameters.</param>
         /// <param name="remoteCollection">The collection of external entities to be synchronized.</param>
-        /// <param name="filter">The filter for entities.</param>
+        /// <param name="set">Filtered db collection for synchronization.</param>
         /// <param name="token">The token to cancel operation.</param>
         /// <param name="progress">The progress of the operation.</param>
         /// <returns>The task of the operation with collection of failed information.</returns>
@@ -29,7 +29,7 @@ namespace Brio.Docs.Synchronization.Interfaces
             ISynchronizationStrategy<TDB> strategy,
             SynchronizingData data,
             IEnumerable<TDB> remoteCollection,
-            Expression<Func<TDB, bool>> filter,
+            IQueryable<TDB> set,
             CancellationToken token,
             IProgress<double> progress = null)
             where TDB : class, ISynchronizable<TDB>, new();

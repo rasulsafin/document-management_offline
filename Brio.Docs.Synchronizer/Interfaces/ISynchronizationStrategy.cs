@@ -44,13 +44,6 @@ namespace Brio.Docs.Synchronization.Interfaces
             CancellationToken token);
 
         /// <summary>
-        /// Gets the synchronization filter for this entity type.
-        /// </summary>
-        /// <param name="data">Synchronization parameters.</param>
-        /// <returns>The filter for this entity type.</returns>
-        Expression<Func<TDB, bool>> GetFilter(SynchronizingData data);
-
-        /// <summary>
         /// Merges remote and local entities. Saves synchronized state.
         /// </summary>
         /// <param name="tuple">The synchronization tuple.</param>

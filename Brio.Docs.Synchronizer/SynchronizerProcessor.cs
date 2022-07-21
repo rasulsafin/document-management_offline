@@ -34,7 +34,7 @@ namespace Brio.Docs.Synchronization
             ISynchronizationStrategy<TDB> strategy,
             SynchronizingData data,
             IEnumerable<TDB> remoteCollection,
-            Expression<Func<TDB, bool>> filter,
+            IQueryable<TDB> set,
             CancellationToken token,
             IProgress<double> progress = null)
             where TDB : class, ISynchronizable<TDB>, new()
@@ -44,29 +44,21 @@ namespace Brio.Docs.Synchronization
 
             progress?.Report(0.0);
 
-            var defaultFiler = strategy.GetFilter(data);
-
-            var dbLocal = await context.Set<TDB>()
+            var dbLocal = await set
                .Unsynchronized()
                .Include(x => x.SynchronizationMate)
-               .Where(defaultFiler)
-               .Where(filter)
                .ToListAsync()
                .ConfigureAwait(false);
 
-            var dbSynchronized = await context.Set<TDB>()
+            var dbSynchronized = await set
                .Synchronized()
                .Include(x => x.SynchronizationMate)
-               .Where(defaultFiler)
-               .Where(filter)
                .ToListAsync()
                .ConfigureAwait(false);
 
             var local = strategy.Order(dbLocal);
             var synchronized = strategy.Order(dbSynchronized);
-            var remote = strategy.Order(
-                remoteCollection
-                   .Where(filter.Compile()));
+            var remote = strategy.Order(remoteCollection);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 local,

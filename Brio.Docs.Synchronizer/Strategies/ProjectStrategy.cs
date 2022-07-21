@@ -102,9 +102,6 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        public Expression<Func<Project, bool>> GetFilter(SynchronizingData data)
-            => data.ProjectsFilter;
-
         public async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Project> tuple,
             SynchronizingData data,

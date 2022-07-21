@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -12,10 +13,8 @@ using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
-using Brio.Docs.Synchronization.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Brio.Docs.Synchronization
 {
@@ -138,6 +137,17 @@ namespace Brio.Docs.Synchronization
             };
         }
 
+        private IQueryable<T> FilterNewAndUpdated<T>(
+            IQueryable<T> collection,
+            Expression<Func<T, bool>> defaultFilter,
+            string[] updatedIds)
+            where T : class, ISynchronizableBase
+        {
+            var newEntities = collection.Where(defaultFilter).Where(x => x.ExternalID == null);
+            var updatedEntities = collection.Where(x => updatedIds.Contains(x.ExternalID)).Where(x => x.ExternalID != null);
+            return newEntities.Concat(updatedEntities);
+        }
+
         private async Task<DateTime> GetLastSynchronizationDate(int userID)
         {
             return (await dbContext.Synchronizations.Where(x => x.UserID == userID)
@@ -194,15 +204,16 @@ namespace Brio.Docs.Synchronization
                .Convert(await data.ConnectionContext.ObjectivesSynchronizer.Get(ids).ConfigureAwait(false))
                .ConfigureAwait(false);
 
-            Expression<Func<Objective, bool>> filter = objective =>
-                (objective.ExternalID == null || ids.Contains(objective.ExternalID)) &&
-                !unsyncProjectsIDs.Contains(objective.ProjectID) &&
-                (objective.Project == null || !unsyncProjectsExternalIDs.Contains(objective.Project.ExternalID));
+            var objectives = dbContext.Objectives.Where(
+                x =>
+                    !unsyncProjectsIDs.Contains(x.ProjectID) &&
+                    (x.Project == null || !unsyncProjectsExternalIDs.Contains(x.Project.ExternalID)));
+
             var synchronizingResults = await processor.Synchronize<Objective, ObjectiveExternalDto>(
                     objectiveStrategy,
                     data,
                     remoteObjectives,
-                    filter,
+                    FilterNewAndUpdated(objectives, data.ObjectivesFilter, ids),
                     token,
                     objectiveProgress)
                .ConfigureAwait(false);
@@ -232,7 +243,7 @@ namespace Brio.Docs.Synchronization
                     projectStrategy,
                     data,
                     remoteProjects,
-                    x => x.ExternalID == null || ids.Contains(x.ExternalID),
+                    FilterNewAndUpdated(dbContext.Projects, data.ProjectsFilter, ids),
                     token,
                     projectProgress)
                .ConfigureAwait(false);

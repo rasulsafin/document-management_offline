@@ -128,9 +128,6 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        public Expression<Func<Objective, bool>> GetFilter(SynchronizingData data)
-            => data.ObjectivesFilter;
-
         public async Task<SynchronizingResult> Merge(
             SynchronizingTuple<Objective> tuple,
             SynchronizingData data,
