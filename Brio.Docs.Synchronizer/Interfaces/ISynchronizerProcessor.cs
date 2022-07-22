@@ -17,8 +17,8 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// Synchronizes all filtered data with each other.
         /// </summary>
         /// <param name="data">Synchronization parameters.</param>
-        /// <param name="remoteCollection">The collection of external entities to be synchronized.</param>
-        /// <param name="set">Filtered db collection for synchronization.</param>
+        /// <param name="remoteCollection">The filtered collection of external entities to be synchronized.</param>
+        /// <param name="set">The filtered db collection for synchronization.</param>
         /// <param name="token">The token to cancel operation.</param>
         /// <param name="progress">The progress of the operation.</param>
         /// <returns>The task of the operation with collection of failed information.</returns>
