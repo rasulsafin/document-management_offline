@@ -15,7 +15,7 @@ using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
-using Brio.Docs.Synchronization;
+using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Utility.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +31,7 @@ namespace Brio.Docs.Services
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ILogger<SynchronizationService> logger;
         private readonly IFactory<IServiceScope, Type, IConnection> connectionScopedFactory;
-        private readonly IFactory<IServiceScope, Synchronizer> synchronizerFactory;
+        private readonly IFactory<IServiceScope, ISynchronizer> synchronizerFactory;
         private readonly IRequestService requestQueue;
 
         public SynchronizationService(
@@ -41,7 +41,7 @@ namespace Brio.Docs.Services
             IServiceScopeFactory serviceScopeFactory,
             ILogger<SynchronizationService> logger,
             IFactory<IServiceScope, Type, IConnection> connectionScopedFactory,
-            IFactory<IServiceScope, Synchronizer> synchronizerFactory)
+            IFactory<IServiceScope, ISynchronizer> synchronizerFactory)
         {
             this.context = context;
             this.mapper = mapper;

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Synchronization.Models;
 
@@ -9,6 +10,11 @@ namespace Brio.Docs.Synchronization.Interfaces
     /// <typeparam name="T">The type of searching.</typeparam>
     internal interface IAttacher<T>
     {
+        /// <summary>
+        /// The collection of remote entities.
+        /// </summary>
+        IReadOnlyCollection<T> RemoteCollection { get; set; }
+
         /// <summary>
         /// Searches and attaches existing entities to a synchronising tuple.
         /// </summary>

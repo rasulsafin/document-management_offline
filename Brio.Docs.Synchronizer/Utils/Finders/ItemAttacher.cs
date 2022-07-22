@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -24,6 +25,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
 
             logger.LogTrace("ItemFinder created");
         }
+
+        public IReadOnlyCollection<Item> RemoteCollection { get; set; }
 
         public async Task AttachExisting(SynchronizingTuple<Item> tuple)
         {

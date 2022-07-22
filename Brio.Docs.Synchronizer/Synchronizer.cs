@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization
 {
-    public class Synchronizer
+    internal class Synchronizer : ISynchronizer
     {
         private readonly DMContext dbContext;
         private readonly ILogger<Synchronizer> logger;
@@ -27,6 +27,8 @@ namespace Brio.Docs.Synchronization
             objectivesMapper;
 
         private readonly ISynchronizerProcessor processor;
+        private readonly IAttacher<Project> projectAttacher;
+        private readonly IAttacher<Objective> objectiveAttacher;
         private readonly IConverter<IReadOnlyCollection<ProjectExternalDto>, IReadOnlyCollection<Project>>
             projectsMapper;
 
@@ -34,6 +36,8 @@ namespace Brio.Docs.Synchronization
             DMContext dbContext,
             IMapper mapper,
             ISynchronizerProcessor processor,
+            IAttacher<Project> projectAttacher,
+            IAttacher<Objective> objectiveAttacher,
             ILogger<Synchronizer> logger,
             IConverter<IReadOnlyCollection<ProjectExternalDto>, IReadOnlyCollection<Project>> projectsMapper,
             IConverter<IReadOnlyCollection<ObjectiveExternalDto>, IReadOnlyCollection<Objective>> objectivesMapper)
@@ -41,6 +45,8 @@ namespace Brio.Docs.Synchronization
             this.dbContext = dbContext;
             this.mapper = mapper;
             this.processor = processor;
+            this.projectAttacher = projectAttacher;
+            this.objectiveAttacher = objectiveAttacher;
             this.logger = logger;
             this.objectivesMapper = objectivesMapper;
             this.projectsMapper = projectsMapper;
@@ -189,9 +195,11 @@ namespace Brio.Docs.Synchronization
                     data.ConnectionContext.ObjectivesSynchronizer)
                .ConfigureAwait(false);
             logger.LogDebug("Updated objective ids: {@IDs}", (object)ids);
+
             var remoteObjectives = await objectivesMapper
                .Convert(await data.ConnectionContext.ObjectivesSynchronizer.Get(ids).ConfigureAwait(false))
                .ConfigureAwait(false);
+            objectiveAttacher.RemoteCollection = remoteObjectives;
 
             var objectives = dbContext.Objectives.Where(
                 x =>
@@ -230,6 +238,7 @@ namespace Brio.Docs.Synchronization
                .ConfigureAwait(false);
 
             var projects = FilterNewAndUpdated(dbContext.Projects, data.ProjectsFilter, ids);
+            projectAttacher.RemoteCollection = remoteProjects;
 
             var synchronizingResults = await processor.Synchronize<Project, ProjectExternalDto>(
                     data,

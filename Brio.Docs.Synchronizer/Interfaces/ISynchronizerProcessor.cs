@@ -11,7 +11,7 @@ namespace Brio.Docs.Synchronization.Interfaces
     /// <summary>
     /// Represents tool to synchronize data.
     /// </summary>
-    public interface ISynchronizerProcessor
+    internal interface ISynchronizerProcessor
     {
         /// <summary>
         /// Synchronizes all filtered data with each other.

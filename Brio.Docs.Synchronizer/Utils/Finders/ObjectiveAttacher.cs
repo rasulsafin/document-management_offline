@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
@@ -7,7 +9,6 @@ using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System.Linq;
 
 namespace Brio.Docs.Synchronization.Utilities.Finders
 {
@@ -24,30 +25,43 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogTrace("ObjectiveAttacher created");
         }
 
+        public IReadOnlyCollection<Objective> RemoteCollection { get; set; }
+
         public async Task AttachExisting(SynchronizingTuple<Objective> tuple)
         {
             var id = tuple.ExternalID;
-            var needToAttach = !string.IsNullOrEmpty(id) && (tuple.Local == null || tuple.Synchronized == null);
+            var needToAttach = !string.IsNullOrEmpty(id) && tuple.Any(x => x == null);
             logger.LogStartAction(tuple, needToAttach ? LogLevel.Debug : LogLevel.Trace);
 
             if (!needToAttach)
                 return;
 
-            var (localProject, syncProject) = await SearchingUtilities
-               .GetProjectsByRemote(context, tuple.Remote.ProjectID)
-               .ConfigureAwait(false);
+            if (tuple.Remote == null)
+            {
+                var (localProject, syncProject) = (tuple.Local?.ProjectID, tuple.Synchronized?.ProjectID);
+                tuple.Remote = RemoteCollection
+                   .Where(x => x.ProjectID == localProject || x.ProjectID == syncProject)
+                   .FirstOrDefault(x => x.ExternalID == id);
+            }
 
-            tuple.Local ??= await context.Objectives
-               .Unsynchronized()
-               .Where(x => x.Project == localProject)
-               .FirstOrDefaultAsync(x => x.ExternalID == id)
-               .ConfigureAwait(false);
+            if (tuple.Remote != null)
+            {
+                var (localProject, syncProject) = await SearchingUtilities
+                   .GetProjectsByRemote(context, tuple.Remote.ProjectID)
+                   .ConfigureAwait(false);
 
-            tuple.Synchronized ??= await context.Objectives
-               .Synchronized()
-               .Where(x => x.Project == syncProject)
-               .FirstOrDefaultAsync(x => x.ExternalID == id)
-               .ConfigureAwait(false);
+                tuple.Local ??= await context.Objectives
+                   .Unsynchronized()
+                   .Where(x => x.Project == localProject)
+                   .FirstOrDefaultAsync(x => x.ExternalID == id)
+                   .ConfigureAwait(false);
+
+                tuple.Synchronized ??= await context.Objectives
+                   .Synchronized()
+                   .Where(x => x.Project == syncProject)
+                   .FirstOrDefaultAsync(x => x.ExternalID == id)
+                   .ConfigureAwait(false);
+            }
 
             logger.LogDebug(
                 "AttachExisting project ends with tuple ({Local}, {Synchronized}, {Remote})",

@@ -16,7 +16,7 @@ namespace Brio.Docs.Synchronization.Interfaces
     /// The strategy to synchronize needed entity type.
     /// </summary>
     /// <typeparam name="TDB">The type of entities for synchronization.</typeparam>
-    public interface ISynchronizationStrategy<TDB>
+    internal interface ISynchronizationStrategy<TDB>
         where TDB : class
     {
         /// <summary>

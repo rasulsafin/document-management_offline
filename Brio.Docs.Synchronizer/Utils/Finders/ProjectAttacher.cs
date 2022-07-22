@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
@@ -23,14 +25,18 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogTrace("ProjectAttacher created");
         }
 
+        public IReadOnlyCollection<Project> RemoteCollection { get; set; }
+
         public async Task AttachExisting(SynchronizingTuple<Project> tuple)
         {
             var id = tuple.ExternalID;
-            var needToAttach = !string.IsNullOrEmpty(id) && (tuple.Local == null || tuple.Synchronized == null);
+            var needToAttach = !string.IsNullOrEmpty(id) && tuple.Any(x => x == null);
             logger.LogStartAction(tuple, needToAttach ? LogLevel.Debug : LogLevel.Trace);
 
             if (!needToAttach)
                 return;
+
+            tuple.Remote ??= RemoteCollection.FirstOrDefault(x => x.ExternalID == id);
 
             tuple.Local ??= await context.Projects
                .Unsynchronized()
