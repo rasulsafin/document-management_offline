@@ -39,6 +39,21 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             if (tuple.Remote == null)
             {
                 var (localProject, syncProject) = (tuple.Local?.ProjectID, tuple.Synchronized?.ProjectID);
+
+                localProject ??= await context.Projects
+                   .AsNoTracking()
+                   .Where(x => x.SynchronizationMateID == syncProject)
+                   .Select(x => x.ID)
+                   .FirstOrDefaultAsync()
+                   .ConfigureAwait(false);
+
+                syncProject ??= await context.Projects
+                   .AsNoTracking()
+                   .Where(x => x.ID == localProject)
+                   .Select(x => x.SynchronizationMateID)
+                   .FirstOrDefaultAsync()
+                   .ConfigureAwait(false);
+
                 tuple.Remote = RemoteCollection
                    .Where(x => x.ProjectID == localProject || x.ProjectID == syncProject)
                    .FirstOrDefault(x => x.ExternalID == id);
