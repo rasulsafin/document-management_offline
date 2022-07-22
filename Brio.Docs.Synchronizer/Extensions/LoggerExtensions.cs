@@ -10,8 +10,10 @@ namespace Brio.Docs.Synchronization.Extensions
         internal static void LogStartAction<TDB>(
             this ILogger logger,
             SynchronizingTuple<TDB> tuple,
+            LogLevel logLevel = LogLevel.Trace,
             [CallerMemberName] string method = "")
-            => logger.LogTrace(
+            => logger.Log(
+                logLevel,
                 "{Method} started for tuple ({Local}, {Synchronized}, {Remote})",
                 method,
                 tuple.Local?.GetId(),

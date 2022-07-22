@@ -39,6 +39,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IMerger<Location>, LocationMerger>();
             services.AddScoped<IMerger<BimElement>, BimElementMerger>();
 
+            services.AddScoped<IAttacher<Project>, ProjectAttacher>();
+            services.AddScoped<IAttacher<Objective>, ObjectiveAttacher>();
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
             services.AddScoped<IAttacher<BimElement>, BimElementAttacher>();
 

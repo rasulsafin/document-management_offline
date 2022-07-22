@@ -16,7 +16,6 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// <summary>
         /// Synchronizes all filtered data with each other.
         /// </summary>
-        /// <param name="strategy">Strategy for performing actions on each synchronization tuple.</param>
         /// <param name="data">Synchronization parameters.</param>
         /// <param name="remoteCollection">The collection of external entities to be synchronized.</param>
         /// <param name="set">Filtered db collection for synchronization.</param>
@@ -26,7 +25,6 @@ namespace Brio.Docs.Synchronization.Interfaces
         /// <typeparam name="TDB">The type of entities for synchronization.</typeparam>
         /// <typeparam name="TDto">The data transfer model type of entities.</typeparam>
         Task<List<SynchronizingResult>> Synchronize<TDB, TDto>(
-            ISynchronizationStrategy<TDB> strategy,
             SynchronizingData data,
             IEnumerable<TDB> remoteCollection,
             IQueryable<TDB> set,
