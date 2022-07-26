@@ -237,6 +237,19 @@ namespace Brio.Docs.Synchronization
                .Convert(await data.ConnectionContext.ProjectsSynchronizer.Get(ids).ConfigureAwait(false))
                .ConfigureAwait(false);
 
+            foreach (var project in remoteProjects)
+            {
+                project.Users = new List<UserProject>
+                {
+                    new ()
+                    {
+                        UserID = data.User.ID,
+                        User = data.User,
+                        Project = project,
+                    },
+                };
+            }
+
             var projects = FilterNewAndUpdated(dbContext.Projects, data.ProjectsFilter, ids);
             projectAttacher.RemoteCollection = remoteProjects;
 
