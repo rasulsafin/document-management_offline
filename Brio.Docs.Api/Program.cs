@@ -1,8 +1,6 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 using Brio.Docs.Api.Extensions;
 using Microsoft.AspNetCore.Hosting;
@@ -15,7 +13,7 @@ namespace Brio.Docs.Api
     {
         public static void Main(string[] args)
         {
-            var mutexName = "Global\\Brio.Docs.Api." + GetAssemblyGuid();
+            var mutexName = "Global\\Brio.Docs.Api";
 
             using var singleAppMutex = new Mutex(true, mutexName, out bool isNew);
 
@@ -53,14 +51,5 @@ namespace Brio.Docs.Api
                     {
                         webBuilder.UseStartup<Startup>();
                     });
-
-        private static string GetAssemblyGuid()
-        {
-            var attributes = Assembly.GetEntryAssembly().GetCustomAttributes(typeof(GuidAttribute), false);
-            if (attributes.Length == 0)
-                return string.Empty;
-
-            return ((GuidAttribute)attributes[0]).Value;
-        }
     }
 }
