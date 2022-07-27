@@ -7,6 +7,7 @@
 #define DMAppExeName "Brio.Docs.Api.exe"
 #define MrsPublisher "BRIO MRS"
 #define DMProgramDataPath "\" + MrsPublisher + "\" + DMAppName + "\"
+#define DMDatabaseName "DocumentManagement.db"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -31,13 +32,17 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 
 [Files]
 Source: "{#DMSourceBuild}{#DmAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#DMSourceBuild}*"; Excludes: "DocumentManagement.db"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#DMSourceBuild}DocumentManagement.db"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: onlyifdoesntexist
+Source: "{#DMSourceBuild}*"; Excludes: "{#DMDatabaseName}*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#DMSourceBuild}{#DMDatabaseName}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: onlyifdoesntexist uninsneveruninstall
 Source: "{#DMUpdater}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: deleteafterinstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#DMAppName}"; Filename: "{app}\{#DMAppExeName}"
+
+[CustomMessages]
+english.RemoveDB=Do you want to remove all projects and objectives from this local machine?
+russian.RemoveDB=Вы хотите удалить все проекты и задачи на данном локальном компьютере?
 
 [Run]
 Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
@@ -55,9 +60,9 @@ procedure CurUninstallStepChanged (CurUninstallStep: TUninstallStep);
     case CurUninstallStep of                   
       usPostUninstall:
         begin
-          mres := MsgBox('Do you want to remove all projects and objectives from this local machine?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2)
+          mres := MsgBox(ExpandConstant('{cm:RemoveDB}'), mbConfirmation, MB_YESNO or MB_DEFBUTTON2)
           if mres = IDYES then
-            DelTree(ExpandConstant('{commonappdata}{#DMProgramDataPath}') + 'DocumentManagement.db*', False, True, False);
+            DelTree(ExpandConstant('{commonappdata}{#DMProgramDataPath}{#DMDatabaseName}*'), False, True, False);
        end;
    end;
 end;
