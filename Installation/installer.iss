@@ -1,4 +1,4 @@
-; Uncomment the following lines to run via Inno Setup IDE.
+ï»¿; Uncomment the following lines to run via Inno Setup IDE.
 #define DMAppName "BRIO Docs"
 #define DMAppVersion "dev"
 #define DMSourceBuild "..\Brio.Docs.Api\bin\Release\net5.0\"
@@ -42,7 +42,7 @@ Name: "{group}\{#DMAppName}"; Filename: "{app}\{#DMAppExeName}"
 
 [CustomMessages]
 english.RemoveDB=Do you want to remove all projects and objectives from this local machine?
-russian.RemoveDB=Âû õîòèòå óäàëèòü âñå ïðîåêòû è çàäà÷è íà äàííîì ëîêàëüíîì êîìïüþòåðå?
+russian.RemoveDB=Ð’Ñ‹ Ñ…Ð¾Ñ‚Ð¸Ñ‚Ðµ ÑƒÐ´Ð°Ð»Ð¸Ñ‚ÑŒ Ð²ÑÐµ Ð¿Ñ€Ð¾ÐµÐºÑ‚Ñ‹ Ð¸ Ð·Ð°Ð´Ð°Ñ‡Ð¸ Ñ ÑÑ‚Ð¾Ð³Ð¾ Ð»Ð¾ÐºÐ°Ð»ÑŒÐ½Ð¾Ð³Ð¾ ÐºÐ¾Ð¼Ð¿ÑŒÑŽÑ‚ÐµÑ€Ð°?
 
 [Run]
 Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
@@ -53,6 +53,54 @@ Name: "{commonappdata}{#DMProgramDataPath}"; Type: dirifempty
 Name: "{commonappdata}\{#MrsPublisher}"; Type: dirifempty
 
 [Code]
+{https://stackoverflow.com/a/20181221}
+function FileReplaceString(const FileName, SearchString, ReplaceString: string):boolean;
+var
+  MyFile : TStrings;
+  MyText : string;
+begin
+  MyFile := TStringList.Create;
+
+  try
+    result := true;
+
+    try
+      MyFile.LoadFromFile(FileName);
+      MyText := MyFile.Text;
+
+      { Only save if text has been changed. }
+      if StringChangeEx(MyText, SearchString, ReplaceString, True) > 0 then
+      begin;
+        MyFile.Text := MyText;
+        MyFile.SaveToFile(FileName);
+      end;
+    except
+      result := false;
+    end;
+  finally
+    MyFile.Free;
+  end;
+end;
+
+procedure CurStepChanged(CurStep: TSetupStep);
+  var
+    isChanged : boolean;
+    newPath : string;
+  begin
+    case CurStep of
+    ssPostInstall:
+      begin
+        newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}{#DMDatabaseName}');
+        StringChangeEx(newPath, '\', '\\', True);
+        FileReplaceString(ExpandConstant('{app}\appsettings.json'), ExpandConstant('{#DMDatabaseName}'), newPath);
+        newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}Logs\main.log');
+        StringChangeEx(newPath, '\', '\\', True);
+        FileReplaceString(ExpandConstant('{app}\appsettings.json'), 'Logs\\main.log', newPath);
+      end;
+    end;
+  end;
+
+{https://stackoverflow.com/a/30815615}
 procedure CurUninstallStepChanged (CurUninstallStep: TUninstallStep);
  var
      mres : integer;
