@@ -82,6 +82,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BrioC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.Connections.BrioCloud.Tests", "Brio.Docs.Connections.BrioCloud.Tests\Brio.Docs.Connections.BrioCloud.Tests.csproj", "{049910D1-4CF5-453B-A2B3-4DF48C237C68}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.Updater", "Brio.Docs.Updater\Brio.Docs.Updater.csproj", "{F6EA1026-95D5-4D15-8000-152F769BD65E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -192,6 +194,10 @@ Global
 		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{049910D1-4CF5-453B-A2B3-4DF48C237C68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -225,6 +231,7 @@ Global
 		{C10C9D67-1440-4D0F-AC38-EE9AC5EE34EF} = {CEB4080A-AA25-4E79-A803-7ED2A5A81846}
 		{F4798543-0E19-4B66-AEBA-D049EEEEF3D8} = {D6D41822-CE95-4B4A-A095-3BC461268736}
 		{049910D1-4CF5-453B-A2B3-4DF48C237C68} = {E49AD887-E735-4526-AE80-4FD7ACA3765E}
+		{F6EA1026-95D5-4D15-8000-152F769BD65E} = {4F4A17E0-2620-421A-B3A7-3E325628953B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {6ACFC65A-74B0-4849-8BDE-3F15A56DC159}
