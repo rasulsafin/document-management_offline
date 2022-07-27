@@ -33,7 +33,7 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 [Files]
 Source: "{#DMSourceBuild}{#DmAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#DMSourceBuild}*"; Excludes: "{#DMDatabaseName}*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "{#DMSourceBuild}{#DMDatabaseName}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: onlyifdoesntexist uninsneveruninstall
+Source: "{#DMSourceBuild}{#DMDatabaseName}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Permissions: users-modify; Flags: onlyifdoesntexist uninsneveruninstall
 Source: "{#DMUpdater}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: deleteafterinstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
@@ -82,6 +82,11 @@ begin
   end;
 end;
 
+function EncodePathForJson(var path : string) : string;
+  begin
+    StringChangeEx(result, '\', '\\', True);
+  end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
   var
     isChanged : boolean;
@@ -91,10 +96,10 @@ procedure CurStepChanged(CurStep: TSetupStep);
     ssPostInstall:
       begin
         newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}{#DMDatabaseName}');
-        StringChangeEx(newPath, '\', '\\', True);
+        newPath := EncodePathForJson(newPath);
         FileReplaceString(ExpandConstant('{app}\appsettings.json'), ExpandConstant('{#DMDatabaseName}'), newPath);
         newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}Logs\main.log');
-        StringChangeEx(newPath, '\', '\\', True);
+        newPath := EncodePathForJson(newPath);
         FileReplaceString(ExpandConstant('{app}\appsettings.json'), 'Logs\\main.log', newPath);
       end;
     end;
