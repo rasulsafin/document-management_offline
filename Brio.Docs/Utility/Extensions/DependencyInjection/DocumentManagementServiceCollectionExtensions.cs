@@ -6,7 +6,7 @@ using Brio.Docs.Integration;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Services;
-using Brio.Docs.Synchronization;
+using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Factories;
 using Brio.Docs.Utility.Mapping.Converters;
@@ -97,7 +97,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.AddScopedFactory<DMContext>();
             services.AddScopedFactory<IMapper>();
-            services.AddScopedFactory<Synchronizer>();
+            services.AddScopedFactory<ISynchronizer>();
             return services;
         }
 

@@ -16,7 +16,7 @@ namespace Brio.Docs.Synchronization.Interfaces
     /// The strategy to synchronize needed entity type.
     /// </summary>
     /// <typeparam name="TDB">The type of entities for synchronization.</typeparam>
-    public interface ISynchronizationStrategy<TDB>
+    internal interface ISynchronizationStrategy<TDB>
         where TDB : class
     {
         /// <summary>
@@ -42,13 +42,6 @@ namespace Brio.Docs.Synchronization.Interfaces
             SynchronizingTuple<TDB> tuple,
             SynchronizingData data,
             CancellationToken token);
-
-        /// <summary>
-        /// Gets the synchronization filter for this entity type.
-        /// </summary>
-        /// <param name="data">Synchronization parameters.</param>
-        /// <returns>The filter for this entity type.</returns>
-        Expression<Func<TDB, bool>> GetFilter(SynchronizingData data);
 
         /// <summary>
         /// Merges remote and local entities. Saves synchronized state.

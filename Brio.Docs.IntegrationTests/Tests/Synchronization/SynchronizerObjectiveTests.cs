@@ -87,6 +87,181 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizedObjectives(local, synchronized);
         }
 
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsLocalObjective_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (objectiveLocal, _, _) = await ArrangeObjective();
+            var ignore = "Ignore";
+            objectiveLocal.Title = ignore;
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsSynchronizedObjective_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var ignore = "Ignore";
+            objectiveLocal.Title = "New value";
+            objectiveSynchronized.Title = ignore;
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsLocalAndSynchronizedProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.Title = "New value";
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => x.ID != objectiveLocal.ID && x.ID != objectiveSynchronized.ID,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsRemoteObjective_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            var ignore = "Ignore";
+            objectiveLocal.Title = "New value";
+            objectiveRemote.Title = ignore;
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsRemoteAndSynchronizedProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.Title = "New value";
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => x.ID == objectiveLocal.ID,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsAll_DoNotSynchronize()
+        {
+            // Arrange.
+            var (objectiveLocal, _, objectiveRemote) = await ArrangeObjective();
+            objectiveLocal.Title = "New value 1";
+            objectiveRemote.Title = "New value 2";
+            objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Objectives.Update(objectiveLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ObjectivesFilter = x => false,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+        }
+
+
         [TestMethod]
         public async Task Synchronize_LocalAndRemoteObjectiveSame_Synchronize()
         {

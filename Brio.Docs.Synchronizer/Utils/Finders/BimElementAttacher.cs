@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
@@ -21,6 +22,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
 
             logger.LogTrace("BimElementAttacher created");
         }
+
+        public IReadOnlyCollection<BimElement> RemoteCollection { get; set; }
 
         public async Task AttachExisting(SynchronizingTuple<BimElement> tuple)
         {
