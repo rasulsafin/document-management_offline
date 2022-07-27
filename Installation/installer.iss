@@ -2,10 +2,11 @@
 #define DMAppName "BRIO Docs"
 #define DMAppVersion "dev"
 #define DMSourceBuild "..\Brio.Docs.Api\bin\Release\net5.0\"
+#define DMUpdater "..\Brio.Docs.Updater\bin\Release\net5.0\"
 
 #define DMAppExeName "Brio.Docs.Api.exe"
 #define MrsPublisher "BRIO MRS"
-#define DMProgramDataPath "\" + {#MrsPublisher} + "\" + {#DMAppName}
+#define DMProgramDataPath "\" + MrsPublisher + "\" + DMAppName + "\"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -16,7 +17,7 @@ AppName={#DMAppName}
 AppVersion={#DMAppVersion}
 AppPublisher={#MrsPublisher}
 DefaultDirName={autopf}\{#MrsPublisher}\{#DMAppName}
-DefaultGroupName={#DMAppName}
+DefaultGroupName={#MrsPublisher}\{#DMAppName}
 DisableProgramGroupPage=yes
 OutputBaseFilename="{#DMAppName} Setup {#DMAppVersion}"
 OutputDir=..\
@@ -32,12 +33,14 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 Source: "{#DMSourceBuild}{#DmAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#DMSourceBuild}*"; Excludes: "DocumentManagement.db"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "{#DMSourceBuild}DocumentManagement.db"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: onlyifdoesntexist
+Source: "{#DMUpdater}*"; DestDir: "{commonappdata}{#DMProgramDataPath}"; Flags: deleteafterinstall
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
 Name: "{group}\{#DMAppName}"; Filename: "{app}\{#DMAppExeName}"
 
 [Run]
+Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
 Filename: "{app}\{#DMAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DMAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]            
@@ -54,7 +57,7 @@ procedure CurUninstallStepChanged (CurUninstallStep: TUninstallStep);
         begin
           mres := MsgBox('Do you want to remove all projects and objectives from this local machine?', mbConfirmation, MB_YESNO or MB_DEFBUTTON2)
           if mres = IDYES then
-            DelTree(ExpandConstant('{commonappdata}{#DMProgramDataPath}'), True, True, True);
+            DelTree(ExpandConstant('{commonappdata}{#DMProgramDataPath}') + 'DocumentManagement.db*', False, True, False);
        end;
    end;
 end;
