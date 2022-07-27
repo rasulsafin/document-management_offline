@@ -27,7 +27,7 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
             if (source.AuthorExternalID == null)
                 return null;
             var user = dbContext.Users.FirstOrDefault(x => x.ExternalID == source.AuthorExternalID);
-            logger.LogDebug("Found project: {@Project}", user);
+            logger.LogDebug("Found user: {@User}", user);
             return user;
         }
     }
