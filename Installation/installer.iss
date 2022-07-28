@@ -46,6 +46,7 @@ russian.RemoveDB=Вы хотите удалить все проекты и за�
 
 [Run]
 Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
+Filename: "briolauncher://register/{#DMAppName}/{#DMAppVersion}/{app}\{#DMAppExeName}?background=true"; Flags: shellexec runasoriginaluser nowait
 Filename: "{app}\{#DMAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DMAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]            
@@ -89,18 +90,19 @@ function EncodePathForJson(var path : string) : string;
 
 procedure CurStepChanged(CurStep: TSetupStep);
   var
-    isChanged : boolean;
     newPath : string;
+    jsonPath : string;
   begin
     case CurStep of
     ssPostInstall:
       begin
+        jsonPath := ExpandConstant('{app}\appsettings.json');
         newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}{#DMDatabaseName}');
         newPath := EncodePathForJson(newPath);
-        FileReplaceString(ExpandConstant('{app}\appsettings.json'), ExpandConstant('{#DMDatabaseName}'), newPath);
+        FileReplaceString(jsonPath, ExpandConstant('{#DMDatabaseName}'), newPath);
         newPath := ExpandConstant('{commonappdata}{#DMProgramDataPath}Logs\main.log');
         newPath := EncodePathForJson(newPath);
-        FileReplaceString(ExpandConstant('{app}\appsettings.json'), 'Logs\\main.log', newPath);
+        FileReplaceString(jsonPath, 'Logs\\main.log', newPath);
       end;
     end;
   end;
