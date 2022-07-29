@@ -49,7 +49,8 @@ Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: run
 Filename: "briolauncher://register/{#DMAppName}/{#DMAppVersion}/{app}\{#DMAppExeName}?background=true"; Flags: shellexec runasoriginaluser nowait
 Filename: "{app}\{#DMAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DMAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
-[UninstallDelete]            
+[UninstallDelete]  
+Name: "{commonappdata}{#DMProgramDataPath}Logs"; Type: filesandordirs          
 Name: "{commonappdata}{#DMProgramDataPath}"; Type: dirifempty
 Name: "{commonappdata}\{#MrsPublisher}"; Type: dirifempty
 
