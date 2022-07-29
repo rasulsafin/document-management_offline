@@ -38,6 +38,54 @@ build:
     paths:
       - '%ARTIFACTS_PATH%'
 
+build-updater:
+  stage: build
+  only:
+    - branches
+  allow_failure: true
+  script:
+    - 'nuget restore'
+    - mkdir "%UPDATER_ARTIFACTS_FOLDER%
+    - '"%MSBUILD_PATH%" /property:Configuration=Release'
+    - xcopy /E "%UPDATER_BUILD_PATH%" "%UPDATER_ARTIFACTS_FOLDER%"
+    - del /S "%UPDATER_ARTIFACTS_FOLDER%\*.pdb"
+    - echo UPDATER_ARTIFACTS_FOLDER=%UPDATER_ARTIFACTS_FOLDER% >> build.env
+  artifacts:
+    expire_in: 2 days
+    paths:
+      - '%UPDATER_ARTIFACTS_FOLDER%'
+    reports:
+      dotenv: build.env
+  variables:
+    BUILD_VERSION: "${BUILD_VERSION_COMMON}-${WEEK_TAG}"
+    UPDATER_ARTIFACTS_FOLDER: "BRIO Docs Updater ${BUILD_VERSION}"
+    UPDATER_BUILD_PATH: 'Brio.Docs.Updater\bin\Release\net5.0'
+        
+build-installer:
+  stage: build
+  needs:
+    - job: build
+      artifacts: true
+    - job: build-updater
+      artifacts: true
+  allow_failure: true
+  script:
+    - iscc /O"%INSTALLER_ARTIFACTS_FULL_PATH%" "%SCRIPT_PATH%" "/DDMAppName=%BUILD_NAME%" "/DDMAppVersion=%BUILD_VERSION_COMMON%" "/DDMSourceBuild=%BUILD_PATH%" "/DDMUpdater=%UPDATER_PATH%"
+  artifacts:
+    name: "%ARTIFACTS_NAME%"
+    paths:
+      - "%INSTALLER_ARTIFACTS_FOLDER%"
+    expire_in: 1 week
+  variables:
+    BUILD_NAME: "BrioDocs"
+    BUILD_VERSION: "${BUILD_VERSION_COMMON}-${WEEK_TAG}"
+    SCRIPT_PATH: "${CI_PROJECT_DIR}/Installation/installer.iss"
+    INSTALLER_ARTIFACTS_FOLDER: "BRIO Docs Setup ${BUILD_VERSION}"
+    INSTALLER_ARTIFACTS_FULL_PATH: "${CI_PROJECT_DIR}/${INSTALLER_ARTIFACTS_FOLDER}/"
+    ARTIFACTS_NAME: "BRIO-DOCS-SETUP-${BUILD_VERSION}"
+    BUILD_PATH: "${CI_PROJECT_DIR}/${ARTIFACTS_PATH}/"
+    UPDATER_PATH: "${CI_PROJECT_DIR}/${UPDATER_ARTIFACTS_FOLDER}/"
+
 tag:
   stage: deploy
   tags:

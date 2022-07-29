@@ -1,8 +1,8 @@
 ﻿; Uncomment the following lines to run via Inno Setup IDE.
-#define DMAppName "BRIO Docs"
-#define DMAppVersion "dev"
-#define DMSourceBuild "..\Brio.Docs.Api\bin\Release\net5.0\"
-#define DMUpdater "..\Brio.Docs.Updater\bin\Release\net5.0\"
+;#define DMAppName "BRIO Docs"
+;#define DMAppVersion "dev"
+;#define DMSourceBuild "..\Brio.Docs.Api\bin\Release\net5.0\"
+;#define DMUpdater "..\Brio.Docs.Updater\bin\Release\net5.0\"
 
 #define DMAppExeName "Brio.Docs.Api.exe"
 #define MrsPublisher "BRIO MRS"
