@@ -46,7 +46,7 @@ russian.RemoveDB=Вы хотите удалить все проекты и за�
 
 [Run]
 Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
-Filename: "briolauncher://register/{#DMAppName}/{#DMAppVersion}/{app}\{#DMAppExeName}?background=true"; Flags: shellexec runasoriginaluser nowait
+Filename: "briolauncher://register/{#DMAppName}/{#DMAppVersion}/{app}\{#DMAppExeName}?background=true"; Flags: shellexec runascurrentuser nowait
 Filename: "{app}\{#DMAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DMAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
 [UninstallDelete]  
