@@ -99,16 +99,20 @@ namespace Brio.Docs.Services
                     {
                         try
                         {
-                            foreach (var item in dbItems)
+                            logger.LogTrace("DeleteItems task started ({ID})", id);
+                            var result = await storage.DeleteFiles(project?.Title, data);
+                            logger.LogDebug("DeleteItems is successful: {Result}", result);
+
+                            if (result)
                             {
-                                scopeContext.Items.Remove(item);
+                                foreach (var item in dbItems)
+                                {
+                                    scopeContext.Items.Remove(item);
+                                }
+
+                                await scopeContext.SaveChangesAsync();
                             }
 
-                            await scopeContext.SaveChangesAsync();
-
-                            logger.LogTrace("DeleteItems task started ({ID})", id);
-                            var result = await storage.DeleteFiles(project?.ExternalID, data);
-                            logger.LogDebug("DeleteItems is successful: {Result}", result);
                             return new RequestResult(result);
                         }
                         catch (Exception e)
