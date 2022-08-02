@@ -249,8 +249,8 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                await service.DeleteItems(new ID<UserDto>(userID), itemIds);
-                return Ok(true);
+                var result = await service.DeleteItems(new ID<UserDto>(userID), itemIds);
+                return Accepted(result);
             }
             catch (NotImplementedException ex)
             {

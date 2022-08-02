@@ -51,7 +51,7 @@ namespace Brio.Docs.Services
             logger.LogTrace("ItemService created");
         }
 
-        public async Task<bool> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
+        public async Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogTrace("DeleteItems started for user {@UserID} with itemIds: {@ItemIds}", userID, itemIds);
@@ -128,7 +128,7 @@ namespace Brio.Docs.Services
                     TaskCreationOptions.LongRunning);
                 requestQueue.AddRequest(id, task.Unwrap(), src);
 
-                return false;
+                return new RequestID(id);
             }
             catch (Exception ex)
             {

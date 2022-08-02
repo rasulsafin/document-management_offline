@@ -63,6 +63,6 @@ namespace Brio.Docs.Client.Services
         /// <returns>True if deleted successfully.</returns>
         /// <exception cref="System.NotImplementedException">Thrown while method is not implemented.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
-        Task<bool> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
+        Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
     }
 }
