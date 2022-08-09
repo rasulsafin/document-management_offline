@@ -7,7 +7,6 @@ using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
-using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
@@ -58,11 +57,10 @@ namespace Brio.Docs.Connections.Bim360.UnitTests
             hub.Projects.Add(project.ID, project);
 
             var stubItemsSyncHelper = new Mock<IItemsUpdater>();
-            var stubUserReader = new Mock<IUsersGetter>();
 
             snapshotGetter = new SnapshotGetter(bim360Snapshot);
             snapshotUpdater = new SnapshotUpdater(snapshotGetter);
-            var issueSnapshotUtilities = new IssueSnapshotUtilities(mockIssuesService.Object, stubUserReader.Object);
+            var issueSnapshotUtilities = new IssueSnapshotUtilities(mockIssuesService.Object);
 
             objectiveUpdater = new ObjectiveUpdater(
                 snapshotGetter,
