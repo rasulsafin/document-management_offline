@@ -124,8 +124,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
                 if (comment != null)
                 {
-                    issueSnapshot.Comments.Add(
-                        await snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot.Entity));
+                    issueSnapshot.Comments.Add(snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot));
                 }
             }
         }

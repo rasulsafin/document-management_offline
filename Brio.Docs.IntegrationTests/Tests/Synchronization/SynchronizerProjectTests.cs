@@ -109,6 +109,179 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
+        public async Task Synchronize_FilterRejectsLocalProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            var ignore = "Ignore";
+            projectLocal.Title = ignore;
+            Fixture.Context.Projects.Update(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsSynchronizedProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            var ignore = "Ignore";
+            projectLocal.Title = "New value";
+            projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Projects.UpdateRange(projectLocal, projectSynchronized);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsLocalAndSynchronizedProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            projectLocal.Title = "New value";
+            projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Projects.Update(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => x.ID != projectLocal.ID && x.ID != projectSynchronized.ID,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsRemoteProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            var ignore = "Ignore";
+            projectLocal.Title = "New value";
+            projectRemote.Title = ignore;
+            projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Projects.Update(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => x.Title != ignore,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsRemoteAndSynchronizedProject_SynchronizeRejectedToo()
+        {
+            // Arrange.
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            projectLocal.Title = "New value";
+            projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Projects.Update(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => x.ID == projectLocal.ID,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_FilterRejectsAll_DoNotSynchronize()
+        {
+            // Arrange.
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            projectLocal.Title = "New value 1";
+            projectRemote.Title = "New value 2";
+            projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
+            Fixture.Context.Projects.Update(projectLocal);
+            await Fixture.Context.SaveChangesAsync();
+            var data = new SynchronizingData
+            {
+                User = await Fixture.Context.Users.FirstAsync(),
+                ProjectsFilter = x => false,
+            };
+
+            // Act.
+            var synchronizationResult = await synchronizer.Synchronize(
+                data,
+                Connection.Object,
+                new ConnectionInfoExternalDto(),
+                new Progress<double>(),
+                new CancellationTokenSource().Token);
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+        }
+
+        [TestMethod]
         public async Task Synchronize_ProjectAddedLocal_AddProjectToRemoteAndSynchronize()
         {
             // Arrange.

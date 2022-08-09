@@ -14,14 +14,11 @@ namespace Brio.Docs.Connections.Bim360.Utilities
     internal class IssueSnapshotUtilities
     {
         private readonly IIssuesService issuesService;
-        private readonly IUsersGetter accountAdminService;
 
         public IssueSnapshotUtilities(
-            IIssuesService issuesService,
-            IUsersGetter accountAdminService)
+            IIssuesService issuesService)
         {
             this.issuesService = issuesService;
-            this.accountAdminService = accountAdminService;
         }
 
         public async Task<Dictionary<string, Attachment>> GetAttachments(
@@ -40,14 +37,14 @@ namespace Brio.Docs.Connections.Bim360.Utilities
             var result = new List<CommentSnapshot>();
 
             await foreach (var comment in issuesService.GetCommentsAsync(project.IssueContainer, issueSnapshot.ID))
-                result.Add(await FillCommentAuthor(comment, project.HubSnapshot.Entity));
+                result.Add(FillCommentAuthor(comment, project.HubSnapshot));
 
             return result;
         }
 
-        public async Task<CommentSnapshot> FillCommentAuthor(Comment comment, Hub hub)
+        public CommentSnapshot FillCommentAuthor(Comment comment, HubSnapshot hub)
         {
-            var author = (await accountAdminService.GetAccountUsersAsync(hub)).FirstOrDefault(u => u.Uid == comment.Attributes.CreatedBy);
+            hub.Users.TryGetValue(comment.Attributes.CreatedBy, out var author);
             return new CommentSnapshot(comment)
             {
                 Author = author == null ? MrsConstants.DEFAULT_AUTHOR_NAME : author.Name,

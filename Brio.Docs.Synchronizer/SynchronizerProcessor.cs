@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Extensions;
+using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
@@ -19,22 +19,33 @@ namespace Brio.Docs.Synchronization
     internal class SynchronizerProcessor : ISynchronizerProcessor
     {
         private readonly DMContext context;
+        private readonly IAttacher<Objective> objectiveAttacher;
+        private readonly ISynchronizationStrategy<Objective> objectiveStrategy;
+        private readonly IAttacher<Project> projectAttacher;
+        private readonly ISynchronizationStrategy<Project> projectStrategy;
         private readonly ILogger<SynchronizerProcessor> logger;
 
         public SynchronizerProcessor(
             DMContext context,
+            IAttacher<Project> projectAttacher,
+            IAttacher<Objective> objectiveAttacher,
+            ISynchronizationStrategy<Project> projectStrategy,
+            ISynchronizationStrategy<Objective> objectiveStrategy,
             ILogger<SynchronizerProcessor> logger)
         {
             this.context = context;
+            this.projectAttacher = projectAttacher;
+            this.objectiveAttacher = objectiveAttacher;
+            this.projectStrategy = projectStrategy;
+            this.objectiveStrategy = objectiveStrategy;
             this.logger = logger;
             logger.LogTrace("ASynchronizationStrategy created");
         }
 
         public async Task<List<SynchronizingResult>> Synchronize<TDB, TDto>(
-            ISynchronizationStrategy<TDB> strategy,
             SynchronizingData data,
             IEnumerable<TDB> remoteCollection,
-            Expression<Func<TDB, bool>> filter,
+            IQueryable<TDB> set,
             CancellationToken token,
             IProgress<double> progress = null)
             where TDB : class, ISynchronizable<TDB>, new()
@@ -44,29 +55,24 @@ namespace Brio.Docs.Synchronization
 
             progress?.Report(0.0);
 
-            var defaultFiler = strategy.GetFilter(data);
-
-            var dbLocal = await context.Set<TDB>()
+            var dbLocal = await set
                .Unsynchronized()
                .Include(x => x.SynchronizationMate)
-               .Where(defaultFiler)
-               .Where(filter)
                .ToListAsync()
                .ConfigureAwait(false);
 
-            var dbSynchronized = await context.Set<TDB>()
+            var dbSynchronized = await set
                .Synchronized()
                .Include(x => x.SynchronizationMate)
-               .Where(defaultFiler)
-               .Where(filter)
                .ToListAsync()
                .ConfigureAwait(false);
+
+            var strategy = GetStrategy<TDB>();
+            var attacher = GetAttacher<TDB>();
 
             var local = strategy.Order(dbLocal);
             var synchronized = strategy.Order(dbSynchronized);
-            var remote = strategy.Order(
-                remoteCollection
-                   .Where(filter.Compile()));
+            var remote = strategy.Order(remoteCollection);
 
             var tuples = TuplesUtils.CreateSynchronizingTuples(
                 local,
@@ -76,6 +82,7 @@ namespace Brio.Docs.Synchronization
 
             logger.LogDebug("{@Count} tuples created", tuples.Count);
 
+            DBContextUtilities.ReloadContext(context, data);
             var results = new List<SynchronizingResult>();
             var i = 0;
 
@@ -87,6 +94,7 @@ namespace Brio.Docs.Synchronization
                 logger.LogTrace("Tuple {ID}", tuple.ExternalID);
                 token.ThrowIfCancellationRequested();
 
+                await attacher.AttachExisting(tuple).ConfigureAwait(false);
                 var action = tuple.DetermineAction();
                 logger.LogDebug("Tuple {ID} must {@Action}", tuple.ExternalID, action);
 
@@ -136,6 +144,23 @@ namespace Brio.Docs.Synchronization
                 SynchronizingAction.RemoveFromRemote => strategy.RemoveFromRemote,
                 _ => throw new ArgumentOutOfRangeException(nameof(action), "Invalid action")
             };
+        }
+
+        private IAttacher<TDB> GetAttacher<TDB>()
+        {
+            var type = typeof(TDB);
+            return type == typeof(Project) ? (IAttacher<TDB>)projectAttacher :
+                type == typeof(Objective)  ? (IAttacher<TDB>)objectiveAttacher :
+                                             throw new NotSupportedException();
+        }
+
+        private ISynchronizationStrategy<TDB> GetStrategy<TDB>()
+            where TDB : class
+        {
+            var type = typeof(TDB);
+            return type == typeof(Project) ? (ISynchronizationStrategy<TDB>)projectStrategy :
+                type == typeof(Objective)  ? (ISynchronizationStrategy<TDB>)objectiveStrategy :
+                                             throw new NotSupportedException();
         }
 
         private async Task SaveDb(SynchronizingData data)

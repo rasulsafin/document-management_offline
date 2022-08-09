@@ -96,10 +96,10 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> UploadFileAsync(string directoryHref, string filePath)
         {
-            directoryHref = NormalizePath(directoryHref);
+            var normalizedDirectoryHref = NormalizePath(directoryHref);
 
             var fileInfo = new FileInfo(filePath);
-            string cloudName = PathManager.FileName(directoryHref, fileInfo.Name);
+            string cloudName = PathManager.FileName(normalizedDirectoryHref, fileInfo.Name);
 
             using (var reader = fileInfo.OpenRead())
             {
@@ -107,7 +107,8 @@ namespace Brio.Docs.Connections.BrioCloud
 
                 if (response.IsSuccessful)
                 {
-                    return cloudName;
+                    var rawName = PathManager.FileName(directoryHref, fileInfo.Name);
+                    return rawName;
                 }
                 else
                 {
