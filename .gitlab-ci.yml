@@ -63,6 +63,8 @@ build-updater:
         
 build-installer:
   stage: build
+  only:
+    - branches
   needs:
     - job: build
       artifacts: true
