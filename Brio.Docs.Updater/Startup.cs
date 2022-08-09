@@ -7,16 +7,15 @@ namespace Brio.Docs.Updater
 {
     public class Startup
     {
-        private readonly string connectionString;
-
-        public Startup(string connectionString)
+        public Startup(string[] args)
         {
-            this.connectionString = connectionString;
             var builder = new ConfigurationBuilder().AddJsonFile("appsettings.json");
 
 #if DEBUG
             builder.AddJsonFile("appsettings.Debug.json");
 #endif
+
+            builder.AddCommandLine(args);
 
             Configuration = builder.Build();
         }
@@ -24,9 +23,7 @@ namespace Brio.Docs.Updater
         public IConfiguration Configuration { get; }
 
         private string ConnectionString
-            => string.IsNullOrEmpty(connectionString)
-                ? Configuration.GetConnectionString("DefaultConnection")
-                : connectionString;
+            => Configuration.GetConnectionString("DefaultConnection");
 
         public void ConfigureServices(IServiceCollection services)
         {
