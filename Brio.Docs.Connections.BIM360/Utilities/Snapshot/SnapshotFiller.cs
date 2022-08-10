@@ -6,6 +6,7 @@ using Brio.Docs.Connections.Bim360.Forge;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models;
+using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Utilities;
@@ -27,6 +28,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         private readonly ConfigurationsHelper configUtilities;
         private readonly StatusEnumCreator statusEnumCreator;
         private readonly ProjectSnapshotUtilities projectSnapshotUtilities;
+        private readonly AccountAdminService accountAdminService;
 
         public SnapshotFiller(
             Bim360Snapshot snapshot,
@@ -40,7 +42,8 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             IssueSnapshotUtilities snapshotUtilities,
             ConfigurationsHelper configUtilities,
             StatusEnumCreator statusEnumCreator,
-            ProjectSnapshotUtilities projectSnapshotUtilities)
+            ProjectSnapshotUtilities projectSnapshotUtilities,
+            AccountAdminService accountAdminService)
         {
             this.snapshot = snapshot;
             this.hubsService = hubsService;
@@ -54,6 +57,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
             this.configUtilities = configUtilities;
             this.statusEnumCreator = statusEnumCreator;
             this.projectSnapshotUtilities = projectSnapshotUtilities;
+            this.accountAdminService = accountAdminService;
         }
 
         public bool IgnoreTestEntities { private get; set; } = true;
@@ -115,6 +119,7 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
         public async Task UpdateIssuesIfNull(DateTime date = default)
         {
             await UpdateProjectsIfNull();
+            await UpdateUsersIfNull();
 
             foreach (var project in snapshot.ProjectEnumerable.Where(x => x.Issues == null))
             {
@@ -136,6 +141,25 @@ namespace Brio.Docs.Connections.Bim360.Utilities.Snapshot
                     project.Issues.Add(issue.ID, issueSnapshot);
                     issueSnapshot.Attachments = await snapshotUtilities.GetAttachments(issueSnapshot, project);
                     issueSnapshot.Comments = await snapshotUtilities.GetComments(issueSnapshot, project);
+                }
+            }
+        }
+
+        public async Task UpdateUsersIfNull()
+        {
+            await UpdateHubsIfNull();
+
+            foreach (var hub in snapshot.Hubs.Where(hub => hub.Value.Users == null))
+            {
+                var usersInHub = await accountAdminService.GetAccountUsersAsync(hub.Value.Entity);
+                hub.Value.Users = new Dictionary<string, User>();
+
+                foreach (var user in usersInHub)
+                {
+                    if (hub.Value.Users.ContainsKey(user.ID))
+                        hub.Value.Users.Remove(user.ID);
+
+                    hub.Value.Users.Add(user.Uid, user);
                 }
             }
         }
