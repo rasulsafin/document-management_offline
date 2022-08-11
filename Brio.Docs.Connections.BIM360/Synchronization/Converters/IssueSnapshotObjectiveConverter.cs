@@ -16,6 +16,7 @@ using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Integration.Interfaces;
+using Newtonsoft.Json;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 {
@@ -155,7 +156,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
                     ExternalID = DataMemberUtilities.GetPath<Comment.CommentAttributes>(x => x.Body),
                     Type = DynamicFieldType.STRING,
                     Name = MrsConstants.COMMENT_FIELD_NAME,
-                    Value = commentSnapshot.Entity.Attributes.Body,
+                    Value = RemoveJson(commentSnapshot.Entity.Attributes.Body),
                     UpdatedAt = commentSnapshot.Entity.Attributes.UpdatedAt ?? default,
                 };
 
@@ -168,6 +169,22 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
                 yield return comment;
             }
+        }
+
+        private string RemoveJson(string body)
+        {
+            if (!body.Contains("{") && !body.Contains("}"))
+                return body;
+
+            var startIndex = body.IndexOf("{");
+            var endIndex = body.IndexOf("}");
+
+            var json = body.Substring(startIndex, endIndex - startIndex + 1);
+
+            var comment = JsonConvert.DeserializeObject<CommentJson>(json);
+
+            var finalString = $"{body.Substring(0, startIndex)}{comment.Name}{body.Substring(endIndex)}";
+            return finalString;
         }
 
         private IEnumerable<ItemExternalDto> GetItems(IssueSnapshot snapshot)
@@ -237,6 +254,15 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             parsedToDto.Location.Location = location.ToTuple();
             parsedToDto.Location.CameraPosition = camera.ToTuple();
             return true;
+        }
+
+        private class CommentJson
+        {
+            public string Type { get; set; }
+
+            public string Id { get; set; }
+
+            public string Name { get; set; }
         }
     }
 }
