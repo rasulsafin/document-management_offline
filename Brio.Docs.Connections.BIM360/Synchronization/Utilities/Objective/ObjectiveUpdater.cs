@@ -146,7 +146,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             {
                 if (comment.Contains($"@{user.Name}"))
                 {
-                    var commentJson = new CommentJson() { Type = "user", Id = user.AutodeskID, Name = user.Name};
+                    var commentJson = new Mention() { Type = "user", Id = user.AutodeskID, Name = user.Name};
                     var json = JsonConvert.SerializeObject(commentJson);
 
                     var result = comment.Replace($"@{user.Name}", $"@{json}");

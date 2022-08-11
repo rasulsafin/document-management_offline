@@ -181,7 +181,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             var json = body.Substring(startIndex, endIndex - startIndex + 1);
 
-            var comment = JsonConvert.DeserializeObject<CommentJson>(json);
+            var comment = JsonConvert.DeserializeObject<Mention>(json);
 
             var finalString = $"{body.Substring(0, startIndex)}{comment.Name}{body.Substring(endIndex)}";
             return finalString;
@@ -254,18 +254,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             parsedToDto.Location.Location = location.ToTuple();
             parsedToDto.Location.CameraPosition = camera.ToTuple();
             return true;
-        }
-
-        public class CommentJson
-        {
-            [JsonProperty("type")]
-            public string Type { get; set; }
-
-            [JsonProperty("id")]
-            public string Id { get; set; }
-
-            [JsonProperty("name")]
-            public string Name { get; set; }
         }
     }
 }
