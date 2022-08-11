@@ -142,19 +142,16 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             if (!comment.Contains("@"))
                 return comment;
 
-            var startAsignationIndex = comment.IndexOf("@");
-            var assingationComment = comment.Remove(0, startAsignationIndex);
-            assingationComment = assingationComment.Replace("@", string.Empty);
             foreach (var user in users)
             {
-                if (assingationComment.StartsWith(user.Name))
+                if (comment.Contains($"@{user.Name}"))
                 {
                     var commentJson = new CommentJson() { Type = "user", Id = user.AutodeskID, Name = user.Name};
                     var json = JsonConvert.SerializeObject(commentJson);
 
-                    var result = comment.Replace(user.Name, json);
+                    var result = comment.Replace($"@{user.Name}", $"@{json}");
 
-                    return result;
+                    comment = result;
                 }
             }
 
