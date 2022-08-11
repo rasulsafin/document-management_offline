@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
@@ -16,6 +17,8 @@ using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Newtonsoft.Json;
+using static Brio.Docs.Connections.Bim360.Synchronization.Converters.IssueSnapshotObjectiveConverter;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
@@ -27,6 +30,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly IIssuesService issuesService;
         private readonly IItemsUpdater itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
+        private readonly AccountAdminService accountAdminService;
 
         private readonly IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>>
             converterBimElementsToComments;
@@ -50,6 +54,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IIssuesService issuesService,
             IItemsUpdater itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
+            AccountAdminService accountAdminService,
             IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>> converterBimElementsToComments,
             IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements,
             IConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>> converterLinkedInfoToComments,
@@ -63,6 +68,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.snapshotUtilities = snapshotUtilities;
+            this.accountAdminService = accountAdminService;
             this.converterBimElementsToComments = converterBimElementsToComments;
             this.converterCommentsToBimElements = converterCommentsToBimElements;
             this.converterLinkedInfoToComments = converterLinkedInfoToComments;
@@ -120,6 +126,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
             if (newComment != null)
             {
+                var users = await accountAdminService.GetProjectUsersAsync(project.ID).ToListAsync();
+                newComment.Value = Assignate(newComment.Value, users);
                 var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
 
                 if (comment != null)
@@ -127,6 +135,30 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                     issueSnapshot.Comments.Add(snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot));
                 }
             }
+        }
+
+        private string Assignate(string comment, List<ProjectUser> users)
+        {
+            if (!comment.Contains("@"))
+                return comment;
+
+            var startAsignationIndex = comment.IndexOf("@");
+            var assingationComment = comment.Remove(0, startAsignationIndex);
+            assingationComment = assingationComment.Replace("@", string.Empty);
+            foreach (var user in users)
+            {
+                if (assingationComment.StartsWith(user.Name))
+                {
+                    var commentJson = new CommentJson() { Type = "user", Id = user.AutodeskID, Name = user.Name};
+                    var json = JsonConvert.SerializeObject(commentJson);
+
+                    var result = comment.Replace(user.Name, json);
+
+                    return result;
+                }
+            }
+
+            return comment;
         }
 
         private async Task<IssueSnapshot> Put(Issue issue, ProjectSnapshot project, bool isNew)
