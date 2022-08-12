@@ -22,7 +22,7 @@ namespace Brio.Docs.Connections.LementPro.Synchronization
             logger.LogTrace("LementProConnectionStorage created");
         }
 
-        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
             logger.LogTrace(
                 "DeleteFiles started with projectId: {@ProjectID}, itemExternalDtos: {@Items}",

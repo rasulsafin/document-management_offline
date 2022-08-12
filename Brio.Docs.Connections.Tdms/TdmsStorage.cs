@@ -18,7 +18,7 @@ namespace Brio.Docs.Connections.Tdms
             this.tdms = tdms;
         }
 
-        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
             throw new NotImplementedException();
         }

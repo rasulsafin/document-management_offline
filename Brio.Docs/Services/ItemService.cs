@@ -89,6 +89,7 @@ namespace Brio.Docs.Services
                 var storage = await connection.GetStorage(info);
 
                 var id = Guid.NewGuid().ToString();
+                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
                 var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
                 var src = new CancellationTokenSource();
                 var scopeContext = contextFactory.Create(scope);
@@ -99,7 +100,7 @@ namespace Brio.Docs.Services
                         try
                         {
                             logger.LogTrace("DeleteItems task started ({ID})", id);
-                            var result = await storage.DeleteFiles(project?.Title, data);
+                            var result = await storage.DeleteFiles(project?.Title, data, progress);
                             logger.LogDebug("DeleteItems is successful: {Result}", result);
 
                             if (result)

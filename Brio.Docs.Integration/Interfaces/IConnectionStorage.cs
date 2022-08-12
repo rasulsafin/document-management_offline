@@ -26,7 +26,8 @@ namespace Brio.Docs.Integration.Interfaces
         /// </summary>
         /// <param name="projectId">Project with items.</param>
         /// <param name="itemExternalDtos">Items to delete.</param>
+        /// <param name="progress">Progress to be tracked.</param>
         /// <returns>Deletion result.</returns>
-        Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos);
+        Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress);
     }
 }
