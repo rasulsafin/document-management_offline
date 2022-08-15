@@ -100,7 +100,7 @@ namespace Brio.Docs.Services
                         try
                         {
                             logger.LogTrace("DeleteItems task started ({ID})", id);
-                            var result = await storage.DeleteFiles(project?.Title, data, progress);
+                            var result = await storage.DeleteFiles(project?.ExternalID, project?.Title, data, progress);
                             logger.LogDebug("DeleteItems is successful: {Result}", result);
 
                             if (result)

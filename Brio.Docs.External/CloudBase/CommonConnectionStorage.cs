@@ -16,9 +16,9 @@ namespace Brio.Docs.External.CloudBase
         public CommonConnectionStorage(ICloudManager cloudManager)
             =>  this.cloudManager = cloudManager;
 
-        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
+        public async Task<bool> DeleteFiles(string projectId, string projectName, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
-            var projectFiles = await ItemsSyncHelper.GetProjectItems(projectId, cloudManager);
+            var projectFiles = await ItemsSyncHelper.GetProjectItems(projectName, cloudManager);
             var deletionResult = true;
             int i = 0;
             double itemCount = itemExternalDtos.Count();
