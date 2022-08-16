@@ -223,6 +223,7 @@ namespace Brio.Docs.Api.Controllers
         /// <summary>
         /// Delete items from remote connection.
         /// </summary>
+        /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>True if deleted successfully.</returns>
         /// <response code="200">Items were deleted successfully.</response>
@@ -231,7 +232,7 @@ namespace Brio.Docs.Api.Controllers
         /// <response code="500">Something went wrong while deleting items.</response>
         /// <response code="501">Method is not implemented yet.</response>
         [HttpPost]
-        [Route("delete")]
+        [Route("delete/{userID}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(bool), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -239,13 +240,17 @@ namespace Brio.Docs.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status501NotImplemented)]
         public async Task<IActionResult> DeleteItems(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID,
             [FromBody]
             IEnumerable<ID<ItemDto>> itemIds)
         {
             try
             {
-                await service.DeleteItems(itemIds);
-                return Ok(true);
+                var result = await service.DeleteItems(new ID<UserDto>(userID), itemIds);
+                return Accepted(result);
             }
             catch (NotImplementedException ex)
             {

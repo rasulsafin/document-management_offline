@@ -57,7 +57,7 @@ namespace Brio.Docs.Connections.MrsPro
             return true;
         }
 
-        public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos)
+        public Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
             throw new NotImplementedException();
         }
