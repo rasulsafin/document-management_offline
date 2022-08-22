@@ -1,4 +1,5 @@
 ﻿using System;
+using Brio.Docs.Client.Exceptions;
 using Newtonsoft.Json;
 
 namespace Brio.Docs.Client
@@ -10,13 +11,13 @@ namespace Brio.Docs.Client
         {
         }
 
-        public RequestResult(Exception exception)
+        public RequestResult(DocumentManagementException exception)
             : this(null, exception)
         {
         }
 
         [JsonConstructor]
-        public RequestResult(object value, Exception exception)
+        public RequestResult(object value, DocumentManagementException exception)
         {
             Value = value;
             Exception = exception;
@@ -24,6 +25,6 @@ namespace Brio.Docs.Client
 
         public object Value { get; private set; }
 
-        public Exception Exception { get; set; }
+        public DocumentManagementException Exception { get; set; }
     }
 }

@@ -89,7 +89,7 @@ namespace Brio.Docs.Services
                 logger.LogTrace("Mapped info {@Info}", info);
 
                 var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v * 0.99, id); });
                 var src = new CancellationTokenSource();
                 var task = Task.Factory.StartNew(
                     async () =>
@@ -104,7 +104,7 @@ namespace Brio.Docs.Services
                             logger.LogInformation("Synchronization finished for user: {UserID}", userID);
                             return new RequestResult(
                                 synchronizationResult.Count == 0,
-                                synchronizationResult.FirstOrDefault()?.Exception.ConvertToBase());
+                                synchronizationResult.FirstOrDefault()?.Exception.ConvertToDocumentManagementException());
                         }
                         finally
                         {
