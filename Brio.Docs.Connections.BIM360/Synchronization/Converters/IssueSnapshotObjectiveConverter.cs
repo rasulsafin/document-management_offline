@@ -173,7 +173,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
         private string RemoveJson(string body)
         {
-            if (!body.Contains("{") && !body.Contains("}"))
+            if (!body.Contains("@") || !body.Contains("{") || !body.Contains("}"))
                 return body;
 
             var startIndex = body.IndexOf("{");
@@ -181,10 +181,17 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
 
             var json = body.Substring(startIndex, endIndex - startIndex + 1);
 
-            var comment = JsonConvert.DeserializeObject<Mention>(json);
+            try
+            {
+                var comment = JsonConvert.DeserializeObject<Mention>(json);
 
-            var finalString = $"{body.Substring(0, startIndex)}{comment.Name}{body.Substring(endIndex)}";
-            return finalString;
+                var finalString = $"{body.Substring(0, startIndex)}{comment.Name}{body.Substring(++endIndex)}";
+                return RemoveJson(finalString);
+            }
+            catch (JsonReaderException)
+            {
+                return body;
+            }
         }
 
         private IEnumerable<ItemExternalDto> GetItems(IssueSnapshot snapshot)

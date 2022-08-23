@@ -126,8 +126,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
             if (newComment != null)
             {
-                var users = await accountAdminService.GetProjectUsersAsync(project.ID).ToListAsync();
-                newComment.Value = Assignate(newComment.Value, users);
+                var asignVariants = project.AssignToVariants;
+                newComment.Value = Assignate(newComment.Value, asignVariants);
                 var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
 
                 if (comment != null)
@@ -137,19 +137,19 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             }
         }
 
-        private string Assignate(string comment, List<ProjectUser> users)
+        private string Assignate(string comment, Dictionary<string, AssignToVariant> asignVariants)
         {
             if (!comment.Contains("@"))
                 return comment;
 
-            foreach (var user in users)
+            foreach (var asignVariant in asignVariants.Values)
             {
-                if (comment.Contains($"@{user.Name}"))
+                if (comment.Contains($"@{asignVariant.Title}"))
                 {
-                    var commentJson = new Mention() { Type = "user", Id = user.AutodeskID, Name = user.Name};
+                    var commentJson = new Mention() { Type = asignVariant.Type.ToString().ToLower(), Id = asignVariant.Entity, Name = asignVariant.Title};
                     var json = JsonConvert.SerializeObject(commentJson);
 
-                    var result = comment.Replace($"@{user.Name}", $"@{json}");
+                    var result = comment.Replace($"@{asignVariant.Title}", $"@{json}");
 
                     comment = result;
                 }
