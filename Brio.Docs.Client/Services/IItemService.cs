@@ -58,10 +58,11 @@ namespace Brio.Docs.Client.Services
         /// <summary>
         /// Delete items from remote connection.
         /// </summary>
+        /// <param name="userID">User's ID.</param>
         /// <param name="itemIds">List of items' id from database.</param>
         /// <returns>True if deleted successfully.</returns>
         /// <exception cref="System.NotImplementedException">Thrown while method is not implemented.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
-        Task<bool> DeleteItems(IEnumerable<ID<ItemDto>> itemIds);
+        Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
     }
 }
