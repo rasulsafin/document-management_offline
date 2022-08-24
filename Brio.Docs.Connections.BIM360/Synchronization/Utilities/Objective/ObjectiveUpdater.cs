@@ -146,7 +146,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             {
                 if (comment.Contains($"@{asignVariant.Title}"))
                 {
-                    var commentJson = new Mention() { Type = asignVariant.Type.ToString().ToLower(), Id = asignVariant.Entity, Name = asignVariant.Title};
+                    var commentJson = new Mention() { Type = asignVariant.Type, Id = asignVariant.Entity, Name = asignVariant.Title };
                     var json = JsonConvert.SerializeObject(commentJson);
 
                     var result = comment.Replace($"@{asignVariant.Title}", $"@{json}");

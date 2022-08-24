@@ -1,16 +1,17 @@
-﻿using Newtonsoft.Json;
+﻿using System.Runtime.Serialization;
 
 namespace Brio.Docs.Connections.Bim360.Forge.Models.Bim360
 {
+    [DataContract]
     public class Mention
     {
-        [JsonProperty("type")]
-        public string Type { get; set; }
+        [DataMember(Name = "type")]
+        public AssignToType Type { get; set; }
 
-        [JsonProperty("id")]
+        [DataMember(Name = "id")]
         public string Id { get; set; }
 
-        [JsonProperty("name")]
+        [DataMember(Name = "name")]
         public string Name { get; set; }
     }
 }

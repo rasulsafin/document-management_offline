@@ -171,15 +171,25 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             }
         }
 
-        private string RemoveJson(string body)
+        private string RemoveJson(string body, int index = 0)
         {
             if (!body.Contains("@") || !body.Contains("{") || !body.Contains("}"))
                 return body;
 
-            var startIndex = body.IndexOf("{");
-            var endIndex = body.IndexOf("}");
+            var startIndex = body.IndexOf("{", index);
+
+            if (startIndex == -1)
+                return body;
+
+            var endIndex = body.IndexOf("}", startIndex);
+
+            if (endIndex == -1)
+                return body;
 
             var json = body.Substring(startIndex, endIndex - startIndex + 1);
+
+            if (json == "{}")
+                return RemoveJson(body, startIndex + 1);
 
             try
             {
@@ -190,7 +200,7 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Converters
             }
             catch (JsonReaderException)
             {
-                return body;
+                return RemoveJson(body, startIndex + 1);
             }
         }
 
