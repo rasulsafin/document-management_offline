@@ -137,9 +137,6 @@ namespace Brio.Docs.Services
             }
         }
 
-        public Task<RequestID> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
-            => throw new NotImplementedException();
-
         public async Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
             using var lScope = logger.BeginMethodScope();
