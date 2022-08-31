@@ -64,5 +64,14 @@ namespace Brio.Docs.Client.Services
         /// <exception cref="System.NotImplementedException">Thrown while method is not implemented.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
+
+        /// <summary>
+        /// Delete items from remote connection.
+        /// </summary>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>True if deleted successfully.</returns>
+        /// <exception cref="System.NotImplementedException">Thrown while method is not implemented.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
+        Task<RequestID> DeleteItems(IEnumerable<ID<ItemDto>> itemIds);
     }
 }

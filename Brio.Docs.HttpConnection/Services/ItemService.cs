@@ -32,7 +32,10 @@ namespace Brio.Docs.HttpConnection.Services
         public async Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
             => await Connection.PostObjectJsonAsync<IEnumerable<ID<ItemDto>>, RequestID>($"{PATH}/{{0}}", itemIds, userID);
 
-        public async Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
+        public Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
+            => throw new System.NotImplementedException();
+
+        public async Task<RequestID> DeleteItems(IEnumerable<ID<ItemDto>> itemIds)
             => await Connection.PostObjectJsonAsync<IEnumerable<ID<ItemDto>>, RequestID>($"{PATH}/delete", itemIds);
     }
 }
