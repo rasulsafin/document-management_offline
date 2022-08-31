@@ -25,10 +25,9 @@ namespace Brio.Docs.Integration.Interfaces
         /// Deletes files from remote storage.
         /// </summary>
         /// <param name="projectId">Project id with items.</param>
-        /// <param name="projectName">Project name with items.</param>
         /// <param name="itemExternalDtos">Items to delete.</param>
         /// <param name="progress">Progress to be tracked.</param>
         /// <returns>Deletion result.</returns>
-        Task<bool> DeleteFiles(string projectId, string projectName, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress);
+        Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress);
     }
 }

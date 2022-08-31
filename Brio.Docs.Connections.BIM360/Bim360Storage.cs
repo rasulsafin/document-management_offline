@@ -52,7 +52,7 @@ namespace Brio.Docs.Connections.Bim360
             return true;
         }
 
-        public async Task<bool> DeleteFiles(string projectId, string projectName, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
+        public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
             logger.LogTrace(
                 "DeleteFiles started with projectId: {@ProjectID}, itemExternalDtos: {@Items}",
