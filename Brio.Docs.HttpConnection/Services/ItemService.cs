@@ -33,6 +33,6 @@ namespace Brio.Docs.HttpConnection.Services
             => await Connection.PostObjectJsonAsync<IEnumerable<ID<ItemDto>>, RequestID>($"{PATH}/{{0}}", itemIds, userID);
 
         public async Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
-            => await Connection.PostObjectJsonAsync<IEnumerable<ID<ItemDto>>, RequestID>($"{PATH}/delete", itemIds);
+            => await Connection.PostObjectJsonAsync<IEnumerable<ID<ItemDto>>, RequestID>($"{PATH}/delete/{userID}", itemIds);
     }
 }
