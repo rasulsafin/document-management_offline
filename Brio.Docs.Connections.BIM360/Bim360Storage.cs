@@ -61,6 +61,9 @@ namespace Brio.Docs.Connections.Bim360
 
             try
             {
+                int i = 0;
+                var count = itemExternalDtos.Count();
+
                 foreach (var itemExternalDto in itemExternalDtos)
                 {
                     var item = await itemsService.GetAsync(projectId, itemExternalDto.ExternalID);
@@ -81,11 +84,13 @@ namespace Brio.Docs.Connections.Bim360
                     var deleteResult = await versionsService.PostVersionAsync(projectId, deletedVersion);
                     if (deleteResult.item == null || deleteResult.version == null)
                         return false;
+
+                    progress?.Report(++i / (double)count);
                 }
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Can't delete file");
+                logger.LogError(ex, "Can't delete files");
                 return false;
             }
 
