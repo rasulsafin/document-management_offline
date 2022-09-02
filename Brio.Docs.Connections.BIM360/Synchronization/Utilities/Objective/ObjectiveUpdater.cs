@@ -18,7 +18,6 @@ using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Newtonsoft.Json;
-using static Brio.Docs.Connections.Bim360.Synchronization.Converters.IssueSnapshotObjectiveConverter;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
@@ -30,7 +29,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
         private readonly IIssuesService issuesService;
         private readonly IItemsUpdater itemsSyncHelper;
         private readonly IssueSnapshotUtilities snapshotUtilities;
-        private readonly AccountAdminService accountAdminService;
 
         private readonly IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>>
             converterBimElementsToComments;
@@ -54,7 +52,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             IIssuesService issuesService,
             IItemsUpdater itemsSyncHelper,
             IssueSnapshotUtilities snapshotUtilities,
-            AccountAdminService accountAdminService,
             IConverter<CommentCreatingData<IEnumerable<BimElementExternalDto>>, IEnumerable<Comment>> converterBimElementsToComments,
             IConverter<IEnumerable<Comment>, IEnumerable<BimElementExternalDto>> converterCommentsToBimElements,
             IConverter<CommentCreatingData<LinkedInfo>, IEnumerable<Comment>> converterLinkedInfoToComments,
@@ -68,7 +65,6 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
             this.issuesService = issuesService;
             this.itemsSyncHelper = itemsSyncHelper;
             this.snapshotUtilities = snapshotUtilities;
-            this.accountAdminService = accountAdminService;
             this.converterBimElementsToComments = converterBimElementsToComments;
             this.converterCommentsToBimElements = converterCommentsToBimElements;
             this.converterLinkedInfoToComments = converterLinkedInfoToComments;
