@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Connections.Bim360.Forge.Extensions;
+using Brio.Docs.Connections.Bim360.Forge.Models;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
 using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Utilities;
@@ -66,18 +67,17 @@ namespace Brio.Docs.Connections.Bim360
 
                 foreach (var itemExternalDto in itemExternalDtos)
                 {
-                    var item = await itemsService.GetAsync(projectId, itemExternalDto.ExternalID);
+                    var item = new ObjectInfo() { ID = itemExternalDto.ExternalID, Type = ITEM_TYPE };
 
                     var deletedVersion = new Forge.Models.DataManagement.Version
                     {
                         Attributes = new Forge.Models.DataManagement.Version.VersionAttributes
                         {
-                            Name = itemExternalDto.FullPath,
                             Extension = new Extension { Type = AUTODESK_VERSION_DELETED_TYPE },
                         },
                         Relationships = new Forge.Models.DataManagement.Version.VersionRelationships
                         {
-                            Item = item.item.ToInfo().ToDataContainer(),
+                            Item = item.ToDataContainer(),
                         },
                     };
 
