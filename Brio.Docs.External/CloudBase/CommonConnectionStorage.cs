@@ -18,15 +18,11 @@ namespace Brio.Docs.External.CloudBase
 
         public async Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress)
         {
-            var projectFiles = await ItemsSyncHelper.GetProjectItems(projectId, cloudManager);
             var deletionResult = true;
             int i = 0;
             double itemCount = itemExternalDtos.Count();
             foreach (var item in itemExternalDtos)
             {
-                if (!projectFiles.Any(f => f.ExternalID.Equals(item.ExternalID)))
-                    return false;
-
                 if (!string.IsNullOrWhiteSpace(item?.ExternalID))
                 {
                     deletionResult = await cloudManager.DeleteFile(item.ExternalID) && deletionResult;
