@@ -8,6 +8,7 @@ using Brio.Docs.Connections.Bim360.Forge.Extensions;
 using Brio.Docs.Connections.Bim360.Forge.Interfaces;
 using Brio.Docs.Connections.Bim360.Forge.Models.Bim360;
 using Brio.Docs.Connections.Bim360.Forge.Models.DataManagement;
+using Brio.Docs.Connections.Bim360.Forge.Services;
 using Brio.Docs.Connections.Bim360.Synchronization.Extensions;
 using Brio.Docs.Connections.Bim360.Synchronization.Interfaces;
 using Brio.Docs.Connections.Bim360.Synchronization.Models;
@@ -16,6 +17,7 @@ using Brio.Docs.Connections.Bim360.Utilities.Snapshot;
 using Brio.Docs.Connections.Bim360.Utilities.Snapshot.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
+using Newtonsoft.Json;
 using Version = Brio.Docs.Connections.Bim360.Forge.Models.DataManagement.Version;
 
 namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
@@ -120,6 +122,8 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
 
             if (newComment != null)
             {
+                var asignVariants = project.AssignToVariants;
+                newComment.Value = Assignate(newComment.Value, asignVariants);
                 var comment = await PostComment(newComment, issueSnapshot.ID, project.IssueContainer);
 
                 if (comment != null)
@@ -127,6 +131,27 @@ namespace Brio.Docs.Connections.Bim360.Synchronization.Utilities.Objective
                     issueSnapshot.Comments.Add(snapshotUtilities.FillCommentAuthor(comment, project.HubSnapshot));
                 }
             }
+        }
+
+        private string Assignate(string comment, Dictionary<string, AssignToVariant> asignVariants)
+        {
+            if (!comment.Contains("@"))
+                return comment;
+
+            foreach (var asignVariant in asignVariants.Values)
+            {
+                if (comment.Contains($"@{asignVariant.Title}"))
+                {
+                    var commentJson = new Mention() { Type = asignVariant.Type, Id = asignVariant.Entity, Name = asignVariant.Title };
+                    var json = JsonConvert.SerializeObject(commentJson);
+
+                    var result = comment.Replace($"@{asignVariant.Title}", $"@{json}");
+
+                    comment = result;
+                }
+            }
+
+            return comment;
         }
 
         private async Task<IssueSnapshot> Put(Issue issue, ProjectSnapshot project, bool isNew)

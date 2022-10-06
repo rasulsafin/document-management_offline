@@ -86,6 +86,7 @@ namespace Brio.Docs.Tests.Services
                 Fixture.Context,
                 mapper,
                 Mock.Of<IFactory<IServiceScope, Type, IConnection>>(),
+                Mock.Of<IFactory<IServiceScope, DMContext>>(),
                 Mock.Of<IRequestService>(),
                 Mock.Of<IServiceScopeFactory>(),
                 Mock.Of<ILogger<ItemService>>());
