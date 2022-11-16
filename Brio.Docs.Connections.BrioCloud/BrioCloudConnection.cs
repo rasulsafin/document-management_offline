@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
@@ -59,9 +60,53 @@ namespace Brio.Docs.Connections.BrioCloud
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             var objectiveType = "BrioCloudIssue";
+
+            var criticalStatus = new EnumerationTypeExternalDto()
+            {
+                ExternalID = "Brio.CriticalStatus",
+                Name = "Critical Status",
+                EnumerationValues = new List<EnumerationValueExternalDto>()
+                {
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Critical.Low",
+                        Value = "Low",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Critical.Normal",
+                        Value = "Normal",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Critical.High",
+                        Value = "High",
+                    },
+                },
+            };
+
+            info.EnumerationTypes = new List<EnumerationTypeExternalDto>
+            {
+                criticalStatus,
+            };
+
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
             {
-                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+                new ObjectiveTypeExternalDto
+                {
+                    Name = objectiveType,
+                    ExternalId = objectiveType,
+                    DefaultDynamicFields = new List<DynamicFieldExternalDto>
+                    {
+                        new ()
+                        {
+                            ExternalID = info.UserExternalID,
+                            Type = DynamicFieldType.ENUM,
+                            Name = "Critical Status",
+                            Value = criticalStatus.EnumerationValues.First().ExternalID,
+                        },
+                    },
+                },
             };
 
             if (string.IsNullOrWhiteSpace(info.UserExternalID))
