@@ -32,13 +32,13 @@ namespace Brio.Docs.Utility
 
         internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
-            var location = "г. Москва";
-            var reviewerPosition = "инженером ТИМ-надзора ООО «ААА»";
-            var reviewerName = "Ивановым И.И.";
-            var responsiblePosition = "прораба ООО «ААА»";
-            var responsibleName = "Петрова П.П.";
-            var address = "2-я улица Строителей д. 123";
-            var verificationSubject = "приточная вентиляция в осях В-Г 6-7_на отметке -4,500";
+            var location = "г. Сызрань";
+            var reviewerPosition = "инженером ТИМ-надзора ООО «БББ»";
+            var reviewerName = "Петровым П.П.";
+            var responsiblePosition = "прораба ООО «БББ»";
+            var responsibleName = "Иванова И.И.";
+            var address = "1-я улица Строителей д. 123";
+            var verificationSubject = "приточная вентиляция в осях В-Г//6-7_на отметке -4,500";
 
             var xml = new XElement("Report",
                     new XAttribute("number", reportId),
@@ -56,9 +56,13 @@ namespace Brio.Docs.Utility
 
             foreach (var objectiveType in objectiveTypes)
             {
-                var heading = new XElement(HEADING_ELEMENT, HeadingElement($"{localizer["Status"]}: {StatusToString(objectiveType.Key)}"));
-                xml.Add(heading);
                 var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
+                xml.Add(body);
+            }
+
+            foreach (var objectiveType in objectiveTypes)
+            {
+                var body = new XElement(TABLE, objectiveType.Select(GenerateItemsElement));
                 xml.Add(body);
             }
 
@@ -122,33 +126,32 @@ namespace Brio.Docs.Utility
                 : string.Join("; ", objective.Location.Position);
 
             var result = new XElement(ROW,
-                new XElement(CELL, itemsElements),
-                new XElement(CELL,
-                    new XElement(HORIZONTAL_ELEMENT,
-                            TextElement("ID: ", true),
-                            TextElement($"{objective.ID}")),
-                    new XElement(HORIZONTAL_ELEMENT,
-                            TextElement($"{localizer["Status"]}: ", true),
-                            TextElement($"{StatusToString(objective.Status)}")),
-                    new XElement(HORIZONTAL_ELEMENT,
-                             TextElement($"{localizer["Time"]}: ", true),
-                             TextElement(objective.CreationDate.ToString("g"))),
-                    new XElement(HORIZONTAL_ELEMENT,
-                             TextElement($"{localizer["Position"]}: ", true),
-                             TextElement(locationTextElement)),
-                    new XElement(HORIZONTAL_ELEMENT,
-                             TextElement($"{localizer["Model_Object"]}: ", true),
-                             TextElement(bimElementsText)),
-                    new XElement(HORIZONTAL_ELEMENT,
-                             TextElement($"{localizer["User"]}: ", true),
-                             TextElement(objective.Author)),
-                    new XElement(HORIZONTAL_ELEMENT,
-                            TextElement($"{localizer["Title"]}: ", true),
-                            TextElement(objective.Title)),
-                    new XElement(HORIZONTAL_ELEMENT,
-                            TextElement($"{localizer["Description"]}: ", true),
-                            TextElement(objective.Description))));
+            new XElement(CELL,
+                new XElement(HORIZONTAL_ELEMENT,
+                    TextElement(objective.ID))),
+            new XElement(CELL,
+                new XElement(HORIZONTAL_ELEMENT,
+                    TextElement(objective.Description))),
+            new XElement(CELL,
+                new XElement(HORIZONTAL_ELEMENT,
+                    TextElement(bimElementsText))),
+            new XElement(CELL,
+                new XElement(HORIZONTAL_ELEMENT,
+                    TextElement($"{StatusToString(objective.Status)}"))),
+            new XElement(CELL,
+                new XElement(HORIZONTAL_ELEMENT,
+                    TextElement(objective.CreationDate.ToString("g")))));
 
+            return result;
+        }
+
+        private XElement GenerateItemsElement(ObjectiveToReportDto objective)
+        {
+            var itemsElements = (objective.Items == null || !objective.Items.Any())
+               ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
+               : objective.Items.Select(GenerateXElement);
+
+            var result = new XElement(ROW, new XElement(CELL, itemsElements));
             return result;
         }
 
