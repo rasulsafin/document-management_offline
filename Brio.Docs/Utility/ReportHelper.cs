@@ -32,20 +32,25 @@ namespace Brio.Docs.Utility
 
         internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
+            var location = "г. Москва";
+            var reviewerPosition = "инженером ТИМ-надзора ООО «ААА»";
+            var reviewerName = "Ивановым И.И.";
+            var responsiblePosition = "прораба ООО «ААА»";
+            var responsibleName = "Петрова П.П.";
+            var address = "2-я улица Строителей д. 123";
+            var verificationSubject = "приточная вентиляция в осях В-Г 6-7_на отметке -4,500";
+
             var xml = new XElement("Report",
-                    new XAttribute("project", projectName),
-                    new XAttribute("number_character", localizer["Number_Character"]),
                     new XAttribute("number", reportId),
+                    new XAttribute("location", location),
                     new XAttribute("date", date.ToString("d", Thread.CurrentThread.CurrentUICulture)),
-                    new XAttribute("report_reportlist", localizer["Report_Report_List"]),
-                    new XAttribute("report_for", localizer["Report_For"]),
-                    new XAttribute("report_project", localizer["Report_Project"]),
-                    new XAttribute("report_position", localizer["Report_Position"]),
-                    new XAttribute("report_screenshot", localizer["Report_Screenshot"]),
-                    new XAttribute("report_comment", localizer["Report_Comment"]),
-                    new XAttribute("report_from", localizer["Report_From"]),
-                    new XAttribute("report_signature", localizer["Report_Signature"]),
-                    new XAttribute("report_full_name", localizer["Report_Full_Name"]));
+                    new XAttribute("reviewer_position", reviewerPosition),
+                    new XAttribute("reviewer_name", reviewerName),
+                    new XAttribute("responsible_position", responsiblePosition),
+                    new XAttribute("responsible_name", responsibleName),
+                    new XAttribute("project_name", projectName),
+                    new XAttribute("address", address),
+                    new XAttribute("verification_subject", verificationSubject));
 
             var objectiveTypes = objectives.OrderBy(o => o.Status).GroupBy(o => o.Status);
 

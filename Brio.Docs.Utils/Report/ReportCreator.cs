@@ -97,41 +97,41 @@ namespace Brio.Docs.Utils.ReportCreator
             using (WordprocessingDocument output = WordprocessingDocument.Open(outputDocument, true))
             {
                 Body updatedBodyContent = new Body(bodyDocument.DocumentElement.InnerXml);
-                Footer footer = new Footer(footerDocument.DocumentElement.OuterXml);
-                Header header = new Header(headerDocument.DocumentElement.OuterXml);
+                //Footer footer = new Footer(footerDocument.DocumentElement.OuterXml);
+                //Header header = new Header(headerDocument.DocumentElement.OuterXml);
 
                 var mainPart = output.MainDocumentPart;
 
                 mainPart.Document.Body = updatedBodyContent;
 
-                mainPart.DeleteParts(mainPart.FooterParts);
-                var footerPart = mainPart.AddNewPart<FooterPart>();
-                footerPart.Footer = footer;
-                var footerId = mainPart.GetIdOfPart(footerPart);
+                //mainPart.DeleteParts(mainPart.FooterParts);
+                //var footerPart = mainPart.AddNewPart<FooterPart>();
+                //footerPart.Footer = footer;
+                //var footerId = mainPart.GetIdOfPart(footerPart);
 
-                mainPart.DeleteParts(mainPart.HeaderParts);
-                var headerPart = mainPart.AddNewPart<HeaderPart>();
-                headerPart.Header = header;
-                var headerId = mainPart.GetIdOfPart(headerPart);
+                //mainPart.DeleteParts(mainPart.HeaderParts);
+                //var headerPart = mainPart.AddNewPart<HeaderPart>();
+                //headerPart.Header = header;
+                //var headerId = mainPart.GetIdOfPart(headerPart);
 
-                var sectPrsMainBody = mainPart.Document.Body.Elements<SectionProperties>();
-                foreach (var sectPr in sectPrsMainBody)
-                {
-                    sectPr.RemoveAllChildren<HeaderReference>();
-                    sectPr.PrependChild<HeaderReference>(new HeaderReference() { Id = headerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.First) });
+                //var sectPrsMainBody = mainPart.Document.Body.Elements<SectionProperties>();
+                //foreach (var sectPr in sectPrsMainBody)
+                //{
+                //    sectPr.RemoveAllChildren<HeaderReference>();
+                //    sectPr.PrependChild<HeaderReference>(new HeaderReference() { Id = headerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.First) });
 
-                    sectPr.RemoveAllChildren<FooterReference>();
-                    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.Default) });
-                }
+                //    sectPr.RemoveAllChildren<FooterReference>();
+                //    sectPr.PrependChild<FooterReference>(new FooterReference() { Id = footerId, Type = new EnumValue<HeaderFooterValues>(HeaderFooterValues.Default) });
+                //}
 
-                var bigLogoImagePart = headerPart.AddImagePart(ImagePartType.Jpeg, LOGO_IMAGE_ID);
-                bigLogoImagePart.FeedData(logoBigStream);
+                //var bigLogoImagePart = headerPart.AddImagePart(ImagePartType.Jpeg, LOGO_IMAGE_ID);
+                //bigLogoImagePart.FeedData(logoBigStream);
 
-                var smallLogoImagePart = footerPart.AddImagePart(ImagePartType.Png, LOGO_IMAGE_ID);
-                smallLogoImagePart.FeedData(logoSmallStream);
+                //var smallLogoImagePart = footerPart.AddImagePart(ImagePartType.Png, LOGO_IMAGE_ID);
+                //smallLogoImagePart.FeedData(logoSmallStream);
 
-                logoBigStream.Close();
-                logoSmallStream.Close();
+                //logoBigStream.Close();
+                //logoSmallStream.Close();
 
                 mainPart.Document.Save();
             }
