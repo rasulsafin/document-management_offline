@@ -13,7 +13,6 @@ namespace Brio.Docs.Utility
     public class ReportHelper
     {
         private static readonly string HORIZONTAL_ELEMENT = "HorizontalElement";
-        private static readonly string HEADING_ELEMENT = "HeadingElement";
         private static readonly string TEXT = "Text";
         private static readonly string IMAGE = "Image";
         private static readonly string TABLE = "Table";
@@ -56,8 +55,14 @@ namespace Brio.Docs.Utility
 
             foreach (var objectiveType in objectiveTypes)
             {
-                var body = objectiveType.Select(GenerateObjectiveElement);
-                xml.Add(body);
+                var objectiveTypeList = objectiveType.ToList();
+                for (int i = 0; i < objectiveTypeList.Count(); i++)
+                {
+                    var objective = objectiveTypeList[i];
+                    var objectiveIndex = i + 1;
+                    var body = GenerateObjectiveElement(objective, objectiveIndex);
+                    xml.Add(body);
+                }
             }
 
             foreach (var objectiveType in objectiveTypes)
@@ -111,7 +116,7 @@ namespace Brio.Docs.Utility
             }
         }
 
-        private XElement GenerateObjectiveElement(ObjectiveToReportDto objective)
+        private XElement GenerateObjectiveElement(ObjectiveToReportDto objective, int index)
         {
             var itemsElements = (objective.Items == null || !objective.Items.Any())
                ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
@@ -126,7 +131,7 @@ namespace Brio.Docs.Utility
                 : string.Join("; ", objective.Location.Position);
 
             var result = new XElement("Objective",
-            new XAttribute("objective_id", objective.ID),
+            new XAttribute("objective_index", index),
             new XAttribute("objective_description", objective.Description),
             new XAttribute("objective_elements", bimElementsText),
             new XAttribute("objective_status", $"{StatusToString(objective.Status)}"),
@@ -137,9 +142,10 @@ namespace Brio.Docs.Utility
 
         private XElement GenerateItemsElement(ObjectiveToReportDto objective)
         {
-            var itemsElements = (objective.Items == null || !objective.Items.Any())
-               ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
-               : objective.Items.Select(GenerateXElement);
+            if (objective.Items == null || !objective.Items.Any())
+                return null;
+
+            var itemsElements = objective.Items.Select(GenerateXElement);
 
             var result = new XElement(ROW, new XElement(CELL, itemsElements));
             return result;
@@ -154,15 +160,6 @@ namespace Brio.Docs.Utility
                 items.Add(new XAttribute("style", "bold"));
             }
 
-            items.Add(text);
-            return new XElement(TEXT, items.ToArray());
-        }
-
-        private XElement HeadingElement(string text)
-        {
-            var items = new List<object>();
-            items.Add(new XAttribute("fontsize", "heading"));
-            items.Add(new XAttribute("style", "bold"));
             items.Add(text);
             return new XElement(TEXT, items.ToArray());
         }
