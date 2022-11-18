@@ -1098,278 +1098,280 @@
 											</w:p>
 										</w:tc>
 									</w:tr>
-									<w:tr>
-										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
-											<w:trHeight w:val="971" w:hRule="atLeast"/>
-										</w:trPr>
-										<w:tc>
-											<w:tcPr>
-												<w:tcW w:w="541" w:type="dxa"/>
-												<w:shd w:val="none"/>
-												<w:tcMar>
-													<w:top w:w="0" w:type="dxa"/>
-													<w:left w:w="108" w:type="dxa"/>
-													<w:bottom w:w="0" w:type="dxa"/>
-													<w:right w:w="108" w:type="dxa"/>
-												</w:tcMar>
-												<w:tcBorders>
-													<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-												</w:tcBorders>
-												<w:tmTcPr id="1668604609" protected="0"/>
-											</w:tcPr>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:after="0" w:line="240" w:lineRule="auto"/>
-													<w:jc w:val="center"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-													<w:t>1</w:t>
-												</w:r>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:r>
-											</w:p>
-										</w:tc>
-										<w:tc>
-											<w:tcPr>
-												<w:tcW w:w="4592" w:type="dxa"/>
-												<w:shd w:val="none"/>
-												<w:tcMar>
-													<w:top w:w="0" w:type="dxa"/>
-													<w:left w:w="108" w:type="dxa"/>
-													<w:bottom w:w="0" w:type="dxa"/>
-													<w:right w:w="108" w:type="dxa"/>
-												</w:tcMar>
-												<w:tcBorders>
-													<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-												</w:tcBorders>
-												<w:tmTcPr id="1668604609" protected="0"/>
-											</w:tcPr>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-													<w:t>Место прохода короба вентиляции через стену не соответствует проекту</w:t>
-												</w:r>
-											</w:p>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:r>
-											</w:p>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-												</w:r>
-											</w:p>
-										</w:tc>
-										<w:tc>
-											<w:tcPr>
-												<w:tcW w:w="2126" w:type="dxa"/>
-												<w:shd w:val="none"/>
-												<w:tcMar>
-													<w:top w:w="0" w:type="dxa"/>
-													<w:left w:w="108" w:type="dxa"/>
-													<w:bottom w:w="0" w:type="dxa"/>
-													<w:right w:w="108" w:type="dxa"/>
-												</w:tcMar>
-												<w:tcBorders>
-													<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-												</w:tcBorders>
-												<w:tmTcPr id="1668604609" protected="0"/>
-											</w:tcPr>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-													</w:rPr>
-													<w:t>проект РД: 01Д/2020-СПЦ09-0201-ОВК01.07</w:t>
-												</w:r>
-												<w:r/>
-											</w:p>
-										</w:tc>
-										<w:tc>
-											<w:tcPr>
-												<w:tcW w:w="1709" w:type="dxa"/>
-												<w:shd w:val="none"/>
-												<w:tcMar>
-													<w:left w:w="0" w:type="dxa"/>
-													<w:right w:w="0" w:type="dxa"/>
-												</w:tcMar>
-												<w:tcBorders>
-													<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-												</w:tcBorders>
-												<w:tmTcPr id="1668604609" protected="0"/>
-											</w:tcPr>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:after="0" w:line="240" w:lineRule="auto"/>
-													<w:jc w:val="center"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-													</w:rPr>
-													<w:t>Устранить</w:t>
-												</w:r>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-													</w:rPr>
-												</w:r>
-											</w:p>
-										</w:tc>
-										<w:tc>
-											<w:tcPr>
-												<w:tcW w:w="1241" w:type="dxa"/>
-												<w:shd w:val="none"/>
-												<w:tcMar>
-													<w:left w:w="0" w:type="dxa"/>
-													<w:right w:w="0" w:type="dxa"/>
-												</w:tcMar>
-												<w:tcBorders>
-													<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-												</w:tcBorders>
-												<w:tmTcPr id="1668604609" protected="0"/>
-											</w:tcPr>
-											<w:p>
-												<w:pPr>
-													<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
-													<w:jc w:val="center"/>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-													</w:rPr>
-												</w:pPr>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:color w:val="000000"/>
-														<w:sz w:val="24"/>
-														<w:szCs w:val="24"/>
-														<w:lang w:eastAsia="ru-ru"/>
-													</w:rPr>
-													<w:t>05.05.2022</w:t>
-												</w:r>
-												<w:r>
-													<w:rPr>
-														<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-														<w:i/>
-														<w:sz w:val="20"/>
-														<w:szCs w:val="20"/>
-													</w:rPr>
-												</w:r>
-											</w:p>
-										</w:tc>
-									</w:tr>
+									<xsl:for-each select="Objective">
+										<w:tr>
+											<w:trPr>
+												<w:tblHeader w:val="0"/>
+												<w:cantSplit w:val="0"/>
+												<w:trHeight w:val="971" w:hRule="atLeast"/>
+											</w:trPr>
+												<w:tc>
+													<w:tcPr>
+														<w:tcW w:w="541" w:type="dxa"/>
+														<w:shd w:val="none"/>
+														<w:tcMar>
+															<w:top w:w="0" w:type="dxa"/>
+															<w:left w:w="108" w:type="dxa"/>
+															<w:bottom w:w="0" w:type="dxa"/>
+															<w:right w:w="108" w:type="dxa"/>
+														</w:tcMar>
+														<w:tcBorders>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:left w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+														</w:tcBorders>
+														<w:tmTcPr id="1668604609" protected="0"/>
+													</w:tcPr>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:after="0" w:line="240" w:lineRule="auto"/>
+															<w:jc w:val="center"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_id"/> </w:t>
+														</w:r>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:r>
+													</w:p>
+												</w:tc>
+												<w:tc>
+													<w:tcPr>
+														<w:tcW w:w="4592" w:type="dxa"/>
+														<w:shd w:val="none"/>
+														<w:tcMar>
+															<w:top w:w="0" w:type="dxa"/>
+															<w:left w:w="108" w:type="dxa"/>
+															<w:bottom w:w="0" w:type="dxa"/>
+															<w:right w:w="108" w:type="dxa"/>
+														</w:tcMar>
+														<w:tcBorders>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+														</w:tcBorders>
+														<w:tmTcPr id="1668604609" protected="0"/>
+													</w:tcPr>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_description"/> </w:t>
+														</w:r>
+													</w:p>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:r>
+													</w:p>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+														</w:r>
+													</w:p>
+												</w:tc>
+												<w:tc>
+													<w:tcPr>
+														<w:tcW w:w="2126" w:type="dxa"/>
+														<w:shd w:val="none"/>
+														<w:tcMar>
+															<w:top w:w="0" w:type="dxa"/>
+															<w:left w:w="108" w:type="dxa"/>
+															<w:bottom w:w="0" w:type="dxa"/>
+															<w:right w:w="108" w:type="dxa"/>
+														</w:tcMar>
+														<w:tcBorders>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+														</w:tcBorders>
+														<w:tmTcPr id="1668604609" protected="0"/>
+													</w:tcPr>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+															</w:rPr>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_elements"/> </w:t>
+														</w:r>
+														<w:r/>
+													</w:p>
+												</w:tc>
+												<w:tc>
+													<w:tcPr>
+														<w:tcW w:w="1709" w:type="dxa"/>
+														<w:shd w:val="none"/>
+														<w:tcMar>
+															<w:left w:w="0" w:type="dxa"/>
+															<w:right w:w="0" w:type="dxa"/>
+														</w:tcMar>
+														<w:tcBorders>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+														</w:tcBorders>
+														<w:tmTcPr id="1668604609" protected="0"/>
+													</w:tcPr>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:after="0" w:line="240" w:lineRule="auto"/>
+															<w:jc w:val="center"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+															</w:rPr>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_status"/> </w:t>
+														</w:r>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+															</w:rPr>
+														</w:r>
+													</w:p>
+												</w:tc>
+												<w:tc>
+													<w:tcPr>
+														<w:tcW w:w="1241" w:type="dxa"/>
+														<w:shd w:val="none"/>
+														<w:tcMar>
+															<w:left w:w="0" w:type="dxa"/>
+															<w:right w:w="0" w:type="dxa"/>
+														</w:tcMar>
+														<w:tcBorders>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+														</w:tcBorders>
+														<w:tmTcPr id="1668604609" protected="0"/>
+													</w:tcPr>
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+															<w:jc w:val="center"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+																<w:lang w:eastAsia="ru-ru"/>
+															</w:rPr>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_date"/> </w:t>
+														</w:r>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+															</w:rPr>
+														</w:r>
+													</w:p>
+												</w:tc>
+										</w:tr>
+									</xsl:for-each>
 								</w:tbl>
 								<w:p>
 									<w:pPr>

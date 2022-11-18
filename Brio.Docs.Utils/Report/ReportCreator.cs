@@ -130,8 +130,8 @@ namespace Brio.Docs.Utils.ReportCreator
                 //var smallLogoImagePart = footerPart.AddImagePart(ImagePartType.Png, LOGO_IMAGE_ID);
                 //smallLogoImagePart.FeedData(logoSmallStream);
 
-                //logoBigStream.Close();
-                //logoSmallStream.Close();
+                logoBigStream.Close();
+                logoSmallStream.Close();
 
                 mainPart.Document.Save();
             }

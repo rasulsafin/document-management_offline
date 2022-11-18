@@ -56,7 +56,7 @@ namespace Brio.Docs.Utility
 
             foreach (var objectiveType in objectiveTypes)
             {
-                var body = new XElement(TABLE, objectiveType.Select(GenerateXElement));
+                var body = objectiveType.Select(GenerateObjectiveElement);
                 xml.Add(body);
             }
 
@@ -111,11 +111,11 @@ namespace Brio.Docs.Utility
             }
         }
 
-        private XElement GenerateXElement(ObjectiveToReportDto objective)
+        private XElement GenerateObjectiveElement(ObjectiveToReportDto objective)
         {
             var itemsElements = (objective.Items == null || !objective.Items.Any())
-                ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
-                : objective.Items.Select(GenerateXElement);
+               ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
+               : objective.Items.Select(GenerateXElement);
 
             var bimElementsText = (objective.BimElements == null || !objective.BimElements.Any())
                 ? DEFAULT
@@ -125,22 +125,12 @@ namespace Brio.Docs.Utility
                 ? DEFAULT
                 : string.Join("; ", objective.Location.Position);
 
-            var result = new XElement(ROW,
-            new XElement(CELL,
-                new XElement(HORIZONTAL_ELEMENT,
-                    TextElement(objective.ID))),
-            new XElement(CELL,
-                new XElement(HORIZONTAL_ELEMENT,
-                    TextElement(objective.Description))),
-            new XElement(CELL,
-                new XElement(HORIZONTAL_ELEMENT,
-                    TextElement(bimElementsText))),
-            new XElement(CELL,
-                new XElement(HORIZONTAL_ELEMENT,
-                    TextElement($"{StatusToString(objective.Status)}"))),
-            new XElement(CELL,
-                new XElement(HORIZONTAL_ELEMENT,
-                    TextElement(objective.CreationDate.ToString("g")))));
+            var result = new XElement("Objective",
+            new XAttribute("objective_id", objective.ID),
+            new XAttribute("objective_description", objective.Description),
+            new XAttribute("objective_elements", bimElementsText),
+            new XAttribute("objective_status", $"{StatusToString(objective.Status)}"),
+            new XAttribute("objective_date", objective.CreationDate.ToString("g")));
 
             return result;
         }
