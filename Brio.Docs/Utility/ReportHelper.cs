@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -132,10 +132,10 @@ namespace Brio.Docs.Utility
 
             var result = new XElement("Objective",
             new XAttribute("objective_index", index),
-            new XAttribute("objective_description", objective.Description),
+            new XAttribute("objective_description", $"{objective.Title}\n{objective.Description}"),
             new XAttribute("objective_elements", bimElementsText),
             new XAttribute("objective_status", $"{StatusToString(objective.Status)}"),
-            new XAttribute("objective_date", objective.CreationDate.ToString("g")));
+            new XAttribute("objective_date", objective.DueDate.ToString("g")));
 
             return result;
         }
