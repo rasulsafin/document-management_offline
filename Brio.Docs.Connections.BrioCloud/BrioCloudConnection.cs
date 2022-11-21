@@ -61,33 +61,63 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             var objectiveType = "BrioCloudIssue";
 
-            var criticalStatus = new EnumerationTypeExternalDto()
+            var deviationType = new EnumerationTypeExternalDto()
             {
-                ExternalID = "Brio.CriticalStatus",
-                Name = "Critical Status",
+                ExternalID = "Brio.DeviationType",
+                Name = "Deviation type",
                 EnumerationValues = new List<EnumerationValueExternalDto>()
                 {
                     new EnumerationValueExternalDto()
                     {
-                        ExternalID = "Brio.Critical.Low",
-                        Value = "Low",
+                        ExternalID = "Brio.Deviation.DiscrepancyProjectSize",
+                        Value = "Несоответствие проектным размерам",
                     },
                     new EnumerationValueExternalDto()
                     {
-                        ExternalID = "Brio.Critical.Normal",
-                        Value = "Normal",
+                        ExternalID = "Brio.Deviation.DisplacementInStructures",
+                        Value = "Смещение отверстий в ограждающих конструкциях либо отсутствие",
                     },
                     new EnumerationValueExternalDto()
                     {
-                        ExternalID = "Brio.Critical.High",
-                        Value = "High",
+                        ExternalID = "Brio.Deviation.LackOfElements",
+                        Value = "Отсутствие элементов",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadLabeling",
+                        Value = "Несоответствие проекту по маркировке",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.OffsetFromDesign",
+                        Value = "Смещение от проектного положения",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadTrace",
+                        Value = "Несоответствие трассировки проекту",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadInstalation",
+                        Value = "Несоответствие места установки проекту",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.Collision",
+                        Value = "Коллизия",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.LackOfIsolation",
+                        Value = "Отсутствие изоляции",
                     },
                 },
             };
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto>
             {
-                criticalStatus,
+                deviationType,
             };
 
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
@@ -102,8 +132,8 @@ namespace Brio.Docs.Connections.BrioCloud
                         {
                             ExternalID = info.UserExternalID,
                             Type = DynamicFieldType.ENUM,
-                            Name = "Critical Status",
-                            Value = criticalStatus.EnumerationValues.First().ExternalID,
+                            Name = "Deviation type",
+                            Value = deviationType.EnumerationValues.First().ExternalID,
                         },
                     },
                 },
