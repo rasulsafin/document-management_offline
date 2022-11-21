@@ -347,7 +347,7 @@ namespace Brio.Docs.Api.Controllers
         ///        {"id": "3"}
         ///     ]
         /// </remarks>
-        /// <param name="objectives">List of objective id's.</param>
+        /// <param name="report">Report.</param>
         /// <param name="path">Path to report storage.</param>
         /// <param name="userID">ID of the user, who generates the report.</param>
         /// <param name="projectName">Name of the project.</param>
@@ -365,7 +365,7 @@ namespace Brio.Docs.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GenerateReport(
             [FromBody]
-            IEnumerable<ID<ObjectiveDto>> objectives,
+            ReportDto report,
             [FromQuery]
             [Required(ErrorMessage = "ValidationError_PathIsRequired")]
             string path,
@@ -379,7 +379,7 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                var result = await service.GenerateReport(objectives, path, userID, projectName);
+                var result = await service.GenerateReport(report, path, userID, projectName);
                 return Created(string.Empty, result);
             }
             catch (ArgumentValidationException ex)

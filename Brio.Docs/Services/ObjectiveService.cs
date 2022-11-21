@@ -143,7 +143,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        public async Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogInformation(
@@ -151,10 +151,10 @@ namespace Brio.Docs.Services
                 userID,
                 path,
                 projectName,
-                objectiveIds);
+                report.Objectives);
             try
             {
-                if (objectiveIds == null)
+                if (report.Objectives == null)
                     throw new ArgumentValidationException("Cannot create report without objectives");
 
                 int count = 0;
@@ -181,7 +181,7 @@ namespace Brio.Docs.Services
 
                 List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
                 var objNum = 1;
-                foreach (var objectiveId in objectiveIds)
+                foreach (var objectiveId in report.Objectives)
                 {
                     var objective = await GetOrThrowAsync(objectiveId);
                     var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
@@ -201,7 +201,7 @@ namespace Brio.Docs.Services
                 Directory.CreateDirectory(reportDir);
                 var reportName = localizer["Report"];
                 path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
-                var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
+                var xmlDoc = reportHelper.Convert(report, objectives, path, projectName, reportID, date);
                 var xmlFooter = reportHelper.CreateFooter();
                 var xmlHeader = reportHelper.CreateHeader();
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);

@@ -91,7 +91,7 @@ namespace Brio.Docs.Client.Services
         /// <summary>
         /// Generate report about selected objectives.
         /// </summary>
-        /// <param name="objectives">List of objective id's.</param>
+        /// <param name="report">Report.</param>
         /// <param name="path">Path to report storage.</param>
         /// <param name="userID">ID of the user, who generates the report.</param>
         /// <param name="projectName">Name of the project.</param>
@@ -99,6 +99,6 @@ namespace Brio.Docs.Client.Services
         /// <exception cref="ANotFoundException">Thrown when one of the objectives not found.</exception>
         /// <exception cref="ArgumentValidationException">Thrown when list of objectives is empty.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectives, string path, int userID, string projectName);
+        Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName);
     }
 }

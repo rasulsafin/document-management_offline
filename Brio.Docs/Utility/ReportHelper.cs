@@ -29,24 +29,19 @@ namespace Brio.Docs.Utility
             this.localizer = localizer;
         }
 
-        internal XDocument Convert(List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
+        internal XDocument Convert(ReportDto report, List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
-            var location = "г. Сызрань";
-            var reviewerPosition = "инженером ТИМ-надзора ООО «БББ»";
-            var reviewerName = "Петровым П.П.";
-            var responsiblePosition = "прораба ООО «БББ»";
-            var responsibleName = "Иванова И.И.";
             var address = "1-я улица Строителей д. 123";
             var verificationSubject = "приточная вентиляция в осях В-Г//6-7_на отметке -4,500";
 
             var xml = new XElement("Report",
                     new XAttribute("number", reportId),
-                    new XAttribute("location", location),
+                    new XAttribute("location", report.Location),
                     new XAttribute("date", date.ToString("d", Thread.CurrentThread.CurrentUICulture)),
-                    new XAttribute("reviewer_position", reviewerPosition),
-                    new XAttribute("reviewer_name", reviewerName),
-                    new XAttribute("responsible_position", responsiblePosition),
-                    new XAttribute("responsible_name", responsibleName),
+                    new XAttribute("reviewer_position", report.ReviewerPosition),
+                    new XAttribute("reviewer_name", report.ReviewerName),
+                    new XAttribute("responsible_position", report.ResponsiblePosition),
+                    new XAttribute("responsible_name", report.ResponsibleName),
                     new XAttribute("project_name", projectName),
                     new XAttribute("address", address),
                     new XAttribute("verification_subject", verificationSubject));
