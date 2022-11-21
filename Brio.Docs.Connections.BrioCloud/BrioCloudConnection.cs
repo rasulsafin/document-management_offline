@@ -112,12 +112,42 @@ namespace Brio.Docs.Connections.BrioCloud
                         ExternalID = "Brio.Deviation.LackOfIsolation",
                         Value = "Отсутствие изоляции",
                     },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.Other",
+                        Value = "Другое",
+                    },
+                },
+            };
+
+            var criticalStatus = new EnumerationTypeExternalDto()
+            {
+                ExternalID = "Brio.CriticalStatus",
+                Name = "Critical status",
+                EnumerationValues = new List<EnumerationValueExternalDto>()
+                {
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.Low",
+                        Value = "Low",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.Normal",
+                        Value = "Normal",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.High",
+                        Value = "High",
+                    },
                 },
             };
 
             info.EnumerationTypes = new List<EnumerationTypeExternalDto>
             {
                 deviationType,
+                criticalStatus,
             };
 
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
@@ -130,10 +160,17 @@ namespace Brio.Docs.Connections.BrioCloud
                     {
                         new ()
                         {
-                            ExternalID = info.UserExternalID,
+                            ExternalID = deviationType.ExternalID,
                             Type = DynamicFieldType.ENUM,
                             Name = "Deviation type",
                             Value = deviationType.EnumerationValues.First().ExternalID,
+                        },
+                        new ()
+                        {
+                            ExternalID = criticalStatus.ExternalID,
+                            Type = DynamicFieldType.ENUM,
+                            Name = "Critical status",
+                            Value = criticalStatus.EnumerationValues.First().ExternalID,
                         },
                     },
                 },
