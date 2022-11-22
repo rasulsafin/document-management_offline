@@ -266,6 +266,19 @@
 											<w:u w:color="auto" w:val="single"/>
 											<w:lang w:eastAsia="ru-ru"/>
 										</w:rPr>
+										<w:t xml:space="preserve"> <xsl:value-of select="@reviewer_company"/> </w:t>
+									</w:r>
+									<w:r>
+										<w:rPr>
+											<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+											<w:i/>
+											<w:iCs/>
+											<w:color w:val="000000"/>
+											<w:sz w:val="24"/>
+											<w:szCs w:val="24"/>
+											<w:u w:color="auto" w:val="single"/>
+											<w:lang w:eastAsia="ru-ru"/>
+										</w:rPr>
 										<w:t xml:space="preserve"> <xsl:value-of select="@reviewer_name"/> </w:t>
 									</w:r>
 									<w:r>
@@ -398,6 +411,19 @@
 											<w:lang w:eastAsia="ru-ru"/>
 										</w:rPr>
 										<w:t xml:space="preserve"> <xsl:value-of select="@responsible_position"/> </w:t>
+									</w:r>
+									<w:r>
+										<w:rPr>
+											<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+											<w:i/>
+											<w:iCs/>
+											<w:color w:val="000000"/>
+											<w:sz w:val="24"/>
+											<w:szCs w:val="24"/>
+											<w:u w:color="auto" w:val="single"/>
+											<w:lang w:eastAsia="ru-ru"/>
+										</w:rPr>
+										<w:t xml:space="preserve"> <xsl:value-of select="@responsible_company"/> </w:t>
 									</w:r>
 									<w:r>
 										<w:rPr>
