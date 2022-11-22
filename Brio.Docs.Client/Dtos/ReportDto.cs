@@ -10,6 +10,10 @@ namespace Brio.Docs.Client.Dtos
 
         public string Location { get; set; }
 
+        public string Address { get; set; }
+
+        public string ObjectName { get; set; }
+
         public string ReviewerPosition { get; set; }
 
         public string ReviewerName { get; set; }

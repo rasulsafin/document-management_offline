@@ -526,7 +526,7 @@
 											<w:u w:color="auto" w:val="single"/>
 											<w:lang w:eastAsia="ru-ru"/>
 										</w:rPr>
-										<w:t xml:space="preserve"> <xsl:value-of select="@project_name"/> </w:t>
+										<w:t xml:space="preserve"> <xsl:value-of select="@object_name"/> </w:t>
 									</w:r>
 									<w:r>
 										<w:rPr>
