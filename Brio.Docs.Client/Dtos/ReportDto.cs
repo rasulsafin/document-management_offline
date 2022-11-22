@@ -25,5 +25,7 @@ namespace Brio.Docs.Client.Dtos
         public string ResponsibleName { get; set; }
 
         public string ResponsibleCompany { get; set; }
+
+        public string VerificationSubject { get; set; }
     }
 }

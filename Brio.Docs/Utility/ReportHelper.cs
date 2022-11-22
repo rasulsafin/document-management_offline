@@ -31,8 +31,6 @@ namespace Brio.Docs.Utility
 
         internal XDocument Convert(ReportDto report, List<ObjectiveToReportDto> objectives, string path, string projectName, string reportId, DateTime date)
         {
-            var verificationSubject = "приточная вентиляция в осях В-Г//6-7_на отметке -4,500";
-
             var xml = new XElement("Report",
                     new XAttribute("number", reportId),
                     new XAttribute("location", report.Location),
@@ -43,7 +41,7 @@ namespace Brio.Docs.Utility
                     new XAttribute("responsible_name", report.ResponsibleName),
                     new XAttribute("object_name", report.ObjectName),
                     new XAttribute("address", report.Address),
-                    new XAttribute("verification_subject", verificationSubject));
+                    new XAttribute("verification_subject", report.VerificationSubject));
 
             var objectiveTypes = objectives.OrderBy(o => o.Status).GroupBy(o => o.Status);
 
