@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Brio.Docs.Client.Dtos;
@@ -53,6 +54,7 @@ namespace Brio.Docs.Utility
                 for (int i = 0; i < objectiveTypeList.Count(); i++)
                 {
                     var objective = objectiveTypeList[i];
+
                     var objectiveIndex = i + 1;
                     var body = GenerateObjectiveElement(objective, objectiveIndex);
                     xml.Add(body);
@@ -116,19 +118,13 @@ namespace Brio.Docs.Utility
                ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
                : objective.Items.Select(GenerateXElement);
 
-            var bimElementsText = (objective.BimElements == null || !objective.BimElements.Any())
-                ? DEFAULT
-                : string.Join(", ", objective.BimElements.Select(x => x.ElementName));
-
-            var locationTextElement = (objective.Location == null || objective.Location?.Position == null)
-                ? DEFAULT
-                : string.Join("; ", objective.Location.Position);
+            var dynamicFields = objective.DynamicFields;
+            string wdCode = dynamicFields.FirstOrDefault(x => x.Key.StartsWith("model_metadata"))?.Value?.ToString();
 
             var result = new XElement("Objective",
             new XAttribute("objective_index", index),
             new XAttribute("objective_description", $"{objective.Title}\n{objective.Description}"),
-            new XAttribute("objective_elements", bimElementsText),
-            new XAttribute("objective_status", $"{StatusToString(objective.Status)}"),
+            new XAttribute("objective_documentation", wdCode),
             new XAttribute("objective_date", objective.DueDate.ToString("g")));
 
             return result;

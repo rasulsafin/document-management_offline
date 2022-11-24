@@ -73,6 +73,9 @@ namespace Brio.Docs.Services
             logger.LogTrace("Add started with data: {@Data}", objectiveToCreate);
             try
             {
+                if (!objectiveToCreate.AuthorID.HasValue)
+                    throw new ArgumentException("The author id is required");
+
                 var objectiveToSave = mapper.Map<Objective>(objectiveToCreate);
                 logger.LogTrace("Mapped data: {@Objective}", objectiveToSave);
                 await context.Objectives.AddAsync(objectiveToSave);
@@ -80,7 +83,10 @@ namespace Brio.Docs.Services
 
                 await bimElementHelper.AddBimElementsAsync(objectiveToCreate.BimElements, objectiveToSave);
                 await itemHelper.AddItemsAsync(objectiveToCreate.Items, objectiveToSave);
-                await dynamicFieldHelper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+                await dynamicFieldHelper.AddDynamicFieldsAsync(
+                    objectiveToCreate.DynamicFields,
+                    objectiveToSave,
+                    objectiveToCreate.AuthorID.Value);
                 await AddLocationAsync(objectiveToCreate.Location, objectiveToSave);
 
                 return mapper.Map<ObjectiveToListDto>(objectiveToSave);
@@ -378,7 +384,13 @@ namespace Brio.Docs.Services
                 var objectiveFromDb = await context.Objectives.FindOrThrowAsync((int)objectiveDto.ID);
                 objectiveFromDb = mapper.Map(objectiveDto, objectiveFromDb);
 
-                await dynamicFieldHelper.UpdateDynamicFieldsAsync(objectiveDto.DynamicFields, objectiveFromDb.ID);
+                await dynamicFieldHelper.UpdateDynamicFieldsAsync(
+                    objectiveDto.DynamicFields.Where(x => x.ID.IsValid),
+                    objectiveFromDb.ID);
+                await dynamicFieldHelper.AddDynamicFieldsAsync(
+                    objectiveDto.DynamicFields.Where(x => !x.ID.IsValid),
+                    objectiveFromDb,
+                    new ID<UserDto>(CurrentUser.ID));
                 await bimElementHelper.UpdateBimElementsAsync(objectiveDto.BimElements, objectiveFromDb.ID);
                 await itemHelper.UpdateItemsAsync(objectiveDto.Items, objectiveFromDb);
 

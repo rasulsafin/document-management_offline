@@ -18,6 +18,8 @@ namespace Brio.Docs.Client.Dtos
 
         public string Description { get; set; }
 
+        public ICollection<DynamicFieldDto> DynamicFields { get; set; }
+
         public IEnumerable<BimElementDto> BimElements { get; set; }
 
         public IEnumerable<ItemDto> Items { get; set; }

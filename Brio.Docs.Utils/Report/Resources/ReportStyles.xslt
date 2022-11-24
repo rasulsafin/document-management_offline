@@ -1297,7 +1297,7 @@
 																<w:sz w:val="24"/>
 																<w:szCs w:val="24"/>
 															</w:rPr>
-															<w:t xml:space="preserve"> <xsl:value-of select="@objective_elements"/> </w:t>
+															<w:t xml:space="preserve"> <xsl:value-of select="@objective_documentation"/> </w:t>
 														</w:r>
 														<w:r/>
 													</w:p>
@@ -1318,35 +1318,7 @@
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
-													<w:p>
-														<w:pPr>
-															<w:spacing w:before="240" w:after="0" w:line="240" w:lineRule="auto"/>
-															<w:jc w:val="center"/>
-															<w:rPr>
-																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-																<w:i/>
-																<w:sz w:val="20"/>
-																<w:szCs w:val="20"/>
-															</w:rPr>
-														</w:pPr>
-														<w:r>
-															<w:rPr>
-																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-																<w:i/>
-																<w:sz w:val="24"/>
-																<w:szCs w:val="24"/>
-															</w:rPr>
-															<w:t xml:space="preserve"> <xsl:value-of select="@objective_status"/> </w:t>
-														</w:r>
-														<w:r>
-															<w:rPr>
-																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
-																<w:i/>
-																<w:sz w:val="20"/>
-																<w:szCs w:val="20"/>
-															</w:rPr>
-														</w:r>
-													</w:p>
+													
 												</w:tc>
 												<w:tc>
 													<w:tcPr>
