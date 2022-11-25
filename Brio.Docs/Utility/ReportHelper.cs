@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
@@ -91,40 +92,23 @@ namespace Brio.Docs.Utility
             return new XDocument(xml);
         }
 
-        private string StatusToString(ObjectiveStatus status)
-        {
-            switch (status)
-            {
-                case ObjectiveStatus.Undefined:
-                    return localizer["Status_Undefined"];
-                case ObjectiveStatus.Open:
-                    return localizer["Status_Open"];
-                case ObjectiveStatus.InProgress:
-                    return localizer["Status_InProgress"];
-                case ObjectiveStatus.Ready:
-                    return localizer["Status_Ready"];
-                case ObjectiveStatus.Late:
-                    return localizer["Status_Late"];
-                case ObjectiveStatus.Closed:
-                    return localizer["Status_Closed"];
-                default:
-                    return "-";
-            }
-        }
-
         private XElement GenerateObjectiveElement(ObjectiveToReportDto objective, int index)
         {
-            var itemsElements = (objective.Items == null || !objective.Items.Any())
-               ? new XElement[] { new XElement(HORIZONTAL_ELEMENT, TextElement(DEFAULT)) }
-               : objective.Items.Select(GenerateXElement);
-
-            var dynamicFields = objective.DynamicFields;
-            string wdCode = dynamicFields.FirstOrDefault(x => x.Key.StartsWith("model_metadata"))?.Value?.ToString();
+            var dynamicFields = objective.DynamicFields.Where(x => x.Key.StartsWith("model_metadata")).ToList();
+            var documentation = new StringBuilder();
+            for (int i = 0; i < dynamicFields.Count; i++)
+            {
+                var field = dynamicFields[i];
+                if (i != dynamicFields.Count - 1)
+                    documentation.AppendLine($"{field.Name}:\n{field.Value};");
+                else
+                    documentation.AppendLine($"{field.Name}:\n{field.Value}");
+            }
 
             var result = new XElement("Objective",
             new XAttribute("objective_index", index),
             new XAttribute("objective_description", $"{objective.Title}\n{objective.Description}"),
-            new XAttribute("objective_documentation", wdCode),
+            new XAttribute("objective_documentation", documentation),
             new XAttribute("objective_date", objective.DueDate.ToString("g")));
 
             return result;
