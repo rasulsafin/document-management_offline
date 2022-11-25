@@ -70,52 +70,52 @@ namespace Brio.Docs.Connections.BrioCloud
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.DiscrepancyProjectSize",
-                        Value = "Несоответствие проектным размерам",
+                        Value = "Mismatch with design dimensions",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.DisplacementInStructures",
-                        Value = "Смещение отверстий в ограждающих конструкциях либо отсутствие",
+                        Value = "Displacement or absence of openings in building envelopes",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.LackOfElements",
-                        Value = "Отсутствие элементов",
+                        Value = "Lack of elements",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.BadLabeling",
-                        Value = "Несоответствие проекту по маркировке",
+                        Value = "Non-compliance with the labeling project",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.OffsetFromDesign",
-                        Value = "Смещение от проектного положения",
+                        Value = "Offset from design position",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.BadTrace",
-                        Value = "Несоответствие трассировки проекту",
+                        Value = "Trace inconsistency with the project",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.BadInstalation",
-                        Value = "Несоответствие места установки проекту",
+                        Value = "Inconsistency of the installation site with the project",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.Collision",
-                        Value = "Коллизия",
+                        Value = "Collision",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.LackOfIsolation",
-                        Value = "Отсутствие изоляции",
+                        Value = "Lack of isolation",
                     },
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.Other",
-                        Value = "Другое",
+                        Value = "Other",
                     },
                 },
             };
