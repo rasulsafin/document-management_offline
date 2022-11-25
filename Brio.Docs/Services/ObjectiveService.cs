@@ -207,13 +207,11 @@ namespace Brio.Docs.Services
                 Directory.CreateDirectory(reportDir);
                 var reportName = localizer["Report"];
                 path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
-                var xmlDoc = reportHelper.Convert(report, objectives, path, projectName, reportID, date);
-                var xmlFooter = reportHelper.CreateFooter();
-                var xmlHeader = reportHelper.CreateHeader();
+                var xmlDoc = reportHelper.Convert(report, objectives, reportID, date);
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
                 ReportCreator reportCreator = new ReportCreator();
-                reportCreator.CreateReport(xmlDoc, xmlFooter, xmlHeader, path);
+                reportCreator.CreateReport(xmlDoc, path);
                 logger.LogInformation("Report created ({Path})", path);
 
                 return new ObjectiveReportCreationResultDto()
