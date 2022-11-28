@@ -7,7 +7,7 @@
 
         <RootNamespace>Brio.Docs.Connections.Bim360.UnitTests</RootNamespace>
 
-        <Version>1.3.0</Version>
+        <Version>1.3.1</Version>
     </PropertyGroup>
 
     <ItemGroup>
