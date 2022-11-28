@@ -26,9 +26,9 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
             logger.LogTrace("Resolve started with source: {@Source} & destination {@Destination}", source, destination);
             if (source.AuthorExternalID == null)
                 return null;
-            var project = dbContext.Users.FirstOrDefault(x => x.ExternalID == source.AuthorExternalID);
-            logger.LogDebug("Found project: {@Project}", project);
-            return project;
+            var user = dbContext.Users.FirstOrDefault(x => x.ExternalID == source.AuthorExternalID);
+            logger.LogDebug("Found user: {@User}", user);
+            return user;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -25,6 +26,8 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             logger.LogTrace("ItemFinder created");
         }
 
+        public IReadOnlyCollection<Item> RemoteCollection { get; set; }
+
         public async Task AttachExisting(SynchronizingTuple<Item> tuple)
         {
             logger.LogTrace("AttachExisting started with tuple {@Object}", tuple);
@@ -41,8 +44,9 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
             {
                 if (tuple.Synchronized == null)
                 {
-                    (localProject, syncProject) =
-                        await GetProjectsByRemote(GetProjectId(tuple.Remote)).ConfigureAwait(false);
+                    (localProject, syncProject) = await SearchingUtilities
+                       .GetProjectsByRemote(context, GetProjectId(tuple.Remote))
+                       .ConfigureAwait(false);
                 }
                 else
                 {
@@ -115,36 +119,6 @@ namespace Brio.Docs.Synchronization.Utilities.Finders
                .Where(predicate)
                .FirstOrDefaultAsync(i => i.ExternalID == externalId || i.RelativePath == path)
                .ConfigureAwait(false);
-        }
-
-        private async Task<(Project localProject, Project syncProject)> GetProjectsByRemote(int? remoteProjectId)
-        {
-            logger.LogTrace("GetProjectsByRemote started for project {@Project}", remoteProjectId);
-            var remoteProject = await context.Projects.AsNoTracking()
-               .Include(x => x.SynchronizationMate)
-               .FirstOrDefaultAsync(x => x.ID == remoteProjectId)
-               .ConfigureAwait(false);
-
-            if (remoteProject == null)
-                return default;
-
-            Project localProject;
-            Project syncProject;
-
-            if (remoteProject.IsSynchronized)
-            {
-                localProject = await context.Projects.AsNoTracking()
-                   .FirstOrDefaultAsync(x => x.SynchronizationMateID == remoteProject.ID)
-                   .ConfigureAwait(false);
-                syncProject = remoteProject;
-            }
-            else
-            {
-                localProject = remoteProject;
-                syncProject = localProject.SynchronizationMate;
-            }
-
-            return (localProject, syncProject);
         }
 
         private async Task<(Project localProject, Project syncProject)> GetProjectsBySynchronized(int syncProjectId)

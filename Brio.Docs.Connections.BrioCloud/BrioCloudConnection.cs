@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Connections.BrioCloud.Synchronization;
 using Brio.Docs.External.CloudBase;
+using Brio.Docs.External.Extensions;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 
@@ -64,7 +65,7 @@ namespace Brio.Docs.Connections.BrioCloud
             };
 
             if (string.IsNullOrWhiteSpace(info.UserExternalID))
-                info.UserExternalID = Guid.NewGuid().ToString();
+                info.UserExternalID = info.GetAuthValue(BrioCloudAuth.USERNAME);
 
             return Task.FromResult(info);
         }

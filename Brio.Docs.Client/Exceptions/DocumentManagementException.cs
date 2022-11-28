@@ -8,8 +8,8 @@ namespace Brio.Docs.Client.Exceptions
     /// </summary>
     public class DocumentManagementException : Exception
     {
-        public DocumentManagementException(string title, string details = null, IReadOnlyDictionary<string, string[]> errors = null)
-            : base(title)
+        public DocumentManagementException(string message, string details = null, IReadOnlyDictionary<string, string[]> errors = null)
+            : base(message)
         {
             Details = details;
             Errors = errors as IReadOnlyDictionary<string, string[]>;

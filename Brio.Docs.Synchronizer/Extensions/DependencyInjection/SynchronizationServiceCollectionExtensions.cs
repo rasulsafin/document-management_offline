@@ -3,11 +3,9 @@ using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Synchronization;
-using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Mergers;
 using Brio.Docs.Synchronization.Mergers.ChildrenMergers;
-using Brio.Docs.Synchronization.Models;
 using Brio.Docs.Synchronization.Strategies;
 using Brio.Docs.Synchronization.Utilities.Finders;
 using Brio.Docs.Synchronization.Utils;
@@ -19,6 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static IServiceCollection AddSynchronizer(this IServiceCollection services)
         {
             services.AddScoped<Synchronizer>();
+            services.AddScoped<ISynchronizer, Synchronizer>(x => x.GetService<Synchronizer>());
             services.AddScoped<ISynchronizerProcessor, SynchronizerProcessor>();
             services.AddScoped<StrategyHelper>();
             services.AddScoped<ISynchronizationStrategy<Project>, ProjectStrategy>();
@@ -39,6 +38,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<IMerger<Location>, LocationMerger>();
             services.AddScoped<IMerger<BimElement>, BimElementMerger>();
 
+            services.AddScoped<IAttacher<Project>, ProjectAttacher>();
+            services.AddScoped<IAttacher<Objective>, ObjectiveAttacher>();
             services.AddScoped<IAttacher<Item>, ItemAttacher>();
             services.AddScoped<IAttacher<BimElement>, BimElementAttacher>();
 
