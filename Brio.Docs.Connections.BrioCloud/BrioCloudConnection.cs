@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
@@ -59,9 +60,120 @@ namespace Brio.Docs.Connections.BrioCloud
         public Task<ConnectionInfoExternalDto> UpdateConnectionInfo(ConnectionInfoExternalDto info)
         {
             var objectiveType = "BrioCloudIssue";
+
+            var deviationType = new EnumerationTypeExternalDto()
+            {
+                ExternalID = "Brio.DeviationType",
+                Name = "Deviation type",
+                EnumerationValues = new List<EnumerationValueExternalDto>()
+                {
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.DiscrepancyProjectSize",
+                        Value = "Mismatch with design dimensions",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.DisplacementInStructures",
+                        Value = "Displacement or absence of openings in building envelopes",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.LackOfElements",
+                        Value = "Lack of elements",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadLabeling",
+                        Value = "Non-compliance with the labeling project",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.OffsetFromDesign",
+                        Value = "Offset from design position",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadTrace",
+                        Value = "Trace inconsistency with the project",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.BadInstalation",
+                        Value = "Inconsistency of the installation site with the project",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.Collision",
+                        Value = "Collision",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.LackOfIsolation",
+                        Value = "Lack of isolation",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.Deviation.Other",
+                        Value = "Other",
+                    },
+                },
+            };
+
+            var criticalStatus = new EnumerationTypeExternalDto()
+            {
+                ExternalID = "Brio.CriticalStatus",
+                Name = "Critical status",
+                EnumerationValues = new List<EnumerationValueExternalDto>()
+                {
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.Low",
+                        Value = "Low",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.Normal",
+                        Value = "Normal",
+                    },
+                    new EnumerationValueExternalDto()
+                    {
+                        ExternalID = "Brio.CriticalStatus.High",
+                        Value = "High",
+                    },
+                },
+            };
+
+            info.EnumerationTypes = new List<EnumerationTypeExternalDto>
+            {
+                deviationType,
+                criticalStatus,
+            };
+
             info.ConnectionType.ObjectiveTypes = new List<ObjectiveTypeExternalDto>
             {
-                new ObjectiveTypeExternalDto { Name = objectiveType, ExternalId = objectiveType },
+                new ObjectiveTypeExternalDto
+                {
+                    Name = objectiveType,
+                    ExternalId = objectiveType,
+                    DefaultDynamicFields = new List<DynamicFieldExternalDto>
+                    {
+                        new ()
+                        {
+                            ExternalID = deviationType.ExternalID,
+                            Type = DynamicFieldType.ENUM,
+                            Name = "Deviation type",
+                            Value = deviationType.EnumerationValues.First().ExternalID,
+                        },
+                        new ()
+                        {
+                            ExternalID = criticalStatus.ExternalID,
+                            Type = DynamicFieldType.ENUM,
+                            Name = "Critical status",
+                            Value = criticalStatus.EnumerationValues.First().ExternalID,
+                        },
+                    },
+                },
             };
 
             if (string.IsNullOrWhiteSpace(info.UserExternalID))
