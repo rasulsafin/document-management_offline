@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Common.Dtos;
@@ -57,10 +58,10 @@ namespace Brio.Docs.Utility
             return mapper.Map<DynamicFieldDto>(dynamicField);
         }
 
-        internal async Task<Objective> AddDynamicFieldsAsync(ICollection<DynamicFieldDto> dynamicFields, Objective objective)
+        internal async Task<Objective> AddDynamicFieldsAsync(IEnumerable<DynamicFieldDto> dynamicFields, Objective objective, ID<UserDto> byUser)
         {
-            var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)objective.AuthorID);
-            objective.DynamicFields = new List<DynamicField>();
+            var user = await context.Users.FindOrThrowAsync(x => x.ID, (int)byUser);
+            objective.DynamicFields ??= new List<DynamicField>();
             foreach (var field in dynamicFields ?? Enumerable.Empty<DynamicFieldDto>())
             {
                 await AddDynamicField(field, objective.ID, user.ConnectionInfoID);
@@ -102,7 +103,7 @@ namespace Brio.Docs.Utility
             }
         }
 
-        internal async Task<bool> UpdateDynamicFieldsAsync(ICollection<DynamicFieldDto> dynamicFieldDtos, int objectiveId)
+        internal async Task<bool> UpdateDynamicFieldsAsync(IEnumerable<DynamicFieldDto> dynamicFieldDtos, int objectiveId)
         {
             try
             {

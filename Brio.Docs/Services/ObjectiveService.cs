@@ -73,6 +73,9 @@ namespace Brio.Docs.Services
             logger.LogTrace("Add started with data: {@Data}", objectiveToCreate);
             try
             {
+                if (!objectiveToCreate.AuthorID.HasValue)
+                    throw new ArgumentException("The author id is required");
+
                 var objectiveToSave = mapper.Map<Objective>(objectiveToCreate);
                 logger.LogTrace("Mapped data: {@Objective}", objectiveToSave);
                 await context.Objectives.AddAsync(objectiveToSave);
@@ -80,7 +83,10 @@ namespace Brio.Docs.Services
 
                 await bimElementHelper.AddBimElementsAsync(objectiveToCreate.BimElements, objectiveToSave);
                 await itemHelper.AddItemsAsync(objectiveToCreate.Items, objectiveToSave);
-                await dynamicFieldHelper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+                await dynamicFieldHelper.AddDynamicFieldsAsync(
+                    objectiveToCreate.DynamicFields,
+                    objectiveToSave,
+                    objectiveToCreate.AuthorID.Value);
                 await AddLocationAsync(objectiveToCreate.Location, objectiveToSave);
 
                 return mapper.Map<ObjectiveToListDto>(objectiveToSave);
@@ -143,7 +149,7 @@ namespace Brio.Docs.Services
             }
         }
 
-        public async Task<ObjectiveReportCreationResultDto> GenerateReport(IEnumerable<ID<ObjectiveDto>> objectiveIds, string path, int userID, string projectName)
+        public async Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName)
         {
             using var lScope = logger.BeginMethodScope();
             logger.LogInformation(
@@ -151,10 +157,10 @@ namespace Brio.Docs.Services
                 userID,
                 path,
                 projectName,
-                objectiveIds);
+                report.Objectives);
             try
             {
-                if (objectiveIds == null)
+                if (report.Objectives == null)
                     throw new ArgumentValidationException("Cannot create report without objectives");
 
                 int count = 0;
@@ -181,7 +187,7 @@ namespace Brio.Docs.Services
 
                 List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
                 var objNum = 1;
-                foreach (var objectiveId in objectiveIds)
+                foreach (var objectiveId in report.Objectives)
                 {
                     var objective = await GetOrThrowAsync(objectiveId);
                     var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
@@ -201,13 +207,11 @@ namespace Brio.Docs.Services
                 Directory.CreateDirectory(reportDir);
                 var reportName = localizer["Report"];
                 path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
-                var xmlDoc = reportHelper.Convert(objectives, path, projectName, reportID, date);
-                var xmlFooter = reportHelper.CreateFooter();
-                var xmlHeader = reportHelper.CreateHeader();
+                var xmlDoc = reportHelper.Convert(report, objectives, reportID, date);
                 logger.LogDebug("XML created: {@XDocument}", xmlDoc);
 
                 ReportCreator reportCreator = new ReportCreator();
-                reportCreator.CreateReport(xmlDoc, xmlFooter, xmlHeader, path);
+                reportCreator.CreateReport(xmlDoc, path);
                 logger.LogInformation("Report created ({Path})", path);
 
                 return new ObjectiveReportCreationResultDto()
@@ -378,7 +382,13 @@ namespace Brio.Docs.Services
                 var objectiveFromDb = await context.Objectives.FindOrThrowAsync((int)objectiveDto.ID);
                 objectiveFromDb = mapper.Map(objectiveDto, objectiveFromDb);
 
-                await dynamicFieldHelper.UpdateDynamicFieldsAsync(objectiveDto.DynamicFields, objectiveFromDb.ID);
+                await dynamicFieldHelper.UpdateDynamicFieldsAsync(
+                    objectiveDto.DynamicFields.Where(x => x.ID.IsValid),
+                    objectiveFromDb.ID);
+                await dynamicFieldHelper.AddDynamicFieldsAsync(
+                    objectiveDto.DynamicFields.Where(x => !x.ID.IsValid),
+                    objectiveFromDb,
+                    new ID<UserDto>(CurrentUser.ID));
                 await bimElementHelper.UpdateBimElementsAsync(objectiveDto.BimElements, objectiveFromDb.ID);
                 await itemHelper.UpdateItemsAsync(objectiveDto.Items, objectiveFromDb);
 
