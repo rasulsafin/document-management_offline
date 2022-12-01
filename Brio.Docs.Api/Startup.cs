@@ -29,7 +29,18 @@ namespace Brio.Docs.Api
         public void ConfigureServices(IServiceCollection services)
         {
             string connection = Configuration.GetConnectionString("DefaultConnection");
-            services.AddDbContext<Database.DMContext>(options => options.UseSqlite(connection));
+            if (string.IsNullOrEmpty(connection))
+            {
+                Log.Fatal("DefaultConnection is not defined in configuration");
+                Log.Information("Terminating");
+                Environment.Exit(1);
+                return;
+            }
+
+            services.AddDbContext<Database.DMContext>(options =>
+            {
+                options.UseSqlite(connection);
+            });
 
             services.AddLocalization(options => options.ResourcesPath = "Resources");
             services.AddMvc()
