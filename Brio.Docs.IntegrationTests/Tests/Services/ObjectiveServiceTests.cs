@@ -72,6 +72,8 @@ namespace Brio.Docs.Tests.Services
                 serviceProvider.GetService<BimElementsHelper>(),
                 Mock.Of<ILogger<ObjectiveService>>(),
                 Mock.Of<IStringLocalizer<ReportLocalization>>());
+
+            CurrentUser.ID = Fixture.Context.Users.First().ID;
         }
 
         [TestCleanup]
