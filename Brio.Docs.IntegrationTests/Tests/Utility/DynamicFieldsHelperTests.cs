@@ -106,7 +106,10 @@ namespace Brio.Docs.Tests.Utility
             var expectedCount = startCount + 1;
 
             // Act
-            var resultObjective = await helper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+            var resultObjective = await helper.AddDynamicFieldsAsync(
+               objectiveToCreate.DynamicFields,
+               objectiveToSave,
+               objectiveToCreate.AuthorID ?? ID<UserDto>.InvalidID);
             var actualCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
 
             // Assert
@@ -141,7 +144,10 @@ namespace Brio.Docs.Tests.Utility
             var expectedCount = startCount + 1;
 
             // Act
-            var resultObjective = await helper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+            var resultObjective = await helper.AddDynamicFieldsAsync(
+                objectiveToCreate.DynamicFields,
+                objectiveToSave,
+                objectiveToCreate.AuthorID ?? ID<UserDto>.InvalidID);
             var actualCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
 
             // Assert
@@ -173,7 +179,10 @@ namespace Brio.Docs.Tests.Utility
             var expectedCount = startCount + 1;
 
             // Act
-            var resultObjective = await helper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+            var resultObjective = await helper.AddDynamicFieldsAsync(
+                objectiveToCreate.DynamicFields,
+                objectiveToSave,
+                objectiveToCreate.AuthorID ?? ID<UserDto>.InvalidID);
             var actualCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
 
             // Assert
@@ -221,7 +230,10 @@ namespace Brio.Docs.Tests.Utility
             var expectedCount = startCount + 3;
 
             // Act
-            var resultObjective = await helper.AddDynamicFieldsAsync(objectiveToCreate.DynamicFields, objectiveToSave);
+            var resultObjective = await helper.AddDynamicFieldsAsync(
+                objectiveToCreate.DynamicFields,
+                objectiveToSave,
+                objectiveToCreate.AuthorID ?? ID<UserDto>.InvalidID);
             var actualCount = Fixture.Context.DynamicFields.Unsynchronized().Count();
 
             // Assert
