@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Web;
 using Brio.Docs.External.Utils;
 using WebDav;
@@ -30,7 +31,7 @@ namespace Brio.Docs.Connections.BrioCloud
         {
             var result = new BrioCloudElement
             {
-                Href = Uri.UnescapeDataString(element.Uri),
+                Href = GetGenericHref(Uri.UnescapeDataString(element.Uri)),
                 IsDirectory = element.IsCollection,
                 DisplayName = Path.GetFileName(HttpUtility.UrlDecode(element.Uri.TrimEnd('/'))),
                 ContentType = element.ContentType,
@@ -42,6 +43,13 @@ namespace Brio.Docs.Connections.BrioCloud
             result.LastModified = element.LastModifiedDate ?? default;
 
             return result;
+        }
+
+        private static string GetGenericHref(string href)
+        {
+            // removing '/remote.php/dav/files/username'
+            var regex = new Regex("^/remote[.]php/dav/files/.*?/");
+            return regex.Replace(href, "/");
         }
     }
 }
