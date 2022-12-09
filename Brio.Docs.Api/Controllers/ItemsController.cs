@@ -261,5 +261,47 @@ namespace Brio.Docs.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
             }
         }
+
+        /// <summary>
+        /// Upload files from the local storage to the remote connection.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Items/upload/{userID}
+        ///     [
+        ///        {"id": 1},
+        ///        {"id": 2},
+        ///        {"id": 3}
+        ///     ]
+        /// </remarks>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>Id of the created long request.</returns>
+        /// <response code="202">Request is accepted but can take a long time to proceed. Check with the /RequestQueue to get the result.</response>
+        /// <response code="500">Something went wrong while server tried to upload files.</response>
+        [HttpPost]
+        [Route("upload/{userID:int}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(RequestID), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UploadItems(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID,
+            [FromBody]
+            IEnumerable<ID<ItemDto>> itemIds)
+        {
+            try
+            {
+                var result = await service.UploadItems(new ID<UserDto>(userID), itemIds);
+                return Accepted(result);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["CouldNotUpload"], ex.Message);
+            }
+        }
     }
 }

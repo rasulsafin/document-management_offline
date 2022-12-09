@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
@@ -54,6 +54,16 @@ namespace Brio.Docs.Client.Services
         /// <returns>Id of the created long request.</returns>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
+
+        /// <summary>
+        /// Uploads files from the local storage to the remote connection storage.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>The ID of the created long request.</returns>
+        /// <exception cref="ANotFoundException">Thrown when users data not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
+        Task<RequestID> UploadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
 
         /// <summary>
         /// Delete items from remote connection.

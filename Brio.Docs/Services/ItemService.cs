@@ -69,27 +69,11 @@ namespace Brio.Docs.Services
                     .FirstOrDefaultAsync();
                 logger.LogDebug("Found project: {@Project}", project);
 
-                var user = await context.Users
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .ThenInclude(x => x.AppProperties)
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .ThenInclude(x => x.AuthFieldNames)
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.AuthFieldValues)
-                    .FindOrThrowAsync(x => x.ID, (int)userID);
-                logger.LogDebug("Found user: {@User}", user);
-
                 var scope = scopeFactory.CreateScope();
-                var connection =
-                    connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
-                var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
-                logger.LogTrace("Mapped info: {@Info}", info);
-                var storage = await connection.GetStorage(info);
+                var storage = await GetStorage(scope, userID);
 
                 var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
                 var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
                 var src = new CancellationTokenSource();
                 var scopeContext = contextFactory.Create(scope);
@@ -155,27 +139,11 @@ namespace Brio.Docs.Services
                     .FirstOrDefaultAsync();
                 logger.LogDebug("Found project: {@Project}", project);
 
-                var user = await context.Users
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .ThenInclude(x => x.AppProperties)
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.ConnectionType)
-                    .ThenInclude(x => x.AuthFieldNames)
-                    .Include(x => x.ConnectionInfo)
-                    .ThenInclude(x => x.AuthFieldValues)
-                    .FindOrThrowAsync(x => x.ID, (int)userID);
-                logger.LogDebug("Found user: {@User}", user);
-
                 var scope = scopeFactory.CreateScope();
-                var connection =
-                    connectionFactory.Create(scope, ConnectionCreator.GetConnection(user.ConnectionInfo.ConnectionType));
-                var info = mapper.Map<ConnectionInfoExternalDto>(user.ConnectionInfo);
-                logger.LogTrace("Mapped info: {@Info}", info);
-                var storage = await connection.GetStorage(info);
+                var storage = await GetStorage(scope, userID);
 
                 var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new Progress<double>(v => { requestQueue.SetProgress(v, id); });
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
                 var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
                 var src = new CancellationTokenSource();
 
@@ -297,6 +265,85 @@ namespace Brio.Docs.Services
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
+        }
+
+        public async Task<RequestID> UploadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("UploadItems started for user {@UserID} with itemIds: {@ItemIds}", userID, itemIds);
+            try
+            {
+                var ids = itemIds.Select(x => (int)x).ToArray();
+                var dbItems = await context.Items
+                    .Where(x => ids.Contains(x.ID))
+                    .ToListAsync();
+                logger.LogDebug("Found items: {@DBItems}", dbItems);
+
+                var projectID = dbItems.FirstOrDefault()?.ProjectID ?? -1;
+                var project = await context.Projects
+                    .Where(x => x.ID == projectID)
+                    .FirstOrDefaultAsync();
+                logger.LogDebug("Found project: {@Project}", project);
+
+                var scope = scopeFactory.CreateScope();
+                var storage = await GetStorage(scope, userID);
+
+                var id = Guid.NewGuid().ToString();
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
+                var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
+                var src = new CancellationTokenSource();
+
+                var task = Task.Factory.StartNew(
+                    async () =>
+                    {
+                        try
+                        {
+                            logger.LogTrace("UploadItems task started ({ID})", id);
+                            var result = await storage.UploadFiles(project?.ExternalID, data, progress);
+                            logger.LogDebug("Uploading is successful: {Result}", result);
+                            return new RequestResult(result);
+                        }
+                        catch (Exception e)
+                        {
+                            logger.LogError(e, "Can't upload items {@ItemIds} with user key {UserID}", itemIds, userID);
+                            return new RequestResult(false);
+                        }
+                        finally
+                        {
+                            scope.Dispose();
+                        }
+                    },
+                    TaskCreationOptions.LongRunning);
+                requestQueue.AddRequest(id, task.Unwrap(), src);
+
+                return new RequestID(id);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't upload items {@ItemIds} with user key {UserID}", itemIds, userID);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
+        private async Task<IConnectionStorage> GetStorage(IServiceScope scope, ID<UserDto> userID)
+        {
+            var connectionInfo = await context.ConnectionInfos.Include(x => x.AuthFieldValues)
+               .FirstOrDefaultAsync(x => x.User.ID == (int)userID);
+            logger.LogDebug("Found connection info: {@ConnectionInfo}", connectionInfo);
+
+            if (connectionInfo == null)
+                throw new NotFoundException<ConnectionInfo>($"ConnectionInfo for user {userID} not found");
+
+            var connectionType = await context.Users.Where(x => x.ID == (int)userID)
+               .Select(x => x.ConnectionInfo.ConnectionType)
+               .FirstAsync();
+
+            logger.LogDebug("Found connection type: {@ConnectionType}", connectionType);
+            var connection = connectionFactory.Create(scope, ConnectionCreator.GetConnection(connectionType));
+            var info = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
+            logger.LogTrace("Mapped connection info: {@Info}", info);
+            var storage = await connection.GetStorage(info);
+            return storage;
         }
     }
 }
