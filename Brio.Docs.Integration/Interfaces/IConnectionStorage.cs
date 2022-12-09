@@ -29,5 +29,17 @@ namespace Brio.Docs.Integration.Interfaces
         /// <param name="progress">Progress to be tracked.</param>
         /// <returns>Deletion result.</returns>
         Task<bool> DeleteFiles(string projectId, IEnumerable<ItemExternalDto> itemExternalDtos, IProgress<double> progress);
+
+        /// <summary>
+        /// Uploads files to the remote storage.
+        /// </summary>
+        /// <param name="projectId">The working project.</param>
+        /// <param name="itemExternalDtos">Items to upload.</param>
+        /// <param name="progress">The progress to be tracked.</param>
+        /// <returns>The task of the uploading with result of the operation. If True, all files were uploaded successfully.</returns>
+        Task<bool> UploadFiles(
+            string projectId,
+            IEnumerable<ItemExternalDto> itemExternalDtos,
+            IProgress<double> progress);
     }
 }

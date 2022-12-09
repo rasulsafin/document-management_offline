@@ -55,5 +55,20 @@ namespace Brio.Docs.External.CloudBase
             progress?.Report(1.0);
             return true;
         }
+
+        public async Task<bool> UploadFiles(
+            string projectId,
+            IEnumerable<ItemExternalDto> itemExternalDtos,
+            IProgress<double> progress)
+        {
+            var projects =
+                await cloudManager.PullAll<ProjectExternalDto>(PathManager.GetTableDir(nameof(ProjectExternalDto)));
+            await ItemsSyncHelper.UploadFiles(
+                itemExternalDtos.ToArray(),
+                cloudManager,
+                projects.FirstOrDefault(x => x.ExternalID == projectId)?.Title);
+            progress?.Report(1.0);
+            return true;
+        }
     }
 }
