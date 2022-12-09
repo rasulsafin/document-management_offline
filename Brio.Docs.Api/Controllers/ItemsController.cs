@@ -33,6 +33,47 @@ namespace Brio.Docs.Api.Controllers
         }
 
         /// <summary>
+        /// Links item to the project.
+        /// </summary>
+        /// <param name="item">The linking item.</param>
+        /// <param name="project">The project ID.</param>
+        /// <returns>The ID of linked item.</returns>
+        /// <response code="200">The item was linked successfully.</response>
+        /// <response code="400">Some is incorrect.</response>
+        /// <response code="404">Could not find project to the linking.</response>
+        /// <response code="500">Something went wrong while linking an item.</response>
+        [HttpPut]
+        [Route("project/{projectID:int}/")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ID<ItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> LinkItem(
+            [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
+            ItemDto item,
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int project)
+        {
+            try
+            {
+                var result = await service.LinkItem(new ID<ProjectDto>(project), item);
+                return Ok(result);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Updates item.
         /// </summary>
         /// <param name="item">Data to update.</param>

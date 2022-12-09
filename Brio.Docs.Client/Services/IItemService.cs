@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
@@ -45,6 +45,14 @@ namespace Brio.Docs.Client.Services
         /// <exception cref="ANotFoundException">Thrown when objective does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);
+
+        /// <summary>
+        /// Links item to the project.
+        /// </summary>
+        /// <param name="projectId">The project's ID.</param>
+        /// <param name="itemDto">The item to link.</param>
+        /// <returns>The item ID linked to the project.</returns>
+        Task<ID<ItemDto>> LinkItem(ID<ProjectDto> projectId, ItemDto itemDto);
 
         /// <summary>
         /// Download files from remote connection to local storage.

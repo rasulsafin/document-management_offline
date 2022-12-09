@@ -51,6 +51,55 @@ namespace Brio.Docs.Services
             logger.LogTrace("ItemService created");
         }
 
+        public async Task<ID<ItemDto>> LinkItem(ID<ProjectDto> projectId, ItemDto itemDto)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("LinkItem started to project: {@Project} and item: {@Item}", projectId, itemDto);
+
+            try
+            {
+                if (await context.Projects.AsNoTracking().AllAsync(x => x.ID != (int)projectId))
+                    throw new NotFoundException<Project>((int)projectId);
+
+                var projectItems = context.Items.Where(
+                    x => x.ProjectID == (int)projectId ||
+                        x.Objectives.Select(o => o.Objective)
+                           .Select(o => o.Project)
+                           .FirstOrDefault()
+                           .ID == (int)projectId);
+
+                var item = projectItems.FirstOrDefault(
+                    x => x.ID == (int)itemDto.ID || x.RelativePath == itemDto.RelativePath);
+
+                logger.LogDebug("Found item: {@Item}", item);
+
+                if (item == null)
+                {
+                    item = mapper.Map<Item>(itemDto);
+                    logger.LogDebug("Mapped item: {@Item}", item);
+                    context.Items.Add(item);
+                }
+
+                if (item.ProjectID != (int)projectId)
+                {
+                    item.ProjectID = (int)projectId;
+                    context.Items.Update(item);
+                    await context.SaveChangesAsync();
+                    logger.LogDebug(
+                        "Saved changes after linking item {Item} to project {@Project}",
+                        item.ID,
+                        projectId);
+                }
+
+                return new ID<ItemDto>(item.ID);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't add item {@Item} to project {@Project}", itemDto, projectId);
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
         public async Task<RequestID> DeleteItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds)
         {
             using var lScope = logger.BeginMethodScope();

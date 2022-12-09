@@ -17,6 +17,9 @@ namespace Brio.Docs.HttpConnection.Services
         {
         }
 
+        public async Task<ID<ItemDto>> LinkItem(ID<ProjectDto> projectId, ItemDto itemDto)
+            => await Connection.PutObjectJsonAsync<ItemDto, ID<ItemDto>>($"{PATH}/{PROJECT}/{{0}}", itemDto, projectId);
+
         public async Task<bool> Update(ItemDto itemDto)
             => await Connection.PutObjectJsonAsync<ItemDto, bool>($"{PATH}", itemDto);
 
