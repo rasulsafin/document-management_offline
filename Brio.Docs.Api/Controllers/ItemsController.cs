@@ -35,8 +35,8 @@ namespace Brio.Docs.Api.Controllers
         /// <summary>
         /// Links item to the project.
         /// </summary>
+        /// <param name="projectID">The project ID.</param>
         /// <param name="item">The linking item.</param>
-        /// <param name="project">The project ID.</param>
         /// <returns>The ID of linked item.</returns>
         /// <response code="200">The item was linked successfully.</response>
         /// <response code="400">Some is incorrect.</response>
@@ -50,17 +50,17 @@ namespace Brio.Docs.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> LinkItem(
-            [FromBody]
-            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
-            ItemDto item,
             [FromRoute]
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
-            int project)
+            int projectID,
+            [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
+            ItemDto item)
         {
             try
             {
-                var result = await service.LinkItem(new ID<ProjectDto>(project), item);
+                var result = await service.LinkItem(new ID<ProjectDto>(projectID), item);
                 return Ok(result);
             }
             catch (ANotFoundException ex)

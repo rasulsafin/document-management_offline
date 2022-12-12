@@ -72,18 +72,23 @@ namespace Brio.Docs.Services
                     x => x.ID == (int)itemDto.ID || x.RelativePath == itemDto.RelativePath);
 
                 logger.LogDebug("Found item: {@Item}", item);
+                var isNew = item == null;
 
-                if (item == null)
+                if (isNew)
                 {
                     item = mapper.Map<Item>(itemDto);
                     logger.LogDebug("Mapped item: {@Item}", item);
-                    context.Items.Add(item);
                 }
 
-                if (item.ProjectID != (int)projectId)
+                if (isNew || item.ProjectID != (int)projectId)
                 {
                     item.ProjectID = (int)projectId;
-                    context.Items.Update(item);
+
+                    if (isNew)
+                        context.Items.Add(item);
+                    else
+                        context.Items.Update(item);
+
                     await context.SaveChangesAsync();
                     logger.LogDebug(
                         "Saved changes after linking item {Item} to project {@Project}",
@@ -389,6 +394,7 @@ namespace Brio.Docs.Services
 
             logger.LogDebug("Found connection type: {@ConnectionType}", connectionType);
             var connection = connectionFactory.Create(scope, ConnectionCreator.GetConnection(connectionType));
+            connectionInfo.ConnectionType = null;
             var info = mapper.Map<ConnectionInfoExternalDto>(connectionInfo);
             logger.LogTrace("Mapped connection info: {@Info}", info);
             var storage = await connection.GetStorage(info);
