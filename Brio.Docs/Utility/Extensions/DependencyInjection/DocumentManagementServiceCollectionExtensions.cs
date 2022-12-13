@@ -77,9 +77,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<BimElementObjectiveTypeConverter>();
             services.AddTransient<DynamicFieldModelToDtoConverter>();
 
-            services.AddTransient<ItemFileNameResolver>();
-            services.AddTransient<ItemFullPathResolver>();
-            services.AddTransient<ItemExternalDtoRelativePathResolver>();
+            services.AddTransient<ItemProjectDirectoryResolver>();
 
             return services;
         }

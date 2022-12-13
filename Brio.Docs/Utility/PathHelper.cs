@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Models;
 
 namespace Brio.Docs.Utility
@@ -10,7 +9,6 @@ namespace Brio.Docs.Utility
     {
         private static readonly string APPLICATION_DIRECTORY_NAME = "Brio MRS";
         private static readonly string DATABASE_DIRECTORY_NAME = "Database";
-        private static readonly string MEDIA_DIRECTORY_NAME = "Media";
         private static readonly string MY_DOCUMENTS = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
         private static readonly char[] INVALID_PATH_CHARS = Path.GetInvalidFileNameChars().Append('.').ToArray();
@@ -22,25 +20,9 @@ namespace Brio.Docs.Utility
         public static string GetFileName(string path)
             => Path.GetFileName(path);
 
-        public static string GetFullPath(string projectName, string fileName)
-            => Combine(Database, GetValidDirectoryName(projectName), fileName.TrimStart('/', '\\'));
-
-        public static string GetFullPath(Project project, string fileName)
-        => Combine(Database, GetValidDirectoryName(project), fileName.TrimStart('/', '\\'));
-
         public static string GetValidDirectoryName(Project project) =>
             // TODO : You can trim the project title, for example, by taking the first 50 characters.
             GetValidDirectoryName(project.Title);
-
-        public static string GetRelativePath(string fileName, ItemType type)
-        {
-            var relativePath = type switch
-            {
-                ItemType.Media => Path.Combine(MEDIA_DIRECTORY_NAME, fileName),
-                _ => Path.Combine(string.Empty, fileName),
-            };
-            return '\\' + relativePath;
-        }
 
         private static string GetValidDirectoryName(string name)
         {

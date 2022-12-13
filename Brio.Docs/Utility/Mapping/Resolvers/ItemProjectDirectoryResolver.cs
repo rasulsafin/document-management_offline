@@ -7,12 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Utility.Mapping.Resolvers
 {
-    public class ItemFullPathResolver : IValueResolver<Item, ItemExternalDto, string>
+    public class ItemProjectDirectoryResolver : IValueResolver<Item, ItemExternalDto, string>
     {
         private readonly DMContext dbContext;
-        private readonly ILogger<ItemFullPathResolver> logger;
+        private readonly ILogger<ItemProjectDirectoryResolver> logger;
 
-        public ItemFullPathResolver(DMContext dbContext, ILogger<ItemFullPathResolver> logger)
+        public ItemProjectDirectoryResolver(DMContext dbContext, ILogger<ItemProjectDirectoryResolver> logger)
         {
             this.dbContext = dbContext;
             this.logger = logger;
@@ -31,15 +31,7 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
             if (project == null)
                 return null;
 
-            if (project.IsSynchronized)
-            {
-                var projectSync = dbContext.Projects.FirstOrDefault(x => x.SynchronizationMateID == projectID);
-                return projectSync == null ? null : PathHelper.GetFullPath(projectSync, source.RelativePath);
-            }
-            else
-            {
-                return PathHelper.GetFullPath(project, source.RelativePath);
-            }
+            return PathHelper.GetValidDirectoryName(project);
         }
     }
 }

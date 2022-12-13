@@ -45,7 +45,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                 resultItems.Add(new ItemExternalDto
                 {
                     ExternalID = file.Href,
-                    FileName = file.DisplayName,
+                    RelativePath = file.DisplayName,
                     ItemType = ItemTypeHelper.GetTypeByName(file.DisplayName),
                     UpdatedAt = file.LastModified > file.CreationDate ? file.LastModified : file.CreationDate,
                 });

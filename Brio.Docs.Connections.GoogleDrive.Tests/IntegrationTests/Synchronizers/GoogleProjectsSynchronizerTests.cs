@@ -63,8 +63,8 @@ namespace Brio.Docs.Connections.GoogleDrive.Tests.IntegrationTests.Synchronizers
                 {
                     new ItemExternalDto
                     {
-                        FileName = Path.GetFileName(TEST_FILE_PATH),
-                        FullPath = Path.GetFullPath(TEST_FILE_PATH),
+                        RelativePath = TEST_FILE_PATH,
+                        ProjectDirectory = Path.GetDirectoryName(Path.GetFullPath(TEST_FILE_PATH)),
                     },
                 },
             };

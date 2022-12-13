@@ -514,7 +514,7 @@ namespace Brio.Docs.Tests.Synchronization
                 new ItemExternalDto
                 {
                     ExternalID = "new_external_item_id",
-                    FileName = "1.txt",
+                    RelativePath = "1.txt",
                     ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 });
@@ -550,7 +550,7 @@ namespace Brio.Docs.Tests.Synchronization
                 new ItemExternalDto
                 {
                     ExternalID = "new_external_item_id",
-                    FileName = "1.txt",
+                    RelativePath = "1.txt",
                     ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 });
@@ -576,7 +576,7 @@ namespace Brio.Docs.Tests.Synchronization
             var externalItem = new ItemExternalDto
             {
                 ExternalID = item.ExternalID,
-                FileName = "1.txt",
+                RelativePath = "1.txt",
                 ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -615,7 +615,7 @@ namespace Brio.Docs.Tests.Synchronization
             var externalItem = new ItemExternalDto
             {
                 ExternalID = syncedItem.ExternalID,
-                FileName = "1.txt",
+                RelativePath = "1.txt",
                 ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
             };
