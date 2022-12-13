@@ -67,7 +67,8 @@ namespace Brio.Docs.External.CloudBase
             await ItemsSyncHelper.UploadFiles(
                 array,
                 cloudManager,
-                projects.FirstOrDefault(x => x.ExternalID == projectId)?.Title);
+                projects.FirstOrDefault(x => x.ExternalID == projectId)?.Title,
+                true);
             progress?.Report(1.0);
             return array;
         }
