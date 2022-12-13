@@ -36,8 +36,8 @@ namespace Brio.Docs.Integration.Interfaces
         /// <param name="projectId">The working project.</param>
         /// <param name="itemExternalDtos">Items to upload.</param>
         /// <param name="progress">The progress to be tracked.</param>
-        /// <returns>The task of the uploading with result of the operation. If True, all files were uploaded successfully.</returns>
-        Task<bool> UploadFiles(
+        /// <returns>The task of the uploading with result with updated items' info.</returns>
+        Task<IEnumerable<ItemExternalDto>> UploadFiles(
             string projectId,
             IEnumerable<ItemExternalDto> itemExternalDtos,
             IProgress<double> progress);

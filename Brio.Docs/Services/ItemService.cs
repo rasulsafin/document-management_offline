@@ -28,6 +28,7 @@ namespace Brio.Docs.Services
         private readonly IMapper mapper;
         private readonly IFactory<IServiceScope, Type, IConnection> connectionFactory;
         private readonly IFactory<IServiceScope, DMContext> contextFactory;
+        private readonly IFactory<IServiceScope, IMapper> mapperFactory;
         private readonly IRequestService requestQueue;
         private readonly IServiceScopeFactory scopeFactory;
         private readonly ILogger<ItemService> logger;
@@ -37,6 +38,7 @@ namespace Brio.Docs.Services
             IMapper mapper,
             IFactory<IServiceScope, Type, IConnection> connectionFactory,
             IFactory<IServiceScope, DMContext> contextFactory,
+            IFactory<IServiceScope, IMapper> mapperFactory,
             IRequestService requestQueue,
             IServiceScopeFactory scopeFactory,
             ILogger<ItemService> logger)
@@ -45,6 +47,7 @@ namespace Brio.Docs.Services
             this.mapper = mapper;
             this.connectionFactory = connectionFactory;
             this.contextFactory = contextFactory;
+            this.mapperFactory = mapperFactory;
             this.requestQueue = requestQueue;
             this.scopeFactory = scopeFactory;
             this.logger = logger;
@@ -341,9 +344,11 @@ namespace Brio.Docs.Services
 
                 var scope = scopeFactory.CreateScope();
                 var storage = await GetStorage(scope, userID);
+                var scopedMapper = mapperFactory.Create(scope);
+                var scopedContext = contextFactory.Create(scope);
 
                 var id = Guid.NewGuid().ToString();
-                Progress<double> progress = new (v => { requestQueue.SetProgress(v, id); });
+                Progress<double> progress = new (v => { requestQueue.SetProgress(v * 0.9, id); });
                 var data = dbItems.Select(x => mapper.Map<ItemExternalDto>(x)).ToList();
                 var src = new CancellationTokenSource();
 
@@ -354,8 +359,23 @@ namespace Brio.Docs.Services
                         {
                             logger.LogTrace("UploadItems task started ({ID})", id);
                             var result = await storage.UploadFiles(project?.ExternalID, data, progress);
-                            logger.LogDebug("Uploading is successful: {Result}", result);
-                            return new RequestResult(result);
+                            logger.LogDebug("Uploading is successful: {@Result}", result);
+                            var updatedItems = result.Select(x => scopedMapper.Map<Item>(x)).ToArray();
+
+                            foreach (var updatedItem in updatedItems.Where(x => !string.IsNullOrEmpty(x.ExternalID)))
+                            {
+                                var found = scopedContext.Items.FirstOrDefault(x => x.RelativePath == updatedItem.RelativePath);
+
+                                if (found != null)
+                                {
+                                    found.ExternalID = updatedItem.ExternalID;
+                                    scopedContext.Items.Update(found);
+                                }
+                            }
+
+                            await scopedContext.SaveChangesAsync();
+                            var allUploaded = updatedItems.All(x => x.ExternalID != null);
+                            return new RequestResult(allUploaded);
                         }
                         catch (Exception e)
                         {
