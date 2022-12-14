@@ -18,12 +18,14 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                 ? PathManager.FILES_DIRECTORY
                 : PathManager.GetFilesDirectoryForProject(projectName);
 
-            var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(remoteDirectoryName));
-
             var toUpload = forceUploading ? items : items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
 
             foreach (var item in toUpload)
             {
+                var directory = remoteDirectoryName;
+                var folders = item.RelativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                directory = folders.Take(folders.Length - 1).Aggregate(directory, PathManager.DirectoryName).Trim('/');
+                var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(directory));
                 var itemsRemoteVersion = existingRemoteFiles.FirstOrDefault(i => i.DisplayName == item.FileName);
                 if (itemsRemoteVersion?.Href != default)
                 {
@@ -32,7 +34,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                         continue;
                 }
 
-                var uploadedHref = await manager.PushFile(remoteDirectoryName, item.FullPath);
+                var uploadedHref = await manager.PushFile(directory, item.FullPath);
                 item.ExternalID = uploadedHref;
             }
         }
