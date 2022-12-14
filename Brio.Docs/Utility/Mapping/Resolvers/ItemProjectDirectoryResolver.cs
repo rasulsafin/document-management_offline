@@ -31,7 +31,7 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
             if (project == null)
                 return null;
 
-            return PathHelper.GetValidDirectoryName(project);
+            return PathHelper.GetDirectory(project);
         }
     }
 }

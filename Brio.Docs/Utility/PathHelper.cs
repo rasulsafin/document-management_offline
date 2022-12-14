@@ -17,6 +17,9 @@ namespace Brio.Docs.Utility
 
         public static string Database => Combine(ApplicationFolder, DATABASE_DIRECTORY_NAME);
 
+        public static string GetDirectory(Project project)
+            => Combine(Database, GetValidDirectoryName(project));
+
         public static string GetFileName(string path)
             => Path.GetFileName(path);
 
