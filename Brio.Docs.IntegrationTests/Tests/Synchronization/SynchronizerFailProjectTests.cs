@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database.Extensions;
@@ -66,7 +67,7 @@ namespace Brio.Docs.Tests.Synchronization
                .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
                .Throws(new Exception());
             await Fixture.Context.Projects.AddAsync(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, result) = await SynchronizingResults();
@@ -90,7 +91,7 @@ namespace Brio.Docs.Tests.Synchronization
                .Setup(x => x.Get(It.IsAny<IReadOnlyCollection<string>>()))
                .ReturnsAsync(ArraySegment<ProjectExternalDto>.Empty);
             await Fixture.Context.Projects.AddAsync(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
                .Throws(new Exception());
 
@@ -110,7 +111,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Arrange.
             var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             Fixture.Context.Remove(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             ProjectSynchronizer.Setup(x => x.Add(It.IsAny<ProjectExternalDto>()))
                 .Throws(new Exception());
 
@@ -126,7 +127,7 @@ namespace Brio.Docs.Tests.Synchronization
         private async Task<(Project local, Project synchronized, ICollection<SynchronizingResult> result)> SynchronizingResults()
         {
             var result = await synchronizer.Synchronize(
-                new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() },
+                new SynchronizingData { UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync() },
                 Connection.Object,
                 new ConnectionInfoExternalDto(),
                 new Progress<double>(),

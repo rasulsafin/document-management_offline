@@ -91,10 +91,10 @@ namespace Brio.Docs.Tests.Synchronization
         public async Task Synchronize_LocalAndRemoteProjectsSame_Synchronize()
         {
             // Arrange.
-            var (projectLocal, projectSynchronized, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
+            var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             projectRemote.Title = projectLocal.Title = "New same title";
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -103,7 +103,6 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckProjects(local, projectLocal);
-            CheckProjects(synchronized, projectSynchronized);
             CheckProjects(synchronized, mapper.Map<Project>(projectRemote), false);
             CheckSynchronizedProjects(local, synchronized);
         }
@@ -116,10 +115,10 @@ namespace Brio.Docs.Tests.Synchronization
             var ignore = "Ignore";
             projectLocal.Title = ignore;
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => x.Title != ignore,
             };
 
@@ -145,10 +144,10 @@ namespace Brio.Docs.Tests.Synchronization
             projectLocal.Title = "New value";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Projects.UpdateRange(projectLocal, projectSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => x.Title != ignore,
             };
 
@@ -173,10 +172,10 @@ namespace Brio.Docs.Tests.Synchronization
             projectLocal.Title = "New value";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => x.ID != projectLocal.ID && x.ID != projectSynchronized.ID,
             };
 
@@ -203,10 +202,10 @@ namespace Brio.Docs.Tests.Synchronization
             projectRemote.Title = ignore;
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => x.Title != ignore,
             };
 
@@ -223,7 +222,6 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
         }
 
-
         [TestMethod]
         public async Task Synchronize_FilterRejectsRemoteAndSynchronizedProject_SynchronizeRejectedToo()
         {
@@ -232,10 +230,10 @@ namespace Brio.Docs.Tests.Synchronization
             projectLocal.Title = "New value";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => x.ID == projectLocal.ID,
             };
 
@@ -261,10 +259,10 @@ namespace Brio.Docs.Tests.Synchronization
             projectRemote.Title = "New value 2";
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ProjectsFilter = x => false,
             };
 
@@ -288,7 +286,7 @@ namespace Brio.Docs.Tests.Synchronization
             var projectLocal = MockData.DEFAULT_PROJECTS[0];
             MockRemoteProjects(ArraySegment<ProjectExternalDto>.Empty);
             await Fixture.Context.Projects.AddAsync(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -296,7 +294,6 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
-            CheckProjects(local, projectLocal);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
         }
@@ -329,7 +326,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Arrange.
             var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             Fixture.Context.Remove(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -352,7 +349,7 @@ namespace Brio.Docs.Tests.Synchronization
             projectSynchronized.IsSynchronized = true;
             projectLocal.SynchronizationMate = projectSynchronized;
             await Fixture.Context.Projects.AddRangeAsync(projectSynchronized, projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -371,7 +368,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (projectLocal, _, _) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             projectLocal.Title = "New title";
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -391,7 +388,7 @@ namespace Brio.Docs.Tests.Synchronization
             var (projectLocal, _, projectRemote) = await SynchronizerTestsHelper.ArrangeProject(ProjectSynchronizer, Fixture);
             var oldTitle = projectLocal.Title;
             projectRemote.Title = "New title";
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -416,7 +413,7 @@ namespace Brio.Docs.Tests.Synchronization
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(1);
             var oldRemoteTitle = projectRemote.Title;
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -441,7 +438,7 @@ namespace Brio.Docs.Tests.Synchronization
             projectRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             var oldRemoteTitle = projectRemote.Title;
             Fixture.Context.Projects.Update(projectLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -463,7 +460,7 @@ namespace Brio.Docs.Tests.Synchronization
             var item = MockData.DEFAULT_ITEMS[0];
             item.Project = projectLocal;
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -543,7 +540,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             await Fixture.Context.Objectives.AddAsync(objective);
             await Fixture.Context.Items.AddRangeAsync(itemLocal, itemSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize(true);
@@ -566,7 +563,7 @@ namespace Brio.Docs.Tests.Synchronization
             var item = MockData.DEFAULT_ITEMS[0];
             item.Project = projectLocal;
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             projectRemote.Items = new List<ItemExternalDto>
             {
                 new ItemExternalDto
@@ -608,7 +605,7 @@ namespace Brio.Docs.Tests.Synchronization
             item.ProjectID = projectSynchronized.ID;
             item.ExternalID = itemExternal.ExternalID;
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -643,7 +640,7 @@ namespace Brio.Docs.Tests.Synchronization
             itemSynchronized.Project = projectSynchronized;
             await Fixture.Context.Items.AddAsync(item);
             await Fixture.Context.Items.AddAsync(itemSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize(true);
@@ -667,7 +664,7 @@ namespace Brio.Docs.Tests.Synchronization
             itemSynchronized.Project = projectSynchronized;
             await Fixture.Context.Items.AddAsync(item);
             await Fixture.Context.Items.AddAsync(itemSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize();
@@ -683,7 +680,7 @@ namespace Brio.Docs.Tests.Synchronization
             Task<(Project local, Project synchronized, ICollection<SynchronizingResult> synchronizationResult)>
             GetProjectsAfterSynchronize(bool ignoreObjectives = false)
         {
-            var data = new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() };
+            var data = new SynchronizingData { UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync() };
 
             if (ignoreObjectives)
                 data.ObjectivesFilter = x => false;

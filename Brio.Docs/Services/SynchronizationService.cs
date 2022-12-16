@@ -77,7 +77,7 @@ namespace Brio.Docs.Services
 
                 var data = new SynchronizingData
                 {
-                    User = user,
+                    UserId = iUserID,
                     ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
                     ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
                 };

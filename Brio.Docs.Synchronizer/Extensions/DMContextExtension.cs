@@ -1,5 +1,8 @@
 using System;
+using System.Threading.Tasks;
 using Brio.Docs.Database.Models;
+using Brio.Docs.Synchronization.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Brio.Docs.Synchronization.Extensions
 {
@@ -26,5 +29,25 @@ namespace Brio.Docs.Synchronization.Extensions
                 BimElement bimElement => bimElement.GlobalID,
                 _ => throw new NotSupportedException()
             };
+
+        public static async ValueTask<SynchronizingTuple<T>> Load<T>(
+            this DbContext context,
+            SynchronizationTupleUnloaded<T> tupleUnloaded)
+            where T : class
+        {
+            var local = tupleUnloaded.LocalId == null
+                ? null
+                : await context.Set<T>().FindAsync(tupleUnloaded.LocalId).ConfigureAwait(false);
+            var synchronized = tupleUnloaded.SynchronizedId == null
+                ? null
+                : await context.Set<T>().FindAsync(tupleUnloaded.SynchronizedId).ConfigureAwait(false);
+
+            return new SynchronizingTuple<T>
+            {
+                Local = local,
+                Synchronized = synchronized,
+                Remote = tupleUnloaded.Remote,
+            };
+        }
     }
 }

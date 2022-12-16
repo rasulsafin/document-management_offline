@@ -56,14 +56,15 @@ namespace Brio.Docs.Synchronization
             progress?.Report(0.0);
 
             var dbLocal = await set
+               .AsNoTracking()
                .Unsynchronized()
                .Include(x => x.SynchronizationMate)
                .ToListAsync()
                .ConfigureAwait(false);
 
             var dbSynchronized = await set
+               .AsNoTracking()
                .Synchronized()
-               .Include(x => x.SynchronizationMate)
                .ToListAsync()
                .ConfigureAwait(false);
 
@@ -82,18 +83,23 @@ namespace Brio.Docs.Synchronization
 
             logger.LogDebug("{@Count} tuples created", tuples.Count);
 
-            DBContextUtilities.ReloadContext(context, data);
+            var unloadedTuples = tuples.Select(SynchronizationTupleExtensions.AsUnloaded);
+
+            context.ChangeTracker.Clear();
             var results = new List<SynchronizingResult>();
             var i = 0;
 
-            foreach (var tuple in tuples)
+            foreach (var unloaded in unloadedTuples)
             {
-                foreach (var db in tuple.AsEnumerable().Where(x => x != null && x.ID != 0))
-                    context.Attach(db);
+                logger.LogTrace(
+                    "Tuple ({Local}, {Synchronized}, {Remote})",
+                    unloaded.LocalId,
+                    unloaded.SynchronizedId,
+                    unloaded.Remote?.ExternalID);
 
-                logger.LogTrace("Tuple {ID}", tuple.ExternalID);
                 token.ThrowIfCancellationRequested();
 
+                var tuple = await context.Load(unloaded).ConfigureAwait(false);
                 await attacher.AttachExisting(tuple).ConfigureAwait(false);
                 var action = tuple.DetermineAction();
                 logger.LogDebug("Tuple {ID} must {@Action}", tuple.ExternalID, action);
@@ -121,7 +127,7 @@ namespace Brio.Docs.Synchronization
                 }
                 finally
                 {
-                    DBContextUtilities.ReloadContext(context, data);
+                    context.ChangeTracker.Clear();
                 }
 
                 progress?.Report(++i / (double)tuples.Count);

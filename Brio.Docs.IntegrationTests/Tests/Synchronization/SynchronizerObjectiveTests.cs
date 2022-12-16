@@ -87,7 +87,6 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizedObjectives(local, synchronized);
         }
 
-
         [TestMethod]
         public async Task Synchronize_FilterRejectsLocalObjective_SynchronizeRejectedToo()
         {
@@ -96,10 +95,10 @@ namespace Brio.Docs.Tests.Synchronization
             var ignore = "Ignore";
             objectiveLocal.Title = ignore;
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => x.Title != ignore,
             };
 
@@ -126,10 +125,10 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveSynchronized.Title = ignore;
             objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => x.Title != ignore,
             };
 
@@ -154,10 +153,10 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveLocal.Title = "New value";
             objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => x.ID != objectiveLocal.ID && x.ID != objectiveSynchronized.ID,
             };
 
@@ -184,10 +183,10 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveRemote.Title = ignore;
             objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => x.Title != ignore,
             };
 
@@ -212,10 +211,10 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveLocal.Title = "New value";
             objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => x.ID == objectiveLocal.ID,
             };
 
@@ -241,10 +240,10 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveRemote.Title = "New value 2";
             objectiveRemote.UpdatedAt = DateTime.UtcNow.AddDays(-1);
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             var data = new SynchronizingData
             {
-                User = await Fixture.Context.Users.FirstAsync(),
+                UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync(),
                 ObjectivesFilter = x => false,
             };
 
@@ -261,7 +260,6 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
         }
 
-
         [TestMethod]
         public async Task Synchronize_LocalAndRemoteObjectiveSame_Synchronize()
         {
@@ -270,7 +268,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             objectiveRemote.Description = objectiveLocal.Description = "New same description";
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -310,7 +308,7 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveLocal.DynamicFields ??= new List<DynamicField>();
             objectiveLocal.DynamicFields.Add(dynamicField);
             await Fixture.Context.DynamicFields.AddAsync(dynamicField);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -367,7 +365,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Arrange.
             var (objectiveLocal, _, _) = await ArrangeObjective();
             Fixture.Context.Remove(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (_, _, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -404,7 +402,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             var description = objectiveLocal.Description = "New local description";
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -450,7 +448,7 @@ namespace Brio.Docs.Tests.Synchronization
             var dueDateIrrelevant = objectiveLocal.DueDate = new DateTime(2021, 3, 10);
             var dueDateRelevant = objectiveRemote.DueDate = new DateTime(2021, 3, 11);
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -492,7 +490,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveLocal,
                 });
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -546,7 +544,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveLocal,
                 });
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             remoteObjective.Items.Add(
                 new ItemExternalDto
                 {
@@ -592,7 +590,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveSynchronized,
                 });
             await Fixture.Context.Items.AddAsync(item);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -632,7 +630,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveSynchronized,
                 });
             await Fixture.Context.Items.AddRangeAsync(syncedItem, localItem);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -670,7 +668,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveLocal,
                 });
             await Fixture.Context.Items.AddRangeAsync(localItem, synchronizedItem);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize(true);
@@ -707,7 +705,7 @@ namespace Brio.Docs.Tests.Synchronization
                     Objective = objectiveLocal,
                 });
             await Fixture.Context.Items.AddRangeAsync(localItem, synchronizedItem);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -737,7 +735,7 @@ namespace Brio.Docs.Tests.Synchronization
                     },
                 });
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -789,7 +787,7 @@ namespace Brio.Docs.Tests.Synchronization
             };
             objectiveLocal.BimElements.Add(new BimElementObjective { BimElement = element });
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
             objectiveRemote.BimElements.Add(mapper.Map<BimElementExternalDto>(element));
 
@@ -821,7 +819,7 @@ namespace Brio.Docs.Tests.Synchronization
                     },
                 });
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
             objectiveRemote.BimElements.Add(new BimElementExternalDto
             {
@@ -854,7 +852,7 @@ namespace Brio.Docs.Tests.Synchronization
             };
             objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
             Fixture.Context.Objectives.Update(objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
             objectiveRemote.BimElements ??= new List<BimElementExternalDto>();
             objectiveRemote.BimElements.Add(mapper.Map<BimElementExternalDto>(element));
 
@@ -886,7 +884,7 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveSynchronized.BimElements.Add(new BimElementObjective { BimElement = element });
             Fixture.Context.Objectives.Update(objectiveLocal);
             Fixture.Context.Objectives.Update(objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -923,7 +921,7 @@ namespace Brio.Docs.Tests.Synchronization
                     },
                 });
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -967,7 +965,7 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveRemote.DynamicFields.Add(remoteField);
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -990,7 +988,7 @@ namespace Brio.Docs.Tests.Synchronization
             field.ExternalID = "ex_field";
             objectiveRemote.DynamicFields = new List<DynamicFieldExternalDto> { field };
 
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1035,7 +1033,7 @@ namespace Brio.Docs.Tests.Synchronization
             var irrelevantType = localField.Type = DynamicFieldType.INTEGER.ToString();
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1079,7 +1077,7 @@ namespace Brio.Docs.Tests.Synchronization
             objectiveRemote.DynamicFields = new List<DynamicFieldExternalDto> { remoteField };
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1110,7 +1108,7 @@ namespace Brio.Docs.Tests.Synchronization
             localField.ExternalID = synchronizedField.ExternalID = "ex_field";
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1136,7 +1134,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Objectives.AddRangeAsync(objectivesLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
@@ -1168,7 +1166,7 @@ namespace Brio.Docs.Tests.Synchronization
             subobjective.ObjectiveTypeID = objectiveLocal.ObjectiveTypeID;
 
             Fixture.Context.Objectives.Update(objectiveLocal);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (locals, synchronized, synchronizationResult) = await GetManyObjectivesAfterSynchronize();
@@ -1291,7 +1289,7 @@ namespace Brio.Docs.Tests.Synchronization
 
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
             Fixture.Context.Objectives.Update(objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1329,7 +1327,7 @@ namespace Brio.Docs.Tests.Synchronization
             var removingID = subobjectiveLocal.ExternalID = subobjectiveSynchronized.ExternalID = "ex_subobjective";
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
-            await Fixture.Context.SaveChangesAsync();
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
             var (local, synchronized, synchronizationResult) = await GetObjectivesAfterSynchronize();
@@ -1523,7 +1521,7 @@ namespace Brio.Docs.Tests.Synchronization
 
         private async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
         {
-            var data = new SynchronizingData { User = await Fixture.Context.Users.FirstAsync() };
+            var data = new SynchronizingData { UserId = await Fixture.Context.Users.Select(x => x.ID).FirstAsync() };
 
             if (ignoreProjects)
                 data.ProjectsFilter = x => false;

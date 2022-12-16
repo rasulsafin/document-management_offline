@@ -235,7 +235,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 set.Add(tuple.Synchronized);
                 logger.LogDebug("Added {ID} to DB", tuple.Synchronized.ExternalID);
             }
-            else if (!tuple.SynchronizedChanged)
+            else if (tuple.SynchronizedChanged)
             {
                 set.Update(tuple.Synchronized);
                 logger.LogDebug("Updated {ID} ({ExternalID})", tuple.Synchronized.ID, tuple.ExternalID);
@@ -246,7 +246,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 set.Add(tuple.Local);
                 logger.LogInformation("Added {ID} to local", tuple.Local.ExternalID);
             }
-            else if (!tuple.RemoteChanged)
+            else if (tuple.LocalChanged)
             {
                 set.Update(tuple.Local);
                 logger.LogInformation("Updated {ID} ({ExternalID})", tuple.Local.ID, tuple.ExternalID);

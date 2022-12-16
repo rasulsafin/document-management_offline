@@ -166,6 +166,12 @@ namespace Brio.Docs.Tests.Synchronization.Helpers
                .ReturnsAsync(array);
         }
 
+        public static async ValueTask SaveChangesAndClearTracking(DbContext context)
+        {
+            await context.SaveChangesAsync();
+            context.ChangeTracker.Clear();
+        }
+
         private static async Task<T> AddIDs<T>(T arg)
             where T : class
         {
