@@ -139,6 +139,17 @@ namespace Brio.Docs.Synchronization.Mergers
                         item.ProjectID = tuple.Remote.Project.ID;
 
                     await locationMerger.Merge(locationTuple).ConfigureAwait(false);
+
+                    locationTuple.ForEachChange(tuple, (location, objective) =>
+                    {
+                        if (location.Item.ProjectID != objective.ProjectID)
+                        {
+                            location.Item.ProjectID = objective.ProjectID;
+                            return true;
+                        }
+
+                        return false;
+                    });
                     tuple.ForEachChange(locationTuple, (objective, location) =>
                     {
                         if (objective.Location == location)

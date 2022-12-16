@@ -15,16 +15,19 @@ namespace Brio.Docs.Synchronization.Mergers
     {
         private readonly DMContext context;
         private readonly IAttacher<Item> itemAttacher;
+        private readonly IMerger<Item> itemMerger;
         private readonly ILogger<LocationMerger> logger;
 
         public LocationMerger(
             DMContext context,
             ILogger<LocationMerger> logger,
-            IAttacher<Item> itemAttacher)
+            IAttacher<Item> itemAttacher,
+            IMerger<Item> itemMerger)
         {
             this.context = context;
             this.logger = logger;
             this.itemAttacher = itemAttacher;
+            this.itemMerger = itemMerger;
             logger.LogTrace("LocationMerger created");
         }
 
@@ -49,21 +52,6 @@ namespace Brio.Docs.Synchronization.Mergers
             logger.LogAfterMerge(tuple);
             await LinkLocationItem(tuple).ConfigureAwait(false);
             logger.LogTrace("Location item merged");
-        }
-
-        private void CreateRemoteLocationItem(SynchronizingTuple<Location> tuple, SynchronizingTuple<Item> itemTuple)
-        {
-            logger.LogDebug("Creating remote");
-
-            itemTuple.Remote = new Item
-            {
-                ExternalID = itemTuple.Synchronized.ExternalID,
-                ItemType = itemTuple.Synchronized.ItemType,
-                RelativePath = itemTuple.Synchronized.RelativePath,
-                ProjectID = itemTuple.Synchronized.ProjectID,
-            };
-            logger.LogDebug("Created item: {@Object}", tuple.Local);
-            itemTuple.RemoteChanged = true;
         }
 
         private async ValueTask<DateTime> GetUpdatedTime(Location location)
@@ -111,10 +99,7 @@ namespace Brio.Docs.Synchronization.Mergers
                 bool Remove(ref Item item)
                 {
                     if (item?.ExternalID != relevantId)
-                    {
                         item = null;
-                        return true;
-                    }
 
                     return false;
                 }
@@ -125,9 +110,8 @@ namespace Brio.Docs.Synchronization.Mergers
 
             await itemAttacher.AttachExisting(itemTuple).ConfigureAwait(false);
             itemTuple.Synchronized ??= itemTuple.Local?.SynchronizationMate;
-
-            if (itemTuple.Synchronized != null && itemTuple.Remote == null)
-                CreateRemoteLocationItem(tuple, itemTuple);
+            await itemMerger.Merge(itemTuple).ConfigureAwait(false);
+            tuple.SynchronizeChanges(itemTuple);
 
             tuple.ForEachChange(
                 itemTuple,
