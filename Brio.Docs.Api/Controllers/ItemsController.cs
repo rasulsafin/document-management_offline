@@ -341,7 +341,7 @@ namespace Brio.Docs.Api.Controllers
             }
             catch (DocumentManagementException ex)
             {
-                return CreateProblemResult(this, 500, localizer["CouldNotUpload"], ex.Message);
+                return CreateProblemResult(this, 500, localizer["FailedToUploadFiles"], ex.Message);
             }
         }
     }

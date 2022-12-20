@@ -234,7 +234,7 @@
   <data name="ValidationError_PageSizeNotInRange" xml:space="preserve">
     <value>Недопустимый размер страницы</value>
   </data>
-  <data name="CouldNotUpload" xml:space="preserve">
-    <value>Не удалось загрузить файлы</value>
+  <data name="FailedToUploadFiles" xml:space="preserve">
+    <value>Не удалось загрузить файлы на облако</value>
   </data>
 </root>
