@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using WebDav;
@@ -64,6 +65,44 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
 
             Assert.AreEqual(folders.Count, foldersCount);
             Assert.AreEqual(files.Count, filesCount);
+        }
+
+        [TestMethod]
+
+        // remove
+        [DataRow("/remote.php/dav/files/username/1.txt", "/1.txt")]
+        [DataRow("/remote.php/dav/files/username/remote.php/dav/files/username/1.txt", "/remote.php/dav/files/username/1.txt")]
+        [DataRow("/remote.php/dav/files/username@example.com/1.txt", "/1.txt")]
+        [DataRow("/remote.php/dav/files/username/folder/1.txt", "/folder/1.txt")]
+        [DataRow("/remote.php/dav/files/username/folder1/folder2/1.txt", "/folder1/folder2/1.txt")]
+        [DataRow("/remote.php/dav/files//1.txt", "/1.txt")]
+
+        // do not remove
+        [DataRow("/1.txt", "/1.txt")]
+        [DataRow("/////1.txt", "/////1.txt")]
+        [DataRow("/folder/1.txt", "/folder/1.txt")]
+        [DataRow("/folder1/folder2/1.txt", "/folder1/folder2/1.txt")]
+        [DataRow("/remote.php/dav//files/username/1.txt", "/remote.php/dav//files/username/1.txt")]
+        [DataRow("/remote.php/dev/files/1.txt", "/remote.php/dev/files/1.txt")]
+        [DataRow("/remote.php/dav/files/1.txt", "/remote.php/dav/files/1.txt")]
+        [DataRow("/folder/remote.php/dav/files/username/1.txt", "/folder/remote.php/dav/files/username/1.txt")]
+        public void GetElements_SourceContainsFile_ElementHrefDoesNotContainPhpMethodAndUserName(string fileUri, string expectingResult)
+        {
+            // Arrange
+            var builder = new WebDavResource.Builder();
+            builder.WithUri(Uri.EscapeDataString(fileUri));
+            builder.IsNotCollection();
+            var file = builder.Build();
+
+            var source = new[] { file };
+            var ignoringUri = string.Empty;
+
+            // Act
+            var result = BrioCloudElement.GetElements(source, ignoringUri);
+            var href = result.First().Href;
+
+            // Assert
+            Assert.AreEqual(expectingResult, href, "Href differs from expected result");
         }
     }
 }
