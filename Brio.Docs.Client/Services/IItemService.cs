@@ -47,6 +47,14 @@ namespace Brio.Docs.Client.Services
         Task<IEnumerable<ItemDto>> GetItems(ID<ObjectiveDto> objectiveID);
 
         /// <summary>
+        /// Links item to the project.
+        /// </summary>
+        /// <param name="projectId">The project's ID.</param>
+        /// <param name="itemDto">The item to link.</param>
+        /// <returns>The item ID linked to the project.</returns>
+        Task<ID<ItemDto>> LinkItem(ID<ProjectDto> projectId, ItemDto itemDto);
+
+        /// <summary>
         /// Download files from remote connection to local storage.
         /// </summary>
         /// <param name="userID">User's ID.</param>
@@ -54,6 +62,16 @@ namespace Brio.Docs.Client.Services
         /// <returns>Id of the created long request.</returns>
         /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
         Task<RequestID> DownloadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
+
+        /// <summary>
+        /// Uploads files from the local storage to the remote connection storage.
+        /// </summary>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>The ID of the created long request.</returns>
+        /// <exception cref="ANotFoundException">Thrown when users data not found.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something went wrong.</exception>
+        Task<RequestID> UploadItems(ID<UserDto> userID, IEnumerable<ID<ItemDto>> itemIds);
 
         /// <summary>
         /// Delete items from remote connection.

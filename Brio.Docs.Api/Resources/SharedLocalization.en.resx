@@ -234,4 +234,7 @@
   <data name="ValidationError_PageSizeNotInRange" xml:space="preserve">
     <value>Page size is not in valid range</value>
   </data>
+  <data name="FailedToUploadFiles" xml:space="preserve">
+    <value>Could not upload files</value>
+  </data>
 </root>

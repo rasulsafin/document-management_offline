@@ -9,7 +9,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
     {
         private static string projectFilesFormat = $"{PathManager.FILES_DIRECTORY}/Project{PathManager.FILES_DIRECTORY}/{{0}}";
 
-        internal static async Task UploadFiles(ICollection<ItemExternalDto> items, ICloudManager manager, string projectName = null)
+        internal static async Task UploadFiles(ICollection<ItemExternalDto> items, ICloudManager manager, string projectName = null, bool forceUploading = false)
         {
             if (items == null)
                 return;
@@ -20,13 +20,16 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
             var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(remoteDirectoryName));
 
-            foreach (var item in items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID)))
+            var toUpload = forceUploading ? items : items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
+
+            foreach (var item in toUpload)
             {
                 var itemsRemoteVersion = existingRemoteFiles.FirstOrDefault(i => i.DisplayName == item.FileName);
                 if (itemsRemoteVersion?.Href != default)
                 {
                     item.ExternalID = itemsRemoteVersion.Href;
-                    continue;
+                    if (!forceUploading)
+                        continue;
                 }
 
                 var uploadedHref = await manager.PushFile(remoteDirectoryName, item.FullPath);

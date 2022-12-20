@@ -33,6 +33,47 @@ namespace Brio.Docs.Api.Controllers
         }
 
         /// <summary>
+        /// Links item to the project.
+        /// </summary>
+        /// <param name="projectID">The project ID.</param>
+        /// <param name="item">The linking item.</param>
+        /// <returns>The ID of linked item.</returns>
+        /// <response code="200">The item was linked successfully.</response>
+        /// <response code="400">Some is incorrect.</response>
+        /// <response code="404">Could not find project to the linking.</response>
+        /// <response code="500">Something went wrong while linking an item.</response>
+        [HttpPut]
+        [Route("project/{projectID:int}/")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ID<ItemDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> LinkItem(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int projectID,
+            [FromBody]
+            [Required(ErrorMessage = "ValidationError_ObjectRequired_Put")]
+            ItemDto item)
+        {
+            try
+            {
+                var result = await service.LinkItem(new ID<ProjectDto>(projectID), item);
+                return Ok(result);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Put"], ex.Message);
+            }
+        }
+
+        /// <summary>
         /// Updates item.
         /// </summary>
         /// <param name="item">Data to update.</param>
@@ -259,6 +300,48 @@ namespace Brio.Docs.Api.Controllers
             catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["ServerError_Delete"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Upload files from the local storage to the remote connection.
+        /// </summary>
+        /// <remarks>
+        /// Sample request:
+        ///
+        ///     POST /Items/upload/{userID}
+        ///     [
+        ///        {"id": 1},
+        ///        {"id": 2},
+        ///        {"id": 3}
+        ///     ]
+        /// </remarks>
+        /// <param name="userID">User's ID.</param>
+        /// <param name="itemIds">List of items' id from database.</param>
+        /// <returns>Id of the created long request.</returns>
+        /// <response code="202">Request is accepted but can take a long time to proceed. Check with the /RequestQueue to get the result.</response>
+        /// <response code="500">Something went wrong while server tried to upload files.</response>
+        [HttpPost]
+        [Route("upload/{userID:int}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(RequestID), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> UploadItems(
+            [FromRoute]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            [CheckValidID]
+            int userID,
+            [FromBody]
+            IEnumerable<ID<ItemDto>> itemIds)
+        {
+            try
+            {
+                var result = await service.UploadItems(new ID<UserDto>(userID), itemIds);
+                return Accepted(result);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["FailedToUploadFiles"], ex.Message);
             }
         }
     }
