@@ -83,7 +83,7 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         [DataRow("/folder/1.txt", "/folder/1.txt")]
         [DataRow("/folder1/folder2/1.txt", "/folder1/folder2/1.txt")]
         [DataRow("/remote.php/dav//files/username/1.txt", "/remote.php/dav//files/username/1.txt")]
-        [DataRow("/remote.php/dev/files/1.txt", "/remote.php/dev/files/1.txt")]
+        [DataRow("/remote.php/dev/files/username/1.txt", "/remote.php/dev/files/username/1.txt")]
         [DataRow("/remote.php/dav/files/1.txt", "/remote.php/dav/files/1.txt")]
         [DataRow("/folder/remote.php/dav/files/username/1.txt", "/folder/remote.php/dav/files/username/1.txt")]
         public void GetElements_SourceContainsFile_ElementHrefDoesNotContainPhpMethodAndUserName(string fileUri, string expectingResult)
