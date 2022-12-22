@@ -5,10 +5,10 @@
         <TargetFramework>net5.0</TargetFramework>
         <Authors>Brio MRS</Authors>
         <Company>Brio MRS©</Company>
-        <Version>1.3.1</Version>
+        <Version>1.4.0</Version>
         <RootNamespace>Brio.Docs.Api</RootNamespace>
-        <AssemblyVersion>1.3.1.0</AssemblyVersion>
-        <FileVersion>1.3.1.0</FileVersion>
+        <AssemblyVersion>1.4.0.0</AssemblyVersion>
+        <FileVersion>1.4.0.0</FileVersion>
         <Copyright>Brio MRS©</Copyright>
         <Product>Brio MRS Document Management Updater</Product>
     </PropertyGroup>

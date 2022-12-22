@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Brio.Docs.Common.Dtos;
+using Brio.Docs.External.Extensions;
 using Brio.Docs.Integration.Dtos;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -119,6 +120,17 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
         }
 
         [TestMethod]
+        public async Task UpdateConnectionInfo_NoExternalId_InfoWithExternalIdSameAsUsername()
+        {
+            var connection = new BrioCloudConnection();
+
+            var connectionInfo = await connection.UpdateConnectionInfo(validInfo);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(connectionInfo.UserExternalID));
+            Assert.AreEqual(validInfo.GetAuthValue(BrioCloudAuth.USERNAME), connectionInfo.UserExternalID);
+        }
+
+        [TestMethod]
         public async Task UpdateConnectionInfo_WrongObjectiveTypeWithoutGuid_NewObjectiveTypeNewGuid()
         {
             string objectiveType = "WrongObjectiveType";
@@ -136,9 +148,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
 
             var expectedResult = "BrioCloudIssue";
             var connectionInfo = await connection.UpdateConnectionInfo(info);
-
-            Assert.IsFalse(string.IsNullOrWhiteSpace(connectionInfo.UserExternalID));
-
             var result = connectionInfo.ConnectionType.ObjectiveTypes.FirstOrDefault();
 
             Assert.AreEqual(expectedResult, result.Name);
@@ -220,9 +229,6 @@ namespace Brio.Docs.Connections.BrioCloud.Tests
             await connection.Connect(info, default);
 
             var connectionInfo = await connection.UpdateConnectionInfo(info);
-
-            Assert.IsFalse(string.IsNullOrWhiteSpace(connectionInfo.UserExternalID));
-
             var result = connectionInfo.ConnectionType.ObjectiveTypes.FirstOrDefault();
 
             Assert.AreEqual(objectiveType, result.Name);

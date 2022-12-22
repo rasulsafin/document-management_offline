@@ -7,7 +7,7 @@
 
     <RootNamespace>Brio.Docs.Connections.BrioCloud.Tests</RootNamespace>
 
-    <Version>1.3.1</Version>
+    <Version>1.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
