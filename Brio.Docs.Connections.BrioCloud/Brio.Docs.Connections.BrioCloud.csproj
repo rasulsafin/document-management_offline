@@ -5,7 +5,7 @@
 		<Authors>Brio MRS</Authors>
 		<Product>Brio MRS Connection</Product>
 		<Company>Brio MRS©</Company>
-		<Version>1.3.1</Version>
+		<Version>1.4.0</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
