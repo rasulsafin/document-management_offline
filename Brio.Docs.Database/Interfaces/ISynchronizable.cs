@@ -8,7 +8,7 @@ namespace Brio.Docs.Database
         where T : ISynchronizable<T>
     {
         /// <summary>
-        /// Synchronized or unsynchronized copy of this model.
+        /// Synchronized copy of this model.
         /// </summary>
         public T SynchronizationMate { get; set; }
     }

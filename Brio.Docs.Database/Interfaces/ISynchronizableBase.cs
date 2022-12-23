@@ -29,7 +29,7 @@ namespace Brio.Docs.Database
         public bool IsSynchronized { get; set; }
 
         /// <summary>
-        /// The ID of synchronized or unsynchronized copy of this model.
+        /// The ID of synchronized copy of this model.
         /// </summary>
         public int? SynchronizationMateID { get; set; }
     }
