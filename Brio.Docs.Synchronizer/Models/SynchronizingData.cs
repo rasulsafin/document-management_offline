@@ -11,7 +11,7 @@ namespace Brio.Docs.Synchronization.Models
 
         public Expression<Func<Project, bool>> ProjectsFilter { get; set; } = project => true;
 
-        public User User { get; set; }
+        public int UserId { get; set; }
 
         internal IConnectionContext ConnectionContext { get; set; }
 

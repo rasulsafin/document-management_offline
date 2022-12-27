@@ -33,6 +33,14 @@ namespace Brio.Docs.Synchronization.Extensions
             yield return tuple.Remote;
         }
 
+        public static SynchronizationTupleUnloaded<T> AsUnloaded<T>(this SynchronizingTuple<T> tuple)
+            => new ()
+            {
+                LocalId = tuple.Local?.GetId(),
+                SynchronizedId = tuple.Synchronized?.GetId(),
+                Remote = tuple.Remote,
+            };
+
         public static bool DoesNeed<T>(this SynchronizingTuple<T> tuple, T element)
             where T : ISynchronizable<T>
         {

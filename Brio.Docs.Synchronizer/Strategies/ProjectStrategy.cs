@@ -193,7 +193,7 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 var hasUser = await context.UserProjects
                    .AsNoTracking()
-                   .AnyAsync(x => x.Project == project && x.UserID == data.User.ID)
+                   .AnyAsync(x => x.Project == project && x.UserID == data.UserId)
                    .ConfigureAwait(false);
 
                 if (!hasUser)
@@ -203,11 +203,11 @@ namespace Brio.Docs.Synchronization.Strategies
                             new UserProject
                             {
                                 Project = project,
-                                UserID = data.User.ID,
+                                UserID = data.UserId,
                             })
                        .ConfigureAwait(false);
 
-                    logger.LogDebug("Added user {ID} to project: {@Project}", data.User.ID, project);
+                    logger.LogDebug("Added user {ID} to project: {@Project}", data.UserId, project);
                 }
             }
 

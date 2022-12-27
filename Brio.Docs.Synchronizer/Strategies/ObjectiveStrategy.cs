@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
+using Brio.Docs.Database.Extensions;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Extensions;
 using Brio.Docs.Synchronization.Extensions;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Synchronization.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Synchronization.Strategies
@@ -56,8 +55,8 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
-                UpdateChildrenBeforeSynchronization(tuple, data);
-                CreateObjectiveParentLink(tuple);
+                await UpdateChildrenBeforeSynchronization(tuple, data).ConfigureAwait(false);
+                await CreateObjectiveParentLink(tuple).ConfigureAwait(false);
                 tuple.Synchronized.ProjectID = tuple.Remote.ProjectID;
                 var id = tuple.Synchronized.ProjectID;
                 tuple.Local.ProjectID = await context.Projects
@@ -97,8 +96,8 @@ namespace Brio.Docs.Synchronization.Strategies
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
 
-                UpdateChildrenBeforeSynchronization(tuple, data);
-                CreateObjectiveParentLink(tuple);
+                await UpdateChildrenBeforeSynchronization(tuple, data).ConfigureAwait(false);
+                await CreateObjectiveParentLink(tuple).ConfigureAwait(false);
                 var projectID = tuple.Local.ProjectID;
                 var projectMateId = await context.Projects
                    .AsNoTracking()
@@ -138,7 +137,7 @@ namespace Brio.Docs.Synchronization.Strategies
             try
             {
                 await merger.Merge(tuple).ConfigureAwait(false);
-                UpdateChildrenBeforeSynchronization(tuple, data);
+                await UpdateChildrenBeforeSynchronization(tuple, data).ConfigureAwait(false);
                 var result = await strategyHelper.Merge(tuple, data.ConnectionContext.ObjectivesSynchronizer, token)
                    .ConfigureAwait(false);
                 await UpdateChildrenAfterSynchronization(tuple, data).ConfigureAwait(false);
@@ -208,28 +207,6 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private static void AddConnectionInfoToDynamicFields(SynchronizingTuple<Objective> tuple, SynchronizingData data)
-        {
-            if (tuple.Remote == null)
-                return;
-
-            var remoteObjective = tuple.Remote;
-
-            foreach (var df in remoteObjective.DynamicFields)
-                AddConnectionInfoTo(df);
-
-            void AddConnectionInfoTo(DynamicField df)
-            {
-                df.ConnectionInfoID ??= data.User.ConnectionInfoID;
-
-                if (df.ChildrenDynamicFields == null)
-                    return;
-
-                foreach (var child in df.ChildrenDynamicFields)
-                    AddConnectionInfoTo(child);
-            }
-        }
-
         private static void AddProjectToRemote(SynchronizingTuple<Objective> tuple)
         {
             tuple.Remote.Project ??= tuple.Synchronized.Project;
@@ -249,26 +226,55 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private void CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
+        private async ValueTask AddConnectionInfoToDynamicFields(SynchronizingTuple<Objective> tuple, SynchronizingData data)
+        {
+            if (tuple.Remote == null)
+                return;
+
+            var connectionInfoId = await context.Users.AsNoTracking()
+                .Where(x => x.ID == data.UserId)
+                .Select(x => x.ConnectionInfoID)
+                .FirstAsync()
+                .ConfigureAwait(false);
+            var remoteObjective = tuple.Remote;
+
+            foreach (var df in remoteObjective.DynamicFields)
+                AddConnectionInfoTo(df);
+
+            void AddConnectionInfoTo(DynamicField df)
+            {
+                df.ConnectionInfoID ??= connectionInfoId;
+
+                if (df.ChildrenDynamicFields == null)
+                    return;
+
+                foreach (var child in df.ChildrenDynamicFields)
+                    AddConnectionInfoTo(child);
+            }
+        }
+
+        private async ValueTask CreateObjectiveParentLink(SynchronizingTuple<Objective> tuple)
         {
             logger.LogTrace("CreateObjectiveParentLink started with {@Tuple}", tuple);
-            if (tuple.Local.ParentObjective != null)
+            if (tuple.Local.ParentObjectiveID != null)
             {
+                var synchronizedParent = await context.Objectives
+                    .Where(x => x.ID == tuple.Local.ParentObjectiveID)
+                    .Select(x => x.SynchronizationMate)
+                    .FirstOrDefaultAsync()
+                    .ConfigureAwait(false);
                 tuple.Synchronized.ParentObjective =
-                    tuple.Remote.ParentObjective = tuple.Local.ParentObjective.SynchronizationMate;
+                    tuple.Remote.ParentObjective = synchronizedParent;
             }
             else if (tuple.Remote.ParentObjective != null)
             {
-                var allObjectives = context.Objectives.Local.Concat(context.Objectives).ToList();
+                tuple.Synchronized.ParentObjective = await context.Objectives.Synchronized()
+                    .FirstAsync(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID))
+                    .ConfigureAwait(false);
 
-                // ReSharper disable once PossibleMultipleEnumeration
-                tuple.Synchronized.ParentObjective = allObjectives
-                   .First(
-                        x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && x.IsSynchronized);
-
-                // ReSharper disable once PossibleMultipleEnumeration
-                tuple.Local.ParentObjective = allObjectives
-                   .First(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID) && !x.IsSynchronized);
+                tuple.Local.ParentObjective = await context.Objectives.Unsynchronized()
+                    .FirstAsync(x => string.Equals(x.ExternalID, tuple.Remote.ParentObjective.ExternalID))
+                    .ConfigureAwait(false);
             }
         }
 
@@ -282,7 +288,7 @@ namespace Brio.Docs.Synchronization.Strategies
                 context.Attach(author);
         }
 
-        private Task UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
+        private async ValueTask UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
             itemIdUpdater.UpdateExternalIds(
@@ -297,15 +303,14 @@ namespace Brio.Docs.Synchronization.Strategies
                 tuple.Remote.DynamicFields ?? ArraySegment<DynamicField>.Empty);
             logger.LogTrace("External ids of dynamic fields updated");
 
-            AddConnectionInfoToDynamicFields(tuple, data);
+            await AddConnectionInfoToDynamicFields(tuple, data).ConfigureAwait(false);
             AddProjectToRemote(tuple);
-            return Task.CompletedTask;
         }
 
-        private void UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
+        private async ValueTask UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             StartTrackAuthor(tuple);
-            AddConnectionInfoToDynamicFields(tuple, data);
+            await AddConnectionInfoToDynamicFields(tuple, data).ConfigureAwait(false);
             AddProjectToRemoteItems(tuple);
         }
     }

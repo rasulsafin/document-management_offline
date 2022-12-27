@@ -69,10 +69,8 @@ namespace Brio.Docs.Synchronization
 
             try
             {
-                if (dbContext.Users.Local.All(x => x.ID != data.User.ID))
-                    dbContext.Attach(data.User);
                 data.Date = DateTime.UtcNow;
-                var userID = data.User.ID;
+                var userID = data.UserId;
                 var lastSynchronization = await GetLastSynchronizationDate(userID).ConfigureAwait(false);
                 var externalDto = mapper.Map<ConnectionInfoExternalDto>(info);
                 context = await connection.GetContext(externalDto).ConfigureAwait(false);
@@ -132,7 +130,7 @@ namespace Brio.Docs.Synchronization
             return new Database.Models.Synchronization
             {
                 Date = data.Date,
-                UserID = data.User.ID,
+                UserID = data.UserId,
             };
         }
 
@@ -207,8 +205,7 @@ namespace Brio.Docs.Synchronization
                 {
                     new ()
                     {
-                        UserID = data.User.ID,
-                        User = data.User,
+                        UserID = data.UserId,
                         ProjectID = remoteObjective.ProjectID,
                         Project = remoteObjective.Project,
                     },
@@ -257,8 +254,7 @@ namespace Brio.Docs.Synchronization
                 {
                     new ()
                     {
-                        UserID = data.User.ID,
-                        User = data.User,
+                        UserID = data.UserId,
                         Project = project,
                     },
                 };
