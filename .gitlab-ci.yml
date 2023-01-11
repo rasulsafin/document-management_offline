@@ -16,10 +16,22 @@ stages:
   - build
   - deploy
 
+try-build:
+  stage: build
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
+    - when: always
+  script:
+    - 'nuget restore'
+    - '"%MSBUILD_PATH%" /property:Configuration=Release'
+
 build:
   stage: build
-  only:
-    - branches
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - when: manual
   script:
     - 'nuget restore'
     - mkdir "%ARTIFACTS_PATH%
@@ -37,8 +49,8 @@ build:
 
 build-updater:
   stage: build
-  only:
-    - branches
+  rules:
+    - when: manual
   allow_failure: true
   script:
     - 'nuget restore'
@@ -60,8 +72,8 @@ build-updater:
         
 build-installer:
   stage: build
-  only:
-    - branches
+  rules:
+    - when: manual
   needs:
     - job: build
       artifacts: true
