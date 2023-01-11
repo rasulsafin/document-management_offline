@@ -1,4 +1,7 @@
 <Project>
+  <PropertyGroup>
+    <MinVerDefaultPreReleasePhase>dev</MinVerDefaultPreReleasePhase>
+  </PropertyGroup>
   <ItemGroup>
     <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
