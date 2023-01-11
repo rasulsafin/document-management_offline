@@ -10,7 +10,7 @@ variables:
   ARTIFACTS_PATH: 'Document Management'
   API_PATH: 'Brio.Docs.Api\bin\Release\Publish'
   LAUNCHER_PATH: 'Brio.Docs.Launcher\bin\Release\net5.0-windows'
-  BUILD_VERSION_COMMON: ${MRS_VERSION_STAGE}.${MRS_VERSION_MAJOR}.${MRS_VERSION_MINOR}.${CI_PIPELINE_ID}
+  UPDATER_ARTIFACTS_FOLDER: 'BRIO Docs Updater'
 
 stages:
   - test
@@ -46,10 +46,16 @@ build:
     - xcopy /E "%API_PATH%" "%ARTIFACTS_PATH%"
     - copy CHANGELOG.md "%ARTIFACTS_PATH%\CHANGELOG.md"
     - del /S "%ARTIFACTS_PATH%\*.pdb"
+    - dotnet tool restore
+    - dotnet minver -d dev -b %CI_PIPELINE_ID%
+    - for /f "delims=" %%i in ('dotnet minver -d dev -b %CI_PIPELINE_ID%') do set version=%%i
+    - echo BUILD_VERSION=%version% >> build.env
   artifacts:
     expire_in: 2 days
     paths:
       - '%ARTIFACTS_PATH%'
+    reports:
+      dotenv: build.env
 
 build-updater:
   stage: build
@@ -68,11 +74,7 @@ build-updater:
     expire_in: 2 days
     paths:
       - '%UPDATER_ARTIFACTS_FOLDER%'
-    reports:
-      dotenv: build.env
   variables:
-    BUILD_VERSION: "${BUILD_VERSION_COMMON}-${WEEK_TAG}"
-    UPDATER_ARTIFACTS_FOLDER: "BRIO Docs Updater ${BUILD_VERSION}"
     UPDATER_BUILD_PATH: 'Brio.Docs.Updater\bin\Release\net5.0'
         
 build-installer:
@@ -87,7 +89,7 @@ build-installer:
       artifacts: true
   allow_failure: true
   script:
-    - iscc /O"%INSTALLER_ARTIFACTS_FULL_PATH%" "%SCRIPT_PATH%" "/DDMAppName=%BUILD_NAME%" "/DDMAppVersion=%BUILD_VERSION_COMMON%" "/DDMSourceBuild=%BUILD_PATH%" "/DDMUpdater=%UPDATER_PATH%"
+    - iscc /O"%INSTALLER_ARTIFACTS_FULL_PATH%" "%SCRIPT_PATH%" "/DDMAppName=%BUILD_NAME%" "/DDMAppVersion=%BUILD_VERSION%" "/DDMSourceBuild=%BUILD_PATH%" "/DDMUpdater=%UPDATER_PATH%"
   artifacts:
     name: "%ARTIFACTS_NAME%"
     paths:
@@ -95,38 +97,9 @@ build-installer:
     expire_in: 1 week
   variables:
     BUILD_NAME: "BrioDocs"
-    BUILD_VERSION: "${BUILD_VERSION_COMMON}-${WEEK_TAG}"
     SCRIPT_PATH: "${CI_PROJECT_DIR}/Installation/installer.iss"
     INSTALLER_ARTIFACTS_FOLDER: "BRIO Docs Setup ${BUILD_VERSION}"
     INSTALLER_ARTIFACTS_FULL_PATH: "${CI_PROJECT_DIR}/${INSTALLER_ARTIFACTS_FOLDER}/"
     ARTIFACTS_NAME: "BRIO-DOCS-SETUP-${BUILD_VERSION}"
     BUILD_PATH: "${CI_PROJECT_DIR}/${ARTIFACTS_PATH}/"
     UPDATER_PATH: "${CI_PROJECT_DIR}/${UPDATER_ARTIFACTS_FOLDER}/"
-
-tag:
-  stage: deploy
-  tags:
-    - bash
-    - docker
-  rules:
-    - if: '$CI_COMMIT_REF_NAME == "master"'
-      when: always
-    - if: '$CI_COMMIT_REF_NAME == "development" && $CI_PIPELINE_SOURCE == "schedule"'
-      when: always
-    - when: never
-  image: ubuntu
-  before_script:
-    - DEBIAN_FRONTEND=noninteractive apt-get update
-    - DEBIAN_FRONTEND=noninteractive apt-get -y install php php-json git git-lfs openssh-client curl
-    - DAY_OF_MONTH=$(date +%-d)
-    - WEEK_TAG=""
-    - if [ $CI_COMMIT_REF_NAME == "development" ] && [ $CI_PIPELINE_SOURCE == "schedule" ]; then WEEK_TAG="-w$((DAY_OF_MONTH / 7 + 1))"; fi
-  script:
-    - VERSION="${BUILD_VERSION_COMMON}${WEEK_TAG}"
-    - git config --global user.email "$GIT_EMAIL"
-    - git config --global user.name "$GIT_NAME"
-    - git remote add $CI_PIPELINE_ID https://oauth2:${GIT_TOKEN}@gitlab.briogroup.ru/mrs/unity/document-management
-    - git fetch
-    - git switch $CI_COMMIT_REF_NAME
-    - git tag -a $VERSION -m "Version $VERSION"
-    - git push $CI_PIPELINE_ID $VERSION
