@@ -6,8 +6,6 @@
     <Authors>Brio MRS</Authors>
     <Company>Brio MRS©</Company>
     <Product>Brio MRS Utils</Product>
-    <PackageIcon></PackageIcon>
-    <Version>1.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
