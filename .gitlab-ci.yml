@@ -35,6 +35,7 @@ build:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
       when: always
     - when: manual
+      allow_failure: true
   script:
     - 'nuget restore'
     - mkdir "%ARTIFACTS_PATH%
@@ -54,6 +55,7 @@ build-updater:
   stage: build
   rules:
     - when: manual
+      allow_failure: true
   allow_failure: true
   script:
     - 'nuget restore'
@@ -77,6 +79,7 @@ build-installer:
   stage: build
   rules:
     - when: manual
+      allow_failure: true
   needs:
     - job: build
       artifacts: true
