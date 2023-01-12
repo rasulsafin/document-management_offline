@@ -13,18 +13,21 @@ variables:
   BUILD_VERSION_COMMON: ${MRS_VERSION_STAGE}.${MRS_VERSION_MAJOR}.${MRS_VERSION_MINOR}.${CI_PIPELINE_ID}
 
 stages:
+  - test
   - build
   - deploy
 
-try-build:
-  stage: build
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - when: always
+integration-tests:
+  stage: test
   script:
-    - 'nuget restore'
-    - '"%MSBUILD_PATH%" /property:Configuration=Release'
+    - 'dotnet test Brio.Docs.IntegrationTests --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+  artifacts:
+    when: always
+    paths:
+      - ./**/*test-result.xml
+    reports:
+      junit:
+        - ./**/*test-result.xml
 
 build:
   stage: build
