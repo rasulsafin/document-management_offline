@@ -47,8 +47,7 @@ build:
     - copy CHANGELOG.md "%ARTIFACTS_PATH%\CHANGELOG.md"
     - del /S "%ARTIFACTS_PATH%\*.pdb"
     - dotnet tool restore
-    - dotnet minver -d dev -b %CI_PIPELINE_ID%
-    - for /f "delims=" %%i in ('dotnet minver -d dev -b %CI_PIPELINE_ID%') do set version=%%i
+    - for /f "delims=" %%i in ('dotnet minver -d dev -b %CI_COMMIT_SHORT_SHA%') do set version=%%i
     - echo BUILD_VERSION=%version% >> build.env
   artifacts:
     expire_in: 2 days
