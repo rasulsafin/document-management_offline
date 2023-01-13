@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,14 +20,17 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                 : PathManager.GetFilesDirectoryForProject(projectName);
 
             var toUpload = forceUploading ? items : items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
+            var cachedManager = new CachedManager(manager);
 
             foreach (var item in toUpload)
             {
-                var directory = remoteDirectoryName;
-                var folders = item.RelativePath.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                directory = folders.Take(folders.Length - 1).Aggregate(directory, PathManager.DirectoryName).Trim('/');
-                var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(directory));
+                var localDirectory = Path.GetDirectoryName(item.RelativePath);
+                var virtualDirectory = PathManager.Join(remoteDirectoryName, PathManager.ConvertToVirtualPath(localDirectory));
+                var fullVirtualPath = PathManager.GetNestedDirectory(virtualDirectory);
+
+                var existingRemoteFiles = await cachedManager.GetRemoteDirectoryFiles(fullVirtualPath);
                 var itemsRemoteVersion = existingRemoteFiles.FirstOrDefault(i => i.DisplayName == item.FileName);
+
                 if (itemsRemoteVersion?.Href != default)
                 {
                     item.ExternalID = itemsRemoteVersion.Href;
@@ -34,7 +38,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                         continue;
                 }
 
-                var uploadedHref = await manager.PushFile(directory, item.FullPath);
+                var uploadedHref = await manager.PushFile(virtualDirectory, item.FullPath);
                 item.ExternalID = uploadedHref;
             }
         }
