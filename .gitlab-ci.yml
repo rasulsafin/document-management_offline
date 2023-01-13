@@ -1,12 +1,9 @@
 workflow:
   rules:
-  - if: $CI_COMMIT_REF_NAME == "master"
-    when: always
-  - if: $CI_COMMIT_REF_NAME == "development"
-    when: always
-  - if: $CI_PIPELINE_SOURCE == "push"
-    when: never
-  - when: always
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
 
 variables:
   MSBUILD_PATH: 'C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe'
@@ -16,13 +13,29 @@ variables:
   BUILD_VERSION_COMMON: ${MRS_VERSION_STAGE}.${MRS_VERSION_MAJOR}.${MRS_VERSION_MINOR}.${CI_PIPELINE_ID}
 
 stages:
+  - test
   - build
   - deploy
 
+integration-tests:
+  stage: test
+  script:
+    - 'dotnet test Brio.Docs.IntegrationTests --test-adapter-path:. --logger:"junit;LogFilePath=..\artifacts\{assembly}-test-result.xml;MethodFormat=Class;FailureBodyFormat=Verbose"'
+  artifacts:
+    when: always
+    paths:
+      - ./**/*test-result.xml
+    reports:
+      junit:
+        - ./**/*test-result.xml
+
 build:
   stage: build
-  only:
-    - branches
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
+    - when: manual
+      allow_failure: true
   script:
     - 'nuget restore'
     - mkdir "%ARTIFACTS_PATH%
@@ -40,8 +53,9 @@ build:
 
 build-updater:
   stage: build
-  only:
-    - branches
+  rules:
+    - when: manual
+      allow_failure: true
   allow_failure: true
   script:
     - 'nuget restore'
@@ -63,8 +77,9 @@ build-updater:
         
 build-installer:
   stage: build
-  only:
-    - branches
+  rules:
+    - when: manual
+      allow_failure: true
   needs:
     - job: build
       artifacts: true
