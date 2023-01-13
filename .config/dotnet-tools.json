@@ -7,6 +7,12 @@
       "commands": [
         "dotnet-ef"
       ]
+    },
+    "minver-cli": {
+      "version": "4.2.0",
+      "commands": [
+        "minver"
+      ]
     }
   }
 }
