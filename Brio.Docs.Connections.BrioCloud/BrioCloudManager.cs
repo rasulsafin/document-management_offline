@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -50,8 +50,8 @@ namespace Brio.Docs.Connections.BrioCloud
 
         public async Task<string> PushFile(string remoteDirName, string fullPath)
         {
-            await CheckDirectory(remoteDirName);
             string path = PathManager.GetNestedDirectory(remoteDirName);
+            await CheckDirectory(path);
             var created = await controller.UploadFileAsync(path, fullPath);
 
             return created;
@@ -167,7 +167,7 @@ namespace Brio.Docs.Connections.BrioCloud
 
         private async Task<bool> CheckDirectory(string directoryName)
         {
-            var foldersInPath = directoryName.Split('/');
+            var foldersInPath = directoryName.Trim('/').Split('/');
             var folderToCheck = new StringBuilder();
 
             foreach (var pathPart in foldersInPath)
@@ -216,24 +216,22 @@ namespace Brio.Docs.Connections.BrioCloud
 
             if (!directoryExists)
             {
-                var createdFolder = await controller.CreateDirAsync(PathManager.GetTablesDir(), tableName);
-                return createdFolder != null;
+                var createdFolder = await CheckDirectory(PathManager.GetTableDir(tableName));
+                return createdFolder;
             }
 
-            return directoryExists;
+            return true;
         }
 
         private async Task<bool> CreateDirectoryIfNecessary(string folderToCheck, string directoryName)
         {
-            string fullPath = Path.Combine(folderToCheck, directoryName);
+            string fullPath = PathManager.DirectoryName(folderToCheck, directoryName);
 
             bool directoryExists = directories.Any(x => x == fullPath);
             if (directoryExists)
             {
                 return true;
             }
-
-            folderToCheck = PathManager.GetNestedDirectory(folderToCheck);
 
             var list = await controller.GetListAsync(folderToCheck);
 
