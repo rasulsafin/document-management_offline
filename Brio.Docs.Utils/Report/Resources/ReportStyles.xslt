@@ -15,7 +15,6 @@
 					<w:tbl>
 						<w:tblPr>
 							<w:tblStyle w:val="NormalTable"/>
-							<w:name w:val="Таблица4"/>
 							<w:tabOrder w:val="0"/>
 							<w:jc w:val="center"/>
 							<w:tblInd w:w="0" w:type="dxa"/>
@@ -27,8 +26,8 @@
 						</w:tblGrid>
 						<w:tr>
 							<w:trPr>
-								<w:tblHeader w:val="0"/>
-								<w:cantSplit w:val="0"/>
+								<w:tblHeader />
+								<w:cantSplit />
 								<w:trHeight w:val="1139" w:hRule="atLeast"/>
 							</w:trPr>
 							<w:tc>
@@ -99,7 +98,6 @@
 								<w:tbl>
 									<w:tblPr>
 										<w:tblStyle w:val="NormalTable"/>
-										<w:name w:val="Таблица1"/>
 										<w:tabOrder w:val="0"/>
 										<w:jc w:val="center"/>
 										<w:tblInd w:w="0" w:type="dxa"/>
@@ -112,8 +110,8 @@
 									</w:tblGrid>
 									<w:tr>
 										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
+											<w:tblHeader />
+											<w:cantSplit />
 											<w:trHeight w:val="314" w:hRule="atLeast"/>
 										</w:trPr>
 										<w:tc>
@@ -761,7 +759,6 @@
 								<w:tbl>
 									<w:tblPr>
 										<w:tblStyle w:val="NormalTable"/>
-										<w:name w:val="Таблица2"/>
 										<w:tabOrder w:val="0"/>
 										<w:jc w:val="left"/>
 										<w:tblInd w:w="0" w:type="dxa"/>
@@ -777,8 +774,8 @@
 									</w:tblGrid>
 									<w:tr>
 										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
+											<w:tblHeader />
+											<w:cantSplit />
 											<w:trHeight w:val="1446" w:hRule="atLeast"/>
 										</w:trPr>
 										<w:tc>
@@ -792,10 +789,10 @@
 													<w:right w:w="108" w:type="dxa"/>
 												</w:tcMar>
 												<w:tcBorders>
-													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000"/>
+													<w:left w:val="single" w:sz="8" w:space="0" w:color="000000"/>
+													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000"/>
+													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000"/>
 												</w:tcBorders>
 												<w:tmTcPr id="1668604609" protected="0"/>
 											</w:tcPr>
@@ -834,10 +831,10 @@
 													<w:right w:w="108" w:type="dxa"/>
 												</w:tcMar>
 												<w:tcBorders>
-													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000"/>
+													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000"/>
+													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000"/>
+													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 												</w:tcBorders>
 												<w:tmTcPr id="1668604609" protected="0"/>
 											</w:tcPr>
@@ -876,10 +873,10 @@
 													<w:right w:w="108" w:type="dxa"/>
 												</w:tcMar>
 												<w:tcBorders>
-													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 												</w:tcBorders>
 												<w:tmTcPr id="1668604609" protected="0"/>
 											</w:tcPr>
@@ -938,10 +935,10 @@
 													<w:right w:w="0" w:type="dxa"/>
 												</w:tcMar>
 												<w:tcBorders>
-													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 												</w:tcBorders>
 												<w:tmTcPr id="1668604609" protected="0"/>
 											</w:tcPr>
@@ -1092,10 +1089,10 @@
 													<w:right w:w="0" w:type="dxa"/>
 												</w:tcMar>
 												<w:tcBorders>
-													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+													<w:top w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+													<w:bottom w:val="single" w:sz="8" w:space="0" w:color="000000" />
+													<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 												</w:tcBorders>
 												<w:tmTcPr id="1668604609" protected="0"/>
 											</w:tcPr>
@@ -1127,14 +1124,14 @@
 									<xsl:for-each select="Objective">
 										<w:tr>
 											<w:trPr>
-												<w:tblHeader w:val="0"/>
-												<w:cantSplit w:val="0"/>
+												<w:tblHeader />
+												<w:cantSplit />
 												<w:trHeight w:val="971" w:hRule="atLeast"/>
 											</w:trPr>
 												<w:tc>
 													<w:tcPr>
 														<w:tcW w:w="541" w:type="dxa"/>
-														<w:shd w:val="none"/>
+														<w:shd w:val="nil"/>
 														<w:tcMar>
 															<w:top w:w="0" w:type="dxa"/>
 															<w:left w:w="108" w:type="dxa"/>
@@ -1142,10 +1139,10 @@
 															<w:right w:w="108" w:type="dxa"/>
 														</w:tcMar>
 														<w:tcBorders>
-															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:left w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:left w:val="single" w:sz="8" w:space="0" w:color="000000" />
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" />
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
@@ -1185,7 +1182,7 @@
 												<w:tc>
 													<w:tcPr>
 														<w:tcW w:w="4592" w:type="dxa"/>
-														<w:shd w:val="none"/>
+														<w:shd w:val="nil"/>
 														<w:tcMar>
 															<w:top w:w="0" w:type="dxa"/>
 															<w:left w:w="108" w:type="dxa"/>
@@ -1193,10 +1190,10 @@
 															<w:right w:w="108" w:type="dxa"/>
 														</w:tcMar>
 														<w:tcBorders>
-															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" />
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
@@ -1270,7 +1267,7 @@
 												<w:tc>
 													<w:tcPr>
 														<w:tcW w:w="2126" w:type="dxa"/>
-														<w:shd w:val="none"/>
+														<w:shd w:val="nil"/>
 														<w:tcMar>
 															<w:top w:w="0" w:type="dxa"/>
 															<w:left w:w="108" w:type="dxa"/>
@@ -1278,10 +1275,10 @@
 															<w:right w:w="108" w:type="dxa"/>
 														</w:tcMar>
 														<w:tcBorders>
-															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" />
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
@@ -1299,40 +1296,62 @@
 															</w:rPr>
 															<w:t xml:space="preserve"> <xsl:value-of select="@objective_documentation"/> </w:t>
 														</w:r>
-														<w:r/>
 													</w:p>
 												</w:tc>
 												<w:tc>
 													<w:tcPr>
 														<w:tcW w:w="1709" w:type="dxa"/>
-														<w:shd w:val="none"/>
+														<w:shd w:val="nil"/>
 														<w:tcMar>
-															<w:left w:w="0" w:type="dxa"/>
-															<w:right w:w="0" w:type="dxa"/>
+															<w:top w:w="0" w:type="dxa"/>
+															<w:left w:w="108" w:type="dxa"/>
+															<w:bottom w:w="0" w:type="dxa"/>
+															<w:right w:w="108" w:type="dxa"/>
 														</w:tcMar>
 														<w:tcBorders>
-															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" />
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
-													
+													<w:p>
+														<w:pPr>
+															<w:spacing w:before="240" w:line="240" w:lineRule="auto"/>
+															<w:jc w:val="center"/>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:sz w:val="20"/>
+																<w:szCs w:val="20"/>
+															</w:rPr>
+														</w:pPr>
+														<w:r>
+															<w:rPr>
+																<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:eastAsia="Times New Roman" w:cs="Times New Roman"/>
+																<w:i/>
+																<w:color w:val="000000"/>
+																<w:sz w:val="24"/>
+																<w:szCs w:val="24"/>
+															</w:rPr>
+															<w:t xml:space="preserve">testiruem...v2</w:t>
+														</w:r>
+													</w:p>
 												</w:tc>
 												<w:tc>
 													<w:tcPr>
 														<w:tcW w:w="1241" w:type="dxa"/>
-														<w:shd w:val="none"/>
+														<w:shd w:val="nil"/>
 														<w:tcMar>
 															<w:left w:w="0" w:type="dxa"/>
 															<w:right w:w="0" w:type="dxa"/>
 														</w:tcMar>
 														<w:tcBorders>
-															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
-															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" tmln="10, 20, 20, 0, 0"/>
-															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" tmln="20, 20, 20, 0, 0"/>
+															<w:top w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:left w:val="nil" w:sz="0" w:space="0" w:color="000000" />
+															<w:bottom w:val="single" w:sz="4" w:space="0" w:color="000000" />
+															<w:right w:val="single" w:sz="8" w:space="0" w:color="000000" />
 														</w:tcBorders>
 														<w:tmTcPr id="1668604609" protected="0"/>
 													</w:tcPr>
@@ -1509,7 +1528,6 @@
 								<w:tbl>
 									<w:tblPr>
 										<w:tblStyle w:val="NormalTable"/>
-										<w:name w:val="Таблица3"/>
 										<w:tabOrder w:val="0"/>
 										<w:jc w:val="center"/>
 										<w:tblInd w:w="0" w:type="dxa"/>
@@ -1524,8 +1542,8 @@
 									</w:tblGrid>
 									<w:tr>
 										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
+											<w:tblHeader />
+											<w:cantSplit />
 											<w:trHeight w:val="784" w:hRule="atLeast"/>
 										</w:trPr>
 										<w:tc>
@@ -1771,8 +1789,8 @@
 									</w:tr>
 									<w:tr>
 										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
+											<w:tblHeader />
+											<w:cantSplit />
 											<w:trHeight w:val="784" w:hRule="atLeast"/>
 										</w:trPr>
 										<w:tc>
@@ -1884,8 +1902,8 @@
 									</w:tr>
 									<w:tr>
 										<w:trPr>
-											<w:tblHeader w:val="0"/>
-											<w:cantSplit w:val="0"/>
+											<w:tblHeader />
+											<w:cantSplit />
 											<w:trHeight w:val="134" w:hRule="atLeast"/>
 										</w:trPr>
 										<w:tc>
@@ -2322,7 +2340,6 @@
 					<w:tbl>
 						<w:tblPr>
 							<w:tblStyle w:val="NormalTable"/>
-							<w:name w:val="Таблица5"/>
 							<w:tabOrder w:val="0"/>
 							<w:jc w:val="left"/>
 							<w:tblInd w:w="0" w:type="dxa"/>
@@ -2347,17 +2364,17 @@
 						<w:numStart w:val="1"/>
 						<w:numRestart w:val="continuous"/>
 					</w:endnotePr>
-					<w:footerReference w:type="default" r:id="rId11"/>
+					<w:footerReference w:type="default" r:id="rId7"/>
 					<w:type w:val="nextPage"/>
 					<w:pgSz w:h="16838" w:w="11906"/>
 					<w:pgMar w:left="1701" w:top="568" w:right="850" w:bottom="426" w:header="0" w:footer="708"/>
-					<w:paperSrc w:first="0" w:other="0" a="0" b="0"/>
+					<w:paperSrc w:first="0" w:other="0" />
 					<w:pgNumType w:fmt="decimal"/>
 					<w:tmGutter w:val="3"/>
 					<w:mirrorMargins w:val="0"/>
 					<w:tmSection w:h="-2">
 						<w:tmFooter w:id="0" w:h="0" edge="708" text="0">
-							<w:shd w:val="none"/>
+							<w:shd w:val="nil"/>
 						</w:tmFooter>
 					</w:tmSection>
 					<w:guidesAndGridMasterPages Id="0" numberOfVerticalGuides="0" numberOfHorizontalGuides="0"/>
