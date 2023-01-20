@@ -8,6 +8,7 @@ using System.Xml.Xsl;
 using Brio.Docs.Utils.ReportCreator.Elements;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Validation;
 using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Brio.Docs.Utils.ReportCreator
@@ -45,6 +46,8 @@ namespace Brio.Docs.Utils.ReportCreator
 
             CreateWithTemplate(bodyDocument, outputDocument);
             Create(xml, outputDocument);
+
+            ValidateWordDocument(outputDocument);
         }
 
         internal static void Read(XElement node, OpenXmlElement element)
@@ -57,6 +60,39 @@ namespace Brio.Docs.Utils.ReportCreator
             {
                 foreach (var subnode in node.Elements())
                     Read(subnode, element);
+            }
+        }
+
+        private static void ValidateWordDocument(string filepath)
+        {
+            using (WordprocessingDocument wordprocessingDocument =
+            WordprocessingDocument.Open(filepath, true))
+            {
+                try
+                {
+                    OpenXmlValidator validator = new OpenXmlValidator();
+                    int count = 0;
+                    foreach (ValidationErrorInfo error in
+                        validator.Validate(wordprocessingDocument))
+                    {
+                        count++;
+                        System.Diagnostics.Debug.WriteLine("Error " + count);
+                        System.Diagnostics.Debug.WriteLine("Description: " + error.Description);
+                        System.Diagnostics.Debug.WriteLine("ErrorType: " + error.ErrorType);
+                        System.Diagnostics.Debug.WriteLine("Node: " + error.Node);
+                        System.Diagnostics.Debug.WriteLine("Path: " + error.Path.XPath);
+                        System.Diagnostics.Debug.WriteLine("Part: " + error.Part.Uri);
+                        System.Diagnostics.Debug.WriteLine("-------------------------------------------");
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"count={count}");
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.Message);
+                }
+
+                wordprocessingDocument.Close();
             }
         }
 

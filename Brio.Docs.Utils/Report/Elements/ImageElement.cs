@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Drawing;
+using System.IO;
 using System.Xml.Linq;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Drawing;
@@ -15,26 +16,23 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class ImageElement : AElement
     {
-        private static readonly double WIDTH = 680;
-        private static readonly double HEIGHT = 400;
-        private static readonly double MAP_WIDTH = 680;
-        private static readonly double MAP_HEIGHT = 400;
+        private static uint ids = 1U;
+
+        private readonly int imageWidth = 600; // Fixed width
 
         public override void Read(XElement node, OpenXmlElement element)
         {
             if (!File.Exists(node.Value))
                 return;
 
-            double width = WIDTH;
-            double height = HEIGHT;
-
-            if (IsMapFile(node.Value))
-            {
-                width = MAP_WIDTH;
-                height = MAP_HEIGHT;
-            }
-
             ImagePart imagePart = ReportCreator.MainPart.AddImagePart(ImagePartType.Png);
+
+            var img = Image.FromFile(node.Value);
+
+            double width = imageWidth;
+            double height = width * ((double)img.Height / img.Width);
+
+            img.Dispose();
 
             using (FileStream stream = new FileStream(node.Value, FileMode.Open))
             {
@@ -51,9 +49,6 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
             element.Append(new Wordprocessing.Run(imageElement));
         }
 
-        private static bool IsMapFile(string path)
-            => Path.GetFileNameWithoutExtension(path).EndsWith(".map", System.StringComparison.OrdinalIgnoreCase);
-
         private static Drawing GetImageElement(string imagePartId, string fileName, string pictureName, double width, double height)
         {
             double englishMetricUnitsPerInch = 914400;
@@ -67,7 +62,7 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
                 new Inline(
                     new Extent { Cx = (Int64Value)emuWidth, Cy = (Int64Value)emuHeight },
                     new EffectExtent { LeftEdge = 0L, TopEdge = 0L, RightEdge = 0L, BottomEdge = 0L },
-                    new DocProperties { Id = (UInt32Value)1U, Name = pictureName },
+                    new DocProperties { Id = (UInt32Value)ids++, Name = pictureName }, // IDs should be unique
                     new DrawingWordprocessing.NonVisualGraphicFrameDrawingProperties(
                     new GraphicFrameLocks { NoChangeAspect = true }),
                     new Graphic(
