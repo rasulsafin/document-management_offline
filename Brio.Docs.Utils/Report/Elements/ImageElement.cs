@@ -33,8 +33,8 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
             { ".wmf", ImagePartType.Wmf },
         };
 
-        private static uint ids = 1U;
-        private readonly int imageWidth = 600; // Fixed width
+        private static uint ids = 1U;           // TODO: suspicious place: not thread-safe, not reset between report generations, not sure if unique
+        private readonly int imageWidth = 600;  // Fixed width
 
         public override void Read(XElement node, OpenXmlElement element)
         {
