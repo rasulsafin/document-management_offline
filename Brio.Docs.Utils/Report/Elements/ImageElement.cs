@@ -20,8 +20,6 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
         private static readonly double MAP_WIDTH = 680;
         private static readonly double MAP_HEIGHT = 400;
 
-        private static readonly string MAP_EXTENSION = ".map.png";
-
         public override void Read(XElement node, OpenXmlElement element)
         {
             if (!File.Exists(node.Value))
@@ -30,7 +28,7 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
             double width = WIDTH;
             double height = HEIGHT;
 
-            if (node.Value.EndsWith(MAP_EXTENSION))
+            if (IsMapFile(node.Value))
             {
                 width = MAP_WIDTH;
                 height = MAP_HEIGHT;
@@ -53,12 +51,15 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
             element.Append(new Wordprocessing.Run(imageElement));
         }
 
+        private static bool IsMapFile(string path)
+            => Path.GetFileNameWithoutExtension(path).EndsWith(".map", System.StringComparison.OrdinalIgnoreCase);
+
         private static Drawing GetImageElement(string imagePartId, string fileName, string pictureName, double width, double height)
         {
             double englishMetricUnitsPerInch = 914400;
             double pixelsPerInch = 96;
 
-            //calculate size in emu
+            // calculate size in emu
             double emuWidth = width * englishMetricUnitsPerInch / pixelsPerInch;
             double emuHeight = height * englishMetricUnitsPerInch / pixelsPerInch;
 

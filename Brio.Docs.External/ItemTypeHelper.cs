@@ -26,7 +26,7 @@ namespace Brio.Docs.External
             ".obj",
         };
 
-        private static readonly IReadOnlyCollection<string> MEDIA_EXTENSIONS = new[] { ".jpg", ".mp4", ".png" };
+        private static readonly IReadOnlyCollection<string> MEDIA_EXTENSIONS = new[] { ".jpg", ".jpeg", ".mp4", ".png" };
 
         public static ItemType GetTypeByName(string fileName)
         {
