@@ -36,14 +36,15 @@ namespace Brio.Docs.Utils.ReportCreator
 
         public void CreateReport(XDocument xml, string outputDocument)
         {
-            if (File.Exists(XSLT_FILE.Value) &&
-                File.Exists(TEMPLATE_DOCUMENT.Value))
-            {
-                var bodyDocument = GetDocument(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+            if (!File.Exists(XSLT_FILE.Value))
+                throw new InvalidOperationException($"File not found: {XSLT_FILE.Value}");
+            if (!File.Exists(XSLT_FILE.Value))
+                throw new InvalidOperationException($"File not found: {TEMPLATE_DOCUMENT.Value}");
 
-                CreateWithTemplate(bodyDocument, outputDocument);
-                Create(xml, outputDocument);
-            }
+            var bodyDocument = GetDocument(XSLT_FILE.Value, TEMPLATE_DOCUMENT.Value, xml.ToString(), outputDocument);
+
+            CreateWithTemplate(bodyDocument, outputDocument);
+            Create(xml, outputDocument);
         }
 
         internal static void Read(XElement node, OpenXmlElement element)
