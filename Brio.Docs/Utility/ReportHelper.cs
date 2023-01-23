@@ -18,7 +18,7 @@ namespace Brio.Docs.Utility
         private static readonly string ROW = "Row";
         private static readonly string CELL = "Cell";
 
-        private static readonly string[] PICTURES_EXTENSIONS = { ".png", ".jpg" };
+        private static readonly string[] PICTURES_EXTENSIONS = { ".png", ".jpg", ".jpeg" };
 
         private readonly IStringLocalizer<ReportLocalization> localizer;
 

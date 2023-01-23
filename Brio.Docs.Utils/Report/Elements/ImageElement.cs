@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Xml.Linq;
 using DocumentFormat.OpenXml;
@@ -16,45 +17,65 @@ namespace Brio.Docs.Utils.ReportCreator.Elements
 {
     internal class ImageElement : AElement
     {
-        private static uint ids = 1U;
+        private static readonly IReadOnlyDictionary<string, ImagePartType> IMAGE_PART_MAP
+            = new Dictionary<string, ImagePartType>
+        {
+            { ".bmp", ImagePartType.Bmp },
+            { ".emf", ImagePartType.Emf },
+            { ".gif", ImagePartType.Gif },
+            { ".ico", ImagePartType.Icon },
+            { ".jpg", ImagePartType.Jpeg },
+            { ".jpeg", ImagePartType.Jpeg },
+            { ".pcx", ImagePartType.Pcx },
+            { ".png", ImagePartType.Png },
+            { ".svg", ImagePartType.Svg },
+            { ".tiff", ImagePartType.Tiff },
+            { ".wmf", ImagePartType.Wmf },
+        };
 
-        private readonly int imageWidth = 600; // Fixed width
+        private static uint ids = 1U;           // TODO: suspicious place: not thread-safe, not reset between report generations, not sure if unique
+        private readonly int imageWidth = 600;  // Fixed width
 
         public override void Read(XElement node, OpenXmlElement element)
         {
-            if (!File.Exists(node.Value))
+            var imagePath = node.Value;
+            if (!File.Exists(imagePath))
                 return;
 
-            ImagePart imagePart = ReportCreator.MainPart.AddImagePart(ImagePartType.Png);
+            var extension = Path.GetExtension(imagePath);
+            if (!IMAGE_PART_MAP.TryGetValue(extension, out var imageType))
+                return;
 
-            var img = Image.FromFile(node.Value);
+            ImagePart imagePart = ReportCreator.MainPart.AddImagePart(imageType);
+
+            var img = Image.FromFile(imagePath);
 
             double width = imageWidth;
             double height = width * ((double)img.Height / img.Width);
 
             img.Dispose();
 
-            using (FileStream stream = new FileStream(node.Value, FileMode.Open))
+            using (FileStream stream = new FileStream(imagePath, FileMode.Open))
             {
                 imagePart.FeedData(stream);
             }
 
             Drawing imageElement = GetImageElement(
-            ReportCreator.MainPart.GetIdOfPart(imagePart),
-            node.Value,
-            Path.GetFileName(node.Value),
-            width,
-            height);
+                ReportCreator.MainPart.GetIdOfPart(imagePart),
+                imagePath,
+                Path.GetFileName(imagePath),
+                width,
+                height);
 
             element.Append(new Wordprocessing.Run(imageElement));
         }
 
         private static Drawing GetImageElement(string imagePartId, string fileName, string pictureName, double width, double height)
         {
-            double englishMetricUnitsPerInch = 914400;
-            double pixelsPerInch = 96;
+            const double englishMetricUnitsPerInch = 914400;
+            const double pixelsPerInch = 96;
 
-            //calculate size in emu
+            // calculate size in emu
             double emuWidth = width * englishMetricUnitsPerInch / pixelsPerInch;
             double emuHeight = height * englishMetricUnitsPerInch / pixelsPerInch;
 
