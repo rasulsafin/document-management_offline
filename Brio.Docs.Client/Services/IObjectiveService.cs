@@ -87,18 +87,5 @@ namespace Brio.Docs.Client.Services
         /// <exception cref="ANotFoundException">Thrown when parent does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID);
-
-        /// <summary>
-        /// Generate report about selected objectives.
-        /// </summary>
-        /// <param name="report">Report.</param>
-        /// <param name="path">Path to report storage.</param>
-        /// <param name="userID">ID of the user, who generates the report.</param>
-        /// <param name="projectName">Name of the project.</param>
-        /// <returns>Object representing the result of report creation process.</returns>
-        /// <exception cref="ANotFoundException">Thrown when one of the objectives not found.</exception>
-        /// <exception cref="ArgumentValidationException">Thrown when list of objectives is empty.</exception>
-        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
-        Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName);
     }
 }

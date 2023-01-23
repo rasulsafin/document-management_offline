@@ -25,6 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISynchronizationService, SynchronizationService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IObjectiveService, ObjectiveService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
