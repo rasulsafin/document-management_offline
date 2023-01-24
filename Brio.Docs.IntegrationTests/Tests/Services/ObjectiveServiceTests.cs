@@ -70,8 +70,7 @@ namespace Brio.Docs.Tests.Services
                 serviceProvider.GetService<ItemsHelper>(),
                 serviceProvider.GetService<DynamicFieldsHelper>(),
                 serviceProvider.GetService<BimElementsHelper>(),
-                Mock.Of<ILogger<ObjectiveService>>(),
-                Mock.Of<IStringLocalizer<ReportLocalization>>());
+                Mock.Of<ILogger<ObjectiveService>>());
 
             CurrentUser.ID = Fixture.Context.Users.First().ID;
         }

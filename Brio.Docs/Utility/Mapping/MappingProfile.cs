@@ -78,14 +78,6 @@ namespace Brio.Docs.Utility.Mapping
                 .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)))
                 .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
                 .ForMember(d => d.DynamicFields, o => o.ConvertUsing<DynamicFieldModelToDtoConverter, ICollection<DynamicField>>());
-            CreateMap<Objective, ObjectiveToReportDto>()
-                .ForMember(d => d.ID, opt => opt.Ignore())
-                .ForMember(d => d.Author, o => o.MapFrom(s => s.Author.Name))
-                .ForMember(d => d.Items, o => o.MapFrom(s => s.Items.Select(i => i.Item)
-                                                                    .Where(x => x.ItemType == (int)ItemType.Media
-                                                                                && !x.RelativePath.EndsWith(".mp4"))))
-                .ForMember(d => d.BimElements, o => o.MapFrom(s => s.BimElements.Select(i => i.BimElement)))
-                .ForMember(d => d.Status, o => o.MapFrom(s => s.Status));
             CreateMap<Objective, ObjectiveToLocationDto>();
             CreateMap<Objective, SubobjectiveDto>();
         }

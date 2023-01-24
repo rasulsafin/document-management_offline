@@ -22,7 +22,7 @@
       <ProjectReference Include="..\Brio.Docs.Database\Brio.Docs.Database.csproj" />
       <ProjectReference Include="..\Brio.Docs.Client\Brio.Docs.Client.csproj" />
       <ProjectReference Include="..\Brio.Docs.Synchronizer\Brio.Docs.Synchronizer.csproj" />
-      <ProjectReference Include="..\Brio.Docs.Utils\Brio.Docs.Utils.csproj" />
+      <ProjectReference Include="..\Brio.Docs.Reports\Brio.Docs.Reports.csproj" />
     </ItemGroup>
   
     <ItemGroup>

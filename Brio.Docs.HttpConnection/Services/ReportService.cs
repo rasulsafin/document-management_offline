@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Services;
 
@@ -13,10 +14,13 @@ namespace Brio.Docs.HttpConnection.Services
         {
         }
 
-        public async Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName)
+        public async Task<ObjectiveReportCreationResultDto> GenerateReport(string reportTypeId, ReportDto report, string projectDirectory, int userID, string projectName)
             => await Connection.PostObjectJsonQueryAsync<ReportDto, ObjectiveReportCreationResultDto>($"{PATH}/create",
-                $"path={{0}}&userID={{1}}&projectName={{2}}",
-                new object[] { path, userID, projectName },
+                $"reportTypeId={{0}}&projectDirectory={{1}}&userID={{2}}&projectName={{3}}",
+                new object[] { reportTypeId, projectDirectory, userID, projectName },
                 report);
+
+        public async Task<IEnumerable<AvailableReportTypeDto>> GetAvailableReportTypes()
+            => await Connection.GetDataAsync<IEnumerable<AvailableReportTypeDto>>($"{PATH}/reportTypes");
     }
 }

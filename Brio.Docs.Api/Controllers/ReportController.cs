@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Brio.Docs.Api.Validators;
 using Brio.Docs.Client.Dtos;
@@ -35,15 +36,16 @@ namespace Brio.Docs.Api.Controllers
         /// <remarks>
         /// Sample request:
         ///
-        ///     POST /Objectives/report? path=C:\\Temp % userID=1 % projectName=ProjectName
+        ///     POST /Objectives/report? reportTypeId=8b4d6eb661884a2b9843f5696a5467a9 % path=C:\\Temp % userID=1 % projectName=ProjectName
         ///     [
         ///        {"id": "1"},
         ///        {"id": "2"},
         ///        {"id": "3"}
         ///     ]
         /// </remarks>
+        /// <param name="reportTypeId">Report type identifier.</param>
         /// <param name="report">Report.</param>
-        /// <param name="path">Path to report storage.</param>
+        /// <param name="projectDirectory">Path to project directory.</param>
         /// <param name="userID">ID of the user, who generates the report.</param>
         /// <param name="projectName">Name of the project.</param>
         /// <returns>Object representing the result of report creation process.</returns>
@@ -59,11 +61,14 @@ namespace Brio.Docs.Api.Controllers
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GenerateReport(
+            [FromQuery]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            string reportTypeId,
             [FromBody]
             ReportDto report,
             [FromQuery]
             [Required(ErrorMessage = "ValidationError_PathIsRequired")]
-            string path,
+            string projectDirectory,
             [FromQuery]
             [CheckValidID]
             [Required(ErrorMessage = "ValidationError_IdIsRequired")]
@@ -74,7 +79,7 @@ namespace Brio.Docs.Api.Controllers
         {
             try
             {
-                var result = await reportService.GenerateReport(report, path, userID, projectName);
+                var result = await reportService.GenerateReport(reportTypeId, report, projectDirectory, userID, projectName);
                 return Created(string.Empty, result);
             }
             catch (ArgumentValidationException ex)
@@ -88,6 +93,34 @@ namespace Brio.Docs.Api.Controllers
             catch (DocumentManagementException ex)
             {
                 return CreateProblemResult(this, 500, localizer["FailedToCreateReport"], ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Retrieve information about available report types.
+        /// </summary>
+        /// <returns>Collection of available report types.</returns>
+        [HttpGet]
+        [Route("reportTypes")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(IEnumerable<AvailableReportTypeDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAvailableReportTypes()
+        {
+            try
+            {
+                var types = await reportService.GetAvailableReportTypes();
+                return Ok(types);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["SomethingIsMissing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
         }
     }
