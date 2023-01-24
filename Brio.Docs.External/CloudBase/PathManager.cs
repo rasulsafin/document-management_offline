@@ -21,11 +21,24 @@ namespace Brio.Docs.External
         public static readonly string FILES_DIRECTORY = "Files";
 
         /// <summary>
+        /// "Files/ProjectFiles".
+        /// </summary>
+        public static readonly string PROJECT_FILES_DIRECTORY = $"{FILES_DIRECTORY}/ProjectFiles";
+
+        /// <summary>
         /// "{0}.json".
         /// </summary>
         public static readonly string RECORDED_FILE_FORMAT = "{0}.json";
 
         public static string GetLocalAppDir() => APPLICATION_ROOT_DIRECTORY_NAME;
+
+        /// <summary>
+        /// Returns "Files/ProjectFiles/&lt;<paramref name="projectFilesFolderName"/>>"
+        /// </summary>
+        /// <param name="projectFilesFolderName">The name of the project folder.</param>
+        /// <returns>Files/ProjectFiles/&lt;<paramref name="projectFilesFolderName"/>></returns>
+        public static string GetFilesDirectoryForProject(string projectFilesFolderName)
+            => Join(PROJECT_FILES_DIRECTORY, projectFilesFolderName);
 
         public static string GetTablesDir() => DirectoryName(APPLICATION_ROOT_DIRECTORY_NAME, TABLE_DIRECTORY);
 
@@ -53,6 +66,19 @@ namespace Brio.Docs.External
             items.Add(nameFile);
             string result = string.Join('/', items);
             return $"/{result}";
+        }
+
+        /// <summary>
+        /// Concatenates two cloud paths into a single path.
+        /// A slash is added between paths if the first path does not end with a slash and the second path does not start with a slash.
+        /// </summary>
+        /// <param name="path1">The first path to join.</param>
+        /// <param name="path2">The second path to join.</param>
+        /// <returns>The concatenated path.</returns>
+        public static string Join(string path1, string path2)
+        {
+            var needDelimiter = !path1.EndsWith('/') && !path2.StartsWith('/');
+            return needDelimiter ? $"{path1}/{path2}" : path1 + path2;
         }
     }
 }

@@ -7,8 +7,6 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 {
     internal class ItemsSyncHelper
     {
-        private static string projectFilesFormat = $"{PathManager.FILES_DIRECTORY}/Project{PathManager.FILES_DIRECTORY}/{{0}}";
-
         internal static async Task UploadFiles(ICollection<ItemExternalDto> items, ICloudManager manager, string projectName = null, bool forceUploading = false)
         {
             if (items == null)
@@ -16,7 +14,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
             var remoteDirectoryName = string.IsNullOrWhiteSpace(projectName)
                 ? PathManager.FILES_DIRECTORY
-                : string.Format(projectFilesFormat, projectName);
+                : PathManager.GetFilesDirectoryForProject(projectName);
 
             var existingRemoteFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(remoteDirectoryName));
 
@@ -40,7 +38,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
         internal static async Task<ICollection<ItemExternalDto>> GetProjectItems(string projectName, ICloudManager manager)
         {
             var resultItems = new List<ItemExternalDto>();
-            var projectFilesFolder = string.Format(projectFilesFormat, projectName);
+            var projectFilesFolder = PathManager.GetFilesDirectoryForProject(projectName);
             var remoteProjectFiles = await manager.GetRemoteDirectoryFiles(PathManager.GetNestedDirectory(projectFilesFolder));
             foreach (var file in remoteProjectFiles.Where(f => !f.IsDirectory))
             {
@@ -49,6 +47,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                     ExternalID = file.Href,
                     FileName = file.DisplayName,
                     ItemType = ItemTypeHelper.GetTypeByName(file.DisplayName),
+                    UpdatedAt = file.LastModified > file.CreationDate ? file.LastModified : file.CreationDate,
                 });
             }
 

@@ -75,11 +75,28 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
         private async Task CheckCashedElements()
         {
-            if (projects == null)
-                projects = await manager.PullAll<ProjectExternalDto>(PathManager.GetTableDir(nameof(ProjectExternalDto)));
+            void UpdateTimeIfNeeded(ProjectExternalDto project, DateTime value)
+            {
+                if (project.UpdatedAt < value)
+                    project.UpdatedAt = value;
+            }
+
+            if (projects != null)
+                return;
+
+            projects = await manager.PullAll<ProjectExternalDto>(
+                PathManager.GetTableDir(nameof(ProjectExternalDto)));
 
             foreach (var project in projects)
+            {
                 project.Items = await ItemsSyncHelper.GetProjectItems(project.Title, manager);
+                var folderUpdatedAt = await ProjectHelper.GetItemsDirectoryUpdatedTime(project.Title, manager);
+                var lastItemUpdatedAt = project.Items != null && project.Items.Any()
+                    ? project.Items.Max(x => x.UpdatedAt)
+                    : default;
+                UpdateTimeIfNeeded(project, folderUpdatedAt);
+                UpdateTimeIfNeeded(project, lastItemUpdatedAt);
+            }
         }
     }
 }
