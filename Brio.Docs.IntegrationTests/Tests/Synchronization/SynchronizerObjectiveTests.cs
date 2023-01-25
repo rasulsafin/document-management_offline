@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Range = Moq.Range;
 
 namespace Brio.Docs.Tests.Synchronization
 {
@@ -1289,6 +1290,55 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreNotEqual(removingID, local.ExternalID, "Local objective must be removed");
             Assert.AreNotEqual(removingID, synchronized.ExternalID, "Synchronized objective must be removed");
             CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ParentObjectiveRemovedFromLocal_RemoveParentAndChildFromRemote()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var objectiveRemoteChild = CreateSubobjective(objectiveRemote);
+            CreateSubobjective(objectiveSynchronized, objectiveRemoteChild.ExternalID);
+
+            MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
+            Fixture.Context.Objectives.Remove(objectiveLocal);
+            Fixture.Context.Objectives.Update(objectiveSynchronized);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(
+                SynchronizerTestsHelper.SynchronizerCall.Remove,
+                Times.Between(1, 2, Range.Inclusive));
+            await assertHelper.IsSynchronizedObjectivesCount(0);
+            await assertHelper.IsLocalObjectivesCount(0);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ParentObjectiveRemovedFromRemote_RemoveParentAndChildFromLocal()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, _) = await ArrangeObjective();
+
+            var subobjectiveLocal = CreateSubobjective(objectiveLocal);
+            var subobjectiveSynchronized = CreateSubobjective(objectiveSynchronized, subobjectiveLocal.ExternalID);
+            subobjectiveLocal.SynchronizationMate = subobjectiveSynchronized;
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+            await assertHelper.IsSynchronizedObjectivesCount(0);
+            await assertHelper.IsLocalObjectivesCount(0);
         }
 
         private void CheckSynchronizedObjectives(Objective local, Objective synchronized)
