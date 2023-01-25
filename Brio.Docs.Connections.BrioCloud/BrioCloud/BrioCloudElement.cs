@@ -38,9 +38,9 @@ namespace Brio.Docs.Connections.BrioCloud
                 ETag = element.ETag,
             };
 
-            result.CreationDate = element.CreationDate ?? default;
+            result.CreationDate = element.CreationDate?.ToUniversalTime() ?? default;
             result.ContentLength = (ulong?)element.ContentLength ?? default;
-            result.LastModified = element.LastModifiedDate ?? default;
+            result.LastModified = element.LastModifiedDate?.ToUniversalTime() ?? default;
 
             return result;
         }
