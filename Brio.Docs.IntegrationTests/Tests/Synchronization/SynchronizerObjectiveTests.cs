@@ -1260,7 +1260,7 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_SubobjectiveRemovedFromLocal_RemoveSubjectiveFromRemoteAndSynchronize()
+        public async Task Synchronize_SubobjectiveRemovedFromLocal_RemoveSubobjectiveFromRemoteAndSynchronize()
         {
             // Arrange.
             var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
@@ -1307,7 +1307,7 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_SubobjectiveRemovedFromRemote_RemoveSubjectiveFromLocalAndSynchronize()
+        public async Task Synchronize_SubobjectiveRemovedFromRemote_RemoveSubobjectiveFromLocalAndSynchronize()
         {
             // Arrange.
             var (objectiveLocal, objectiveSynchronized, _) = await ArrangeObjective();
@@ -1319,8 +1319,8 @@ namespace Brio.Docs.Tests.Synchronization
 
             var subobjectiveSynchronized = MockData.DEFAULT_OBJECTIVES[1];
             objectiveSynchronized.ChildrenObjectives = new List<Objective> { subobjectiveSynchronized };
-            subobjectiveSynchronized.ProjectID = objectiveLocal.ProjectID;
-            subobjectiveSynchronized.ObjectiveTypeID = objectiveLocal.ObjectiveTypeID;
+            subobjectiveSynchronized.ProjectID = objectiveSynchronized.ProjectID;
+            subobjectiveSynchronized.ObjectiveTypeID = objectiveSynchronized.ObjectiveTypeID;
             subobjectiveSynchronized.IsSynchronized = true;
 
             subobjectiveLocal.SynchronizationMate = subobjectiveSynchronized;
