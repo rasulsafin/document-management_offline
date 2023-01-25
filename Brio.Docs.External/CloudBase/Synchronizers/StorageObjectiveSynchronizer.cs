@@ -42,6 +42,11 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
 
         public async Task<ObjectiveExternalDto> Remove(ObjectiveExternalDto obj)
         {
+            await CheckCashedElements().ConfigureAwait(false);
+
+            foreach (var objective in objectives.Where(x => x.ParentObjectiveExternalID == obj.ExternalID))
+                await manager.Delete<ObjectiveExternalDto>(objective.ExternalID).ConfigureAwait(false);
+
             var deleteResult = await manager.Delete<ObjectiveExternalDto>(obj.ExternalID);
             if (!deleteResult)
                 return null;
