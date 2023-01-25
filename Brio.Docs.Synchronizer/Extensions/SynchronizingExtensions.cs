@@ -15,7 +15,10 @@ namespace Brio.Docs.Synchronization.Extensions
         public static SynchronizingAction DetermineAction<T>(this SynchronizingTuple<T> tuple)
             => DetermineAction((tuple.Local, tuple.Synchronized, tuple.Remote));
 
-        public static SynchronizingAction DetermineAction<T>(this (T local, T synchronized, T remote) tuple)
+        public static SynchronizingAction DetermineAction<T>(this SynchronizationTupleUnloaded<T> tuple)
+            => DetermineAction((tuple.LocalId, tuple.SynchronizedId, tuple.Remote));
+
+        public static SynchronizingAction DetermineAction(this (object local, object synchronized, object remote) tuple)
             => tuple.synchronized == null && tuple.local == null     ? SynchronizingAction.AddToLocal
                 : tuple.synchronized == null && tuple.remote == null ? SynchronizingAction.AddToRemote
                 : tuple.local == null && tuple.remote == null        ? SynchronizingAction.RemoveFromLocal

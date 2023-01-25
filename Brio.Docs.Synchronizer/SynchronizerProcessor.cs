@@ -83,6 +83,9 @@ namespace Brio.Docs.Synchronization
 
             logger.LogDebug("{@Count} tuples created", tuples.Count);
 
+            foreach (var tuple in tuples)
+                await attacher.AttachExisting(tuple).ConfigureAwait(false);
+
             var unloadedTuples = tuples.Select(SynchronizationTupleExtensions.AsUnloaded);
 
             context.ChangeTracker.Clear();
@@ -99,9 +102,8 @@ namespace Brio.Docs.Synchronization
 
                 token.ThrowIfCancellationRequested();
 
+                var action = unloaded.DetermineAction();
                 var tuple = await context.Load(unloaded).ConfigureAwait(false);
-                await attacher.AttachExisting(tuple).ConfigureAwait(false);
-                var action = tuple.DetermineAction();
                 logger.LogDebug("Tuple {ID} must {@Action}", tuple.ExternalID, action);
 
                 try
