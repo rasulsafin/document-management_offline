@@ -20,7 +20,7 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                 : PathManager.GetFilesDirectoryForProject(projectName);
 
             var toUpload = forceUploading ? items : items.Where(i => string.IsNullOrWhiteSpace(i.ExternalID));
-            var cachedManager = new CachedManager(manager);
+            var cachedManager = new CachedCloudManager(manager);
 
             foreach (var item in toUpload)
             {

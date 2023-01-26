@@ -6,7 +6,7 @@ using Brio.Docs.External.Utils;
 
 namespace Brio.Docs.External.CloudBase
 {
-    internal class CachedManager : ICloudManager
+    internal class CachedCloudManager : ICloudManager
     {
         private readonly Dictionary<(Type, string), object> pullAllCache;
         private readonly Dictionary<(Type, string), object> pullByIdCache;
@@ -16,7 +16,7 @@ namespace Brio.Docs.External.CloudBase
 
         private readonly ICloudManager wrappedManager;
 
-        public CachedManager(ICloudManager wrappedManager)
+        public CachedCloudManager(ICloudManager wrappedManager)
         {
             this.wrappedManager = wrappedManager;
 
