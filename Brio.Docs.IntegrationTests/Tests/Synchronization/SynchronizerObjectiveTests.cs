@@ -18,6 +18,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
+using Range = Moq.Range;
 
 namespace Brio.Docs.Tests.Synchronization
 {
@@ -1159,11 +1160,7 @@ namespace Brio.Docs.Tests.Synchronization
         {
             // Arrange.
             var (objectiveLocal, _, _) = await ArrangeObjective();
-
-            var subobjective = MockData.DEFAULT_OBJECTIVES[1];
-            objectiveLocal.ChildrenObjectives = new List<Objective> { subobjective };
-            subobjective.ProjectID = objectiveLocal.ProjectID;
-            subobjective.ObjectiveTypeID = objectiveLocal.ObjectiveTypeID;
+            var subobjective = CreateSubobjective(objectiveLocal);
 
             Fixture.Context.Objectives.Update(objectiveLocal);
             await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
@@ -1199,15 +1196,7 @@ namespace Brio.Docs.Tests.Synchronization
                 ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
                 Title = "Title1",
             };
-
-            var objectiveRemoteChild = new ObjectiveExternalDto
-            {
-                ExternalID = "external_id2",
-                ProjectExternalID = Project.remote.ExternalID,
-                ParentObjectiveExternalID = objectiveRemoteParent.ExternalID,
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
-                Title = "Title2",
-            };
+            var objectiveRemoteChild = CreateSubobjective(objectiveRemoteParent);
 
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemoteParent });
 
@@ -1231,17 +1220,7 @@ namespace Brio.Docs.Tests.Synchronization
         {
             // Arrange.
             var (_, _, objectiveRemote) = await ArrangeObjective();
-            var objectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-
-            var objectiveRemoteChild = new ObjectiveExternalDto
-            {
-                ExternalID = "external_id2",
-                ProjectExternalID = Project.remote.ExternalID,
-                ParentObjectiveExternalID = objectiveRemote.ExternalID,
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
-                Title = "Title2",
-            };
-
+            var objectiveRemoteChild = CreateSubobjective(objectiveRemote);
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
 
             // Act.
@@ -1260,32 +1239,12 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_SubobjectiveRemovedFromLocal_RemoveSubjectiveFromRemoteAndSynchronize()
+        public async Task Synchronize_SubobjectiveRemovedFromLocal_RemoveSubobjectiveFromRemoteAndSynchronize()
         {
             // Arrange.
             var (_, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
-            var objectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-
-            var objectiveRemoteChild = new ObjectiveExternalDto
-            {
-                ExternalID = "external_id2",
-                ProjectExternalID = Project.remote.ExternalID,
-                ParentObjectiveExternalID = objectiveRemote.ExternalID,
-                ObjectiveType = new ObjectiveTypeExternalDto { Name = objectiveType.Name },
-                Title = "Title2",
-            };
-
-            objectiveSynchronized.ChildrenObjectives = new List<Objective>
-            {
-                new Objective
-                {
-                    ExternalID = objectiveRemoteChild.ExternalID,
-                    Project = objectiveSynchronized.Project,
-                    ObjectiveType = objectiveType,
-                    Title = objectiveRemoteChild.Title,
-                    IsSynchronized = true,
-                },
-            };
+            var subobjectiveSynchronized = CreateSubobjective(objectiveSynchronized);
+            var objectiveRemoteChild = CreateSubobjective(objectiveRemote, subobjectiveSynchronized.ExternalID);
 
             MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
             Fixture.Context.Objectives.Update(objectiveSynchronized);
@@ -1307,24 +1266,15 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_SubobjectiveRemovedFromRemote_RemoveSubjectiveFromLocalAndSynchronize()
+        public async Task Synchronize_SubobjectiveRemovedFromRemote_RemoveSubobjectiveFromLocalAndSynchronize()
         {
             // Arrange.
             var (objectiveLocal, objectiveSynchronized, _) = await ArrangeObjective();
 
-            var subobjectiveLocal = MockData.DEFAULT_OBJECTIVES[1];
-            objectiveLocal.ChildrenObjectives = new List<Objective> { subobjectiveLocal };
-            subobjectiveLocal.ProjectID = objectiveLocal.ProjectID;
-            subobjectiveLocal.ObjectiveTypeID = objectiveLocal.ObjectiveTypeID;
-
-            var subobjectiveSynchronized = MockData.DEFAULT_OBJECTIVES[1];
-            objectiveSynchronized.ChildrenObjectives = new List<Objective> { subobjectiveSynchronized };
-            subobjectiveSynchronized.ProjectID = objectiveLocal.ProjectID;
-            subobjectiveSynchronized.ObjectiveTypeID = objectiveLocal.ObjectiveTypeID;
-            subobjectiveSynchronized.IsSynchronized = true;
-
+            var subobjectiveLocal = CreateSubobjective(objectiveLocal);
+            var subobjectiveSynchronized = CreateSubobjective(objectiveSynchronized, subobjectiveLocal.ExternalID);
             subobjectiveLocal.SynchronizationMate = subobjectiveSynchronized;
-            var removingID = subobjectiveLocal.ExternalID = subobjectiveSynchronized.ExternalID = "ex_subobjective";
+            var removingID = subobjectiveLocal.ExternalID;
 
             Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
             await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
@@ -1340,6 +1290,55 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreNotEqual(removingID, local.ExternalID, "Local objective must be removed");
             Assert.AreNotEqual(removingID, synchronized.ExternalID, "Synchronized objective must be removed");
             CheckSynchronizedObjectives(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ParentObjectiveRemovedFromLocal_RemoveParentAndChildFromRemote()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, objectiveRemote) = await ArrangeObjective();
+            var objectiveRemoteChild = CreateSubobjective(objectiveRemote);
+            CreateSubobjective(objectiveSynchronized, objectiveRemoteChild.ExternalID);
+
+            MockRemoteObjectives(new[] { objectiveRemoteChild, objectiveRemote });
+            Fixture.Context.Objectives.Remove(objectiveLocal);
+            Fixture.Context.Objectives.Update(objectiveSynchronized);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(
+                SynchronizerTestsHelper.SynchronizerCall.Remove,
+                Times.Between(1, 2, Range.Inclusive));
+            await assertHelper.IsSynchronizedObjectivesCount(0);
+            await assertHelper.IsLocalObjectivesCount(0);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ParentObjectiveRemovedFromRemote_RemoveParentAndChildFromLocal()
+        {
+            // Arrange.
+            var (objectiveLocal, objectiveSynchronized, _) = await ArrangeObjective();
+
+            var subobjectiveLocal = CreateSubobjective(objectiveLocal);
+            var subobjectiveSynchronized = CreateSubobjective(objectiveSynchronized, subobjectiveLocal.ExternalID);
+            subobjectiveLocal.SynchronizationMate = subobjectiveSynchronized;
+
+            Fixture.Context.Objectives.UpdateRange(objectiveLocal, objectiveSynchronized);
+            MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var synchronizationResult = await Synchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+            await assertHelper.IsSynchronizedObjectivesCount(0);
+            await assertHelper.IsLocalObjectivesCount(0);
         }
 
         private void CheckSynchronizedObjectives(Objective local, Objective synchronized)
@@ -1491,6 +1490,39 @@ namespace Brio.Docs.Tests.Synchronization
             await Fixture.Context.SaveChangesAsync();
 
             return (objectiveLocal, objectiveSynchronized, objectiveRemote);
+        }
+
+        private Objective CreateSubobjective(Objective parent, string externalId = "ex_subobjective")
+        {
+            var subobjective = MockData.DEFAULT_OBJECTIVES[1];
+            parent.ChildrenObjectives = new List<Objective> { subobjective };
+            subobjective.ProjectID = parent.ProjectID;
+            subobjective.ObjectiveTypeID = parent.ObjectiveTypeID;
+            subobjective.IsSynchronized = parent.IsSynchronized;
+            subobjective.ExternalID = externalId;
+            return subobjective;
+        }
+
+        private ObjectiveExternalDto CreateSubobjective(ObjectiveExternalDto parent, string externalId = "ex_subobjective")
+        {
+            var sample = MockData.DEFAULT_OBJECTIVES[1];
+            var subobjective = new ObjectiveExternalDto
+            {
+                ExternalID = externalId,
+                ProjectExternalID = parent.ProjectExternalID,
+                ParentObjectiveExternalID = parent.ExternalID,
+                AuthorExternalID = parent.AuthorExternalID,
+                ObjectiveType = parent.ObjectiveType,
+                UpdatedAt = DateTime.Now,
+                CreationDate = sample.CreationDate,
+                DueDate = sample.DueDate,
+                Title = sample.Title,
+                Description = sample.Description,
+                Items = new List<ItemExternalDto>(),
+                Status = (ObjectiveStatus)sample.Status,
+            };
+
+            return subobjective;
         }
 
         private async Task<
