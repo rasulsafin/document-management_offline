@@ -13,7 +13,7 @@ using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 namespace Brio.Docs.Api.Controllers
 {
     /// <summary>
-    /// Controller for managing Objectives.
+    /// Controller for managing reports.
     /// </summary>
     [Route("[controller]")]
     [ApiController]
