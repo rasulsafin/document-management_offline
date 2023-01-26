@@ -273,10 +273,12 @@ namespace Brio.Docs.Tests.Synchronization
                 new ConnectionInfoExternalDto(),
                 new Progress<double>(),
                 new CancellationTokenSource().Token);
+            var local = await SynchronizerTestsHelper.Include(Fixture.Context.Projects.Unsynchronized()).FirstOrDefaultAsync();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+            CheckProjects(projectLocal, local);
         }
 
         [TestMethod]
@@ -296,6 +298,36 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ProjectAddedLocalWithItems_AddProjectToRemoteAndSynchronize()
+        {
+            // Arrange.
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            var items = MockData.DEFAULT_ITEMS;
+            projectLocal.Items = items;
+            MockRemoteProjects(ArraySegment<ProjectExternalDto>.Empty);
+            await Fixture.Context.Projects.AddAsync(projectLocal);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
+            CheckSynchronizedProjects(local, synchronized);
+            Assert.AreEqual(
+                items.Count,
+                local.Items?.Count ?? 0,
+                "The number of local items does not match the expected value");
+            Assert.AreEqual(
+                items.Count,
+                ResultProjectExternalDto.Items?.Count ?? 0,
+                "The number of remote items does not match the expected value");
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -379,6 +411,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckProjects(local, projectLocal);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -450,6 +483,7 @@ namespace Brio.Docs.Tests.Synchronization
             Assert.AreNotEqual(oldRemoteTitle, synchronized.Title, "The synchronized project has remote changes.");
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -472,6 +506,7 @@ namespace Brio.Docs.Tests.Synchronization
             await assertHelper.IsLocalItemsCount(1);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -585,6 +620,7 @@ namespace Brio.Docs.Tests.Synchronization
             await assertHelper.IsLocalItemsCount(2);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -617,6 +653,7 @@ namespace Brio.Docs.Tests.Synchronization
             await assertHelper.IsLocalItemsCount(0);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+            ValidateSendingProject();
         }
 
         [TestMethod]
@@ -738,5 +775,11 @@ namespace Brio.Docs.Tests.Synchronization
 
         private void MockRemoteProjects(IReadOnlyCollection<ProjectExternalDto> array)
             => SynchronizerTestsHelper.MockGetRemote(ProjectSynchronizer, array, x => x.ExternalID);
+
+        private void ValidateSendingProject()
+        {
+            foreach (var item in ResultProjectExternalDto.Items ?? Enumerable.Empty<ItemExternalDto>())
+                Assert.IsNotNull(item.ProjectDirectory, $"The synchronizer gives to a remote connection invalid item {item.RelativePath}");
+        }
     }
 }

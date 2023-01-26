@@ -29,7 +29,7 @@ namespace Brio.Docs.Synchronization.Mergers
                 item => item.Name,
                 item => item.RelativePath,
                 item => item.ItemType);
-            if (tuple.Remote is { ProjectID: 0, Project: null, Objectives: null })
+            if (tuple.Remote is { ProjectID: null, Project: null, Objectives: null })
                 tuple.Remote.ProjectID = tuple.AsEnumerable().Select(x => x?.ProjectID).FirstOrDefault(x => x != null);
 
             logger.LogAfterMerge(tuple);
