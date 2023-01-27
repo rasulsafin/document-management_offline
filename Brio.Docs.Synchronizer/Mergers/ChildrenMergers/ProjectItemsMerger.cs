@@ -34,5 +34,16 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
 
         protected override Expression<Func<Item, bool>> GetNeedToRemoveExpression(Project parent)
             => needToRemoveExpression;
+
+        protected override bool UnlinkChild(Project parent, Item child)
+        {
+            if (base.UnlinkChild(parent, child))
+            {
+                child.ProjectID = null;
+                return true;
+            }
+
+            return false;
+        }
     }
 }

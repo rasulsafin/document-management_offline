@@ -680,13 +680,14 @@ namespace Brio.Docs.Tests.Synchronization
             await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
-            var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize(true);
+            var (local, _, synchronizationResult) = await GetProjectsAfterSynchronize(true);
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(1);
+            Assert.AreEqual(0, local.Items.Count, "The file is still linked to the project");
         }
 
         [TestMethod]
