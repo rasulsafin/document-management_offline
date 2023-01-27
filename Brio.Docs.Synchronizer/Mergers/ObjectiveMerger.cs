@@ -142,7 +142,7 @@ namespace Brio.Docs.Synchronization.Mergers
 
                     locationTuple.ForEachChange(tuple, (location, objective) =>
                     {
-                        if (location.Item.ProjectID != objective.ProjectID)
+                        if (location.Item.ProjectID != objective.ProjectID && objective.ProjectID != 0)
                         {
                             location.Item.ProjectID = objective.ProjectID;
                             return true;

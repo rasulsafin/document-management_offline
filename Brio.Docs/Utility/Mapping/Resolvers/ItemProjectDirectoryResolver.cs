@@ -1,4 +1,5 @@
-﻿using System.Linq;
+using System;
+using System.Linq;
 using AutoMapper;
 using Brio.Docs.Database;
 using Brio.Docs.Database.Models;
@@ -29,7 +30,7 @@ namespace Brio.Docs.Utility.Mapping.Resolvers
             logger.LogDebug("Found project {@Project}", project);
 
             if (project == null)
-                return null;
+                throw new InvalidOperationException("Can not get a project from the item");
 
             return PathHelper.GetDirectory(project);
         }
