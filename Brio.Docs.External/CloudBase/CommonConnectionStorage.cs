@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,6 +44,7 @@ namespace Brio.Docs.External.CloudBase
             foreach (var item in itemExternalDtos)
             {
                 token.ThrowIfCancellationRequested();
+                Directory.CreateDirectory(Path.GetDirectoryName(item.FullPath));
                 var downloadResult = await cloudManager.PullFile(item.ExternalID, item.FullPath);
                 progress?.Report(++i / itemCount);
                 if (!downloadResult)

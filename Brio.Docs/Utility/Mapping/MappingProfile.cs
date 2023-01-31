@@ -177,10 +177,8 @@ namespace Brio.Docs.Utility.Mapping
                .ForMember(x => x.AuthorExternalID, с => с.MapFrom(d => d.Author.ExternalID));
 
             CreateMap<Item, ItemExternalDto>()
-                .ForMember(x => x.FileName, o => o.MapFrom<ItemFileNameResolver>())
-                .ForMember(x => x.FullPath, o => o.MapFrom<ItemFullPathResolver>());
-            CreateMap<ItemExternalDto, Item>()
-               .ForMember(x => x.RelativePath, o => o.MapFrom<ItemExternalDtoRelativePathResolver>());
+                .ForMember(x => x.ProjectDirectory, o => o.MapFrom<ItemProjectDirectoryResolver>());
+            CreateMap<ItemExternalDto, Item>();
             CreateMap<ItemExternalDto, ObjectiveItem>()
                .ForMember(x => x.Item, o => o.MapFrom(x => x));
 

@@ -126,6 +126,25 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
         protected virtual Expression<Func<TChild, bool>> GetNeedToRemoveExpression(TParent parent)
             => defaultNeedToRemoveExpression;
 
+        protected virtual bool UnlinkChild(
+            TParent parent,
+            TChild child)
+        {
+            if (HasChild(parent, child))
+            {
+                var first = GetChildrenCollectionFunc(parent)
+                   .First(x => GetChildFromLinkFunc(x) == child);
+                GetChildrenCollectionFunc(parent).Remove(first);
+
+                var entry = context.Entry(first);
+                if (IsOneToManyRelationship && entry.State == EntityState.Deleted)
+                    entry.State = EntityState.Modified;
+                return true;
+            }
+
+            return false;
+        }
+
         private bool AddChild(TParent parent, TChild child)
         {
             if (!HasChild(parent, child))
@@ -255,25 +274,6 @@ namespace Brio.Docs.Synchronization.Mergers.ChildrenMergers
             }
 
             tuple.SynchronizeChanges(childTuple);
-        }
-
-        private bool UnlinkChild(
-            TParent parent,
-            TChild child)
-        {
-            if (HasChild(parent, child))
-            {
-                var first = GetChildrenCollectionFunc(parent)
-                   .First(x => GetChildFromLinkFunc(x) == child);
-                GetChildrenCollectionFunc(parent).Remove(first);
-
-                var entry = context.Entry(first);
-                if (IsOneToManyRelationship && entry.State == EntityState.Deleted)
-                    entry.State = EntityState.Modified;
-                return true;
-            }
-
-            return false;
         }
     }
 }

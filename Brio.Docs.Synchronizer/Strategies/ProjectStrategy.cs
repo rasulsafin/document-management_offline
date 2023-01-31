@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Brio.Docs.Database;
@@ -170,6 +169,9 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
+                foreach (var item in tuple.Remote.Items ?? Enumerable.Empty<Item>())
+                    item.ProjectID = tuple.Synchronized.ID;
+
                 return await strategyHelper.RemoveFromRemote(data.ConnectionContext.ProjectsSynchronizer, tuple, token)
                    .ConfigureAwait(false);
             }

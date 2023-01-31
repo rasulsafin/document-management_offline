@@ -191,6 +191,7 @@ namespace Brio.Docs.Synchronization.Strategies
 
             try
             {
+                await UpdateChildrenBeforeSynchronization(tuple, data).ConfigureAwait(false);
                 return await strategyHelper
                    .RemoveFromRemote(data.ConnectionContext.ObjectivesSynchronizer, tuple, token)
                    .ConfigureAwait(false);
@@ -222,7 +223,7 @@ namespace Brio.Docs.Synchronization.Strategies
             foreach (var link in tuple.Remote.Items)
             {
                 var item = link.Item;
-                item.ProjectID = tuple.AsEnumerable().Select(x => x.ProjectID).First(x => x != 0);
+                item.ProjectID = tuple.AsEnumerable().Select(x => x?.ProjectID ?? 0).First(x => x != 0);
             }
         }
 
@@ -278,16 +279,6 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
-        private void StartTrackAuthor(SynchronizingTuple<Objective> synchronizingTuple)
-        {
-            var author = synchronizingTuple.Local.Author;
-            if (author == null)
-                return;
-
-            if (context.Entry(author).State == EntityState.Detached)
-                context.Attach(author);
-        }
-
         private async ValueTask UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
@@ -309,7 +300,6 @@ namespace Brio.Docs.Synchronization.Strategies
 
         private async ValueTask UpdateChildrenBeforeSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
-            StartTrackAuthor(tuple);
             await AddConnectionInfoToDynamicFields(tuple, data).ConfigureAwait(false);
             AddProjectToRemoteItems(tuple);
         }

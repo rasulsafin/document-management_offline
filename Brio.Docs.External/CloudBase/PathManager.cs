@@ -80,5 +80,8 @@ namespace Brio.Docs.External
             var needDelimiter = !path1.EndsWith('/') && !path2.StartsWith('/');
             return needDelimiter ? $"{path1}/{path2}" : path1 + path2;
         }
+
+        public static string ConvertToVirtualPath(string localPath)
+            => localPath.Replace('\\', '/');
     }
 }

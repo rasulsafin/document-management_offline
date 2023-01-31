@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -449,7 +448,7 @@ namespace Brio.Docs.Tests.Synchronization
                 Item = new ItemExternalDto
                 {
                     ExternalID = item.ExternalID,
-                    FileName = item.Name,
+                    RelativePath = item.Name,
                 },
             };
 
@@ -472,8 +471,7 @@ namespace Brio.Docs.Tests.Synchronization
                     new ItemExternalDto
                     {
                         ExternalID = itemSynchronized.ExternalID,
-                        FileName = itemSynchronized.Name,
-                        FullPath = Path.GetFullPath(itemSynchronized.RelativePath),
+                        RelativePath = itemSynchronized.RelativePath,
                         ItemType = ItemType.File,
                         UpdatedAt = itemSynchronized.UpdatedAt,
                     });

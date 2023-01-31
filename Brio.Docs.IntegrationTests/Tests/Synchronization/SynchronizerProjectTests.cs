@@ -273,10 +273,12 @@ namespace Brio.Docs.Tests.Synchronization
                 new ConnectionInfoExternalDto(),
                 new Progress<double>(),
                 new CancellationTokenSource().Token);
+            var local = await SynchronizerTestsHelper.Include(Fixture.Context.Projects.Unsynchronized()).FirstOrDefaultAsync();
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
+            CheckProjects(projectLocal, local);
         }
 
         [TestMethod]
@@ -296,6 +298,35 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
             CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
             CheckSynchronizedProjects(local, synchronized);
+        }
+
+        [TestMethod]
+        public async Task Synchronize_ProjectAddedLocalWithItems_AddProjectToRemoteAndSynchronize()
+        {
+            // Arrange.
+            var projectLocal = MockData.DEFAULT_PROJECTS[0];
+            var items = MockData.DEFAULT_ITEMS;
+            projectLocal.Items = items;
+            MockRemoteProjects(ArraySegment<ProjectExternalDto>.Empty);
+            await Fixture.Context.Projects.AddAsync(projectLocal);
+            await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
+
+            // Act.
+            var (local, synchronized, synchronizationResult) = await GetProjectsAfterSynchronize();
+
+            // Assert.
+            assertHelper.IsSynchronizationSuccessful(synchronizationResult);
+            CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
+            CheckProjects(synchronized, mapper.Map<Project>(ResultProjectExternalDto), false);
+            CheckSynchronizedProjects(local, synchronized);
+            Assert.AreEqual(
+                items.Count,
+                local.Items?.Count ?? 0,
+                "The number of local items does not match the expected value");
+            Assert.AreEqual(
+                items.Count,
+                ResultProjectExternalDto.Items?.Count ?? 0,
+                "The number of remote items does not match the expected value");
         }
 
         [TestMethod]
@@ -484,7 +515,7 @@ namespace Brio.Docs.Tests.Synchronization
                 new ItemExternalDto
                 {
                     ExternalID = "item_external_id",
-                    FileName = "item_name",
+                    RelativePath = "item_name",
                     ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
@@ -532,7 +563,7 @@ namespace Brio.Docs.Tests.Synchronization
                 new ItemExternalDto
                 {
                     ExternalID = itemLocal.ExternalID,
-                    FileName = "item_name",
+                    RelativePath = "item_name",
                     ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
@@ -569,7 +600,7 @@ namespace Brio.Docs.Tests.Synchronization
                 new ItemExternalDto
                 {
                     ExternalID = "item_external_id",
-                    FileName = "item_name",
+                    RelativePath = "item_name",
                     ItemType = ItemType.File,
                     UpdatedAt = DateTime.UtcNow,
                 },
@@ -595,7 +626,7 @@ namespace Brio.Docs.Tests.Synchronization
             var itemExternal = new ItemExternalDto
             {
                 ExternalID = "item_external_id",
-                FileName = "item_name",
+                RelativePath = "item_name",
                 ItemType = ItemType.File,
                 UpdatedAt = DateTime.UtcNow,
             };
@@ -643,13 +674,14 @@ namespace Brio.Docs.Tests.Synchronization
             await SynchronizerTestsHelper.SaveChangesAndClearTracking(Fixture.Context);
 
             // Act.
-            var (_, _, synchronizationResult) = await GetProjectsAfterSynchronize(true);
+            var (local, _, synchronizationResult) = await GetProjectsAfterSynchronize(true);
 
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(1);
+            Assert.AreEqual(0, local.Items.Count, "The file is still linked to the project");
         }
 
         [TestMethod]

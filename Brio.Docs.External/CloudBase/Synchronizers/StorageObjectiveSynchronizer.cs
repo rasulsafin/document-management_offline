@@ -69,6 +69,10 @@ namespace Brio.Docs.External.CloudBase.Synchronizers
                 manager,
                 projects.FirstOrDefault(x => x.ExternalID == obj.ProjectExternalID)?.Title);
             obj.Items = obj.Items.Where(x => !string.IsNullOrWhiteSpace(x.ExternalID)).ToList();
+
+            foreach (var item in obj.Items)
+                item.ProjectDirectory = null;
+
             UpdatedTimeUtilities.UpdateTime(obj);
             var createSuccess = await manager.Push(obj, newId);
             if (!createSuccess)
