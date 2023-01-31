@@ -5,6 +5,7 @@ using Brio.Docs.Database;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
+using Brio.Docs.Reports;
 using Brio.Docs.Services;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Utility;
@@ -25,6 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISynchronizationService, SynchronizationService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IObjectiveService, ObjectiveService>();
+            services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
@@ -34,6 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IRequestService, RequestQueueService>();
             services.AddSingleton<IRequestQueueService, RequestQueueService>();
             services.AddSingleton<CryptographyHelper>();
+            services.AddSingleton<ReportGenerator>();
 
             services.AddFactories();
             services.AddSynchronizer();

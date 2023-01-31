@@ -46,12 +46,6 @@ namespace Brio.Docs.HttpConnection.Services
         public async Task<IEnumerable<ID<ObjectiveDto>>> Remove(ID<ObjectiveDto> objectiveID)
             => await Connection.DeleteDataAsync<IEnumerable<ID<ObjectiveDto>>>($"{PATH}/{{0}}", objectiveID);
 
-        public async Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName)
-            => await Connection.PostObjectJsonQueryAsync<ReportDto, ObjectiveReportCreationResultDto>($"{PATH}/report",
-                $"path={{0}}&userID={{1}}&projectName={{2}}",
-                new object[] { path, userID, projectName },
-                report);
-
         public async Task<IEnumerable<ObjectiveToLocationDto>> GetObjectivesWithLocation(ID<ProjectDto> projectID, string itemName, ObjectiveFilterParameters filter)
             => await Connection.PostObjectJsonQueryAsync<ObjectiveFilterParameters, IEnumerable<ObjectiveToLocationDto>>(
                 $"{PATH}/locations",

@@ -19,7 +19,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Client", "Brio.Do
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Database", "Brio.Docs.Database\Brio.Docs.Database.csproj", "{100FECFA-06E2-4D4D-90A4-ADFF9B251718}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Utils", "Brio.Docs.Utils\Brio.Docs.Utils.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Reports", "Brio.Docs.Reports\Brio.Docs.Reports.csproj", "{F5838427-97CC-44DA-8075-49A8C7480065}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.YandexDisk", "Brio.Docs.Connections.YandexDisk\Brio.Docs.Connections.YandexDisk.csproj", "{F5F2A042-4AAF-4E9E-8C26-DD8A3591F34E}"
 EndProject
@@ -61,11 +61,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BrioC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Connections.BrioCloud.Tests", "Brio.Docs.Connections.BrioCloud.Tests\Brio.Docs.Connections.BrioCloud.Tests.csproj", "{049910D1-4CF5-453B-A2B3-4DF48C237C68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.HttpConnection", "Brio.Docs.HttpConnection\Brio.Docs.HttpConnection.csproj", "{40826F44-914B-45B9-8603-ACB2D60D65A0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.HttpConnection", "Brio.Docs.HttpConnection\Brio.Docs.HttpConnection.csproj", "{40826F44-914B-45B9-8603-ACB2D60D65A0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.HttpConnection.PrismDI", "Brio.Docs.HttpConnection.PrismDI\Brio.Docs.HttpConnection.PrismDI.csproj", "{0BBF7BE1-A0F6-4DE7-BFDF-B6EC5EC03F79}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.HttpConnection.PrismDI", "Brio.Docs.HttpConnection.PrismDI\Brio.Docs.HttpConnection.PrismDI.csproj", "{0BBF7BE1-A0F6-4DE7-BFDF-B6EC5EC03F79}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Brio.Docs.Updater", "Brio.Docs.Updater\Brio.Docs.Updater.csproj", "{F6EA1026-95D5-4D15-8000-152F769BD65E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Updater", "Brio.Docs.Updater\Brio.Docs.Updater.csproj", "{F6EA1026-95D5-4D15-8000-152F769BD65E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

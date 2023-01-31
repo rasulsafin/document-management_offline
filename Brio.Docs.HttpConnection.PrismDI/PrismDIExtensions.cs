@@ -20,6 +20,7 @@ namespace Brio.Docs.HttpConnection
             container.RegisterSingleton<IItemService, ItemService>();
             container.RegisterSingleton<IObjectiveTypeService, ObjectiveTypeService>();
             container.RegisterSingleton<IObjectiveService, ObjectiveService>();
+            container.RegisterSingleton<IReportService, ReportService>();
             container.RegisterSingleton<IProjectService, ProjectService>();
             container.RegisterSingleton<IUserService, UserService>();
             container.RegisterSingleton<IRequestQueueService, RequestQueueService>();

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -18,9 +17,7 @@ using Brio.Docs.Utility;
 using Brio.Docs.Utility.Extensions;
 using Brio.Docs.Utility.Pagination;
 using Brio.Docs.Utility.Sorting;
-using Brio.Docs.Utils.ReportCreator;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 
 namespace Brio.Docs.Services
@@ -33,17 +30,14 @@ namespace Brio.Docs.Services
         private readonly DynamicFieldsHelper dynamicFieldHelper;
         private readonly BimElementsHelper bimElementHelper;
         private readonly ILogger<ObjectiveService> logger;
-        private readonly ReportHelper reportHelper;
         private readonly QueryMapper<Objective> queryMapper;
-        private readonly IStringLocalizer<ReportLocalization> localizer;
 
         public ObjectiveService(DMContext context,
             IMapper mapper,
             ItemsHelper itemHelper,
             DynamicFieldsHelper dynamicFieldHelper,
             BimElementsHelper bimElementHelper,
-            ILogger<ObjectiveService> logger,
-            IStringLocalizer<ReportLocalization> localizer)
+            ILogger<ObjectiveService> logger)
         {
             this.context = context;
             this.mapper = mapper;
@@ -51,10 +45,7 @@ namespace Brio.Docs.Services
             this.dynamicFieldHelper = dynamicFieldHelper;
             this.bimElementHelper = bimElementHelper;
             this.logger = logger;
-            this.localizer = localizer;
             logger.LogTrace("ObjectiveService created");
-
-            reportHelper = new ReportHelper(localizer);
 
             queryMapper = new QueryMapper<Objective>(new QueryMapperConfiguration { IsCaseSensitive = false, IgnoreNotMappedFields = false });
             queryMapper.AddMap(nameof(ObjectiveToListDto.Status), x => x.Status);
@@ -144,85 +135,6 @@ namespace Brio.Docs.Services
             {
                 logger.LogError(ex, "Can't get objective with key {ObjectiveID}", objectiveID);
                 if (ex is ANotFoundException)
-                    throw;
-                throw new DocumentManagementException(ex.Message, ex.StackTrace);
-            }
-        }
-
-        public async Task<ObjectiveReportCreationResultDto> GenerateReport(ReportDto report, string path, int userID, string projectName)
-        {
-            using var lScope = logger.BeginMethodScope();
-            logger.LogInformation(
-                "GenerateReport started for user {UserId} with path = {Path}, projectName = {ProjectName} objectiveIds: {@ObjectiveIDs}",
-                userID,
-                path,
-                projectName,
-                report.Objectives);
-            try
-            {
-                if (report.Objectives == null)
-                    throw new ArgumentValidationException("Cannot create report without objectives");
-
-                int count = 0;
-                DateTime date = DateTime.Now.Date;
-
-                var reportCount = await context.ReportCounts.FindAsync(userID);
-                if (reportCount != null)
-                {
-                    if (reportCount.Date == date)
-                        count = reportCount.Count;
-                }
-                else
-                {
-                    reportCount = new ReportCount() { UserID = userID, Count = count, Date = date };
-                    await context.AddAsync(reportCount);
-                }
-
-                reportCount.Count = ++count;
-                reportCount.Date = date;
-                logger.LogDebug("Report Count updating: {@ReportCount}", reportCount);
-                await context.SaveChangesAsync();
-
-                string reportID = $"{date:yyyyMMdd}-{count}";
-
-                List<ObjectiveToReportDto> objectives = new List<ObjectiveToReportDto>();
-                var objNum = 1;
-                foreach (var objectiveId in report.Objectives)
-                {
-                    var objective = await GetOrThrowAsync(objectiveId);
-                    var objectiveToReport = mapper.Map<ObjectiveToReportDto>(objective);
-                    objectiveToReport.ID = $"{reportID}/{objNum++}";
-
-                    foreach (var item in objectiveToReport.Items)
-                    {
-                        var newName = Path.Combine(path, item.RelativePath.TrimStart('\\'));
-                        item.RelativePath = newName;
-                    }
-
-                    objectives.Add(objectiveToReport);
-                }
-
-                logger.LogDebug("Objectives for report: {@Objectives}", objectives);
-                var reportDir = Path.Combine(path, "Reports");
-                Directory.CreateDirectory(reportDir);
-                var reportName = localizer["Report"];
-                path = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
-                var xmlDoc = reportHelper.Convert(report, objectives, reportID, date);
-                logger.LogDebug("XML created: {@XDocument}", xmlDoc);
-
-                ReportCreator reportCreator = new ReportCreator();
-                reportCreator.CreateReport(xmlDoc, path);
-                logger.LogInformation("Report created ({Path})", path);
-
-                return new ObjectiveReportCreationResultDto()
-                {
-                    ReportPath = path,
-                };
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Can't create report");
-                if (ex is ArgumentValidationException || ex is ANotFoundException)
                     throw;
                 throw new DocumentManagementException(ex.Message, ex.StackTrace);
             }
