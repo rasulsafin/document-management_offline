@@ -6,6 +6,6 @@ namespace Brio.Docs.Reports.Models
     {
         public ReportDetails ReportInfo { get; set; }
 
-        public List<ObjectiveDetails> Tasks { get; set; }
+        public List<ObjectiveDetails> Objectives { get; set; }
     }
 }

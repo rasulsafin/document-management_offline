@@ -152,7 +152,7 @@ namespace Brio.Docs.Services
             return new ReportModel()
             {
                 ReportInfo = reportDetails ?? throw new ArgumentNullException(nameof(reportDetails)),
-                Tasks = objectives ?? throw new ArgumentNullException(nameof(objectives)),
+                Objectives = objectives ?? throw new ArgumentNullException(nameof(objectives)),
             };
         }
 
