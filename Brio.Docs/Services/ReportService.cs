@@ -179,7 +179,7 @@ namespace Brio.Docs.Services
                     Description = objective.Description,
                     Author = new UserDetails
                     {
-                        Name = objective.Author.Name,
+                        Name = objective.Author?.Name ?? string.Empty,
                     },
                     CreationTime = objective.CreationDate,
                     DueTime = objective.DueDate,
@@ -197,7 +197,7 @@ namespace Brio.Docs.Services
 
         private IEnumerable<AttachedElementDetails> CreateAttachedElementsDetails(Objective objective)
         {
-            foreach (var item in objective.BimElements)
+            foreach (var item in objective.BimElements ?? Enumerable.Empty<BimElementObjective>())
             {
                 yield return new AttachedElementDetails
                 {
@@ -210,7 +210,7 @@ namespace Brio.Docs.Services
 
         private IEnumerable<AttachedImageDetails> CreateAttachedImagesDetails(Objective objective, string projectDirectory)
         {
-            foreach (var item in objective.Items)
+            foreach (var item in objective.Items ?? Enumerable.Empty<ObjectiveItem>())
             {
                 var itemInfo = item.Item;
                 if (!ReportGenerator.IsSupportedImageExtension(itemInfo.RelativePath))
@@ -234,7 +234,7 @@ namespace Brio.Docs.Services
         {
             var ret = new Dictionary<string, string>();
 
-            foreach (var field in objective.DynamicFields)
+            foreach (var field in objective.DynamicFields ?? Enumerable.Empty<DynamicField>())
             {
                 var fieldDto = await dynamicFieldsHelper.BuildObjectDynamicField(field);
                 var name = fieldDto.Name;
