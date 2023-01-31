@@ -24,6 +24,7 @@ namespace Brio.Docs.Tests.Utility
                     Name = PAULI_USER.Name,
                     PasswordHash = PAULI_USER.PasswordHash,
                     PasswordSalt = PAULI_USER.PasswordSalt,
+                    ExternalID = $"external id for {PAULI_USER.Login}",
                 },
                 new User
                 {
@@ -31,6 +32,7 @@ namespace Brio.Docs.Tests.Utility
                     Name = SCHREDINGER_USER.Name,
                     PasswordHash = SCHREDINGER_USER.PasswordHash,
                     PasswordSalt = SCHREDINGER_USER.PasswordSalt,
+                    ExternalID = $"external id for {SCHREDINGER_USER.Login}",
                 },
                 new User
                 {
@@ -38,6 +40,7 @@ namespace Brio.Docs.Tests.Utility
                     Name = HEISENBERG_USER.Name,
                     PasswordHash = HEISENBERG_USER.PasswordHash,
                     PasswordSalt = HEISENBERG_USER.PasswordSalt,
+                    ExternalID = $"external id for {HEISENBERG_USER.Login}",
                 },
                 new User
                 {
@@ -45,6 +48,7 @@ namespace Brio.Docs.Tests.Utility
                     Name = BOHR_USER.Name,
                     PasswordHash = BOHR_USER.PasswordHash,
                     PasswordSalt = BOHR_USER.PasswordSalt,
+                    ExternalID = $"external id for {BOHR_USER.Login}",
                 },
             };
 

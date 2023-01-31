@@ -289,6 +289,7 @@ namespace Brio.Docs.Tests.Synchronization
             var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
             objectiveLocal.Project = Project.local;
             objectiveLocal.ObjectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            objectiveLocal.AuthorID = await Fixture.Context.Users.Select(x => x.ID).FirstAsync();
 
             MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Objectives.AddAsync(objectiveLocal);
@@ -317,7 +318,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
-            CheckObjectives(local, objectiveLocal, false);
+            CheckObjectives(objectiveLocal, local, false);
             CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }

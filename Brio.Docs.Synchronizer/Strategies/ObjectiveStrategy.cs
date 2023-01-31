@@ -279,6 +279,13 @@ namespace Brio.Docs.Synchronization.Strategies
             }
         }
 
+        private async ValueTask LoadAuthorToRemoteObjectives(SynchronizingTuple<Objective> tuple)
+        {
+            var remote = tuple.Remote;
+            if (remote != null && remote.AuthorID != null && remote.AuthorID != 0 && remote.Author == null)
+                remote.Author = await context.Users.FindAsync(remote.AuthorID).ConfigureAwait(false);
+        }
+
         private async ValueTask UpdateChildrenAfterSynchronization(SynchronizingTuple<Objective> tuple, SynchronizingData data)
         {
             logger.LogTrace("UpdateChildrenAfterSynchronization started with {@Tuple}", tuple);
@@ -302,6 +309,7 @@ namespace Brio.Docs.Synchronization.Strategies
         {
             await AddConnectionInfoToDynamicFields(tuple, data).ConfigureAwait(false);
             AddProjectToRemoteItems(tuple);
+            await LoadAuthorToRemoteObjectives(tuple).ConfigureAwait(false);
         }
     }
 }
