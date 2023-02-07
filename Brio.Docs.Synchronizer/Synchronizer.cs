@@ -199,19 +199,6 @@ namespace Brio.Docs.Synchronization
                .ConfigureAwait(false);
             objectiveAttacher.RemoteCollection = remoteObjectives;
 
-            foreach (var remoteObjective in remoteObjectives)
-            {
-                remoteObjective.Project.Users ??= new List<UserProject>
-                {
-                    new ()
-                    {
-                        UserID = data.UserId,
-                        ProjectID = remoteObjective.ProjectID,
-                        Project = remoteObjective.Project,
-                    },
-                };
-            }
-
             var objectives = dbContext.Objectives.Where(
                 x =>
                     !unsyncProjectsIDs.Contains(x.ProjectID) &&

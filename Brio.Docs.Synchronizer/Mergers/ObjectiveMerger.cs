@@ -48,7 +48,6 @@ namespace Brio.Docs.Synchronization.Mergers
                 tuple.Synchronized?.ID,
                 tuple.ExternalID);
             tuple.Merge(
-                objective => objective.Author,
                 objective => objective.AuthorID,
                 objective => objective.CreationDate,
                 objective => objective.DueDate,
@@ -103,7 +102,7 @@ namespace Brio.Docs.Synchronization.Mergers
                 {
                     var item = link.Item;
 
-                    if (item is { Project: null, Objectives: null })
+                    if (item is { ProjectID: null, Objectives: null })
                         item.ProjectID = tuple.Remote.Project?.ID ?? tuple.Remote.ProjectID;
                 }
             }
@@ -135,8 +134,8 @@ namespace Brio.Docs.Synchronization.Mergers
                 case SynchronizingAction.AddToRemote:
                     var item = locationTuple.Remote?.Item;
 
-                    if (item is { Project: null, Objectives: null })
-                        item.ProjectID = tuple.Remote.Project.ID;
+                    if (item is { ProjectID: null, Objectives: null })
+                        item.ProjectID = tuple.Remote.ProjectID;
 
                     await locationMerger.Merge(locationTuple).ConfigureAwait(false);
 

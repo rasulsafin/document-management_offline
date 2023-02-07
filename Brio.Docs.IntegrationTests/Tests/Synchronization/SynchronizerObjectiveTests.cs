@@ -84,7 +84,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(local, objectiveLocal);
             CheckObjectives(synchronized, objectiveSynchronized);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -278,7 +278,7 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             CheckObjectives(local, objectiveLocal);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -324,7 +324,7 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Add);
             CheckObjectives(objectiveLocal, local, false);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -369,7 +369,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -425,7 +425,7 @@ namespace Brio.Docs.Tests.Synchronization
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             CheckObjectives(local, objectiveLocal);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             Assert.AreEqual(
                 description,
                 ResultObjectiveExternalDto.Description,
@@ -446,7 +446,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             Assert.AreEqual(description, local.Description, "The local description has not changed");
             CheckSynchronizedObjectives(local, synchronized);
         }
@@ -470,7 +470,7 @@ namespace Brio.Docs.Tests.Synchronization
             // Assert.
             assertHelper.IsSynchronizationSuccessful(synchronizationResult);
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             Assert.AreEqual(
                 title,
                 synchronized.Title,
@@ -514,7 +514,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(1);
             await assertHelper.IsLocalItemsCount(1);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -540,7 +540,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedItemsCount(1);
             await assertHelper.IsLocalItemsCount(1);
-            CheckObjectives(synchronized, mapper.Map<Objective>(remoteObjective), false);
+            CheckObjectives(synchronized, Map(remoteObjective), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -576,7 +576,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(2);
             await assertHelper.IsLocalItemsCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -614,7 +614,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -654,7 +654,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -692,7 +692,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(1);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -729,7 +729,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedItemsCount(0);
             await assertHelper.IsLocalItemsCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -759,7 +759,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsBimElementsCount(1);
             await assertHelper.IsBimElementObjectiveLinksCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -784,7 +784,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsBimElementsCount(1);
             await assertHelper.IsBimElementObjectiveLinksCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -813,7 +813,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsBimElementsCount(1);
             await assertHelper.IsBimElementObjectiveLinksCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -849,7 +849,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsBimElementsCount(2);
             await assertHelper.IsBimElementObjectiveLinksCount(4);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -878,7 +878,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsBimElementsCount(0);
             await assertHelper.IsBimElementObjectiveLinksCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -908,7 +908,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsBimElementsCount(0);
             await assertHelper.IsBimElementObjectiveLinksCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -945,7 +945,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedDynamicFieldsCount(2);
             await assertHelper.IsLocalDynamicFieldsCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -989,7 +989,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedDynamicFieldsCount(2);
             await assertHelper.IsLocalDynamicFieldsCount(2);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -1012,7 +1012,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedDynamicFieldsCount(1);
             await assertHelper.IsLocalDynamicFieldsCount(1);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -1065,7 +1065,7 @@ namespace Brio.Docs.Tests.Synchronization
                 dynamicField.Type,
                 "The dynamic field type does not match the expected value.");
             Assert.AreNotEqual(irrelevantType, dynamicField.Type, "The dynamic field type has irrelevant value");
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -1101,7 +1101,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Update);
             await assertHelper.IsSynchronizedDynamicFieldsCount(0);
             await assertHelper.IsLocalDynamicFieldsCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(ResultObjectiveExternalDto), false);
+            CheckObjectives(synchronized, Map(ResultObjectiveExternalDto), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -1132,7 +1132,7 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedDynamicFieldsCount(0);
             await assertHelper.IsLocalDynamicFieldsCount(0);
-            CheckObjectives(synchronized, mapper.Map<Objective>(objectiveRemote), false);
+            CheckObjectives(synchronized, Map(objectiveRemote), false);
             CheckSynchronizedObjectives(local, synchronized);
         }
 
@@ -1221,8 +1221,8 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedObjectivesCount(2);
             await assertHelper.IsLocalObjectivesCount(2);
-            CheckObjectives(synchronized.First(x => x.ParentObjectiveID == null), mapper.Map<Objective>(objectiveRemoteParent), false);
-            CheckObjectives(synchronized.First(x => x.ParentObjectiveID != null), mapper.Map<Objective>(objectiveRemoteChild), false);
+            CheckObjectives(synchronized.First(x => x.ParentObjectiveID == null), Map(objectiveRemoteParent), false);
+            CheckObjectives(synchronized.First(x => x.ParentObjectiveID != null), Map(objectiveRemoteChild), false);
             CheckSynchronizedObjectives(
                 locals.First(x => x.ParentObjectiveID == null),
                 synchronized.First(x => x.ParentObjectiveID == null));
@@ -1244,8 +1244,8 @@ namespace Brio.Docs.Tests.Synchronization
             CheckSynchronizerCalls(SynchronizerTestsHelper.SynchronizerCall.Nothing);
             await assertHelper.IsSynchronizedObjectivesCount(2);
             await assertHelper.IsLocalObjectivesCount(2);
-            CheckObjectives(synchronized.First(x => x.ParentObjectiveID == null), mapper.Map<Objective>(objectiveRemote), false);
-            CheckObjectives(synchronized.First(x => x.ParentObjectiveID != null), mapper.Map<Objective>(objectiveRemoteChild), false);
+            CheckObjectives(synchronized.First(x => x.ParentObjectiveID == null), Map(objectiveRemote), false);
+            CheckObjectives(synchronized.First(x => x.ParentObjectiveID != null), Map(objectiveRemoteChild), false);
             CheckSynchronizedObjectives(
                 locals.First(x => x.ParentObjectiveID == null),
                 synchronized.First(x => x.ParentObjectiveID == null));
@@ -1562,6 +1562,14 @@ namespace Brio.Docs.Tests.Synchronization
             var synchronized = await SynchronizerTestsHelper.Include(Fixture.Context.Objectives.Synchronized())
                .FirstOrDefaultAsync();
             return (local, synchronized, synchronizationResult);
+        }
+        
+        private Objective Map(ObjectiveExternalDto objectiveExternalDto)
+        {
+            var obj = mapper.Map<Objective>(objectiveExternalDto);
+            obj.Author = Fixture.Context.Users.Find(obj.AuthorID);
+            obj.Project = Fixture.Context.Projects.Find(obj.ProjectID);
+            return obj;
         }
 
         private async Task<ICollection<SynchronizingResult>> Synchronize(bool ignoreProjects = false)
