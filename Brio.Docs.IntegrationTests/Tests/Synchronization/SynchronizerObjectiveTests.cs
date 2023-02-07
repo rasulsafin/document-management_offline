@@ -283,13 +283,18 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_ObjectiveAddedLocal_AddObjectiveToRemoteAndSynchronize()
+        [DataRow(null)] // without author
+        [DataRow(0)] // created by currently syncing user
+        [DataRow(1)] // created by another user
+        public async Task Synchronize_ObjectiveAddedLocal_AddObjectiveToRemoteAndSynchronize(int? authorNumber)
         {
             // Arrange.
             var objectiveLocal = MockData.DEFAULT_OBJECTIVES[0];
             objectiveLocal.Project = Project.local;
             objectiveLocal.ObjectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
-            objectiveLocal.AuthorID = await Fixture.Context.Users.Select(x => x.ID).FirstAsync();
+            objectiveLocal.AuthorID = authorNumber.HasValue
+                ? await Fixture.Context.Users.Skip(authorNumber.Value).Select(x => x.ID).FirstAsync()
+                : null;
 
             MockRemoteObjectives(ArraySegment<ObjectiveExternalDto>.Empty);
             await Fixture.Context.Objectives.AddAsync(objectiveLocal);
@@ -324,10 +329,16 @@ namespace Brio.Docs.Tests.Synchronization
         }
 
         [TestMethod]
-        public async Task Synchronize_ObjectiveAddedRemote_AddObjectiveToLocalAndSynchronize()
+        [DataRow(null)] // without author
+        [DataRow(0)]    // created by currently syncing user
+        [DataRow(1)]    // created by another user
+        public async Task Synchronize_ObjectiveAddedRemote_AddObjectiveToLocalAndSynchronize(int? authorNumber)
         {
             // Arrange.
             var objectiveType = await Fixture.Context.ObjectiveTypes.FirstOrDefaultAsync();
+            var author = authorNumber.HasValue
+                ? await Fixture.Context.Users.Skip(authorNumber.Value).Select(x => x.ExternalID).FirstOrDefaultAsync()
+                : null;
 
             var objectiveRemote = new ObjectiveExternalDto
             {
@@ -338,6 +349,7 @@ namespace Brio.Docs.Tests.Synchronization
                 DueDate = DateTime.UtcNow,
                 Title = "Title",
                 Description = "Description",
+                AuthorExternalID = author,
                 BimElements = new List<BimElementExternalDto>
                 {
                     new BimElementExternalDto
