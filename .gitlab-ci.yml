@@ -59,6 +59,8 @@ build:
 build-updater:
   stage: build
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
     - when: manual
       allow_failure: true
   allow_failure: true
@@ -79,6 +81,8 @@ build-updater:
 build-installer:
   stage: build
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: always
     - when: manual
       allow_failure: true
   needs:
