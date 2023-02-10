@@ -69,11 +69,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<DynamicFieldModelToExternalValueResolver>();
 
             services.AddTransient<ObjectiveExternalDtoProjectIdResolver>();
-            services.AddTransient<ObjectiveExternalDtoProjectResolver>();
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeResolver>();
             services.AddTransient<ObjectiveExternalDtoObjectiveTypeIdResolver>();
             services.AddTransient<ObjectiveExternalDtoAuthorIdResolver>();
-            services.AddTransient<ObjectiveExternalDtoAuthorResolver>();
             services.AddTransient<ObjectiveObjectiveTypeResolver>();
             services.AddTransient<ObjectiveProjectIDResolver>();
 

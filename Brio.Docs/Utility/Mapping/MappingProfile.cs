@@ -157,10 +157,10 @@ namespace Brio.Docs.Utility.Mapping
 
             CreateMap<ObjectiveExternalDto, Objective>()
                .ForMember(x => x.ProjectID, o => o.MapFrom<ObjectiveExternalDtoProjectIdResolver>())
-               .ForMember(x => x.Project, o => o.MapFrom<ObjectiveExternalDtoProjectResolver>())
+               .ForMember(x => x.Project, o => o.Ignore())
                .ForMember(x => x.ObjectiveTypeID, o => o.MapFrom<ObjectiveExternalDtoObjectiveTypeIdResolver>())
                .ForMember(d => d.AuthorID, с => с.MapFrom<ObjectiveExternalDtoAuthorIdResolver>())
-               .ForMember(d => d.Author, с => с.MapFrom<ObjectiveExternalDtoAuthorResolver>());
+               .ForMember(d => d.Author, с => с.Ignore());
             CreateMap<Objective, ObjectiveExternalDto>()
                .ForMember(x => x.ProjectExternalID, o => o.MapFrom<ObjectiveProjectIDResolver>())
                .ForMember(x => x.ObjectiveType, o => o.MapFrom<ObjectiveObjectiveTypeResolver>())

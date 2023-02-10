@@ -78,8 +78,8 @@ namespace Brio.Docs.Services
                 var data = new SynchronizingData
                 {
                     UserId = iUserID,
-                    ProjectsFilter = x => x.Users.Any(u => u.UserID == iUserID),
-                    ObjectivesFilter = x => x.Project.Users.Any(u => u.UserID == iUserID),
+                    ProjectsFilter = x => x.ID == 0 || x.Users.Any(u => u.UserID == iUserID),
+                    ObjectivesFilter = x => x.ID == 0 || x.Project.Users.Any(u => u.UserID == iUserID),
                 };
 
                 var connection = connectionScopedFactory.Create(
