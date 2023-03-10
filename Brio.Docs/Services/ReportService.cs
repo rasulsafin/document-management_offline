@@ -169,6 +169,17 @@ namespace Brio.Docs.Services
         private async Task<List<ObjectiveDetails>> CreateObjectivesDetails(ReportDto reportDto, string projectDirectory)
         {
             var objectives = new List<ObjectiveDetails>();
+            var types = reportDto.ScreenshotTypes?.ToHashSet()
+                ?? new HashSet<ScreenshotType>
+                {
+                    ScreenshotType.AR,
+                    ScreenshotType.MR,
+                    ScreenshotType.Amr,
+                    ScreenshotType.RW,
+                    ScreenshotType.VR,
+                    ScreenshotType.Undefined,
+                };
+
             foreach (var objectiveId in reportDto.Objectives)
             {
                 var objective = await GetOrThrowAsync(objectiveId);
@@ -184,7 +195,11 @@ namespace Brio.Docs.Services
                     CreationTime = objective.CreationDate,
                     DueTime = objective.DueDate,
                     AttachedElements = CreateAttachedElementsDetails(objective).ToList(),
-                    AttachedImages = CreateAttachedImagesDetails(objective, projectDirectory).ToList(),
+                    AttachedImages = CreateAttachedImagesDetails(
+                            objective,
+                            projectDirectory,
+                            item => IsScreenshotNeededInReport(types, item))
+                        .ToList(),
                     Fields = await CreateDynamicFieldsLookup(objective),
                 };
 
@@ -208,12 +223,18 @@ namespace Brio.Docs.Services
             }
         }
 
-        private IEnumerable<AttachedImageDetails> CreateAttachedImagesDetails(Objective objective, string projectDirectory)
+        private IEnumerable<AttachedImageDetails> CreateAttachedImagesDetails(
+            Objective objective,
+            string projectDirectory,
+            Predicate<Item> predicate)
         {
             foreach (var item in objective.Items ?? Enumerable.Empty<ObjectiveItem>())
             {
                 var itemInfo = item.Item;
                 if (!ReportGenerator.IsSupportedImageExtension(itemInfo.RelativePath))
+                    continue;
+
+                if (!predicate(item.Item))
                     continue;
 
                 var itemPath = Path.Combine(projectDirectory, itemInfo.RelativePath.TrimStart('\\'));
@@ -252,6 +273,31 @@ namespace Brio.Docs.Services
             }
 
             return ret;
+        }
+
+        private bool IsScreenshotNeededInReport(IReadOnlySet<ScreenshotType> needed, Item item)
+        {
+            ScreenshotType GetScreenshotType()
+            {
+                var nameWithoutExtension = Path.GetFileNameWithoutExtension(item.RelativePath);
+                if (nameWithoutExtension == null)
+                    return ScreenshotType.Undefined;
+                if (nameWithoutExtension.EndsWith(".RW", StringComparison.OrdinalIgnoreCase))
+                    return ScreenshotType.RW;
+                if (nameWithoutExtension.EndsWith(".MR", StringComparison.OrdinalIgnoreCase))
+                    return ScreenshotType.MR;
+                if (nameWithoutExtension.EndsWith(".AR", StringComparison.OrdinalIgnoreCase))
+                    return ScreenshotType.AR;
+                if (nameWithoutExtension.EndsWith(".AMR", StringComparison.OrdinalIgnoreCase))
+                    return ScreenshotType.Amr;
+                if (nameWithoutExtension.EndsWith(".VR", StringComparison.OrdinalIgnoreCase))
+                    return ScreenshotType.VR;
+
+                return ScreenshotType.Undefined;
+            }
+
+            var type = GetScreenshotType();
+            return needed.Contains(type);
         }
 
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
