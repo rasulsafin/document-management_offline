@@ -46,6 +46,7 @@ russian.RemoveDB=Вы хотите удалить все проекты и за�
 
 [Run]
 Filename: "{commonappdata}{#DMProgramDataPath}Brio.Docs.Updater.exe"; Flags: runhidden
+Filename: "briolauncher://remove/{#DMAppName}/{code:GetPreviousVersion}"; Check: NeedRemoveFromBrioLauncher(); Flags: shellexec runascurrentuser nowait
 Filename: "briolauncher://register/{#DMAppName}/{#DMAppVersion}/{app}\{#DMAppExeName}?background=true"; Flags: shellexec runascurrentuser nowait
 Filename: "{app}\{#DMAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(DMAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 
@@ -54,7 +55,20 @@ Name: "{commonappdata}{#DMProgramDataPath}Logs"; Type: filesandordirs
 Name: "{commonappdata}{#DMProgramDataPath}"; Type: dirifempty
 Name: "{commonappdata}\{#MrsPublisher}"; Type: dirifempty
 
+[UninstallRun]
+Filename: "briolauncher://remove/{#DMAppName}/{#DMAppVersion}"; Flags: shellexec runascurrentuser nowait;
+
 [Code]
+var
+  hasInstalledVersion: Boolean;
+  installedVersion: String;
+
+function InitializeSetup(): Boolean;
+  begin
+    hasInstalledVersion:=RegQueryStringValue(HKLM, ExpandConstant('SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#SetupSetting("AppId")}_is1'), 'DisplayVersion', installedVersion);
+    Result:=True;
+  end;
+
 {https://stackoverflow.com/a/20181221}
 function FileReplaceString(const FileName, SearchString, ReplaceString: string):boolean;
 var
@@ -106,6 +120,19 @@ procedure CurStepChanged(CurStep: TSetupStep);
         FileReplaceString(jsonPath, 'Logs\\main.log', newPath);
       end;
     end;
+  end;
+
+function GetPreviousVersion(Param: string): String;
+  begin
+    Result := installedVersion;
+  end;
+
+function NeedRemoveFromBrioLauncher(): Boolean;
+  var
+    isVersionEmpty: Boolean;
+  begin
+    isVersionEmpty := installedVersion<>'';
+    Result := hasInstalledVersion AND isVersionEmpty;
   end;
 
 {https://stackoverflow.com/a/30815615}
