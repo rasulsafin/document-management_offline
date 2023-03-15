@@ -169,16 +169,7 @@ namespace Brio.Docs.Services
         private async Task<List<ObjectiveDetails>> CreateObjectivesDetails(ReportDto reportDto, string projectDirectory)
         {
             var objectives = new List<ObjectiveDetails>();
-            var types = reportDto.ScreenshotTypes?.ToHashSet()
-                ?? new HashSet<ScreenshotType>
-                {
-                    ScreenshotType.AR,
-                    ScreenshotType.MR,
-                    ScreenshotType.Amr,
-                    ScreenshotType.RW,
-                    ScreenshotType.VR,
-                    ScreenshotType.Undefined,
-                };
+            var screenshotTypes = reportDto.ScreenshotTypes?.Select(x => x?.TrimStart('.')).ToHashSet();
 
             foreach (var objectiveId in reportDto.Objectives)
             {
@@ -195,10 +186,8 @@ namespace Brio.Docs.Services
                     CreationTime = objective.CreationDate,
                     DueTime = objective.DueDate,
                     AttachedElements = CreateAttachedElementsDetails(objective).ToList(),
-                    AttachedImages = CreateAttachedImagesDetails(
-                            objective,
-                            projectDirectory,
-                            item => IsScreenshotNeededInReport(types, item))
+                    AttachedImages = CreateAttachedImagesDetails(objective, projectDirectory)
+                        .Where(x => IsScreenshotNeededInReport(screenshotTypes, x))
                         .ToList(),
                     Fields = await CreateDynamicFieldsLookup(objective),
                 };
@@ -223,18 +212,12 @@ namespace Brio.Docs.Services
             }
         }
 
-        private IEnumerable<AttachedImageDetails> CreateAttachedImagesDetails(
-            Objective objective,
-            string projectDirectory,
-            Predicate<Item> predicate)
+        private IEnumerable<AttachedImageDetails> CreateAttachedImagesDetails(Objective objective, string projectDirectory)
         {
             foreach (var item in objective.Items ?? Enumerable.Empty<ObjectiveItem>())
             {
                 var itemInfo = item.Item;
                 if (!ReportGenerator.IsSupportedImageExtension(itemInfo.RelativePath))
-                    continue;
-
-                if (!predicate(item.Item))
                     continue;
 
                 var itemPath = Path.Combine(projectDirectory, itemInfo.RelativePath.TrimStart('\\'));
@@ -275,29 +258,13 @@ namespace Brio.Docs.Services
             return ret;
         }
 
-        private bool IsScreenshotNeededInReport(IReadOnlySet<ScreenshotType> needed, Item item)
+        private bool IsScreenshotNeededInReport(IReadOnlySet<string> needed, AttachedImageDetails image)
         {
-            ScreenshotType GetScreenshotType()
-            {
-                var nameWithoutExtension = Path.GetFileNameWithoutExtension(item.RelativePath);
-                if (nameWithoutExtension == null)
-                    return ScreenshotType.Undefined;
-                if (nameWithoutExtension.EndsWith(".RW", StringComparison.OrdinalIgnoreCase))
-                    return ScreenshotType.RW;
-                if (nameWithoutExtension.EndsWith(".MR", StringComparison.OrdinalIgnoreCase))
-                    return ScreenshotType.MR;
-                if (nameWithoutExtension.EndsWith(".AR", StringComparison.OrdinalIgnoreCase))
-                    return ScreenshotType.AR;
-                if (nameWithoutExtension.EndsWith(".AMR", StringComparison.OrdinalIgnoreCase))
-                    return ScreenshotType.Amr;
-                if (nameWithoutExtension.EndsWith(".VR", StringComparison.OrdinalIgnoreCase))
-                    return ScreenshotType.VR;
+            if (needed == null)
+                return true; // All screenshots if there are no screenshot types in the DTO.
 
-                return ScreenshotType.Undefined;
-            }
-
-            var type = GetScreenshotType();
-            return needed.Contains(type);
+            return needed.Contains(image.Suffix, StringComparer.OrdinalIgnoreCase) ||
+                (image.IsUnknownMode && needed.Contains(null));
         }
 
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
