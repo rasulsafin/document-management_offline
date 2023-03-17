@@ -8,6 +8,8 @@ namespace Brio.Docs.Client.Dtos
         [Required(ErrorMessage = "ValidationError_ObjectivesIsRequired")]
         public IEnumerable<ID<ObjectiveDto>> Objectives { get; set; }
 
+        public IEnumerable<string> ScreenshotTypes { get; set; }
+
         public IDictionary<string, string> Fields { get; set; }
     }
 }

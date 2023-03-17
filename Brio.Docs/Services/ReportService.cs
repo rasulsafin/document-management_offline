@@ -169,6 +169,8 @@ namespace Brio.Docs.Services
         private async Task<List<ObjectiveDetails>> CreateObjectivesDetails(ReportDto reportDto, string projectDirectory)
         {
             var objectives = new List<ObjectiveDetails>();
+            var screenshotTypes = reportDto.ScreenshotTypes?.Select(x => x?.TrimStart('.')).ToHashSet();
+
             foreach (var objectiveId in reportDto.Objectives)
             {
                 var objective = await GetOrThrowAsync(objectiveId);
@@ -184,7 +186,9 @@ namespace Brio.Docs.Services
                     CreationTime = objective.CreationDate,
                     DueTime = objective.DueDate,
                     AttachedElements = CreateAttachedElementsDetails(objective).ToList(),
-                    AttachedImages = CreateAttachedImagesDetails(objective, projectDirectory).ToList(),
+                    AttachedImages = CreateAttachedImagesDetails(objective, projectDirectory)
+                        .Where(x => IsScreenshotNeededInReport(screenshotTypes, x))
+                        .ToList(),
                     Fields = await CreateDynamicFieldsLookup(objective),
                 };
 
@@ -252,6 +256,15 @@ namespace Brio.Docs.Services
             }
 
             return ret;
+        }
+
+        private bool IsScreenshotNeededInReport(IReadOnlySet<string> needed, AttachedImageDetails image)
+        {
+            if (needed == null)
+                return true; // All screenshots if there are no screenshot types in the DTO.
+
+            return needed.Contains(image.Suffix, StringComparer.OrdinalIgnoreCase) ||
+                (image.IsUnknownMode && needed.Contains(null));
         }
 
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
