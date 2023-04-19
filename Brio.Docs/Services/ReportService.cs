@@ -68,7 +68,8 @@ namespace Brio.Docs.Services
                 report.Objectives);
             try
             {
-                if (!reportGenerator.TryGetReportInfo(reportTypeId, out _))
+                var attempt = reportGenerator.TryGetReportInfo(reportTypeId, out ReportGenerator.ReportInfo info);
+                if (!attempt)
                     throw new ArgumentValidationException("Unknown report type ID");
 
                 if (report.Objectives == null)
@@ -77,7 +78,7 @@ namespace Brio.Docs.Services
                 var date = DateTime.Now;
                 var reportFilePath = await ExecuteAndIncrementReportCount(userID, date, async count =>
                 {
-                     return await GenerateReportCore(reportTypeId, report, date, count, projectDirectory);
+                     return await GenerateReportCore(reportTypeId, report, date, count, projectDirectory, info);
                 });
 
                 return new ObjectiveReportCreationResultDto()
@@ -129,7 +130,12 @@ namespace Brio.Docs.Services
             return result;
         }
 
-        private async Task<string> GenerateReportCore(string reportTypeId, ReportDto report, DateTime generationDate, int reportIndex, string projectDirectory)
+        private async Task<string> GenerateReportCore(string reportTypeId,
+            ReportDto report,
+            DateTime generationDate,
+            int reportIndex,
+            string projectDirectory,
+            ReportGenerator.ReportInfo info)
         {
             var reportID = $"{generationDate:yyyyMMdd}-{reportIndex}";
 
@@ -140,9 +146,9 @@ namespace Brio.Docs.Services
             var reportDir = Path.Combine(projectDirectory, "Reports");
             Directory.CreateDirectory(reportDir);
             var reportName = reportLocalizer["Report"];
-            var targetPath = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
+            var targetPath = Path.Combine(reportDir, $"{reportName} {reportID}{info.Extension}");
 
-            reportGenerator.Generate(reportTypeId, targetPath, vm);
+            reportGenerator.Generate(reportTypeId, targetPath, vm, info);
             logger.LogInformation("Report created ({Path})", targetPath);
             return targetPath;
         }

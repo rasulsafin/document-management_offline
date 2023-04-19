@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 using Brio.Docs.Reports.Models;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SharpDocx;
+using static Brio.Docs.Reports.ReportGenerator;
 
 namespace Brio.Docs.Reports
 {
+    public enum ReportType
+    {
+        Docx = 0,
+        Csv = 1,
+    }
+
     public class ReportGenerator
     {
         private static readonly string REPORTS_RES_FOLDER = @"ReportResources";
@@ -37,11 +47,44 @@ namespace Brio.Docs.Reports
         public bool TryGetReportInfo(string reportTypeId, out ReportInfo info)
             => reports.TryGetValue(reportTypeId, out info);
 
-        public void Generate(string reportTypeId, string outFilePath, ReportModel vm)
+        public void Generate(string reportTypeId, string outFilePath, ReportModel vm, ReportGenerator.ReportInfo reportInfo)
         {
             if (!reports.TryGetValue(reportTypeId, out var info))
                 throw new ArgumentException("Can not find report template by ID: {ID}", reportTypeId);
+            switch (reportInfo.ReportType)
+            {
+                case ReportType.Docx:
+                    CreateDocxReport(outFilePath, vm, info);
+                    break;
 
+                case ReportType.Csv:
+                    CreateCsvReport(vm, outFilePath);
+                    break;
+            }
+        }
+
+        private void CreateCsvReport(ReportModel vm, string outFilePath)
+        {
+            var csv = new StringBuilder();
+            csv.Append("ProjectName;ObjectName;GlobalId");
+            csv.AppendLine();
+            foreach (var objective in vm.Objectives)
+            {
+                if (!objective.AttachedElements.Any())
+                    continue;
+                csv.Append(
+                    new BimItemsTable(objective.AttachedElements)
+                    .CreateReport());
+            }
+
+            File.WriteAllText(outFilePath, csv.ToString());
+        }
+
+        private void CreateDocxReport(
+            string outFilePath,
+            ReportModel vm,
+            ReportInfo info)
+        {
             var templateFilePath = info.TemplateFilePath;
             File.Delete(outFilePath);
 
@@ -59,14 +102,17 @@ namespace Brio.Docs.Reports
             {
                 if (IsReportInfoValid(report))
                 {
-                    var templatePath = Path.Combine(reportResourcesFolder, report.TemplateFilePath);
-                    if (!File.Exists(templatePath))
+                    if (report.ReportType == ReportType.Docx)
                     {
-                        logger.LogWarning("Template file in report {ID} does not exist: {Path}", report.ID, templatePath);
-                        continue;
-                    }
+                        var templatePath = Path.Combine(reportResourcesFolder, report.TemplateFilePath);
+                        if (!File.Exists(templatePath))
+                        {
+                            logger.LogWarning("Template file in report {ID} does not exist: {Path}", report.ID, templatePath);
+                            continue;
+                        }
 
-                    report.TemplateFilePath = templatePath;
+                        report.TemplateFilePath = templatePath;
+                    }
 
                     reports.Add(report.ID, report);
                 }
@@ -110,7 +156,7 @@ namespace Brio.Docs.Reports
                 return false;
             }
 
-            if (string.IsNullOrEmpty(report.TemplateFilePath))
+            if (report.ReportType != ReportType.Csv && string.IsNullOrEmpty(report.TemplateFilePath))
             {
                 logger.LogWarning("Template file path is not specified for report type {ID}", report.ID);
                 return false;
@@ -134,7 +180,54 @@ namespace Brio.Docs.Reports
 
             public string TemplateFilePath { get; set; }
 
+            public ReportType ReportType { get; set; }
+
+            public string Extension { get; set; }
+
             public List<string> Fields { get; set; } = new List<string>();
+        }
+
+        public class BimItemsTable
+        {
+            private List<CsvReportRow> rows;
+
+            public BimItemsTable(IEnumerable<AttachedElementDetails> details)
+            {
+                rows = new List<CsvReportRow>();
+                foreach (var item in details)
+                {
+                    rows.Add(new CsvReportRow(item));
+                }
+            }
+
+            public List<CsvReportRow> ReportRows { get => rows; }
+
+            public string CreateReport()
+            {
+                var csv = new StringBuilder();
+                foreach (var item in ReportRows)
+                {
+                    csv.AppendLine($"{item.ProjectName}; {item.Name}; {item.Id}");
+                }
+
+                return csv.ToString();
+            }
+        }
+
+        public class CsvReportRow
+        {
+            public CsvReportRow(AttachedElementDetails details)
+            {
+                ProjectName = details.ProjectName;
+                Name = details.Name;
+                Id = details.GlobalID;
+            }
+
+            public string ProjectName { get; set; }
+
+            public string Name { get; set; }
+
+            public string Id { get; set; }
         }
     }
 }
