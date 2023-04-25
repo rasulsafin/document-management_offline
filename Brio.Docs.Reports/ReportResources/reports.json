@@ -10,7 +10,7 @@
           "Объект строительства"
         ],
         "TemplateFilePath": "MrsStandardTemplate.docx",
-        "ReportType": 0,
+        "ReportType": "report",
         "Extension": ".docx"
       },
       {
@@ -28,7 +28,7 @@
           "Предмет проверки"
         ],
         "TemplateFilePath": "InspectionActTemplate.docx",
-        "ReportType": 0,
+        "ReportType": "Report",
         "Extension": ".docx"
       },
       {
@@ -37,7 +37,7 @@
         "Description": "Таблица с id элементов, к которым прикреплены задачи",
         "Fields": [
         ],
-        "ReportType": 1,
+        "ReportType": "Table",
         "Extension": ".csv"
       }
     ]

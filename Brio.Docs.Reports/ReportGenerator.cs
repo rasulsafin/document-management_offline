@@ -15,8 +15,8 @@ namespace Brio.Docs.Reports
 {
     public enum ReportType
     {
-        Docx = 0,
-        Csv = 1,
+        Report = 0,
+        Table = 1,
     }
 
     public class ReportGenerator
@@ -53,11 +53,11 @@ namespace Brio.Docs.Reports
                 throw new ArgumentException("Can not find report template by ID: {ID}", reportTypeId);
             switch (reportInfo.ReportType)
             {
-                case ReportType.Docx:
+                case ReportType.Report:
                     CreateDocxReport(outFilePath, vm, info);
                     break;
 
-                case ReportType.Csv:
+                case ReportType.Table:
                     CreateCsvReport(vm, outFilePath);
                     break;
             }
@@ -102,7 +102,7 @@ namespace Brio.Docs.Reports
             {
                 if (IsReportInfoValid(report))
                 {
-                    if (report.ReportType == ReportType.Docx)
+                    if (report.ReportType == ReportType.Report)
                     {
                         var templatePath = Path.Combine(reportResourcesFolder, report.TemplateFilePath);
                         if (!File.Exists(templatePath))
@@ -156,7 +156,7 @@ namespace Brio.Docs.Reports
                 return false;
             }
 
-            if (report.ReportType != ReportType.Csv && string.IsNullOrEmpty(report.TemplateFilePath))
+            if (report.ReportType != ReportType.Table && string.IsNullOrEmpty(report.TemplateFilePath))
             {
                 logger.LogWarning("Template file path is not specified for report type {ID}", report.ID);
                 return false;
