@@ -129,7 +129,12 @@ namespace Brio.Docs.Services
             return result;
         }
 
-        private async Task<string> GenerateReportCore(string reportTypeId, ReportDto report, DateTime generationDate, int reportIndex, string projectDirectory)
+        private async Task<string> GenerateReportCore(
+            string reportTypeId,
+            ReportDto report,
+            DateTime generationDate,
+            int reportIndex,
+            string projectDirectory)
         {
             var reportID = $"{generationDate:yyyyMMdd}-{reportIndex}";
 
@@ -139,11 +144,11 @@ namespace Brio.Docs.Services
 
             var reportDir = Path.Combine(projectDirectory, "Reports");
             Directory.CreateDirectory(reportDir);
-            var reportName = reportLocalizer["Report"];
-            var targetPath = Path.Combine(reportDir, $"{reportName} {reportID}.docx");
+            var reportName = $"{reportLocalizer["Report"]} {reportID}";
 
-            reportGenerator.Generate(reportTypeId, targetPath, vm);
+            var targetPath = reportGenerator.Generate(reportTypeId, reportDir, reportName, vm);
             logger.LogInformation("Report created ({Path})", targetPath);
+
             return targetPath;
         }
 

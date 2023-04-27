@@ -1,14 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Brio.Docs.Reports.Models;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SharpDocx;
 
 namespace Brio.Docs.Reports
 {
+    public enum ReportType
+    {
+        Report = 0,
+        Table = 1,
+    }
+
     public class ReportGenerator
     {
         private static readonly string REPORTS_RES_FOLDER = @"ReportResources";
@@ -37,11 +47,56 @@ namespace Brio.Docs.Reports
         public bool TryGetReportInfo(string reportTypeId, out ReportInfo info)
             => reports.TryGetValue(reportTypeId, out info);
 
-        public void Generate(string reportTypeId, string outFilePath, ReportModel vm)
+        public string Generate(string reportTypeId, string outFolder, string reportName, ReportModel vm)
         {
-            if (!reports.TryGetValue(reportTypeId, out var info))
+            if (!reports.TryGetValue(reportTypeId, out var reportInfo))
                 throw new ArgumentException("Can not find report template by ID: {ID}", reportTypeId);
 
+            string filePath;
+
+            switch (reportInfo.ReportType)
+            {
+                case ReportType.Report:
+                    filePath = Path.Combine(outFolder, $"{reportName}.docx");
+                    CreateDocxReport(filePath, vm, reportInfo);
+                    break;
+
+                case ReportType.Table:
+                    filePath = Path.Combine(outFolder, $"{reportName}.csv");
+                    CreateCsvReport(filePath, vm);
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unable to create report of type {reportInfo.ReportType}");
+            }
+
+            return filePath;
+        }
+
+        private void CreateCsvReport(string outFilePath, ReportModel vm)
+        {
+            var attachedElements = vm.Objectives.SelectMany(x => x.AttachedElements).ToList();
+
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ";",
+            };
+
+            using (var writer = new StreamWriter(outFilePath))
+            using (var csv = new CsvWriter(writer, configuration))
+            {
+                csv.Context.RegisterClassMap<CsvRow>();
+                csv.WriteHeader<AttachedElementDetails>();
+                csv.NextRecord();
+                csv.WriteRecords(attachedElements);
+            }
+        }
+
+        private void CreateDocxReport(
+            string outFilePath,
+            ReportModel vm,
+            ReportInfo info)
+        {
             var templateFilePath = info.TemplateFilePath;
             File.Delete(outFilePath);
 
@@ -59,14 +114,17 @@ namespace Brio.Docs.Reports
             {
                 if (IsReportInfoValid(report))
                 {
-                    var templatePath = Path.Combine(reportResourcesFolder, report.TemplateFilePath);
-                    if (!File.Exists(templatePath))
+                    if (report.ReportType == ReportType.Report)
                     {
-                        logger.LogWarning("Template file in report {ID} does not exist: {Path}", report.ID, templatePath);
-                        continue;
-                    }
+                        var templatePath = Path.Combine(reportResourcesFolder, report.TemplateFilePath);
+                        if (!File.Exists(templatePath))
+                        {
+                            logger.LogWarning("Template file in report {ID} does not exist: {Path}", report.ID, templatePath);
+                            continue;
+                        }
 
-                    report.TemplateFilePath = templatePath;
+                        report.TemplateFilePath = templatePath;
+                    }
 
                     reports.Add(report.ID, report);
                 }
@@ -110,7 +168,7 @@ namespace Brio.Docs.Reports
                 return false;
             }
 
-            if (string.IsNullOrEmpty(report.TemplateFilePath))
+            if (report.ReportType != ReportType.Table && string.IsNullOrEmpty(report.TemplateFilePath))
             {
                 logger.LogWarning("Template file path is not specified for report type {ID}", report.ID);
                 return false;
@@ -134,7 +192,19 @@ namespace Brio.Docs.Reports
 
             public string TemplateFilePath { get; set; }
 
+            public ReportType ReportType { get; set; }
+
             public List<string> Fields { get; set; } = new List<string>();
+        }
+
+        public class CsvRow : ClassMap<AttachedElementDetails>
+        {
+            public CsvRow()
+            {
+                Map(m => m.ProjectName).Index(0).Name("Project name");
+                Map(m => m.Name).Index(1).Name("Name");
+                Map(m => m.GlobalID).Index(2).Name("Id");
+            }
         }
     }
 }
