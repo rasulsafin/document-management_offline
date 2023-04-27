@@ -11,7 +11,6 @@
         ],
         "TemplateFilePath": "MrsStandardTemplate.docx",
         "ReportType": "report",
-        "Extension": ".docx"
       },
       {
         "ID": "771abbbbde9448d3bb31257a63f946aa",
@@ -29,7 +28,6 @@
         ],
         "TemplateFilePath": "InspectionActTemplate.docx",
         "ReportType": "Report",
-        "Extension": ".docx"
       },
       {
         "ID": "171abb7bde9445d3bu31257a63f946aa",
@@ -38,7 +36,6 @@
         "Fields": [
         ],
         "ReportType": "Table",
-        "Extension": ".csv"
       }
     ]
 }

@@ -1,15 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Brio.Docs.Reports.Models;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using CsvHelper;
+using CsvHelper.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SharpDocx;
-using static Brio.Docs.Reports.ReportGenerator;
 
 namespace Brio.Docs.Reports
 {
@@ -47,37 +47,55 @@ namespace Brio.Docs.Reports
         public bool TryGetReportInfo(string reportTypeId, out ReportInfo info)
             => reports.TryGetValue(reportTypeId, out info);
 
-        public void Generate(string reportTypeId, string outFilePath, ReportModel vm, ReportGenerator.ReportInfo reportInfo)
+        public string Generate(string outFolder, string reportName, ReportModel vm, ReportGenerator.ReportInfo reportInfo)
         {
-            if (!reports.TryGetValue(reportTypeId, out var info))
-                throw new ArgumentException("Can not find report template by ID: {ID}", reportTypeId);
+            var fileNameNoExtension = Path.Combine(outFolder, $"{reportName}");
+            string fileName = default;
             switch (reportInfo.ReportType)
             {
                 case ReportType.Report:
-                    CreateDocxReport(outFilePath, vm, info);
+                    fileName = $"{fileNameNoExtension}.docx";
+                    CreateDocxReport(fileName, vm, reportInfo);
                     break;
 
                 case ReportType.Table:
-                    CreateCsvReport(vm, outFilePath);
+                    fileName = $"{fileNameNoExtension}.csv";
+                    CreateCsvReport(vm, fileName);
                     break;
             }
+
+            return fileName;
         }
 
         private void CreateCsvReport(ReportModel vm, string outFilePath)
         {
-            var csv = new StringBuilder();
-            csv.Append("ProjectName;ObjectName;GlobalId");
-            csv.AppendLine();
+            List<AttachedElementDetails> attachedElements = new List<AttachedElementDetails>();
             foreach (var objective in vm.Objectives)
             {
                 if (!objective.AttachedElements.Any())
                     continue;
-                csv.Append(
-                    new BimItemsTable(objective.AttachedElements)
-                    .CreateReport());
+                attachedElements.AddRange(objective.AttachedElements);
             }
 
-            File.WriteAllText(outFilePath, csv.ToString());
+            var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                Delimiter = ";",
+            };
+
+            using (var writer = new StreamWriter(outFilePath))
+            using (var csv = new CsvWriter(writer, configuration))
+            {
+                csv.Context.RegisterClassMap<CsvRow>();
+                csv.WriteHeader<AttachedElementDetails>();
+                csv.NextRecord();
+                foreach (var record in attachedElements)
+                {
+                    csv.WriteRecord(record);
+                    csv.NextRecord();
+                }
+
+                csv.WriteRecords(attachedElements);
+            }
         }
 
         private void CreateDocxReport(
@@ -182,52 +200,17 @@ namespace Brio.Docs.Reports
 
             public ReportType ReportType { get; set; }
 
-            public string Extension { get; set; }
-
             public List<string> Fields { get; set; } = new List<string>();
         }
 
-        public class BimItemsTable
+        public class CsvRow : ClassMap<AttachedElementDetails>
         {
-            private List<CsvReportRow> rows;
-
-            public BimItemsTable(IEnumerable<AttachedElementDetails> details)
+            public CsvRow()
             {
-                rows = new List<CsvReportRow>();
-                foreach (var item in details)
-                {
-                    rows.Add(new CsvReportRow(item));
-                }
+                Map(m => m.ProjectName).Index(0).Name("Project name");
+                Map(m => m.Name).Index(1).Name("Name");
+                Map(m => m.GlobalID).Index(2).Name("Id");
             }
-
-            public List<CsvReportRow> ReportRows { get => rows; }
-
-            public string CreateReport()
-            {
-                var csv = new StringBuilder();
-                foreach (var item in ReportRows)
-                {
-                    csv.AppendLine($"{item.ProjectName}; {item.Name}; {item.Id}");
-                }
-
-                return csv.ToString();
-            }
-        }
-
-        public class CsvReportRow
-        {
-            public CsvReportRow(AttachedElementDetails details)
-            {
-                ProjectName = details.ProjectName;
-                Name = details.Name;
-                Id = details.GlobalID;
-            }
-
-            public string ProjectName { get; set; }
-
-            public string Name { get; set; }
-
-            public string Id { get; set; }
         }
     }
 }

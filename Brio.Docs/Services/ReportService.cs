@@ -145,10 +145,10 @@ namespace Brio.Docs.Services
 
             var reportDir = Path.Combine(projectDirectory, "Reports");
             Directory.CreateDirectory(reportDir);
-            var reportName = reportLocalizer["Report"];
-            var targetPath = Path.Combine(reportDir, $"{reportName} {reportID}{info.Extension}");
+            var reportName = $"{reportLocalizer["Report"]} {reportID}";
 
-            reportGenerator.Generate(reportTypeId, targetPath, vm, info);
+            var name = reportGenerator.Generate(reportDir, reportName, vm, info);
+            var targetPath = Path.Combine(reportDir, name);
             logger.LogInformation("Report created ({Path})", targetPath);
             return targetPath;
         }
