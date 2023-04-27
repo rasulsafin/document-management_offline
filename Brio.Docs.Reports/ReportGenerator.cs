@@ -47,35 +47,35 @@ namespace Brio.Docs.Reports
         public bool TryGetReportInfo(string reportTypeId, out ReportInfo info)
             => reports.TryGetValue(reportTypeId, out info);
 
-        public string Generate(string outFolder, string reportName, ReportModel vm, ReportGenerator.ReportInfo reportInfo)
+        public string Generate(string reportTypeId, string outFolder, string reportName, ReportModel vm)
         {
-            var fileNameNoExtension = Path.Combine(outFolder, $"{reportName}");
-            string fileName = default;
+            if (!reports.TryGetValue(reportTypeId, out var reportInfo))
+                throw new ArgumentException("Can not find report template by ID: {ID}", reportTypeId);
+
+            string filePath;
+
             switch (reportInfo.ReportType)
             {
                 case ReportType.Report:
-                    fileName = $"{fileNameNoExtension}.docx";
-                    CreateDocxReport(fileName, vm, reportInfo);
+                    filePath = Path.Combine(outFolder, $"{reportName}.docx");
+                    CreateDocxReport(filePath, vm, reportInfo);
                     break;
 
                 case ReportType.Table:
-                    fileName = $"{fileNameNoExtension}.csv";
-                    CreateCsvReport(vm, fileName);
+                    filePath = Path.Combine(outFolder, $"{reportName}.csv");
+                    CreateCsvReport(filePath, vm);
                     break;
+
+                default:
+                    throw new InvalidOperationException($"Unable to create report of type {reportInfo.ReportType}");
             }
 
-            return fileName;
+            return filePath;
         }
 
-        private void CreateCsvReport(ReportModel vm, string outFilePath)
+        private void CreateCsvReport(string outFilePath, ReportModel vm)
         {
-            List<AttachedElementDetails> attachedElements = new List<AttachedElementDetails>();
-            foreach (var objective in vm.Objectives)
-            {
-                if (!objective.AttachedElements.Any())
-                    continue;
-                attachedElements.AddRange(objective.AttachedElements);
-            }
+            var attachedElements = vm.Objectives.SelectMany(x => x.AttachedElements).ToList();
 
             var configuration = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
@@ -88,12 +88,6 @@ namespace Brio.Docs.Reports
                 csv.Context.RegisterClassMap<CsvRow>();
                 csv.WriteHeader<AttachedElementDetails>();
                 csv.NextRecord();
-                foreach (var record in attachedElements)
-                {
-                    csv.WriteRecord(record);
-                    csv.NextRecord();
-                }
-
                 csv.WriteRecords(attachedElements);
             }
         }

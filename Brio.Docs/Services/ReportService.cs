@@ -68,8 +68,7 @@ namespace Brio.Docs.Services
                 report.Objectives);
             try
             {
-                var attempt = reportGenerator.TryGetReportInfo(reportTypeId, out ReportGenerator.ReportInfo info);
-                if (!attempt)
+                if (!reportGenerator.TryGetReportInfo(reportTypeId, out _))
                     throw new ArgumentValidationException("Unknown report type ID");
 
                 if (report.Objectives == null)
@@ -78,7 +77,7 @@ namespace Brio.Docs.Services
                 var date = DateTime.Now;
                 var reportFilePath = await ExecuteAndIncrementReportCount(userID, date, async count =>
                 {
-                     return await GenerateReportCore(reportTypeId, report, date, count, projectDirectory, info);
+                     return await GenerateReportCore(reportTypeId, report, date, count, projectDirectory);
                 });
 
                 return new ObjectiveReportCreationResultDto()
@@ -130,12 +129,12 @@ namespace Brio.Docs.Services
             return result;
         }
 
-        private async Task<string> GenerateReportCore(string reportTypeId,
+        private async Task<string> GenerateReportCore(
+            string reportTypeId,
             ReportDto report,
             DateTime generationDate,
             int reportIndex,
-            string projectDirectory,
-            ReportGenerator.ReportInfo info)
+            string projectDirectory)
         {
             var reportID = $"{generationDate:yyyyMMdd}-{reportIndex}";
 
@@ -147,9 +146,9 @@ namespace Brio.Docs.Services
             Directory.CreateDirectory(reportDir);
             var reportName = $"{reportLocalizer["Report"]} {reportID}";
 
-            var name = reportGenerator.Generate(reportDir, reportName, vm, info);
-            var targetPath = Path.Combine(reportDir, name);
+            var targetPath = reportGenerator.Generate(reportTypeId, reportDir, reportName, vm);
             logger.LogInformation("Report created ({Path})", targetPath);
+
             return targetPath;
         }
 
