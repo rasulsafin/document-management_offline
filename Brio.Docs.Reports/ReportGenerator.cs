@@ -7,6 +7,8 @@ using System.Reflection;
 using Brio.Docs.Reports.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SharpDocx;
@@ -23,6 +25,7 @@ namespace Brio.Docs.Reports
     {
         private static readonly string REPORTS_RES_FOLDER = @"ReportResources";
         private static readonly string REPORTS_MANIFEST = @"reports.json";
+        private static readonly int START_HEADERS_BOOKMARK_ID = 1000000;
 
         private readonly Dictionary<string, ReportInfo> reports = new Dictionary<string, ReportInfo>();
         private readonly string reportResourcesFolder;
@@ -102,6 +105,92 @@ namespace Brio.Docs.Reports
 
             var doc = DocumentFactory.Create(templateFilePath, vm);
             doc.Generate(outFilePath);
+
+            MakeTOC(outFilePath);
+        }
+
+        private void MakeTOC(string path)
+        {
+            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
+            {
+                var body = wordDoc.MainDocumentPart.Document.Body;
+
+                var headers = body.
+                    Descendants<ParagraphProperties>().
+                    ToList().
+                    Where(x => x.ParagraphStyleId != null).
+                    Where(x => x.ParagraphStyleId.Val == "para1").
+                    ToList();
+
+                var firstElementTOC = body.
+                    ChildElements.Where(x => x.InnerText.Contains("TOC \\o")).
+                    First();
+                foreach (var hyperlink in firstElementTOC.Descendants<Hyperlink>())
+                {
+                    hyperlink.Remove();
+                }
+
+                var lastChild = firstElementTOC;
+                var bookmarkId = START_HEADERS_BOOKMARK_ID;
+
+                for (int i = 0; i < headers.Count; i++)
+                {
+                    var header = headers[i];
+
+                    var bookmarksStart = headers[i].Parent.Descendants<BookmarkStart>().ToList();
+                    var bookmarksEnd = headers[i].Parent.Descendants<BookmarkEnd>().ToList();
+
+                    for (int j = 0; j < bookmarksStart.Count; j++)
+                    {
+                        bookmarkId++;
+                        bookmarksStart[j].Id = $"{bookmarkId}";
+                        bookmarksEnd[j].Id = $"{bookmarkId}";
+                        bookmarksStart[j].Name = $"_TOC{bookmarkId}";
+                    }
+
+                    if (i == 0)
+                    {
+                        Hyperlink hyperlink = new Hyperlink()
+                        {
+                            Anchor = bookmarksStart.First().Name,
+                            History = new DocumentFormat.OpenXml.OnOffValue(true),
+                            InnerXml = $@"
+                                <w:r>
+                                    <w:t>{header.Parent.InnerText}</w:t>
+                                    <w:tab/>
+                                    <w:t>3</w:t>
+                                </w:r>",
+                        };
+
+                        lastChild.InsertAt(hyperlink, lastChild.ChildElements.Count - 1);
+                        continue;
+                    }
+
+                    var paragraph = new Paragraph()
+                    {
+                        InnerXml = $@"
+                        <w:pPr>
+                            <w:pStyle w:val=""para19""/>
+                            <w:tabs defTabSz=""708"">
+                                <w:tab w:val=""right"" w:pos=""9355"" w:leader=""dot""/>
+                            </w:tabs>
+                        </w:pPr>
+                        <w:hyperlink w:anchor=""{bookmarksStart.First().Name}"" w:history=""1"">
+                            <w:r>
+                                <w:t>{header.Parent.InnerText}</w:t>
+                                <w:tab/>
+                                <w:t>3</w:t>
+                            </w:r>
+                        </w:hyperlink>",
+                    };
+
+                    body.InsertAfter(paragraph, lastChild);
+
+                    lastChild = paragraph;
+                }
+
+                wordDoc.Save();
+            }
         }
 
         private void LoadReportsManifest(string path)
