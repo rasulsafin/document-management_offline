@@ -106,10 +106,17 @@ namespace Brio.Docs.Reports
             var doc = DocumentFactory.Create(templateFilePath, vm);
             doc.Generate(outFilePath);
 
-            MakeTOC(outFilePath);
+            try
+            {
+                MakeToc(outFilePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"TOC can't be created:\n{ex}");
+            }
         }
 
-        private void MakeTOC(string path)
+        private void MakeToc(string path)
         {
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
             {
@@ -119,8 +126,7 @@ namespace Brio.Docs.Reports
                     Descendants<ParagraphProperties>().
                     ToList().
                     Where(x => x.ParagraphStyleId != null).
-                    Where(x => x.ParagraphStyleId.Val == "para1").
-                    ToList();
+                    Where(x => x.ParagraphStyleId.Val == "para1");
 
                 var firstElementTOC = body.
                     ChildElements.Where(x => x.InnerText.Contains("TOC \\o")).
@@ -132,13 +138,12 @@ namespace Brio.Docs.Reports
 
                 var lastChild = firstElementTOC;
                 var bookmarkId = START_HEADERS_BOOKMARK_ID;
+                var isFirstHyperlinkChanged = false;
 
-                for (int i = 0; i < headers.Count; i++)
+                foreach (var header in headers)
                 {
-                    var header = headers[i];
-
-                    var bookmarksStart = headers[i].Parent.Descendants<BookmarkStart>().ToList();
-                    var bookmarksEnd = headers[i].Parent.Descendants<BookmarkEnd>().ToList();
+                    var bookmarksStart = header.Parent.Descendants<BookmarkStart>().ToList();
+                    var bookmarksEnd = header.Parent.Descendants<BookmarkEnd>().ToList();
 
                     for (int j = 0; j < bookmarksStart.Count; j++)
                     {
@@ -148,7 +153,7 @@ namespace Brio.Docs.Reports
                         bookmarksStart[j].Name = $"_TOC{bookmarkId}";
                     }
 
-                    if (i == 0)
+                    if (isFirstHyperlinkChanged)
                     {
                         Hyperlink hyperlink = new Hyperlink()
                         {
@@ -163,6 +168,7 @@ namespace Brio.Docs.Reports
                         };
 
                         lastChild.InsertAt(hyperlink, lastChild.ChildElements.Count - 1);
+                        isFirstHyperlinkChanged = true;
                         continue;
                     }
 
