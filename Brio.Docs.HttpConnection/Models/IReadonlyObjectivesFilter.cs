@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Brio.Docs.Client;
+using Brio.Docs.Client.Filters;
 
 namespace Brio.Docs.HttpConnection.Models
 {
@@ -63,5 +64,10 @@ namespace Brio.Docs.HttpConnection.Models
         /// Lower limit of objective's due date.
         /// </summary>
         DateTime? FinishedAfter { get; }
+
+        /// <summary>
+        /// Collection of required dynamic fields id with values.
+        /// </summary>
+        IReadOnlyList<ObjectiveFilterParameters.DynamicFieldFilterValue> DynamicFieldValues { get; }
     }
 }

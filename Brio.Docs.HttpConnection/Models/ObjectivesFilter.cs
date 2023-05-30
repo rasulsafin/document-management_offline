@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Brio.Docs.Client;
+using Brio.Docs.Client.Filters;
 
 namespace Brio.Docs.HttpConnection.Models
 {
@@ -29,9 +30,15 @@ namespace Brio.Docs.HttpConnection.Models
 
         public DateTime? FinishedAfter { get; set; }
 
+        public List<ObjectiveFilterParameters.DynamicFieldFilterValue> DynamicFieldValues { get; set; } =
+            new List<ObjectiveFilterParameters.DynamicFieldFilterValue>();
+
         IReadOnlyList<ID<ObjectiveType>> IReadonlyObjectivesFilter.TypeIds => TypeIds;
 
         IReadOnlyList<int> IReadonlyObjectivesFilter.Statuses => Statuses;
+
+        IReadOnlyList<ObjectiveFilterParameters.DynamicFieldFilterValue> IReadonlyObjectivesFilter.DynamicFieldValues =>
+            DynamicFieldValues;
 
         public void CopyValuesFrom(IReadonlyObjectivesFilter other)
         {
@@ -46,6 +53,7 @@ namespace Brio.Docs.HttpConnection.Models
             UpdatedBefore = other.UpdatedBefore;
             FinishedAfter = other.FinishedAfter;
             FinishedBefore = other.FinishedBefore;
+            DynamicFieldValues = other.DynamicFieldValues?.ToList();
         }
 
         public void RestoreDefaultValues() => CopyValuesFrom(new ObjectivesFilter());

@@ -153,6 +153,7 @@ namespace Brio.Docs.Services
                 var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
+                                    .Include(x => x.DynamicFields)
                                     .Where(x => x.ProjectID == dbProject.ID);
 
                 allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
@@ -425,6 +426,17 @@ namespace Brio.Docs.Services
                     await GetAllObjectiveIds(obj, childrenIds);
 
                 filterdObjectives = filterdObjectives.Where(x => !childrenIds.Contains(x.ID));
+            }
+
+            if (filter.DynamicFieldValues != null && filter.DynamicFieldValues.Count > 0)
+            {
+                filterdObjectives =
+                    filter.DynamicFieldValues
+                    .Aggregate(
+                        filterdObjectives,
+                        (objectives, dynamicField) =>
+                            objectives.Where(x =>
+                                x.DynamicFields.FirstOrDefault(df => df.ExternalID == dynamicField.Id && df.Value == dynamicField.Value) != null));
             }
 
             return filterdObjectives;

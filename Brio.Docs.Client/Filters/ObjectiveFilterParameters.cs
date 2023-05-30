@@ -26,5 +26,14 @@ namespace Brio.Docs.Client.Filters
         public DateTime? FinishedBefore { get; set; }
 
         public DateTime? FinishedAfter { get; set; }
+
+        public List<DynamicFieldFilterValue> DynamicFieldValues { get; set; }
+
+        public class DynamicFieldFilterValue
+        {
+            public string Id { get; set; }
+
+            public string Value { get; set; }
+        }
     }
 }
