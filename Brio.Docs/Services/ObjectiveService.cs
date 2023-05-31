@@ -436,7 +436,7 @@ namespace Brio.Docs.Services
                         filterdObjectives,
                         (objectives, dynamicField) =>
                             objectives.Where(x =>
-                                x.DynamicFields.FirstOrDefault(df => df.ExternalID == dynamicField.Id && df.Value == dynamicField.Value) != null));
+                                x.DynamicFields.FirstOrDefault(df => df.ExternalID == dynamicField.Key && df.Value == dynamicField.Value) != null));
             }
 
             return filterdObjectives;
