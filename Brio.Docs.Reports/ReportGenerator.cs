@@ -141,7 +141,8 @@ namespace Brio.Docs.Reports
                             var isHeading1 = paragraph.
                                 Element("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}name").
                                 Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val").
-                                Value == "Heading 1";
+                                Value.
+                                ToLower() == "heading 1";
 
                             if (isHeading1)
                             {
