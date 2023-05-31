@@ -4,6 +4,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml.Linq;
+using System.Xml;
 using Brio.Docs.Reports.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
@@ -120,12 +122,41 @@ namespace Brio.Docs.Reports
             using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
             {
                 var body = wordDoc.MainDocumentPart.Document.Body;
+                string headingStyleId = string.Empty;
+
+                var stylePart = wordDoc.MainDocumentPart.StyleDefinitionsPart;
+                if (stylePart != null)
+                {
+                    using (var reader = XmlReader.Create(stylePart.GetStream(FileMode.Open, FileAccess.Read)))
+                    {
+                        var document = XDocument.Load(reader);
+                        var styles = document.Elements();
+                        var paragraphs = document.
+                            Root.
+                            Elements("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}style").
+                            Where(x => x.Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type").Value == "paragraph");
+
+                        foreach (var paragraph in paragraphs)
+                        {
+                            var isHeading1 = paragraph.
+                                Element("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}name").
+                                Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val").
+                                Value == "Heading 1";
+
+                            if (isHeading1)
+                            {
+                                headingStyleId = paragraph.Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}styleId").Value;
+                                break;
+                            }
+                        }
+                    }
+                }
 
                 var headers = body.
                     Descendants<ParagraphProperties>().
                     ToList().
                     Where(x => x.ParagraphStyleId != null).
-                    Where(x => x.ParagraphStyleId.Val == "para1");
+                    Where(x => x.ParagraphStyleId.Val == headingStyleId);
 
                 var toc = body.
                     ChildElements.Where(x => x.InnerText.Contains("TOC \\o")).
@@ -147,10 +178,10 @@ namespace Brio.Docs.Reports
                     var bookmarksStart = header.Parent.Descendants<BookmarkStart>().First();
                     var bookmarksEnd = header.Parent.Descendants<BookmarkEnd>().First();
 
-                    bookmarkId++;
                     bookmarksStart.Id = $"{bookmarkId}";
                     bookmarksEnd.Id = $"{bookmarkId}";
                     bookmarksStart.Name = $"_TOC{bookmarkId}";
+                    bookmarkId++;
 
                     var paragraph = new Paragraph()
                     {
