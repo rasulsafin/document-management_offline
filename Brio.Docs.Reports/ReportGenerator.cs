@@ -25,7 +25,6 @@ namespace Brio.Docs.Reports
     {
         private static readonly string REPORTS_RES_FOLDER = @"ReportResources";
         private static readonly string REPORTS_MANIFEST = @"reports.json";
-        private static readonly int START_HEADERS_BOOKMARK_ID = 1000000;
 
         private readonly Dictionary<string, ReportInfo> reports = new Dictionary<string, ReportInfo>();
         private readonly string reportResourcesFolder;
@@ -128,49 +127,30 @@ namespace Brio.Docs.Reports
                     Where(x => x.ParagraphStyleId != null).
                     Where(x => x.ParagraphStyleId.Val == "para1");
 
-                var firstElementTOC = body.
+                var toc = body.
                     ChildElements.Where(x => x.InnerText.Contains("TOC \\o")).
-                    First();
-                foreach (var hyperlink in firstElementTOC.Descendants<Hyperlink>())
+                    FirstOrDefault();
+
+                if (toc == null)
+                    return;
+
+                foreach (var hyperlink in toc.Descendants<Hyperlink>())
                 {
                     hyperlink.Remove();
                 }
 
-                var lastChild = firstElementTOC;
-                var bookmarkId = START_HEADERS_BOOKMARK_ID;
-                var isFirstHyperlinkChanged = false;
+                var lastChild = toc;
+                var bookmarkId = 1;
 
                 foreach (var header in headers)
                 {
-                    var bookmarksStart = header.Parent.Descendants<BookmarkStart>().ToList();
-                    var bookmarksEnd = header.Parent.Descendants<BookmarkEnd>().ToList();
+                    var bookmarksStart = header.Parent.Descendants<BookmarkStart>().First();
+                    var bookmarksEnd = header.Parent.Descendants<BookmarkEnd>().First();
 
-                    for (int j = 0; j < bookmarksStart.Count; j++)
-                    {
-                        bookmarkId++;
-                        bookmarksStart[j].Id = $"{bookmarkId}";
-                        bookmarksEnd[j].Id = $"{bookmarkId}";
-                        bookmarksStart[j].Name = $"_TOC{bookmarkId}";
-                    }
-
-                    if (isFirstHyperlinkChanged)
-                    {
-                        Hyperlink hyperlink = new Hyperlink()
-                        {
-                            Anchor = bookmarksStart.First().Name,
-                            History = new DocumentFormat.OpenXml.OnOffValue(true),
-                            InnerXml = $@"
-                                <w:r>
-                                    <w:t>{header.Parent.InnerText}</w:t>
-                                    <w:tab/>
-                                    <w:t>3</w:t>
-                                </w:r>",
-                        };
-
-                        lastChild.InsertAt(hyperlink, lastChild.ChildElements.Count - 1);
-                        isFirstHyperlinkChanged = true;
-                        continue;
-                    }
+                    bookmarkId++;
+                    bookmarksStart.Id = $"{bookmarkId}";
+                    bookmarksEnd.Id = $"{bookmarkId}";
+                    bookmarksStart.Name = $"_TOC{bookmarkId}";
 
                     var paragraph = new Paragraph()
                     {
@@ -181,11 +161,11 @@ namespace Brio.Docs.Reports
                                 <w:tab w:val=""right"" w:pos=""9355"" w:leader=""dot""/>
                             </w:tabs>
                         </w:pPr>
-                        <w:hyperlink w:anchor=""{bookmarksStart.First().Name}"" w:history=""1"">
+                        <w:hyperlink w:anchor=""{bookmarksStart.Name}"" w:history=""1"">
                             <w:r>
                                 <w:t>{header.Parent.InnerText}</w:t>
                                 <w:tab/>
-                                <w:t>3</w:t>
+                                <w:t>?</w:t>
                             </w:r>
                         </w:hyperlink>",
                     };
