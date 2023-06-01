@@ -30,6 +30,8 @@ namespace Brio.Docs.HttpConnection.Models
 
         public DateTime? FinishedAfter { get; set; }
 
+        public string BimElementParent { get; set; }
+
         public List<ObjectiveFilterParameters.DynamicFieldFilterValue> DynamicFieldValues { get; set; } =
             new List<ObjectiveFilterParameters.DynamicFieldFilterValue>();
 

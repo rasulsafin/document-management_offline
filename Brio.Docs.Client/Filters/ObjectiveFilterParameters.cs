@@ -29,6 +29,8 @@ namespace Brio.Docs.Client.Filters
 
         public List<DynamicFieldFilterValue> DynamicFieldValues { get; set; }
 
+        public string BimElementParent { get; set; }
+
         public class DynamicFieldFilterValue
         {
             public string Key { get; set; }

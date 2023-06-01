@@ -69,5 +69,10 @@ namespace Brio.Docs.HttpConnection.Models
         /// Collection of required dynamic fields id with values.
         /// </summary>
         IReadOnlyList<ObjectiveFilterParameters.DynamicFieldFilterValue> DynamicFieldValues { get; }
+
+        /// <summary>
+        /// Get objectives where bim elements with this ParentName.
+        /// </summary>
+        string BimElementParent { get; }
     }
 }

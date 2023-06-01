@@ -344,6 +344,44 @@ namespace Brio.Docs.Services
             }
         }
 
+        public async Task<IEnumerable<ObjectiveBimParentDto>> GetParentsOfObjectivesBimElements(ID<ProjectDto> projectID)
+        {
+            using var lScope = logger.BeginMethodScope();
+            logger.LogTrace("Get parents of bim elements in all objectives by projectID: {@ProjectID}", projectID);
+            try
+            {
+                var dbProject = await context.Projects.Unsynchronized()
+                    .FindOrThrowAsync(x => x.ID, (int)projectID);
+                logger.LogDebug("Found project: {@DBProject}", dbProject);
+
+                var allObjectives = context.Objectives
+                    .AsNoTracking()
+                    .Unsynchronized()
+                    .Include(x => x.BimElements)
+                        .ThenInclude(x => x.BimElement)
+                    .Where(x => x.ProjectID == dbProject.ID);
+
+                HashSet<string> bimParents = new ();
+
+                foreach (Objective objective in allObjectives)
+                {
+                    foreach (BimElementObjective bimElement in objective.BimElements)
+                    {
+                        bimParents.Add(bimElement.BimElement.ParentName);
+                    }
+                }
+
+                return bimParents.Select(x => new ObjectiveBimParentDto() { ParentName = x }).ToList();
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Can't find objectives by project key {ProjectID}", projectID);
+                if (ex is ANotFoundException)
+                    throw;
+                throw new DocumentManagementException(ex.Message, ex.StackTrace);
+            }
+        }
+
         private async Task<Objective> GetOrThrowAsync(ID<ObjectiveDto> objectiveID)
         {
             using var lScope = logger.BeginMethodScope();
@@ -438,6 +476,9 @@ namespace Brio.Docs.Services
                             objectives.Where(x =>
                                 x.DynamicFields.FirstOrDefault(df => df.ExternalID == dynamicField.Key && df.Value == dynamicField.Value) != null));
             }
+
+            if (!string.IsNullOrEmpty(filter.BimElementParent))
+                filterdObjectives = filterdObjectives.Where(x => x.BimElements.Any(e => e.BimElement.ParentName == filter.BimElementParent));
 
             return filterdObjectives;
         }
