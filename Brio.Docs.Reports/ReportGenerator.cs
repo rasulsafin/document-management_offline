@@ -4,9 +4,13 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Xml;
+using System.Xml.Linq;
 using Brio.Docs.Reports.Models;
 using CsvHelper;
 using CsvHelper.Configuration;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using SharpDocx;
@@ -102,6 +106,109 @@ namespace Brio.Docs.Reports
 
             var doc = DocumentFactory.Create(templateFilePath, vm);
             doc.Generate(outFilePath);
+
+            try
+            {
+                MakeToc(outFilePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError($"TOC can't be created:\n{ex}");
+            }
+        }
+
+        private void MakeToc(string path)
+        {
+            using (WordprocessingDocument wordDoc = WordprocessingDocument.Open(path, true))
+            {
+                var body = wordDoc.MainDocumentPart.Document.Body;
+                string headingStyleId = string.Empty;
+
+                var stylePart = wordDoc.MainDocumentPart.StyleDefinitionsPart;
+                if (stylePart != null)
+                {
+                    using (var reader = XmlReader.Create(stylePart.GetStream(FileMode.Open, FileAccess.Read)))
+                    {
+                        var document = XDocument.Load(reader);
+                        var styles = document.Elements();
+                        var paragraphs = document.
+                            Root.
+                            Elements("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}style").
+                            Where(x => x.Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}type").Value == "paragraph");
+
+                        foreach (var paragraph in paragraphs)
+                        {
+                            var isHeading1 = paragraph.
+                                Element("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}name").
+                                Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val").
+                                Value.
+                                ToLower() == "heading 1";
+
+                            if (isHeading1)
+                            {
+                                headingStyleId = paragraph.Attribute("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}styleId").Value;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                var headers = body.
+                    Descendants<ParagraphProperties>().
+                    ToList().
+                    Where(x => x.ParagraphStyleId != null).
+                    Where(x => x.ParagraphStyleId.Val == headingStyleId);
+
+                var toc = body.
+                    ChildElements.Where(x => x.InnerText.Contains("TOC \\o")).
+                    FirstOrDefault();
+
+                if (toc == null)
+                    return;
+
+                foreach (var hyperlink in toc.Descendants<Hyperlink>())
+                {
+                    hyperlink.Remove();
+                }
+
+                var lastChild = toc;
+                var bookmarkId = 1;
+
+                foreach (var header in headers)
+                {
+                    var bookmarksStart = header.Parent.Descendants<BookmarkStart>().First();
+                    var bookmarksEnd = header.Parent.Descendants<BookmarkEnd>().First();
+
+                    bookmarksStart.Id = $"{bookmarkId}";
+                    bookmarksEnd.Id = $"{bookmarkId}";
+                    bookmarksStart.Name = $"_TOC{bookmarkId}";
+                    bookmarkId++;
+
+                    var paragraph = new Paragraph()
+                    {
+                        InnerXml = $@"
+                        <w:pPr>
+                            <w:pStyle w:val=""para19""/>
+                            <w:tabs defTabSz=""708"">
+                                <w:tab w:val=""right"" w:pos=""9355"" w:leader=""dot""/>
+                            </w:tabs>
+                        </w:pPr>
+                        <w:hyperlink w:anchor=""{bookmarksStart.Name}"" w:history=""1"">
+                            <w:r>
+                                <w:t>{header.Parent.InnerText}</w:t>
+                                <w:tab/>
+                                <w:t>?</w:t>
+                            </w:r>
+                        </w:hyperlink>",
+                    };
+
+                    body.InsertAfter(paragraph, lastChild);
+
+                    lastChild = paragraph;
+                }
+
+                wordDoc.Save();
+            }
         }
 
         private void LoadReportsManifest(string path)
