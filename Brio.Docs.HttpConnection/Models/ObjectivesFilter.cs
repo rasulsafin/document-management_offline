@@ -56,6 +56,7 @@ namespace Brio.Docs.HttpConnection.Models
             FinishedAfter = other.FinishedAfter;
             FinishedBefore = other.FinishedBefore;
             DynamicFieldValues = other.DynamicFieldValues?.ToList();
+            BimElementParent = other.BimElementParent;
         }
 
         public void RestoreDefaultValues() => CopyValuesFrom(new ObjectivesFilter());

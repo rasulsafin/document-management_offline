@@ -354,22 +354,12 @@ namespace Brio.Docs.Services
                     .FindOrThrowAsync(x => x.ID, (int)projectID);
                 logger.LogDebug("Found project: {@DBProject}", dbProject);
 
-                var allObjectives = context.Objectives
-                    .AsNoTracking()
-                    .Unsynchronized()
-                    .Include(x => x.BimElements)
-                        .ThenInclude(x => x.BimElement)
-                    .Where(x => x.ProjectID == dbProject.ID);
-
-                HashSet<string> bimParents = new ();
-
-                foreach (Objective objective in allObjectives)
-                {
-                    foreach (BimElementObjective bimElement in objective.BimElements)
-                    {
-                        bimParents.Add(bimElement.BimElement.ParentName);
-                    }
-                }
+                var bimParents = await context.BimElementObjectives.AsNoTracking()
+                    .Where(x => x.Objective.ProjectID == dbProject.ID)
+                    .Where(x => !x.Objective.IsSynchronized)
+                    .Select(x => x.BimElement.ParentName)
+                    .Distinct()
+                    .ToListAsync();
 
                 return bimParents.Select(x => new ObjectiveBimParentDto() { ParentName = x }).ToList();
             }
@@ -468,13 +458,11 @@ namespace Brio.Docs.Services
 
             if (filter.DynamicFieldValues != null && filter.DynamicFieldValues.Count > 0)
             {
-                filterdObjectives =
-                    filter.DynamicFieldValues
-                    .Aggregate(
-                        filterdObjectives,
-                        (objectives, dynamicField) =>
-                            objectives.Where(x =>
-                                x.DynamicFields.FirstOrDefault(df => df.ExternalID == dynamicField.Key && df.Value == dynamicField.Value) != null));
+                foreach (var filterValue in filter.DynamicFieldValues)
+                {
+                    filterdObjectives = filterdObjectives.Where(x =>
+                        x.DynamicFields.Any(df => df.ExternalID == filterValue.ExternalId && df.Value == filterValue.Value));
+                }
             }
 
             if (!string.IsNullOrEmpty(filter.BimElementParent))

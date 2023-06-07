@@ -33,7 +33,7 @@ namespace Brio.Docs.Client.Filters
 
         public class DynamicFieldFilterValue
         {
-            public string Key { get; set; }
+            public string ExternalId { get; set; }
 
             public string Value { get; set; }
         }
