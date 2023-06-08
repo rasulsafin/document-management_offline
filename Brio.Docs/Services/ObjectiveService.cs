@@ -153,7 +153,6 @@ namespace Brio.Docs.Services
                 var allObjectives = context.Objectives
                                     .AsNoTracking()
                                     .Unsynchronized()
-                                    .Include(x => x.DynamicFields)
                                     .Where(x => x.ProjectID == dbProject.ID);
 
                 allObjectives = await ApplyFilter(filter, allObjectives, dbProject.ID);
