@@ -87,5 +87,14 @@ namespace Brio.Docs.Client.Services
         /// <exception cref="ANotFoundException">Thrown when parent does not exist.</exception>
         /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
         Task<IEnumerable<SubobjectiveDto>> GetObjectivesByParent(ID<ObjectiveDto> parentID);
+
+        /// <summary>
+        /// Return list of bim elements parents of objectives linked to projectID.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <returns>Collection of bim elements parents.</returns>
+        /// <exception cref="ANotFoundException">Thrown when parent does not exist.</exception>
+        /// <exception cref="DocumentManagementException">Thrown when something else went wrong.</exception>
+        Task<IEnumerable<ObjectiveBimParentDto>> GetParentsOfObjectivesBimElements(ID<ProjectDto> projectID);
     }
 }

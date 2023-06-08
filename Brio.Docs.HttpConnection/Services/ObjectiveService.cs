@@ -52,5 +52,8 @@ namespace Brio.Docs.HttpConnection.Services
                 $"projectID={{0}}&itemName={{1}}",
                 new object[] { projectID, itemName },
                 filter);
+
+        public async Task<IEnumerable<ObjectiveBimParentDto>> GetParentsOfObjectivesBimElements(ID<ProjectDto> projectID)
+            => await Connection.GetDataAsync<IEnumerable<ObjectiveBimParentDto>>($"{PATH}/bimparents/{{0}}", projectID);
     }
 }

@@ -333,5 +333,40 @@ namespace Brio.Docs.Api.Controllers
                 return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
             }
         }
+
+        /// <summary>
+        /// Return all bim parents of objectives linked to project.
+        /// </summary>
+        /// <param name="projectID">Project's ID.</param>
+        /// <returns>Collection of bim parents.</returns>
+        /// <response code="200">Collection of sub-objectives linked to objective.</response>
+        /// <response code="400">Invalid project id.</response>
+        /// <response code="404">Could not find bim parents.</response>
+        /// <response code="500">Something went wrong while retrieving bim parents list.</response>
+        [HttpGet]
+        [Route("bimparents/{projectID}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetObjectiveBimParents(
+            [FromRoute]
+            [CheckValidID]
+            [Required(ErrorMessage = "ValidationError_IdIsRequired")]
+            int projectID)
+        {
+            try
+            {
+                var parents = await service.GetParentsOfObjectivesBimElements(new ID<ProjectDto>(projectID));
+                return Ok(parents);
+            }
+            catch (ANotFoundException ex)
+            {
+                return CreateProblemResult(this, 404, localizer["CheckValidProjectID_Missing"], ex.Message);
+            }
+            catch (DocumentManagementException ex)
+            {
+                return CreateProblemResult(this, 500, localizer["ServerError_Get"], ex.Message);
+            }
+        }
     }
 }
