@@ -242,7 +242,10 @@ namespace Brio.Docs.Services
                                     .Where(x => x.ProjectID == dbProject.ID)
                                     .Include(x => x.Location)
                                         .ThenInclude(x => x.Item)
-                                    .Where(x => x.Location != null && x.Location.Item.Name == itemName);
+                                    .Where(x => x.Location != null);
+
+                if (!string.IsNullOrEmpty(itemName))
+                    objectivesWithLocations = objectivesWithLocations.Where(x => x.Location.Item.Name == itemName);
 
                 objectivesWithLocations = await ApplyFilter(filter, objectivesWithLocations, dbProject.ID);
 
