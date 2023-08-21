@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30503.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs", "Brio.Docs\Brio.Docs.csproj", "{4C808E57-40B4-408B-84FC-DD05B3CCA35C}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -66,6 +66,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.HttpConnection.PrismDI", "Brio.Docs.HttpConnection.PrismDI\Brio.Docs.HttpConnection.PrismDI.csproj", "{0BBF7BE1-A0F6-4DE7-BFDF-B6EC5EC03F79}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.Updater", "Brio.Docs.Updater\Brio.Docs.Updater.csproj", "{F6EA1026-95D5-4D15-8000-152F769BD65E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Brio.Docs.ApiTests", "Brio.Docs.ApiTests\Brio.Docs.ApiTests.csproj", "{E6DDB7FE-62C1-46CD-AA26-CB092CBAFBAB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -153,6 +155,10 @@ Global
 		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F6EA1026-95D5-4D15-8000-152F769BD65E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6DDB7FE-62C1-46CD-AA26-CB092CBAFBAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6DDB7FE-62C1-46CD-AA26-CB092CBAFBAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6DDB7FE-62C1-46CD-AA26-CB092CBAFBAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6DDB7FE-62C1-46CD-AA26-CB092CBAFBAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

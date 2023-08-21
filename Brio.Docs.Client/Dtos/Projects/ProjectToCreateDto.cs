@@ -1,5 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Runtime.Serialization;
+using Brio.Docs.Client.Converters;
+using Newtonsoft.Json;
 
 namespace Brio.Docs.Client.Dtos
 {

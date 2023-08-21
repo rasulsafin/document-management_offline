@@ -8,6 +8,7 @@ using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
 using Brio.Docs.Client.Filters;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Services.ForApi;
 using Brio.Docs.Client.Sorts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,10 +24,10 @@ namespace Brio.Docs.Api.Controllers
     [ApiController]
     public class ObjectivesController : ControllerBase
     {
-        private readonly IObjectiveService service;
+        private readonly IObjectiveForApiService service;
         private readonly IStringLocalizer<SharedLocalization> localizer;
 
-        public ObjectivesController(IObjectiveService service,
+        public ObjectivesController(IObjectiveForApiService service,
             IStringLocalizer<SharedLocalization> localizer)
         {
             this.service = service;

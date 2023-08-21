@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Brio.Docs.Client.Converters;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 
 namespace Brio.Docs.Client.Dtos
 {

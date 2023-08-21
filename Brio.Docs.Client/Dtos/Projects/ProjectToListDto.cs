@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using Brio.Docs.Client.Converters;
+using Newtonsoft.Json;
 
 namespace Brio.Docs.Client.Dtos
 {

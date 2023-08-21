@@ -1,12 +1,14 @@
 using System;
 using AutoMapper;
 using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Services.ForApi;
 using Brio.Docs.Database;
 using Brio.Docs.Integration;
 using Brio.Docs.Integration.Factories;
 using Brio.Docs.Integration.Interfaces;
 using Brio.Docs.Reports;
 using Brio.Docs.Services;
+using Brio.Docs.Services.ForApi;
 using Brio.Docs.Synchronization.Interfaces;
 using Brio.Docs.Utility;
 using Brio.Docs.Utility.Factories;
@@ -26,13 +28,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddScoped<ISynchronizationService, SynchronizationService>();
             services.AddScoped<IItemService, ItemService>();
             services.AddScoped<IObjectiveService, ObjectiveService>();
+            services.AddScoped<IObjectiveForApiService, ObjectiveForApiService>();
             services.AddScoped<IReportService, ReportService>();
             services.AddScoped<IObjectiveTypeService, ObjectiveTypeService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IConnectionTypeService, ConnectionTypeService>();
             services.AddScoped<IBimElementService, BimElementService>();
+            services.AddScoped<IProjectForApiService, ProjectForApiService>();
 
+            services.AddSingleton<IConfigService, ConfigService>();
             services.AddSingleton<IRequestService, RequestQueueService>();
             services.AddSingleton<IRequestQueueService, RequestQueueService>();
             services.AddSingleton<CryptographyHelper>();

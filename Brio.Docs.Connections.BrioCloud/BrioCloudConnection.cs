@@ -70,7 +70,7 @@ namespace Brio.Docs.Connections.BrioCloud
                     new EnumerationValueExternalDto()
                     {
                         ExternalID = "Brio.Deviation.DiscrepancyProjectSize",
-                        Value = "Несоответствие проектным размерам",
+                        Value = "у соответствие проектным размерам",
                     },
                     new EnumerationValueExternalDto()
                     {

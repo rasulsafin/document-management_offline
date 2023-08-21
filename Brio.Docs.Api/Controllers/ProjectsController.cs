@@ -5,11 +5,12 @@ using Brio.Docs.Api.Validators;
 using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
 using Brio.Docs.Client.Exceptions;
-using Brio.Docs.Client.Services;
+using Brio.Docs.Client.Services.ForApi;
 using Brio.Docs.Database.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
+using Newtonsoft.Json;
 using static Brio.Docs.Api.Validators.ServiceResponsesValidator;
 
 namespace Brio.Docs.Api.Controllers
@@ -21,10 +22,10 @@ namespace Brio.Docs.Api.Controllers
     [ApiController]
     public class ProjectsController : ControllerBase
     {
-        private readonly IProjectService service;
+        private readonly IProjectForApiService service;
         private readonly IStringLocalizer<SharedLocalization> localizer;
 
-        public ProjectsController(IProjectService service,
+        public ProjectsController(IProjectForApiService service,
             IStringLocalizer<SharedLocalization> localizer)
         {
             this.service = service;

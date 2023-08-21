@@ -4,6 +4,9 @@ using System.Linq;
 using AutoMapper;
 using Brio.Docs.Client;
 using Brio.Docs.Client.Dtos;
+using Brio.Docs.Client.Dtos.ForApi.Project;
+using Brio.Docs.Client.Dtos.ForApi.Projects;
+using Brio.Docs.Client.Dtos.ForApi;
 using Brio.Docs.Common.Dtos;
 using Brio.Docs.Database.Models;
 using Brio.Docs.Integration.Dtos;
@@ -19,6 +22,7 @@ namespace Brio.Docs.Utility.Mapping
             CreateMapToDto();
             CreateMapToModel();
             CreateMapForExternal();
+            CreateMapForProjectApi();
         }
 
         private void CreateMapToDto()
@@ -239,6 +243,36 @@ namespace Brio.Docs.Utility.Mapping
                .ForMember(d => d.CameraPositionY, o => o.MapFrom(s => s.CameraPosition.y))
                .ForMember(d => d.CameraPositionZ, o => o.MapFrom(s => s.CameraPosition.z))
                .ForMember(d => d.Guid, o => o.MapFrom(s => s.Guid));
+        }
+
+        private void CreateMapForProjectApi()
+        {
+            // TODO: CreatedById, UpdatedById ant etc.
+            CreateMap<ItemDto, ItemForApiDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (long)src.ID))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.RelativePath))
+                .ForMember(dest => dest.RelativePath, opt => opt.MapFrom(src => src.RelativePath));
+
+            CreateMap<ItemForApiDto, ItemDto>()
+                .ForMember(dest => dest.ID, opt => opt.MapFrom(src => (ID<ItemDto>)src.Id))
+                .ForMember(dest => dest.RelativePath, opt => opt.MapFrom(src => src.Name))
+                .ForMember(dest => dest.RelativePath, opt => opt.MapFrom(src => src.RelativePath));
+
+            CreateMap<ProjectDto, ProjectToUpdateForApi>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (long)src.ID));
+
+            // TODO Add ProjectId logic somehow.
+
+            CreateMap<ProjectToCreateDto, ProjectToCreateForApiDto>()
+                .ForMember(dest => dest.CreatedById, opt => opt.MapFrom(src => (long)src.AuthorID))
+                .ForMember(dest => dest.UpdatedById, opt => opt.MapFrom(src => (long)src.AuthorID))
+                ;
+
+            CreateMap<ProjectToListDto, ProjectToReadForApiDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => (long)src.ID));
+
+            CreateMap<ProjectToListDto, ProjectToReadForApiDto>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ID));
         }
 
         private string GetName(User s)
